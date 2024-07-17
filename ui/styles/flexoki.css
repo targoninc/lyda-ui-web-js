@@ -1,0 +1,28 @@
+:root {
+    --color-1: #DA702C;
+    --color-1-rgb: 218, 112, 44;
+    --color-2: #D14D41;
+    --color-2-rgb: 209, 77, 65;
+    --color-2-dark: #AF3029;
+    --color-2-dark-rgb: 175, 48, 41;
+    --color-3: #FFFCF0;
+    --color-3-rgb: 255, 252, 240;
+    --color-4: #E6E4D9;
+    --color-4-rgb: 230, 228, 217;
+    --color-5: #100F0F;
+    --color-5-rgb: 16, 15, 15;
+    --color-6: #6F6E69;
+    --color-6-rgb: 111, 110, 105;
+    --color-7: #B7B5AC;
+    --color-7-rgb: 183, 181, 172;
+    --color-8: #879A39;
+    --color-8-rgb: 135, 154, 57;
+    --color-8-dark: #66800B;
+    --color-8-dark-rgb: 102, 128, 11;
+    --color-9: #DAD8CE;
+    --blue: #4385BE;
+}
+
+.user-widget {
+    background: var(--color-7);
+}

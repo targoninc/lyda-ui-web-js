@@ -1,0 +1,21 @@
+:root {
+    --color-1: #d46311;
+    --color-1-rgb: 212, 99, 17;
+    --color-3: #1d1d1d;
+    --color-3-rgb: 29, 29, 29;
+    --color-4: #0d0d0d;
+    --color-4-rgb: 13, 13, 13;
+    --color-5: #ffffff;
+    --color-5-rgb: 255, 255, 255;
+    --filter-5: sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%) invert(100%);
+    --color-9: #444444;
+    --color-9-rgb: 68, 68, 68;
+}
+
+button {
+    color: var(--color-5);
+}
+
+.user-widget {
+    background: var(--color-6);
+}

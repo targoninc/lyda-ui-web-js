@@ -1,0 +1,59 @@
+name: Lyda UI Web
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3.5.2
+
+      - name: Log in to Docker registry
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: registry.targoninc.com
+          username: targonregistry
+          password: ${{ secrets.TARGON_REGISTRY_PW }}
+
+      - name: Generate image name
+        id: reponame
+        uses: ashley-taylor/regex-property-action@v1.3
+        with:
+          value: ${{ github.repository }}
+          regex: /|-|_
+          flags: g
+          replacement: _
+
+      - name: Show image name
+        run: echo "${{ steps.reponame.outputs.value }}"
+
+      - name: Build and tag Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: DOCKERFILE
+          target: php
+          push: false
+          tags: registry.targoninc.com/${{ steps.reponame.outputs.value }}:latest, registry.targoninc.com/${{ steps.reponame.outputs.value }}:${{ github.run_number }}
+
+      - name: Push Docker image to registry
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: DOCKERFILE
+          target: php
+          push: true
+          tags: registry.targoninc.com/${{ steps.reponame.outputs.value }}:latest, registry.targoninc.com/${{ steps.reponame.outputs.value }}:${{ github.run_number }}
+
+      - name: Delete old Docker images
+        env:
+          REGISTRY_USER: ${{ secrets.TARGON_REGISTRY_USER }}
+          REGISTRY_PASSWORD: ${{ secrets.TARGON_REGISTRY_PW }}
+          REPOSITORY: ${{ steps.reponame.outputs.value }}
+        run: |
+          chmod +x ./_scripts/delete_old_docker_images.sh
+          ./_scripts/delete_old_docker_images.sh $REGISTRY_USER $REGISTRY_PASSWORD $REPOSITORY
