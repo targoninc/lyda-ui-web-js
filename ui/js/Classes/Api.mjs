@@ -1,7 +1,9 @@
+import {Config} from "./Config.mjs";
+
 export class Api {
     static get endpoints() {
         const endpoints = {
-            base: "https://api.lyda.app/v1/",
+            base: Config.apiBaseUrl,
             auth: {
                 reAuthenticate: "reauth",
                 isLoggedIn: "isLoggedIn",

@@ -1,6 +1,8 @@
+import {Config} from "../Classes/Config.mjs";
+
 export class Images {
     static get BASE_URL() {
-        return "https://api.lyda.app/storage/v2/images";
+        return `${Config.storageBaseUrl}/storage/v2/images`;
     }
 
     static get FORMAT() {

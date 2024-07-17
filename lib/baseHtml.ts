@@ -76,7 +76,7 @@ export async function baseHtml(req: Request) {
 <footer class="flex-v"></footer>
 
 <div class="notifications flex-v"></div>
-<script src="js/main.mjs" type="module"></script>
+<script src="/main.mjs" type="module"></script>
 </body>
 </html>`;
 }

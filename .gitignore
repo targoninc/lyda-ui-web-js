@@ -2,3 +2,4 @@
 *.idea
 .bak
 /.gitignore.bak
+/dist
