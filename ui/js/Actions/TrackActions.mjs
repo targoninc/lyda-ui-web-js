@@ -24,11 +24,7 @@ export class TrackActions {
         }, seconds * 1000);
     }
 
-    static async unfollowUserFromElement(e) {
-        const userId = Util.getUserIdFromEvent(e);
-        if (userId === "") {
-            return;
-        }
+    static async unfollowUserFromElement(userId) {
         const res = await Api.postAsync(Api.endpoints.user.actions.unfollow, {
             id: userId
         });
@@ -172,19 +168,19 @@ export class TrackActions {
         return await Api.postAsync(Api.endpoints.tracks.actions.unrepost, { id });
     }
 
-    static async runFollowFunctionFromElement(e, following) {
+    static async runFollowFunctionFromElement(e, userId, following) {
         const button = e.target;
         const span = button.querySelector("span");
         const img = button.querySelector("img");
         if (following.value) {
-            const res = await TrackActions.unfollowUserFromElement(e);
+            const res = await TrackActions.unfollowUserFromElement(userId);
             if (res.code !== 200) {
                 return;
             }
             span.innerText = "Follow";
             img.src = Icons.FOLLOW;
         } else {
-            const res = await TrackActions.followUserFromElement(e);
+            const res = await TrackActions.followUserFromElement(userId);
             if (res.code !== 200) {
                 return;
             }
@@ -194,14 +190,7 @@ export class TrackActions {
         following.value = !following.value;
     }
 
-    static async followUserFromElement(e) {
-        let userId = Util.getUserIdFromEvent(e);
-        if (userId === "") {
-            return {
-                code: 400,
-                message: "Invalid user ID",
-            };
-        }
+    static async followUserFromElement(userId) {
         const res = await Api.postAsync(Api.endpoints.user.actions.follow, {
             id: userId,
         });

@@ -428,13 +428,6 @@ export class Util {
         return userId;
     }
 
-    static getAuthorizationHeaders() {
-        return {
-            "sessionid": Util.getSessionId(),
-            "sessiontoken": Util.getSessionToken()
-        };
-    }
-
     static updateUiThemeToggle(uiTheme) {
         const modeSwitch = document.querySelector(".dark-mode-switch");
         if (modeSwitch) {

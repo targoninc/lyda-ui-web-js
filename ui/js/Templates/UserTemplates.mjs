@@ -114,7 +114,7 @@ export class UserTemplates {
                     .text(initialFollowing === true ? "Unfollow" : "Follow")
                     .build()
             ).onclick(async (e) => {
-                await TrackActions.runFollowFunctionFromElement(e, following);
+                await TrackActions.runFollowFunctionFromElement(e, userId, following);
             })
             .build();
     }
