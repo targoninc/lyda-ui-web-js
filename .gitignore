@@ -3,3 +3,4 @@
 .bak
 /.gitignore.bak
 /dist
+.env

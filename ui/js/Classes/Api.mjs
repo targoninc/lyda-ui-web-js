@@ -157,7 +157,7 @@ export class Api {
                 }
             }
         };
-        return this.resolveEndpoints(endpoints, endpoints.base);
+        return this.resolveEndpoints(endpoints, endpoints.base + "/");
     }
 
     static resolveEndpoints(endpoints, base) {

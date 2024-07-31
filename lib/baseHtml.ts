@@ -21,17 +21,18 @@ export async function baseHtml(req: Request) {
     }
 
     let id, newimage;
+    const apiUrl = process.env.API_URL ?? "https://api.lyda.app";
     if (url.includes("/track/")) {
         id = url.split("/")[4];
-        newimage = `https://api.lyda.app/storage/v2/covers/tracks/${dechex(id)}.webp`;
+        newimage = `${apiUrl}/storage/v2/covers/tracks/${dechex(id)}.webp`;
         image = await getImageOrDefault(newimage, image);
     } else if (url.includes("/album/")) {
         id = url.split("/")[4];
-        newimage = `https://api.lyda.app/storage/v2/covers/albums/${dechex(id)}.webp`;
+        newimage = `${apiUrl}/storage/v2/covers/albums/${dechex(id)}.webp`;
         image = await getImageOrDefault(newimage, image);
     } else if (url.includes("/playlist/")) {
         id = url.split("/")[4];
-        newimage = `https://api.lyda.app/storage/v2/covers/playlists/${dechex(id)}.webp`;
+        newimage = `${apiUrl}/storage/v2/covers/playlists/${dechex(id)}.webp`;
         image = await getImageOrDefault(newimage, image);
     }
 
@@ -54,7 +55,6 @@ export async function baseHtml(req: Request) {
     <link rel="stylesheet" type="text/css" href="/styles/shared_targon.css"/>
     <link rel="apple-touch-icon" href="/img/icons/favicon_128.png">
     <link rel="icon" href="/img/icons/favicon_128.png" sizes="128x128">
-    <link rel="me" href="https://wetdry.world/@loudar">
 
     <meta name="twitter:card" content="summary_large_image"/>
     <meta name="twitter:site" content="@streamlyda"/>
