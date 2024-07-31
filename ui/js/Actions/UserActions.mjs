@@ -58,8 +58,7 @@ export class UserActions {
             formData.append("avatar", file);
             let response = await fetch(Api.endpoints.user.actions.avatar.upload, {
                 method: "POST",
-                body: formData,
-                headers: Util.getAuthorizationHeaders()
+                body: formData
             });
             if (response.status === 200) {
                 loader.classList.add("hidden");
@@ -79,8 +78,7 @@ export class UserActions {
             let response = await fetch(Api.endpoints.user.actions.avatar.delete, {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
-                    ...Util.getAuthorizationHeaders()
+                    "Content-Type": "application/json"
                 }
             });
             if (response.status === 200) {
@@ -111,7 +109,6 @@ export class UserActions {
             formData.append("banner", file);
             let response = await fetch(Api.endpoints.user.actions.banner.upload, {
                 method: "POST",
-                headers: Util.getAuthorizationHeaders(),
                 body: formData
             });
             if (response.status === 200) {
@@ -133,8 +130,7 @@ export class UserActions {
                 let response = await fetch(Api.endpoints.user.actions.banner.delete, {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json",
-                        ...Util.getAuthorizationHeaders()
+                        "Content-Type": "application/json"
                     }
                 });
                 if (response.status === 200) {

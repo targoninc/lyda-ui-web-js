@@ -137,8 +137,7 @@ export class AudioUpload {
 
         this.writeToInfo("Authenticating...", "audio");
         this.ws.send(JSON.stringify({
-            type: "authenticationRequest",
-            ...Util.getAuthorizationHeaders()
+            type: "authenticationRequest"
         }));
     }
 
@@ -159,8 +158,7 @@ export class AudioUpload {
         this.ws.send(JSON.stringify({
             type: "initFileUploadRequest",
             id: this.id,
-            extension: dotParts[dotParts.length - 1],
-            ...Util.getAuthorizationHeaders()
+            extension: dotParts[dotParts.length - 1]
         }));
     }
 
@@ -222,8 +220,7 @@ export class AudioUpload {
                 type: "fileUploadRequest",
                 id: this.id,
                 offset: 0,
-                data: data,
-                ...Util.getAuthorizationHeaders()
+                data: data
             }));
         };
         reader.onerror = (error) => {
@@ -237,8 +234,7 @@ export class AudioUpload {
         if (data.success) {
             this.ws.send(JSON.stringify({
                 type: "completeFileUploadRequest",
-                id: this.id,
-                ...Util.getAuthorizationHeaders()
+                id: this.id
             }));
         } else {
             this.writeToInfo("Failed to upload audio: " + data.message, "audio");

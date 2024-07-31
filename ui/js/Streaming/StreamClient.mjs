@@ -7,8 +7,7 @@ import {Util} from "../Classes/Util.mjs";
 export class StreamClient {
     constructor(id) {
         this.id = id;
-        const auth = Util.getAuthorizationHeaders();
-        const src = `${Api.endpoints.tracks.audio}?id=${this.id}&sessionid=${auth.sessionid}&sessiontoken=${auth.sessiontoken}`;
+        const src = `${Api.endpoints.tracks.audio}?id=${this.id}`;
         this.audio = new Audio(src);
         this.duration = this.audio.duration;
         this.audio.crossOrigin = "anonymous";

@@ -34,23 +34,14 @@ export class Lyda {
                 return cacheItem.content;
             }
         }
-        const authorizationHeaders = Util.getAuthorizationHeaders();
         let r = await fetch(config["apiBaseUrl"] + "/v1/"+endpoint+params, {
             method: "GET",
             mode: "cors",
             headers: {
-                "Content-Type": "application/json",
-                ...authorizationHeaders
+                "Content-Type": "application/json"
             }
         });
         if (r.status !== 200) {
-            if (r.status === 401) {
-                const newSessionToken = LydaCache.get("sessionid").content;
-                if (authorizationHeaders.sessiontoken !== newSessionToken && newSessionToken && !refreshSessionRetry) {
-                    document.cookie = "PHPSESSID="+newSessionToken+"; path=/";
-                    return Lyda.getEndpointData(endpoint, params, true);
-                }
-            }
             console.error("Failed to fetch from endpoint " + endpoint + ", status: " + r.status);
             return {
                 error: "Failed to fetch from endpoint " + endpoint + ", status: " + r.status,

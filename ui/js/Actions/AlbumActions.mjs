@@ -108,8 +108,7 @@ export class AlbumActions {
             formData.append("id", id.toString());
             let response = await fetch(Api.endpoints.albums.actions.uploadCover, {
                 method: "POST",
-                body: formData,
-                headers: Util.getAuthorizationHeaders()
+                body: formData
             });
             if (response.status === 200) {
                 loader.classList.add("hidden");
