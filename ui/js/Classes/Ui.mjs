@@ -36,10 +36,8 @@ export class Ui {
                 const res = await Api.getAsync(Api.endpoints.notifications.get);
                 let notifications = [];
                 if (res.code !== 200) {
-                    if (res.code === 401) {
-                        LydaCache.clear();
-                        UrlHandler.redirectIfDifferent("/login");
-                    }
+                    Ui.notify("Failed to get notifications", "error");
+                    return;
                 } else {
                     notifications = res.data;
                 }

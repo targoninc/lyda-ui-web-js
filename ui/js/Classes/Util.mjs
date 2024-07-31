@@ -65,6 +65,9 @@ export class Util {
     }
 
     static toHexString(id) {
+        if (id === null || id === undefined) {
+            return "";
+        }
         if (id.constructor === String) {
             id = parseInt(id);
         }
@@ -338,13 +341,11 @@ export class Util {
         let userData;
         const res = await Api.getAsync(Api.endpoints.user.get);
         if (res.code === 401) {
-            UrlHandler.redirectIfDifferent("/login");
             return null;
         }
         userData = res.data;
         LydaCache.set(cacheKey, new CacheItem(JSON.stringify(userData)));
         if (userData === null) {
-            UrlHandler.redirectIfDifferent("/login");
             return null;
         }
         return Util.mapNullToEmptyString(userData);

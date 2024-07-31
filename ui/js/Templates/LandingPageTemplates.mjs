@@ -208,7 +208,7 @@ export class LandingPageTemplates {
                         }, ["auth-input"]),
                         create("a")
                             .classes("inlineLink")
-                            .href("https://targoninc.com/forgot-password")
+                            .href("/forgot-password")
                             .text("Change/forgot password?")
                             .build(),
                         create("a")

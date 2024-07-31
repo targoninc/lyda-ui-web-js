@@ -8,7 +8,6 @@ export class Api {
                 isLoggedIn: "isLoggedIn",
                 actions: {
                     logout: "logout",
-                    targonLogin: "targonLogin",
                 }
             },
             audit: {
@@ -16,14 +15,12 @@ export class Api {
                 actionLogs: "actionLogs",
             },
             user: {
-                login: "login",
-                register: "register",
                 get: "get",
                 profile: "profile",
                 settings: "settings",
                 permissions: "permissions",
                 random: "random",
-                userExists: "userExists",
+                userExists: "exists",
                 actions: {
                     follow: "follow",
                     unfollow: "unfollow",
