@@ -10,11 +10,11 @@ export class LydaApi {
      */
     static getLogs(filterState, successCallback) {
         const errorText = "Failed to get logs";
-        Api.getAsync(Api.endpoints.audit.logs, {type: filterState.value}, Util.getAuthorizationHeaders()).then(logs => {
+        Api.getAsync(Api.endpoints.audit.logs, {type: filterState.value}).then(logs => {
             LydaApi.handleResponse(logs, errorText, successCallback);
         });
         filterState.onUpdate = async (newValue) => {
-            Api.getAsync(Api.endpoints.audit.logs, {type: newValue}, Util.getAuthorizationHeaders()).then(logs => {
+            Api.getAsync(Api.endpoints.audit.logs, {type: newValue}).then(logs => {
                 LydaApi.handleResponse(logs, errorText, successCallback);
             });
         };

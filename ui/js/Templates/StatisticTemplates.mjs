@@ -182,7 +182,7 @@ export class StatisticTemplates {
             GenericTemplates.action(Icons.CALCULATE, "Calculate royalties", "calculateRoyalties", async () => {
                 const res = await Api.postAsync(Api.endpoints.royalties.calculateRoyalties, {
                     month: selectedState.value
-                }, Util.getAuthorizationHeaders());
+                });
                 if (res.code !== 200) {
                     Ui.notify(res.data, "error");
                     return;
@@ -210,7 +210,7 @@ export class StatisticTemplates {
 
             actions.push(GenericTemplates.action(Icons.PAYPAL, "Set PayPal mail", "setPaypalMail", async () => {
                 await Ui.getTextInputModal("Set PayPal mail", "The account you will receive payments with", "", "Save", "Cancel", async (address) => {
-                    const res = await Api.postAsync(Api.endpoints.user.set.paypalMail, {address}, Util.getAuthorizationHeaders());
+                    const res = await Api.postAsync(Api.endpoints.user.set.paypalMail, {address});
                     if (res.code !== 200) {
                         Ui.notify(res.data, "error");
                         return;
@@ -221,7 +221,7 @@ export class StatisticTemplates {
             }, [], [invertVisibilityClass, "secondary"]));
             actions.push(GenericTemplates.action(Icons.PAYPAL, "Remove PayPal mail", "removePaypalMail", async () => {
                 await Ui.getConfirmationModal("Remove PayPal mail", "Are you sure you want to remove your paypal mail? You'll have to add it again manually.", "Yes", "No", async () => {
-                    const res = await Api.postAsync(Api.endpoints.user.remove.paypalMail, {}, Util.getAuthorizationHeaders());
+                    const res = await Api.postAsync(Api.endpoints.user.remove.paypalMail);
                     if (res.code !== 200) {
                         Ui.notify(res.data, "error");
                         return;
@@ -231,7 +231,7 @@ export class StatisticTemplates {
                 }, () => {}, Icons.WARNING);
             }, [], [visibilityClass, "secondary"]));
             actions.push(GenericTemplates.action(Icons.PAY, "Request payment", "requestPayment", async () => {
-                const res = await Api.postAsync(Api.endpoints.royalties.requestPayment, {}, Util.getAuthorizationHeaders());
+                const res = await Api.postAsync(Api.endpoints.royalties.requestPayment);
                 if (res.code !== 200) {
                     Ui.notify(res.data, "error");
                     return;

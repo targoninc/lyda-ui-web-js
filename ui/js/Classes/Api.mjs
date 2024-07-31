@@ -5,7 +5,6 @@ export class Api {
         const endpoints = {
             base: Config.apiBaseUrl,
             auth: {
-                reAuthenticate: "reauth",
                 isLoggedIn: "isLoggedIn",
                 actions: {
                     logout: "logout",
@@ -17,6 +16,9 @@ export class Api {
                 actionLogs: "actionLogs",
             },
             user: {
+                login: "login",
+                register: "register",
+                get: "get",
                 profile: "profile",
                 settings: "settings",
                 permissions: "permissions",

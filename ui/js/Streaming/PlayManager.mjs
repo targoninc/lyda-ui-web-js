@@ -383,7 +383,7 @@ export class PlayManager {
         if (window.trackInfo && window.trackInfo[id] && !noCache) {
             return window.trackInfo[id];
         }
-        const res = await Api.getAsync(Api.endpoints.tracks.byId, { id }, Util.getAuthorizationHeaders());
+        const res = await Api.getAsync(Api.endpoints.tracks.byId, { id });
         return PlayManager.parseTrackData(res.data);
     }
 }

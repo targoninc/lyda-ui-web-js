@@ -15,7 +15,7 @@ export class AlbumActions {
     }
 
     static async openAddToAlbumModal(track) {
-        const res = await Api.getAsync(Api.endpoints.albums.byUserId, {user_id: track.userId}, Util.getAuthorizationHeaders());
+        const res = await Api.getAsync(Api.endpoints.albums.byUserId, {user_id: track.userId});
         if (res.code !== 200) {
             console.error("Failed to get albums: ", res.data);
             return;
@@ -30,7 +30,7 @@ export class AlbumActions {
     }
 
     static async createNewAlbum(album) {
-        const res = await Api.postAsync(Api.endpoints.albums.actions.new, album, Util.getAuthorizationHeaders());
+        const res = await Api.postAsync(Api.endpoints.albums.actions.new, album);
         if (res.code !== 200) {
             Ui.notify("Failed to create album: " + res.data, "error");
             return;
@@ -39,7 +39,7 @@ export class AlbumActions {
     }
 
     static async deleteAlbum(id) {
-        const res = await Api.postAsync(Api.endpoints.albums.actions.delete, {id}, Util.getAuthorizationHeaders());
+        const res = await Api.postAsync(Api.endpoints.albums.actions.delete, {id});
         if (res.code === 200) {
             PlayManager.removeStreamClient(id);
             QueueManager.removeFromManualQueue(id);
@@ -59,7 +59,7 @@ export class AlbumActions {
                 albumIds.push(parseInt(albumId));
             }
         }
-        const res = await Api.postAsync(Api.endpoints.albums.actions.addTrack, {album_ids: albumIds, track_id}, Util.getAuthorizationHeaders());
+        const res = await Api.postAsync(Api.endpoints.albums.actions.addTrack, {album_ids: albumIds, track_id});
         Util.removeModal();
         if (res.code !== 200) {
             Ui.notify("Failed to add track to albums: " + res.data, "error");
@@ -69,7 +69,7 @@ export class AlbumActions {
     }
 
     static async removeTrackFromAlbum(track_id, album_id) {
-        const res = await Api.postAsync(Api.endpoints.albums.actions.removeTrack, {id: album_id, track_id}, Util.getAuthorizationHeaders());
+        const res = await Api.postAsync(Api.endpoints.albums.actions.removeTrack, {id: album_id, track_id});
         if (res.code !== 200) {
             Ui.notify("Failed to remove track from album: " + res.data, "error");
             return false;
@@ -122,7 +122,7 @@ export class AlbumActions {
     }
 
     static async moveTrackInAlbum(albumId, trackId, newPosition) {
-        const res = await Api.postAsync(Api.endpoints.albums.actions.reorderTracks, {id: albumId, track_id: trackId, new_position: newPosition}, Util.getAuthorizationHeaders());
+        const res = await Api.postAsync(Api.endpoints.albums.actions.reorderTracks, {id: albumId, track_id: trackId, new_position: newPosition});
         if (res.code !== 200) {
             Ui.notify("Failed to move track in album: " + res.data, "error");
             return false;
@@ -131,11 +131,11 @@ export class AlbumActions {
     }
 
     static async likeAlbum(id) {
-        return await Api.postAsync(Api.endpoints.albums.actions.like, { id }, Util.getAuthorizationHeaders());
+        return await Api.postAsync(Api.endpoints.albums.actions.like, { id });
     }
 
     static async unlikeAlbum(id) {
-        return await Api.postAsync(Api.endpoints.albums.actions.unlike, { id }, Util.getAuthorizationHeaders());
+        return await Api.postAsync(Api.endpoints.albums.actions.unlike, { id });
     }
 
     static async toggleLike(id, isEnabled) {

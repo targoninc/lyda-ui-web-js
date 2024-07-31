@@ -155,7 +155,7 @@ export class UserActions {
             if (!timestamp) {
                 return;
             }
-            const res = await Api.getAsync(Api.endpoints.notifications.get, { after: timestamp }, Util.getAuthorizationHeaders());
+            const res = await Api.getAsync(Api.endpoints.notifications.get, { after: timestamp });
             if (res.code !== 200) {
                 return;
             }
@@ -189,7 +189,7 @@ export class UserActions {
         if (e.target.getAttribute("markedAsRead") === "true" || !timestamp) {
             return;
         }
-        await Api.postAsync(Api.endpoints.notifications.actions.markAllAsRead, {newest: timestamp}, Util.getAuthorizationHeaders());
+        await Api.postAsync(Api.endpoints.notifications.actions.markAllAsRead, {newest: timestamp});
         e.target.setAttribute("markedAsRead", "true");
         const notificationBubble = document.querySelector(".notification-bubble");
         if (notificationBubble) {
@@ -232,7 +232,7 @@ export class UserActions {
         if (onlyLocal) {
             return;
         }
-        const res = await Api.postAsync(Api.endpoints.user.actions.theme.set, { theme: themeName }, Util.getAuthorizationHeaders());
+        const res = await Api.postAsync(Api.endpoints.user.actions.theme.set, { theme: themeName });
         if (res.code !== 200) {
             Ui.notify("Failed to update theme", "error");
         }
@@ -242,7 +242,7 @@ export class UserActions {
         const res = await Api.postAsync(Api.endpoints.user.set.setting, {
             setting: "playFromAutoQueue",
             value: playFromAutoQueue
-        }, Util.getAuthorizationHeaders());
+        });
         if (res.code !== 200) {
             Ui.notify("Failed to update play from auto queue", "error");
             return false;
@@ -254,7 +254,7 @@ export class UserActions {
         const res = await Api.postAsync(Api.endpoints.user.set.setting, {
             setting: "publicLikes",
             value: publicLikes
-        }, Util.getAuthorizationHeaders());
+        });
         if (res.code !== 200) {
             Ui.notify("Failed to update public likes", "error");
             return false;
@@ -300,7 +300,7 @@ export class UserActions {
         user.usersettings["notification_" + key] = !user.usersettings["notification_" + key];
         const value = user.usersettings["notification_" + key];
         LydaCache.set("user", new CacheItem(user));
-        const res = await Api.postAsync(Api.endpoints.user.set.setting, { setting: "notification_" + key, value }, Util.getAuthorizationHeaders());
+        const res = await Api.postAsync(Api.endpoints.user.set.setting, { setting: "notification_" + key, value });
         if (res.code !== 200) {
             Ui.notify("Failed to toggle notification", "error");
             user.usersettings["notification_" + key] = !user.usersettings["notification_" + key];
@@ -311,7 +311,7 @@ export class UserActions {
     }
 
     static async unverifyUser(id) {
-        const res = await Api.postAsync(Api.endpoints.user.actions.unverify, { id }, Util.getAuthorizationHeaders());
+        const res = await Api.postAsync(Api.endpoints.user.actions.unverify, { id });
         if (res.code !== 200) {
             Ui.notify("Failed to unverify user", "error");
             return false;
@@ -320,7 +320,7 @@ export class UserActions {
     }
 
     static async verifyUser(id) {
-        const res = await Api.postAsync(Api.endpoints.user.actions.verify, { id }, Util.getAuthorizationHeaders());
+        const res = await Api.postAsync(Api.endpoints.user.actions.verify, { id });
         if (res.code !== 200) {
             Ui.notify("Failed to verify user", "error");
             return false;
@@ -330,7 +330,7 @@ export class UserActions {
 
     static editDescription(currentDescription, successCallback) {
         Ui.getTextAreaInputModal("Edit description", "Enter your new description", currentDescription, "Save", "Cancel", async (description) => {
-            const res = await Api.postAsync(Api.endpoints.user.set.property, { property: "description", value: description }, Util.getAuthorizationHeaders());
+            const res = await Api.postAsync(Api.endpoints.user.set.property, { property: "description", value: description });
             if (res.code !== 200) {
                 Ui.notify("Failed to update description", "error");
                 return;
@@ -348,7 +348,7 @@ export class UserActions {
             const res = await Api.postAsync(Api.endpoints.user.set.property, {
                 property: "displayname",
                 value: displayname
-            }, Util.getAuthorizationHeaders());
+            });
             if (res.code !== 200) {
                 Ui.notify("Failed to update displayname", "error");
                 return;
@@ -367,7 +367,7 @@ export class UserActions {
             const res = await Api.postAsync(Api.endpoints.user.set.property, {
                 property: "username",
                 value: username
-            }, Util.getAuthorizationHeaders());
+            });
             if (res.code !== 200) {
                 Ui.notify("Failed to update username", "error");
                 return;

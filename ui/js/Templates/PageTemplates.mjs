@@ -192,7 +192,7 @@ export class PageTemplates {
 
     static notFoundPage() {
         const randomUserWidget = new FjsObservable(create("span").text("loading...").build());
-        Api.getAsync(Api.endpoints.user.random, {}, Util.getAuthorizationHeaders()).then(async data => {
+        Api.getAsync(Api.endpoints.user.random).then(async data => {
             if (data.code !== 200) {
                 randomUserWidget.value = create("span").text("Failed to load random user").build();
                 return;

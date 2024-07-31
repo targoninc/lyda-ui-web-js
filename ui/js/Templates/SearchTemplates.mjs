@@ -75,7 +75,7 @@ export class SearchTemplates {
                             return;
                         }
                         const tempCount = resultCount + 1;
-                        const res = await Api.getAsync(Api.endpoints.search, { search, filters }, Util.getAuthorizationHeaders());
+                        const res = await Api.getAsync(Api.endpoints.search, { search, filters });
                         if (res.code !== 200) {
                             Ui.notify("Failed to search, status code " + res.code, "error");
                             return;

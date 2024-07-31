@@ -617,7 +617,7 @@ export class GenericTemplates {
                             const res = await Api.getAsync(Api.endpoints.search, {
                                 search,
                                 filters: JSON.stringify(["users"])
-                            }, Util.getAuthorizationHeaders());
+                            });
                             if (res.code === 200) {
                                 const results = document.getElementById("user-search-results");
                                 results.innerHTML = "";

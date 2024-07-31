@@ -122,7 +122,7 @@ export class SettingsTemplates {
 
     static refreshProfileButton() {
         return GenericTemplates.action(Icons.RELOAD, "Refresh profile info", "refreshProfileInfo", async () => {
-            const res = await Api.getAsync(Api.endpoints.user.profile, {}, Util.getAuthorizationHeaders());
+            const res = await Api.getAsync(Api.endpoints.user.profile);
             if (res.code === 200) {
                 const user = res.data;
                 LydaCache.set("user", new CacheItem(user));

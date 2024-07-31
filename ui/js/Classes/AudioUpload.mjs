@@ -190,7 +190,7 @@ export class AudioUpload {
         const formData = new FormData();
         formData.append("id", this.id);
         formData.append("cover", this.coverFile);
-        const res = await Api.postRawAsync(Api.endpoints.tracks.actions.uploadCover, formData, Util.getAuthorizationHeaders());
+        const res = await Api.postRawAsync(Api.endpoints.tracks.actions.uploadCover, formData);
         if (res.code === 200) {
             this.writeToInfo("Cover uploaded!", "cover");
             this.setInfoSuccess("cover");
@@ -277,7 +277,7 @@ export class AudioUpload {
             genre: state.genre,
             description: state.description,
             price: state.price,
-        }, Util.getAuthorizationHeaders());
+        });
 
         if (res.code !== 200) {
             this.writeToInfo("Failed to create track: " + res.data, "info");

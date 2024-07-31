@@ -18,7 +18,7 @@ export class StatisticsWrapper {
 
     static async getRoyaltiesByMonth() {
         const chartObservable = new FjsObservable(StatisticTemplates.royaltiesByMonthChart([], []));
-        Api.getAsync(Api.endpoints.statistics.royaltiesByMonth, {}, Util.getAuthorizationHeaders()).then((res) => {
+        Api.getAsync(Api.endpoints.statistics.royaltiesByMonth).then((res) => {
             if (res.code !== 200) {
                 Ui.notify(res.data, "error");
                 return;
@@ -33,7 +33,7 @@ export class StatisticsWrapper {
 
     static async getRoyaltiesByTrack() {
         const chartObservable = new FjsObservable(StatisticTemplates.royaltiesByTrackChart([], []));
-        Api.getAsync(Api.endpoints.statistics.royaltiesByTrack, {}, Util.getAuthorizationHeaders()).then((res) => {
+        Api.getAsync(Api.endpoints.statistics.royaltiesByTrack).then((res) => {
             if (res.code !== 200) {
                 Ui.notify(res.data, "error");
                 return;
@@ -47,7 +47,7 @@ export class StatisticsWrapper {
 
     static async getPlayCountByTracks() {
         const chartObservable = new FjsObservable(StatisticTemplates.playCountByTrackChart([], []));
-        Api.getAsync(Api.endpoints.statistics.playCountByTrack, {}, Util.getAuthorizationHeaders()).then((res) => {
+        Api.getAsync(Api.endpoints.statistics.playCountByTrack).then((res) => {
             if (res.code !== 200) {
                 Ui.notify(res.data, "error");
                 return;
@@ -61,7 +61,7 @@ export class StatisticsWrapper {
 
     static async getPlayCountByMonth() {
         const chartObservable = new FjsObservable(StatisticTemplates.playCountByMonthChart([], []));
-        Api.getAsync(Api.endpoints.statistics.playCountByMonth, {}, Util.getAuthorizationHeaders()).then((res) => {
+        Api.getAsync(Api.endpoints.statistics.playCountByMonth).then((res) => {
             if (res.code !== 200) {
                 Ui.notify(res.data, "error");
                 return;
@@ -76,7 +76,7 @@ export class StatisticsWrapper {
 
     static async getLikesByTrack() {
         const chartObservable = new FjsObservable(StatisticTemplates.likesByTrackChart([], []));
-        Api.getAsync(Api.endpoints.statistics.likesByTrack, {}, Util.getAuthorizationHeaders()).then((res) => {
+        Api.getAsync(Api.endpoints.statistics.likesByTrack).then((res) => {
             if (res.code !== 200) {
                 Ui.notify(res.data, "error");
                 return;

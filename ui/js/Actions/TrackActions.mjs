@@ -15,7 +15,7 @@ export class TrackActions {
     static async savePlay(id) {
         return await Api.postAsync(Api.endpoints.tracks.actions.savePlay, {
             id: id,
-        }, Util.getAuthorizationHeaders());
+        });
     }
 
     static savePlayAfterTime(id, seconds) {
@@ -31,7 +31,7 @@ export class TrackActions {
         }
         const res = await Api.postAsync(Api.endpoints.user.actions.unfollow, {
             id: userId
-        }, Util.getAuthorizationHeaders());
+        });
 
         if (res.code !== 200) {
             Ui.notify("Error while trying to unfollow user: " + res.data, "error");
@@ -47,7 +47,7 @@ export class TrackActions {
         }
         const res = await Api.postAsync(Api.endpoints.tracks.actions.delete, {
             id: e.target.id,
-        }, Util.getAuthorizationHeaders());
+        });
         if (res.code === 200) {
             PlayManager.removeStreamClient(e.target.id);
             QueueManager.removeFromManualQueue(e.target.id);
@@ -66,7 +66,7 @@ export class TrackActions {
             }
             const res = await Api.postAsync(Api.endpoints.comments.actions.delete, {
                 id: commentId,
-            }, Util.getAuthorizationHeaders());
+            });
 
             if (res.code !== 200) {
                 Ui.notify(res.data, "error");
@@ -113,7 +113,7 @@ export class TrackActions {
             id: trackId,
             content: content,
             parentId: parentId === "" ? 0 : parentId,
-        }, Util.getAuthorizationHeaders());
+        });
 
         if (res.code !== 200) {
             Ui.notify(res.data, "error");
@@ -157,19 +157,19 @@ export class TrackActions {
     }
 
     static async likeTrack(id) {
-        return await Api.postAsync(Api.endpoints.tracks.actions.like, { id }, Util.getAuthorizationHeaders());
+        return await Api.postAsync(Api.endpoints.tracks.actions.like, { id });
     }
 
     static async unlikeTrack(id) {
-        return await Api.postAsync(Api.endpoints.tracks.actions.unlike, { id }, Util.getAuthorizationHeaders());
+        return await Api.postAsync(Api.endpoints.tracks.actions.unlike, { id });
     }
 
     static async repostTrack(id) {
-        return await Api.postAsync(Api.endpoints.tracks.actions.repost, { id }, Util.getAuthorizationHeaders());
+        return await Api.postAsync(Api.endpoints.tracks.actions.repost, { id });
     }
 
     static async unrepostTrack(id) {
-        return await Api.postAsync(Api.endpoints.tracks.actions.unrepost, { id }, Util.getAuthorizationHeaders());
+        return await Api.postAsync(Api.endpoints.tracks.actions.unrepost, { id });
     }
 
     static async runFollowFunctionFromElement(e, following) {
@@ -204,7 +204,7 @@ export class TrackActions {
         }
         const res = await Api.postAsync(Api.endpoints.user.actions.follow, {
             id: userId,
-        }, Util.getAuthorizationHeaders());
+        });
 
         if (res.code !== 200) {
             new Ui();
@@ -216,7 +216,7 @@ export class TrackActions {
     }
 
     static async getCollabTypes() {
-        const res = await Api.getAsync(Api.endpoints.tracks.collabTypes, {}, Util.getAuthorizationHeaders());
+        const res = await Api.getAsync(Api.endpoints.tracks.collabTypes);
         if (res.code !== 200) {
             Ui.notify("Error while trying to get collab types: " + res.data, "error");
             return [];
@@ -415,7 +415,7 @@ export class TrackActions {
         const res = await Api.postAsync(Api.endpoints.tracks.actions.removeCollaborator, {
             id: trackId,
             userId: userId,
-        }, Util.getAuthorizationHeaders());
+        });
 
         if (res.code !== 200) {
             Ui.notify("Error while trying to remove collaborator: " + res.data, "error");
@@ -431,7 +431,7 @@ export class TrackActions {
             id: trackId,
             userId: userId,
             collabType: collabType,
-        }, Util.getAuthorizationHeaders());
+        });
 
         if (res.code !== 200) {
             Ui.notify("Error while trying to add collaborator: " + res.data, "error");
@@ -447,7 +447,7 @@ export class TrackActions {
                 id: trackId,
                 field: property,
                 value: description
-            }, Util.getAuthorizationHeaders());
+            });
             if (res.code !== 200) {
                 Ui.notify("Failed to update " + property, "error");
                 return;
@@ -464,7 +464,7 @@ export class TrackActions {
     }
 
     static async getUnapprovedTracks() {
-        const res = await Api.getAsync(Api.endpoints.tracks.unapprovedCollabs, {}, Util.getAuthorizationHeaders());
+        const res = await Api.getAsync(Api.endpoints.tracks.unapprovedCollabs);
         if (res.code !== 200) {
             Ui.notify("Error while trying to get unapproved tracks: " + res.data, "error");
             return [];
@@ -475,7 +475,7 @@ export class TrackActions {
     static async approveCollab(id, name = "track") {
         const res = await Api.postAsync(Api.endpoints.tracks.actions.approveCollab, {
             id: id,
-        }, Util.getAuthorizationHeaders());
+        });
         if (res.code !== 200) {
             Ui.notify("Error while trying to approve collab: " + res.data, "error");
             return;
@@ -491,7 +491,7 @@ export class TrackActions {
     static async denyCollab(id, name = "track") {
         const res = await Api.postAsync(Api.endpoints.tracks.actions.denyCollab, {
             id: id,
-        }, Util.getAuthorizationHeaders());
+        });
         if (res.code !== 200) {
             Ui.notify("Error while trying to deny collab: " + res.data, "error");
             return;
@@ -516,7 +516,7 @@ export class TrackActions {
             isrc: track.isrc,
             upc: track.upc,
             price: track.price,
-        }, Util.getAuthorizationHeaders());
+        });
         if (res.code !== 200) {
             Ui.notify("Error while trying to update track: " + res.data, "error");
             return;

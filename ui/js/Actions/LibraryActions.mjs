@@ -4,7 +4,7 @@ import {Ui} from "../Classes/Ui.mjs";
 
 export class LibraryActions {
     static async getLibrary(name) {
-        const res = await Api.getAsync(Api.endpoints.library.get, { name }, Util.getAuthorizationHeaders());
+        const res = await Api.getAsync(Api.endpoints.library.get, { name });
         if (res.code !== 200) {
             Ui.notify("Failed to get library", "error");
             return false;

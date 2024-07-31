@@ -33,7 +33,7 @@ export class Ui {
         if (document.getElementById("navTop") === null) {
             let userTemplateRender;
             if (signedIn) {
-                const res = await Api.getAsync(Api.endpoints.notifications.get, {}, Util.getAuthorizationHeaders());
+                const res = await Api.getAsync(Api.endpoints.notifications.get);
                 let notifications = [];
                 if (res.code !== 200) {
                     if (res.code === 401) {

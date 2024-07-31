@@ -6,7 +6,7 @@ export class AuthApi {
     static userExists(email, successCallback = () => {
     }, errorCallback = () => {
     }) {
-        Api.getAsync(Api.endpoints.user.userExists, {email: encodeURIComponent(email)}, Util.getAuthorizationHeaders()).then((response) => {
+        Api.getAsync(Api.endpoints.user.userExists, {email: encodeURIComponent(email)}).then((response) => {
             if (response.code === 200) {
                 successCallback(response.data);
             } else {
@@ -20,7 +20,7 @@ export class AuthApi {
             email,
             password,
             mfaCode
-        }, Util.getAuthorizationHeaders()).then((response) => {
+        }).then((response) => {
             if (response.code === 200) {
                 successCallback(response.data);
             } else {
@@ -31,7 +31,7 @@ export class AuthApi {
     }
 
     static user(id, successCallback) {
-        Api.getAsync(Api.endpoints.user.profile, {id}, Util.getAuthorizationHeaders()).then((response) => {
+        Api.getAsync(Api.endpoints.user.profile, {id}).then((response) => {
             if (response.code === 200) {
                 successCallback(response.data);
             }
@@ -44,7 +44,7 @@ export class AuthApi {
             displayname,
             email,
             password
-        }, Util.getAuthorizationHeaders()).then((response) => {
+        }).then((response) => {
             if (response.code === 200) {
                 successCallback(response);
             } else {
@@ -58,7 +58,7 @@ export class AuthApi {
         Api.postAsync(Api.endpoints.user.actions.mfaRequest, {
             email,
             password
-        }, Util.getAuthorizationHeaders()).then((response) => {
+        }).then((response) => {
             if (response.code === 200) {
                 successCallback(response);
             } else {

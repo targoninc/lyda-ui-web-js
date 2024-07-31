@@ -29,7 +29,7 @@ export class ProfilePage {
     }
 
     static async addTracksAsync(element, user, selfUser, isOwnProfile) {
-        const tracksRes = await Api.getAsync(Api.endpoints.tracks.byUserId, { id: user.id, name: user.username }, Util.getAuthorizationHeaders());
+        const tracksRes = await Api.getAsync(Api.endpoints.tracks.byUserId, { id: user.id, name: user.username });
         if (tracksRes.code !== 200) {
             Ui.notify(tracksRes.data, "error");
             return;
@@ -43,7 +43,7 @@ export class ProfilePage {
     static async addAlbumsAsync(element, user, selfUser, isOwnProfile, isLoggedIn) {
         const albumsRes = await Api.getAsync(Api.endpoints.albums.byUserId, {
             id: user.id, name: user.username
-        }, Util.getAuthorizationHeaders());
+        });
         if (albumsRes.code !== 200) {
             Ui.notify(albumsRes.data, "error");
             return;
@@ -57,7 +57,7 @@ export class ProfilePage {
     static async addPlaylistsAsync(element, user, selfUser, isOwnProfile, isLoggedIn) {
         const playlistsRes = await Api.getAsync(Api.endpoints.playlists.byUserId, {
             id: user.id, name: user.username
-        }, Util.getAuthorizationHeaders());
+        });
         if (playlistsRes.code !== 200) {
             Ui.notify(playlistsRes.data, "error");
             return;
@@ -71,7 +71,7 @@ export class ProfilePage {
     static async addRepostsAsync(element, user, selfUser, isOwnProfile) {
         const repostsRes = await Api.getAsync(Api.endpoints.reposts.byUserId, {
             id: user.id, name: user.username
-        }, Util.getAuthorizationHeaders());
+        });
         if (repostsRes.code !== 200) {
             Ui.notify(repostsRes.data, "error");
             return;

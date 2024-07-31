@@ -90,7 +90,7 @@ export class Lyda {
             }
         }
         let user;
-        const permissionData  = await Api.getAsync(Api.endpoints.user.permissions, {}, Util.getAuthorizationHeaders());
+        const permissionData  = await Api.getAsync(Api.endpoints.user.permissions);
         const permissions = permissionData.data;
         switch (element.getAttribute("datatype")) {
         case "uploadForm":
@@ -135,7 +135,7 @@ export class Lyda {
             break;
         case "statistics":
             user = await Util.getUserAsync();
-            const royaltyInfo = await Api.getAsync(Api.endpoints.statistics.royaltyInfo, {}, Util.getAuthorizationHeaders());
+            const royaltyInfo = await Api.getAsync(Api.endpoints.statistics.royaltyInfo);
             element.append(await StatisticTemplates.statisticActions(user, royaltyInfo.data, permissions));
             element.append(create("div").classes("flex").children(...(await StatisticsWrapper.getStatistics())).build());
             break;
@@ -172,7 +172,7 @@ export class Lyda {
                 Ui.notify("You do not have permission to view action logs", "error");
                 return;
             }
-            const actionLogs = await Api.getAsync(Api.endpoints.audit.actionLogs, {}, Util.getAuthorizationHeaders());
+            const actionLogs = await Api.getAsync(Api.endpoints.audit.actionLogs);
             element.appendChild(await LogTemplates.actionLogs(user, actionLogs.data));
             break;
         case "unapprovedTracks":
@@ -223,7 +223,7 @@ export class Lyda {
             const offset = (pageNumber - 1) * pageSize;
             const params = type === "following" ? { offset, filter } : { offset };
             loadingState.value = true;
-            const res = await Api.getAsync(endpoint, params, Util.getAuthorizationHeaders());
+            const res = await Api.getAsync(endpoint, params);
             if (res.code !== 200) {
                 Ui.notify("Failed to get tracks", "error");
                 loadingState.value = false;

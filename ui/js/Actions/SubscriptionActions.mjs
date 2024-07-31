@@ -36,7 +36,7 @@ export class SubscriptionActions {
     }
 
     static async getPlanId(id) {
-        const response = await Api.getAsync(Api.endpoints.subscriptions.byId, {id: id}, Util.getAuthorizationHeaders());
+        const response = await Api.getAsync(Api.endpoints.subscriptions.byId, {id: id});
         if (response.code !== 200) {
             Ui.notify("Failed to get plan id", "error");
             return null;
@@ -73,7 +73,7 @@ export class SubscriptionActions {
     }
 
     static async subscriptionSuccess(data, parameters) {
-        const response = await Api.postAsync(Api.endpoints.subscriptions.create, {...parameters}, Util.getAuthorizationHeaders());
+        const response = await Api.postAsync(Api.endpoints.subscriptions.create, {...parameters});
         if (response.code === 200) {
             Ui.notify("Subscription started", "success");
         } else {
@@ -92,7 +92,7 @@ export class SubscriptionActions {
     }
 
     static async cancelSubscriptionAsync(id) {
-        const response = await Api.postAsync(Api.endpoints.subscriptions.delete, {id}, Util.getAuthorizationHeaders());
+        const response = await Api.postAsync(Api.endpoints.subscriptions.delete, {id});
         if (response.code !== 200) {
             Ui.notify(response.data, "error");
             return false;
@@ -109,7 +109,7 @@ export class SubscriptionActions {
     }
 
     static async loadSubscriptionOptions() {
-        const res = await Api.getAsync(Api.endpoints.subscriptions.options, {}, Util.getAuthorizationHeaders());
+        const res = await Api.getAsync(Api.endpoints.subscriptions.options);
         if (res.code !== 200) {
             Ui.notify("Failed to load subscription options", "error");
             return;

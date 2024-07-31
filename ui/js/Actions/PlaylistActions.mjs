@@ -15,7 +15,7 @@ export class PlaylistActions {
     }
 
     static async openAddToPlaylistModal(objectToBeAdded, type) {
-        const res = await Api.getAsync(Api.endpoints.playlists.byUserId, {user_id: objectToBeAdded.userId}, Util.getAuthorizationHeaders());
+        const res = await Api.getAsync(Api.endpoints.playlists.byUserId, {user_id: objectToBeAdded.userId});
         if (res.code !== 200) {
             console.error("Failed to get playlists: ", res.data);
             return;
@@ -35,7 +35,7 @@ export class PlaylistActions {
     }
 
     static async createNewPlaylist(playlist) {
-        const res = await Api.postAsync(Api.endpoints.playlists.actions.new, playlist, Util.getAuthorizationHeaders());
+        const res = await Api.postAsync(Api.endpoints.playlists.actions.new, playlist);
         if (res.code !== 200) {
             Ui.notify("Failed to create playlist: " + res.data, "error");
             return;
@@ -44,7 +44,7 @@ export class PlaylistActions {
     }
 
     static async deletePlaylist(id) {
-        const res = await Api.postAsync(Api.endpoints.playlists.actions.delete, {id}, Util.getAuthorizationHeaders());
+        const res = await Api.postAsync(Api.endpoints.playlists.actions.delete, {id});
         if (res.code === 200) {
             PlayManager.removeStreamClient(id);
             QueueManager.removeFromManualQueue(id);
@@ -64,7 +64,7 @@ export class PlaylistActions {
                 playlistIds.push(playlist.id.split("_")[1]);
             }
         }
-        const res = await Api.postAsync(Api.endpoints.playlists.actions.addTrack, {playlist_ids: playlistIds, track_id}, Util.getAuthorizationHeaders());
+        const res = await Api.postAsync(Api.endpoints.playlists.actions.addTrack, {playlist_ids: playlistIds, track_id});
         Util.removeModal();
         if (res.code !== 200) {
             Ui.notify("Failed to add track to playlists: " + res.data, "error");
@@ -74,7 +74,7 @@ export class PlaylistActions {
     }
 
     static async removeTrackFromPlaylist(track_id, playlist_id) {
-        const res = await Api.postAsync(Api.endpoints.playlists.actions.removeTrack, {id: playlist_id, track_id}, Util.getAuthorizationHeaders());
+        const res = await Api.postAsync(Api.endpoints.playlists.actions.removeTrack, {id: playlist_id, track_id});
         if (res.code !== 200) {
             Ui.notify("Failed to remove track from playlist: " + res.data, "error");
             return false;
@@ -127,7 +127,7 @@ export class PlaylistActions {
     }
 
     static async moveTrackInPlaylist(playlistId, trackId, newPosition) {
-        const res = await Api.postAsync(Api.endpoints.playlists.actions.reorderTracks, {id: playlistId, track_id: trackId, new_position: newPosition}, Util.getAuthorizationHeaders());
+        const res = await Api.postAsync(Api.endpoints.playlists.actions.reorderTracks, {id: playlistId, track_id: trackId, new_position: newPosition});
         if (res.code !== 200) {
             Ui.notify("Failed to move track in playlist: " + res.data, "error");
             return false;
@@ -136,11 +136,11 @@ export class PlaylistActions {
     }
 
     static async likePlaylist(id) {
-        return await Api.postAsync(Api.endpoints.playlists.actions.like, { id }, Util.getAuthorizationHeaders());
+        return await Api.postAsync(Api.endpoints.playlists.actions.like, { id });
     }
 
     static async unlikePlaylist(id) {
-        return await Api.postAsync(Api.endpoints.playlists.actions.unlike, { id }, Util.getAuthorizationHeaders());
+        return await Api.postAsync(Api.endpoints.playlists.actions.unlike, { id });
     }
 
     static async toggleLike(id, isEnabled) {
@@ -189,7 +189,7 @@ export class PlaylistActions {
                 playlistIds.push(playlist.id.split("_")[1]);
             }
         }
-        const res = await Api.postAsync(Api.endpoints.playlists.actions.addAlbum, {playlist_ids: playlistIds, album_id: id}, Util.getAuthorizationHeaders());
+        const res = await Api.postAsync(Api.endpoints.playlists.actions.addAlbum, {playlist_ids: playlistIds, album_id: id});
         Util.removeModal();
         if (res.code !== 200) {
             Ui.notify(res.data, "error");

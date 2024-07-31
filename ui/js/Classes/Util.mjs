@@ -254,7 +254,7 @@ export class Util {
                     return Util.mapNullToEmptyString(userData);
                 }
             }
-            return await Util.reAuthAndGetUser();
+            return await Util.getUser();
         } else {
             if (!noCache) {
                 const cachedUser = LydaCache.get("user:" + id).content;
@@ -263,7 +263,7 @@ export class Util {
                     return Util.mapNullToEmptyString(userData);
                 }
             }
-            const res = await Api.getAsync(Api.endpoints.user.profile, { id }, Util.getAuthorizationHeaders());
+            const res = await Api.getAsync(Api.endpoints.user.profile, { id });
             if (res.code === 401) {
                 return null;
             }
@@ -283,7 +283,7 @@ export class Util {
     }
 
     static async getUserByNameAsync(name) {
-        const res = await Api.getAsync(Api.endpoints.user.profile, { name }, Util.getAuthorizationHeaders());
+        const res = await Api.getAsync(Api.endpoints.user.profile, { name });
         if (res.code === 401) {
             return null;
         }
@@ -333,23 +333,17 @@ export class Util {
         return obj;
     }
 
-    static async reAuthAndGetUser() {
+    static async getUser() {
         const cacheKey = "user";
         let userData;
-        const lastReauth = LydaCache.get("reauth");
-        if (lastReauth !== null && lastReauth.content === "failed") {
-            return null;
-        }
-        const res = await Api.getAsync(Api.endpoints.auth.reAuthenticate, {}, Util.getAuthorizationHeaders());
+        const res = await Api.getAsync(Api.endpoints.user.get);
         if (res.code === 401) {
-            LydaCache.set("reauth", new CacheItem("failed"));
             UrlHandler.redirectIfDifferent("/login");
             return null;
         }
         userData = res.data;
         LydaCache.set(cacheKey, new CacheItem(JSON.stringify(userData)));
         if (userData === null) {
-            LydaCache.set("reauth", new CacheItem("failed"));
             UrlHandler.redirectIfDifferent("/login");
             return null;
         }
