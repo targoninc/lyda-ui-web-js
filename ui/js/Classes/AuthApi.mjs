@@ -31,7 +31,7 @@ export class AuthApi {
     }
 
     static user(id, successCallback) {
-        Api.getAsync(Api.endpoints.user.profile, {id}).then((response) => {
+        Api.getAsync(Api.endpoints.user.get, {id}).then((response) => {
             if (response.code === 200) {
                 successCallback(response.data);
             }
@@ -59,11 +59,11 @@ export class AuthApi {
             email,
             password
         }).then((response) => {
-            if (response.code === 200) {
-                successCallback(response);
+            if (response.code === 200 || response.code === 204) {
+                successCallback && successCallback(response);
             } else {
                 Ui.notify(response.data, "error");
-                errorCallback(response);
+                errorCallback && errorCallback(response);
             }
         });
     }

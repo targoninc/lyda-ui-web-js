@@ -16,7 +16,6 @@ export class Api {
             },
             user: {
                 get: "get",
-                profile: "profile",
                 settings: "settings",
                 permissions: "permissions",
                 random: "random",
@@ -40,7 +39,7 @@ export class Api {
                     requestVerification: "requestVerification",
                     login: "login",
                     register: "register",
-                    mfaRequest: "mfaRequest",
+                    mfaRequest: "mfa-request",
                 },
                 set: {
                     setting: "setting",

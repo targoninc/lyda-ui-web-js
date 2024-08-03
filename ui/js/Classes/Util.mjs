@@ -266,7 +266,7 @@ export class Util {
                     return Util.mapNullToEmptyString(userData);
                 }
             }
-            const res = await Api.getAsync(Api.endpoints.user.profile, { id });
+            const res = await Api.getAsync(Api.endpoints.user.get, { id: nullIfEmpty(id) });
             if (res.code === 401) {
                 return null;
             }
@@ -286,7 +286,7 @@ export class Util {
     }
 
     static async getUserByNameAsync(name) {
-        const res = await Api.getAsync(Api.endpoints.user.profile, { name });
+        const res = await Api.getAsync(Api.endpoints.user.get, { name: nullIfEmpty(name) });
         if (res.code === 401) {
             return null;
         }
@@ -471,4 +471,12 @@ export class Util {
         link.download = fileName;
         link.click();
     }
+}
+
+export function nullIfEmpty(value) {
+    if (value === undefined) {
+        return null;
+    }
+
+    return value;
 }

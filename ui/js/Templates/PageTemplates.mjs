@@ -88,7 +88,7 @@ export class PageTemplates {
         return create("div")
             .classes("profile", "flex-v")
             .attributes("lyda", "")
-            .attributes("endpoint", "user/profile")
+            .attributes("endpoint", "user/get")
             .attributes("params", "name")
             .attributes("datatype", "profile")
             .build();

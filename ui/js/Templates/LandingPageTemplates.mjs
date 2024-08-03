@@ -108,7 +108,7 @@ export class LandingPageTemplates {
 
     static checkForMfaBox(step, user) {
         AuthApi.mfaRequest(user.value.email, user.value.password, (res) => {
-            if (res.data && res.data !== "false") {
+            if (res.data && res.data !== "false" && res.code === 200) {
                 step.value = "mfa";
             } else {
                 step.value = "logging-in";

@@ -34,7 +34,7 @@ export class Lyda {
                 return cacheItem.content;
             }
         }
-        let r = await fetch(config["apiBaseUrl"] + "/v1/"+endpoint+params, {
+        let r = await fetch(config["apiBaseUrl"] + "/" + endpoint + params, {
             method: "GET",
             mode: "cors",
             headers: {

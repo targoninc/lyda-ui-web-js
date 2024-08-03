@@ -22,7 +22,6 @@ export class Images {
 
         return image;
     }
-	
     static get None() {
         return Images.BASE_URL + "/none" + Images.FORMAT;
     }
