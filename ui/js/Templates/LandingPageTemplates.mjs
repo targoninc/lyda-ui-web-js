@@ -4,7 +4,7 @@ import {AuthApi} from "../Classes/AuthApi.mjs";
 import {GenericTemplates} from "./GenericTemplates.mjs";
 import {FormTemplates} from "./FormTemplates.mjs";
 import {UserValidator} from "../Classes/Validators/UserValidator.mjs";
-import {Util} from "../Classes/Util.mjs";
+import {finalizeLogin, Util} from "../Classes/Util.mjs";
 import {LydaCache} from "../Cache/LydaCache.mjs";
 import {CacheItem} from "../Cache/CacheItem.mjs";
 import {Ui} from "../Classes/Ui.mjs";
@@ -108,7 +108,9 @@ export class LandingPageTemplates {
 
     static checkForMfaBox(step, user) {
         AuthApi.mfaRequest(user.value.email, user.value.password, (res) => {
-            if (res.data && res.data !== "false" && res.code === 200) {
+            if (res.data && res.data.user) {
+                finalizeLogin(step, res.data.user);
+            } else if (res.data && res.data.mfa_needed) {
                 step.value = "mfa";
             } else {
                 step.value = "logging-in";
@@ -121,18 +123,8 @@ export class LandingPageTemplates {
     static loggingInBox(step, user) {
         AuthApi.login(user.value.email, user.value.password, user.value.mfaCode, (data) => {
             Ui.notify("Logged in as " + data.username, "success");
-            Util.setCookie("token", data.token, 7);
             AuthApi.user(data.user_id, (user) => {
-                LydaCache.set("user", new CacheItem(JSON.stringify(user)));
-                LydaCache.set("sessionid", new CacheItem(Util.getSessionId()));
-                step.value = "complete";
-
-                let referrer = document.referrer;
-                if (referrer !== "" && !referrer.includes("login")) {
-                    window.location.href = referrer;
-                } else {
-                    window.location.href = "/home";
-                }
+                finalizeLogin(step, user);
             });
         });
 

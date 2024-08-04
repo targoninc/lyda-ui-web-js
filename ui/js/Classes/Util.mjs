@@ -480,3 +480,16 @@ export function nullIfEmpty(value) {
 
     return value;
 }
+
+export function finalizeLogin(step, user) {
+    LydaCache.set("user", new CacheItem(JSON.stringify(user)));
+    LydaCache.set("sessionid", new CacheItem(Util.getSessionId()));
+    step.value = "complete";
+
+    let referrer = document.referrer;
+    if (referrer !== "" && !referrer.includes("login")) {
+        //window.location.href = referrer;
+    } else {
+        //window.location.href = "/home";
+    }
+}

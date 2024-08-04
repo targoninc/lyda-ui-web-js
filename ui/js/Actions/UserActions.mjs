@@ -228,7 +228,7 @@ export class UserActions {
         if (onlyLocal) {
             return;
         }
-        const res = await Api.postAsync(Api.endpoints.user.actions.theme.set, { theme: themeName });
+        const res = await Api.postAsync(Api.endpoints.user.actions.setTheme, { theme: themeName });
         if (res.code !== 200) {
             Ui.notify("Failed to update theme", "error");
         }

@@ -31,9 +31,7 @@ export class Api {
                         upload: "upload",
                         delete: "delete",
                     },
-                    theme: {
-                        set: "set",
-                    },
+                    setTheme: "set-theme",
                     verify: "verify",
                     unverify: "unverify",
                     requestVerification: "requestVerification",
@@ -233,7 +231,8 @@ export class Api {
             headers: {
                 "Content-Type": "application/json",
                 ...authorizationHeaders
-            }
+            },
+            credentials: "include",
         });
         return {
             code: res.status,
@@ -264,6 +263,7 @@ export class Api {
                 ...headers,
                 ...authorizationHeaders
             },
+            credentials: "include",
             body
         });
         return {
