@@ -58,7 +58,8 @@ export class UserActions {
             formData.append("avatar", file);
             let response = await fetch(Api.endpoints.user.actions.avatar.upload, {
                 method: "POST",
-                body: formData
+                body: formData,
+                credentials: "include"
             });
             if (response.status === 200) {
                 loader.classList.add("hidden");

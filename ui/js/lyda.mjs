@@ -39,7 +39,8 @@ export class Lyda {
             mode: "cors",
             headers: {
                 "Content-Type": "application/json"
-            }
+            },
+            credentials: "include"
         });
         if (r.status !== 200) {
             console.error("Failed to fetch from endpoint " + endpoint + ", status: " + r.status);

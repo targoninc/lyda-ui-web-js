@@ -18,26 +18,6 @@ export class Util {
         return urlParams.get(name);
     }
 
-    static getSessionId() {
-        let token = document.cookie.match(/PHPSESSID=[^;]+/)?.toString();
-        if (token === undefined) {
-            return null;
-        }
-        return token.replace("PHPSESSID=", "");
-    }
-
-    static getSessionToken() {
-        let token = document.cookie.match(/token=[^;]+/)?.toString();
-        if (token === undefined) {
-            return null;
-        }
-        return token.replace("token=", "");
-    }
-
-    static setCookie(name, value, days) {
-        document.cookie = name + "=" + value + ";path=/;max-age=" + (days * 24 * 60 * 60) + ";SameSite=Lax;";
-    }
-
     static showButtonLoader(e) {
         try { 
             e.target.querySelector(".loader").classList.remove("hidden"); e.target.querySelector("span").classList.add("hidden"); 
@@ -483,7 +463,6 @@ export function nullIfEmpty(value) {
 
 export function finalizeLogin(step, user) {
     LydaCache.set("user", new CacheItem(JSON.stringify(user)));
-    LydaCache.set("sessionid", new CacheItem(Util.getSessionId()));
     step.value = "complete";
 
     let referrer = document.referrer;

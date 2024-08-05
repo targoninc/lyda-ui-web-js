@@ -61,7 +61,8 @@ export class LydaCache {
         fetch(cacheItem.reFetchUrl, {
             method: cacheItem.reFetchMethod,
             headers: cacheItem.reFetchHeaders,
-            body: cacheItem.reFetchBody
+            body: cacheItem.reFetchBody,
+            credentials: "include"
         }).then(async (response) => {
             const res = await response.text();
             try {

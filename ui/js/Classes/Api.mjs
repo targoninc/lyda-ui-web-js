@@ -5,10 +5,7 @@ export class Api {
         const endpoints = {
             base: Config.apiBaseUrl,
             auth: {
-                isLoggedIn: "isLoggedIn",
-                actions: {
-                    logout: "logout",
-                }
+                isLoggedIn: "isLoggedIn"
             },
             audit: {
                 logs: "logs",
@@ -36,6 +33,7 @@ export class Api {
                     unverify: "unverify",
                     requestVerification: "requestVerification",
                     login: "login",
+                    logout: "logout",
                     register: "register",
                     mfaRequest: "mfa-request",
                 },
@@ -246,7 +244,7 @@ export class Api {
      * @param {*} authorizationHeaders - The authorization headers to use
      * @returns {Promise<{code: number, data: any}>} - The response code and data
      */
-    static async postAsync(url, body, authorizationHeaders = {}) {
+    static async postAsync(url, body = {}, authorizationHeaders = {}) {
         return await Api.postRawAsync(url, JSON.stringify(body), authorizationHeaders);
     }
 
@@ -259,6 +257,7 @@ export class Api {
         }
         const res = await fetch(url, {
             method: "POST",
+            mode: "cors",
             headers: {
                 ...headers,
                 ...authorizationHeaders

@@ -284,7 +284,8 @@ export class TrackActions {
             formData.append("id", id.toString());
             let response = await fetch(Api.endpoints.tracks.actions.uploadCover, {
                 method: "POST",
-                body: formData
+                body: formData,
+                credentials: "include"
             });
             if (response.status === 200) {
                 loader.classList.add("hidden");

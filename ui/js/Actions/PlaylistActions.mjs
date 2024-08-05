@@ -113,7 +113,8 @@ export class PlaylistActions {
             formData.append("id", id.toString());
             let response = await fetch(Api.endpoints.playlists.actions.uploadCover, {
                 method: "POST",
-                body: formData
+                body: formData,
+                credentials: "include"
             });
             if (response.status === 200) {
                 loader.classList.add("hidden");

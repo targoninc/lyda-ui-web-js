@@ -18,7 +18,7 @@ export class AuthActions {
 
     static async logOut() {
         AuthActions.resetUiState();
-        const res = await Api.postAsync(Api.endpoints.auth.actions.logout);
+        const res = await Api.postAsync(Api.endpoints.user.actions.logout);
         if (res.code === 200) {
             window.router.reload();
             Ui.notify("Logged out!", "success");
