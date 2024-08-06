@@ -28,7 +28,6 @@ export class Api {
                         upload: "upload",
                         delete: "delete",
                     },
-                    setTheme: "set-theme",
                     verify: "verify",
                     unverify: "unverify",
                     requestVerification: "requestVerification",
@@ -36,9 +35,9 @@ export class Api {
                     logout: "logout",
                     register: "register",
                     mfaRequest: "mfa-request",
+                    updateSetting: "update-setting",
                 },
                 set: {
-                    setting: "setting",
                     property: "property",
                     paypalMail: "paypalMail",
                 },

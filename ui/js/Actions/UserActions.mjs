@@ -229,14 +229,14 @@ export class UserActions {
         if (onlyLocal) {
             return;
         }
-        const res = await Api.postAsync(Api.endpoints.user.actions.setTheme, { theme: themeName });
+        const res = await Api.postAsync(Api.endpoints.user.actions.updateSetting, { setting: "theme", value: themeName });
         if (res.code !== 200) {
             Ui.notify("Failed to update theme", "error");
         }
     }
 
     static async setPlayFromAutoQueue(playFromAutoQueue) {
-        const res = await Api.postAsync(Api.endpoints.user.set.setting, {
+        const res = await Api.postAsync(Api.endpoints.user.actions.updateSetting, {
             setting: "playFromAutoQueue",
             value: playFromAutoQueue
         });
@@ -248,7 +248,7 @@ export class UserActions {
     }
 
     static async setPublicLikes(publicLikes) {
-        const res = await Api.postAsync(Api.endpoints.user.set.setting, {
+        const res = await Api.postAsync(Api.endpoints.user.actions.updateSetting, {
             setting: "publicLikes",
             value: publicLikes
         });
@@ -297,7 +297,7 @@ export class UserActions {
         user.usersettings["notification_" + key] = !user.usersettings["notification_" + key];
         const value = user.usersettings["notification_" + key];
         LydaCache.set("user", new CacheItem(user));
-        const res = await Api.postAsync(Api.endpoints.user.set.setting, { setting: "notification_" + key, value });
+        const res = await Api.postAsync(Api.endpoints.user.actions.updateSetting, { setting: "notification_" + key, value });
         if (res.code !== 200) {
             Ui.notify("Failed to toggle notification", "error");
             user.usersettings["notification_" + key] = !user.usersettings["notification_" + key];

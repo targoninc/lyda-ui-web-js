@@ -7,12 +7,12 @@ export class Badge {
     name;
     /** @var {string} description */
     description;
-    /** @var {UserBadge[]|null} userBadges */
-    userBadges = null;
+    /** @var {UserBadge[]|null} user_badges */
+    user_badges = null;
     constructor(data) {
         this.id = data.id;
         this.name = data.name;
         this.description = data.description;
-        this.userBadges = data.userBadges;
+        this.user_badges = data.user_badges;
     }
 }

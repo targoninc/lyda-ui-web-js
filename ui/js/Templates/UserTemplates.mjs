@@ -278,8 +278,8 @@ export class UserTemplates {
 
     static profileInfo(user, selfUser, isOwnProfile, permissions, following, followsBack) {
         let specialInfo = [];
-        if (user.userBadges.length > 0) {
-            specialInfo = [UserTemplates.badges(user.userBadges)];
+        if (user.user_badges.length > 0) {
+            specialInfo = [UserTemplates.badges(user.user_badges)];
         }
         let verification = [];
         if (user.verified) {

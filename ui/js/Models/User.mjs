@@ -149,8 +149,8 @@ export class User {
     comments = null;
     /** @var {Theme[]|null} themes */
     themes = null;
-    /** @var {UserBadge[]|null} userBadges */
-    userBadges = null;
+    /** @var {UserBadge[]|null} user_badges */
+    user_badges = null;
     /** @var {RoyaltyPayment[]|null} royaltyPayments */
     royaltyPayments = null;
     /** @var {Albumlike[]|null} albumlikes */
@@ -226,7 +226,7 @@ export class User {
         this.albumtracks = data.albumtracks;
         this.comments = data.comments;
         this.themes = data.themes;
-        this.userBadges = data.userBadges;
+        this.user_badges = data.user_badges;
         this.royaltyPayments = data.royaltyPayments;
         this.albumlikes = data.albumlikes;
         this.artistRoyalties = data.artistRoyalties;

@@ -36,12 +36,11 @@ export class Ui {
                 const res = await Api.getAsync(Api.endpoints.notifications.get);
                 let notifications = [];
                 if (res.code !== 200) {
-                    Ui.notify("Failed to get notifications", "error");
-                    return;
+                    userTemplateRender = NavTemplates.notSignedInNote();
                 } else {
                     notifications = res.data;
+                    userTemplateRender = NavTemplates.signedInNote(user, await Util.getAvatarFromUserIdAsync(user.id), notifications);
                 }
-                userTemplateRender = NavTemplates.signedInNote(user, await Util.getAvatarFromUserIdAsync(user.id), notifications);
             } else {
                 userTemplateRender = NavTemplates.notSignedInNote();
             }
