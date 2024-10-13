@@ -67,6 +67,8 @@ export class LandingPageTemplates {
     }
 
     static completeBox() {
+        window.location.href = "/";
+
         return LandingPageTemplates.waitingBox("Complete", "Redirecting...");
     }
 

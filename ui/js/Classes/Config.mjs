@@ -3,10 +3,10 @@ export class Config {
         return window.location.host;
     }
     static get apiBaseUrl() {
-        return window.location.hostname === "localhost" ? "http://localhost:8080" : "https://api.lyda.app";
+        return window.location.hostname === "localhost" ? "http://localhost:8081" : "https://api.lyda.app";
     }
     static get storageBaseUrl() {
-        return window.location.hostname === "localhost" ? "http://localhost:8080" : "https://api.lyda.app";
+        return window.location.hostname === "localhost" ? "http://localhost:8081" : "https://api.lyda.app";
     }
 
     static get() {

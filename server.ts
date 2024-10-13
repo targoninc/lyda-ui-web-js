@@ -14,7 +14,7 @@ app.get("/api-url", (req, res) => {
     res.send(process.env.API_URL ?? "https://api.lyda.app");
 });
 
-app.get("*", async (req, res) => {
+app.get("*foo", async (req, res) => {
     baseHtml(req).then(html => res.send(html));
 });
 
