@@ -141,7 +141,7 @@ export class AlbumTemplates {
                     .build(),
                 create("div")
                     .classes("button-container")
-                    .children(GenericTemplates.newAlbumButton())
+                    .children(GenericTemplates.newAlbumButton(["secondary"]))
                     .build(),
             ];
         } else {

@@ -149,18 +149,18 @@ export class GenericTemplates {
             .build();
     }
 
-    static newAlbumButton() {
+    static newAlbumButton(classes = []) {
         return GenericTemplates.action(Icons.ALBUM_ADD, "New album", "new_album", async e => {
             e.preventDefault();
             await AlbumActions.openNewAlbumModal();
-        }, [], ["positive", "secondary"]);
+        }, [], ["positive", ...classes]);
     }
 
-    static newPlaylistButton() {
+    static newPlaylistButton(classes = []) {
         return GenericTemplates.action(Icons.PLAYLIST_ADD, "New playlist", "new_playlist", async e => {
             e.preventDefault();
             await PlaylistActions.openNewPlaylistModal();
-        }, [], ["positive", "secondary"]);
+        }, [], ["positive", ...classes]);
     }
 
     static newTrackButton(classes = []) {

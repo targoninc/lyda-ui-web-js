@@ -184,7 +184,7 @@ export class PlaylistTemplates {
                     .build(),
                 create("div")
                     .classes("button-container")
-                    .children(GenericTemplates.newPlaylistButton())
+                    .children(GenericTemplates.newPlaylistButton(["secondary"]))
                     .build(),
             ];
         } else {
