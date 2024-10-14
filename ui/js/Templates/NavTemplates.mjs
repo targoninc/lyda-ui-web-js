@@ -227,7 +227,7 @@ export class NavTemplates {
         if (!notifications || notifications.length === 0 || notifications.constructor !== Array) {
             notificationList = [
                 create("div")
-                    .classes("text-center")
+                    .classes("text-center", "padded")
                     .text("No notifications")
                     .build()
             ];

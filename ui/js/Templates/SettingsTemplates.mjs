@@ -19,7 +19,6 @@ export class SettingsTemplates {
                     .build(),
                 SettingsTemplates.themeSection(userSettings.uiTheme),
                 SettingsTemplates.behaviourSection(userSettings),
-                SettingsTemplates.accountManagementSection(),
                 SettingsTemplates.notificationsSection(userSettings)
             )
             .build();
@@ -44,36 +43,6 @@ export class SettingsTemplates {
         return GenericTemplates.toggle(text, "notification_" + key, async () => {
             await UserActions.toggleNotification(key);
         }, [], currentValue);
-    }
-
-    static accountManagementSection() {
-        return create("div")
-            .classes("card", "flex-v")
-            .children(
-                create("h2")
-                    .text("Account Management")
-                    .build(),
-                create("div")
-                    .classes("flex")
-                    .children(
-                        SettingsTemplates.serviceRelatedLinks(),
-                        SettingsTemplates.refreshProfileButton()
-                    ).build()
-            )
-            .build();
-    }
-
-    static serviceRelatedLinks() {
-        return create("div")
-            .classes("flex")
-            .children(
-                GenericTemplates.action(Icons.SUBSCRIPTIONS, "Manage Subscriptions", "subscriptions", () => {
-                    window.open("https://finance.targoninc.com", "_blank");
-                }, [], ["secondary"]),
-                GenericTemplates.action(Icons.ACCOUNTS, "Manage Account", "accounts", () => {
-                    window.open("https://accounts.targoninc.com", "_blank");
-                }, [], ["secondary"]),
-            ).build();
     }
 
     static behaviourSection(userSettings) {
@@ -118,18 +87,6 @@ export class SettingsTemplates {
                         ...themes.map(theme => SettingsTemplates.themeSelector(theme, currentTheme$))
                     ).build(),
             ).build();
-    }
-
-    static refreshProfileButton() {
-        return GenericTemplates.action(Icons.RELOAD, "Refresh profile info", "refreshProfileInfo", async () => {
-            const res = await Api.getAsync(Api.endpoints.user.get);
-            if (res.code === 200) {
-                const user = res.data;
-                LydaCache.set("user", new CacheItem(user));
-                await Ui.initUser(user.username);
-                Ui.notify("Refreshed profile info", "success");
-            }
-        });
     }
 
     static playFromAutoQueueToggle(currentValue) {
