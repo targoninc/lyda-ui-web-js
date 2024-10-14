@@ -76,7 +76,7 @@ export class ProfilePage {
             return;
         }
         const reposts = repostsRes.data;
-        const repostCards = UserTemplates.trackCards(reposts, selfUser, isOwnProfile);
+        const repostCards = UserTemplates.trackCards(reposts, user.id, selfUser, isOwnProfile);
         element.innerHTML = "";
         element.appendChild(repostCards);
     }

@@ -153,14 +153,14 @@ export class GenericTemplates {
         return GenericTemplates.action(Icons.ALBUM_ADD, "New album", "new_album", async e => {
             e.preventDefault();
             await AlbumActions.openNewAlbumModal();
-        }, [], ["positive"]);
+        }, [], ["positive", "secondary"]);
     }
 
     static newPlaylistButton() {
         return GenericTemplates.action(Icons.PLAYLIST_ADD, "New playlist", "new_playlist", async e => {
             e.preventDefault();
             await PlaylistActions.openNewPlaylistModal();
-        }, [], ["positive"]);
+        }, [], ["positive", "secondary"]);
     }
 
     static newTrackButton(classes = []) {
@@ -168,6 +168,13 @@ export class GenericTemplates {
             e.preventDefault();
             window.router.navigate("upload");
         }, [], ["positive", ...classes], Links.LINK("upload"));
+    }
+
+    static openPageButton(text, page) {
+        return GenericTemplates.action(Icons.STARS, text, page, async e => {
+            e.preventDefault();
+            window.router.navigate(page);
+        }, [], ["positive", "secondary"], Links.LINK(page));
     }
 
     static actionWithSmallBreakpoint(icon, text, id, onclick, attributes = [], classes = [], link = null) {
