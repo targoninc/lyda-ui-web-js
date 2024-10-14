@@ -278,14 +278,12 @@ export class UserTemplates {
 
     static profileInfo(user, selfUser, isOwnProfile, permissions, following, followsBack) {
         let specialInfo = [];
-        if (user.user_badges.length > 0) {
-            specialInfo = [UserTemplates.badges(user.user_badges)];
+        if (user.badges.length > 0) {
+            specialInfo = [UserTemplates.badges(user.badges)];
         }
         let verification = [];
         if (user.verified) {
-            verification.push(
-                UserTemplates.verificationbadge()
-            );
+            verification.push(UserTemplates.verificationbadge());
             if (permissions.some(p => p.name === Permissions.canVerifyUsers)) {
                 verification.push(
                     GenericTemplates.action(Icons.X, "Unverify", "unverify", async e => {
