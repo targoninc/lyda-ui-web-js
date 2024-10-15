@@ -1,4 +1,4 @@
-import {create, FjsObservable} from "https://fjs.targoninc.com/f.js";
+import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {Icons} from "../Enums/Icons.mjs";
 import {UserTemplates} from "./UserTemplates.mjs";
 import {UserActions} from "../Actions/UserActions.mjs";
@@ -188,7 +188,7 @@ export class NavTemplates {
     static notificationImage(image) {
         const type = image.type;
         const id = image.id;
-        const srcState = new FjsObservable("");
+        const srcState = signal("");
         Util.getAvatarFromUserIdAsync(id).then((src) => {
             srcState.value = src;
         });

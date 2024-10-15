@@ -1,6 +1,6 @@
 import {Icons} from "../Enums/Icons.mjs";
 import {TrackActions} from "../Actions/TrackActions.mjs";
-import {create, FjsObservable} from "https://fjs.targoninc.com/f.js";
+import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {UserTemplates} from "./UserTemplates.mjs";
 import {AlbumActions} from "../Actions/AlbumActions.mjs";
 import {PlaylistActions} from "../Actions/PlaylistActions.mjs";
@@ -14,9 +14,9 @@ export class StatisticsTemplates {
             "album": AlbumActions.toggleLike,
             "playlist": PlaylistActions.toggleLike,
         };
-        const toggleState = new FjsObservable(liked);
-        const toggleClass = new FjsObservable(liked ? "enabled" : "_");
-        const imageState = new FjsObservable(liked ? Icons.LIKE : Icons.LIKE_OUTLINE);
+        const toggleState = signal(liked);
+        const toggleClass = signal(liked ? "enabled" : "_");
+        const imageState = signal(liked ? Icons.LIKE : Icons.LIKE_OUTLINE);
         toggleState.onUpdate = (value) => {
             if (Util.isLoggedIn()) {
                 toggleClass.value = value ? "enabled" : "_";
@@ -27,8 +27,8 @@ export class StatisticsTemplates {
     }
 
     static repostIndicator(reference_id, repost_count, reposted) {
-        const toggleState = new FjsObservable(reposted);
-        const toggleClass = new FjsObservable(reposted ? "enabled" : "_");
+        const toggleState = signal(reposted);
+        const toggleClass = signal(reposted ? "enabled" : "_");
         toggleState.onUpdate = (value) => {
             if (Util.isLoggedIn()) {
                 toggleClass.value = value ? "enabled" : "_";
@@ -39,7 +39,7 @@ export class StatisticsTemplates {
 
     static statsIndicator(stats_type, toggleObservable, count, statdisplay, image_src, reference_id = -1, clickFunc = () => {
     }, extraClasses = []) {
-        const countState = new FjsObservable(count);
+        const countState = signal(count);
         toggleObservable.onUpdate = (value) => {
             if (!Util.isLoggedIn()) {
                 return;
@@ -76,8 +76,8 @@ export class StatisticsTemplates {
     }
 
     static genericUserListOpener(type, track_id, items, user) {
-        const openState = new FjsObservable(false);
-        const listClass = new FjsObservable("hidden");
+        const openState = signal(false);
+        const listClass = signal("hidden");
 
         openState.onUpdate = (value) => {
             listClass.value = value ? "visible" : "hidden";
@@ -88,7 +88,7 @@ export class StatisticsTemplates {
         };
 
         const itemsList = items.map(item => {
-            const avatar = new FjsObservable(Images.DEFAULT_AVATAR);
+            const avatar = signal(Images.DEFAULT_AVATAR);
             Util.getAvatarFromUserIdAsync(item.userId).then(avatarUrl => {
                 avatar.value = avatarUrl;
             });

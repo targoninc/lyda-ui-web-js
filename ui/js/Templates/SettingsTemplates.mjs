@@ -1,13 +1,7 @@
-import {create, FjsObservable} from "https://fjs.targoninc.com/f.js";
-import {CacheItem} from "../Cache/CacheItem.mjs";
-import {Api} from "../Classes/Api.mjs";
+import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {UserActions} from "../Actions/UserActions.mjs";
-import {LydaCache} from "../Cache/LydaCache.mjs";
 import {Themes} from "../Enums/Themes.mjs";
 import {GenericTemplates} from "./GenericTemplates.mjs";
-import {Icons} from "../Enums/Icons.mjs";
-import {Ui} from "../Classes/Ui.mjs";
-import {Util} from "../Classes/Util.mjs";
 
 export class SettingsTemplates {
     static settingsPage(userSettings) {
@@ -59,7 +53,7 @@ export class SettingsTemplates {
     }
 
     static themeSelector(theme, currentTheme$) {
-        const active$ = new FjsObservable(currentTheme$.value === theme ? "active" : "_");
+        const active$ = signal(currentTheme$.value === theme ? "active" : "_");
         currentTheme$.onUpdate = (currentTheme) => {
             active$.value = currentTheme === theme ? "active" : "_";
         };
@@ -74,7 +68,7 @@ export class SettingsTemplates {
 
     static themeSection(currentTheme) {
         const themes = Object.values(Themes);
-        const currentTheme$ = new FjsObservable(currentTheme);
+        const currentTheme$ = signal(currentTheme);
         return create("div")
             .classes("card", "flex-v")
             .children(

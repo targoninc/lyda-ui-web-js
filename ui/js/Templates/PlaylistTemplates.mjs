@@ -1,4 +1,4 @@
-import {create, FjsObservable} from "https://fjs.targoninc.com/f.js";
+import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {Icons} from "../Enums/Icons.mjs";
 import {GenericTemplates} from "./GenericTemplates.mjs";
 import {PlaylistActions} from "../Actions/PlaylistActions.mjs";
@@ -206,7 +206,7 @@ export class PlaylistTemplates {
         if (playlist.visibility === "private") {
             icons.push(GenericTemplates.lock());
         }
-        const coverState = new FjsObservable(Images.DEFAULT_AVATAR);
+        const coverState = signal(Images.DEFAULT_AVATAR);
         Util.getCoverFileFromPlaylistIdAsync(playlist.id, playlist.userId).then(cover => {
             coverState.value = cover;
         });
@@ -255,7 +255,7 @@ export class PlaylistTemplates {
     }
 
     static playlistCover(playlist, overwriteWidth = null) {
-        const coverState = new FjsObservable(Images.DEFAULT_AVATAR);
+        const coverState = signal(Images.DEFAULT_AVATAR);
         Util.getCoverFileFromPlaylistIdAsync(playlist.id, playlist.userId).then(cover => {
             coverState.value = cover;
         });
@@ -313,7 +313,7 @@ export class PlaylistTemplates {
         const a_user = playlist.user;
         const trackChildren = [];
         const positionMap = tracks.map(t => t.id);
-        const positionsState = new FjsObservable(positionMap);
+        const positionsState = signal(positionMap);
 
         async function startCallback(trackId) {
             await PlaylistActions.startTrackInPlaylist(playlist, trackId);

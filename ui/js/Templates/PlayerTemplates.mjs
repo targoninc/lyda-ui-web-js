@@ -1,6 +1,6 @@
 import {PlayManager} from "../Streaming/PlayManager.mjs";
 import {StreamingUpdater} from "../Streaming/StreamingUpdater.mjs";
-import {create, FjsObservable} from "https://fjs.targoninc.com/f.js";
+import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {Icons} from "../Enums/Icons.mjs";
 import {Time} from "../Classes/Helpers/Time.mjs";
 import {QueueManager} from "../Streaming/QueueManager.mjs";
@@ -168,7 +168,7 @@ export class PlayerTemplates {
         const trackList = await Promise.all(tasks);
         const loopingSingle = PlayManager.isLoopingSingle();
         const loopingContext = PlayManager.isLoopingContext();
-        const cover = new FjsObservable(Images.DEFAULT_AVATAR);
+        const cover = signal(Images.DEFAULT_AVATAR);
         Util.getCoverFileFromTrackIdAsync(track.id, track.userId).then((src) => {
             cover.value = src;
         });

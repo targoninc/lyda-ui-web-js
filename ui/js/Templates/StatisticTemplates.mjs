@@ -1,6 +1,6 @@
 import {Chart, registerables} from "https://cdn.jsdelivr.net/npm/chart.js@4.3.0/+esm";
 import {BoxPlotChart} from "https://cdn.jsdelivr.net/npm/@sgratzl/chartjs-chart-boxplot@4.2.7/+esm";
-import {create, FjsObservable} from "https://fjs.targoninc.com/f.js";
+import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {Colors} from "../Classes/Colors.mjs";
 import {ChartOptions} from "../Classes/ChartOptions.mjs";
 import {GenericTemplates} from "./GenericTemplates.mjs";
@@ -10,7 +10,6 @@ import {Num} from "../Classes/Helpers/Num.mjs";
 import {Permissions} from "../Enums/Permissions.mjs";
 import {FormTemplates} from "./FormTemplates.mjs";
 import {Ui} from "../Classes/Ui.mjs";
-import {Util} from "../Classes/Util.mjs";
 
 Chart.register(...registerables);
 
@@ -173,7 +172,7 @@ export class StatisticTemplates {
                 text: m.month + (m.calculated ? " (calculated)" : "")
             };
         });
-        const selectedState = new FjsObservable(months[0]);
+        const selectedState = signal(months[0]);
 
         return [
             FormTemplates.dropDownField("Month", "month", months, selectedState, true, (value) => {
@@ -200,9 +199,9 @@ export class StatisticTemplates {
         }
 
         if (royaltyInfo.available && parseFloat(royaltyInfo.available) >= 0.5) {
-            const paypalMailExistsState = new FjsObservable(royaltyInfo.paypalMail !== null);
-            const visibilityClass = new FjsObservable(paypalMailExistsState.value ? "visible" : "hidden");
-            const invertVisibilityClass = new FjsObservable(paypalMailExistsState.value ? "hidden" : "visible");
+            const paypalMailExistsState = signal(royaltyInfo.paypalMail !== null);
+            const visibilityClass = signal(paypalMailExistsState.value ? "visible" : "hidden");
+            const invertVisibilityClass = signal(paypalMailExistsState.value ? "hidden" : "visible");
             paypalMailExistsState.onUpdate = (exists) => {
                 visibilityClass.value = exists ? "visible" : "hidden";
                 invertVisibilityClass.value = exists ? "hidden" : "visible";

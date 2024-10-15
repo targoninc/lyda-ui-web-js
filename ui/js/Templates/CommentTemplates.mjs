@@ -1,4 +1,4 @@
-import {create, FjsObservable} from "https://fjs.targoninc.com/f.js";
+import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {StatisticsTemplates} from "./StatisticsTemplates.mjs";
 import {GenericTemplates} from "./GenericTemplates.mjs";
 import {Icons} from "../Enums/Icons.mjs";
@@ -104,7 +104,7 @@ export class CommentTemplates {
     }
 
     static commentsIndicator(track_id, comment_count) {
-        const toggleState = new FjsObservable(false);
+        const toggleState = signal(false);
         return StatisticsTemplates.statsIndicator("comments", toggleState, comment_count, "Comment", Icons.COMMENT, track_id);
     }
 
@@ -166,7 +166,7 @@ export class CommentTemplates {
             const deleteAction = GenericTemplates.inlineAction("Delete", Icons.DELETE, "delete-comment", comment.id, TrackActions.deleteCommentFromElement);
             actions.push(deleteAction);
         }
-        const avatarState = new FjsObservable(Images.DEFAULT_AVATAR);
+        const avatarState = signal(Images.DEFAULT_AVATAR);
         Util.getAvatarFromUserIdAsync(comment.userId).then(avatar => {
             avatarState.value = avatar;
         });

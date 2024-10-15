@@ -1,4 +1,4 @@
-import {create, FjsObservable} from "https://fjs.targoninc.com/f.js";
+import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {Icons} from "../Enums/Icons.mjs";
 import {AlbumActions} from "../Actions/AlbumActions.mjs";
 import {FormTemplates} from "./FormTemplates.mjs";
@@ -169,7 +169,7 @@ export class AlbumTemplates {
         if (album.visibility === "private") {
             icons.push(GenericTemplates.lock());
         }
-        const avatarState = new FjsObservable(Images.DEFAULT_AVATAR);
+        const avatarState = signal(Images.DEFAULT_AVATAR);
         Util.getAvatarFromUserIdAsync(album.userId).then((src) => {
             avatarState.value = src;
         });
@@ -224,7 +224,7 @@ export class AlbumTemplates {
      * @returns {Promise<*>}
      */
     static albumCover(album, overwriteWidth = null) {
-        const srcState = new FjsObservable(Images.DEFAULT_AVATAR);
+        const srcState = signal(Images.DEFAULT_AVATAR);
         Util.getCoverFileFromAlbumIdAsync(album.id, album.userId).then((src) => {
             srcState.value = src;
         });
@@ -281,7 +281,7 @@ export class AlbumTemplates {
         const a_user = album.user;
         const trackChildren = [];
         const positionMap = tracks.map(t => t.id);
-        const positionsState = new FjsObservable(positionMap);
+        const positionsState = signal(positionMap);
 
         async function startCallback(trackId) {
             await AlbumActions.startTrackInAlbum(album, trackId);

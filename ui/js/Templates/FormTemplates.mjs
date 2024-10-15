@@ -129,7 +129,7 @@ export class FormTemplates {
     }
 
     static genre(value = "other", parentState = null) {
-        const genreState = new FjsObservable([value]);
+        const genreState = signal([value]);
         Api.getAsync(Api.endpoints.genres.list).then((res) => {
             if (res.code !== 200) {
                 Ui.notify("Failed to load genres", "error");

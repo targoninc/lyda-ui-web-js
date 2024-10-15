@@ -1,4 +1,4 @@
-import {create, FjsObservable} from "https://fjs.targoninc.com/f.js";
+import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {AuthActions} from "../Actions/AuthActions.mjs";
 import {LandingPageTemplates} from "./LandingPageTemplates.mjs";
 import {UserTemplates} from "./UserTemplates.mjs";
@@ -191,7 +191,7 @@ export class PageTemplates {
     }
 
     static notFoundPage() {
-        const randomUserWidget = new FjsObservable(create("span").text("loading...").build());
+        const randomUserWidget = signal(create("span").text("loading...").build());
         Api.getAsync(Api.endpoints.user.random).then(async data => {
             if (data.code !== 200) {
                 randomUserWidget.value = create("span").text("Failed to load random user").build();

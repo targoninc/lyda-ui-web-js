@@ -1,4 +1,4 @@
-import {FjsObservable} from "https://fjs.targoninc.com/f.js";
+import {signal} from "https://fjs.targoninc.com/f.js";
 
 export class Time {
     static localDate(time) {
@@ -71,7 +71,7 @@ export class Time {
     }
 
     static agoUpdating(time) {
-        const state = new FjsObservable(Time.ago(time));
+        const state = signal(Time.ago(time));
         const updateIn = (time) => {
             state.value = Time.ago(time);
             const updateInterval = Time.#shouldUpdateInSeconds(state.value) ? 1000 : 60000;

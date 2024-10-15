@@ -1,4 +1,4 @@
-import {create, FjsObservable, ifjs} from "https://fjs.targoninc.com/f.js";
+import {create, ifjs, signal, signalMap} from "https://fjs.targoninc.com/f.js";
 import {Icons} from "../Enums/Icons.mjs";
 import {AlbumActions} from "../Actions/AlbumActions.mjs";
 import {PlaylistActions} from "../Actions/PlaylistActions.mjs";
@@ -222,7 +222,7 @@ export class GenericTemplates {
     }
 
     static pill(value, text, onclick = () => {}, pillState, extraClasses = []) {
-        const selectedState = new FjsObservable(pillState.value === value ? "active" : "_");
+        const selectedState = signal(pillState.value === value ? "active" : "_");
         pillState.onUpdate = (newSelected) => {
             selectedState.value = newSelected === value ? "active" : "_";
         };
@@ -237,7 +237,7 @@ export class GenericTemplates {
     static pills(options, pillState, extraClasses = [], loadingState = null) {
         let spinner = null;
         if (loadingState) {
-            const spinnerClass = new FjsObservable(loadingState.value ? "_" : "hidden");
+            const spinnerClass = signal(loadingState.value ? "_" : "hidden");
             loadingState.onUpdate = (loading) => {
                 spinnerClass.value = loading ? "_" : "hidden";
             };
@@ -512,7 +512,7 @@ export class GenericTemplates {
     }
 
     static tabSelector(tabs, callback, selectedTab = 0) {
-        const selectedState = new FjsObservable(selectedTab);
+        const selectedState = signal(selectedTab);
         selectedState.onUpdate = (newSelected) => {
             callback(newSelected);
         };
@@ -522,7 +522,7 @@ export class GenericTemplates {
             .classes("tab-selector", "flex", "rounded", "limitToContentWidth")
             .children(
                 ...tabs.map((t, i) => {
-                    const innerSelectedState = new FjsObservable(i === selectedTab ? "selected" : "_");
+                    const innerSelectedState = signal(i === selectedTab ? "selected" : "_");
                     selectedState.onUpdate = (newSelected) => {
                         innerSelectedState.value = i === newSelected ? "selected" : "_";
                     };
@@ -554,7 +554,7 @@ export class GenericTemplates {
     }
 
     static addUserLinkSearchResult(entry, selectedState) {
-        const selectedClassState = new FjsObservable(selectedState.value === entry.id ? "active" : "_");
+        const selectedClassState = signal(selectedState.value === entry.id ? "active" : "_");
         selectedState.onUpdate = (newSelected) => {
             selectedClassState.value = newSelected === entry.id ? "active" : "_";
         };
@@ -575,25 +575,34 @@ export class GenericTemplates {
             ).build();
     }
 
+    static select(options, value, id = null, classes = []) {
+        const baseSelect = create("select")
+            .classes(...classes)
+            .id(id)
+            .value(value)
+            .build();
+
+        return create("div")
+            .children(
+                signalMap(options, baseSelect, option => GenericTemplates.selectOption(option))
+            ).build()
+    }
+
+    static selectOption(option) {
+        return create("option")
+            .text(option.name)
+            .value(option.id)
+            .build()
+    }
+
     static addLinkedUserModal(title, text, currentValue, icon, confirmText, cancelText, confirmCallback, cancelCallback) {
-        const selectedState = new FjsObservable(0);
+        const selectedState = signal(0);
         const userMap = new Map();
-        const collabTypeOptions = new FjsObservable(create("span").text("Loading collab types...").build());
+        const collabTypeOptions = signal(create("span").text("Loading collab types...").build());
         let collabTypes = [];
         TrackActions.getCollabTypes().then(types => {
             collabTypes = types;
-            collabTypeOptions.value = create("select")
-                .classes("full")
-                .id("collabType")
-                .value("1")
-                .children(
-                    ...types.map(type => {
-                        return create("option")
-                            .text(type.name)
-                            .value(type.id)
-                            .build();
-                    })
-                ).build();
+            collabTypeOptions.value = GenericTemplates.select(types, "1", "collabType", ["full"]);
         });
 
         return GenericTemplates.modal([

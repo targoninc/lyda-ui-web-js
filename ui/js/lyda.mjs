@@ -8,7 +8,7 @@ import {TrackEditTemplates} from "./Templates/TrackEditTemplates.mjs";
 import {TrackTemplates} from "./Templates/TrackTemplates.mjs";
 import {ProfilePage} from "./Classes/ProfilePage.mjs";
 import {AlbumTemplates} from "./Templates/AlbumTemplates.mjs";
-import {create, FjsObservable, signal} from "https://fjs.targoninc.com/f.js";
+import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {PlaylistTemplates} from "./Templates/PlaylistTemplates.mjs";
 import {LibraryActions} from "./Actions/LibraryActions.mjs";
 import {Api} from "./Classes/Api.mjs";
@@ -148,7 +148,7 @@ export class Lyda {
                 Ui.notify("You do not have permission to view logs", "error");
                 return;
             }
-            const filterState = new FjsObservable("all");
+            const filterState = signal("all");
             element.appendChild(LogTemplates.logFilters(filterState));
             let logsList = create("div").build();
             element.appendChild(logsList);
@@ -204,10 +204,10 @@ export class Lyda {
 
     static async loadFeed(type, element, user) {
         const endpoint = Api.endpoints.tracks.feeds[type];
-        const pageState = new FjsObservable(1);
-        const tracksState = new FjsObservable([]);
-        const filterState = new FjsObservable("all");
-        const loadingState = new FjsObservable(false);
+        const pageState = signal(1);
+        const tracksState = signal([]);
+        const filterState = signal("all");
+        const loadingState = signal(false);
         const pageSize = 10;
         const update = async () => {
             const pageNumber = pageState.value;

@@ -1,4 +1,4 @@
-import {create, FjsObservable} from "https://fjs.targoninc.com/f.js";
+import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {FormTemplates} from "./FormTemplates.mjs";
 import {GenericTemplates} from "./GenericTemplates.mjs";
 import {Icons} from "../Enums/Icons.mjs";
@@ -12,7 +12,7 @@ import {Ui} from "../Classes/Ui.mjs";
 
 export class TrackEditTemplates {
     static getStateWithParentUpdate(key, value, parentState) {
-        const state = new FjsObservable(value);
+        const state = signal(value);
         state.onUpdate = (newValue) => {
             if (parentState) parentState.value = {...parentState.value, [key]: newValue};
         };
@@ -25,7 +25,7 @@ export class TrackEditTemplates {
     }
 
     static uploadForm(title, collaborators, releaseDate, visibility, genre, isrc, upc, description, monetization, price, linkedUsers, termsOfService) {
-        const state = new FjsObservable({
+        const state = signal({
             title: title ?? "",
             collaborators: collaborators ?? "",
             releaseDate: releaseDate ?? Util.getDateForPicker(new Date()),
@@ -75,7 +75,7 @@ export class TrackEditTemplates {
     }
 
     static editTrackModal(track, confirmCallback, cancelCallback) {
-        const state = new FjsObservable(track);
+        const state = signal(track);
 
         return GenericTemplates.modal([
             create("div")
@@ -348,14 +348,14 @@ export class TrackEditTemplates {
     }
 
     static linkedUsers(linkedUsers = [], parentState = null) {
-        const linkedUserState = new FjsObservable(linkedUsers);
+        const linkedUserState = signal(linkedUsers);
         const userMap = new Map();
         linkedUserState.onUpdate = (newValue) => {
             const container = document.getElementById("linked_users_container");
             container.innerHTML = "";
             for (const id of newValue) {
                 const user = userMap.get(id);
-                const avatarState = new FjsObservable(Images.DEFAULT_AVATAR);
+                const avatarState = signal(Images.DEFAULT_AVATAR);
                 Util.getAvatarFromUserIdAsync(user.id).then((avatar) => {
                     avatarState.value = avatar;
                 });

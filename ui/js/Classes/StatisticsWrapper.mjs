@@ -1,6 +1,5 @@
 import {StatisticTemplates} from "../Templates/StatisticTemplates.mjs";
-import {FjsObservable} from "https://fjs.targoninc.com/f.js";
-import {Util} from "./Util.mjs";
+import {signal} from "https://fjs.targoninc.com/f.js";
 import {Api} from "./Api.mjs";
 import {Ui} from "./Ui.mjs";
 import {Num} from "./Helpers/Num.mjs";
@@ -17,7 +16,7 @@ export class StatisticsWrapper {
     }
 
     static async getRoyaltiesByMonth() {
-        const chartObservable = new FjsObservable(StatisticTemplates.royaltiesByMonthChart([], []));
+        const chartObservable = signal(StatisticTemplates.royaltiesByMonthChart([], []));
         Api.getAsync(Api.endpoints.statistics.royaltiesByMonth).then((res) => {
             if (res.code !== 200) {
                 Ui.notify(res.data, "error");
@@ -32,7 +31,7 @@ export class StatisticsWrapper {
     }
 
     static async getRoyaltiesByTrack() {
-        const chartObservable = new FjsObservable(StatisticTemplates.royaltiesByTrackChart([], []));
+        const chartObservable = signal(StatisticTemplates.royaltiesByTrackChart([], []));
         Api.getAsync(Api.endpoints.statistics.royaltiesByTrack).then((res) => {
             if (res.code !== 200) {
                 Ui.notify(res.data, "error");
@@ -46,7 +45,7 @@ export class StatisticsWrapper {
     }
 
     static async getPlayCountByTracks() {
-        const chartObservable = new FjsObservable(StatisticTemplates.playCountByTrackChart([], []));
+        const chartObservable = signal(StatisticTemplates.playCountByTrackChart([], []));
         Api.getAsync(Api.endpoints.statistics.playCountByTrack).then((res) => {
             if (res.code !== 200) {
                 Ui.notify(res.data, "error");
@@ -60,7 +59,7 @@ export class StatisticsWrapper {
     }
 
     static async getPlayCountByMonth() {
-        const chartObservable = new FjsObservable(StatisticTemplates.playCountByMonthChart([], []));
+        const chartObservable = signal(StatisticTemplates.playCountByMonthChart([], []));
         Api.getAsync(Api.endpoints.statistics.playCountByMonth).then((res) => {
             if (res.code !== 200) {
                 Ui.notify(res.data, "error");
@@ -75,7 +74,7 @@ export class StatisticsWrapper {
     }
 
     static async getLikesByTrack() {
-        const chartObservable = new FjsObservable(StatisticTemplates.likesByTrackChart([], []));
+        const chartObservable = signal(StatisticTemplates.likesByTrackChart([], []));
         Api.getAsync(Api.endpoints.statistics.likesByTrack).then((res) => {
             if (res.code !== 200) {
                 Ui.notify(res.data, "error");

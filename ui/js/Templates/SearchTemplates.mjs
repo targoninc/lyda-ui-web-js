@@ -1,12 +1,11 @@
-import {create, FjsObservable} from "https://fjs.targoninc.com/f.js";
+import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {Api} from "../Classes/Api.mjs";
 import {Ui} from "../Classes/Ui.mjs";
-import {Util} from "../Classes/Util.mjs";
 
 export class SearchTemplates {
     static search() {
-        const results = new FjsObservable([]);
-        const selectedResult = new FjsObservable({ id: null });
+        const results = signal([]);
+        const selectedResult = signal({ id: null });
 
         return create("div")
             .classes("search", "relative", "align-center")
@@ -92,7 +91,7 @@ export class SearchTemplates {
 
     static searchResults(results, selectedResult) {
         let searchResults = results.value;
-        const sResults = new FjsObservable(SearchTemplates.searchResultsList(searchResults, selectedResult));
+        const sResults = signal(SearchTemplates.searchResultsList(searchResults, selectedResult));
         results.onUpdate = () => {
             searchResults = results.value;
             sResults.value = SearchTemplates.searchResultsList(searchResults, selectedResult);
@@ -130,7 +129,7 @@ export class SearchTemplates {
     }
 
     static searchResult(display, id, type, image = "", selectedResult = null) {
-        const addClass = new FjsObservable(selectedResult.id === id ? "selected" : "_");
+        const addClass = signal(selectedResult.id === id ? "selected" : "_");
         let elementReference;
         selectedResult.onUpdate = (newValue) => {
             addClass.value = newValue.id === id ? "selected" : "_";

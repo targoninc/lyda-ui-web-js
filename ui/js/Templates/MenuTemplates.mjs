@@ -1,4 +1,4 @@
-import {create, FjsObservable} from "https://fjs.targoninc.com/f.js";
+import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {AlbumActions} from "../Actions/AlbumActions.mjs";
 import {PlaylistActions} from "../Actions/PlaylistActions.mjs";
 import {GenericTemplates} from "./GenericTemplates.mjs";
@@ -6,9 +6,9 @@ import {Util} from "../Classes/Util.mjs";
 
 export class MenuTemplates {
     static genericMenu(title, menuItems) {
-        const indexState = new FjsObservable(0);
+        const indexState = signal(0);
         const menuItemCount = menuItems.length;
-        let modal = new FjsObservable(MenuTemplates.getGenericModalWithSelectedIndex(indexState.value, title, menuItems));
+        let modal = signal(MenuTemplates.getGenericModalWithSelectedIndex(indexState.value, title, menuItems));
         indexState.onUpdate = newIndex => {
             modal.value = MenuTemplates.getGenericModalWithSelectedIndex(newIndex, title, menuItems);
         };
