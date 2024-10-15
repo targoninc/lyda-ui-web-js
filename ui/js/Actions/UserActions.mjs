@@ -211,21 +211,9 @@ export class UserActions {
             if (t === themeName) {
                 return;
             }
-            Util.removeStylesheet(window.location.origin + "/styles/" + t + ".css");
+            Util.removeStylesheet("/styles/" + t + ".css");
         });
-        switch (themeName) {
-        case "dark":
-            Util.includeStylesheet(window.location.origin + "/styles/dark.css");
-            break;
-        case "flexoki":
-            Util.includeStylesheet(window.location.origin + "/styles/flexoki.css");
-            break;
-        case "light":
-            break;
-        default:
-            console.warn("Unknown theme: ", themeName);
-            return;
-        }
+        Util.includeStylesheet(`/styles/${themeName}.css`);
         if (onlyLocal) {
             return;
         }

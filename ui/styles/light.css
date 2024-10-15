@@ -1,0 +1,12 @@
+.fakeButton.positive:hover {
+    background-color: var(--color-8);
+    color: var(--color-5);
+}
+
+.fakeButton.positive:hover .svg {
+    filter: var(--filter-5);
+}
+
+.clickable.secondary.padded-inline:hover {
+    background: var(--color-4);
+}

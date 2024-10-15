@@ -11,6 +11,7 @@
     --color-4-rgb: 230, 228, 217;
     --color-5: #100F0F;
     --color-5-rgb: 16, 15, 15;
+    --filter-5: sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%) invert(0%);
     --color-6: #6F6E69;
     --color-6-rgb: 111, 110, 105;
     --color-7: #B7B5AC;
@@ -19,10 +20,20 @@
     --color-8-rgb: 135, 154, 57;
     --color-8-dark: #66800B;
     --color-8-dark-rgb: 102, 128, 11;
+    --filter-8: brightness(0) saturate(100%) invert(29%) sepia(96%) saturate(1386%) hue-rotate(53deg) brightness(107%) contrast(91%);
     --color-9: #DAD8CE;
     --blue: #4385BE;
 }
 
+.fakeButton.positive:hover {
+    background-color: var(--color-8);
+    color: var(--color-5);
+}
+
+.fakeButton.positive:hover .svg {
+    filter: var(--filter-5);
+}
+
 .user-widget {
-    background: var(--color-7);
+    background: var(--color-3);
 }

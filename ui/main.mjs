@@ -7,74 +7,9 @@ import {Lyda} from "./js/lyda.mjs";
 import {UiActions} from "./js/Actions/UiActions.mjs";
 import {Ui} from "./js/Classes/Ui.mjs";
 import {Util} from "./js/Classes/Util.mjs";
+import {routes} from "./js/routes.mjs";
 
-window.router = new Router([
-    {
-        path: "404",
-        aliases: ["error", "not-found"]
-    },
-    {
-        path: "profile",
-        params: ["name"],
-        aliases: ["user"]
-    },
-    {
-        path: "explore",
-        aliases: ["discover", "home", "app"]
-    },
-    {
-        path: "following"
-    },
-    {
-        path: "album",
-        params: ["id"]
-    },
-    {
-        path: "playlist",
-        params: ["id"]
-    },
-    {
-        path: "track",
-        params: ["id", "code"]
-    },
-    {
-        path: "settings"
-    },
-    {
-        path: "statistics"
-    },
-    {
-        path: "upload"
-    },
-    {
-        path: "library",
-        params: ["name"]
-    },
-    {
-        path: "logout"
-    },
-    {
-        path: "login"
-    },
-    {
-        path: "logs"
-    },
-    {
-        path: "action-logs"
-    },
-    {
-        path: "unapproved-tracks"
-    },
-    {
-        path: "moderation"
-    },
-    {
-        path: "test"
-    },
-    {
-        path: "subscribe"
-    }
-], async (route, params) => {
+window.router = new Router(routes, async (route, params) => {
     const page = route.path.replace("/", "");
     console.log(`Navigating to ${page} with params`, params);
 
