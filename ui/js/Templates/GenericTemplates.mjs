@@ -655,7 +655,12 @@ export class GenericTemplates {
                                         optionsVisible.value = false;
                                         break;
                                     default:
-                                        selectedIndex.value = 0;
+                                        if ((e.keyCode > 32 && e.keyCode < 126) || e.key === "Backspace") {
+                                            setTimeout(() => {
+                                                search.value = e.target.value;
+                                                selectedIndex.value = 0;
+                                            });
+                                        }
                                         break;
                                 }
                             })
