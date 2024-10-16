@@ -38,9 +38,9 @@ export class GenericTemplates {
             .build();
     }
 
-    static cardLabel(text, icon = null) {
+    static cardLabel(text, icon = null, classes = []) {
         return create("div")
-            .classes("card-label", "flex", "small-gap")
+            .classes("card-label", "flex", "small-gap", ...classes)
             .children(
                 ifjs(icon, GenericTemplates.icon(icon)),
                 create("span")
@@ -63,7 +63,7 @@ export class GenericTemplates {
                     .onclick(callback)
                     .build(),
                 create("div")
-                    .classes("toggle-container", "align-center")
+                    .classes("toggle-container")
                     .children(
                         create("span")
                             .classes("toggle-slider")

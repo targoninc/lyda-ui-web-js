@@ -50,7 +50,7 @@
     --font-size-large: 20px;
     --font-size-xlarge: 28px;
     --font-size-xxlarge: 36px;
-    --border-radius: 3px;
+    --border-radius: 5px;
     --large-border-radius: calc(var(--border-radius) * 2);
     --base-padding: 10px;
     --large-padding: calc(var(--base-padding) * 2);
@@ -263,7 +263,7 @@ h2 {
 
 h3 {
     font-size: 2.2rem;
-    font-weight: lighter;
+    font-weight: normal;
     margin: 0;
 }
 
@@ -276,6 +276,11 @@ h3 {
     color: var(--color-5);
     font-weight: normal;
     align-items: center;
+}
+
+.card-label.error {
+    border-bottom: 3px solid var(--color-2);
+    color: var(--color-5);
 }
 
 h5 {
@@ -312,8 +317,8 @@ input, textarea, select {
     color: var(--color-5);
     border-radius: var(--border-radius);
     padding: 5px 10px;
-    width: 40%;
     height: max-content;
+    font-size: var(--font-size-medium);
 }
 
 input:focus-visible, textarea:focus-visible, select:focus-visible {
@@ -461,7 +466,7 @@ button.secondary {
 }
 
 .border-card {
-    border: 1px solid var(--color-5);
+    background: var(--color-6);
 }
 
 .card {
@@ -536,7 +541,7 @@ summary {
 /* Create a custom checkbox */
 .checkmark {
     position: absolute;
-    top: 4px;
+    top: 2px;
     left: 0;
     height: 14px;
     width: 14px;
@@ -742,6 +747,10 @@ td:last-child, th:last-child {
 
 .error {
     color: var(--color-2);
+}
+
+.error input, .error button, .error select, .error textarea {
+    border-color: var(--color-2);
 }
 
 .inlineLink:hover {

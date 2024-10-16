@@ -1,4 +1,4 @@
-import {create, signal} from "https://fjs.targoninc.com/f.js";
+import {computedSignal, create, signal} from "https://fjs.targoninc.com/f.js";
 import {Icons} from "../Enums/Icons.mjs";
 import {GenericTemplates} from "./GenericTemplates.mjs";
 import {PlaylistActions} from "../Actions/PlaylistActions.mjs";
@@ -131,41 +131,41 @@ export class PlaylistTemplates {
     }
 
     static newPlaylistModal() {
+        const state = signal({
+            name: "",
+            description: "",
+            visibility: "public",
+        });
+        const name = computedSignal(state, s => s.name);
+        const description = computedSignal(state, s => s.description);
+
         return create("div")
             .classes("flex-v")
             .children(
-                create("div")
-                    .classes("flex")
+                create("h2")
                     .children(
-                        create("img")
-                            .styles("width", "30px", "height", "auto")
-                            .classes("inline-icon", "svg", "nopointer")
-                            .attributes("src", Icons.PLAYLIST_ADD)
-                            .build(),
-                        create("h2")
+                        GenericTemplates.icon("playlist_add", true),
+                        create("span")
                             .text("New playlist")
-                            .build()
-                    )
-                    .build(),
+                            .build(),
+                    ).build(),
                 create("div")
                     .classes("flex-v")
                     .id("newPlaylistForm")
                     .children(
-                        FormTemplates.textField("Name", "name", "Playlist name", "text", "", true),
-                        FormTemplates.textAreaField("Description", "description", "Description", "", false, 5),
-                        FormTemplates.visibility("public"),
-                    )
-                    .build(),
+                        FormTemplates.textField("Name", "name", "Playlist name", "text", name, true, v => {
+                            state.value = { ...state.value, name: v };
+                        }),
+                        FormTemplates.textAreaField("Description", "description", "Description", description, false, 5, v => {
+                            state.value = { ...state.value, description: v };
+                        }),
+                        FormTemplates.visibility("public", state),
+                    ).build(),
                 create("div")
                     .classes("flex")
                     .children(
                         GenericTemplates.button("Create playlist", async () => {
-                            const playlist = {};
-                            const formId = "newPlaylistForm";
-                            playlist.name = Form.getFieldValue(formId, "name");
-                            playlist.description = Form.getFieldValue(formId, "description");
-                            playlist.visibility = Form.getFieldValue(formId, "visibility");
-                            await PlaylistActions.createNewPlaylist(playlist);
+                            await PlaylistActions.createNewPlaylist(state.value);
                             Util.removeModal();
                         }, ["positive"]),
                         GenericTemplates.button("Cancel", Util.removeModal, ["negative"])

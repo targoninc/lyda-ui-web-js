@@ -858,7 +858,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .search-select-input {
     flex-grow: 1;
-    background: var(--color-6);
+    background: var(--color-4);
     border-radius: var(--border-radius) 0 0 var(--border-radius);
     border: 1px solid var(--color-7);
 }

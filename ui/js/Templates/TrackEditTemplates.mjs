@@ -38,6 +38,8 @@ export class TrackEditTemplates {
             price: price ?? "1",
             linkedUsers: linkedUsers ?? [],
         });
+        const errorSections = signal([]);
+        const errorFields = signal([]);
 
         return create("div")
             .classes("card")
@@ -60,9 +62,8 @@ export class TrackEditTemplates {
                             .text("Upload a track")
                             .build(),
                         TrackEditTemplates.upDownButtons(state, true),
-                        TrackEditTemplates.filesSection(true, state),
-                        TrackEditTemplates.infoSection(state),
-                        TrackEditTemplates.uploadButton(state),
+                        TrackEditTemplates.infoSection(state, errorSections, errorFields),
+                        TrackEditTemplates.uploadButton(state, errorSections, errorFields),
                         TrackEditTemplates.uploadInfo(),
                     ).build(),
             ).build();
@@ -96,7 +97,7 @@ export class TrackEditTemplates {
                     create("p")
                         .text("Edit the track details below")
                         .build(),
-                    TrackEditTemplates.infoSection(state, false, false),
+                    TrackEditTemplates.infoSection(state, signal([]), signal([]), false, false),
                     create("div")
                         .classes("flex")
                         .children(
@@ -112,7 +113,7 @@ export class TrackEditTemplates {
 
     static upDownButtons(state, uploadEnabled = false) {
         const buttons = [
-            GenericTemplates.action(Icons.ARROW_DOWN, "Download Info", "downloadInfo", () => {
+            GenericTemplates.action("file_save", "Download Info", "downloadInfo", () => {
                 const json = JSON.stringify(state.value);
                 Util.downloadFile(`${state.value.title}_${Date.now()}.json`, json);
             }, [
@@ -121,7 +122,7 @@ export class TrackEditTemplates {
         ];
 
         if (uploadEnabled) {
-            buttons.push(GenericTemplates.action(Icons.UPLOAD, "Upload Info", "uploadInfo", () => {
+            buttons.push(GenericTemplates.action("upload_file", "Upload Info", "uploadInfo", () => {
                 const fileInput = document.createElement("input");
                 fileInput.type = "file";
                 fileInput.onchange = async (e) => {
@@ -167,12 +168,20 @@ export class TrackEditTemplates {
             .build();
     }
 
-    static uploadButton(state) {
+    static uploadButton(state, errorSections, errorFields) {
         const disabled = computedSignal(state, s => {
-            let errors = [];
-            const requiredProps = ["audioFile", "title", "genre", "termsOfService"];
-            if (requiredProps.some(p => !s[p])) {
+            const errors = [];
+            const requiredProps = [
+                { section: "audio", field: "audioFile" },
+                { section: "info", field: "title" },
+                { section: "info", field: "genre" },
+                { section: "terms", field: "termsOfService" },
+            ];
+            if (requiredProps.some(p => !s[p.field])) {
                 errors.push("Missing required fields");
+                const errorProps = requiredProps.filter(p => !s[p.field]);
+                errorSections.value = errorProps.map(p => p.section);
+                errorFields.value = errorProps.map(p => p.field);
             }
 
             return errors.length > 0;
@@ -199,32 +208,32 @@ export class TrackEditTemplates {
             .build();
     }
 
-    static filesSection(isNewTrack = false, state) {
+    static filesSection(isNewTrack = false, state, errorSections, errorFields) {
         return create("div")
-            .classes("flex", "space-outwards")
+            .classes("flex-v")
             .children(
-                TrackEditTemplates.sectionCard("Audio", [TrackEditTemplates.audioFile(isNewTrack, state)], "music_note", ["flex-grow"]),
-                TrackEditTemplates.sectionCard("Artwork", [
+                TrackEditTemplates.sectionCard("Audio", errorSections, "audio", [TrackEditTemplates.audioFile(isNewTrack, state)], "music_note", ["flex-grow"]),
+                TrackEditTemplates.sectionCard("Artwork", errorSections, "artwork", [
                     TrackEditTemplates.coverFile(state),
                     TrackEditTemplates.imagePreview("cover-file")
                 ], "image", ["flex-grow"]),
             ).build();
     }
 
-    static infoSection(state, enableTos = true, enableLinkedUsers = true) {
+    static infoSection(state, errorSections, errorFields, enableTos = true, enableLinkedUsers = true) {
         const isPrivate = computedSignal(state, s => s.visibility === "private");
 
         return create("div")
             .classes("flex")
             .children(
-                TrackEditTemplates.sectionCard("Track Details", [
+                TrackEditTemplates.sectionCard("Track Details", errorSections, "info", [
                     create("div")
                         .classes("flex")
                         .children(
                             FormTemplates.visibility(state.value.visibility, state),
                             ifjs(isPrivate, GenericTemplates.text("When your track is private, it will only be visible to you and people you share the secret link with.", ["warning"]))
                         ).build(),
-                    TrackEditTemplates.title(state.value.title, state),
+                    TrackEditTemplates.title(state, errorFields),
                     TrackEditTemplates.collaborators(state.value.collaborators, state),
                     enableLinkedUsers ? TrackEditTemplates.linkedUsers(state.value.linkedUsers, state) : null,
                     TrackEditTemplates.releaseDate(state.value.releaseDate, state),
@@ -236,22 +245,26 @@ export class TrackEditTemplates {
                 create("div")
                     .classes("flex-v")
                     .children(
-                        TrackEditTemplates.sectionCard("Monetization", [
+                        TrackEditTemplates.filesSection(true, state, errorSections, errorFields),
+                        TrackEditTemplates.sectionCard("Monetization", errorSections, "monetization", [
                             TrackEditTemplates.monetization(),
                             TrackEditTemplates.price(state.value.price, state)
                         ], "attach_money"),
-                        enableTos ? TrackEditTemplates.sectionCard("Terms of Service", [
+                        enableTos ? TrackEditTemplates.sectionCard("Terms of Service", errorSections, "terms", [
                             TrackEditTemplates.termsOfService(state.value.termsOfService, state)
                         ], "gavel") : null,
                     ).build()
             ).build();
     }
 
-    static sectionCard(title, children, icon = null, classes = []) {
+    static sectionCard(title, errorSections, id, children, icon = null, classes = []) {
+        const hasError = computedSignal(errorSections, e => e.includes(id));
+        const errorClass = computedSignal(hasError, h => h ? "error" : "_");
+
         return create("div")
             .classes("border-card", "flex-v", ...classes)
             .children(
-                GenericTemplates.cardLabel(title, icon),
+                GenericTemplates.cardLabel(title, icon, [errorClass]),
                 ...children
             ).build();
     }
@@ -345,11 +358,13 @@ export class TrackEditTemplates {
             state.value = v;
         });
     }
-    static title(value = "", parentState = null) {
-        const state = this.getStateWithParentUpdate("title", value, parentState);
-        return FormTemplates.textField("Title", "title", "Title", "text", state, true, v => {
-            state.value = v;
-        });
+    static title(parentState, errorFields) {
+        const value = computedSignal(parentState, s => s.title);
+        const errorClass = computedSignal(errorFields, e => e.includes("title") ? "error" : "_");
+
+        return FormTemplates.textField("Title", "title", "Title", "text", value, true, v => {
+            parentState.value = {...parentState.value, title: v};
+        }, false, () => {}, [errorClass]);
     }
     static price(value = "1", parentState) {
         const state = this.getStateWithParentUpdate("price", value, parentState);
@@ -409,7 +424,7 @@ export class TrackEditTemplates {
         };
 
         return create("div")
-            .classes("flex", "space-outwards")
+            .classes("flex-v", "small-gap")
             .children(
                 create("label")
                     .text("Linked Users")

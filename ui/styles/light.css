@@ -10,3 +10,15 @@
 .clickable.secondary.padded-inline:hover {
     background: var(--color-4);
 }
+
+.border-card {
+    background: var(--color-4);
+}
+
+.card-label {
+    background: var(--color-9);
+}
+
+.tab {
+    background: var(--color-9);
+}

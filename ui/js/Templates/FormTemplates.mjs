@@ -7,7 +7,7 @@ import {Ui} from "../Classes/Ui.mjs";
 export class FormTemplates {
     static fileField(title, text, name, accept, required = false, onchange = () => {}) {
         return create("div")
-            .classes("flex", "space-outwards")
+            .classes("flex-v", "small-gap")
             .children(
                 create("label")
                     .text(title)
