@@ -14,19 +14,39 @@ export class GenericTemplates {
             .id(id)
             .onclick(callback)
             .children(
-                GenericTemplates.inlineIcon(icon),
+                GenericTemplates.icon(icon),
                 create("span")
                     .text(text)
                     .build()
-            )
+            ).build()
+    }
+
+    static icon(icon, adaptive = false) {
+        const isMaterial = icon && icon.includes && !icon.includes(window.location.origin);
+        const iconClass = adaptive ? "adaptive-icon" : "inline-icon";
+
+        if (isMaterial) {
+            return create("i")
+                .classes(iconClass, "material-symbols-outlined", "nopointer")
+                .text(icon)
+                .build();
+        }
+
+        return create("img")
+            .classes(iconClass, "svg", "nopointer")
+            .attributes("src", icon)
             .build();
     }
 
-    static inlineIcon(icon) {
-        return create("img")
-            .classes("inline-icon", "svg", "nopointer")
-            .attributes("src", icon)
-            .build();
+    static cardLabel(text, icon = null) {
+        return create("div")
+            .classes("card-label", "flex", "small-gap")
+            .children(
+                ifjs(icon, GenericTemplates.icon(icon)),
+                create("span")
+                    .text(text)
+                    .build(),
+            ).build();
     }
 
     static toggle(text, id, callback = () => {
@@ -135,11 +155,7 @@ export class GenericTemplates {
         return create(link ? "a" : "div")
             .classes("flex", "small-gap", "clickable", "fakeButton", "padded-inline", "rounded")
             .children(
-                create("img")
-                    .classes("inline-icon", "svg", "nopointer")
-                    .src(icon)
-                    .alt(text)
-                    .build(),
+                GenericTemplates.icon(icon),
                 create("span")
                     .classes("nopointer")
                     .text(text)
@@ -617,6 +633,7 @@ export class GenericTemplates {
         selectedIndex.subscribe(updateSelectedId);
         filtered.subscribe(updateSelectedId);
         updateSelectedId();
+        const currentIcon = computedSignal(optionsVisible, vis => vis ? Icons.UP : Icons.DOWN);
 
         return create("div")
             .classes("search-select", "flex-v", "relative")
@@ -671,7 +688,7 @@ export class GenericTemplates {
                                 optionsVisible.value = !optionsVisible.value;
                             })
                             .children(
-                                GenericTemplates.inlineIcon(Icons.ARROW_DOWN)
+                                GenericTemplates.icon(currentIcon)
                             ).build()
                     ).build(),
                 ifjs(optionsVisible, signalMap(filtered, create("div").classes("search-select-options", "flex-v"), option => GenericTemplates.searchSelectOption(option, value, search, optionsVisible, selectedId)))
@@ -693,7 +710,7 @@ export class GenericTemplates {
                 optionsVisible.value = false;
             })
             .children(
-                ifjs(option.image, GenericTemplates.inlineIcon(option.image)),
+                ifjs(option.image, GenericTemplates.icon(option.image)),
                 create("span")
                     .text(option.name)
                     .build()
@@ -719,14 +736,14 @@ export class GenericTemplates {
                     create("div")
                         .classes("flex")
                         .children(
-                            create("img")
-                                .classes("icon", "svg")
-                                .styles("width", "30px", "height", "auto")
-                                .attributes("src", icon)
-                                .build(),
                             create("h2")
-                                .text(title)
-                                .build()
+                                .classes("flex")
+                                .children(
+                                    GenericTemplates.icon(icon, true),
+                                    create("span")
+                                        .text(title)
+                                        .build(),
+                                ).build()
                         ).build(),
                     create("p")
                         .text(text)

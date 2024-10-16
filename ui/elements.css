@@ -4,6 +4,10 @@
     --card-width: 405px;
 }
 
+.material-symbols-outlined {
+    font-size: 1em !important;
+}
+
 .nav-logo {
     width: 20px;
     height: 20px;
@@ -152,6 +156,12 @@
 .inline-icon {
     height: var(--font-size-small);
     width: var(--font-size-small);
+    align-self: center;
+}
+
+.adaptive-icon {
+    height: 1em !important;
+    width: 1em !important;
     align-self: center;
 }
 
@@ -759,6 +769,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 .tab {
     background: var(--color-6);
     border: none !important;
+    color: var(--color-5);
     border-radius: 0;
 }
 
@@ -769,7 +780,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .tab-selector {
     gap: 0;
-    border: 1px solid var(--color-5);
+    border: 1px solid var(--color-7);
 }
 
 .tab:first-child {
@@ -827,8 +838,9 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     background: var(--color-3);
     cursor: pointer;
     padding: 1px 8px;
-    border: 1px solid var(--color-6);
+    border: 1px solid var(--color-7);
     border-radius: 0 var(--border-radius) var(--border-radius) 0;
+    border-left: none;
 }
 
 .search-select-dropdown:hover {
@@ -844,7 +856,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     flex-grow: 1;
     background: var(--color-6);
     border-radius: var(--border-radius) 0 0 var(--border-radius);
-    border: 1px solid var(--color-6);
+    border: 1px solid var(--color-7);
 }
 
 .search-select-input:focus-visible {

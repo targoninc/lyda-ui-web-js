@@ -267,13 +267,15 @@ h3 {
     margin: 0;
 }
 
-h4 {
+.card-label {
     margin: 0;
-    background: var(--color-5);
+    background: var(--color-7);
     width: max-content;
-    padding: 0 9px;
-    border-radius: var(--border-radius);
-    color: var(--color-4);
+    padding: 0.1em .66em;
+    border-radius: 999px 999px 999px 0;
+    color: var(--color-5);
+    font-weight: normal;
+    align-items: center;
 }
 
 h5 {
@@ -306,12 +308,17 @@ form {
 
 input, textarea, select {
     background: var(--color-4);
-    border: 1px solid var(--color-5);
+    border: 1px solid var(--color-7);
     color: var(--color-5);
     border-radius: var(--border-radius);
     padding: 5px 10px;
     width: 40%;
     height: max-content;
+}
+
+input:focus-visible, textarea:focus-visible, select:focus-visible {
+    border-color: var(--color-8);
+    outline: none;
 }
 
 input[type="checkbox"] {
@@ -443,6 +450,10 @@ button.secondary {
     color: var(--color-1);
 }
 
+.warning {
+    color: var(--color-attention);
+}
+
 .card, .border-card {
     padding: 20px;
     border-radius: var(--border-radius);
@@ -451,6 +462,7 @@ button.secondary {
 
 .border-card {
     border: 1px solid var(--color-5);
+    flex-grow: 1;
 }
 
 .card {

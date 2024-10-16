@@ -1,4 +1,4 @@
-import {create, signal} from "https://fjs.targoninc.com/f.js";
+import {computedSignal, create, ifjs, signal} from "https://fjs.targoninc.com/f.js";
 import {FormTemplates} from "./FormTemplates.mjs";
 import {GenericTemplates} from "./GenericTemplates.mjs";
 import {Icons} from "../Enums/Icons.mjs";
@@ -188,19 +188,28 @@ export class TrackEditTemplates {
     }
 
     static filesSection(isNewTrack = false, state) {
-        return TrackEditTemplates.detailsSection("Files", "upload-files", [
-            TrackEditTemplates.sectionCard("Audio", [TrackEditTemplates.audioFile(isNewTrack, state)]),
-            TrackEditTemplates.sectionCard("Artwork", [
-                TrackEditTemplates.coverFile(),
-                TrackEditTemplates.imagePreview("cover-file")
-            ]),
-        ]);
+        return create("div")
+            .classes("flex", "space-outwards")
+            .children(
+                TrackEditTemplates.sectionCard("Audio", [TrackEditTemplates.audioFile(isNewTrack, state)], "music_note"),
+                TrackEditTemplates.sectionCard("Artwork", [
+                    TrackEditTemplates.coverFile(),
+                    TrackEditTemplates.imagePreview("cover-file")
+                ], "image"),
+            ).build();
     }
 
     static infoSection(state, enableTos = true, enableLinkedUsers = true) {
+        const isPrivate = computedSignal(state, s => s.visibility === "private");
+
         return TrackEditTemplates.detailsSection("Info", "upload-details", [
             TrackEditTemplates.sectionCard("Track Details", [
-                FormTemplates.visibility(state.value.visibility, state),
+                create("div")
+                    .classes("flex")
+                    .children(
+                        FormTemplates.visibility(state.value.visibility, state),
+                        ifjs(isPrivate, GenericTemplates.text("When your track is private, it will only be visible to you and people you share the secret link with.", ["warning"]))
+                    ).build(),
                 TrackEditTemplates.title(state.value.title, state),
                 TrackEditTemplates.collaborators(state.value.collaborators, state),
                 enableLinkedUsers ? TrackEditTemplates.linkedUsers(state.value.linkedUsers, state) : null,
@@ -209,27 +218,26 @@ export class TrackEditTemplates {
                 TrackEditTemplates.isrc(state.value.isrc, state),
                 TrackEditTemplates.upc(state.value.upc, state),
                 TrackEditTemplates.description(state.value.description, state),
-            ]),
+            ], "info"),
             TrackEditTemplates.sectionCard("Monetization", [
                 TrackEditTemplates.monetization(),
                 TrackEditTemplates.price(state.value.price, state)
-            ]),
+            ], "attach_money"),
             enableTos ? TrackEditTemplates.sectionCard("Terms of Service", [
                 TrackEditTemplates.termsOfService(state.value.termsOfService, state)
-            ]) : null,
+            ], "gavel") : null,
         ]);
     }
-    static sectionCard(title, children) {
+
+    static sectionCard(title, children, icon = null) {
         return create("div")
             .classes("border-card", "flex-v")
             .children(
-                create("h4")
-                    .text(title)
-                    .build(),
+                GenericTemplates.cardLabel(title, icon),
                 ...children
-            )
-            .build();
+            ).build();
     }
+
     static detailsSection(title, cssClass, children, open = true) {
         return create("details")
             .classes(cssClass, "flex-v")
@@ -342,8 +350,8 @@ export class TrackEditTemplates {
     }
 
     static addLinkedUserButton(callback, classes = []) {
-        return GenericTemplates.action(Icons.FOLLOW, "Add User", "add_linked_user", () => {
-            Ui.getAddLinkedUserModal("Link a user", "Enter the username of the user you want to link", "", "Link", "Cancel", callback, () => {}, Icons.FOLLOW);
+        return GenericTemplates.action("person_add", "Add User", "add_linked_user", () => {
+            Ui.getAddLinkedUserModal("Link a user", "Enter the username of the user you want to link", "", "Link", "Cancel", callback, () => {}, "person_add");
         }, [], classes);
     }
 
@@ -394,7 +402,7 @@ export class TrackEditTemplates {
                             if (!linkedUserState.value.includes(newUser.id)) {
                                 linkedUserState.value = [...linkedUserState.value, newUser.id];
                             }
-                        }, ["align-center"])
+                        }, ["align-center", "secondary"])
                     ).build(),
             )
             .build();
