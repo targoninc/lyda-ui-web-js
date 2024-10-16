@@ -628,7 +628,7 @@ summary {
     border-color: var(--color-1);
 }
 
-.fakeButton.disabled {
+.fakeButton.disabled, button.disabled {
     opacity: .2;
     cursor: not-allowed;
     pointer-events: none;

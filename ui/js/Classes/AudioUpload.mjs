@@ -1,4 +1,4 @@
-import {Api} from "../Classes/Api.mjs";
+import {Api} from "./Api.mjs";
 import {Util} from "./Util.mjs";
 import {Ui} from "./Ui.mjs";
 

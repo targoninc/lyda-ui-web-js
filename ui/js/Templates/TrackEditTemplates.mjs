@@ -168,8 +168,20 @@ export class TrackEditTemplates {
     }
 
     static uploadButton(state) {
+        const disabled = computedSignal(state, s => {
+            let errors = [];
+            const requiredProps = ["audioFile", "title", "genre", "termsOfService"];
+            if (requiredProps.some(p => !s[p])) {
+                errors.push("Missing required fields");
+            }
+
+            return errors.length > 0;
+        });
+        const buttonClass = computedSignal(disabled, d => d ? "disabled" : "positive");
+
         return create("button")
-            .classes("positive")
+            .classes(buttonClass)
+            .disabled(disabled)
             .onclick(e => {
                 Util.showButtonLoader(e);
                 Util.closeAllDetails();
@@ -193,7 +205,7 @@ export class TrackEditTemplates {
             .children(
                 TrackEditTemplates.sectionCard("Audio", [TrackEditTemplates.audioFile(isNewTrack, state)], "music_note"),
                 TrackEditTemplates.sectionCard("Artwork", [
-                    TrackEditTemplates.coverFile(),
+                    TrackEditTemplates.coverFile(state),
                     TrackEditTemplates.imagePreview("cover-file")
                 ], "image"),
             ).build();
@@ -202,31 +214,37 @@ export class TrackEditTemplates {
     static infoSection(state, enableTos = true, enableLinkedUsers = true) {
         const isPrivate = computedSignal(state, s => s.visibility === "private");
 
-        return TrackEditTemplates.detailsSection("Info", "upload-details", [
-            TrackEditTemplates.sectionCard("Track Details", [
+        return create("div")
+            .classes("flex-v")
+            .children(
+                TrackEditTemplates.sectionCard("Track Details", [
+                    create("div")
+                        .classes("flex")
+                        .children(
+                            FormTemplates.visibility(state.value.visibility, state),
+                            ifjs(isPrivate, GenericTemplates.text("When your track is private, it will only be visible to you and people you share the secret link with.", ["warning"]))
+                        ).build(),
+                    TrackEditTemplates.title(state.value.title, state),
+                    TrackEditTemplates.collaborators(state.value.collaborators, state),
+                    enableLinkedUsers ? TrackEditTemplates.linkedUsers(state.value.linkedUsers, state) : null,
+                    TrackEditTemplates.releaseDate(state.value.releaseDate, state),
+                    FormTemplates.genre(state.value.genre, state),
+                    TrackEditTemplates.isrc(state.value.isrc, state),
+                    TrackEditTemplates.upc(state.value.upc, state),
+                    TrackEditTemplates.description(state.value.description, state),
+                ], "info"),
                 create("div")
                     .classes("flex")
                     .children(
-                        FormTemplates.visibility(state.value.visibility, state),
-                        ifjs(isPrivate, GenericTemplates.text("When your track is private, it will only be visible to you and people you share the secret link with.", ["warning"]))
-                    ).build(),
-                TrackEditTemplates.title(state.value.title, state),
-                TrackEditTemplates.collaborators(state.value.collaborators, state),
-                enableLinkedUsers ? TrackEditTemplates.linkedUsers(state.value.linkedUsers, state) : null,
-                TrackEditTemplates.releaseDate(state.value.releaseDate, state),
-                FormTemplates.genre(state.value.genre, state),
-                TrackEditTemplates.isrc(state.value.isrc, state),
-                TrackEditTemplates.upc(state.value.upc, state),
-                TrackEditTemplates.description(state.value.description, state),
-            ], "info"),
-            TrackEditTemplates.sectionCard("Monetization", [
-                TrackEditTemplates.monetization(),
-                TrackEditTemplates.price(state.value.price, state)
-            ], "attach_money"),
-            enableTos ? TrackEditTemplates.sectionCard("Terms of Service", [
-                TrackEditTemplates.termsOfService(state.value.termsOfService, state)
-            ], "gavel") : null,
-        ]);
+                        TrackEditTemplates.sectionCard("Monetization", [
+                            TrackEditTemplates.monetization(),
+                            TrackEditTemplates.price(state.value.price, state)
+                        ], "attach_money"),
+                        enableTos ? TrackEditTemplates.sectionCard("Terms of Service", [
+                            TrackEditTemplates.termsOfService(state.value.termsOfService, state)
+                        ], "gavel") : null,
+                    ).build()
+            ).build();
     }
 
     static sectionCard(title, children, icon = null) {
@@ -257,24 +275,35 @@ export class TrackEditTemplates {
                 if (fileName) {
                     const titleInput = document.querySelector("input#title");
                     if (titleInput) {
-                        titleInput.value = fileName.replace(/\.[^/.]+$/, "");
+                        const safeName = fileName.replace(/\.[^/.]+$/, "");
+                        titleInput.value = safeName;
                         if (parentState) {
-                            parentState.value = {...parentState.value, title: titleInput.value};
+                            parentState.value = {...parentState.value, title: titleInput.value, audioFile: safeName};
                         }
                     }
                 }
             }
         });
     }
-    static coverFile() {
-        return FormTemplates.fileField("Cover File", "Choose file (.jpg,.jpeg,.png,.gif)", "cover-file", "jpg,jpeg,png,gif", false);
+
+    static coverFile(parentState) {
+        return FormTemplates.fileField("Cover File", "Choose file (.jpg,.jpeg,.png,.gif)", "cover-file", "jpg,jpeg,png,gif", false, (fileName) => {
+            if (fileName) {
+                if (parentState) {
+                    const safeName = fileName.replace(/\.[^/.]+$/, "");
+                    parentState.value = {...parentState.value, coverFile: safeName};
+                }
+            }
+        });
     }
+
     static imagePreview(name) {
         return create("img")
             .id(name + "-preview")
             .classes("image-preview", "hidden")
             .build();
     }
+
     static termsOfService(checked = false, parentState = null) {
         const state = this.getStateWithParentUpdate("termsOfService", checked, parentState);
         return FormTemplates.checkBoxField("Terms of Service", "agreement", "I have read and agree to the Terms of Service and Privacy Policy", state, true, v => {
