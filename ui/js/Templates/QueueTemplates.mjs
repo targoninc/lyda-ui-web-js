@@ -85,7 +85,7 @@ export class QueueTemplates {
                             .text(" - ")
                             .build(),
                         create("span")
-                            .classes("align-center", "clickable", "flexGrow")
+                            .classes("align-center", "clickable", "flex-grow")
                             .text(track.title)
                             .attributes("track_id", track.id)
                             .onclick(TrackActions.openTrackFromElement)
@@ -146,7 +146,7 @@ export class QueueTemplates {
                             .classes("flex", "align-center", "justify-center", "text-small")
                             .children(
                                 create("span")
-                                    .classes("flexGrow")
+                                    .classes("flex-grow")
                                     .text(queueText)
                                     .build(),
                             ).build(),

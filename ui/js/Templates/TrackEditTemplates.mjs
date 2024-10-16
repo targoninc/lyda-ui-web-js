@@ -203,11 +203,11 @@ export class TrackEditTemplates {
         return create("div")
             .classes("flex", "space-outwards")
             .children(
-                TrackEditTemplates.sectionCard("Audio", [TrackEditTemplates.audioFile(isNewTrack, state)], "music_note"),
+                TrackEditTemplates.sectionCard("Audio", [TrackEditTemplates.audioFile(isNewTrack, state)], "music_note", ["flex-grow"]),
                 TrackEditTemplates.sectionCard("Artwork", [
                     TrackEditTemplates.coverFile(state),
                     TrackEditTemplates.imagePreview("cover-file")
-                ], "image"),
+                ], "image", ["flex-grow"]),
             ).build();
     }
 
@@ -215,7 +215,7 @@ export class TrackEditTemplates {
         const isPrivate = computedSignal(state, s => s.visibility === "private");
 
         return create("div")
-            .classes("flex-v")
+            .classes("flex")
             .children(
                 TrackEditTemplates.sectionCard("Track Details", [
                     create("div")
@@ -232,9 +232,9 @@ export class TrackEditTemplates {
                     TrackEditTemplates.isrc(state.value.isrc, state),
                     TrackEditTemplates.upc(state.value.upc, state),
                     TrackEditTemplates.description(state.value.description, state),
-                ], "info"),
+                ], "info", ["flex-grow"]),
                 create("div")
-                    .classes("flex")
+                    .classes("flex-v")
                     .children(
                         TrackEditTemplates.sectionCard("Monetization", [
                             TrackEditTemplates.monetization(),
@@ -247,9 +247,9 @@ export class TrackEditTemplates {
             ).build();
     }
 
-    static sectionCard(title, children, icon = null) {
+    static sectionCard(title, children, icon = null, classes = []) {
         return create("div")
-            .classes("border-card", "flex-v")
+            .classes("border-card", "flex-v", ...classes)
             .children(
                 GenericTemplates.cardLabel(title, icon),
                 ...children

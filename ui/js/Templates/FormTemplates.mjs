@@ -37,39 +37,14 @@ export class FormTemplates {
      */
     static dropDownField(title, name, options, selectedValue = "", required = false, onchange = () => {}) {
         const optionsState = options.constructor === FjsObservable ? options : signal(options);
-        const getSelect = (newOptions) => {
-            return create("select")
-                .name(name)
-                .id(name)
-                .value(selectedValue)
-                .required(required)
-                .onchange((e) => onchange(e.target.value))
-                .children(
-                    ...newOptions.map((option) => create("option")
-                        .value(option.value)
-                        .text(option.text)
-                        .selected(option.value === selectedValue)
-                        .build()
-                    )
-                ).build();
-        };
-        let select;
-        if (optionsState.value.length === 0) {
-            select = signal(getSelect([selectedValue]));
-        } else {
-            select = signal(getSelect(optionsState.value));
-        }
-        optionsState.onUpdate = ((newOptions) => {
-            select.value = getSelect(newOptions);
-        });
 
         return create("div")
-            .classes("flex", "space-outwards")
+            .classes("flex-v", "small-gap")
             .children(
                 create("label")
                     .text(title)
                     .build(),
-                select
+                GenericTemplates.searchableSelect(optionsState, selectedValue, name)
             ).build();
     }
 
@@ -82,7 +57,7 @@ export class FormTemplates {
 
     static textAreaField(title, name, placeholder, value = "", required = false, rows = 3, onchange = () => {}) {
         return create("div")
-            .classes("flex", "space-outwards")
+            .classes("flex-v", "small-gap")
             .children(
                 create("label")
                     .text(title)
@@ -119,7 +94,7 @@ export class FormTemplates {
         }
 
         return create("div")
-            .classes("flex", "space-outwards", ...classes)
+            .classes("flex-v", "small-gap", ...classes)
             .children(
                 create("label")
                     .text(title)
@@ -129,17 +104,17 @@ export class FormTemplates {
     }
 
     static genre(value = "other", parentState = null) {
-        const genreState = signal([value]);
+        const genres = signal([{ name: value, id: value }]);
         Api.getAsync(Api.endpoints.genres.list).then((res) => {
             if (res.code !== 200) {
                 Ui.notify("Failed to load genres", "error");
             }
-            genreState.value = res.data.map((genre) => {
-                return {value: genre.genre, text: genre.genre};
+            genres.value = res.data.map((genre) => {
+                return {name: genre.genre, id: genre.genre};
             });
         });
         const state = TrackEditTemplates.getStateWithParentUpdate("genre", value, parentState);
-        return FormTemplates.dropDownField("Genre", "genre", genreState, state, true, v => {
+        return FormTemplates.dropDownField("Genre", "genre", genres, state, true, v => {
             state.value = v;
         });
     }

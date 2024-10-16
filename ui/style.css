@@ -462,7 +462,6 @@ button.secondary {
 
 .border-card {
     border: 1px solid var(--color-5);
-    flex-grow: 1;
 }
 
 .card {
@@ -763,7 +762,7 @@ td:last-child, th:last-child {
     border: 1px solid var(--color-6);
 }
 
-.flexGrow {
+.flex-grow {
     flex-grow: 1;
 }
 

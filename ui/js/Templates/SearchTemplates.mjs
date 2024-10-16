@@ -156,7 +156,7 @@ export class SearchTemplates {
                             .build()
                     ).build(),
                 create("span")
-                    .classes("search-result-text", "flexGrow")
+                    .classes("search-result-text", "flex-grow")
                     .text(display)
                     .build(),
                 create("span")

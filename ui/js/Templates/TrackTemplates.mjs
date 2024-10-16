@@ -316,13 +316,13 @@ export class TrackTemplates {
                     .children(
                         TrackTemplates.feedTrackCover(track),
                         create("div")
-                            .classes("flex-v", "flexGrow")
+                            .classes("flex-v", "flex-grow")
                             .children(
                                 create("div")
                                     .classes("flex")
                                     .children(
                                         create("div")
-                                            .classes("flex-v", "flexGrow", "small-gap")
+                                            .classes("flex-v", "flex-grow", "small-gap")
                                             .children(
                                                 create("div")
                                                     .classes("flex")
@@ -475,13 +475,13 @@ export class TrackTemplates {
                 .children(
                     TrackTemplates.smallListTrackCover(track, startCallback),
                     create("div")
-                        .classes("flex-v", "flexGrow")
+                        .classes("flex-v", "flex-grow")
                         .children(
                             create("div")
                                 .classes("flex")
                                 .children(
                                     create("div")
-                                        .classes("flex-v", "flexGrow", "small-gap")
+                                        .classes("flex-v", "flex-grow", "small-gap")
                                         .children(
                                             create("div")
                                                 .classes("flex")
@@ -498,7 +498,7 @@ export class TrackTemplates {
                                                     StatisticsTemplates.likesIndicator("track", track.id, track.tracklikes.length,
                                                         Util.arrayPropertyMatchesUser(track.tracklikes, "userId", user)),
                                                     create("div")
-                                                        .classes("flexGrow")
+                                                        .classes("flex-grow")
                                                         .build(),
                                                     ...trackActions
                                                 ).build(),

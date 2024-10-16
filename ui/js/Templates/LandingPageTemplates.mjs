@@ -288,7 +288,7 @@ export class LandingPageTemplates {
                                 username: value
                             };
                         }, true, () => {
-                        }, ["auth-input", "flexGrow"]),
+                        }, ["auth-input", "flex-grow"]),
                         FormTemplates.textField("Display name", "displayname", "Display name", "text", user.value.username, true, (value) => {
                             if (!touchedFields.has("displayname") && value) {
                                 touchedFields.add("displayname");
@@ -298,7 +298,7 @@ export class LandingPageTemplates {
                                 displayname: value
                             };
                         }, false, () => {
-                        }, ["auth-input", "flexGrow"]),
+                        }, ["auth-input", "flex-grow"]),
                         FormTemplates.textField("Email", "email", "Email", "email", user.value.email, true, (value) => {
                             if (!touchedFields.has("email") && value) {
                                 touchedFields.add("email");
@@ -314,7 +314,7 @@ export class LandingPageTemplates {
                                 ];
                             });
                         }, false, () => {
-                        }, ["auth-input", "flexGrow"]),
+                        }, ["auth-input", "flex-grow"]),
                         FormTemplates.textField("Password", "password", "Password", "password", user.value.password, true, (value) => {
                             if (!touchedFields.has("password") && value) {
                                 touchedFields.add("password");
@@ -324,7 +324,7 @@ export class LandingPageTemplates {
                                 password: value
                             };
                         }, false, () => {
-                        }, ["auth-input", "flexGrow"]),
+                        }, ["auth-input", "flex-grow"]),
                         FormTemplates.textField("Repeat password", "password-2", "Repeat password", "password", user.value.password, true, (value) => {
                             if (!touchedFields.has("password2") && value) {
                                 touchedFields.add("password2");
@@ -334,7 +334,7 @@ export class LandingPageTemplates {
                                 password2: value
                             };
                         }, false, () => {
-                        }, ["auth-input", "flexGrow"]),
+                        }, ["auth-input", "flex-grow"]),
                         FormTemplates.checkBoxField("I agree to the Terms of Service & Privacy Policy", "tos-checkbox", "I agree to the Terms of Service & Privacy Policy", false, true),
                         create("a")
                             .classes("inlineLink")
@@ -379,7 +379,7 @@ export class LandingPageTemplates {
                                     .for("email-input")
                                     .build(),
                                 create("input")
-                                    .classes("flexGrow")
+                                    .classes("flex-grow")
                                     .name("email")
                                     .id("email-input")
                                     .type("text")

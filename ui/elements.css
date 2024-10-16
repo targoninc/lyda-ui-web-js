@@ -244,6 +244,10 @@
     width: max-content;
 }
 
+label {
+    font-size: var(--font-size-small);
+}
+
 .audio-player-audio {
     height: max-content;
 }

@@ -20,7 +20,7 @@ export class NavTemplates {
                 NavTemplates.burgerMenu(),
                 NavTemplates.burgerMenuContent(),
                 create("div")
-                    .classes("flex", "flexGrow")
+                    .classes("flex", "flex-grow")
                     .children(
                         NavTemplates.navButton("following", "Feed", Icons.PEOPLE, async () => {
                             window.router.navigate("following");

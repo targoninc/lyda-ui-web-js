@@ -29,7 +29,7 @@ export class PlayerTemplates {
         const isPlaying = PlayManager.isPlaying(track.id);
 
         return create("div")
-            .classes("audio-player", "flexGrow", "flex")
+            .classes("audio-player", "flex-grow", "flex")
             .id("player_" + track.id)
             .children(
                 create("div")
@@ -60,7 +60,7 @@ export class PlayerTemplates {
                             )
                             .build(),
                         create("div")
-                            .classes("audio-player-scrubber", "flexGrow", "clickable", "flex", "rounded", "padded-inline")
+                            .classes("audio-player-scrubber", "flex-grow", "clickable", "flex", "rounded", "padded-inline")
                             .id(track.id)
                             .onmousedown(PlayManager.scrubFromElement)
                             .onmousemove(async e => {
