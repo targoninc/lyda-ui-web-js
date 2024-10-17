@@ -49,8 +49,8 @@ export async function baseHtml(req: Request) {
     <meta name="description" content="${description}">
     <meta name="theme-color" content="#202025">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <link rel="stylesheet" type="text/css" href="/style.css"/>
-    <link rel="stylesheet" type="text/css" href="/elements.css"/>
+    <link rel="stylesheet" type="text/css" href="/styles/style.css"/>
+    <link rel="stylesheet" type="text/css" href="/styles/elements.css"/>
     <link rel="stylesheet" type="text/css" href="/styles/dark.css"/>
     <link rel="stylesheet" type="text/css" href="/styles/shared_targon.css"/>
     <link rel="apple-touch-icon" href="/img/icons/favicon_128.png">
@@ -68,6 +68,7 @@ export async function baseHtml(req: Request) {
     <meta property="og:title" content="${title}"/>
     <meta property="og:description" content="${description}"/>
     <meta property="og:image" content="${image}"/>
+    <script src="/main.js" type="module"></script>
 </head>
 <body>
 <div class="page-background">
@@ -77,7 +78,6 @@ export async function baseHtml(req: Request) {
 <footer class="flex-v"></footer>
 
 <div class="notifications flex-v"></div>
-<script src="/main.mjs" type="module"></script>
 </body>
 </html>`;
 }

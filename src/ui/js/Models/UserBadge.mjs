@@ -1,5 +1,5 @@
-import { Badge } from 'Badge.mjs';
-import { User } from 'User.mjs';
+import { Badge } from 'src/ui/js/Models/Badge.mjs';
+import { User } from 'src/ui/js/Models/User.mjs';
 
 export class UserBadge {
     /** @var {number} userId */

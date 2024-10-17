@@ -1,4 +1,4 @@
-import { UserBadge } from 'UserBadge.mjs';
+import { UserBadge } from 'src/ui/js/Models/UserBadge.mjs';
 
 export class Badge {
     /** @var {number} id */

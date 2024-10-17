@@ -1,14 +1,15 @@
 import express from "express";
 import {baseHtml} from "./lib/baseHtml";
 import {config} from "dotenv";
-import path from "path";
+import * as path from "node:path";
 
 config();
 
 console.log(process.cwd());
 
 const app = express();
-app.use(express.static(path.join(process.cwd(), "ui")));
+app.use(express.static(path.join(process.cwd(), "out")));
+app.use(express.static(path.join(process.cwd(), "src/ui")));
 
 app.get("/api-url", (req, res) => {
     res.send(process.env.API_URL ?? "https://api.lyda.app");

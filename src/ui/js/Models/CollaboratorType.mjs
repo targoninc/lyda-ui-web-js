@@ -1,4 +1,4 @@
-import { TrackCollaborator } from 'TrackCollaborator.mjs';
+import { TrackCollaborator } from 'src/ui/js/Models/TrackCollaborator.mjs';
 
 export class CollaboratorType {
     /** @var {number} id */

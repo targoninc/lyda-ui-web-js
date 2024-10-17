@@ -1,4 +1,4 @@
-import { User } from 'User.mjs';
+import { User } from 'src/ui/js/Models/User.mjs';
 
 export class ActionLog {
     /** @var {number} id */

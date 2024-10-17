@@ -1,22 +1,21 @@
-import { Music } from 'Music.mjs';
-import { User } from 'User.mjs';
+import { User } from 'src/ui/js/Models/User.mjs';
 
-export class Repost {
+export class Theme {
+    /** @var {number} id */
+    id;
     /** @var {number} userId */
     userId;
-    /** @var {number} trackId */
-    trackId;
     /** @var {Date} createdAt */
     createdAt;
-    /** @var {Music|null} music */
-    music = null;
+    /** @var {string} name */
+    name;
     /** @var {User|null} user */
     user = null;
     constructor(data) {
+        this.id = data.id;
         this.userId = data.userId;
-        this.trackId = data.trackId;
         this.createdAt = data.createdAt;
-        this.music = data.music;
+        this.name = data.name;
         this.users = data.users;
     }
 }

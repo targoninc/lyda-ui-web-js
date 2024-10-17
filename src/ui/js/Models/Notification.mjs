@@ -1,5 +1,5 @@
-import { Music } from 'Music.mjs';
-import { User } from 'User.mjs';
+import { Music } from 'src/ui/js/Models/Music.mjs';
+import { User } from 'src/ui/js/Models/User.mjs';
 
 export class Notification {
     /** @var {number} id */

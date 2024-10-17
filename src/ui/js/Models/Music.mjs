@@ -1,12 +1,12 @@
-import { User } from 'User.mjs';
-import { TrackCollaborator } from 'TrackCollaborator.mjs';
-import { Notification } from 'Notification.mjs';
-import { Listeninghistory } from 'Listeninghistory.mjs';
-import { Tracklike } from 'Tracklike.mjs';
-import { Repost } from 'Repost.mjs';
-import { Playlisttrack } from 'Playlisttrack.mjs';
-import { Albumtrack } from 'Albumtrack.mjs';
-import { Comment } from 'Comment.mjs';
+import { User } from 'src/ui/js/Models/User.mjs';
+import { TrackCollaborator } from 'src/ui/js/Models/TrackCollaborator.mjs';
+import { Notification } from 'src/ui/js/Models/Notification.mjs';
+import { Listeninghistory } from 'src/ui/js/Models/Listeninghistory.mjs';
+import { Tracklike } from 'src/ui/js/Models/Tracklike.mjs';
+import { Repost } from 'src/ui/js/Models/Repost.mjs';
+import { Playlisttrack } from 'src/ui/js/Models/Playlisttrack.mjs';
+import { Albumtrack } from 'src/ui/js/Models/Albumtrack.mjs';
+import { Comment } from 'src/ui/js/Models/Comment.mjs';
 import { AnalyzedFrequencyRatio } from 'AnalyzedFrequencyRatio.mjs';
 import { TrackRoyaltie } from 'TrackRoyaltie.mjs';
 

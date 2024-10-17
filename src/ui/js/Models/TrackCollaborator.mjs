@@ -1,6 +1,6 @@
-import { CollaboratorType } from 'CollaboratorType.mjs';
-import { Music } from 'Music.mjs';
-import { User } from 'User.mjs';
+import { CollaboratorType } from 'src/ui/js/Models/CollaboratorType.mjs';
+import { Music } from 'src/ui/js/Models/Music.mjs';
+import { User } from 'src/ui/js/Models/User.mjs';
 
 export class TrackCollaborator {
     /** @var {number} trackId */

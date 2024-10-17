@@ -1,6 +1,6 @@
-import { Album } from 'Album.mjs';
-import { Music } from 'Music.mjs';
-import { User } from 'User.mjs';
+import { Album } from 'src/ui/js/Models/Album.mjs';
+import { Music } from 'src/ui/js/Models/Music.mjs';
+import { User } from 'src/ui/js/Models/User.mjs';
 
 export class Albumtrack {
     /** @var {number} albumId */

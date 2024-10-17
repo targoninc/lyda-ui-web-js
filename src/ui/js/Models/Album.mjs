@@ -1,6 +1,6 @@
-import { User } from 'User.mjs';
-import { Albumtrack } from 'Albumtrack.mjs';
-import { Albumlike } from 'Albumlike.mjs';
+import { User } from 'src/ui/js/Models/User.mjs';
+import { Albumtrack } from 'src/ui/js/Models/Albumtrack.mjs';
+import { Albumlike } from 'src/ui/js/Models/Albumlike.mjs';
 import { Track } from 'Track.mjs';
 
 export class Album {

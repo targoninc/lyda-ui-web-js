@@ -1,5 +1,5 @@
-import { Playlist } from 'Playlist.mjs';
-import { User } from 'User.mjs';
+import { Playlist } from 'src/ui/js/Models/Playlist.mjs';
+import { User } from 'src/ui/js/Models/User.mjs';
 
 export class Playlistlike {
     /** @var {number} userId */

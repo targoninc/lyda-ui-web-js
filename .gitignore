@@ -4,3 +4,4 @@
 /.gitignore.bak
 /dist
 .env
+/out/
