@@ -832,4 +832,21 @@ export class GenericTemplates {
             .src(Icons.GIFT)
             .build();
     }
+
+    static inlineLink(link, text, newTab = true) {
+        if (link.constructor === Function) {
+            return create("a")
+                .classes("inlineLink")
+                .onclick(link)
+                .text(text)
+                .build();
+        }
+
+        return create("a")
+            .classes("inlineLink")
+            .href(link)
+            .target(newTab ? "_blank" : "_self")
+            .text(text)
+            .build()
+    }
 }

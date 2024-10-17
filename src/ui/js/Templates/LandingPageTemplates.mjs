@@ -198,17 +198,8 @@ export class LandingPageTemplates {
                                 step.value = "checking-mfa";
                             }
                         }, ["auth-input"]),
-                        create("a")
-                            .classes("inlineLink")
-                            .href("/forgot-password")
-                            .text("Change/forgot password?")
-                            .build(),
-                        create("a")
-                            .classes("inlineLink")
-                            .text("Register instead")
-                            .onclick(() => {
-                                continueLogin();
-                            }).build(),
+                        GenericTemplates.inlineLink("/forgot-password", "Change/forgot password?", false),
+                        GenericTemplates.inlineLink(continueLogin, "Register instead"),
                         GenericTemplates.action(Icons.RIGHT, "Login", "mfaCheckTrigger", () => {
                             step.value = "checking-mfa";
                         }, [], ["secondary", "positive"]),
@@ -334,12 +325,7 @@ export class LandingPageTemplates {
                         }, false, () => {
                         }, ["auth-input", "flex-grow"]),
                         FormTemplates.checkBoxField("I agree to the Terms of Service & Privacy Policy", "tos-checkbox", "I agree to the Terms of Service & Privacy Policy", false, true),
-                        create("a")
-                            .classes("inlineLink")
-                            .href("https://targoninc.com/tos")
-                            .target("_blank")
-                            .text("Read the Terms of Service / Privacy Policy")
-                            .build(),
+                        GenericTemplates.inlineLink("https://targoninc.com/tos", "Read the Terms of Service / Privacy Policy"),
                         GenericTemplates.action(Icons.RIGHT, "Register", "registerTrigger", () => {
                             continueRegistration();
                         }, [], ["secondary", "positive"]),
