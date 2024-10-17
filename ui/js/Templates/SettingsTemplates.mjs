@@ -3,6 +3,7 @@ import {UserActions} from "../Actions/UserActions.mjs";
 import {Themes} from "../Enums/Themes.mjs";
 import {GenericTemplates} from "./GenericTemplates.mjs";
 import {getUserSettingValue} from "../Classes/Util.mjs";
+import {UserSettings} from "../Enums/UserSettings.mjs";
 
 export class SettingsTemplates {
     static settingsPage(user) {
@@ -12,7 +13,7 @@ export class SettingsTemplates {
                 create("h1")
                     .text("Settings")
                     .build(),
-                SettingsTemplates.themeSection(getUserSettingValue(user, "theme")),
+                SettingsTemplates.themeSection(getUserSettingValue(user, UserSettings.theme)),
                 SettingsTemplates.behaviourSection(user),
                 SettingsTemplates.notificationsSection(user)
             )
@@ -26,11 +27,11 @@ export class SettingsTemplates {
                 create("h2")
                     .text("E-Mail Notifications")
                     .build(),
-                SettingsTemplates.notificationToggle("Like notifications", "like", getUserSettingValue(user, "notification_like")),
-                SettingsTemplates.notificationToggle("Comment notifications", "comment", getUserSettingValue(user, "notification_comment")),
-                SettingsTemplates.notificationToggle("Follow notifications", "follow", getUserSettingValue(user, "notification_follow")),
-                SettingsTemplates.notificationToggle("Repost notifications", "repost", getUserSettingValue(user, "notification_repost")),
-                SettingsTemplates.notificationToggle("Collaboration notifications", "collaboration", getUserSettingValue(user, "notification_collaboration")),
+                SettingsTemplates.notificationToggle("Like notifications", "like", getUserSettingValue(user, UserSettings.notificationLike)),
+                SettingsTemplates.notificationToggle("Comment notifications", "comment", getUserSettingValue(user, UserSettings.notificationComment)),
+                SettingsTemplates.notificationToggle("Follow notifications", "follow", getUserSettingValue(user, UserSettings.notificationFollow)),
+                SettingsTemplates.notificationToggle("Repost notifications", "repost", getUserSettingValue(user, UserSettings.notificationRepost)),
+                SettingsTemplates.notificationToggle("Collaboration notifications", "collaboration", getUserSettingValue(user, UserSettings.notificationCollaboration)),
             ).build();
     }
 
@@ -47,8 +48,8 @@ export class SettingsTemplates {
                 create("h2")
                     .text("Behaviour")
                     .build(),
-                SettingsTemplates.playFromAutoQueueToggle(getUserSettingValue(user, "playFromAutoQueue")),
-                SettingsTemplates.publicLikesToggle(getUserSettingValue(user, "publicLikes")),
+                SettingsTemplates.playFromAutoQueueToggle(getUserSettingValue(user, UserSettings.playFromAutoQueue)),
+                SettingsTemplates.publicLikesToggle(getUserSettingValue(user, UserSettings.publicLikes)),
             ).build();
     }
 
@@ -84,13 +85,13 @@ export class SettingsTemplates {
     }
 
     static playFromAutoQueueToggle(currentValue) {
-        return GenericTemplates.toggle("Play from auto queue", "playFromAutoQueue", async () => {
+        return GenericTemplates.toggle("Play from auto queue", UserSettings.playFromAutoQueue, async () => {
             await UserActions.togglePlayFromAutoQueue();
         }, [], currentValue);
     }
 
     static publicLikesToggle(currentValue) {
-        return GenericTemplates.toggle("Make my library public", "publicLikes", async () => {
+        return GenericTemplates.toggle("Make my library public", UserSettings.publicLikes, async () => {
             await UserActions.togglePublicLikes();
         }, [], currentValue);
     }

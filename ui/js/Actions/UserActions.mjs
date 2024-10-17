@@ -6,6 +6,7 @@ import {CacheItem} from "../Cache/CacheItem.mjs";
 import {Icons} from "../Enums/Icons.mjs";
 import {NavTemplates} from "../Templates/NavTemplates.mjs";
 import {Themes} from "../Enums/Themes.mjs";
+import {UserSettings} from "../Enums/UserSettings.mjs";
 
 export class UserActions {
     static updateAvatar(newSrc) {
@@ -196,7 +197,7 @@ export class UserActions {
 
     static async setTheme(theme) {
         let user = await Util.getUserAsync();
-        user.settings = updateUserSetting(user, "theme", theme);
+        user.settings = updateUserSetting(user, UserSettings.theme, theme);
         LydaCache.set("user", new CacheItem(user));
         await UserActions.setUiTheme(theme);
     }
@@ -217,7 +218,7 @@ export class UserActions {
         if (onlyLocal) {
             return;
         }
-        const res = await Api.postAsync(Api.endpoints.user.actions.updateSetting, { setting: "theme", value: themeName });
+        const res = await Api.postAsync(Api.endpoints.user.actions.updateSetting, { setting: UserSettings.theme, value: themeName });
         if (res.code !== 200) {
             Ui.notify("Failed to update theme", "error");
         }
@@ -235,18 +236,6 @@ export class UserActions {
         return true;
     }
 
-    static async setPublicLikes(publicLikes) {
-        const res = await Api.postAsync(Api.endpoints.user.actions.updateSetting, {
-            setting: "publicLikes",
-            value: publicLikes
-        });
-        if (res.code !== 200) {
-            Ui.notify("Failed to update public likes", "error");
-            return false;
-        }
-        return true;
-    }
-
     static async toggleBooleanUserSetting(key) {
         const user = await Util.getUserAsync();
         const newValue = !getUserSettingValue(user, key);
@@ -259,11 +248,11 @@ export class UserActions {
     }
 
     static async togglePlayFromAutoQueue() {
-        return await UserActions.toggleBooleanUserSetting("playFromAutoQueue");
+        return await UserActions.toggleBooleanUserSetting(UserSettings.playFromAutoQueue);
     }
 
     static async togglePublicLikes() {
-        return await UserActions.toggleBooleanUserSetting("publicLikes");
+        return await UserActions.toggleBooleanUserSetting(UserSettings.publicLikes);
     }
 
     static async toggleNotificationSetting(key) {
