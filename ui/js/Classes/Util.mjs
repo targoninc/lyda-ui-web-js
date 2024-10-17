@@ -472,3 +472,23 @@ export function finalizeLogin(step, user) {
         //window.location.href = "/home";
     }
 }
+
+export function getUserSettingValue(user, key) {
+    const val = user.settings.find(s => s.key === key)?.value;
+    if (val === "true") return true;
+    if (val === "false") return false;
+    return val;
+}
+
+export function userHasSettingValue(user, key, value) {
+    return getUserSettingValue(user, key) === value;
+}
+
+export function updateUserSetting(user, key, value) {
+    return user.settings.map(s => {
+        if (s.key === key) {
+            s.value = value;
+        }
+        return s;
+    })
+}

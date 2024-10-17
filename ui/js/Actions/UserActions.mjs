@@ -1,5 +1,5 @@
 import {Api} from "../Classes/Api.mjs";
-import {Util} from "../Classes/Util.mjs";
+import {getUserSettingValue, updateUserSetting, Util} from "../Classes/Util.mjs";
 import {Ui} from "../Classes/Ui.mjs";
 import {LydaCache} from "../Cache/LydaCache.mjs";
 import {CacheItem} from "../Cache/CacheItem.mjs";
@@ -196,9 +196,9 @@ export class UserActions {
 
     static async setTheme(theme) {
         let user = await Util.getUserAsync();
-        user.usersettings.uiTheme = theme;
+        user.settings = updateUserSetting(user, "theme", theme);
         LydaCache.set("user", new CacheItem(user));
-        await UserActions.setUiTheme(user.usersettings.uiTheme);
+        await UserActions.setUiTheme(theme);
     }
 
     static async setUiTheme(themeName, onlyLocal = false) {
@@ -223,13 +223,13 @@ export class UserActions {
         }
     }
 
-    static async setPlayFromAutoQueue(playFromAutoQueue) {
+    static async setBooleanUserSetting(key, value) {
         const res = await Api.postAsync(Api.endpoints.user.actions.updateSetting, {
-            setting: "playFromAutoQueue",
-            value: playFromAutoQueue
+            setting: key,
+            value
         });
         if (res.code !== 200) {
-            Ui.notify("Failed to update play from auto queue", "error");
+            Ui.notify("Failed to update user setting", "error");
             return false;
         }
         return true;
@@ -247,24 +247,28 @@ export class UserActions {
         return true;
     }
 
-    static async togglePlayFromAutoQueue() {
+    static async toggleBooleanUserSetting(key) {
         const user = await Util.getUserAsync();
-        user.usersettings.playFromAutoQueue = !user.usersettings.playFromAutoQueue;
-        LydaCache.set("user", new CacheItem(user));
-        if (!await UserActions.setPlayFromAutoQueue(user.usersettings.playFromAutoQueue)) {
-            user.usersettings.playFromAutoQueue = !user.usersettings.playFromAutoQueue;
+        const newValue = !getUserSettingValue(user, key);
+        if (await UserActions.setBooleanUserSetting(key, newValue)) {
+            user.settings = updateUserSetting(user, key, newValue);
             LydaCache.set("user", new CacheItem(user));
+            return true;
         }
+        return false;
+    }
+
+    static async togglePlayFromAutoQueue() {
+        return await UserActions.toggleBooleanUserSetting("playFromAutoQueue");
     }
 
     static async togglePublicLikes() {
-        const user = LydaCache.get("user").content;
-        user.usersettings.publicLikes = !user.usersettings.publicLikes;
-        LydaCache.set("user", new CacheItem(user));
-        if (!await UserActions.setPublicLikes(user.usersettings.publicLikes)) {
-            user.usersettings.publicLikes = !user.usersettings.publicLikes;
-            LydaCache.set("user", new CacheItem(user));
-        }
+        return await UserActions.toggleBooleanUserSetting("publicLikes");
+    }
+
+    static async toggleNotificationSetting(key) {
+        const settingKey = "notification_" + key;
+        return await UserActions.toggleBooleanUserSetting(settingKey);
     }
 
     static async openProfileFromElement(e) {
@@ -278,21 +282,6 @@ export class UserActions {
             return;
         }
         window.router.navigate("profile/" + username);
-    }
-
-    static async toggleNotification(key) {
-        const user = await Util.getUserAsync();
-        user.usersettings["notification_" + key] = !user.usersettings["notification_" + key];
-        const value = user.usersettings["notification_" + key];
-        LydaCache.set("user", new CacheItem(user));
-        const res = await Api.postAsync(Api.endpoints.user.actions.updateSetting, { setting: "notification_" + key, value });
-        if (res.code !== 200) {
-            Ui.notify("Failed to toggle notification", "error");
-            user.usersettings["notification_" + key] = !user.usersettings["notification_" + key];
-            LydaCache.set("user", new CacheItem(user));
-            return false;
-        }
-        return true;
     }
 
     static async unverifyUser(id) {

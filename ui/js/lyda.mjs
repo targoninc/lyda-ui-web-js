@@ -123,7 +123,7 @@ export class Lyda {
             break;
         case "settings":
             user = await Util.getUserAsync();
-            element.appendChild(SettingsTemplates.settingsPage(user.usersettings));
+            element.appendChild(SettingsTemplates.settingsPage(user));
             break;
         case "statistics":
             user = await Util.getUserAsync();

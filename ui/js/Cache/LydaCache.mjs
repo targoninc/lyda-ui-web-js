@@ -80,4 +80,8 @@ export class LydaCache {
     static clear() {
         this.cacheImplementation.clear();
     }
+
+    static remove(cacheKey) {
+        this.cacheImplementation.removeItem(cacheKey);
+    }
 }

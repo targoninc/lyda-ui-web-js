@@ -9,6 +9,8 @@ import {Ui} from "./js/Classes/Ui.mjs";
 import {Util} from "./js/Classes/Util.mjs";
 import {routes} from "./js/routes.mjs";
 
+LydaCache.clear();
+
 window.router = new Router(routes, async (route, params) => {
     const page = route.path.replace("/", "");
     console.log(`Navigating to ${page} with params`, params);

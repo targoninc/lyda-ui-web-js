@@ -1,4 +1,4 @@
-import {Util} from "./Util.mjs";
+import {userHasSettingValue, Util} from "./Util.mjs";
 import {UrlHandler} from "./UrlHandler.mjs";
 import {Api} from "./Api.mjs";
 import {LydaCache} from "../Cache/LydaCache.mjs";
@@ -130,12 +130,13 @@ export class Ui {
             await UserActions.setUiTheme("dark", true);
             return;
         }
-        if (!user.usersettings.uiTheme || user.usersettings.uiTheme === "") {
-            user.usersettings.uiTheme = darkPreferred.matches ? "dark" : "light";
-            await UserActions.setUiTheme(user.usersettings.uiTheme);
+        const existingSetting = user.settings.find(s => s.key === "theme");
+        if (!existingSetting) {
+            const newTheme = darkPreferred.matches ? "dark" : "light";
+            await UserActions.setUiTheme(newTheme);
             LydaCache.set("user", new CacheItem(user));
         } else {
-            await UserActions.setUiTheme(user.usersettings.uiTheme, true);
+            await UserActions.setUiTheme(existingSetting.value, true);
         }
     }
 

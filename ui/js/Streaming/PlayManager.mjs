@@ -5,7 +5,7 @@ import {StreamingUpdater} from "./StreamingUpdater.mjs";
 import {QueueManager} from "./QueueManager.mjs";
 import {TrackActions} from "../Actions/TrackActions.mjs";
 import {StreamClient} from "./StreamClient.mjs";
-import {Util} from "../Classes/Util.mjs";
+import {userHasSettingValue, Util} from "../Classes/Util.mjs";
 import {Ui} from "../Classes/Ui.mjs";
 
 export class PlayManager {
@@ -53,7 +53,7 @@ export class PlayManager {
             } else {
                 const user = await Util.getUserAsync();
                 const autoQueue = QueueManager.getAutoQueue();
-                if (autoQueue.length > 0 && user && user.usersettings.playFromAutoQueue) {
+                if (autoQueue.length > 0 && user && userHasSettingValue(user, "playFromAutoQueue", true)) {
                     await PlayManager.playNextInAutoQueue();
                 } else {
                     await PlayManager.stopAllAsync();
