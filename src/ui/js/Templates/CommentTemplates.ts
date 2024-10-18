@@ -1,5 +1,5 @@
 import {create, signal} from "https://fjs.targoninc.com/f.js";
-import {StatisticsTemplates} from "./StatisticsTemplates.mjs";
+import {StatisticsTemplates} from "./StatisticsTemplates.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {Icons} from "../Enums/Icons.js";
 import {CommentActions} from "../Actions/CommentActions.ts";

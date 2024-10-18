@@ -7,7 +7,7 @@ import {AlbumActions} from "./AlbumActions.ts";
 import {PlaylistActions} from "./PlaylistActions.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
-import {CommentTemplates} from "../Templates/CommentTemplates.mjs";
+import {CommentTemplates} from "../Templates/CommentTemplates.ts";
 import {TrackEditTemplates} from "../Templates/TrackEditTemplates.ts";
 import {Ui} from "../Classes/Ui.ts";
 

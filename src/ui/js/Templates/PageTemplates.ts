@@ -1,6 +1,6 @@
 import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {AuthActions} from "../Actions/AuthActions.ts";
-import {LandingPageTemplates} from "./LandingPageTemplates.mjs";
+import {LandingPageTemplates} from "./LandingPageTemplates.ts";
 import {UserTemplates} from "./UserTemplates.ts";
 import {Api} from "../Classes/Api.ts";
 import {Util} from "../Classes/Util.ts";

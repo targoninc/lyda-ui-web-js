@@ -1,4 +1,4 @@
-import {StatisticTemplates} from "../Templates/StatisticTemplates.mjs";
+import {StatisticTemplates} from "../Templates/StatisticTemplates.ts";
 import {signal} from "https://fjs.targoninc.com/f.js";
 import {Api} from "./Api.ts";
 import {Ui} from "./Ui.ts";

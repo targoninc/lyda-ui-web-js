@@ -5,7 +5,7 @@ import {UserActions} from "../Actions/UserActions.ts";
 import {NavActions} from "../Actions/NavActions.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {Links} from "../Enums/Links.ts";
-import {SearchTemplates} from "./SearchTemplates.mjs";
+import {SearchTemplates} from "./SearchTemplates.ts";
 import {NotificationParser} from "../Classes/Helpers/NotificationParser.ts";
 import {AuthActions} from "../Actions/AuthActions.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
