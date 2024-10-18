@@ -14,7 +14,7 @@ import {LibraryActions} from "./Actions/LibraryActions.ts";
 import {Api} from "./Classes/Api.ts";
 import {StatisticTemplates} from "./Templates/StatisticTemplates.mjs";
 import {LogTemplates} from "./Templates/LogTemplates.mjs";
-import {Permissions} from "./Enums/Permissions.mjs";
+import {Permissions} from "./Enums/Permissions.ts";
 import {LydaApi} from "./Classes/LydaApi.ts";
 import {TrackActions} from "./Actions/TrackActions.ts";
 import {CommentActions} from "./Actions/CommentActions.ts";

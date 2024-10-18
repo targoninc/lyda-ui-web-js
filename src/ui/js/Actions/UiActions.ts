@@ -1,5 +1,5 @@
 import {GenericTemplates} from "../Templates/GenericTemplates.ts";
-import {MenuTemplates} from "../Templates/MenuTemplates.mjs";
+import {MenuTemplates} from "../Templates/MenuTemplates.ts";
 import {Util} from "../Classes/Util.ts";
 import {FeatureDetector} from "../Classes/Helpers/FeatureDetector.ts";
 import {Ui} from "../Classes/Ui.ts";
@@ -21,9 +21,9 @@ export class UiActions {
         Ui.addModal(modal);
     }
 
-    static runMenuIndexAction(index) {
-        const menuItem = document.querySelector(".modal-container").querySelector(`.menu-item:nth-child(${index + 1})`);
-        menuItem.click();
+    static runMenuIndexAction(index: number) {
+        const menuItem = document.querySelector(".modal-container")?.querySelector(`.menu-item:nth-child(${index + 1})`);
+        menuItem?.click();
     }
 
     static runMobileCheck() {

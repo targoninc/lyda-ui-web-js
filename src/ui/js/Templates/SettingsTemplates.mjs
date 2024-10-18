@@ -1,9 +1,9 @@
 import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {UserActions} from "../Actions/UserActions.ts";
-import {Themes} from "../Enums/Themes.mjs";
+import {Themes} from "../Enums/Themes.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {getUserSettingValue} from "../Classes/Util.ts";
-import {UserSettings} from "../Enums/UserSettings.mjs";
+import {UserSettings} from "../Enums/UserSettings.ts";
 
 export class SettingsTemplates {
     static settingsPage(user) {
@@ -16,8 +16,7 @@ export class SettingsTemplates {
                 SettingsTemplates.themeSection(getUserSettingValue(user, UserSettings.theme)),
                 SettingsTemplates.behaviourSection(user),
                 SettingsTemplates.notificationsSection(user)
-            )
-            .build();
+            ).build();
     }
 
     static notificationsSection(user) {

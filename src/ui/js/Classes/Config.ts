@@ -10,27 +10,38 @@ export class Config {
     }
 
     static get() {
-        const config = {
-            appBaseUrl: Config.appBaseUrl,
-            apiBaseUrl: Config.apiBaseUrl,
-            storageBaseUrl: Config.storageBaseUrl,
-        };
-
         try {
-            config.filePath = config.storageBaseUrl + "/storage/v2";
-            config.avatarPath = config.filePath + "/avatars/";
-            config.bannerPath = config.filePath + "/banners/";
-            config.coverPath = config.filePath + "/covers/";
-            config.coverPathTracks = config.coverPath + "tracks/";
-            config.coverPathAlbums = config.coverPath + "albums/";
-            config.coverPathPlaylists = config.coverPath + "playlists/";
+            let config = {
+                appBaseUrl: Config.appBaseUrl,
+                apiBaseUrl: Config.apiBaseUrl,
+                storageBaseUrl: Config.storageBaseUrl,
+                filePath: Config.storageBaseUrl + "/storage/v2",
+                avatarPath: "",
+                bannerPath: "",
+                coverPath: "",
+                coverPathTracks: "",
+                coverPathAlbums: "",
+                coverPathPlaylists: "",
+            } as { [key: string]: string };
+
+            config = {
+                ...config,
+                avatarPath: config.filePath + "/avatars/",
+                bannerPath: config.filePath + "/banners/",
+                coverPath: config.filePath + "/covers/",
+                coverPathTracks: config.coverPath + "tracks/",
+                coverPathAlbums: config.coverPath + "albums/",
+                coverPathPlaylists: config.coverPath + "playlists/",
+            }
+
             return config;
         } catch (e) {
-            console.error("Failed to parse config");
+            console.error("Failed to create config");
         }
     }
 
-    static getKey(key) {
-        return (Config.get())[key];
+    static getKey(key: string): string|null {
+        const config = Config.get();
+        return config ? config[key] : null;
     }
 }

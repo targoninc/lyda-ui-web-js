@@ -3,11 +3,11 @@ export class Links {
         return "https://lyda.app/";
     }
 	
-    static LINK(path) {
+    static LINK(path: string) {
         return Links.BASE_URL + path;
     }
 
-    static PROFILE(path) {
+    static PROFILE(path: string) {
         return Links.LINK("profile/" + path);
     }
 }

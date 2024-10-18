@@ -5,8 +5,8 @@ import {LydaCache} from "../Cache/LydaCache.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {Icons} from "../Enums/Icons.js";
 import {NavTemplates} from "../Templates/NavTemplates.ts";
-import {Themes} from "../Enums/Themes.mjs";
-import {UserSettings} from "../Enums/UserSettings.mjs";
+import {Themes} from "../Enums/Themes.ts";
+import {UserSettings} from "../Enums/UserSettings.ts";
 
 export class UserActions {
     static updateAvatar(newSrc) {

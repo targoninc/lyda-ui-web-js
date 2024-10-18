@@ -7,11 +7,11 @@ import {UserActions} from "../Actions/UserActions.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {AlbumTemplates} from "./AlbumTemplates.mjs";
 import {Icons as Icons} from "../Enums/Icons.js";
-import {Badges} from "../Enums/Badges.mjs";
+import {Badges} from "../Enums/Badges.ts";
 import {Links} from "../Enums/Links.ts";
 import {PlaylistTemplates} from "./PlaylistTemplates.mjs";
 import {CustomText} from "../Classes/Helpers/CustomText.ts";
-import {Permissions} from "../Enums/Permissions.mjs";
+import {Permissions} from "../Enums/Permissions.ts";
 import {Images} from "../Enums/Images.ts";
 
 export class UserTemplates {

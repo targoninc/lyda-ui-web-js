@@ -7,7 +7,7 @@ import {GenericTemplates} from "./GenericTemplates.ts";
 import {Icons} from "../Enums/Icons.js";
 import {Api} from "../Classes/Api.ts";
 import {Num} from "../Classes/Helpers/Num.ts";
-import {Permissions} from "../Enums/Permissions.mjs";
+import {Permissions} from "../Enums/Permissions.ts";
 import {FormTemplates} from "./FormTemplates.ts";
 import {Ui} from "../Classes/Ui.ts";
 
