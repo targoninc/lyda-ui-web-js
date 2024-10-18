@@ -1,20 +1,20 @@
-import {TrackActions} from "../Actions/TrackActions.mjs";
+import {TrackActions} from "../Actions/TrackActions.ts";
 import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {UserTemplates} from "./UserTemplates.mjs";
 import {Util} from "../Classes/Util.mjs";
-import {Icons} from "../Enums/Icons.mjs";
+import {Icons} from "../Enums/Icons.js";
 import {PlayManager} from "../Streaming/PlayManager.mjs";
-import {GenericTemplates} from "./GenericTemplates.mjs";
-import {AlbumActions} from "../Actions/AlbumActions.mjs";
+import {GenericTemplates} from "./GenericTemplates.ts";
+import {AlbumActions} from "../Actions/AlbumActions.ts";
 import {Time} from "../Classes/Helpers/Time.mjs";
 import {QueueManager} from "../Streaming/QueueManager.mjs";
 import {StatisticsTemplates} from "./StatisticsTemplates.mjs";
 import {AlbumTemplates} from "./AlbumTemplates.mjs";
-import {PlaylistActions} from "../Actions/PlaylistActions.mjs";
+import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {PlaylistTemplates} from "./PlaylistTemplates.mjs";
 import {DragActions} from "../Actions/DragActions.mjs";
 import {Images} from "../Enums/Images.mjs";
-import {TrackEditTemplates} from "./TrackEditTemplates.mjs";
+import {TrackEditTemplates} from "./TrackEditTemplates.ts";
 import {UserActions} from "../Actions/UserActions.mjs";
 import {CustomText} from "../Classes/Helpers/CustomText.mjs";
 import {CommentTemplates} from "./CommentTemplates.mjs";
@@ -353,17 +353,10 @@ export class TrackTemplates {
                                         isPrivate ? null : StatisticsTemplates.repostListOpener(track.id, track.reposts, user),
                                         CommentTemplates.commentsIndicator(track.id, track.comments.length),
                                         CommentTemplates.commentListOpener(track.id, track.comments, user),
-                                        GenericTemplates.action(
-                                            queueSubState.icon,
-                                            queueSubState.text,
-                                            track.id,
-                                            () => {
-                                                QueueManager.toggleInManualQueue(track.id);
-                                                inQueue.value = QueueManager.isInManualQueue(track.id);
-                                            },
-                                            [],
-                                            ["secondary"]
-                                        ),
+                                        GenericTemplates.action(queueSubState.icon, queueSubState.text, track.id, () => {
+                                            QueueManager.toggleInManualQueue(track.id);
+                                            inQueue.value = QueueManager.isInManualQueue(track.id);
+                                        }, [], ["secondary"]),
                                     ).build(),
                                 create("div")
                                     .classes("flex")
@@ -401,35 +394,16 @@ export class TrackTemplates {
             downState.value = (canEdit && newMap[newMap.length - 1] !== track.id) ? "_" : "nonclickable";
         };
         if (canEdit) {
-            trackActions.push(GenericTemplates.action(
-                Icons.ARROW_UP,
-                "Move up",
-                list.id,
-                async () => {
-                    await TrackActions.moveTrackUpInList(positionsState, track, type, list);
-                },
-                [],
-                [upState]
-            ));
-            trackActions.push(GenericTemplates.action(
-                Icons.ARROW_DOWN,
-                "Move down",
-                list.id,
-                async () => {
-                    await TrackActions.moveTrackDownInList(positionsState, track, type, list);
-                },
-                [],
-                [downState]
-            ));
+            trackActions.push(GenericTemplates.action(Icons.ARROW_UP, "Move up", list.id, async () => {
+                await TrackActions.moveTrackUpInList(positionsState, track, type, list);
+            }, [], [upState]));
+            trackActions.push(GenericTemplates.action(Icons.ARROW_DOWN, "Move down", list.id, async () => {
+                await TrackActions.moveTrackDownInList(positionsState, track, type, list);
+            }, [], [downState]));
 
-            trackActions.push(GenericTemplates.action(
-                Icons.X,
-                "Remove from " + type,
-                list.id,
-                async () => {
-                    await TrackActions.removeTrackFromList(positionsState, track, type, list);
-                },
-            ));
+            trackActions.push(GenericTemplates.action(Icons.X, "Remove from " + type, list.id, async () => {
+                await TrackActions.removeTrackFromList(positionsState, track, type, list);
+            }));
         }
 
         const dragData = {
@@ -542,14 +516,9 @@ export class TrackTemplates {
         });
         let actionButton = null, classes = [];
         if (user && user.id === track.userId) {
-            actionButton = GenericTemplates.action(
-                Icons.X,
-                "Remove",
-                track.id,
-                async () => {
-                    await TrackActions.removeCollaboratorFromTrack(track.id, collaborator.userId);
-                },
-            );
+            actionButton = GenericTemplates.action(Icons.X, "Remove", track.id, async () => {
+                await TrackActions.removeCollaboratorFromTrack(track.id, collaborator.userId);
+            });
             classes.push("no-redirect");
         }
         return UserTemplates.linkedUser(collaborator.userId, collaborator.user.username, collaborator.user.displayname, avatarState, collaborator.collaboratorType.name, actionButton, [], classes);
@@ -608,16 +577,9 @@ export class TrackTemplates {
         const editActions = [];
         if (trackData.canEdit) {
             editActions.push(
-                GenericTemplates.action(
-                    Icons.ALBUM_ADD,
-                    "Add to album",
-                    track.id,
-                    async () => {
-                        await AlbumActions.openAddToAlbumModal(track);
-                    },
-                    [],
-                    ["secondary"]
-                ),
+                GenericTemplates.action(Icons.ALBUM_ADD, "Add to album", track.id, async () => {
+                    await AlbumActions.openAddToAlbumModal(track);
+                }, [], ["secondary"]),
             );
             editActions.push(TrackTemplates.copyPrivateLinkButton(track.id, track.secretcode));
             editActions.push(TrackEditTemplates.openEditPageButton(track));
@@ -810,37 +772,16 @@ export class TrackTemplates {
         let actions = [];
         if (user) {
             actions = [
-                GenericTemplates.action(
-                    isPlaying ? Icons.PAUSE : Icons.PLAY,
-                    isPlaying ? "Pause" : "Play",
-                    track.id,
-                    async (e) => {
-                        await PlayManager.togglePlayAsync(e.target.id);
-                    },
-                    ["duration", track.duration],
-                    ["audio-player-toggle", "secondary"]
-                ),
-                GenericTemplates.action(
-                    queueSubState.icon,
-                    queueSubState.text,
-                    track.id,
-                    () => {
-                        QueueManager.toggleInManualQueue(track.id);
-                        inQueue.value = QueueManager.isInManualQueue(track.id);
-                    },
-                    [],
-                    ["secondary"]
-                ),
-                GenericTemplates.action(
-                    Icons.PLAYLIST_ADD,
-                    "Add to playlist",
-                    track.id,
-                    async () => {
-                        await PlaylistActions.openAddToPlaylistModal(track, "track");
-                    },
-                    [],
-                    ["secondary"]
-                )
+                GenericTemplates.action(isPlaying ? Icons.PAUSE : Icons.PLAY, isPlaying ? "Pause" : "Play", track.id, async (e) => {
+                    await PlayManager.togglePlayAsync(e.target.id);
+                }, ["duration", track.duration], ["audio-player-toggle", "secondary"]),
+                GenericTemplates.action(queueSubState.icon, queueSubState.text, track.id, () => {
+                    QueueManager.toggleInManualQueue(track.id);
+                    inQueue.value = QueueManager.isInManualQueue(track.id);
+                }, [], ["secondary"]),
+                GenericTemplates.action(Icons.PLAYLIST_ADD, "Add to playlist", track.id, async () => {
+                    await PlaylistActions.openAddToPlaylistModal(track, "track");
+                }, [], ["secondary"])
             ];
         }
 
@@ -910,15 +851,8 @@ export class TrackTemplates {
     }
 
     static copyPrivateLinkButton(id, code) {
-        return GenericTemplates.action(
-            Icons.COPY,
-            "Copy private link",
-            id,
-            async () => {
-                await Util.copyToClipboard(window.location.origin + "/track/" + id + "/" + code);
-            },
-            [],
-            ["secondary"]
-        );
+        return GenericTemplates.action(Icons.COPY, "Copy private link", id, async () => {
+            await Util.copyToClipboard(window.location.origin + "/track/" + id + "/" + code);
+        }, [], ["secondary"]);
     }
 }

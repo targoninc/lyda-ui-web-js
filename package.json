@@ -1,8 +1,10 @@
 {
+  "type": "module",
   "scripts": {
     "build-web": "bun build ./src/ui/main.mjs --outdir ./out --sourcemap=linked --minify --watch",
     "start": "npm run build && node dist/server.js",
-    "start-bun": "bun --watch ./src/server.ts"
+    "start-bun": "bun --watch ./src/server.ts",
+    "update-submodules": "git submodule update --remote --merge"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",

@@ -1,8 +1,8 @@
-import {GenericTemplates} from "../Templates/GenericTemplates.mjs";
+import {GenericTemplates} from "../Templates/GenericTemplates.ts";
 import {MenuTemplates} from "../Templates/MenuTemplates.mjs";
 import {Util} from "../Classes/Util.mjs";
 import {FeatureDetector} from "../Classes/Helpers/FeatureDetector.mjs";
-import {Ui} from "../Classes/Ui.mjs";
+import {Ui} from "../Classes/Ui.ts";
 
 export class UiActions {
     static closeModal() {

@@ -1,7 +1,7 @@
 import {computedSignal, create, ifjs, signal, signalMap} from "https://fjs.targoninc.com/f.js";
 import {Num as NumberFormatter} from "../Classes/Helpers/Num.mjs";
 import {SubscriptionActions} from "../Actions/SubscriptionActions.mjs";
-import {GenericTemplates} from "./GenericTemplates.mjs";
+import {GenericTemplates} from "./GenericTemplates.ts";
 import {Time} from "../Classes/Helpers/Time.mjs";
 
 export class SubscriptionTemplates {

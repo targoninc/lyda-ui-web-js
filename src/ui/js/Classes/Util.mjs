@@ -1,11 +1,11 @@
-import {Ui} from "./Ui.mjs";
+import {Ui} from "./Ui.ts";
 import {UrlHandler} from "./UrlHandler.mjs";
 import {Images} from "../Enums/Images.mjs";
 import {Config} from "./Config.mjs";
 import {LydaCache} from "../Cache/LydaCache.mjs";
-import {Api} from "./Api.mjs";
+import {Api} from "./Api.ts";
 import {CacheItem} from "../Cache/CacheItem.mjs";
-import {Icons} from "../Enums/Icons.mjs";
+import {Icons} from "../Enums/Icons.js";
 
 export class Util {
     static capitalizeFirstLetter(string) {

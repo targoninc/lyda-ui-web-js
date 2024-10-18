@@ -1,19 +1,19 @@
 import {PlayManager} from "../Streaming/PlayManager.mjs";
 import {StreamingUpdater} from "../Streaming/StreamingUpdater.mjs";
 import {create, signal} from "https://fjs.targoninc.com/f.js";
-import {Icons} from "../Enums/Icons.mjs";
+import {Icons} from "../Enums/Icons.js";
 import {Time} from "../Classes/Helpers/Time.mjs";
 import {QueueManager} from "../Streaming/QueueManager.mjs";
 import {Images} from "../Enums/Images.mjs";
 import {QueueTemplates} from "./QueueTemplates.mjs";
-import {AlbumActions} from "../Actions/AlbumActions.mjs";
-import {PlaylistActions} from "../Actions/PlaylistActions.mjs";
-import {TrackActions} from "../Actions/TrackActions.mjs";
+import {AlbumActions} from "../Actions/AlbumActions.ts";
+import {PlaylistActions} from "../Actions/PlaylistActions.ts";
+import {TrackActions} from "../Actions/TrackActions.ts";
 import {UserTemplates} from "./UserTemplates.mjs";
 import {StatisticsTemplates} from "./StatisticsTemplates.mjs";
 import {CommentTemplates} from "./CommentTemplates.mjs";
-import {GenericTemplates} from "./GenericTemplates.mjs";
-import {Ui} from "../Classes/Ui.mjs";
+import {GenericTemplates} from "./GenericTemplates.ts";
+import {Ui} from "../Classes/Ui.ts";
 import {Util} from "../Classes/Util.mjs";
 
 export class PlayerTemplates {

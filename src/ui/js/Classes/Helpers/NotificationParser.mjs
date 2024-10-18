@@ -1,5 +1,5 @@
 import {NavTemplates} from "../../Templates/NavTemplates.mjs";
-import {GenericTemplates} from "../../Templates/GenericTemplates.mjs";
+import {GenericTemplates} from "../../Templates/GenericTemplates.ts";
 
 export class NotificationParser {
     static parse(message, data) {

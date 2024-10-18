@@ -1,20 +1,20 @@
 import {create, signal} from "https://fjs.targoninc.com/f.js";
-import {Icons} from "../Enums/Icons.mjs";
-import {AlbumActions} from "../Actions/AlbumActions.mjs";
-import {FormTemplates} from "./FormTemplates.mjs";
+import {Icons} from "../Enums/Icons.js";
+import {AlbumActions} from "../Actions/AlbumActions.ts";
+import {FormTemplates} from "./FormTemplates.ts";
 import {Form} from "../Classes/Helpers/Form.mjs";
 import {Time} from "../Classes/Helpers/Time.mjs";
-import {GenericTemplates} from "./GenericTemplates.mjs";
-import {TrackActions} from "../Actions/TrackActions.mjs";
+import {GenericTemplates} from "./GenericTemplates.ts";
+import {TrackActions} from "../Actions/TrackActions.ts";
 import {UserTemplates} from "./UserTemplates.mjs";
 import {PlayManager} from "../Streaming/PlayManager.mjs";
 import {TrackTemplates} from "./TrackTemplates.mjs";
 import {QueueManager} from "../Streaming/QueueManager.mjs";
-import {PlaylistActions} from "../Actions/PlaylistActions.mjs";
+import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {StatisticsTemplates} from "./StatisticsTemplates.mjs";
 import {Images} from "../Enums/Images.mjs";
 import {Util} from "../Classes/Util.mjs";
-import {Ui} from "../Classes/Ui.mjs";
+import {Ui} from "../Classes/Ui.ts";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track, albums) {
@@ -310,17 +310,10 @@ export class AlbumTemplates {
         const editActions = [];
         if (data.canEdit) {
             editActions.push(
-                GenericTemplates.action(
-                    Icons.DELETE,
-                    "Delete",
-                    album.id,
-                    async (e) => {
-                        await Ui.getConfirmationModal("Delete album", "Are you sure you want to delete this album?", "Yes", "No", AlbumActions.deleteAlbumFromElement.bind(null, e), () => {
-                        }, Icons.WARNING);
-                    },
-                    [],
-                    ["secondary", "negative"]
-                )
+                GenericTemplates.action(Icons.DELETE, "Delete", album.id, async (e) => {
+                    await Ui.getConfirmationModal("Delete album", "Are you sure you want to delete this album?", "Yes", "No", AlbumActions.deleteAlbumFromElement.bind(null, e), () => {
+                    }, Icons.WARNING);
+                }, [], ["secondary", "negative"])
             );
         }
 
@@ -404,41 +397,20 @@ export class AlbumTemplates {
         let actions = [];
         if (user) {
             actions = [
-                GenericTemplates.action(
-                    isPlaying ? Icons.PAUSE : Icons.PLAY,
-                    isPlaying ? "Pause" : "Play",
-                    album.id,
-                    async () => {
-                        const firstTrack = album.albumtracks[0];
-                        await AlbumActions.startTrackInAlbum(album, firstTrack.id, true);
-                    },
-                    ["duration", album.duration],
-                    [album.albumtracks.length === 0 ? "nonclickable" : "_", "secondary"]
-                ),
-                GenericTemplates.action(
-                    allTracksInQueue ? Icons.UNQUEUE : Icons.QUEUE,
-                    allTracksInQueue ? "Unqueue" : "Queue",
-                    album.id,
-                    () => {
-                        for (let track of album.albumtracks) {
-                            if (!manualQueue.includes(track.trackId)) {
-                                QueueManager.addToManualQueue(track.trackId);
-                            }
+                GenericTemplates.action(isPlaying ? Icons.PAUSE : Icons.PLAY, isPlaying ? "Pause" : "Play", album.id, async () => {
+                    const firstTrack = album.albumtracks[0];
+                    await AlbumActions.startTrackInAlbum(album, firstTrack.id, true);
+                }, ["duration", album.duration], [album.albumtracks.length === 0 ? "nonclickable" : "_", "secondary"]),
+                GenericTemplates.action(allTracksInQueue ? Icons.UNQUEUE : Icons.QUEUE, allTracksInQueue ? "Unqueue" : "Queue", album.id, () => {
+                    for (let track of album.albumtracks) {
+                        if (!manualQueue.includes(track.trackId)) {
+                            QueueManager.addToManualQueue(track.trackId);
                         }
-                    },
-                    [],
-                    [allTracksInQueue ? "audio-queueremove" : "audio-queueadd", "secondary"],
-                ),
-                GenericTemplates.action(
-                    Icons.PLAYLIST_ADD,
-                    "Add to playlist",
-                    album.id,
-                    async () => {
-                        await PlaylistActions.openAddToPlaylistModal(album, "album");
-                    },
-                    [],
-                    ["secondary"]
-                )
+                    }
+                }, [], [allTracksInQueue ? "audio-queueremove" : "audio-queueadd", "secondary"]),
+                GenericTemplates.action(Icons.PLAYLIST_ADD, "Add to playlist", album.id, async () => {
+                    await PlaylistActions.openAddToPlaylistModal(album, "album");
+                }, [], ["secondary"])
             ];
         }
 

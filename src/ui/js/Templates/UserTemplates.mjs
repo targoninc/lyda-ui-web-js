@@ -1,14 +1,14 @@
 import {create, nullElement, signal} from "https://fjs.targoninc.com/f.js";
 import {Util} from "../Classes/Util.mjs";
-import {TrackActions} from "../Actions/TrackActions.mjs";
+import {TrackActions} from "../Actions/TrackActions.ts";
 import {LydaCache} from "../Cache/LydaCache.mjs";
 import {TrackTemplates} from "./TrackTemplates.mjs";
 import {UserActions} from "../Actions/UserActions.mjs";
-import {GenericTemplates} from "./GenericTemplates.mjs";
+import {GenericTemplates} from "./GenericTemplates.ts";
 import {AlbumTemplates} from "./AlbumTemplates.mjs";
-import {Icons as Icons} from "../Enums/Icons.mjs";
+import {Icons as Icons} from "../Enums/Icons.js";
 import {Badges} from "../Enums/Badges.mjs";
-import {Links} from "../Enums/Links.mjs";
+import {Links} from "../Enums/Links.ts";
 import {PlaylistTemplates} from "./PlaylistTemplates.mjs";
 import {CustomText} from "../Classes/Helpers/CustomText.mjs";
 import {Permissions} from "../Enums/Permissions.mjs";

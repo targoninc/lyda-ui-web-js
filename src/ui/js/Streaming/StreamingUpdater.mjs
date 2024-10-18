@@ -1,6 +1,6 @@
 import {PlayManager} from "./PlayManager.mjs";
 import {Time} from "../Classes/Helpers/Time.mjs";
-import {Icons} from "../Enums/Icons.mjs";
+import {Icons} from "../Enums/Icons.js";
 import {LydaCache} from "../Cache/LydaCache.mjs";
 import {CacheItem} from "../Cache/CacheItem.mjs";
 import {QueueTemplates} from "../Templates/QueueTemplates.mjs";

@@ -1,7 +1,7 @@
-import {Api} from "./Api.mjs";
-import {Ui} from "./Ui.mjs";
+import {Api} from "./Api.ts";
+import {Ui} from "./Ui.ts";
 import {UserTemplates} from "../Templates/UserTemplates.mjs";
-import {GenericTemplates} from "../Templates/GenericTemplates.mjs";
+import {GenericTemplates} from "../Templates/GenericTemplates.ts";
 
 export class ProfilePage {
     static async addTabSectionAsync(element, user, selfUser, isOwnProfile) {

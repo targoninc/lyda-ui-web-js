@@ -1,14 +1,15 @@
 import {computedSignal, create, ifjs, signal} from "https://fjs.targoninc.com/f.js";
-import {FormTemplates} from "./FormTemplates.mjs";
-import {GenericTemplates} from "./GenericTemplates.mjs";
-import {Icons} from "../Enums/Icons.mjs";
+import {FormTemplates} from "./FormTemplates.ts";
+import {GenericTemplates} from "./GenericTemplates.ts";
+import {Icons} from "../Enums/Icons.ts";
 import {UserTemplates} from "./UserTemplates.mjs";
 import {Images} from "../Enums/Images.mjs";
-import {TrackActions} from "../Actions/TrackActions.mjs";
+import {TrackActions} from "../Actions/TrackActions.ts";
 import {Genres} from "../Enums/Genres.mjs";
 import {Util} from "../Classes/Util.mjs";
 import {AudioUpload} from "../Classes/AudioUpload.mjs";
-import {Ui} from "../Classes/Ui.mjs";
+import {Ui} from "../Classes/Ui.ts";
+import {DomNode, HtmlPropertyValue, Signal} from "../../fjsc/f2.ts";
 
 export class TrackEditTemplates {
     static getStateWithParentUpdate(key, value, parentState) {
@@ -269,7 +270,7 @@ export class TrackEditTemplates {
             ).build();
     }
 
-    static detailsSection(title, cssClass, children, open = true) {
+    static detailsSection(title: HtmlPropertyValue, cssClass: HtmlPropertyValue, children: DomNode[], open = true) {
         return create("details")
             .classes(cssClass, "flex-v")
             .children(
@@ -282,8 +283,8 @@ export class TrackEditTemplates {
             .build();
     }
 
-    static audioFile(canOverwriteTitle = false, parentState = null) {
-        return FormTemplates.fileField("Audio File", "Choose file", "audio-file", "audio/*", true, (fileName) => {
+    static audioFile(canOverwriteTitle = false, parentState: Signal<any>) {
+        return FormTemplates.fileField("Audio File", "Choose file", "audio-file", "audio/*", true, (fileName: string) => {
             if (canOverwriteTitle) {
                 if (fileName) {
                     const titleInput = document.querySelector("input#title");
@@ -299,8 +300,8 @@ export class TrackEditTemplates {
         });
     }
 
-    static coverFile(parentState) {
-        return FormTemplates.fileField("Cover File", "Choose file (.jpg,.jpeg,.png,.gif)", "cover-file", "jpg,jpeg,png,gif", false, (fileName) => {
+    static coverFile(parentState: Signal<any>) {
+        return FormTemplates.fileField("Cover File", "Choose file (.jpg,.jpeg,.png,.gif)", "cover-file", "jpg,jpeg,png,gif", false, (fileName: string) => {
             if (fileName) {
                 if (parentState) {
                     const safeName = fileName.replace(/\.[^/.]+$/, "");
@@ -310,7 +311,7 @@ export class TrackEditTemplates {
         });
     }
 
-    static imagePreview(name) {
+    static imagePreview(name: HtmlPropertyValue) {
         return create("img")
             .id(name + "-preview")
             .classes("image-preview", "hidden")
@@ -319,7 +320,7 @@ export class TrackEditTemplates {
 
     static termsOfService(checked = false, parentState = null) {
         const state = this.getStateWithParentUpdate("termsOfService", checked, parentState);
-        return FormTemplates.checkBoxField("Terms of Service", "agreement", "I have read and agree to the Terms of Service and Privacy Policy", state, true, v => {
+        return FormTemplates.checkBoxField("agreement", "I have read and agree to the Terms of Service and Privacy Policy", state, true, v => {
             state.value = v;
         });
     }
@@ -380,22 +381,16 @@ export class TrackEditTemplates {
     }
 
     static deleteTrackButton(trackId) {
-        return GenericTemplates.action(
-            Icons.DELETE,
-            "Delete",
-            trackId,
-            async (e) => {
-                await Ui.getConfirmationModal("Delete track", "Are you sure you want to delete this track?", "Yes", "No", TrackActions.deleteTrackFromElement.bind(null, e), () => {
-                }, Icons.WARNING);
-            },
-            [],
-            ["secondary", "negative"]
-        );
+        return GenericTemplates.action(Icons.DELETE, "Delete", trackId, async (e) => {
+            await Ui.getConfirmationModal("Delete track", "Are you sure you want to delete this track?", "Yes", "No", TrackActions.deleteTrackFromElement.bind(null, e), () => {
+            }, Icons.WARNING);
+        }, [], ["secondary", "negative"]);
     }
 
     static addLinkedUserButton(callback, classes = []) {
         return GenericTemplates.action("person_add", "Add User", "add_linked_user", () => {
-            Ui.getAddLinkedUserModal("Link a user", "Enter the username of the user you want to link", "", "Link", "Cancel", callback, () => {}, "person_add");
+            Ui.getAddLinkedUserModal("Link a user", "Enter the username of the user you want to link", "", "Link", "Cancel", callback, () => {
+            }, "person_add");
         }, [], classes);
     }
 

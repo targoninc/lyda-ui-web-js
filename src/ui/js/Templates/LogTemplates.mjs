@@ -1,6 +1,6 @@
 import {Time} from "../Classes/Helpers/Time.mjs";
 import {UserTemplates} from "./UserTemplates.mjs";
-import {GenericTemplates} from "./GenericTemplates.mjs";
+import {GenericTemplates} from "./GenericTemplates.ts";
 import {create} from "https://fjs.targoninc.com/f.js";
 import {Util} from "../Classes/Util.mjs";
 

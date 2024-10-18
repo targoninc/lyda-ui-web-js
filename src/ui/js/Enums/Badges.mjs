@@ -1,4 +1,4 @@
-import {Icons} from "./Icons.mjs";
+import {Icons} from "./Icons.js";
 
 export class Badges {
     static BADGE(name) {

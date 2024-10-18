@@ -1,10 +1,10 @@
 import {create} from "https://fjs.targoninc.com/f.js";
-import {Icons} from "../Enums/Icons.mjs";
-import {TrackActions} from "../Actions/TrackActions.mjs";
+import {Icons} from "../Enums/Icons.js";
+import {TrackActions} from "../Actions/TrackActions.ts";
 import {Time} from "../Classes/Helpers/Time.mjs";
 import {QueueManager} from "../Streaming/QueueManager.mjs";
 import {UserActions} from "../Actions/UserActions.mjs";
-import {GenericTemplates} from "./GenericTemplates.mjs";
+import {GenericTemplates} from "./GenericTemplates.ts";
 import {DragActions} from "../Actions/DragActions.mjs";
 import {Util} from "../Classes/Util.mjs";
 

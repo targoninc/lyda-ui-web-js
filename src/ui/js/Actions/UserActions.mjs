@@ -1,9 +1,9 @@
-import {Api} from "../Classes/Api.mjs";
+import {Api} from "../Classes/Api.ts";
 import {getUserSettingValue, updateUserSetting, Util} from "../Classes/Util.mjs";
-import {Ui} from "../Classes/Ui.mjs";
+import {Ui} from "../Classes/Ui.ts";
 import {LydaCache} from "../Cache/LydaCache.mjs";
 import {CacheItem} from "../Cache/CacheItem.mjs";
-import {Icons} from "../Enums/Icons.mjs";
+import {Icons} from "../Enums/Icons.js";
 import {NavTemplates} from "../Templates/NavTemplates.mjs";
 import {Themes} from "../Enums/Themes.mjs";
 import {UserSettings} from "../Enums/UserSettings.mjs";

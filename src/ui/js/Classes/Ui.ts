@@ -1,9 +1,9 @@
 import {userHasSettingValue, Util} from "./Util.mjs";
 import {UrlHandler} from "./UrlHandler.mjs";
-import {Api} from "./Api.mjs";
+import {Api} from "./Api.ts";
 import {LydaCache} from "../Cache/LydaCache.mjs";
 import {NavTemplates} from "../Templates/NavTemplates.mjs";
-import {GenericTemplates} from "../Templates/GenericTemplates.mjs";
+import {GenericTemplates} from "../Templates/GenericTemplates.ts";
 import {CacheItem} from "../Cache/CacheItem.mjs";
 import {UserActions} from "../Actions/UserActions.mjs";
 

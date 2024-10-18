@@ -1,7 +1,7 @@
-import {Api} from "../Classes/Api.mjs";
+import {Api} from "../Classes/Api.ts";
 import {SubscriptionTemplates} from "../Templates/SubscriptionTemplates.mjs";
 import {Util} from "../Classes/Util.mjs";
-import {Ui} from "../Classes/Ui.mjs";
+import {Ui} from "../Classes/Ui.ts";
 
 export class SubscriptionActions {
     static clientId = "AUw6bB-HQTIfqy5fhk-s5wZOaEQdaCIjRnCyIC3WDCRxVKc9Qvz1c6xLw7etCit1CD1qSHY5Pv-3xgQN";

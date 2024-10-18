@@ -4,26 +4,26 @@ import {PlayManager} from "./Streaming/PlayManager.mjs";
 import {CacheItem} from "./Cache/CacheItem.mjs";
 import {UserTemplates} from "./Templates/UserTemplates.mjs";
 import {SettingsTemplates} from "./Templates/SettingsTemplates.mjs";
-import {TrackEditTemplates} from "./Templates/TrackEditTemplates.mjs";
+import {TrackEditTemplates} from "./Templates/TrackEditTemplates.ts";
 import {TrackTemplates} from "./Templates/TrackTemplates.mjs";
 import {ProfilePage} from "./Classes/ProfilePage.mjs";
 import {AlbumTemplates} from "./Templates/AlbumTemplates.mjs";
 import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {PlaylistTemplates} from "./Templates/PlaylistTemplates.mjs";
 import {LibraryActions} from "./Actions/LibraryActions.mjs";
-import {Api} from "./Classes/Api.mjs";
+import {Api} from "./Classes/Api.ts";
 import {StatisticTemplates} from "./Templates/StatisticTemplates.mjs";
 import {LogTemplates} from "./Templates/LogTemplates.mjs";
 import {Permissions} from "./Enums/Permissions.mjs";
 import {LydaApi} from "./Classes/LydaApi.mjs";
-import {TrackActions} from "./Actions/TrackActions.mjs";
+import {TrackActions} from "./Actions/TrackActions.ts";
 import {CommentActions} from "./Actions/CommentActions.mjs";
 import {CommentTemplates} from "./Templates/CommentTemplates.mjs";
 import {SubscriptionTemplates} from "./Templates/SubscriptionTemplates.mjs";
 import {SubscriptionActions} from "./Actions/SubscriptionActions.mjs";
 import {Util} from "./Classes/Util.mjs";
 import {StatisticsWrapper} from "./Classes/StatisticsWrapper.mjs";
-import {Ui} from "./Classes/Ui.mjs";
+import {Ui} from "./Classes/Ui.ts";
 
 export class Lyda {
     static async getEndpointData(config, endpoint, params = "", refreshSessionRetry = false) {

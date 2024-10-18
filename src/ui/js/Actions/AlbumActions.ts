@@ -1,8 +1,8 @@
-import {GenericTemplates} from "../Templates/GenericTemplates.mjs";
+import {GenericTemplates} from "../Templates/GenericTemplates.ts";
 import {AlbumTemplates} from "../Templates/AlbumTemplates.mjs";
-import {Api} from "../Classes/Api.mjs";
+import {Api} from "../Classes/Api.ts";
 import {Util} from "../Classes/Util.mjs";
-import {Ui} from "../Classes/Ui.mjs";
+import {Ui} from "../Classes/Ui.ts";
 import {PlayManager} from "../Streaming/PlayManager.mjs";
 import {QueueManager} from "../Streaming/QueueManager.mjs";
 

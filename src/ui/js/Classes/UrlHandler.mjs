@@ -1,4 +1,4 @@
-import {Ui} from "./Ui.mjs";
+import {Ui} from "./Ui.ts";
 
 export class UrlHandler {
     /**

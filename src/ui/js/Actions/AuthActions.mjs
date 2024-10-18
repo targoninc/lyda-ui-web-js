@@ -1,8 +1,8 @@
-import {Api} from "../Classes/Api.mjs";
+import {Api} from "../Classes/Api.ts";
 import {Util} from "../Classes/Util.mjs";
-import {Ui} from "../Classes/Ui.mjs";
+import {Ui} from "../Classes/Ui.ts";
 import {LydaCache} from "../Cache/LydaCache.mjs";
-import {Icons} from "../Enums/Icons.mjs";
+import {Icons} from "../Enums/Icons.js";
 import {PlayManager} from "../Streaming/PlayManager.mjs";
 
 export class AuthActions {

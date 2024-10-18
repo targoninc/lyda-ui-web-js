@@ -1,10 +1,10 @@
 import {create, signal} from "https://fjs.targoninc.com/f.js";
-import {Icons} from "../Enums/Icons.mjs";
+import {Icons} from "../Enums/Icons.js";
 import {UserTemplates} from "./UserTemplates.mjs";
 import {UserActions} from "../Actions/UserActions.mjs";
 import {NavActions} from "../Actions/NavActions.mjs";
-import {GenericTemplates} from "./GenericTemplates.mjs";
-import {Links} from "../Enums/Links.mjs";
+import {GenericTemplates} from "./GenericTemplates.ts";
+import {Links} from "../Enums/Links.ts";
 import {SearchTemplates} from "./SearchTemplates.mjs";
 import {NotificationParser} from "../Classes/Helpers/NotificationParser.mjs";
 import {AuthActions} from "../Actions/AuthActions.mjs";

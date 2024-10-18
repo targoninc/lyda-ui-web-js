@@ -3,13 +3,13 @@ import {BoxPlotChart} from "https://cdn.jsdelivr.net/npm/@sgratzl/chartjs-chart-
 import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {Colors} from "../Classes/Colors.mjs";
 import {ChartOptions} from "../Classes/ChartOptions.mjs";
-import {GenericTemplates} from "./GenericTemplates.mjs";
-import {Icons} from "../Enums/Icons.mjs";
-import {Api} from "../Classes/Api.mjs";
+import {GenericTemplates} from "./GenericTemplates.ts";
+import {Icons} from "../Enums/Icons.js";
+import {Api} from "../Classes/Api.ts";
 import {Num} from "../Classes/Helpers/Num.mjs";
 import {Permissions} from "../Enums/Permissions.mjs";
-import {FormTemplates} from "./FormTemplates.mjs";
-import {Ui} from "../Classes/Ui.mjs";
+import {FormTemplates} from "./FormTemplates.ts";
+import {Ui} from "../Classes/Ui.ts";
 
 Chart.register(...registerables);
 
@@ -175,7 +175,7 @@ export class StatisticTemplates {
         const selectedState = signal(months[0]);
 
         return [
-            FormTemplates.dropDownField("Month", "month", months, selectedState, true, (value) => {
+            FormTemplates.dropDownField("Month", months, selectedState, true, (value) => {
                 selectedState.value = value;
             }),
             GenericTemplates.action(Icons.CALCULATE, "Calculate royalties", "calculateRoyalties", async () => {
@@ -216,7 +216,8 @@ export class StatisticTemplates {
                     }
                     Ui.notify("PayPal mail set", "success");
                     paypalMailExistsState.value = true;
-                }, () => {}, Icons.PAYPAL);
+                }, () => {
+                }, Icons.PAYPAL);
             }, [], [invertVisibilityClass, "secondary"]));
             actions.push(GenericTemplates.action(Icons.PAYPAL, "Remove PayPal mail", "removePaypalMail", async () => {
                 await Ui.getConfirmationModal("Remove PayPal mail", "Are you sure you want to remove your paypal mail? You'll have to add it again manually.", "Yes", "No", async () => {
@@ -227,7 +228,8 @@ export class StatisticTemplates {
                     }
                     Ui.notify("PayPal mail removed");
                     paypalMailExistsState.value = false;
-                }, () => {}, Icons.WARNING);
+                }, () => {
+                }, Icons.WARNING);
             }, [], [visibilityClass, "secondary"]));
             actions.push(GenericTemplates.action(Icons.PAY, "Request payment", "requestPayment", async () => {
                 const res = await Api.postAsync(Api.endpoints.royalties.requestPayment);

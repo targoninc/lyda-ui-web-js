@@ -1,7 +1,7 @@
 import {StatisticTemplates} from "../Templates/StatisticTemplates.mjs";
 import {signal} from "https://fjs.targoninc.com/f.js";
-import {Api} from "./Api.mjs";
-import {Ui} from "./Ui.mjs";
+import {Api} from "./Api.ts";
+import {Ui} from "./Ui.ts";
 import {Num} from "./Helpers/Num.mjs";
 
 export class StatisticsWrapper {

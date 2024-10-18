@@ -1,6 +1,6 @@
-import {Api} from "./Api.mjs";
+import {Api} from "./Api.ts";
 import {Util} from "./Util.mjs";
-import {Ui} from "./Ui.mjs";
+import {Ui} from "./Ui.ts";
 
 export class AudioUpload {
     constructor(e, state) {

@@ -1,12 +1,12 @@
 import {LydaCache} from "../Cache/LydaCache.mjs";
-import {Api} from "../Classes/Api.mjs";
+import {Api} from "../Classes/Api.ts";
 import {CacheItem} from "../Cache/CacheItem.mjs";
 import {StreamingUpdater} from "./StreamingUpdater.mjs";
 import {QueueManager} from "./QueueManager.mjs";
-import {TrackActions} from "../Actions/TrackActions.mjs";
+import {TrackActions} from "../Actions/TrackActions.ts";
 import {StreamClient} from "./StreamClient.mjs";
 import {userHasSettingValue, Util} from "../Classes/Util.mjs";
-import {Ui} from "../Classes/Ui.mjs";
+import {Ui} from "../Classes/Ui.ts";
 
 export class PlayManager {
     static async playCheck(track) {

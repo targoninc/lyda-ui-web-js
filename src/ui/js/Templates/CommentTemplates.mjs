@@ -1,9 +1,9 @@
 import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {StatisticsTemplates} from "./StatisticsTemplates.mjs";
-import {GenericTemplates} from "./GenericTemplates.mjs";
-import {Icons} from "../Enums/Icons.mjs";
+import {GenericTemplates} from "./GenericTemplates.ts";
+import {Icons} from "../Enums/Icons.js";
 import {CommentActions} from "../Actions/CommentActions.mjs";
-import {TrackActions} from "../Actions/TrackActions.mjs";
+import {TrackActions} from "../Actions/TrackActions.ts";
 import {UserTemplates} from "./UserTemplates.mjs";
 import {Time} from "../Classes/Helpers/Time.mjs";
 import {Images} from "../Enums/Images.mjs";

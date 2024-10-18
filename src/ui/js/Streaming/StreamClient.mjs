@@ -1,4 +1,4 @@
-import {Api} from "../Classes/Api.mjs";
+import {Api} from "../Classes/Api.ts";
 import {LydaCache} from "../Cache/LydaCache.mjs";
 import {PlayManager} from "./PlayManager.mjs";
 import {CacheItem} from "../Cache/CacheItem.mjs";

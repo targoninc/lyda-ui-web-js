@@ -1,18 +1,19 @@
-import {computedSignal, create, ifjs, signal, signalMap} from "https://fjs.targoninc.com/f.js";
-import {Icons} from "../Enums/Icons.mjs";
-import {AlbumActions} from "../Actions/AlbumActions.mjs";
-import {PlaylistActions} from "../Actions/PlaylistActions.mjs";
-import {Links} from "../Enums/Links.mjs";
-import {Api} from "../Classes/Api.mjs";
-import {TrackActions} from "../Actions/TrackActions.mjs";
+import {Icons} from "../Enums/Icons.ts";
+import {AlbumActions} from "../Actions/AlbumActions.ts";
+import {PlaylistActions} from "../Actions/PlaylistActions.ts";
+import {Links} from "../Enums/Links.ts";
+import {Api} from "../Classes/Api.ts";
+import {TrackActions} from "../Actions/TrackActions.ts";
+import {create, HtmlPropertyValue, ifjs, StringOrSignal} from "../../fjsc/f2.ts";
 
 export class GenericTemplates {
-    static buttonWithIcon(text, icon, alt, callback = () => {
+    static buttonWithIcon(text: HtmlPropertyValue, icon: HtmlPropertyValue, alt: HtmlPropertyValue, callback = () => {
     }, extraClasses = [], id = null) {
         return create("button")
             .classes(...extraClasses)
             .id(id)
             .onclick(callback)
+            .alt(alt)
             .children(
                 GenericTemplates.icon(icon),
                 create("span")
@@ -21,7 +22,7 @@ export class GenericTemplates {
             ).build()
     }
 
-    static icon(icon, adaptive = false) {
+    static icon(icon: HtmlPropertyValue, adaptive = false) {
         const isMaterial = icon && icon.includes && !icon.includes(window.location.origin);
         const iconClass = adaptive ? "adaptive-icon" : "inline-icon";
 
@@ -38,7 +39,7 @@ export class GenericTemplates {
             .build();
     }
 
-    static cardLabel(text, icon = null, classes = []) {
+    static cardLabel(text: HtmlPropertyValue, icon: HtmlPropertyValue = null, classes = []) {
         return create("div")
             .classes("card-label", "flex", "small-gap", ...classes)
             .children(
@@ -49,7 +50,7 @@ export class GenericTemplates {
             ).build();
     }
 
-    static toggle(text, id, callback = () => {
+    static toggle(text: HtmlPropertyValue, id: HtmlPropertyValue, callback = () => {
     }, extraClasses = [], checked = false) {
         return create("label")
             .classes("flex", ...extraClasses)
@@ -76,8 +77,8 @@ export class GenericTemplates {
             ).build();
     }
 
-    static button(text, callback = () => {
-    }, extraClasses = [], id = null) {
+    static button(text: HtmlPropertyValue, callback = () => {
+    }, extraClasses = [], id: HtmlPropertyValue|null = null) {
         return create("button")
             .classes(...extraClasses)
             .id(id)
@@ -93,7 +94,7 @@ export class GenericTemplates {
             .build();
     }
 
-    static title(title, icons = []) {
+    static title(title: HtmlPropertyValue, icons = []) {
         return create("div")
             .classes("flex", "nopointer")
             .children(
@@ -105,21 +106,21 @@ export class GenericTemplates {
             ).build();
     }
 
-    static text(text, extraClasses = []) {
+    static text(text: HtmlPropertyValue, extraClasses = []) {
         return create("span")
             .classes("text", ...extraClasses)
             .text(text)
             .build();
     }
 
-    static textWithHtml(text, extraClasses = []) {
+    static textWithHtml(text: HtmlPropertyValue, extraClasses = []) {
         return create("span")
             .classes("text", "notification-text", ...extraClasses)
             .html(text)
             .build();
     }
 
-    static dragTargetInList(dragStopCallback = () => {}, id = "", dropEffect = "move") {
+    static dragTargetInList(dragStopCallback = (v) => {}, id = "", dropEffect = "move") {
         return create("div")
             .classes("dropzone", "fullWidth", "relative")
             .attributes("reference_id", id)
@@ -131,11 +132,11 @@ export class GenericTemplates {
                     .classes("dragTarget", "fullWidth", "hidden")
                     .ondragenter(e => {
                         e.preventDefault();
-                        e.target.previousSibling.classList.add("dragover");
+                        e.target!.previousSibling.classList.add("dragover");
                     })
                     .ondragleave(e => {
                         e.preventDefault();
-                        e.target.previousSibling.classList.remove("dragover");
+                        e.target!.previousSibling.classList.remove("dragover");
                     })
                     .ondragover(e => {
                         e.preventDefault();
@@ -143,7 +144,7 @@ export class GenericTemplates {
                     })
                     .ondrop(e => {
                         e.preventDefault();
-                        e.target.previousSibling.classList.remove("dragover");
+                        e.target!.previousSibling.classList.remove("dragover");
                         const data = e.dataTransfer.getData("text/plain");
                         dragStopCallback(JSON.parse(data));
                     })
@@ -151,7 +152,7 @@ export class GenericTemplates {
             ).build();
     }
 
-    static action(icon, text, id, onclick, attributes = [], classes = [], link = null) {
+    static action(icon: HtmlPropertyValue, text: HtmlPropertyValue, id: HtmlPropertyValue, onclick: (e: any) => void, attributes = [], classes: StringOrSignal[] = [], link: StringOrSignal = null) {
         return create(link ? "a" : "div")
             .classes("flex", "small-gap", "clickable", "fakeButton", "padded-inline", "rounded")
             .children(
@@ -170,16 +171,16 @@ export class GenericTemplates {
     }
 
     static newAlbumButton(classes = []) {
-        return GenericTemplates.action(Icons.ALBUM_ADD, "New album", "new_album", async e => {
+        return GenericTemplates.action(Icons.ALBUM_ADD, "New album", "new_album", (e: any) => {
             e.preventDefault();
-            await AlbumActions.openNewAlbumModal();
+            AlbumActions.openNewAlbumModal().then();
         }, [], ["positive", ...classes]);
     }
 
     static newPlaylistButton(classes = []) {
-        return GenericTemplates.action(Icons.PLAYLIST_ADD, "New playlist", "new_playlist", async e => {
+        return GenericTemplates.action(Icons.PLAYLIST_ADD, "New playlist", "new_playlist", e => {
             e.preventDefault();
-            await PlaylistActions.openNewPlaylistModal();
+            PlaylistActions.openNewPlaylistModal().then();
         }, [], ["positive", ...classes]);
     }
 
@@ -323,14 +324,14 @@ export class GenericTemplates {
             .text(text)
             .build();
     };
-    static fileInput = (id, name, accept, text, required = false, changeCallback = () => {}) => {
+    static fileInput = (id: HtmlPropertyValue, name: HtmlPropertyValue, accept: HtmlPropertyValue, text: HtmlPropertyValue, required = false, changeCallback = (v) => {}) => {
         return create("div")
             .children(
                 create("input")
                     .type("button")
                     .classes("full")
                     .value(text)
-                    .onclick(e => {
+                    .onclick((e) => {
                         e.target.nextElementSibling.click();
                         e.target.value = "Choosing...";
                     })
@@ -371,7 +372,7 @@ export class GenericTemplates {
             )
             .build();
     };
-    static checkbox = (name, checked = false, text = "", required = false, onchange = () => {}) => {
+    static checkbox = (name: HtmlPropertyValue, checked = false, text: HtmlPropertyValue = "", required = false, onchange = () => {}) => {
         return create("label")
             .classes("checkbox-container")
             .text(text)

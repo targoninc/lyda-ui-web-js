@@ -1,7 +1,7 @@
 import {create, signal} from "https://fjs.targoninc.com/f.js";
-import {AlbumActions} from "../Actions/AlbumActions.mjs";
-import {PlaylistActions} from "../Actions/PlaylistActions.mjs";
-import {GenericTemplates} from "./GenericTemplates.mjs";
+import {AlbumActions} from "../Actions/AlbumActions.ts";
+import {PlaylistActions} from "../Actions/PlaylistActions.ts";
+import {GenericTemplates} from "./GenericTemplates.ts";
 import {Util} from "../Classes/Util.mjs";
 
 export class MenuTemplates {

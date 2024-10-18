@@ -1,19 +1,19 @@
 import {computedSignal, create, signal} from "https://fjs.targoninc.com/f.js";
-import {Icons} from "../Enums/Icons.mjs";
-import {GenericTemplates} from "./GenericTemplates.mjs";
-import {PlaylistActions} from "../Actions/PlaylistActions.mjs";
-import {FormTemplates} from "./FormTemplates.mjs";
+import {Icons} from "../Enums/Icons.js";
+import {GenericTemplates} from "./GenericTemplates.ts";
+import {PlaylistActions} from "../Actions/PlaylistActions.ts";
+import {FormTemplates} from "./FormTemplates.ts";
 import {Form} from "../Classes/Helpers/Form.mjs";
 import {Time} from "../Classes/Helpers/Time.mjs";
 import {TrackTemplates} from "./TrackTemplates.mjs";
 import {UserTemplates} from "./UserTemplates.mjs";
-import {TrackActions} from "../Actions/TrackActions.mjs";
+import {TrackActions} from "../Actions/TrackActions.ts";
 import {QueueManager} from "../Streaming/QueueManager.mjs";
 import {PlayManager} from "../Streaming/PlayManager.mjs";
 import {StatisticsTemplates} from "./StatisticsTemplates.mjs";
 import {Images} from "../Enums/Images.mjs";
 import {Util} from "../Classes/Util.mjs";
-import {Ui} from "../Classes/Ui.mjs";
+import {Ui} from "../Classes/Ui.ts";
 
 export class PlaylistTemplates {
     static async addTrackToPlaylistModal(track, playlists) {
@@ -340,17 +340,10 @@ export class PlaylistTemplates {
         const editActions = [];
         if (data.canEdit) {
             editActions.push(
-                GenericTemplates.action(
-                    Icons.DELETE,
-                    "Delete",
-                    playlist.id,
-                    async (e) => {
-                        await Ui.getConfirmationModal("Delete playlist", "Are you sure you want to delete this playlist?", "Yes", "No", PlaylistActions.deletePlaylistFromElement.bind(null, e), () => {
-                        }, Icons.WARNING);
-                    },
-                    [],
-                    ["secondary", "negative"]
-                )
+                GenericTemplates.action(Icons.DELETE, "Delete", playlist.id, async (e) => {
+                    await Ui.getConfirmationModal("Delete playlist", "Are you sure you want to delete this playlist?", "Yes", "No", PlaylistActions.deletePlaylistFromElement.bind(null, e), () => {
+                    }, Icons.WARNING);
+                }, [], ["secondary", "negative"])
             );
         }
 
@@ -435,31 +428,17 @@ export class PlaylistTemplates {
         let actions = [];
         if (user) {
             actions = [
-                GenericTemplates.action(
-                    isPlaying ? Icons.PAUSE : Icons.PLAY,
-                    isPlaying ? "Pause" : "Play",
-                    playlist.id,
-                    async () => {
-                        const firstTrack = playlist.playlisttracks[0];
-                        await PlaylistActions.startTrackInPlaylist(playlist, firstTrack.id, true);
-                    },
-                    ["duration", playlist.duration],
-                    [playlist.playlisttracks.length === 0 ? "nonclickable" : "_", "secondary"]
-                ),
-                GenericTemplates.action(
-                    allTracksInQueue ? Icons.UNQUEUE : Icons.QUEUE,
-                    allTracksInQueue ? "Unqueue" : "Queue",
-                    playlist.id,
-                    () => {
-                        for (let track of playlist.albumtracks) {
-                            if (!manualQueue.includes(track.trackId)) {
-                                QueueManager.addToManualQueue(track.trackId);
-                            }
+                GenericTemplates.action(isPlaying ? Icons.PAUSE : Icons.PLAY, isPlaying ? "Pause" : "Play", playlist.id, async () => {
+                    const firstTrack = playlist.playlisttracks[0];
+                    await PlaylistActions.startTrackInPlaylist(playlist, firstTrack.id, true);
+                }, ["duration", playlist.duration], [playlist.playlisttracks.length === 0 ? "nonclickable" : "_", "secondary"]),
+                GenericTemplates.action(allTracksInQueue ? Icons.UNQUEUE : Icons.QUEUE, allTracksInQueue ? "Unqueue" : "Queue", playlist.id, () => {
+                    for (let track of playlist.albumtracks) {
+                        if (!manualQueue.includes(track.trackId)) {
+                            QueueManager.addToManualQueue(track.trackId);
                         }
-                    },
-                    [],
-                    [inQueue ? "audio-queueremove" : "audio-queueadd", "secondary"]
-                )
+                    }
+                }, [], [inQueue ? "audio-queueremove" : "audio-queueadd", "secondary"])
             ];
         }
 

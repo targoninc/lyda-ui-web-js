@@ -1,7 +1,7 @@
 import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {UserActions} from "../Actions/UserActions.mjs";
 import {Themes} from "../Enums/Themes.mjs";
-import {GenericTemplates} from "./GenericTemplates.mjs";
+import {GenericTemplates} from "./GenericTemplates.ts";
 import {getUserSettingValue} from "../Classes/Util.mjs";
 import {UserSettings} from "../Enums/UserSettings.mjs";
 

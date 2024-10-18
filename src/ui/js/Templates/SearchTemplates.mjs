@@ -1,6 +1,6 @@
 import {create, signal} from "https://fjs.targoninc.com/f.js";
-import {Api} from "../Classes/Api.mjs";
-import {Ui} from "../Classes/Ui.mjs";
+import {Api} from "../Classes/Api.ts";
+import {Ui} from "../Classes/Ui.ts";
 
 export class SearchTemplates {
     static search() {

@@ -1,11 +1,11 @@
 import {create, signal} from "https://fjs.targoninc.com/f.js";
-import {Icons} from "../Enums/Icons.mjs";
+import {Icons} from "../Enums/Icons.js";
 import {AuthApi} from "../Classes/AuthApi.mjs";
-import {GenericTemplates} from "./GenericTemplates.mjs";
-import {FormTemplates} from "./FormTemplates.mjs";
+import {GenericTemplates} from "./GenericTemplates.ts";
+import {FormTemplates} from "./FormTemplates.ts";
 import {UserValidator} from "../Classes/Validators/UserValidator.mjs";
 import {finalizeLogin} from "../Classes/Util.mjs";
-import {Ui} from "../Classes/Ui.mjs";
+import {Ui} from "../Classes/Ui.ts";
 
 export class LandingPageTemplates {
     static newLandingPage() {
@@ -324,7 +324,7 @@ export class LandingPageTemplates {
                             };
                         }, false, () => {
                         }, ["auth-input", "flex-grow"]),
-                        FormTemplates.checkBoxField("I agree to the Terms of Service & Privacy Policy", "tos-checkbox", "I agree to the Terms of Service & Privacy Policy", false, true),
+                        FormTemplates.checkBoxField("tos-checkbox", "I agree to the Terms of Service & Privacy Policy", false, true),
                         GenericTemplates.inlineLink("https://targoninc.com/tos", "Read the Terms of Service / Privacy Policy"),
                         GenericTemplates.action(Icons.RIGHT, "Register", "registerTrigger", () => {
                             continueRegistration();

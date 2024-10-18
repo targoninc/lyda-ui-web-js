@@ -1,4 +1,4 @@
-import {Api} from "../Classes/Api.mjs";
+import {Api} from "../Classes/Api.ts";
 
 export class QueueActions {
     static async getNewAutoQueueTracks() {

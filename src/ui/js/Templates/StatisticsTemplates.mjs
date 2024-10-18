@@ -1,9 +1,9 @@
-import {Icons} from "../Enums/Icons.mjs";
-import {TrackActions} from "../Actions/TrackActions.mjs";
+import {Icons} from "../Enums/Icons.js";
+import {TrackActions} from "../Actions/TrackActions.ts";
 import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {UserTemplates} from "./UserTemplates.mjs";
-import {AlbumActions} from "../Actions/AlbumActions.mjs";
-import {PlaylistActions} from "../Actions/PlaylistActions.mjs";
+import {AlbumActions} from "../Actions/AlbumActions.ts";
+import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {Images} from "../Enums/Images.mjs";
 import {Util} from "../Classes/Util.mjs";
 

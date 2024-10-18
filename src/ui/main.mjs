@@ -5,11 +5,14 @@ import {LydaCache} from "./js/Cache/LydaCache.mjs";
 import {PlayManager} from "./js/Streaming/PlayManager.mjs";
 import {Lyda} from "./js/lyda.mjs";
 import {UiActions} from "./js/Actions/UiActions.mjs";
-import {Ui} from "./js/Classes/Ui.mjs";
+import {Ui} from "./js/Classes/Ui.ts";
 import {Util} from "./js/Classes/Util.mjs";
-import {routes} from "./js/routes.mjs";
+import {routes} from "./js/routes";
+import {GenericTemplates} from "./js/Templates/GenericTemplates.ts";
 
 LydaCache.clear();
+let pageContainer = document.querySelector(".page-container");
+pageContainer.appendChild(GenericTemplates.loadingSpinner());
 
 window.router = new Router(routes, async (route, params) => {
     const page = route.path.replace("/", "");
@@ -17,7 +20,6 @@ window.router = new Router(routes, async (route, params) => {
 
     await Ui.windowResize();
 
-    let pageContainer = document.querySelector(".page-container");
     const user = await Util.getUserAsync();
     pageContainer.innerHTML = "";
     let template = PageTemplates.mapping[page]();
