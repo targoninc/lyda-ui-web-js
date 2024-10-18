@@ -1,11 +1,16 @@
 import {Api} from "../Classes/Api.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
-import {PlayManager} from "./PlayManager.mjs";
+import {PlayManager} from "./PlayManager.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {Util} from "../Classes/Util.ts";
 
 export class StreamClient {
-    constructor(id) {
+    id: number;
+    audio: HTMLAudioElement;
+    duration: number;
+    playing: boolean;
+
+    constructor(id: number) {
         this.id = id;
         const src = `${Api.endpoints.tracks.audio}?id=${this.id}`;
         this.audio = new Audio(src);
@@ -37,7 +42,7 @@ export class StreamClient {
         await this.audio.pause();
     }
 
-    scrubTo(time, relative = true) {
+    scrubTo(time: number, relative = true) {
         //await this.stopAsync();
         this.audio.currentTime = time * (relative ? this.audio.duration : 1);
         //await this.startAsync();
@@ -51,7 +56,7 @@ export class StreamClient {
         return this.audio.volume;
     }
 
-    setVolume(volume) {
+    setVolume(volume: number) {
         this.audio.volume = volume;
     }
 

@@ -1,4 +1,4 @@
-import {PlayManager} from "../Streaming/PlayManager.mjs";
+import {PlayManager} from "../Streaming/PlayManager.ts";
 import {UiActions} from "../Actions/UiActions.ts";
 import {AuthActions} from "../Actions/AuthActions.ts";
 

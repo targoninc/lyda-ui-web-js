@@ -4,6 +4,7 @@
     "build-web": "bun build ./src/ui/main.mjs --outdir ./out --sourcemap=linked --minify --watch",
     "start": "npm run build && node dist/server.js",
     "start-bun": "bun --watch ./src/server.ts",
+    "fetch-submodules": "git submodule update --init",
     "update-submodules": "git submodule update --remote --merge"
   },
   "devDependencies": {

@@ -3,8 +3,8 @@ import {AlbumTemplates} from "../Templates/AlbumTemplates.mjs";
 import {Api} from "../Classes/Api.ts";
 import {Util} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
-import {PlayManager} from "../Streaming/PlayManager.mjs";
-import {QueueManager} from "../Streaming/QueueManager.mjs";
+import {PlayManager} from "../Streaming/PlayManager.ts";
+import {QueueManager} from "../Streaming/QueueManager.ts";
 
 export class AlbumActions {
     static async deleteAlbumFromElement(e) {

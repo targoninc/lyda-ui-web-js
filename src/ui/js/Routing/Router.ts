@@ -1,7 +1,11 @@
 export class Router {
     currentRoute = null;
+    routes: any[];
+    preRouteChange: Function = () => {};
+    postRouteChange: Function = () => {};
+    onNoRouteFound: Function = () => {};
 
-    constructor(routes, preRouteChange = null, postRouteChange = null, onNoRouteFound = () => {}) {
+    constructor(routes: any[], preRouteChange = () => {}, postRouteChange = () => {}, onNoRouteFound = () => {}) {
         this.routes = routes;
         this.preRouteChange = preRouteChange;
         this.postRouteChange = postRouteChange;
@@ -16,7 +20,7 @@ export class Router {
 
     async handleRouteChange() {
         const path = window.location.pathname.substring(1);
-        const route = this.routes.find(r => path.startsWith(r.path) || (r.aliases && r.aliases.some(a => path.startsWith(a))));
+        const route = this.routes.find(r => path.startsWith(r.path) || (r.aliases && r.aliases.some((a: string) => path.startsWith(a))));
         this.currentRoute = route;
         if (route) {
             const params = this.getParams(path, route);
@@ -28,9 +32,11 @@ export class Router {
         }
     }
 
-    getParams(fullPath, route) {
+    getParams(fullPath: string, route: any) {
         const path = fullPath.split("/").filter(p => p !== "");
-        const params = {};
+        const params: {
+            [key: string]: string;
+        } = {};
         for (let i = 0; i < path.length; i++) {
             params["path_" + i] = path[i];
         }
@@ -46,7 +52,7 @@ export class Router {
         return params;
     }
 
-    async navigate(path) {
+    async navigate(path: string) {
         if (!path.startsWith("/")) {
             path = "/" + path;
         }

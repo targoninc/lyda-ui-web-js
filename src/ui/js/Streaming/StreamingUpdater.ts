@@ -1,10 +1,10 @@
-import {PlayManager} from "./PlayManager.mjs";
+import {PlayManager} from "./PlayManager.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {Icons} from "../Enums/Icons.js";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {QueueTemplates} from "../Templates/QueueTemplates.mjs";
-import {QueueManager} from "./QueueManager.mjs";
+import {QueueManager} from "./QueueManager.ts";
 import {PlayerTemplates} from "../Templates/PlayerTemplates.mjs";
 import {Util} from "../Classes/Util.ts";
 

@@ -1,6 +1,6 @@
-import {StreamingUpdater} from "./StreamingUpdater.mjs";
+import {StreamingUpdater} from "./StreamingUpdater.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
-import {PlayManager} from "./PlayManager.mjs";
+import {PlayManager} from "./PlayManager.ts";
 import {QueueActions} from "../Actions/QueueActions.ts";
 
 export class QueueManager {

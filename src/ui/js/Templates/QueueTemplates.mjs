@@ -2,7 +2,7 @@ import {create} from "https://fjs.targoninc.com/f.js";
 import {Icons} from "../Enums/Icons.js";
 import {TrackActions} from "../Actions/TrackActions.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
-import {QueueManager} from "../Streaming/QueueManager.mjs";
+import {QueueManager} from "../Streaming/QueueManager.ts";
 import {UserActions} from "../Actions/UserActions.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {DragActions} from "../Actions/DragActions.ts";

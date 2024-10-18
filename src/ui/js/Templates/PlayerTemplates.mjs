@@ -1,9 +1,9 @@
-import {PlayManager} from "../Streaming/PlayManager.mjs";
-import {StreamingUpdater} from "../Streaming/StreamingUpdater.mjs";
+import {PlayManager} from "../Streaming/PlayManager.ts";
+import {StreamingUpdater} from "../Streaming/StreamingUpdater.ts";
 import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {Icons} from "../Enums/Icons.js";
 import {Time} from "../Classes/Helpers/Time.ts";
-import {QueueManager} from "../Streaming/QueueManager.mjs";
+import {QueueManager} from "../Streaming/QueueManager.ts";
 import {Images} from "../Enums/Images.ts";
 import {QueueTemplates} from "./QueueTemplates.mjs";
 import {AlbumActions} from "../Actions/AlbumActions.ts";

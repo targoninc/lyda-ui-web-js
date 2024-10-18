@@ -1,15 +1,15 @@
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {Api} from "../Classes/Api.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
-import {StreamingUpdater} from "./StreamingUpdater.mjs";
-import {QueueManager} from "./QueueManager.mjs";
+import {StreamingUpdater} from "./StreamingUpdater.ts";
+import {QueueManager} from "./QueueManager.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
-import {StreamClient} from "./StreamClient.mjs";
+import {StreamClient} from "./StreamClient.ts";
 import {userHasSettingValue, Util} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
 
 export class PlayManager {
-    static async playCheck(track) {
+    static async playCheck(track: any) {
         if (PlayManager.isPlaying(track.id)) {
             const value = PlayManager.getCurrentTime(track.id, false);
 
@@ -29,7 +29,7 @@ export class PlayManager {
         }
     }
 
-    static async playNextFromQueues(currentTrack) {
+    static async playNextFromQueues(currentTrack: any) {
         const queue = QueueManager.getManualQueue();
         const nextTrackId = queue[0];
         if (nextTrackId !== undefined) {
@@ -62,22 +62,17 @@ export class PlayManager {
         }
     }
 
-    static addStreamClient(id, streamClient) {
+    static addStreamClient(id: number, streamClient: StreamClient) {
         PlayManager.ensureWindowObjects();
         window.streamClients[id] = streamClient;
     }
 
-    static removeStreamClient(id) {
+    static removeStreamClient(id: number) {
         PlayManager.ensureWindowObjects();
         delete window.streamClients[id];
     }
 
-    /**
-     * Gets the stream client to handle the track with the given id
-     * @param id {string} The id of the track
-     * @returns {StreamClient} The NewStreamClient object
-     */
-    static getStreamClient(id) {
+    static getStreamClient(id: number): StreamClient {
         PlayManager.ensureWindowObjects();
         return window.streamClients[id];
     }
@@ -108,7 +103,7 @@ export class PlayManager {
         }
     }
 
-    static playFrom(type, name, id) {
+    static playFrom(type: string, name: string, id: number) {
         PlayManager.ensureWindowObjects();
         window.playingFrom = { type, name, id };
         LydaCache.set("playingFrom", new CacheItem(window.playingFrom));
@@ -127,7 +122,7 @@ export class PlayManager {
         return playingFrom;
     }
 
-    static isPlaying(id) {
+    static isPlaying(id: number) {
         const streamClient = PlayManager.getStreamClient(id);
         if (streamClient === undefined) {
             return false;
@@ -136,7 +131,7 @@ export class PlayManager {
         }
     }
 
-    static addStreamClientIfNotExists(id, duration) {
+    static addStreamClientIfNotExists(id: number, duration: number) {
         let streamClient;
         if (PlayManager.getStreamClient(id) === undefined) {
             streamClient = new StreamClient(id);
@@ -151,7 +146,7 @@ export class PlayManager {
         return streamClient;
     }
 
-    static async togglePlayAsync(id) {
+    static async togglePlayAsync(id: number) {
         const streamClient = PlayManager.getStreamClient(id);
         if (streamClient === undefined) {
             return;
@@ -167,7 +162,7 @@ export class PlayManager {
         await StreamingUpdater.updatePlayState();
     }
 
-    static async startAsync(id) {
+    static async startAsync(id: number) {
         await PlayManager.stopAllAsync();
 
         if (!Util.isLoggedIn()) {
@@ -182,7 +177,7 @@ export class PlayManager {
         await StreamingUpdater.updatePlayState();
     }
 
-    static async safeStartAsync(id) {
+    static async safeStartAsync(id: number) {
         await PlayManager.startAsync(id);
         if (PlayManager.getCurrentTime(id) > .1) {
             await PlayManager.scrubTo(id, 0);
@@ -199,7 +194,7 @@ export class PlayManager {
         return true;
     }
 
-    static async initializeTrackAsync(id) {
+    static async initializeTrackAsync(id: number) {
         const streamClient = PlayManager.getStreamClient(id);
         const track = await PlayManager.getTrackData(id);
         if (streamClient === undefined) {
@@ -208,7 +203,7 @@ export class PlayManager {
         await StreamingUpdater.updatePlayState();
     }
 
-    static async stopAsync(id) {
+    static async stopAsync(id: number) {
         const streamClient = PlayManager.getStreamClient(id);
         if (streamClient === undefined) {
             return;
@@ -230,7 +225,7 @@ export class PlayManager {
         await StreamingUpdater.updatePlayState();
     }
 
-    static async scrubFromElement(e) {
+    static async scrubFromElement(e: any) {
         const value = e.offsetX / e.target.offsetWidth;
         if (e.target.id !== window.currentTrackId) {
             await PlayManager.startAsync(e.target.id);
@@ -266,7 +261,7 @@ export class PlayManager {
         await StreamingUpdater.updateLoopStates(loopingSingle, loopingContext);
     }
 
-    static async scrubTo(id, value) {
+    static async scrubTo(id: number, value: number) {
         value = Math.min(Math.max(value, 0), 1);
 
         //await PlayManager.stopAllAsync(id);
@@ -277,12 +272,12 @@ export class PlayManager {
         await StreamingUpdater.updatePlayState();
     }
 
-    static getCurrentTime(id, relative = false) {
+    static getCurrentTime(id: number, relative = false) {
         const streamClient = PlayManager.getStreamClient(id);
         return streamClient.getCurrentTime(relative);
     }
 
-    static getDuration(id) {
+    static getDuration(id: number) {
         const streamClient = PlayManager.getStreamClient(id);
         if (streamClient === undefined) {
             return 0;
@@ -290,7 +285,7 @@ export class PlayManager {
         return streamClient.duration;
     }
 
-    static getBufferedLength(id) {
+    static getBufferedLength(id: number) {
         const streamClient = PlayManager.getStreamClient(id);
         if (streamClient === undefined) {
             return 0;
@@ -298,7 +293,7 @@ export class PlayManager {
         return streamClient.getBufferedLength();
     }
 
-    static toggleMute(id) {
+    static toggleMute(id: number) {
         const streamClient = PlayManager.getStreamClient(id);
         if (streamClient.getVolume() > 0) {
             window.trackInfo[id].volume = streamClient.getVolume();
@@ -311,12 +306,12 @@ export class PlayManager {
         StreamingUpdater.updateMuteState(id);
     }
 
-    static async setLoudnessFromElement(e) {
+    static async setLoudnessFromElement(e: any) {
         let value = 1 - (e.offsetY / e.target.offsetHeight);
         await PlayManager.setLoudness(e.target.id, value);
     }
 
-    static async setLoudnessFromWheel(e) {
+    static async setLoudnessFromWheel(e: any) {
         const id = e.target.id;
         let value = PlayManager.getLoudness(id);
         if (e.deltaY < 0) {
@@ -327,12 +322,12 @@ export class PlayManager {
         await PlayManager.setLoudness(id, value);
     }
 
-    static getLoudness(id) {
+    static getLoudness(id: number) {
         const streamClient = PlayManager.getStreamClient(id);
         return streamClient.getVolume();
     }
 
-    static async setLoudness(id, value) {
+    static async setLoudness(id: number, value: number) {
         value = Math.min(Math.max(value, 0), 1);
         const streamClient = PlayManager.getStreamClient(id);
         await streamClient.setVolume(value);
@@ -343,12 +338,12 @@ export class PlayManager {
         LydaCache.set("volume", new CacheItem(value));
     }
 
-    static async skipForward(id) {
+    static async skipForward(id: number) {
         const streamClient = PlayManager.getStreamClient(id);
         await PlayManager.scrubTo(id, streamClient.getCurrentTime(true) + .1);
     }
 
-    static async skipBackward(id) {
+    static async skipBackward(id: number) {
         const streamClient = PlayManager.getStreamClient(id);
         await PlayManager.scrubTo(id, streamClient.getCurrentTime(true) - .1);
     }
@@ -359,18 +354,18 @@ export class PlayManager {
         }
     };
 
-    static async volumeUp(id) {
+    static async volumeUp(id: number) {
         const streamClient = PlayManager.getStreamClient(id);
         await PlayManager.setLoudness(id, streamClient.getVolume() * PlayManager.config.controls.volumeChangeRelative);
     }
 
-    static async volumeDown(id) {
+    static async volumeDown(id: number) {
         const streamClient = PlayManager.getStreamClient(id);
         await PlayManager.setLoudness(id, streamClient.getVolume() / PlayManager.config.controls.volumeChangeRelative);
     }
 
-    static async parseTrackData(trackData) {
-        trackData.track.user = LydaCache.get("user:" + trackData.track.userId).content ?? await Util.getUserAsync(trackData.track.userId);
+    static async parseTrackData(trackData: any) {
+        trackData.track.user = LydaCache.get("user:" + trackData.track.userId)?.content ?? await Util.getUserAsync(trackData.track.userId);
         trackData.user = await Util.getUserAsync();
         if (!window.trackInfo) {
             window.trackInfo = {};
@@ -379,7 +374,7 @@ export class PlayManager {
         return trackData;
     }
 
-    static async getTrackData(id, noCache = false) {
+    static async getTrackData(id: number, noCache = false) {
         if (window.trackInfo && window.trackInfo[id] && !noCache) {
             return window.trackInfo[id];
         }

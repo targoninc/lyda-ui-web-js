@@ -1,6 +1,6 @@
 import {LydaCache} from "./Cache/LydaCache.ts";
 import {Config} from "./Classes/Config.ts";
-import {PlayManager} from "./Streaming/PlayManager.mjs";
+import {PlayManager} from "./Streaming/PlayManager.ts";
 import {CacheItem} from "./Cache/CacheItem.ts";
 import {UserTemplates} from "./Templates/UserTemplates.ts";
 import {SettingsTemplates} from "./Templates/SettingsTemplates.mjs";
