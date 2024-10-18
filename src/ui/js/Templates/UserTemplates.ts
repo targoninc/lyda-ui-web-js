@@ -1,18 +1,18 @@
 import {create, nullElement, signal} from "https://fjs.targoninc.com/f.js";
-import {Util} from "../Classes/Util.mjs";
+import {Util} from "../Classes/Util.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
-import {LydaCache} from "../Cache/LydaCache.mjs";
+import {LydaCache} from "../Cache/LydaCache.ts";
 import {TrackTemplates} from "./TrackTemplates.mjs";
-import {UserActions} from "../Actions/UserActions.mjs";
+import {UserActions} from "../Actions/UserActions.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {AlbumTemplates} from "./AlbumTemplates.mjs";
 import {Icons as Icons} from "../Enums/Icons.js";
 import {Badges} from "../Enums/Badges.mjs";
 import {Links} from "../Enums/Links.ts";
 import {PlaylistTemplates} from "./PlaylistTemplates.mjs";
-import {CustomText} from "../Classes/Helpers/CustomText.mjs";
+import {CustomText} from "../Classes/Helpers/CustomText.ts";
 import {Permissions} from "../Enums/Permissions.mjs";
-import {Images} from "../Enums/Images.mjs";
+import {Images} from "../Enums/Images.ts";
 
 export class UserTemplates {
     static userWidget(user_id, username, displayname, avatar, following, extraAttributes = undefined, extraClasses = undefined) {

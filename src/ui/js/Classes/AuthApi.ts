@@ -1,5 +1,5 @@
 import {Api} from "./Api.ts";
-import {Util} from "./Util.mjs";
+import {Util} from "./Util.ts";
 import {Ui} from "./Ui.ts";
 
 export class AuthApi {

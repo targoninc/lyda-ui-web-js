@@ -1,4 +1,4 @@
-import {Config} from "./Config.mjs";
+import {Config} from "./Config.ts";
 
 export class Api {
     static get endpoints() {

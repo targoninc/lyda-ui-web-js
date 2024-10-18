@@ -1,8 +1,8 @@
 import {computedSignal, create, ifjs, signal, signalMap} from "https://fjs.targoninc.com/f.js";
-import {Num as NumberFormatter} from "../Classes/Helpers/Num.mjs";
-import {SubscriptionActions} from "../Actions/SubscriptionActions.mjs";
+import {Num as NumberFormatter} from "../Classes/Helpers/Num.ts";
+import {SubscriptionActions} from "../Actions/SubscriptionActions.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
-import {Time} from "../Classes/Helpers/Time.mjs";
+import {Time} from "../Classes/Helpers/Time.ts";
 
 export class SubscriptionTemplates {
     static page(user, currency, options) {

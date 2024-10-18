@@ -1,8 +1,8 @@
-import {Time} from "../Classes/Helpers/Time.mjs";
-import {UserTemplates} from "./UserTemplates.mjs";
+import {Time} from "../Classes/Helpers/Time.ts";
+import {UserTemplates} from "./UserTemplates.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {create} from "https://fjs.targoninc.com/f.js";
-import {Util} from "../Classes/Util.mjs";
+import {Util} from "../Classes/Util.ts";
 
 export class LogTemplates {
     static async actionLogs(selfUser, data) {

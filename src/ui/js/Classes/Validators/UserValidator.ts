@@ -1,12 +1,6 @@
 export class UserValidator {
-    /**
-     *
-     * @param state {Object}
-     * @param touchedFields {Set<string>}
-     * @returns {Set<any>}
-     */
-    static validateRegistration(state, touchedFields) {
-        let errors = new Set();
+    static validateRegistration(state: any, touchedFields: Set<string>): Set<string> {
+        let errors = new Set<string>();
         if (!state.username && touchedFields.has("username")) {
             errors.add("Username missing");
         }
@@ -25,13 +19,8 @@ export class UserValidator {
         return errors;
     }
 
-    /**
-     *
-     * @param state
-     * @returns {Set<any>}
-     */
-    static validateLogin(state) {
-        let errors = new Set();
+    static validateLogin(state: any): Set<string> {
+        let errors = new Set<string>();
         if (!state.email) {
             errors.add("E-Mail address missing");
         }
@@ -41,26 +30,16 @@ export class UserValidator {
         return errors;
     }
 
-    /**
-     *
-     * @param state
-     * @returns {Set<any>}
-     */
-    static validatePasswordReset(state) {
-        let errors = new Set();
+    static validatePasswordReset(state: any): Set<string> {
+        let errors = new Set<string>();
         if (!state.email) {
             errors.add("Email missing");
         }
         return errors;
     }
 
-    /**
-     *
-     * @param state
-     * @returns {Set<any>}
-     */
-    static validateEmailCheck(state) {
-        let errors = new Set();
+    static validateEmailCheck(state: any): Set<string> {
+        let errors = new Set<string>();
         if (!state.email) {
             errors.add("E-Mail address missing");
         }

@@ -2,18 +2,18 @@ import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {Icons} from "../Enums/Icons.js";
 import {AlbumActions} from "../Actions/AlbumActions.ts";
 import {FormTemplates} from "./FormTemplates.ts";
-import {Form} from "../Classes/Helpers/Form.mjs";
-import {Time} from "../Classes/Helpers/Time.mjs";
+import {Form} from "../Classes/Helpers/Form.ts";
+import {Time} from "../Classes/Helpers/Time.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
-import {UserTemplates} from "./UserTemplates.mjs";
+import {UserTemplates} from "./UserTemplates.ts";
 import {PlayManager} from "../Streaming/PlayManager.mjs";
 import {TrackTemplates} from "./TrackTemplates.mjs";
 import {QueueManager} from "../Streaming/QueueManager.mjs";
 import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {StatisticsTemplates} from "./StatisticsTemplates.mjs";
-import {Images} from "../Enums/Images.mjs";
-import {Util} from "../Classes/Util.mjs";
+import {Images} from "../Enums/Images.ts";
+import {Util} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
 
 export class AlbumTemplates {

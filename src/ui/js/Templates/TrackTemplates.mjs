@@ -1,24 +1,24 @@
 import {TrackActions} from "../Actions/TrackActions.ts";
-import {create, signal} from "https://fjs.targoninc.com/f.js";
-import {UserTemplates} from "./UserTemplates.mjs";
-import {Util} from "../Classes/Util.mjs";
+import {UserTemplates} from "./UserTemplates.ts";
+import {Util} from "../Classes/Util.ts";
 import {Icons} from "../Enums/Icons.js";
 import {PlayManager} from "../Streaming/PlayManager.mjs";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {AlbumActions} from "../Actions/AlbumActions.ts";
-import {Time} from "../Classes/Helpers/Time.mjs";
+import {Time} from "../Classes/Helpers/Time.ts";
 import {QueueManager} from "../Streaming/QueueManager.mjs";
 import {StatisticsTemplates} from "./StatisticsTemplates.mjs";
 import {AlbumTemplates} from "./AlbumTemplates.mjs";
 import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {PlaylistTemplates} from "./PlaylistTemplates.mjs";
-import {DragActions} from "../Actions/DragActions.mjs";
-import {Images} from "../Enums/Images.mjs";
+import {DragActions} from "../Actions/DragActions.ts";
+import {Images} from "../Enums/Images.ts";
 import {TrackEditTemplates} from "./TrackEditTemplates.ts";
-import {UserActions} from "../Actions/UserActions.mjs";
-import {CustomText} from "../Classes/Helpers/CustomText.mjs";
+import {UserActions} from "../Actions/UserActions.ts";
+import {CustomText} from "../Classes/Helpers/CustomText.ts";
 import {CommentTemplates} from "./CommentTemplates.mjs";
-import {TrackProcessor} from "../Classes/Helpers/TrackProcessor.mjs";
+import {TrackProcessor} from "../Classes/Helpers/TrackProcessor.ts";
+import {create, signal} from "../../fjsc/f2.js";
 
 export class TrackTemplates {
     /**

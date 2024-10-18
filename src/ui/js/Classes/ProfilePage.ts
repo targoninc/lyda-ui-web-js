@@ -1,6 +1,6 @@
 import {Api} from "./Api.ts";
 import {Ui} from "./Ui.ts";
-import {UserTemplates} from "../Templates/UserTemplates.mjs";
+import {UserTemplates} from "../Templates/UserTemplates.ts";
 import {GenericTemplates} from "../Templates/GenericTemplates.ts";
 
 export class ProfilePage {

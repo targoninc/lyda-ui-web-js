@@ -1,17 +1,17 @@
-import {signal} from "https://fjs.targoninc.com/f.js";
+import {signal} from "../../../fjsc/f2.ts";
 
 export class Time {
-    static localDate(time) {
+    static localDate(time: number|string|Date) {
         return new Date(time).toDateString();
     }
 
-    static adjust(time) {
+    static adjust(time: number|string|Date): Date {
         time = new Date(time);
         time.setMinutes(time.getMinutes() - time.getTimezoneOffset());
         return time;
     }
 
-    static ago(time) {
+    static ago(time: number|string|Date): string {
         time = Time.adjust(time);
         switch (typeof time) {
         case "number":
@@ -42,7 +42,7 @@ export class Time {
             [5806080000, "Last century", "Next century"], // 60*60*24*7*4*12*100*2
             [58060800000, "centuries", 2903040000] // 60*60*24*7*4*12*100*20, 60*60*24*7*4*12*100
         ];
-        let seconds = (+new Date() - time) / 1000,
+        let seconds = (+new Date() - <number>time) / 1000,
             token = "ago",
             list_choice = 1;
 
@@ -54,25 +54,25 @@ export class Time {
             token = "from now";
             list_choice = 2;
         }
-        let i = 0,
-            format;
-        while ((format = time_formats[i++]))
-            if (seconds < format[0]) {
+        let i = 0, format;
+        while ((format = time_formats[i++])) {
+            if (seconds < (format[0] as number)) {
                 if (typeof format[2] == "string")
-                    return format[list_choice];
+                    return format[list_choice] as string;
                 else
                     return Math.floor(seconds / format[2]) + " " + format[1] + " " + token;
             }
-        return time;
+        }
+        return time.toString();
     }
 
-    static #shouldUpdateInSeconds(time) {
+    static #shouldUpdateInSeconds(time: string) {
         return time.includes("seconds") || time === "Just now";
     }
 
-    static agoUpdating(time) {
+    static agoUpdating(time: number|string|Date) {
         const state = signal(Time.ago(time));
-        const updateIn = (time) => {
+        const updateIn = (time: string|number|Date) => {
             state.value = Time.ago(time);
             const updateInterval = Time.#shouldUpdateInSeconds(state.value) ? 1000 : 60000;
             if (state.value.includes("hours")) {
@@ -85,12 +85,9 @@ export class Time {
         return state;
     }
 
-    static format(time) {
+    static format(time: number): string {
         let minutes = Math.floor(time / 60);
         let seconds = Math.floor(time - minutes * 60);
-        if (seconds < 10) {
-            seconds = "0" + seconds;
-        }
-        return minutes + ":" + seconds;
+        return minutes + ":" + seconds.toString().padStart(2, "0");
     }
 }

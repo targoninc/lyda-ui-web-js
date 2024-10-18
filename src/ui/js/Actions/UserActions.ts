@@ -1,10 +1,10 @@
 import {Api} from "../Classes/Api.ts";
-import {getUserSettingValue, updateUserSetting, Util} from "../Classes/Util.mjs";
+import {getUserSettingValue, updateUserSetting, Util} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
-import {LydaCache} from "../Cache/LydaCache.mjs";
-import {CacheItem} from "../Cache/CacheItem.mjs";
+import {LydaCache} from "../Cache/LydaCache.ts";
+import {CacheItem} from "../Cache/CacheItem.ts";
 import {Icons} from "../Enums/Icons.js";
-import {NavTemplates} from "../Templates/NavTemplates.mjs";
+import {NavTemplates} from "../Templates/NavTemplates.ts";
 import {Themes} from "../Enums/Themes.mjs";
 import {UserSettings} from "../Enums/UserSettings.mjs";
 

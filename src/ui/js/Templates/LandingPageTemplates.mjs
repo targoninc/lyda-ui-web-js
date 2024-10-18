@@ -1,10 +1,10 @@
 import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {Icons} from "../Enums/Icons.js";
-import {AuthApi} from "../Classes/AuthApi.mjs";
+import {AuthApi} from "../Classes/AuthApi.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {FormTemplates} from "./FormTemplates.ts";
-import {UserValidator} from "../Classes/Validators/UserValidator.mjs";
-import {finalizeLogin} from "../Classes/Util.mjs";
+import {UserValidator} from "../Classes/Validators/UserValidator.ts";
+import {finalizeLogin} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
 
 export class LandingPageTemplates {

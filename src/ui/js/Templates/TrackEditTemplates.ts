@@ -1,15 +1,14 @@
-import {computedSignal, create, ifjs, signal} from "https://fjs.targoninc.com/f.js";
 import {FormTemplates} from "./FormTemplates.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {Icons} from "../Enums/Icons.ts";
-import {UserTemplates} from "./UserTemplates.mjs";
-import {Images} from "../Enums/Images.mjs";
+import {UserTemplates} from "./UserTemplates.ts";
+import {Images} from "../Enums/Images.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
-import {Genres} from "../Enums/Genres.mjs";
-import {Util} from "../Classes/Util.mjs";
-import {AudioUpload} from "../Classes/AudioUpload.mjs";
+import {Genres} from "../Enums/Genres.ts";
+import {Util} from "../Classes/Util.ts";
+import {AudioUpload} from "../Classes/AudioUpload.ts";
 import {Ui} from "../Classes/Ui.ts";
-import {DomNode, HtmlPropertyValue, Signal} from "../../fjsc/f2.ts";
+import {DomNode, HtmlPropertyValue, Signal, computedSignal, create, ifjs, signal} from "../../fjsc/f2.ts";
 
 export class TrackEditTemplates {
     static getStateWithParentUpdate(key, value, parentState) {

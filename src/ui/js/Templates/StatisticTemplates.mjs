@@ -1,12 +1,12 @@
 import {Chart, registerables} from "https://cdn.jsdelivr.net/npm/chart.js@4.3.0/+esm";
 import {BoxPlotChart} from "https://cdn.jsdelivr.net/npm/@sgratzl/chartjs-chart-boxplot@4.2.7/+esm";
 import {create, signal} from "https://fjs.targoninc.com/f.js";
-import {Colors} from "../Classes/Colors.mjs";
-import {ChartOptions} from "../Classes/ChartOptions.mjs";
+import {Colors} from "../Classes/Colors.ts";
+import {ChartOptions} from "../Classes/ChartOptions.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {Icons} from "../Enums/Icons.js";
 import {Api} from "../Classes/Api.ts";
-import {Num} from "../Classes/Helpers/Num.mjs";
+import {Num} from "../Classes/Helpers/Num.ts";
 import {Permissions} from "../Enums/Permissions.mjs";
 import {FormTemplates} from "./FormTemplates.ts";
 import {Ui} from "../Classes/Ui.ts";

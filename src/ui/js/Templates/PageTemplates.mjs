@@ -1,9 +1,9 @@
 import {create, signal} from "https://fjs.targoninc.com/f.js";
-import {AuthActions} from "../Actions/AuthActions.mjs";
+import {AuthActions} from "../Actions/AuthActions.ts";
 import {LandingPageTemplates} from "./LandingPageTemplates.mjs";
-import {UserTemplates} from "./UserTemplates.mjs";
+import {UserTemplates} from "./UserTemplates.ts";
 import {Api} from "../Classes/Api.ts";
-import {Util} from "../Classes/Util.mjs";
+import {Util} from "../Classes/Util.ts";
 
 export class PageTemplates {
     static mapping = {

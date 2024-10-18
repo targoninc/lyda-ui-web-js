@@ -1,11 +1,11 @@
-import {LydaCache} from "../Cache/LydaCache.mjs";
+import {LydaCache} from "../Cache/LydaCache.ts";
 import {Api} from "../Classes/Api.ts";
-import {CacheItem} from "../Cache/CacheItem.mjs";
+import {CacheItem} from "../Cache/CacheItem.ts";
 import {StreamingUpdater} from "./StreamingUpdater.mjs";
 import {QueueManager} from "./QueueManager.mjs";
 import {TrackActions} from "../Actions/TrackActions.ts";
 import {StreamClient} from "./StreamClient.mjs";
-import {userHasSettingValue, Util} from "../Classes/Util.mjs";
+import {userHasSettingValue, Util} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
 
 export class PlayManager {

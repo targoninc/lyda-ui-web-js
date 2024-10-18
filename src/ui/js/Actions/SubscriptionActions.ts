@@ -1,6 +1,6 @@
 import {Api} from "../Classes/Api.ts";
 import {SubscriptionTemplates} from "../Templates/SubscriptionTemplates.mjs";
-import {Util} from "../Classes/Util.mjs";
+import {Util} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
 
 export class SubscriptionActions {

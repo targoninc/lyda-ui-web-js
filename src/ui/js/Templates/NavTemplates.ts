@@ -1,15 +1,15 @@
 import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {Icons} from "../Enums/Icons.js";
-import {UserTemplates} from "./UserTemplates.mjs";
-import {UserActions} from "../Actions/UserActions.mjs";
-import {NavActions} from "../Actions/NavActions.mjs";
+import {UserTemplates} from "./UserTemplates.ts";
+import {UserActions} from "../Actions/UserActions.ts";
+import {NavActions} from "../Actions/NavActions.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {Links} from "../Enums/Links.ts";
 import {SearchTemplates} from "./SearchTemplates.mjs";
-import {NotificationParser} from "../Classes/Helpers/NotificationParser.mjs";
-import {AuthActions} from "../Actions/AuthActions.mjs";
-import {Time} from "../Classes/Helpers/Time.mjs";
-import {Util} from "../Classes/Util.mjs";
+import {NotificationParser} from "../Classes/Helpers/NotificationParser.ts";
+import {AuthActions} from "../Actions/AuthActions.ts";
+import {Time} from "../Classes/Helpers/Time.ts";
+import {Util} from "../Classes/Util.ts";
 
 export class NavTemplates {
     static navTop(userTemplate) {

@@ -1,11 +1,11 @@
-import {userHasSettingValue, Util} from "./Util.mjs";
-import {UrlHandler} from "./UrlHandler.mjs";
+import {userHasSettingValue, Util} from "./Util.ts";
+import {UrlHandler} from "./UrlHandler.ts";
 import {Api} from "./Api.ts";
-import {LydaCache} from "../Cache/LydaCache.mjs";
-import {NavTemplates} from "../Templates/NavTemplates.mjs";
+import {LydaCache} from "../Cache/LydaCache.ts";
+import {NavTemplates} from "../Templates/NavTemplates.ts";
 import {GenericTemplates} from "../Templates/GenericTemplates.ts";
-import {CacheItem} from "../Cache/CacheItem.mjs";
-import {UserActions} from "../Actions/UserActions.mjs";
+import {CacheItem} from "../Cache/CacheItem.ts";
+import {UserActions} from "../Actions/UserActions.ts";
 
 export class Ui {
     static validUrlPaths = {

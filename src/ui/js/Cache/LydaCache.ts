@@ -1,15 +1,10 @@
-import {CacheItem} from "./CacheItem.mjs";
+import {CacheItem} from "./CacheItem.ts";
 
 export class LydaCache {
     static disable = false;
     static cacheImplementation = sessionStorage;
 
-    /**
-     * Get a cache item from the cache
-     * @param cacheKey {string} The key of the cache item
-     * @returns {CacheItem} The cache item content or null if the cache is disabled
-     */
-    static get(cacheKey) {
+    static get(cacheKey: string): CacheItem|null {
         if (this.disable) {
             return null;
         }
@@ -18,7 +13,7 @@ export class LydaCache {
 
         let value;
         try {
-            value = JSON.parse(cacheItem);
+            value = JSON.parse(<string>cacheItem);
         } catch (e) {
             value = cacheItem;
         }
@@ -36,7 +31,7 @@ export class LydaCache {
         return value;
     }
 
-    static set(cacheKey, cacheItem) {
+    static set(cacheKey: string, cacheItem: any) {
         if (this.disable) {
             return;
         }
@@ -51,7 +46,7 @@ export class LydaCache {
         }
     }
 
-    static reFetch(cacheKey, cacheItem) {
+    static reFetch(cacheKey: string, cacheItem: any) {
         if (this.disable) {
             return;
         }
@@ -81,7 +76,7 @@ export class LydaCache {
         this.cacheImplementation.clear();
     }
 
-    static remove(cacheKey) {
+    static remove(cacheKey: string) {
         this.cacheImplementation.removeItem(cacheKey);
     }
 }

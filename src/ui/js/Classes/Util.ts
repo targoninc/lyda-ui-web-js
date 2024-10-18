@@ -1,10 +1,10 @@
 import {Ui} from "./Ui.ts";
-import {UrlHandler} from "./UrlHandler.mjs";
-import {Images} from "../Enums/Images.mjs";
-import {Config} from "./Config.mjs";
-import {LydaCache} from "../Cache/LydaCache.mjs";
+import {UrlHandler} from "./UrlHandler.ts";
+import {Images} from "../Enums/Images.ts";
+import {Config} from "./Config.ts";
+import {LydaCache} from "../Cache/LydaCache.ts";
 import {Api} from "./Api.ts";
-import {CacheItem} from "../Cache/CacheItem.mjs";
+import {CacheItem} from "../Cache/CacheItem.ts";
 import {Icons} from "../Enums/Icons.js";
 
 export class Util {

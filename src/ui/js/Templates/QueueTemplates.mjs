@@ -1,12 +1,12 @@
 import {create} from "https://fjs.targoninc.com/f.js";
 import {Icons} from "../Enums/Icons.js";
 import {TrackActions} from "../Actions/TrackActions.ts";
-import {Time} from "../Classes/Helpers/Time.mjs";
+import {Time} from "../Classes/Helpers/Time.ts";
 import {QueueManager} from "../Streaming/QueueManager.mjs";
-import {UserActions} from "../Actions/UserActions.mjs";
+import {UserActions} from "../Actions/UserActions.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
-import {DragActions} from "../Actions/DragActions.mjs";
-import {Util} from "../Classes/Util.mjs";
+import {DragActions} from "../Actions/DragActions.ts";
+import {Util} from "../Classes/Util.ts";
 
 export class QueueTemplates {
     static async queueItem(track, index, totalCount, user, attributes = [], classes = []) {

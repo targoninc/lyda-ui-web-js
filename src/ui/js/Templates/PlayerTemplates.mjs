@@ -2,19 +2,19 @@ import {PlayManager} from "../Streaming/PlayManager.mjs";
 import {StreamingUpdater} from "../Streaming/StreamingUpdater.mjs";
 import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {Icons} from "../Enums/Icons.js";
-import {Time} from "../Classes/Helpers/Time.mjs";
+import {Time} from "../Classes/Helpers/Time.ts";
 import {QueueManager} from "../Streaming/QueueManager.mjs";
-import {Images} from "../Enums/Images.mjs";
+import {Images} from "../Enums/Images.ts";
 import {QueueTemplates} from "./QueueTemplates.mjs";
 import {AlbumActions} from "../Actions/AlbumActions.ts";
 import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
-import {UserTemplates} from "./UserTemplates.mjs";
+import {UserTemplates} from "./UserTemplates.ts";
 import {StatisticsTemplates} from "./StatisticsTemplates.mjs";
 import {CommentTemplates} from "./CommentTemplates.mjs";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {Ui} from "../Classes/Ui.ts";
-import {Util} from "../Classes/Util.mjs";
+import {Util} from "../Classes/Util.ts";
 
 export class PlayerTemplates {
     static audioPlayer(track) {

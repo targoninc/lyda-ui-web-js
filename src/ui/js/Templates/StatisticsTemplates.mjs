@@ -1,11 +1,11 @@
 import {Icons} from "../Enums/Icons.js";
 import {TrackActions} from "../Actions/TrackActions.ts";
 import {create, signal} from "https://fjs.targoninc.com/f.js";
-import {UserTemplates} from "./UserTemplates.mjs";
+import {UserTemplates} from "./UserTemplates.ts";
 import {AlbumActions} from "../Actions/AlbumActions.ts";
 import {PlaylistActions} from "../Actions/PlaylistActions.ts";
-import {Images} from "../Enums/Images.mjs";
-import {Util} from "../Classes/Util.mjs";
+import {Images} from "../Enums/Images.ts";
+import {Util} from "../Classes/Util.ts";
 
 export class StatisticsTemplates {
     static likesIndicator(type, reference_id, like_count, liked) {

@@ -1,6 +1,6 @@
 import {PlayManager} from "../Streaming/PlayManager.mjs";
-import {UiActions} from "../Actions/UiActions.mjs";
-import {AuthActions} from "../Actions/AuthActions.mjs";
+import {UiActions} from "../Actions/UiActions.ts";
+import {AuthActions} from "../Actions/AuthActions.ts";
 
 export class KeyBinds {
     static bindings = {

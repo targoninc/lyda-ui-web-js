@@ -3,7 +3,7 @@ import {Api} from "../Classes/Api";
 import {TrackEditTemplates} from "./TrackEditTemplates.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {FJSC, SelectOption} from "../../fjsc";
-import {computedSignal, create, HtmlPropertyValue, signal, Signal, StringOrSignal} from "../../fjsc/f2.js";
+import {computedSignal, create, HtmlPropertyValue, signal, Signal} from "../../fjsc/f2.js";
 
 export class FormTemplates {
     static fileField(title: string, text: string, name: string, accept: string, required = false, onchange = (v) => {}) {

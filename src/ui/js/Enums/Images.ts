@@ -1,4 +1,4 @@
-import {Config} from "../Classes/Config.mjs";
+import {Config} from "../Classes/Config.ts";
 
 export class Images {
     static get BASE_URL() {

@@ -1,12 +1,12 @@
 import {Router} from "./js/Routing/Router.mjs";
 import {PageTemplates} from "./js/Templates/PageTemplates.mjs";
-import {KeyBinds} from "./js/Classes/KeyBindHandler.mjs";
-import {LydaCache} from "./js/Cache/LydaCache.mjs";
+import {KeyBinds} from "./js/Classes/KeyBindHandler.ts";
+import {LydaCache} from "./js/Cache/LydaCache.ts";
 import {PlayManager} from "./js/Streaming/PlayManager.mjs";
 import {Lyda} from "./js/lyda.mjs";
-import {UiActions} from "./js/Actions/UiActions.mjs";
+import {UiActions} from "./js/Actions/UiActions.ts";
 import {Ui} from "./js/Classes/Ui.ts";
-import {Util} from "./js/Classes/Util.mjs";
+import {Util} from "./js/Classes/Util.ts";
 import {routes} from "./js/routes";
 import {GenericTemplates} from "./js/Templates/GenericTemplates.ts";
 

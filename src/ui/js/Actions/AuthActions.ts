@@ -1,7 +1,7 @@
 import {Api} from "../Classes/Api.ts";
-import {Util} from "../Classes/Util.mjs";
+import {Util} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
-import {LydaCache} from "../Cache/LydaCache.mjs";
+import {LydaCache} from "../Cache/LydaCache.ts";
 import {Icons} from "../Enums/Icons.js";
 import {PlayManager} from "../Streaming/PlayManager.mjs";
 

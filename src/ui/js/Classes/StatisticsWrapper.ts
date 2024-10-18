@@ -2,7 +2,7 @@ import {StatisticTemplates} from "../Templates/StatisticTemplates.mjs";
 import {signal} from "https://fjs.targoninc.com/f.js";
 import {Api} from "./Api.ts";
 import {Ui} from "./Ui.ts";
-import {Num} from "./Helpers/Num.mjs";
+import {Num} from "./Helpers/Num.ts";
 
 export class StatisticsWrapper {
     static async getStatistics() {

@@ -1,17 +1,19 @@
-import {NavTemplates} from "../../Templates/NavTemplates.mjs";
+import {NavTemplates} from "../../Templates/NavTemplates.ts";
 import {GenericTemplates} from "../../Templates/GenericTemplates.ts";
 
 export class NotificationParser {
-    static parse(message, data) {
+    static parse(message: string, data: any) {
         const messageParts = this.getMessageWithLinkTags(data, message);
         const elements = [];
         for (let part of messageParts) {
             if (part.type === "plain") {
                 elements.push(GenericTemplates.textWithHtml(part.text));
             } else {
-                const relativeLink = `/${part.type}/${NotificationParser.getLinkIdentifierByType(part.type, part.text, part.collection)}`;
-                const link = NavTemplates.notificationLink(relativeLink, NotificationParser.getDisplayTextByType(part.type, part.text, part.collection));
-                elements.push(link);
+                if (part.collection) {
+                    const relativeLink = `/${part.type}/${NotificationParser.getLinkIdentifierByType(part.type, part.text, part.collection)}`;
+                    const link = NavTemplates.notificationLink(relativeLink, NotificationParser.getDisplayTextByType(part.type, part.text, part.collection));
+                    elements.push(link);
+                }
             }
         }
         let image;
@@ -28,7 +30,7 @@ export class NotificationParser {
         };
     }
 
-    static getDisplayTextByType(type, id, collection) {
+    static getDisplayTextByType(type: string, id: any, collection: any[]) {
         switch (type) {
         case "profile":
             return collection.find(item => item.id === id).username;
@@ -42,7 +44,7 @@ export class NotificationParser {
         return id;
     }
 
-    static getLinkIdentifierByType(type, id, collection) {
+    static getLinkIdentifierByType(type: string, id: any, collection: any[]) {
         switch (type) {
         case "profile":
             return collection.find(item => item.id === id).username;
@@ -50,7 +52,7 @@ export class NotificationParser {
         return id;
     }
 
-    static getMessageWithLinkTags(data, message) {
+    static getMessageWithLinkTags(data: any, message: string) {
         if (!data) {
             return [{type: "plain", text: message}];
         }
@@ -60,6 +62,11 @@ export class NotificationParser {
             "#": {collection: data.tracks, type: "track"},
             "~": {collection: data.albums, type: "album"},
             "%": {collection: data.playlists, type: "playlist"},
+        } as {
+            [key: string]: {
+                collection: any[],
+                type: string
+            }
         };
 
         let regExp = new RegExp("([@#~%])(\\d+)", "g");

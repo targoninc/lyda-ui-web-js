@@ -1,8 +1,8 @@
 import {Api} from "../Classes/Api.ts";
-import {LydaCache} from "../Cache/LydaCache.mjs";
+import {LydaCache} from "../Cache/LydaCache.ts";
 import {PlayManager} from "./PlayManager.mjs";
-import {CacheItem} from "../Cache/CacheItem.mjs";
-import {Util} from "../Classes/Util.mjs";
+import {CacheItem} from "../Cache/CacheItem.ts";
+import {Util} from "../Classes/Util.ts";
 
 export class StreamClient {
     constructor(id) {

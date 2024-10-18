@@ -1,7 +1,7 @@
 import {StreamingUpdater} from "./StreamingUpdater.mjs";
-import {LydaCache} from "../Cache/LydaCache.mjs";
+import {LydaCache} from "../Cache/LydaCache.ts";
 import {PlayManager} from "./PlayManager.mjs";
-import {QueueActions} from "../Actions/QueueActions.mjs";
+import {QueueActions} from "../Actions/QueueActions.ts";
 
 export class QueueManager {
     static addToAutoQueue(id) {

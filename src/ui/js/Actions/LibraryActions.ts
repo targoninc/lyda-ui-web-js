@@ -1,5 +1,5 @@
 import {Api} from "../Classes/Api.ts";
-import {Util} from "../Classes/Util.mjs";
+import {Util} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
 
 export class LibraryActions {
