@@ -3,9 +3,9 @@ import {Time} from "../Classes/Helpers/Time.ts";
 import {Icons} from "../Enums/Icons.js";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
-import {QueueTemplates} from "../Templates/QueueTemplates.mjs";
+import {QueueTemplates} from "../Templates/QueueTemplates.ts";
 import {QueueManager} from "./QueueManager.ts";
-import {PlayerTemplates} from "../Templates/PlayerTemplates.mjs";
+import {PlayerTemplates} from "../Templates/PlayerTemplates.ts";
 import {Util} from "../Classes/Util.ts";
 
 export class StreamingUpdater {
@@ -43,6 +43,9 @@ export class StreamingUpdater {
         }
 
         const footer = document.querySelector("footer");
+        if (!footer) {
+            return;
+        }
         const existingPlayer = footer.querySelector("#player_" + window.currentTrackId);
         if (existingPlayer !== null) {
             return;
@@ -55,7 +58,7 @@ export class StreamingUpdater {
         }
     }
 
-    static updateLoopStates(loopingSingle, loopingContext) {
+    static updateLoopStates(loopingSingle: boolean, loopingContext: boolean) {
         const loopSingleButtons = document.querySelectorAll(".loop-button-img");
         for (const loopButton of loopSingleButtons) {
             loopButton.src = loopingSingle ? Icons.LOOP_SINGLE : Icons.LOOP_OFF;
@@ -66,7 +69,7 @@ export class StreamingUpdater {
         streamClient.audio.loop = loopingSingle;
     }
 
-    static updateScrubber(id) {
+    static updateScrubber(id: number) {
         const valueRelative = PlayManager.getCurrentTime(id, true);
         const value = PlayManager.getCurrentTime(id, false);
         const scrubHeads = document.querySelectorAll(".audio-player-scrubhead");
@@ -102,7 +105,7 @@ export class StreamingUpdater {
         }
     }
 
-    static updateBuffers(id, bufferedLength, duration) {
+    static updateBuffers(id: number, bufferedLength: number, duration: number) {
         const buffers = document.querySelectorAll(".audio-player-scrubbar-buffered");
         let cssWidth = (bufferedLength / duration) * 100;
         if (cssWidth > 100) {
@@ -122,7 +125,7 @@ export class StreamingUpdater {
         }
     }
 
-    static updateMuteState(id) {
+    static updateMuteState(id: number) {
         const streamClient = PlayManager.getStreamClient(id);
         const targets = document.querySelectorAll(".loudness-control-icon");
         for (const target of targets) {
@@ -137,7 +140,7 @@ export class StreamingUpdater {
         }
     }
 
-    static updateLoudness(id, value) {
+    static updateLoudness(id: number, value: number) {
         const loudnessBars = document.querySelectorAll(".audio-player-loudnesshead");
         const cssWidth = value * 100;
         for (const loudnessBar of loudnessBars) {
@@ -159,8 +162,8 @@ export class StreamingUpdater {
             if (queue.includes(queueItem.id)) {
                 queueItem.classList.remove("audio-queueadd");
                 queueItem.classList.add("audio-queueremove");
-                img.src = Icons.UNQUEUE;
-                text.innerText = "Unqueue";
+                img && (img.src = Icons.UNQUEUE);
+                text && (text.innerText = "Unqueue");
             }
         }
         const unqueueDom = document.querySelectorAll(".audio-queueremove");
@@ -170,19 +173,19 @@ export class StreamingUpdater {
             if (!queue.includes(unqueueItem.id)) {
                 unqueueItem.classList.remove("audio-queueremove");
                 unqueueItem.classList.add("audio-queueadd");
-                img.src = Icons.QUEUE;
-                text.innerText = "Queue";
+                img && (img.src = Icons.QUEUE);
+                text && (text.innerText = "Queue");
             }
         }
 
         const queueContainer = document.querySelector(".queue");
         if (queueContainer) {
             const queue = QueueManager.getManualQueue();
-            const tasks = queue.map(id => PlayManager.getTrackData(id));
+            const tasks = queue.map((id: number) => PlayManager.getTrackData(id));
             const trackList = await Promise.all(tasks);
             const queueList = queueContainer.querySelector(".queue-list");
             const newQueueContainer = await QueueTemplates.queue(trackList);
-            if (!queueList.classList.contains("hidden")) {
+            if (!queueList?.classList.contains("hidden")) {
                 newQueueContainer.classList.remove("hidden");
             }
             queueContainer.replaceWith(newQueueContainer);
@@ -202,6 +205,9 @@ export class StreamingUpdater {
             }
             const img = target.querySelector("img");
             const text = target.querySelector("span");
+            if (!img || !text) {
+                continue;
+            }
             if (streamClient.playing) {
                 img.src = Icons.PAUSE;
                 img.alt = "Pause";
@@ -226,12 +232,15 @@ export class StreamingUpdater {
     static enableBuffering() {
         const targets = document.querySelectorAll(".audio-player-toggle");
         for (const target of targets) {
-            const streamClient = PlayManager.getStreamClient(target.id);
+            const streamClient = PlayManager.getStreamClient(parseInt(target.id));
             if (streamClient === undefined) {
                 continue;
             }
             const img = target.querySelector("img");
             const text = target.querySelector("span");
+            if (!img || !text) {
+                continue;
+            }
             img.src = Icons.SPINNER;
             img.alt = "Buffering";
             img.classList.add("spinner-animation");

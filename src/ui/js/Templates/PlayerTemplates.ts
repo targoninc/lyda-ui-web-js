@@ -5,7 +5,7 @@ import {Icons} from "../Enums/Icons.js";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {QueueManager} from "../Streaming/QueueManager.ts";
 import {Images} from "../Enums/Images.ts";
-import {QueueTemplates} from "./QueueTemplates.mjs";
+import {QueueTemplates} from "./QueueTemplates.ts";
 import {AlbumActions} from "../Actions/AlbumActions.ts";
 import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
