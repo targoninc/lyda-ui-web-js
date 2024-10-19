@@ -4,7 +4,7 @@ import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {Links} from "../Enums/Links.ts";
 import {Api} from "../Classes/Api.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
-import {create, HtmlPropertyValue, ifjs, StringOrSignal} from "../../fjsc/f2.ts";
+import {create, signal, computedSignal, signalMap, HtmlPropertyValue, ifjs, StringOrSignal, TypeOrSignal} from "../../fjsc/f2.ts";
 
 export class GenericTemplates {
     static buttonWithIcon(text: HtmlPropertyValue, icon: HtmlPropertyValue, alt: HtmlPropertyValue, callback = () => {
@@ -372,7 +372,8 @@ export class GenericTemplates {
             )
             .build();
     };
-    static checkbox = (name: HtmlPropertyValue, checked = false, text: HtmlPropertyValue = "", required = false, onchange = () => {}) => {
+
+    static checkbox = (name: HtmlPropertyValue, checked: TypeOrSignal<boolean> = false, text: HtmlPropertyValue = "", required = false, onchange = (v) => {}) => {
         return create("label")
             .classes("checkbox-container")
             .text(text)

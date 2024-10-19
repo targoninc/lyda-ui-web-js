@@ -3,7 +3,8 @@ import {Api} from "../Classes/Api";
 import {TrackEditTemplates} from "./TrackEditTemplates.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {FJSC, SelectOption} from "../../fjsc";
-import {computedSignal, create, HtmlPropertyValue, signal, Signal} from "../../fjsc/f2.js";
+import {computedSignal, create, HtmlPropertyValue, signal, Signal, TypeOrSignal} from "../../fjsc/f2.js";
+import {SearchableSelectConfig} from "../../fjsc/Types.ts";
 
 export class FormTemplates {
     static fileField(title: string, text: string, name: string, accept: string, required = false, onchange = (v) => {}) {
@@ -35,14 +36,14 @@ export class FormTemplates {
                 create("label")
                     .text(title)
                     .build(),
-                FJSC.searchableSelect({
+                FJSC.searchableSelect(<SearchableSelectConfig>{
                     options: optionsState as Signal<SelectOption[]>,
                     value: selectedValue
                 })
             ).build();
     }
 
-    static checkBoxField(name: HtmlPropertyValue, text: HtmlPropertyValue, checked = false, required = false, onchange = () => {}) {
+    static checkBoxField(name: HtmlPropertyValue, text: HtmlPropertyValue, checked: TypeOrSignal<boolean> = false, required = false, onchange = (v) => {}) {
         return create("div")
             .classes("flex", "space-outwards")
             .children(GenericTemplates.checkbox(name, checked, text, required, onchange))

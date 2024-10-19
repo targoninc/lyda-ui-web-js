@@ -237,7 +237,7 @@ export class TrackEditTemplates {
                     TrackEditTemplates.collaborators(state.value.collaborators, state),
                     enableLinkedUsers ? TrackEditTemplates.linkedUsers(state.value.linkedUsers, state) : null,
                     TrackEditTemplates.releaseDate(state.value.releaseDate, state),
-                    FormTemplates.genre(state.value.genre, state),
+                    FormTemplates.genre(state),
                     TrackEditTemplates.isrc(state.value.isrc, state),
                     TrackEditTemplates.upc(state.value.upc, state),
                     TrackEditTemplates.description(state.value.description, state),
@@ -318,46 +318,53 @@ export class TrackEditTemplates {
     }
 
     static termsOfService(checked = false, parentState = null) {
-        const state = this.getStateWithParentUpdate("termsOfService", checked, parentState);
+        const state = computedSignal<boolean>(parentState, s => s.termsOfService);
         return FormTemplates.checkBoxField("agreement", "I have read and agree to the Terms of Service and Privacy Policy", state, true, v => {
             state.value = v;
         });
     }
+
     static monetization() {
         return create("span")
             .text("This track will be monetized through streaming subscriptions and available for buying.")
             .build();
     }
+
     static description(value = "", parentState = null) {
         const state = this.getStateWithParentUpdate("description", value, parentState);
         return FormTemplates.textAreaField("Description", "description", "Description", state, false, 5, v => {
             state.value = v;
         });
     }
+
     static upc(value = "", parentState = null) {
         const state = this.getStateWithParentUpdate("upc", value, parentState);
         return FormTemplates.textField("UPC", "upc", "00888072469600", "text", state, false, v => {
             state.value = v;
         });
     }
+
     static isrc(value = "", parentState = null) {
         const state = this.getStateWithParentUpdate("isrc", value, parentState);
         return FormTemplates.textField("ISRC", "isrc", "QZNWX2227540", "text", state, false, v => {
             state.value = v;
         });
     }
+
     static releaseDate(value = Util.getDateForPicker(new Date()), parentState = null) {
         const state = this.getStateWithParentUpdate("releaseDate", value, parentState);
         return FormTemplates.textField("Release Date", "release_date", "YYYY-MM-DD", "date", state, false, v => {
             state.value = v;
         });
     }
+
     static collaborators(value = "", parentState = null) {
         const state = this.getStateWithParentUpdate("collaborators", value, parentState);
         return FormTemplates.textField("Collaborators", "collaborators", "Collaborators", "text", state, false, v => {
             state.value = v;
         });
     }
+
     static title(parentState, errorFields) {
         const value = computedSignal(parentState, s => s.title);
         const errorClass = computedSignal(errorFields, e => e.includes("title") ? "error" : "_");
@@ -366,6 +373,7 @@ export class TrackEditTemplates {
             parentState.value = {...parentState.value, title: v};
         }, false, () => {}, [errorClass]);
     }
+
     static price(value = "1", parentState) {
         const state = this.getStateWithParentUpdate("price", value, parentState);
         return FormTemplates.textField("Minimum track price in USD", "price", "1", "number", state, false, v => {
