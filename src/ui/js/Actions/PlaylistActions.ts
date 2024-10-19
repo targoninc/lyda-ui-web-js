@@ -44,12 +44,11 @@ export class PlaylistActions {
         Ui.notify("Created playlist", "success");
     }
 
-    static async deletePlaylist(id) {
+    static async deletePlaylist(id: number) {
         const res = await Api.postAsync(Api.endpoints.playlists.actions.delete, {id});
         if (res.code === 200) {
             PlayManager.removeStreamClient(id);
             QueueManager.removeFromManualQueue(id);
-            const ui = new Ui();
             Ui.notify("Successfully deleted playlist", "success");
             navigate("profile");
         } else {
@@ -57,15 +56,15 @@ export class PlaylistActions {
         }
     }
 
-    static async addTrackToPlaylists(track_id) {
-        const playlists = document.querySelectorAll("input[id^=playlist_]");
+    static async addTrackToPlaylists(id: number) {
+        const playlists = document.querySelectorAll("input[id^=playlist_]") as NodeListOf<HTMLInputElement>;
         let playlistIds = [];
         for (let playlist of playlists) {
             if (playlist.checked) {
                 playlistIds.push(playlist.id.split("_")[1]);
             }
         }
-        const res = await Api.postAsync(Api.endpoints.playlists.actions.addTrack, {playlist_ids: playlistIds, track_id});
+        const res = await Api.postAsync(Api.endpoints.playlists.actions.addTrack, {playlist_ids: playlistIds, track_id: id});
         Util.removeModal();
         if (res.code !== 200) {
             Ui.notify("Failed to add track to playlists: " + res.data, "error");
@@ -74,7 +73,7 @@ export class PlaylistActions {
         Ui.notify("Added track to playlist(s)", "success");
     }
 
-    static async removeTrackFromPlaylist(track_id, playlist_id) {
+    static async removeTrackFromPlaylist(track_id: number, playlist_id: number) {
         const res = await Api.postAsync(Api.endpoints.playlists.actions.removeTrack, {id: playlist_id, track_id});
         if (res.code !== 200) {
             Ui.notify("Failed to remove track from playlist: " + res.data, "error");
@@ -92,21 +91,23 @@ export class PlaylistActions {
         navigate("playlist/" + trackId);
     }
 
-    static async replaceCover(e) {
-        if (e.target.getAttribute("canEdit") !== "true") {
+    static async replaceCover(e: MouseEvent) {
+        const target = e.target as HTMLImageElement;
+        if (!target || target.getAttribute("canEdit") !== "true") {
             return;
         }
-        const oldSrc = e.target.src;
+        const oldSrc = target.src;
         const loader = document.querySelector("#cover-loader");
-        loader.classList.remove("hidden");
+        loader && loader.classList.remove("hidden");
         let fileInput = document.createElement("input");
         const id = parseInt(Util.getPlaylistIdFromEvent(e));
         fileInput.type = "file";
         fileInput.accept = "image/*";
         fileInput.onchange = async (e) => {
-            let file = e.target.files[0];
+            const fileTarget = e.target as HTMLInputElement;
+            let file = fileTarget.files![0];
             if (!file) {
-                loader.classList.add("hidden");
+                loader && loader.classList.add("hidden");
                 return;
             }
             let formData = new FormData();
@@ -118,8 +119,7 @@ export class PlaylistActions {
                 credentials: "include"
             });
             if (response.status === 200) {
-                loader.classList.add("hidden");
-                new Ui();
+                loader && loader.classList.add("hidden");
                 Ui.notify("Cover updated", "success");
                 await Util.updateImage(URL.createObjectURL(file), oldSrc);
             }

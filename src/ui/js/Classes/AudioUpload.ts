@@ -2,9 +2,19 @@ import {Api} from "./Api.ts";
 import {Util} from "./Util.ts";
 import {Ui} from "./Ui.ts";
 import {navigate} from "../Routing/Router.ts";
+import {Signal} from "../../fjsc/f2.ts";
 
 export class AudioUpload {
-    constructor(e, state) {
+    triggerEvent: Event;
+    state: Signal<any>;
+    uploadInfo: any;
+    id: string|undefined;
+    ws: any;
+    api: Api|undefined;
+    coverFile: File|undefined;
+    audioFile: File|undefined;
+
+    constructor(e: Event, state: Signal<any>) {
         this.triggerEvent = e;
         this.state = state;
 
@@ -28,7 +38,6 @@ export class AudioUpload {
 
         this.writeToInfo("Waiting to start");
         this.api = new Api();
-        this.ui = new Ui();
         this.ws = this.api.connectToWebsocket(this.api.websockets.uploadAudio,
             this.handleMessage.bind(this),
             this.handleError.bind(this),
@@ -37,7 +46,7 @@ export class AudioUpload {
         );
     }
 
-    writeToInfo(text, type = null) {
+    writeToInfo(text: string, type: string|null|undefined = null) {
         if (type === undefined || type === "all" || type === null) {
             for (let key in this.uploadInfo) {
                 this.uploadInfo[key].innerText = text;
@@ -65,17 +74,21 @@ export class AudioUpload {
 
     validate() {
         let success = true;
-        let cover_input = document.getElementById("cover-file");
-        this.coverFile = cover_input.files[0];
-        if (this.coverFile) {
-            success = !success ?? this.validateCondition(this.audioFile.type.startsWith("image/"), "Invalid file type", "cover");
-            success = !success ?? this.validateCondition(this.audioFile.size < 20 * 1024 * 1024, "Cover file too big", "cover");
+        let cover_input = document.getElementById("cover-file") as HTMLInputElement;
+        if (cover_input) {
+            this.coverFile = cover_input.files![0];
+            if (this.coverFile) {
+                success = !success ?? this.validateCondition(this.coverFile.type.startsWith("image/"), "Invalid file type", "cover");
+                success = !success ?? this.validateCondition(this.coverFile.size < 20 * 1024 * 1024, "Cover file too big", "cover");
+            }
         }
 
-        let audio_input = document.getElementById("audio-file");
-        this.audioFile = audio_input.files[0];
-        success = !success ?? this.validateCondition(this.audioFile.type.startsWith("audio/"), "Invalid file type", "audio");
-        success = !success ?? this.validateCondition(this.audioFile.size < 1000 * 1024 * 1024, "Audio file too big", "audio");
+        let audio_input = document.getElementById("audio-file") as HTMLInputElement;
+        if (audio_input) {
+            this.audioFile = audio_input.files![0];
+            success = !success ?? this.validateCondition(this.audioFile.type.startsWith("audio/"), "Invalid file type", "audio");
+            success = !success ?? this.validateCondition(this.audioFile.size < 1000 * 1024 * 1024, "Audio file too big", "audio");
+        }
 
         let requiredInputs = document.querySelectorAll("[required]");
         for (let input of requiredInputs) {
@@ -102,7 +115,7 @@ export class AudioUpload {
         this.setInfoError("audio");
     }
 
-    handleMessage(ev) {
+    handleMessage(ev: MessageEvent) {
         let data = JSON.parse(ev.data);
         console.log(data);
         switch (data.type) {
@@ -147,7 +160,7 @@ export class AudioUpload {
         this.setInfoError("audio");
     }
 
-    handleAuthenticationResponse(data) {
+    handleAuthenticationResponse(data: any) {
         if (!data.success) {
             this.writeToInfo("Authentication failed: " + data.message, "audio");
             this.setInfoError("audio");
@@ -155,12 +168,14 @@ export class AudioUpload {
         }
 
         this.writeToInfo("Authenticated!", "audio");
-        const dotParts = this.audioFile.name.split(".");
-        this.ws.send(JSON.stringify({
-            type: "initFileUploadRequest",
-            id: this.id,
-            extension: dotParts[dotParts.length - 1]
-        }));
+        const dotParts = this.audioFile?.name.split(".") ?? [];
+        if (dotParts.length > 0) {
+            this.ws.send(JSON.stringify({
+                type: "initFileUploadRequest",
+                id: this.id,
+                extension: dotParts[dotParts.length - 1]
+            }));
+        }
     }
 
     startCoverUpload() {
@@ -187,6 +202,9 @@ export class AudioUpload {
 
         this.writeToInfo("Uploading cover...", "cover");
         const formData = new FormData();
+        if (!this.id || !this.coverFile) {
+            throw new Error("Invalid state");
+        }
         formData.append("id", this.id);
         formData.append("cover", this.coverFile);
         const res = await Api.postRawAsync(Api.endpoints.tracks.actions.uploadCover, formData);
@@ -214,6 +232,9 @@ export class AudioUpload {
     startAudioUpload() {
         this.writeToInfo("Uploading audio...", "audio");
         let reader = new FileReader();
+        if (!this.audioFile) {
+            throw new Error("Invalid state");
+        }
         reader.readAsDataURL(this.audioFile);
         reader.onload = (e) => {
             let data = e.target.result;

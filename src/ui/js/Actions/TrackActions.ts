@@ -197,7 +197,6 @@ export class TrackActions {
         });
 
         if (res.code !== 200) {
-            new Ui();
             Ui.notify("Error while trying to follow user: " + res.data, "error");
             return res;
         }
@@ -269,7 +268,7 @@ export class TrackActions {
         }
         const oldSrc = e.target.src;
         const loader = document.querySelector("#cover-loader");
-        loader.classList.remove("hidden");
+        loader && loader.classList.remove("hidden");
         let fileInput = document.createElement("input");
         const id = parseInt(Util.getTrackIdFromEvent(e));
         fileInput.type = "file";
@@ -277,7 +276,7 @@ export class TrackActions {
         fileInput.onchange = async (e) => {
             let file = e.target.files[0];
             if (!file) {
-                loader.classList.add("hidden");
+                loader && loader.classList.add("hidden");
                 return;
             }
             let formData = new FormData();
@@ -289,8 +288,7 @@ export class TrackActions {
                 credentials: "include"
             });
             if (response.status === 200) {
-                loader.classList.add("hidden");
-                new Ui();
+                loader && loader.classList.add("hidden");
                 Ui.notify("Cover updated", "success");
                 await Util.updateImage(URL.createObjectURL(file), oldSrc);
             }

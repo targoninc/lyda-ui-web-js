@@ -114,7 +114,6 @@ export class AlbumActions {
             });
             if (response.status === 200) {
                 loader.classList.add("hidden");
-                new Ui();
                 Ui.notify("Cover updated", "success");
                 await Util.updateImage(URL.createObjectURL(file), oldSrc);
             }

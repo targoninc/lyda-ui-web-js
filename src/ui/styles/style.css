@@ -61,6 +61,16 @@
     --anti-gap-margin: -7px;
     --default-shadow: 0 0 15px -7px var(--color-5);
     --button-bottom-border-size: 3px;
+
+    --fjsc-text-color: var(--color-5);
+
+    --fjsc-interactive-background: var(--color-3);
+    --fjsc-interactive-background-hover: var(--color-4);
+    --fjsc-interactive-background-active: var(--fjsc-primary-300);
+    --fjsc-interactive-color: var(--color-5);
+    --fjsc-interactive-color-active: var(--color-4);
+    --fjsc-interactive-border: var(--color-7);
+    --fjsc-interactive-border-focused: var(--blue);
 }
 
 a {
