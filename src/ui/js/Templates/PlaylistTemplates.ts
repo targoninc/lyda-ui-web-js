@@ -16,9 +16,11 @@ import {FJSC} from "../../fjsc";
 import {User} from "../DbModels/User.ts";
 import {Playlist} from "../DbModels/Playlist.ts";
 import {create, ifjs, signal, computedSignal} from "../../fjsc/f2.ts";
+import {Track} from "../DbModels/Track.ts";
+import {Album} from "../DbModels/Album.ts";
 
 export class PlaylistTemplates {
-    static async addTrackToPlaylistModal(track, playlists) {
+    static async addTrackToPlaylistModal(track: Track, playlists: Playlist[]) {
         let playlistList = [];
         if (playlists.length === 0) {
             playlistList.push(create("span")
@@ -26,8 +28,8 @@ export class PlaylistTemplates {
                 .text("No playlists found")
                 .build());
         } else {
-            playlistList = await Promise.all(playlists.map(async playlist => {
-                return await PlaylistTemplates.playlistInAddList(playlist, playlist.playlisttracks?.find(t => t.id === track.id) !== undefined);
+            playlistList = await Promise.all(playlists.map(async (playlist: Playlist) => {
+                return await PlaylistTemplates.playlistInAddList(playlist, playlist.tracks?.find((t: Track) => t.id === track.id) !== undefined);
             }));
         }
 
@@ -56,17 +58,18 @@ export class PlaylistTemplates {
                 create("div")
                     .classes("flex")
                     .children(
-                        GenericTemplates.button("Ok", async () => {
-                            await PlaylistActions.addTrackToPlaylists(track.id);
-                        }, ["positive"]),
-                        GenericTemplates.button("Cancel", Util.removeModal, ["negative"])
-                    )
-                    .build()
-            )
-            .build();
+                        FJSC.button({
+                            text: "Ok",
+                            onclick: async () => PlaylistActions.addTrackToPlaylists(track.id),
+                            icon: { icon: "playlist_add" },
+                            classes: ["positive"],
+                        }),
+                        GenericTemplates.modalCancelButton()
+                    ).build()
+            ).build();
     }
 
-    static async addAlbumToPlaylistModal(album, playlists) {
+    static async addAlbumToPlaylistModal(album: Album, playlists: Playlist[]) {
         let playlistList = [];
         if (playlists.length === 0) {
             playlistList.push(create("span")
@@ -74,8 +77,8 @@ export class PlaylistTemplates {
                 .text("No playlists found")
                 .build());
         } else {
-            playlistList = await Promise.all(playlists.map(async playlist => {
-                return await PlaylistTemplates.playlistInAddList(playlist, playlist.playlisttracks.find(t => t.id === album.id) !== undefined);
+            playlistList = await Promise.all(playlists.map(async (playlist: Playlist) => {
+                return await PlaylistTemplates.playlistInAddList(playlist, playlist.tracks?.find((t: Track) => t.id === album.id) !== undefined);
             }));
         }
 
@@ -93,25 +96,23 @@ export class PlaylistTemplates {
                         create("h5")
                             .text(`Add ${album.name} to playlist`)
                             .build()
-                    )
-                    .build(),
+                    ).build(),
                 create("div")
                     .classes("flex-v")
-                    .children(
-                        ...playlistList,
-                    )
+                    .children(...playlistList)
                     .build(),
                 create("div")
                     .classes("flex")
                     .children(
-                        GenericTemplates.button("Ok", async () => {
-                            await PlaylistActions.addAlbumToPlaylists(album.id);
-                        }, ["positive"]),
-                        GenericTemplates.button("Cancel", Util.removeModal, ["negative"])
-                    )
-                    .build()
-            )
-            .build();
+                        FJSC.button({
+                            text: "Ok",
+                            onclick: async () => PlaylistActions.addAlbumToPlaylists(album.id),
+                            icon: { icon: "playlist_add" },
+                            classes: ["positive"],
+                        }),
+                        GenericTemplates.modalCancelButton()
+                    ).build()
+            ).build();
     }
 
     static async playlistInAddList(playlist, isChecked) {
@@ -177,12 +178,7 @@ export class PlaylistTemplates {
                             },
                             classes: ["positive"],
                         }),
-                        FJSC.button({
-                            text: "Cancel",
-                            onclick: Util.removeModal,
-                            classes: ["negative"],
-                            icon: { icon: "close" }
-                        }),
+                        GenericTemplates.modalCancelButton()
                     ).build()
             ).build();
     }

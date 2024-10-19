@@ -13,7 +13,7 @@ import {
     ifjs,
     StringOrSignal,
     TypeOrSignal,
-    Signal, nullElement, AnyNode
+    Signal, nullElement, AnyNode, AnyElement
 } from "../../fjsc/f2.ts";
 import {FJSC} from "../../fjsc";
 import {SearchableSelectConfig} from "../../fjsc/Types.ts";
@@ -618,6 +618,15 @@ export class GenericTemplates {
             .classes("spinner")
             .children()
             .build();
+    }
+
+    static modalCancelButton(modal: AnyElement|null = null) {
+        return FJSC.button({
+            text: "Cancel",
+            onclick: () => Util.removeModal(modal),
+            classes: ["negative"],
+            icon: { icon: "close" }
+        });
     }
 
     static addUserLinkSearchResult(entry, selectedState) {

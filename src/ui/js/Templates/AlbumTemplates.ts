@@ -147,19 +147,14 @@ export class AlbumTemplates {
                             },
                             classes: ["positive"],
                         }),
-                        FJSC.button({
-                            text: "Cancel",
-                            onclick: Util.removeModal,
-                            classes: ["negative"],
-                            icon: { icon: "close" }
-                        }),
+                        GenericTemplates.modalCancelButton()
                     ).build()
             ).build();
     }
 
-    static noAlbumsYet(isOwnProfile) {
+    static noAlbumsYet(isOwnProfile: boolean) {
         let children;
-        if (isOwnProfile === true) {
+        if (isOwnProfile) {
             children = [
                 create("p")
                     .text("You have not created any albums yet.")
