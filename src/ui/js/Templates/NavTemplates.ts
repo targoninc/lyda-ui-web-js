@@ -1,4 +1,3 @@
-import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {Icons} from "../Enums/Icons.js";
 import {UserTemplates} from "./UserTemplates.ts";
 import {UserActions} from "../Actions/UserActions.ts";
@@ -10,6 +9,8 @@ import {NotificationParser} from "../Classes/Helpers/NotificationParser.ts";
 import {AuthActions} from "../Actions/AuthActions.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {Util} from "../Classes/Util.ts";
+import {navigate} from "../Routing/Router.ts";
+import {create, signal} from "../../fjsc/f2.ts";
 
 export class NavTemplates {
     static navTop(userTemplate) {
@@ -23,13 +24,13 @@ export class NavTemplates {
                     .classes("flex", "flex-grow")
                     .children(
                         NavTemplates.navButton("following", "Feed", Icons.PEOPLE, async () => {
-                            window.router.navigate("following");
+                            navigate("following");
                         }),
                         NavTemplates.navButton("explore", "Explore", Icons.STARS, async () => {
-                            window.router.navigate("explore");
+                            navigate("explore");
                         }),
                         NavTemplates.navButton("library", "Library", Icons.LIKE, async () => {
-                            window.router.navigate("library");
+                            navigate("library");
                         }),
                         SearchTemplates.search(),
                     ).build(),
@@ -41,7 +42,7 @@ export class NavTemplates {
         return create("div")
             .classes("nav-logo", "hideOnMidBreakpoint", "pointer")
             .onclick(async () => {
-                await window.router.navigate("explore");
+                navigate("explore");
             })
             .children(
                 create("img")
@@ -87,15 +88,15 @@ export class NavTemplates {
                     .build(),
                 NavTemplates.navButtonInBurger("following", "Feed", Icons.PEOPLE, async () => {
                     NavActions.closeBurgerMenu();
-                    window.router.navigate("following");
+                    navigate("following");
                 }),
                 NavTemplates.navButtonInBurger("explore", "Explore", Icons.STARS, async () => {
                     NavActions.closeBurgerMenu();
-                    window.router.navigate("explore");
+                    navigate("explore");
                 }),
                 NavTemplates.navButtonInBurger("library", "Library", Icons.LIKE, async () => {
                     NavActions.closeBurgerMenu();
-                    window.router.navigate("library");
+                    navigate("library");
                 }),
             ).build();
     }
@@ -140,7 +141,7 @@ export class NavTemplates {
             .children(
                 GenericTemplates.actionWithMidBreakpoint(Icons.UPLOAD, "Upload", "upload", async e => {
                     e.preventDefault();
-                    await window.router.navigate("upload");
+                    navigate("upload");
                 }, [], ["positive"], Links.LINK("upload")),
                 NavTemplates.notifications(notifications),
                 UserTemplates.userWidget(user.id, user.username, user.displayname, avatar, true, [], ["align-center"]),
@@ -156,7 +157,7 @@ export class NavTemplates {
             .classes("widest-fill-right")
             .children(
                 GenericTemplates.action(Icons.LOGIN, "Log in", "login", async () => {
-                    await window.router.navigate("login");
+                    navigate("login");
                 })
             )
             .build();
@@ -185,7 +186,7 @@ export class NavTemplates {
             ).build();
     }
 
-    static notificationImage(image) {
+    static notificationImage(image: { type: string, id: string }) {
         const type = image.type;
         const id = image.id;
         const srcState = signal("");
@@ -207,7 +208,7 @@ export class NavTemplates {
         return create("span")
             .classes("inlineLink")
             .onclick(async () => {
-                await window.router.navigate(link);
+                navigate(link);
             })
             .onauxclick(async e => {
                 if (e.button === 2) {

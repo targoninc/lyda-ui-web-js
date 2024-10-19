@@ -1,18 +1,19 @@
-import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {AlbumActions} from "../Actions/AlbumActions.ts";
 import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {Util} from "../Classes/Util.ts";
+import {navigate} from "../Routing/Router.ts";
+import {AnyElement, create, HtmlPropertyValue, Signal, signal} from "../../fjsc/f2.ts";
 
 export class MenuTemplates {
-    static genericMenu(title, menuItems) {
+    static genericMenu(title: HtmlPropertyValue, menuItems: any[]) {
         const indexState = signal(0);
         const menuItemCount = menuItems.length;
         let modal = signal(MenuTemplates.getGenericModalWithSelectedIndex(indexState.value, title, menuItems));
-        indexState.onUpdate = newIndex => {
+        indexState.onUpdate = (newIndex: number) => {
             modal.value = MenuTemplates.getGenericModalWithSelectedIndex(newIndex, title, menuItems);
         };
-        const eventListener = e => {
+        const eventListener = (e: KeyboardEvent) => {
             if (e.code === "ArrowUp") {
                 e.preventDefault();
                 if (indexState.value === 0) {
@@ -36,7 +37,7 @@ export class MenuTemplates {
         return modal;
     }
 
-    static getGenericModalWithSelectedIndex(index, title, menuItems) {
+    static getGenericModalWithSelectedIndex(index: number, title: HtmlPropertyValue, menuItems: any[]) {
         return create("div")
             .classes("flex-v")
             .children(
@@ -45,7 +46,7 @@ export class MenuTemplates {
             ).build();
     }
 
-    static menuItem(text, action, isSelected) {
+    static menuItem(text: HtmlPropertyValue, action: Function, isSelected: boolean) {
         return create("div")
             .classes("fakeButton", "clickable", "rounded", "padded-inline", isSelected ? "active" : "_")
             .text(text)
@@ -55,7 +56,7 @@ export class MenuTemplates {
 
     static createMenu() {
         const title = "Create something new";
-        let modal;
+        let modal: AnyElement;
         const items = [
             {
                 text: "New Album",
@@ -68,7 +69,7 @@ export class MenuTemplates {
                 text: "New Track",
                 action: async () => {
                     Util.removeModal(modal);
-                    await window.router.navigate("upload");
+                    navigate("upload");
                 }
             },
             {

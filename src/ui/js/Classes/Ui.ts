@@ -171,7 +171,7 @@ export class Ui {
         for (let element of elements) {
             element.innerHTML = value;
             element.onclick = async () => {
-                window.router.navigate(newPage, params);
+                navigate(newPage, params);
             };
         }
     }

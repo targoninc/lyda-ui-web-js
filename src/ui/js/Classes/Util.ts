@@ -6,6 +6,7 @@ import {LydaCache} from "../Cache/LydaCache.ts";
 import {Api} from "./Api.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {Icons} from "../Enums/Icons.js";
+import {AnyElement} from "../../fjsc/f2.ts";
 
 export class Util {
     static capitalizeFirstLetter(string) {
@@ -288,7 +289,7 @@ export class Util {
         }, 100);
     }
 
-    static removeModal(modal = null) {
+    static removeModal(modal: AnyElement|null = null) {
         if (modal === null || !(modal instanceof HTMLElement)) {
             modal = document.querySelector(".modal-container");
         }

@@ -62,7 +62,7 @@ export class UserTemplates {
                 if (noredirect) {
                     return;
                 }
-                await window.router.navigate(`profile/${username}`);
+                navigate(`profile/${username}`);
             })
             .href(Links.PROFILE(username))
             .children(
@@ -146,7 +146,7 @@ export class UserTemplates {
         unapprovedTracks.onUpdate = (tracks) => {
             link.value = tracks.length === 0 ? nullElement() : GenericTemplates.action(Icons.APPROVAL, "Unapproved tracks", "unapproved-tracks", async e => {
                 e.preventDefault();
-                window.router.navigate("unapproved-tracks");
+                navigate("unapproved-tracks");
             }, [], [], Links.LINK("unapproved-tracks"));
         };
 
@@ -166,11 +166,11 @@ export class UserTemplates {
                 GenericTemplates.newPlaylistButton(),
                 GenericTemplates.action(Icons.SETTINGS, "Settings", "settings", async e => {
                     e.preventDefault();
-                    window.router.navigate("settings");
+                    navigate("settings");
                 }, [], [], Links.LINK("settings")),
                 GenericTemplates.action(Icons.STATISTICS, "Statistics", "statistics", async e => {
                     e.preventDefault();
-                    window.router.navigate("statistics");
+                    navigate("statistics");
                 }, [], [], Links.LINK("statistics")),
                 UserTemplates.unapprovedTracksLink(),
             )

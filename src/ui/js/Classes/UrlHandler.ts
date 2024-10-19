@@ -9,7 +9,7 @@ export class UrlHandler {
         if (window.router.currentRoute.path === page) {
             return;
         }
-        window.router.navigate(page);
+        navigate(page);
         if (notification !== null) {
             Ui.notify(notification.message, notification.type);
         }

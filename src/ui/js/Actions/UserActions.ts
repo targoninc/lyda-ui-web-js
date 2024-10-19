@@ -270,7 +270,7 @@ export class UserActions {
         if (username === "") {
             return;
         }
-        window.router.navigate("profile/" + username);
+        navigate("profile/" + username);
     }
 
     static async unverifyUser(id) {

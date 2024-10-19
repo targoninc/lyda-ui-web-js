@@ -185,7 +185,7 @@ export class Lyda {
         case "subscribe":
             user = await Util.getUserAsync();
             if (!user) {
-                window.router.navigate("login");
+                navigate("login");
                 return;
             }
             SubscriptionActions.addPaypalSdkIfNotExists(SubscriptionActions.clientId);

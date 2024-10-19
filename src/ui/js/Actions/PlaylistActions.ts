@@ -50,7 +50,7 @@ export class PlaylistActions {
             QueueManager.removeFromManualQueue(id);
             const ui = new Ui();
             Ui.notify("Successfully deleted playlist", "success");
-            window.router.navigate("profile");
+            navigate("profile");
         } else {
             Ui.notify("Error trying to delete playlist: " + res.data, "error");
         }
@@ -88,7 +88,7 @@ export class PlaylistActions {
         if (trackId === "") {
             return;
         }
-        window.router.navigate("playlist/" + trackId);
+        navigate("playlist/" + trackId);
     }
 
     static async replaceCover(e) {

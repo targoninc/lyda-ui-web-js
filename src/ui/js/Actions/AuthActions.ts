@@ -29,7 +29,7 @@ export class AuthActions {
     static async logOutWithRedirect() {
         let r = await AuthActions.logOut();
         if (r.code === 200) {
-            window.router.navigate("login");
+            navigate("login");
         } else {
             Ui.notify("Failed to log out. Please try again later.", "error");
         }
@@ -41,7 +41,7 @@ export class AuthActions {
             await Ui.getConfirmationModal("Log out", "Are you sure you want to log out?", "Yes", "No", AuthActions.logOut, () => {
             }, Icons.WARNING);
         } else {
-            window.router.navigate("login");
+            navigate("login");
         }
     }
 }

@@ -44,7 +44,7 @@ export class AlbumActions {
             PlayManager.removeStreamClient(id);
             QueueManager.removeFromManualQueue(id);
             Ui.notify("Successfully deleted album", "success");
-            window.router.navigate("profile");
+            navigate("profile");
         } else {
             Ui.notify("Error trying to delete album: " + res.data, "error");
         }
@@ -83,7 +83,7 @@ export class AlbumActions {
         if (trackId === "") {
             return;
         }
-        window.router.navigate("album/" + trackId);
+        navigate("album/" + trackId);
     }
 
     static async replaceCover(e) {

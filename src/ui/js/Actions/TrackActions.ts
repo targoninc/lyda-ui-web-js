@@ -48,7 +48,7 @@ export class TrackActions {
             PlayManager.removeStreamClient(e.target.id);
             QueueManager.removeFromManualQueue(e.target.id);
             Ui.notify(res.data, "success");
-            window.router.navigate("profile");
+            navigate("profile");
         } else {
             Ui.notify("Error trying to delete track: " + res.data, "error");
         }
@@ -259,7 +259,7 @@ export class TrackActions {
         if (trackId === "") {
             return;
         }
-        window.router.navigate("track/" + trackId);
+        navigate("track/" + trackId);
     }
 
     static async replaceCover(e) {

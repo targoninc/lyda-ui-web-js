@@ -59,7 +59,7 @@ export class SearchTemplates {
                             if (selectedResult.value === null) {
                                 return;
                             }
-                            window.router.navigate(selectedResult.value.type + "/" + selectedResult.value.id);
+                            navigate(selectedResult.value.type + "/" + selectedResult.value.id);
                             return;
                         }
 
@@ -143,7 +143,7 @@ export class SearchTemplates {
         elementReference = create("div")
             .classes("search-result", "padded", "flex", addClass)
             .onclick(async () => {
-                window.router.navigate(type + "/" + id);
+                navigate(type + "/" + id);
                 const resultList = document.querySelector(".search-results");
                 resultList.classList.add("hidden");
             })
