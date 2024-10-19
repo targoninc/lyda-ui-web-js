@@ -15,6 +15,8 @@ import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
+import {User} from "../DbModels/User.ts";
+import { Playlist } from "../DbModels/Playlist.ts";
 
 export class PlaylistTemplates {
     static async addTrackToPlaylistModal(track, playlists) {
@@ -186,9 +188,9 @@ export class PlaylistTemplates {
             ).build();
     }
 
-    static noPlaylistsYet(isOwnProfile) {
+    static noPlaylistsYet(isOwnProfile: boolean) {
         let children;
-        if (isOwnProfile === true) {
+        if (isOwnProfile) {
             children = [
                 create("p")
                     .text("You have not created any playlists yet.")
@@ -212,7 +214,7 @@ export class PlaylistTemplates {
             .build();
     }
 
-    static playlistCard(playlist, user, isSecondary) {
+    static playlistCard(playlist: Playlist, user: User, isSecondary: boolean) {
         const icons = [];
         if (playlist.visibility === "private") {
             icons.push(GenericTemplates.lock());

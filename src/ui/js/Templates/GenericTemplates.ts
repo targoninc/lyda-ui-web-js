@@ -4,15 +4,26 @@ import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {Links} from "../Enums/Links.ts";
 import {Api} from "../Classes/Api.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
-import {create, signal, computedSignal, signalMap, HtmlPropertyValue, ifjs, StringOrSignal, TypeOrSignal} from "../../fjsc/f2.ts";
+import {
+    create,
+    signal,
+    computedSignal,
+    signalMap,
+    HtmlPropertyValue,
+    ifjs,
+    StringOrSignal,
+    TypeOrSignal,
+    Signal, nullElement, AnyNode
+} from "../../fjsc/f2.ts";
 import {FJSC} from "../../fjsc";
 import {SearchableSelectConfig} from "../../fjsc/Types.ts";
 import {Util} from "../Classes/Util.ts";
 import {CollaboratorType} from "../DbModels/CollaboratorType.ts";
+import {navigate, Router} from "../Routing/Router.ts";
 
 export class GenericTemplates {
     static buttonWithIcon(text: HtmlPropertyValue, icon: HtmlPropertyValue, alt: HtmlPropertyValue, callback = () => {
-    }, extraClasses = [], id = null) {
+    }, extraClasses: string[] = [], id = null) {
         return create("button")
             .classes(...extraClasses)
             .id(id)
@@ -27,7 +38,7 @@ export class GenericTemplates {
     }
 
     static icon(icon: HtmlPropertyValue, adaptive = false) {
-        const isMaterial = icon && icon.includes && !icon.includes(window.location.origin);
+        const isMaterial = icon && (icon as string) && icon.includes && !icon.includes(window.location.origin);
         const iconClass = adaptive ? "adaptive-icon" : "inline-icon";
 
         if (isMaterial) {
@@ -43,7 +54,7 @@ export class GenericTemplates {
             .build();
     }
 
-    static cardLabel(text: HtmlPropertyValue, icon: HtmlPropertyValue = null, classes = []) {
+    static cardLabel(text: HtmlPropertyValue, icon: HtmlPropertyValue = null, classes: string[] = []) {
         return create("div")
             .classes("card-label", "flex", "small-gap", ...classes)
             .children(
@@ -55,7 +66,7 @@ export class GenericTemplates {
     }
 
     static toggle(text: HtmlPropertyValue, id: HtmlPropertyValue, callback = () => {
-    }, extraClasses = [], checked = false) {
+    }, extraClasses: string[] = [], checked = false) {
         return create("label")
             .classes("flex", ...extraClasses)
             .for(id)
@@ -82,7 +93,7 @@ export class GenericTemplates {
     }
 
     static button(text: HtmlPropertyValue, callback = () => {
-    }, extraClasses = [], id: HtmlPropertyValue|null = null) {
+    }, extraClasses: string[] = [], id: HtmlPropertyValue | null = null) {
         return create("button")
             .classes(...extraClasses)
             .id(id)
@@ -110,21 +121,21 @@ export class GenericTemplates {
             ).build();
     }
 
-    static text(text: HtmlPropertyValue, extraClasses = []) {
+    static text(text: HtmlPropertyValue, extraClasses: string[] = []) {
         return create("span")
             .classes("text", ...extraClasses)
             .text(text)
             .build();
     }
 
-    static textWithHtml(text: HtmlPropertyValue, extraClasses = []) {
+    static textWithHtml(text: HtmlPropertyValue, extraClasses: string[] = []) {
         return create("span")
             .classes("text", "notification-text", ...extraClasses)
             .html(text)
             .build();
     }
 
-    static dragTargetInList(dragStopCallback = (v) => {}, id = "", dropEffect = "move") {
+    static dragTargetInList(dragStopCallback: Function, id = "", dropEffect = "move") {
         return create("div")
             .classes("dropzone", "fullWidth", "relative")
             .attributes("reference_id", id)
@@ -136,27 +147,32 @@ export class GenericTemplates {
                     .classes("dragTarget", "fullWidth", "hidden")
                     .ondragenter(e => {
                         e.preventDefault();
-                        e.target!.previousSibling.classList.add("dragover");
+                        const target = e.target as HTMLElement;
+                        const previous = target.previousSibling as HTMLElement;
+                        previous.classList.add("dragover");
                     })
                     .ondragleave(e => {
                         e.preventDefault();
-                        e.target!.previousSibling.classList.remove("dragover");
+                        const target = e.target as HTMLElement;
+                        const previous = target.previousSibling as HTMLElement;
+                        previous.classList.remove("dragover");
                     })
-                    .ondragover(e => {
+                    .ondragover((e: DragEvent) => {
                         e.preventDefault();
-                        e.dataTransfer.dropEffect = dropEffect;
+                        e.dataTransfer!.dropEffect = dropEffect as ("link" | "none" | "move" | "copy");
                     })
-                    .ondrop(e => {
+                    .ondrop((e: DragEvent) => {
                         e.preventDefault();
-                        e.target!.previousSibling.classList.remove("dragover");
-                        const data = e.dataTransfer.getData("text/plain");
+                        const target = e.target as HTMLElement;
+                        const previous = target.previousSibling as HTMLElement;
+                        previous.classList.remove("dragover");
+                        const data = e.dataTransfer!.getData("text/plain");
                         dragStopCallback(JSON.parse(data));
-                    })
-                    .build()
+                    }).build()
             ).build();
     }
 
-    static action(icon: HtmlPropertyValue, text: HtmlPropertyValue, id: HtmlPropertyValue, onclick: (e: any) => void, attributes = [], classes: StringOrSignal[] = [], link: StringOrSignal = null) {
+    static action(icon: HtmlPropertyValue, text: HtmlPropertyValue, id: HtmlPropertyValue, onclick: (e: any) => void, attributes = [], classes: StringOrSignal[] = [], link: StringOrSignal|null = null) {
         return create(link ? "a" : "div")
             .classes("flex", "small-gap", "clickable", "fakeButton", "padded-inline", "rounded")
             .children(
@@ -165,8 +181,7 @@ export class GenericTemplates {
                     .classes("nopointer")
                     .text(text)
                     .build()
-            )
-            .id(id)
+            ).id(id)
             .attributes(...attributes)
             .classes(...classes)
             .href(link)
@@ -174,35 +189,35 @@ export class GenericTemplates {
             .build();
     }
 
-    static newAlbumButton(classes = []) {
+    static newAlbumButton(classes: string[] = []) {
         return GenericTemplates.action(Icons.ALBUM_ADD, "New album", "new_album", (e: any) => {
             e.preventDefault();
             AlbumActions.openNewAlbumModal().then();
         }, [], ["positive", ...classes]);
     }
 
-    static newPlaylistButton(classes = []) {
+    static newPlaylistButton(classes: string[] = []) {
         return GenericTemplates.action(Icons.PLAYLIST_ADD, "New playlist", "new_playlist", e => {
             e.preventDefault();
             PlaylistActions.openNewPlaylistModal().then();
         }, [], ["positive", ...classes]);
     }
 
-    static newTrackButton(classes = []) {
+    static newTrackButton(classes: string[] = []) {
         return GenericTemplates.action(Icons.UPLOAD, "Upload", "upload", async e => {
             e.preventDefault();
-            window.router.navigate("upload");
+            navigate("upload");
         }, [], ["positive", ...classes], Links.LINK("upload"));
     }
 
-    static openPageButton(text, page) {
+    static openPageButton(text: HtmlPropertyValue, page: string) {
         return GenericTemplates.action(Icons.STARS, text, page, async e => {
             e.preventDefault();
-            window.router.navigate(page);
+            navigate(page);
         }, [], ["positive", "secondary"], Links.LINK(page));
     }
 
-    static actionWithSmallBreakpoint(icon, text, id, onclick, attributes = [], classes = [], link = null) {
+    static actionWithSmallBreakpoint(icon: HtmlPropertyValue, text: HtmlPropertyValue, id: HtmlPropertyValue, onclick: Function, attributes = [], classes: string[] = [], link = null) {
         return create(link ? "a" : "div")
             .classes("flex", "small-gap", "clickable", "fakeButton", "padded-inline", "rounded")
             .children(
@@ -215,8 +230,7 @@ export class GenericTemplates {
                     .classes("nopointer", "hideOnSmallBreakpoint")
                     .text(text)
                     .build()
-            )
-            .id(id)
+            ).id(id)
             .attributes(...attributes)
             .classes(...classes)
             .href(link)
@@ -224,7 +238,7 @@ export class GenericTemplates {
             .build();
     }
 
-    static actionWithMidBreakpoint(icon, text, id, onclick, attributes = [], classes = [], link = null) {
+    static actionWithMidBreakpoint(icon: HtmlPropertyValue, text: HtmlPropertyValue, id: HtmlPropertyValue, onclick: Function, attributes = [], classes: string[] = [], link = null) {
         return create(link ? "a" : "div")
             .classes("flex", "small-gap", "clickable", "fakeButton", "padded-inline", "rounded")
             .children(
@@ -246,9 +260,10 @@ export class GenericTemplates {
             .build();
     }
 
-    static pill(value, text, onclick = () => {}, pillState, extraClasses = []) {
+    static pill(value: any, text: HtmlPropertyValue, onclick = () => {
+    }, pillState: Signal<any>, extraClasses: string[] = []) {
         const selectedState = signal(pillState.value === value ? "active" : "_");
-        pillState.onUpdate = (newSelected) => {
+        pillState.onUpdate = (newSelected: any) => {
             selectedState.value = newSelected === value ? "active" : "_";
         };
 
@@ -259,33 +274,23 @@ export class GenericTemplates {
             .build();
     }
 
-    static pills(options, pillState, extraClasses = [], loadingState = null) {
-        let spinner = null;
-        if (loadingState) {
-            const spinnerClass = signal(loadingState.value ? "_" : "hidden");
-            loadingState.onUpdate = (loading) => {
-                spinnerClass.value = loading ? "_" : "hidden";
-            };
-            spinner = create("img")
-                .src(Icons.SPINNER)
-                .alt("Loading...")
-                .classes("spinner-animation", "icon", "align-center", "nopointer", spinnerClass)
-                .build();
-        }
-
+    static pills(options: any[], pillState: Signal<any>, extraClasses: string[] = [], loadingState: Signal<boolean> | null = null) {
         return create("div")
             .classes("flex", "pill-container", ...extraClasses)
             .children(
                 ...options.map(p => {
                     return GenericTemplates.pill(p.value, p.text, p.onclick, pillState);
                 }),
-                spinner
-            )
-            .build();
+                ifjs(loadingState, create("img")
+                    .src(Icons.SPINNER)
+                    .alt("Loading...")
+                    .classes("spinner-animation", "icon", "align-center", "nopointer")
+                    .build())
+            ).build();
     }
 
-    static inlineAction = (text, icon, alt, id = null, callback = () => {
-    }, extraAttributes = [], extraClasses = []) => {
+    static inlineAction(text: HtmlPropertyValue, icon: HtmlPropertyValue, alt: HtmlPropertyValue, id = null, callback = () => {
+    }, extraAttributes = [], extraClasses: string[] = []) {
         return create("div")
             .classes("inline-action", "flex", "clickable", "fakeButton", "padded-inline", "rounded", "align-center")
             .id(id)
@@ -301,10 +306,10 @@ export class GenericTemplates {
                     .classes("nopointer", "text-xsmall")
                     .text(text)
                     .build()
-            )
-            .build();
-    };
-    static centeredDeleteButton = (id, callback, extraClasses) => {
+            ).build();
+    }
+
+    static centeredDeleteButton(id: HtmlPropertyValue, callback: Function, extraClasses: string[] = []) {
         return create("div")
             .id(id)
             .classes("delete-button", "fakeButton", "centeredInParent", "clickable", "flex", "padded-inline", "rounded", ...extraClasses)
@@ -314,32 +319,37 @@ export class GenericTemplates {
                     .classes("inline-icon", "svg", "nopointer")
                     .attributes("src", Icons.DELETE, "alt", "Delete")
                     .build()
-            )
-            .build();
-    };
-    static card = () => {
+            ).build();
+    }
+
+    static card() {
         return create("div")
             .classes("card")
             .build();
-    };
-    static notification = (type = "success", text = "Success!") => {
+    }
+
+    static notification(type = "success", text = "Success!") {
         return create("div")
             .classes("notification", type)
             .text(text)
             .build();
-    };
-    static fileInput = (id: HtmlPropertyValue, name: HtmlPropertyValue, accept: HtmlPropertyValue, text: HtmlPropertyValue, required = false, changeCallback = (v) => {}) => {
+    }
+
+    static fileInput(id: HtmlPropertyValue, name: HtmlPropertyValue, accept: HtmlPropertyValue, text: HtmlPropertyValue, required = false, changeCallback = (v: string) => {
+    }) {
+        // TODO: Use signals
+
         return create("div")
             .children(
                 create("input")
                     .type("button")
                     .classes("full")
                     .value(text)
-                    .onclick((e) => {
-                        e.target.nextElementSibling.click();
-                        e.target.value = "Choosing...";
-                    })
-                    .build(),
+                    .onclick((e: Event) => {
+                        const target = e.target as HTMLInputElement;
+                        (<HTMLInputElement>target.nextElementSibling).click();
+                        target.value = "Choosing...";
+                    }).build(),
                 create("input")
                     .type("file")
                     .styles("display", "none")
@@ -348,8 +358,9 @@ export class GenericTemplates {
                     .required(required)
                     .attributes("accept", accept)
                     .onchange(e => {
-                        const accept = e.target.getAttribute("accept");
-                        let fileName = e.target.value;
+                        const target = e.target as HTMLInputElement;
+                        const accept = target!.getAttribute("accept");
+                        let fileName = target!.value;
                         if (accept && !accept.includes("*")) {
                             const accepts = accept.split(",");
                             const extension = fileName.substring(fileName.lastIndexOf(".") + 1);
@@ -357,27 +368,27 @@ export class GenericTemplates {
                                 fileName = "Not supported type.";
                             }
                         }
-                        e.target.previousElementSibling.value = truncate(fileName);
-                        e.target.previousElementSibling.title = fileName;
+                        const previous = target.previousElementSibling as HTMLInputElement;
+                        previous.value = truncate(fileName);
+                        previous.title = fileName;
                         const probableName = fileName.substring(fileName.lastIndexOf("\\") + 1);
                         changeCallback(probableName);
 
-                        const preview = document.getElementById(name + "-preview");
-                        if (preview) {
-                            preview.src = URL.createObjectURL(e.target.files[0]);
+                        const preview = document.getElementById(name + "-preview") as HTMLImageElement;
+                        if (preview && target.files) {
+                            preview.src = URL.createObjectURL(target.files[0]);
                             preview.style.display = "initial";
                         }
 
-                        function truncate(text) {
+                        function truncate(text: string) {
                             return text.length > 20 ? text.substring(0, 20) + "..." : text;
                         }
-                    })
-                    .build()
-            )
-            .build();
+                    }).build()
+            ).build();
     };
 
-    static checkbox = (name: HtmlPropertyValue, checked: TypeOrSignal<boolean> = false, text: HtmlPropertyValue = "", required = false, onchange = (v) => {}) => {
+    static checkbox(name: HtmlPropertyValue, checked: TypeOrSignal<boolean> = false, text: HtmlPropertyValue = "", required = false, onchange = (v: boolean) => {
+    }) {
         return create("label")
             .classes("checkbox-container")
             .text(text)
@@ -388,7 +399,7 @@ export class GenericTemplates {
                     .id(name)
                     .required(required)
                     .checked(checked)
-                    .onchange((e) => onchange(e.target.checked))
+                    .onchange((e) => onchange((e.target as HTMLInputElement).checked))
                     .build(),
                 create("span")
                     .classes("checkmark")
@@ -397,13 +408,11 @@ export class GenericTemplates {
                             .classes("checkmark-icon")
                             .text("✓")
                             .build()
-                    )
-                    .build(),
-            )
-            .build();
-    };
+                    ).build(),
+            ).build();
+    }
 
-    static modal = (children, extraClasses = []) => {
+    static modal = (children: AnyNode[], extraClasses: string[] = []) => {
         return create("div")
             .classes("modal-container")
             .children(
@@ -416,36 +425,47 @@ export class GenericTemplates {
                         ...children
                     ).build()
             ).build();
-    };
+    }
 
-    static confirmationModal = (title, text, icon, confirmText, cancelText, confirmCallback, cancelCallback) => {
+    static confirmationModal(title: HtmlPropertyValue, text: HtmlPropertyValue, icon: HtmlPropertyValue,
+                             confirmText: StringOrSignal, cancelText: StringOrSignal, confirmCallback: Function,
+                             cancelCallback: Function) {
         return GenericTemplates.modal([
-            create("div")
-                .classes("flex")
-                .children(
-                    create("img")
-                        .styles("width", "30px", "height", "auto")
-                        .attributes("src", icon)
-                        .build(),
-                    create("h2")
-                        .text(title)
-                        .build()
-                ).build(),
-            create("p")
-                .text(text)
-                .build(),
-            create("div")
-                .classes("flex")
-                .children(
-                    GenericTemplates.button(confirmText ?? "Confirm", confirmCallback, ["positive"]),
-                    GenericTemplates.button(cancelText ?? "Cancel", cancelCallback, ["negative"])
-                )
-                .build()
-        ], ["confirmationModal"]
+                create("div")
+                    .classes("flex")
+                    .children(
+                        create("img")
+                            .styles("width", "30px", "height", "auto")
+                            .attributes("src", icon)
+                            .build(),
+                        create("h2")
+                            .text(title)
+                            .build()
+                    ).build(),
+                create("p")
+                    .text(text)
+                    .build(),
+                create("div")
+                    .classes("flex")
+                    .children(
+                        FJSC.button({
+                            text: confirmText ?? "Confirm",
+                            onclick: confirmCallback,
+                            classes: ["positive"],
+                            icon: {icon: "check"}
+                        }),
+                        FJSC.button({
+                            text: cancelText ?? "Cancel",
+                            onclick: cancelCallback,
+                            classes: ["negative"],
+                            icon: {icon: "close"}
+                        }),
+                    ).build()
+            ], ["confirmationModal"]
         );
-    };
+    }
 
-    static imageModal(imageUrl) {
+    static imageModal(imageUrl: StringOrSignal) {
         return create("div")
             .classes("modal-container")
             .children(
@@ -463,81 +483,104 @@ export class GenericTemplates {
             ).build();
     }
 
-    static textInputModal(title, text, currentValue, icon, confirmText, cancelText, confirmCallback, cancelCallback) {
+    static textInputModal(title: HtmlPropertyValue, text: HtmlPropertyValue, currentValue: HtmlPropertyValue,
+                          icon: HtmlPropertyValue, confirmText: StringOrSignal, cancelText: StringOrSignal,
+                          confirmCallback: Function, cancelCallback: Function) {
         return GenericTemplates.modal([
-            create("div")
-                .classes("flex-v")
-                .children(
-                    create("div")
-                        .classes("flex")
-                        .children(
-                            create("img")
-                                .classes("icon", "svg")
-                                .styles("width", "30px", "height", "auto")
-                                .attributes("src", icon)
-                                .build(),
-                            create("h2")
-                                .text(title)
-                                .build()
-                        ).build(),
-                    create("p")
-                        .text(text)
-                        .build(),
-                    create("input")
-                        .classes("full")
-                        .id("textInputModalInput")
-                        .value(currentValue ?? "")
-                        .build(),
-                    create("div")
-                        .classes("flex")
-                        .children(
-                            GenericTemplates.button(confirmText ?? "Confirm", confirmCallback, ["positive"]),
-                            GenericTemplates.button(cancelText ?? "Cancel", cancelCallback, ["negative"])
-                        ).build()
-                ).build(),
-        ], ["confirmationModal"]
+                create("div")
+                    .classes("flex-v")
+                    .children(
+                        create("div")
+                            .classes("flex")
+                            .children(
+                                create("img")
+                                    .classes("icon", "svg")
+                                    .styles("width", "30px", "height", "auto")
+                                    .attributes("src", icon)
+                                    .build(),
+                                create("h2")
+                                    .text(title)
+                                    .build()
+                            ).build(),
+                        create("p")
+                            .text(text)
+                            .build(),
+                        create("input")
+                            .classes("full")
+                            .id("textInputModalInput")
+                            .value(currentValue ?? "")
+                            .build(),
+                        create("div")
+                            .classes("flex")
+                            .children(
+                                FJSC.button({
+                                    text: confirmText ?? "Confirm",
+                                    onclick: confirmCallback,
+                                    classes: ["positive"],
+                                    icon: {icon: "check"}
+                                }),
+                                FJSC.button({
+                                    text: cancelText ?? "Cancel",
+                                    onclick: cancelCallback,
+                                    classes: ["negative"],
+                                    icon: {icon: "close"}
+                                }),
+                            ).build()
+                    ).build(),
+            ], ["confirmationModal"]
         );
     }
 
-    static textAreaInputModal(title, text, currentValue, icon, confirmText, cancelText, confirmCallback, cancelCallback) {
+    static textAreaInputModal(title: HtmlPropertyValue, text: HtmlPropertyValue, currentValue: HtmlPropertyValue, icon: HtmlPropertyValue, confirmText: StringOrSignal, cancelText: StringOrSignal,
+                              confirmCallback: Function, cancelCallback: Function) {
         return GenericTemplates.modal([
-            create("div")
-                .classes("flex-v")
-                .children(
-                    create("div")
-                        .classes("flex")
-                        .children(
-                            create("img")
-                                .classes("icon", "svg")
-                                .styles("width", "30px", "height", "auto")
-                                .attributes("src", icon)
-                                .build(),
-                            create("h2")
-                                .text(title)
-                                .build()
-                        ).build(),
-                    create("p")
-                        .text(text)
-                        .build(),
-                    create("textarea")
-                        .classes("full", "fullWidth")
-                        .id("textAreaInputModalInput")
-                        .value(currentValue ?? "")
-                        .build(),
-                    create("div")
-                        .classes("flex")
-                        .children(
-                            GenericTemplates.button(confirmText ?? "Confirm", confirmCallback, ["positive"]),
-                            GenericTemplates.button(cancelText ?? "Cancel", cancelCallback, ["negative"])
-                        ).build()
-                ).build(),
-        ], ["confirmationModal"]
+                create("div")
+                    .classes("flex-v")
+                    .children(
+                        create("div")
+                            .classes("flex")
+                            .children(
+                                create("img")
+                                    .classes("icon", "svg")
+                                    .styles("width", "30px", "height", "auto")
+                                    .attributes("src", icon)
+                                    .build(),
+                                create("h2")
+                                    .text(title)
+                                    .build()
+                            ).build(),
+                        create("p")
+                            .text(text)
+                            .build(),
+                        create("textarea")
+                            .classes("full", "fullWidth")
+                            .id("textAreaInputModalInput")
+                            .value(currentValue ?? "")
+                            .build(),
+                        create("div")
+                            .classes("flex")
+                            .children(
+                                FJSC.button({
+                                    text: confirmText ?? "Confirm",
+                                    onclick: confirmCallback,
+                                    classes: ["positive"],
+                                    icon: {icon: "check"}
+                                }),
+                                FJSC.button({
+                                    text: cancelText ?? "Cancel",
+                                    onclick: cancelCallback,
+                                    classes: ["negative"],
+                                    icon: {icon: "close"}
+                                }),
+                            ).build()
+                    ).build(),
+            ], ["confirmationModal"]
         );
     }
 
-    static tabSelector(tabs, callback, selectedTab = 0) {
+    static tabSelector(tabs: any[], callback: Function, selectedTab = 0) {
         const selectedState = signal(selectedTab);
-        selectedState.onUpdate = (newSelected) => {
+        selectedState.onUpdate = (newSelected: any) => {
             callback(newSelected);
         };
         callback(selectedTab);
@@ -547,7 +590,7 @@ export class GenericTemplates {
             .children(
                 ...tabs.map((t, i) => {
                     const innerSelectedState = signal(i === selectedTab ? "selected" : "_");
-                    selectedState.onUpdate = (newSelected) => {
+                    selectedState.onUpdate = (newSelected: number) => {
                         innerSelectedState.value = i === newSelected ? "selected" : "_";
                     };
                     return create("button")
@@ -562,7 +605,7 @@ export class GenericTemplates {
             .build();
     }
 
-    static containerWithSpinner(className) {
+    static containerWithSpinner(className: string) {
         return create("div")
             .classes(className)
             .children(
@@ -599,7 +642,7 @@ export class GenericTemplates {
             ).build();
     }
 
-    static select(options, value, id = null, classes = []) {
+    static select(options, value, id = null, classes: string[] = []) {
         const baseSelect = create("select")
             .classes(...classes)
             .id(id)
@@ -619,7 +662,7 @@ export class GenericTemplates {
             .build();
     }
 
-    static searchableSelect(options, value, id = null, classes = []) {
+    static searchableSelect(options, value, id = null, classes: string[] = []) {
         const search = signal(options.value.find(o => o.id === value)?.name ?? "");
         const optionsVisible = signal(false);
         const filtered = signal(options.value);
@@ -702,7 +745,7 @@ export class GenericTemplates {
     static searchSelectOption(option, value, search, optionsVisible, selectedId) {
         let element;
         const selectedClass = computedSignal(selectedId, (id) => {
-            element?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            element?.scrollIntoView({behavior: "smooth", block: "nearest"});
             return id === option.id ? "selected" : "_";
         });
 
@@ -737,76 +780,76 @@ export class GenericTemplates {
         });
 
         return GenericTemplates.modal([
-            create("div")
-                .classes("flex-v")
-                .children(
-                    create("div")
-                        .classes("flex")
-                        .children(
-                            create("h2")
-                                .classes("flex")
-                                .children(
-                                    GenericTemplates.icon(icon, true),
-                                    create("span")
-                                        .text(title)
-                                        .build(),
-                                ).build()
-                        ).build(),
-                    create("p")
-                        .text(text)
-                        .build(),
-                    create("input")
-                        .classes("full")
-                        .id("addUserSearch")
-                        .value(currentValue ?? "")
-                        .oninput(async (e) => {
-                            const search = e.target.value;
-                            const res = await Api.getAsync(Api.endpoints.search, {
-                                search,
-                                filters: JSON.stringify(["users"])
-                            });
-                            if (res.code === 200) {
-                                const results = document.getElementById("user-search-results");
-                                if (results) {
-                                    results.innerHTML = "";
-                                    for (const user of res.data) {
-                                        userMap.set(user.id, user);
-                                        results.appendChild(GenericTemplates.addUserLinkSearchResult(user, selectedState));
+                create("div")
+                    .classes("flex-v")
+                    .children(
+                        create("div")
+                            .classes("flex")
+                            .children(
+                                create("h2")
+                                    .classes("flex")
+                                    .children(
+                                        GenericTemplates.icon(icon, true),
+                                        create("span")
+                                            .text(title)
+                                            .build(),
+                                    ).build()
+                            ).build(),
+                        create("p")
+                            .text(text)
+                            .build(),
+                        create("input")
+                            .classes("full")
+                            .id("addUserSearch")
+                            .value(currentValue ?? "")
+                            .oninput(async (e) => {
+                                const search = e.target.value;
+                                const res = await Api.getAsync(Api.endpoints.search, {
+                                    search,
+                                    filters: JSON.stringify(["users"])
+                                });
+                                if (res.code === 200) {
+                                    const results = document.getElementById("user-search-results");
+                                    if (results) {
+                                        results.innerHTML = "";
+                                        for (const user of res.data) {
+                                            userMap.set(user.id, user);
+                                            results.appendChild(GenericTemplates.addUserLinkSearchResult(user, selectedState));
+                                        }
                                     }
                                 }
-                            }
-                        })
-                        .build(),
-                    create("div")
-                        .classes("flex-v")
-                        .styles("max-height", "200px", "overflow", "auto", "flex-wrap", "nowrap")
-                        .id("user-search-results")
-                        .build(),
-                    collabTypeOptions,
-                    create("div")
-                        .classes("flex")
-                        .children(
-                            FJSC.button({
-                                text: confirmText ?? "Confirm",
-                                onclick: async () => {
-                                    const user = userMap.get(selectedState.value);
-                                    user.collab_type = parseInt(collabType.value);
-                                    confirmCallback(selectedState.value, user, collabTypes);
-                                },
-                                icon: {
-                                    icon: "person_add"
-                                },
-                                classes: ["positive"],
-                            }),
-                            FJSC.button({
-                                text: cancelText ?? "Cancel",
-                                onclick: cancelCallback,
-                                classes: ["negative"],
-                                icon: { icon: "close" }
-                            }),
-                        ).build()
-                ).build(),
-        ], ["confirmationModal"]
+                            })
+                            .build(),
+                        create("div")
+                            .classes("flex-v")
+                            .styles("max-height", "200px", "overflow", "auto", "flex-wrap", "nowrap")
+                            .id("user-search-results")
+                            .build(),
+                        collabTypeOptions,
+                        create("div")
+                            .classes("flex")
+                            .children(
+                                FJSC.button({
+                                    text: confirmText ?? "Confirm",
+                                    onclick: async () => {
+                                        const user = userMap.get(selectedState.value);
+                                        user.collab_type = parseInt(collabType.value);
+                                        confirmCallback(selectedState.value, user, collabTypes);
+                                    },
+                                    icon: {
+                                        icon: "person_add"
+                                    },
+                                    classes: ["positive"],
+                                }),
+                                FJSC.button({
+                                    text: cancelText ?? "Cancel",
+                                    onclick: cancelCallback,
+                                    classes: ["negative"],
+                                    icon: {icon: "close"}
+                                }),
+                            ).build()
+                    ).build(),
+            ], ["confirmationModal"]
         );
     }
 

@@ -64,3 +64,8 @@ export class Router {
         this.handleRouteChange().then();
     }
 }
+
+export function navigate(path: string) {
+    // @ts-ignore
+    (<Router>window.router).navigate(path).then();
+}

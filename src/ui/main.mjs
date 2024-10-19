@@ -7,7 +7,7 @@ import {Lyda} from "./js/lyda.ts";
 import {UiActions} from "./js/Actions/UiActions.ts";
 import {Ui} from "./js/Classes/Ui.ts";
 import {Util} from "./js/Classes/Util.ts";
-import {routes} from "./js/routes";
+import {routes} from "./js/Routing/routes.js";
 import {GenericTemplates} from "./js/Templates/GenericTemplates.ts";
 
 LydaCache.clear();
