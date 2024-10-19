@@ -60,6 +60,7 @@
     --layout-gap: 10px;
     --anti-gap-margin: -7px;
     --default-shadow: 0 0 15px -7px var(--color-5);
+    --button-bottom-border-size: 3px;
 }
 
 a {
@@ -250,22 +251,24 @@ footer {
     position: relative;
 }
 
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    padding: 0;
+}
+
 h1 {
     font-size: var(--font-size-xxlarge);
     font-weight: 300;
-    margin: 0;
     padding: 0;
 }
 
 h2 {
     font-size: var(--font-size-xlarge);
-    margin: 10px 0;
 }
 
 h3 {
     font-size: 2.2rem;
     font-weight: normal;
-    margin: 0;
 }
 
 .card-label {
@@ -371,30 +374,26 @@ button {
 }
 
 button.negative {
-    background: var(--color-2);
-    border-color: var(--color-2);
-    color: var(--color-4);
+    border-bottom: var(--button-bottom-border-size) solid var(--color-2);
 }
 
 button.negative:hover {
-    background: var(--color-2-dark);
+    border-bottom: var(--button-bottom-border-size) solid var(--color-2-dark);
     border-color: var(--color-2-dark);
 }
 
 button.positive {
-    background: var(--color-8);
-    border-color: var(--color-8);
-    color: var(--color-4);
+    border-bottom: var(--button-bottom-border-size) solid var(--color-8);
 }
 
 button.positive:hover {
-    background: var(--color-8-dark);
+    border-bottom: var(--button-bottom-border-size) solid var(--color-8-dark);
     border-color: var(--color-8-dark);
 }
 
 button:hover, button.secondary:hover {
-    background: var(--color-1);
-    border: 1px solid var(--color-1);
+    border-bottom: var(--button-bottom-border-size) solid var(--color-1);
+    border-color: var(--color-1);
 }
 
 button.secondary {
@@ -810,18 +809,18 @@ td:last-child, th:last-child {
 .modal {
     position: absolute;
     background: var(--color-4);
-    box-shadow: var(--default-shadow);
-    border: 1px solid var(--color-5);
+    border: 1px solid var(--color-7);
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 5;
+    border-radius: calc(var(--border-radius) * 2);
 }
 
 .modal-overlay {
     position: absolute;
     background: var(--color-4);
-    opacity: .5;
+    opacity: .95;
     top: 0;
     left: 0;
     width: 100%;

@@ -7,6 +7,8 @@ import {TrackActions} from "../Actions/TrackActions.ts";
 import {create, signal, computedSignal, signalMap, HtmlPropertyValue, ifjs, StringOrSignal, TypeOrSignal} from "../../fjsc/f2.ts";
 import {FJSC} from "../../fjsc";
 import {SearchableSelectConfig} from "../../fjsc/Types.ts";
+import {Util} from "../Classes/Util.ts";
+import {CollaboratorType} from "../DbModels/CollaboratorType.ts";
 
 export class GenericTemplates {
     static buttonWithIcon(text: HtmlPropertyValue, icon: HtmlPropertyValue, alt: HtmlPropertyValue, callback = () => {
@@ -409,11 +411,10 @@ export class GenericTemplates {
                     .classes("modal-overlay")
                     .build(),
                 create("div")
-                    .classes("modal", "padded-large", "rounded", ...extraClasses)
+                    .classes("modal", "padded-large", ...extraClasses)
                     .children(
                         ...children
-                    )
-                    .build()
+                    ).build()
             ).build();
     };
 
@@ -429,8 +430,7 @@ export class GenericTemplates {
                     create("h2")
                         .text(title)
                         .build()
-                )
-                .build(),
+                ).build(),
             create("p")
                 .text(text)
                 .build(),
@@ -726,7 +726,7 @@ export class GenericTemplates {
         const selectedState = signal(0);
         const userMap = new Map();
         const collabTypeOptions = signal(create("span").text("Loading collab types...").build());
-        let collabTypes = [];
+        let collabTypes: CollaboratorType[] = [];
         const collabType = signal("1");
         TrackActions.getCollabTypes().then(types => {
             collabTypes = types;
@@ -767,10 +767,12 @@ export class GenericTemplates {
                             });
                             if (res.code === 200) {
                                 const results = document.getElementById("user-search-results");
-                                results.innerHTML = "";
-                                for (const user of res.data) {
-                                    userMap.set(user.id, user);
-                                    results.appendChild(GenericTemplates.addUserLinkSearchResult(user, selectedState));
+                                if (results) {
+                                    results.innerHTML = "";
+                                    for (const user of res.data) {
+                                        userMap.set(user.id, user);
+                                        results.appendChild(GenericTemplates.addUserLinkSearchResult(user, selectedState));
+                                    }
                                 }
                             }
                         })
@@ -784,12 +786,24 @@ export class GenericTemplates {
                     create("div")
                         .classes("flex")
                         .children(
-                            GenericTemplates.button(confirmText ?? "Confirm", () => {
-                                const user = userMap.get(selectedState.value);
-                                user.collab_type = parseInt(collabType.value);
-                                confirmCallback(selectedState.value, user, collabTypes);
-                            }, ["positive"]),
-                            GenericTemplates.button(cancelText ?? "Cancel", cancelCallback, ["negative"])
+                            FJSC.button({
+                                text: confirmText ?? "Confirm",
+                                onclick: async () => {
+                                    const user = userMap.get(selectedState.value);
+                                    user.collab_type = parseInt(collabType.value);
+                                    confirmCallback(selectedState.value, user, collabTypes);
+                                },
+                                icon: {
+                                    icon: "person_add"
+                                },
+                                classes: ["positive"],
+                            }),
+                            FJSC.button({
+                                text: cancelText ?? "Cancel",
+                                onclick: cancelCallback,
+                                classes: ["negative"],
+                                icon: { icon: "close" }
+                            }),
                         ).build()
                 ).build(),
         ], ["confirmationModal"]

@@ -49,6 +49,7 @@ export async function baseHtml(req: Request) {
     <meta name="description" content="${description}">
     <meta name="theme-color" content="#202025">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" type="text/css" href="/fjsc/fjs-components.css"/>
     <link rel="stylesheet" type="text/css" href="/styles/style.css"/>
     <link rel="stylesheet" type="text/css" href="/styles/elements.css"/>
     <link rel="stylesheet" type="text/css" href="/styles/dark.css"/>

@@ -2,8 +2,17 @@ import {GenericTemplates} from "./GenericTemplates.ts";
 import {Api} from "../Classes/Api";
 import {Ui} from "../Classes/Ui.ts";
 import {FJSC, SelectOption} from "../../fjsc";
-import {computedSignal, create, HtmlPropertyValue, signal, Signal, TypeOrSignal} from "../../fjsc/f2.js";
+import {
+    computedSignal,
+    create,
+    HtmlPropertyValue,
+    signal,
+    Signal,
+    StringOrSignal,
+    TypeOrSignal
+} from "../../fjsc/f2.js";
 import {SearchableSelectConfig} from "../../fjsc/Types.ts";
+import {Album} from "../DbModels/Album.ts";
 
 export class FormTemplates {
     static fileField(title: string, text: string, name: string, accept: string, required = false, onchange = (v) => {}) {
@@ -18,10 +27,11 @@ export class FormTemplates {
             ).build();
     }
 
-    static visibility(value = "public", parentState = null) {
-        const state = computedSignal<string>(parentState, p => p.visibility ?? "public");
+    static visibility(value = "public", parentState: Signal<Album>, onchange = v => {}) {
+        const state = computedSignal<string>(parentState, (p: Album) => p.visibility ?? "public");
         return GenericTemplates.toggle("Private", "visibility", () => {
             state.value = state.value === "public" ? "private" : "public";
+            onchange(state.value);
         }, [], value === "private");
     }
 
@@ -48,7 +58,7 @@ export class FormTemplates {
             .build();
     }
 
-    static textAreaField(title: HtmlPropertyValue, name: HtmlPropertyValue, placeholder: HtmlPropertyValue, value = "", required = false, rows = 3, onchange = (v: string) => {}) {
+    static textAreaField(title: HtmlPropertyValue, name: HtmlPropertyValue, placeholder: HtmlPropertyValue, value: StringOrSignal = "", required = false, rows = 3, onchange = (v: string) => {}) {
         return create("div")
             .classes("flex-v", "small-gap")
             .children(
@@ -69,7 +79,7 @@ export class FormTemplates {
             .build();
     }
 
-    static textField(title: string, name: string, placeholder: string, type = "text", value = "", required = false, onchange = (val: string) => {
+    static textField(title: string, name: string, placeholder: string, type = "text", value: StringOrSignal = "", required = false, onchange = (val: string) => {
     }, autofocus = false, onkeydown = () => {
     }, classes = []) {
         const input = create("input")

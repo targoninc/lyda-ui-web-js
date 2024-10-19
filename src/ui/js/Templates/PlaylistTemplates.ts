@@ -180,6 +180,7 @@ export class PlaylistTemplates {
                             text: "Cancel",
                             onclick: Util.removeModal,
                             classes: ["negative"],
+                            icon: { icon: "close" }
                         }),
                     ).build()
             ).build();

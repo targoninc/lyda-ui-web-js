@@ -1,0 +1,41 @@
+import {TrackLike} from "./TrackLike.ts";
+import {Album} from "./Album.ts";
+import {Playlist} from "./Playlist.ts";
+import {Notification} from "./Notification.ts";
+import {Comment} from "./Comment.ts";
+import {TrackCollaborator} from "./TrackCollaborator.ts";
+import {User} from "./User.ts";
+
+export interface Track {
+    user?: User;
+    comments?: Comment[];
+    likes?: TrackLike[];
+    playlists?: Playlist[];
+    albums?: Album[];
+    notifications?: Notification[];
+    collaborators?: TrackCollaborator[];
+    id: number;
+    user_id: number;
+    title: string;
+    isrc: string;
+    upc: string;
+    visibility: string;
+    credits: string;
+    loudnes_data: string;
+    genre: string;
+    version: string;
+    versionid: number;
+    length: number;
+    description: string;
+    release_date: Date;
+    updated_at: Date;
+    created_at: Date;
+    plays: number;
+    secretcode: string;
+    has_audio: boolean;
+    monetization: boolean;
+    extension: string;
+    filename: string;
+    price: number;
+    processed: boolean;
+}

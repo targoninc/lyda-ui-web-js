@@ -1,8 +1,6 @@
-import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {Icons} from "../Enums/Icons.js";
 import {AlbumActions} from "../Actions/AlbumActions.ts";
 import {FormTemplates} from "./FormTemplates.ts";
-import {Form} from "../Classes/Helpers/Form.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
@@ -15,6 +13,9 @@ import {StatisticsTemplates} from "./StatisticsTemplates.ts";
 import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
+import {FJSC} from "../../fjsc";
+import {computedSignal, create, signal} from "../../fjsc/f2.ts";
+import {Album} from "../DbModels/Album.ts";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track, albums) {
@@ -84,7 +85,17 @@ export class AlbumTemplates {
     }
 
     static newAlbumModal() {
-        const state = signal({});
+        const album = signal(<Album>{
+            name: "",
+            upc: "",
+            description: "",
+            release_date: new Date(),
+            visibility: "private",
+        });
+        const name = computedSignal<string>(album, (s: Album) => s.name);
+        const upc = computedSignal<string>(album, (s: Album) => s.upc);
+        const description = computedSignal<string>(album, (s: Album) => s.description);
+        const releaseDate = computedSignal<string>(album, (s: Album) => s.release_date);
 
         return create("div")
             .classes("flex-v")
@@ -106,32 +117,44 @@ export class AlbumTemplates {
                     .classes("flex-v")
                     .id("newAlbumForm")
                     .children(
-                        FormTemplates.textField("Name", "name", "Album name", "text", "", true),
-                        FormTemplates.textField("UPC", "upc", "UPC", "text", "", false),
-                        FormTemplates.textAreaField("Description", "description", "Description", "", false, 5),
-                        FormTemplates.textField("Release Date", "release_date", "YYYY-MM-DD", "date", "", false),
-                        FormTemplates.visibility("public", state),
-                    )
-                    .build(),
+                        FormTemplates.textField("Name", "name", "Album name", "text", name, true, v => {
+                            album.value = { ...album.value, name: v };
+                        }),
+                        FormTemplates.textField("UPC", "upc", "UPC", "text", upc, false, v => {
+                            album.value = { ...album.value, upc: v };
+                        }),
+                        FormTemplates.textAreaField("Description", "description", "Description", description, false, 5, v => {
+                            album.value = { ...album.value, description: v };
+                        }),
+                        FormTemplates.textField("Release Date", "release_date", "YYYY-MM-DD", "date", releaseDate, false, v => {
+                            album.value = { ...album.value, release_date: v };
+                        }),
+                        FormTemplates.visibility("public", album, v => {
+                            album.value = { ...album.value, visibility: v ? "private" : "public" };
+                        }),
+                    ).build(),
                 create("div")
                     .classes("flex")
                     .children(
-                        GenericTemplates.button("Create album", async () => {
-                            const album = {};
-                            const formId = "newAlbumForm";
-                            album.name = Form.getFieldValue(formId, "name");
-                            album.upc = Form.getFieldValue(formId, "upc");
-                            album.description = Form.getFieldValue(formId, "description");
-                            album.releaseDate = Form.getFieldValue(formId, "release_date");
-                            album.visibility = Form.getFieldValue(formId, "visibility");
-                            await AlbumActions.createNewAlbum(album);
-                            Util.removeModal();
-                        }, ["positive"]),
-                        GenericTemplates.button("Cancel", Util.removeModal, ["negative"])
-                    )
-                    .build()
-            )
-            .build();
+                        FJSC.button({
+                            text: "Create album",
+                            onclick: async () => {
+                                await AlbumActions.createNewAlbum(album.value);
+                                Util.removeModal();
+                            },
+                            icon: {
+                                icon: "playlist_add"
+                            },
+                            classes: ["positive"],
+                        }),
+                        FJSC.button({
+                            text: "Cancel",
+                            onclick: Util.removeModal,
+                            classes: ["negative"],
+                            icon: { icon: "close" }
+                        }),
+                    ).build()
+            ).build();
     }
 
     static noAlbumsYet(isOwnProfile) {
