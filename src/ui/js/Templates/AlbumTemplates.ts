@@ -14,7 +14,7 @@ import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
-import {computedSignal, create, signal} from "../../fjsc/f2.ts";
+import {AnyNode, computedSignal, create, ifjs, signal} from "../../fjsc/f2.ts";
 import {Album} from "../DbModels/Album.ts";
 
 export class AlbumTemplates {
@@ -341,6 +341,7 @@ export class AlbumTemplates {
                 }, [], ["secondary", "negative"])
             );
         }
+        const coverLoading = signal(false);
 
         return create("div")
             .classes("single-page", "noflexwrap", "padded-large", "rounded-large", "flex-v")
@@ -363,12 +364,12 @@ export class AlbumTemplates {
                         create("div")
                             .classes("cover-container", "relative", data.canEdit ? "pointer" : "_")
                             .attributes("album_id", album.id, "canEdit", data.canEdit)
-                            .onclick(AlbumActions.replaceCover)
+                            .onclick(e => AlbumActions.replaceCover(e, coverLoading))
                             .children(
-                                create("div")
-                                    .classes("loader", "loader-small", "centeredInParent", "hidden")
+                                ifjs(coverLoading, create("div")
+                                    .classes("loader", "loader-small", "centeredInParent")
                                     .id("cover-loader")
-                                    .build(),
+                                    .build()),
                                 create("img")
                                     .classes("cover", "blurOnParentHover", "nopointer")
                                     .src(await Util.getCoverFileFromAlbumIdAsync(album.id, album.userId))
@@ -410,7 +411,7 @@ export class AlbumTemplates {
             .build();
     }
 
-    static audioActions(album, user, editActions = []) {
+    static audioActions(album, user, editActions: AnyNode[] = []) {
         const playingFrom = PlayManager.getPlayingFrom();
         const isPlaying =
             playingFrom.type === "album" && playingFrom.id === album.id;
@@ -419,7 +420,7 @@ export class AlbumTemplates {
             manualQueue.includes(t.trackId),
         );
 
-        let actions = [];
+        let actions: AnyNode[] = [];
         if (user) {
             actions = [
                 GenericTemplates.action(isPlaying ? Icons.PAUSE : Icons.PLAY, isPlaying ? "Pause" : "Play", album.id, async () => {

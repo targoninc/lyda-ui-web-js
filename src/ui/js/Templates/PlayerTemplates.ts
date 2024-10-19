@@ -1,6 +1,5 @@
 import {PlayManager} from "../Streaming/PlayManager.ts";
 import {StreamingUpdater} from "../Streaming/StreamingUpdater.ts";
-import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {Icons} from "../Enums/Icons.js";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {QueueManager} from "../Streaming/QueueManager.ts";
@@ -15,9 +14,12 @@ import {CommentTemplates} from "./CommentTemplates.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {Util} from "../Classes/Util.ts";
+import {create, signal} from "../../fjsc/f2.ts";
+import {Track} from "../DbModels/Track.ts";
+import {User} from "../DbModels/User.ts";
 
 export class PlayerTemplates {
-    static audioPlayer(track) {
+    static audioPlayer(track: Track) {
         PlayManager.addStreamClientIfNotExists(track.id, track.length);
         setInterval(async () => {
             await PlayManager.playCheck(track);
@@ -44,8 +46,8 @@ export class PlayerTemplates {
                         create("div")
                             .classes("audio-player-toggle", "clickable", "fakeButton", "flex", "rounded-50", "padded-inline", "relative")
                             .id(track.id)
-                            .onclick(async e => {
-                                await PlayManager.togglePlayAsync(e.target.id);
+                            .onclick(() => {
+                                PlayManager.togglePlayAsync(track.id).then();
                             })
                             .children(
                                 create("img")
@@ -108,7 +110,7 @@ export class PlayerTemplates {
             .build();
     }
 
-    static loudnessControl(track) {
+    static loudnessControl(track: Track) {
         setTimeout(() => {
             StreamingUpdater.updateLoudness(window.currentTrackId, PlayManager.getLoudness(window.currentTrackId));
             StreamingUpdater.updateMuteState(window.currentTrackId);
@@ -123,8 +125,8 @@ export class PlayerTemplates {
                 create("div")
                     .classes("loudness-button", "fakeButton", "clickable", "flex", "rounded-50", "padded-inline")
                     .id(track.id)
-                    .onclick(e => {
-                        PlayManager.toggleMute(e.target.id);
+                    .onclick(() => {
+                        PlayManager.toggleMute(track.id);
                     })
                     .children(
                         create("img")
@@ -232,17 +234,21 @@ export class PlayerTemplates {
             .build();
     }
 
-    static async bottomTrackInfo(track, trackUser, user, playingFrom) {
+    static async bottomTrackInfo(track: Track, trackUser: User, user: User, playingFrom: any) {
         const icons = [];
         const isPrivate = track.visibility !== "public";
         if (isPrivate) {
             icons.push(GenericTemplates.lock());
         }
 
+        if (!track.likes) {
+            track.likes = [];
+        }
+
         return create("div")
             .classes("bottom-track-info", "flex")
             .children(
-                !user.isSubscribed ? PlayerTemplates.noSubscriptionInfo() : null,
+                //TODO: !user.isSubscribed ? PlayerTemplates.noSubscriptionInfo() : null,
                 create("span")
                     .classes("title", "clickable", "padded-inline", "align-center")
                     .text(track.title)
@@ -257,8 +263,8 @@ export class PlayerTemplates {
                 create("div")
                     .classes("flex", "align-center")
                     .children(
-                        StatisticsTemplates.likesIndicator("track", track.id, track.tracklikes.length,
-                            Util.arrayPropertyMatchesUser(track.tracklikes, "userId", user)),
+                        StatisticsTemplates.likesIndicator("track", track.id, track.likes.length,
+                            Util.arrayPropertyMatchesUser(track.likes, "userId", user)),
                         isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, Util.arrayPropertyMatchesUser(track.reposts, "userId", user)),
                         CommentTemplates.commentsIndicator(track.id, track.comments.length,
                             Util.arrayPropertyMatchesUser(track.comments, "userId", user)),

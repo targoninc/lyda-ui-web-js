@@ -6,6 +6,7 @@ import {Ui} from "../Classes/Ui.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
 import {QueueManager} from "../Streaming/QueueManager.ts";
 import {navigate} from "../Routing/Router.ts";
+import {Signal} from "../../fjsc/f2.ts";
 
 export class PlaylistActions {
     static async deletePlaylistFromElement(e) {
@@ -91,14 +92,13 @@ export class PlaylistActions {
         navigate("playlist/" + trackId);
     }
 
-    static async replaceCover(e: MouseEvent) {
+    static async replaceCover(e: MouseEvent, loading: Signal<boolean>) {
         const target = e.target as HTMLImageElement;
         if (!target || target.getAttribute("canEdit") !== "true") {
             return;
         }
         const oldSrc = target.src;
-        const loader = document.querySelector("#cover-loader");
-        loader && loader.classList.remove("hidden");
+        loading.value = true;
         let fileInput = document.createElement("input");
         const id = parseInt(Util.getPlaylistIdFromEvent(e));
         fileInput.type = "file";
@@ -107,7 +107,7 @@ export class PlaylistActions {
             const fileTarget = e.target as HTMLInputElement;
             let file = fileTarget.files![0];
             if (!file) {
-                loader && loader.classList.add("hidden");
+                loading.value = false;
                 return;
             }
             let formData = new FormData();
@@ -119,7 +119,7 @@ export class PlaylistActions {
                 credentials: "include"
             });
             if (response.status === 200) {
-                loader && loader.classList.add("hidden");
+                loading.value = false;
                 Ui.notify("Cover updated", "success");
                 await Util.updateImage(URL.createObjectURL(file), oldSrc);
             }

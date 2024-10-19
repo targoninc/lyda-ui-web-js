@@ -1,9 +1,7 @@
-import {computedSignal, create, signal} from "https://fjs.targoninc.com/f.js";
 import {Icons} from "../Enums/Icons.js";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {FormTemplates} from "./FormTemplates.ts";
-import {Form} from "../Classes/Helpers/Form.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {TrackTemplates} from "./TrackTemplates.ts";
 import {UserTemplates} from "./UserTemplates.ts";
@@ -16,7 +14,8 @@ import {Util} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
 import {User} from "../DbModels/User.ts";
-import { Playlist } from "../DbModels/Playlist.ts";
+import {Playlist} from "../DbModels/Playlist.ts";
+import {create, ifjs, signal, computedSignal} from "../../fjsc/f2.ts";
 
 export class PlaylistTemplates {
     static async addTrackToPlaylistModal(track, playlists) {
@@ -359,6 +358,7 @@ export class PlaylistTemplates {
                 }, [], ["secondary", "negative"])
             );
         }
+        const coverLoading = signal(false);
 
         return create("div")
             .classes("single-page", "noflexwrap", "padded-large", "rounded-large", "flex-v")
@@ -381,12 +381,12 @@ export class PlaylistTemplates {
                         create("div")
                             .classes("cover-container", "relative", data.canEdit ? "pointer" : "_")
                             .attributes("playlist_id", playlist.id, "canEdit", data.canEdit)
-                            .onclick(PlaylistActions.replaceCover)
+                            .onclick(e => PlaylistActions.replaceCover(e, coverLoading))
                             .children(
-                                create("div")
-                                    .classes("loader", "loader-small", "centeredInParent", "hidden")
+                                ifjs(coverLoading, create("div")
+                                    .classes("loader", "loader-small", "centeredInParent")
                                     .id("cover-loader")
-                                    .build(),
+                                    .build()),
                                 create("img")
                                     .classes("cover", "blurOnParentHover", "nopointer")
                                     .src(await Util.getCoverFileFromPlaylistIdAsync(playlist.id, playlist.userId))

@@ -11,6 +11,7 @@ import {CommentTemplates} from "../Templates/CommentTemplates.ts";
 import {TrackEditTemplates} from "../Templates/TrackEditTemplates.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {navigate} from "../Routing/Router.ts";
+import {Signal} from "../../fjsc/f2.ts";
 
 export class TrackActions {
     static async savePlay(id) {
@@ -262,21 +263,22 @@ export class TrackActions {
         navigate("track/" + trackId);
     }
 
-    static async replaceCover(e) {
-        if (e.target.getAttribute("canEdit") !== "true") {
+    static async replaceCover(e: MouseEvent, loading: Signal<boolean>) {
+        const target = e.target as HTMLImageElement;
+        if (target.getAttribute("canEdit") !== "true") {
             return;
         }
-        const oldSrc = e.target.src;
-        const loader = document.querySelector("#cover-loader");
-        loader && loader.classList.remove("hidden");
+        const oldSrc = target.src;
+        loading.value = true;
         let fileInput = document.createElement("input");
         const id = parseInt(Util.getTrackIdFromEvent(e));
         fileInput.type = "file";
         fileInput.accept = "image/*";
         fileInput.onchange = async (e) => {
-            let file = e.target.files[0];
+            const fileTarget = e.target as HTMLInputElement;
+            let file = fileTarget.files![0];
             if (!file) {
-                loader && loader.classList.add("hidden");
+                loading.value = false;
                 return;
             }
             let formData = new FormData();
@@ -288,7 +290,7 @@ export class TrackActions {
                 credentials: "include"
             });
             if (response.status === 200) {
-                loader && loader.classList.add("hidden");
+                loading.value = false;
                 Ui.notify("Cover updated", "success");
                 await Util.updateImage(URL.createObjectURL(file), oldSrc);
             }

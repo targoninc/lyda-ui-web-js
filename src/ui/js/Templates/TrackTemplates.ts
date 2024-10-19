@@ -18,7 +18,7 @@ import {UserActions} from "../Actions/UserActions.ts";
 import {CustomText} from "../Classes/Helpers/CustomText.ts";
 import {CommentTemplates} from "./CommentTemplates.ts";
 import {TrackProcessor} from "../Classes/Helpers/TrackProcessor.ts";
-import {create, signal} from "../../fjsc/f2.js";
+import {create, ifjs, signal} from "../../fjsc/f2.js";
 
 export class TrackTemplates {
     /**
@@ -598,6 +598,7 @@ export class TrackTemplates {
                 description.classList.add("overflowing");
             }
         }, 200);
+        const coverLoading = signal(false);
 
         return create("div")
             .classes("single-page", "noflexwrap", "padded-large", "rounded-large", "flex-v")
@@ -626,12 +627,12 @@ export class TrackTemplates {
                         create("div")
                             .classes("cover-container", "relative", trackData.canEdit ? "pointer" : "_")
                             .attributes("track_id", track.id, "canEdit", trackData.canEdit)
-                            .onclick(TrackActions.replaceCover)
+                            .onclick(e => TrackActions.replaceCover(e, coverLoading))
                             .children(
-                                create("div")
-                                    .classes("loader", "loader-small", "centeredInParent", "hidden")
+                                ifjs(coverLoading, create("div")
+                                    .classes("loader", "loader-small", "centeredInParent")
                                     .id("cover-loader")
-                                    .build(),
+                                    .build()),
                                 create("img")
                                     .classes("cover", "blurOnParentHover", "nopointer")
                                     .src(await Util.getCoverFileFromTrackIdAsync(track.id, trackUser.id))
