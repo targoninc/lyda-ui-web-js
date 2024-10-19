@@ -5,6 +5,8 @@ import {Links} from "../Enums/Links.ts";
 import {Api} from "../Classes/Api.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
 import {create, signal, computedSignal, signalMap, HtmlPropertyValue, ifjs, StringOrSignal, TypeOrSignal} from "../../fjsc/f2.ts";
+import {FJSC} from "../../fjsc";
+import {SearchableSelectConfig} from "../../fjsc/Types.ts";
 
 export class GenericTemplates {
     static buttonWithIcon(text: HtmlPropertyValue, icon: HtmlPropertyValue, alt: HtmlPropertyValue, callback = () => {
@@ -728,7 +730,10 @@ export class GenericTemplates {
         const collabType = signal("1");
         TrackActions.getCollabTypes().then(types => {
             collabTypes = types;
-            collabTypeOptions.value = GenericTemplates.searchableSelect(signal(types), collabType, "collabType", ["full"]);
+            collabTypeOptions.value = FJSC.searchableSelect(<SearchableSelectConfig>{
+                options: signal(types),
+                value: collabType,
+            });
         });
 
         return GenericTemplates.modal([

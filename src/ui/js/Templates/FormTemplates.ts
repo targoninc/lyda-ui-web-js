@@ -1,6 +1,5 @@
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {Api} from "../Classes/Api";
-import {TrackEditTemplates} from "./TrackEditTemplates.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {FJSC, SelectOption} from "../../fjsc";
 import {computedSignal, create, HtmlPropertyValue, signal, Signal, TypeOrSignal} from "../../fjsc/f2.js";
@@ -16,12 +15,11 @@ export class FormTemplates {
                     .for(name)
                     .build(),
                 GenericTemplates.fileInput(name, name, accept, text, required, onchange)
-            )
-            .build();
+            ).build();
     }
 
     static visibility(value = "public", parentState = null) {
-        const state = TrackEditTemplates.getStateWithParentUpdate("visibility", value, parentState);
+        const state = computedSignal<string>(parentState, p => p.visibility ?? "public");
         return GenericTemplates.toggle("Private", "visibility", () => {
             state.value = state.value === "public" ? "private" : "public";
         }, [], value === "private");

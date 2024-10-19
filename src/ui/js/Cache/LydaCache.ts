@@ -53,6 +53,9 @@ export class LydaCache {
         if (!(cacheItem instanceof CacheItem)) {
             throw new Error("cacheItem must be an instance of CacheItem");
         }
+        if (!cacheItem.reFetchUrl) {
+            return;
+        }
         fetch(cacheItem.reFetchUrl, {
             method: cacheItem.reFetchMethod,
             headers: cacheItem.reFetchHeaders,

@@ -84,6 +84,8 @@ export class AlbumTemplates {
     }
 
     static newAlbumModal() {
+        const state = signal({});
+
         return create("div")
             .classes("flex-v")
             .children(
@@ -108,7 +110,7 @@ export class AlbumTemplates {
                         FormTemplates.textField("UPC", "upc", "UPC", "text", "", false),
                         FormTemplates.textAreaField("Description", "description", "Description", "", false, 5),
                         FormTemplates.textField("Release Date", "release_date", "YYYY-MM-DD", "date", "", false),
-                        FormTemplates.visibility("public"),
+                        FormTemplates.visibility("public", state),
                     )
                     .build(),
                 create("div")

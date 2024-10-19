@@ -14,6 +14,7 @@ import {StatisticsTemplates} from "./StatisticsTemplates.ts";
 import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
+import {FJSC} from "../../fjsc";
 
 export class PlaylistTemplates {
     static async addTrackToPlaylistModal(track, playlists) {
@@ -164,15 +165,24 @@ export class PlaylistTemplates {
                 create("div")
                     .classes("flex")
                     .children(
-                        GenericTemplates.button("Create playlist", async () => {
-                            await PlaylistActions.createNewPlaylist(state.value);
-                            Util.removeModal();
-                        }, ["positive"]),
-                        GenericTemplates.button("Cancel", Util.removeModal, ["negative"])
-                    )
-                    .build()
-            )
-            .build();
+                        FJSC.button({
+                            text: "Create playlist",
+                            onclick: async () => {
+                                await PlaylistActions.createNewPlaylist(state.value);
+                                Util.removeModal();
+                            },
+                            icon: {
+                                icon: "playlist_add"
+                            },
+                            classes: ["positive"],
+                        }),
+                        FJSC.button({
+                            text: "Cancel",
+                            onclick: Util.removeModal,
+                            classes: ["negative"],
+                        }),
+                    ).build()
+            ).build();
     }
 
     static noPlaylistsYet(isOwnProfile) {
