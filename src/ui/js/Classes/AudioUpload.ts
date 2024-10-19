@@ -1,6 +1,7 @@
 import {Api} from "./Api.ts";
 import {Util} from "./Util.ts";
 import {Ui} from "./Ui.ts";
+import {navigate} from "../Routing/Router.ts";
 
 export class AudioUpload {
     constructor(e, state) {
@@ -167,7 +168,7 @@ export class AudioUpload {
             this.writeToInfo("No cover file, skipping step.", "cover");
             this.setInfoSuccess("cover");
             Ui.notify("Track upload completed!", "success");
-            navigate(`track/${this.id}`).then();
+            navigate(`track/${this.id}`);
             return;
         }
 
@@ -193,7 +194,7 @@ export class AudioUpload {
             this.writeToInfo("Cover uploaded!", "cover");
             this.setInfoSuccess("cover");
             Ui.notify("File upload completed", "success");
-            navigate(`track/${this.id}`).then();
+            navigate(`track/${this.id}`);
         } else if (iteration < maxIterations && res.code !== 400) {
             setTimeout(() => {
                 this.writeToInfo("Retrying cover upload...", "cover");

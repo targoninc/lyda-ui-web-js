@@ -7,6 +7,7 @@ import {Icons} from "../Enums/Icons.js";
 import {NavTemplates} from "../Templates/NavTemplates.ts";
 import {Themes} from "../Enums/Themes.ts";
 import {UserSettings} from "../Enums/UserSettings.ts";
+import {navigate} from "../Routing/Router.ts";
 
 export class UserActions {
     static updateAvatar(newSrc) {

@@ -10,6 +10,7 @@ import {CacheItem} from "../Cache/CacheItem.ts";
 import {CommentTemplates} from "../Templates/CommentTemplates.ts";
 import {TrackEditTemplates} from "../Templates/TrackEditTemplates.ts";
 import {Ui} from "../Classes/Ui.ts";
+import {navigate} from "../Routing/Router.ts";
 
 export class TrackActions {
     static async savePlay(id) {

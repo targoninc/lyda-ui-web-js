@@ -24,6 +24,7 @@ import {SubscriptionActions} from "./Actions/SubscriptionActions.ts";
 import {Util} from "./Classes/Util.ts";
 import {StatisticsWrapper} from "./Classes/StatisticsWrapper.ts";
 import {Ui} from "./Classes/Ui.ts";
+import {navigate} from "./Routing/Router.ts";
 
 export class Lyda {
     static async getEndpointData(config, endpoint, params = "", refreshSessionRetry = false) {

@@ -3,7 +3,7 @@ import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {Util} from "../Classes/Util.ts";
 import {navigate} from "../Routing/Router.ts";
-import {AnyElement, create, HtmlPropertyValue, Signal, signal} from "../../fjsc/f2.ts";
+import {AnyElement, create, HtmlPropertyValue, signal} from "../../fjsc/f2.ts";
 
 export class MenuTemplates {
     static genericMenu(title: HtmlPropertyValue, menuItems: any[]) {

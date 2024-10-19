@@ -5,6 +5,7 @@ import {Util} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
 import {QueueManager} from "../Streaming/QueueManager.ts";
+import {navigate} from "../Routing/Router.ts";
 
 export class PlaylistActions {
     static async deletePlaylistFromElement(e) {

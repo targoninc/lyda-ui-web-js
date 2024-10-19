@@ -13,6 +13,7 @@ import {PlaylistTemplates} from "./PlaylistTemplates.ts";
 import {CustomText} from "../Classes/Helpers/CustomText.ts";
 import {Permissions} from "../Enums/Permissions.ts";
 import {Images} from "../Enums/Images.ts";
+import {navigate} from "../Routing/Router.ts";
 
 export class UserTemplates {
     static userWidget(user_id, username, displayname, avatar, following, extraAttributes = undefined, extraClasses = undefined) {

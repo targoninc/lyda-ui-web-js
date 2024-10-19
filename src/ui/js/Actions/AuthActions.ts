@@ -4,6 +4,7 @@ import {Ui} from "../Classes/Ui.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {Icons} from "../Enums/Icons.js";
 import {PlayManager} from "../Streaming/PlayManager.ts";
+import {navigate} from "../Routing/Router.ts";
 
 export class AuthActions {
     static resetUiState() {
