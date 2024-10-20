@@ -87,7 +87,7 @@ export class Util {
         }, true);
     }
 
-    static async getAvatarFromUserIdAsync(id) {
+    static async getAvatarFromUserIdAsync(id: number|null) {
         if (id === null) {
             return Images.DEFAULT_AVATAR;
         }
@@ -95,7 +95,7 @@ export class Util {
         return await this.getFileOrBackupAsync(baseUrl + Util.toHexString(id) + Images.FORMAT, Images.DEFAULT_AVATAR);
     }
 
-    static async getBannerFromUserIdAsync(id) {
+    static async getBannerFromUserIdAsync(id: number|null) {
         if (id === null) {
             return Images.DEFAULT_BANNER;
         }
@@ -103,22 +103,22 @@ export class Util {
         return await this.getFileOrBackupAsync(baseUrl + Util.toHexString(id) + Images.FORMAT, Images.DEFAULT_BANNER);
     }
 
-    static async getCoverFileFromTrackIdAsync(id, user_id = null) {
+    static async getCoverFileFromTrackIdAsync(id: number, user_id: number|null = null) {
         const baseUrl = Config.getKey("storageBaseUrl") + "/storage/v2/covers/tracks/";
         return await this.getFileOrBackupAsync(baseUrl + Util.toHexString(id) + Images.FORMAT, Util.getAvatarFromUserIdAsync(user_id));
     }
 
-    static async getCoverFileFromAlbumIdAsync(id, user_id = null) {
+    static async getCoverFileFromAlbumIdAsync(id: number, user_id: number|null = null) {
         const baseUrl = Config.getKey("storageBaseUrl") + "/storage/v2/covers/albums/";
         return await this.getFileOrBackupAsync(baseUrl + Util.toHexString(id) + Images.FORMAT, Util.getAvatarFromUserIdAsync(user_id));
     }
 
-    static async getCoverFileFromPlaylistIdAsync(id, user_id = null) {
+    static async getCoverFileFromPlaylistIdAsync(id: number, user_id: number|null = null) {
         const baseUrl = Config.getKey("storageBaseUrl") + "/storage/v2/covers/playlists/";
         return await this.getFileOrBackupAsync(baseUrl + Util.toHexString(id) + Images.FORMAT, Util.getAvatarFromUserIdAsync(user_id));
     }
 
-    static async getFileOrBackupAsync(url, backupUrl) {
+    static async getFileOrBackupAsync(url: string, backupUrl: string) {
         const res = await fetch(url);
         if (res.status === 200) {
             return url;
@@ -126,17 +126,17 @@ export class Util {
         return backupUrl;
     }
 
-    static async copyToClipboard(text) {
+    static async copyToClipboard(text: string) {
         await navigator.clipboard.writeText(text);
         Ui.notify("Copied to clipboard", "success");
     }
 
-    static async fileExists(url) {
+    static async fileExists(url: string) {
         let response = await fetch(url);
         return response.status === 200;
     }
 
-    static async updateImage(newSrc, oldSrc) {
+    static async updateImage(newSrc: string, oldSrc: string) {
         const fileExists = await this.fileExists(newSrc);
         if (!fileExists) {
             setTimeout(() => {

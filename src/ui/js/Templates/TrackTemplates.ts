@@ -18,7 +18,7 @@ import {UserActions} from "../Actions/UserActions.ts";
 import {CustomText} from "../Classes/Helpers/CustomText.ts";
 import {CommentTemplates} from "./CommentTemplates.ts";
 import {TrackProcessor} from "../Classes/Helpers/TrackProcessor.ts";
-import {create, ifjs, signal} from "../../fjsc/f2.js";
+import {create, ifjs, Signal, signal} from "../../fjsc/f2.js";
 
 export class TrackTemplates {
     /**
@@ -372,7 +372,7 @@ export class TrackTemplates {
             ).build();
     }
 
-    static listTrackInAlbumOrPlaylist(track, user, canEdit, list, positionsState, type, startCallback = null) {
+    static listTrackInAlbumOrPlaylist(track, user, canEdit, list, positionsState: Signal<any>, type: string, startCallback: Function|null = null) {
         const icons = [];
         if (track.visibility === "private") {
             icons.push(GenericTemplates.lock());

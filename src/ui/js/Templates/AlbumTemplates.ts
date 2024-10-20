@@ -16,19 +16,27 @@ import {Ui} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
 import {AnyNode, computedSignal, create, ifjs, signal} from "../../fjsc/f2.ts";
 import {Album} from "../DbModels/Album.ts";
+import {CheckboxConfig} from "../../fjsc/Types.ts";
+import {Track} from "../DbModels/Track.ts";
+import {User} from "../DbModels/User.ts";
 
 export class AlbumTemplates {
-    static async addToAlbumModal(track, albums) {
-        let albumList = [];
+    static async addToAlbumModal(track: Track, albums: Album[]) {
+        let albumList: AnyNode[] = [];
         if (albums.length === 0) {
             albumList.push(create("span")
                 .classes("nopointer")
                 .text("No albums found")
                 .build());
         } else {
-            albumList = await Promise.all(albums.map(async album => {
-                return await AlbumTemplates.albumInAddList(album, album.albumtracks.find(t => t.id === track.id) !== undefined);
-            }));
+            albumList = await Promise.all(albums.map(async (album: Album) => {
+                if (!album.tracks) {
+                    console.warn("Album has no tracks: ", album);
+                    return;
+                }
+
+                return await AlbumTemplates.albumInAddList(album, album.tracks.find((t: Track) => t.id === track.id) !== undefined);
+            })) as AnyNode[];
         }
 
         return create("div")
@@ -51,8 +59,7 @@ export class AlbumTemplates {
                     .classes("flex-v")
                     .children(
                         ...albumList,
-                    )
-                    .build(),
+                    ).build(),
                 create("div")
                     .classes("flex")
                     .children(
@@ -60,28 +67,29 @@ export class AlbumTemplates {
                             await AlbumActions.addTrackToAlbums(track.id);
                         }, ["positive"]),
                         GenericTemplates.button("Cancel", Util.removeModal, ["negative"])
-                    )
-                    .build()
-            )
-            .build();
+                    ).build()
+            ).build();
     }
 	
-    static async albumInAddList(album, isChecked) {
+    static async albumInAddList(album: Album, isChecked: boolean) {
+        const checked = signal(isChecked);
+
         return create("div")
             .classes("flex", "rounded", "padded", "card")
             .onclick(() => {
-                let checkbox = document.getElementById("album_" + album.id);
-                checkbox.checked = !checkbox.checked;
+                checked.value = !checked.value;
             })
             .children(
-                GenericTemplates.checkbox("album_" + album.id, isChecked, "", false),
+                FJSC.checkbox(<CheckboxConfig>{
+                    name: "album_" + album.id,
+                    checked,
+                }),
                 await AlbumTemplates.smallAlbumCover(album),
                 create("span")
                     .classes("nopointer")
                     .text(album.name)
                     .build(),
-            )
-            .build();
+            ).build();
     }
 
     static newAlbumModal() {
@@ -127,7 +135,7 @@ export class AlbumTemplates {
                             album.value = { ...album.value, description: v };
                         }),
                         FormTemplates.textField("Release Date", "release_date", "YYYY-MM-DD", "date", releaseDate, false, v => {
-                            album.value = { ...album.value, release_date: v };
+                            album.value = { ...album.value, release_date: new Date(v) };
                         }),
                         FormTemplates.visibility("public", album, v => {
                             album.value = { ...album.value, visibility: v ? "private" : "public" };
@@ -178,19 +186,17 @@ export class AlbumTemplates {
             .build();
     }
 
-    /**
-     *
-     * @param album {Album}
-     * @param user {User}
-     * @param isSecondary
-     */
-    static albumCard(album, user, isSecondary = false) {
+    static albumCard(album: Album, user: User, isSecondary = false) {
+        if (!album.user) {
+            throw new Error("Album has no user: ", album);
+        }
+
         const icons = [];
         if (album.visibility === "private") {
             icons.push(GenericTemplates.lock());
         }
         const avatarState = signal(Images.DEFAULT_AVATAR);
-        Util.getAvatarFromUserIdAsync(album.userId).then((src) => {
+        Util.getAvatarFromUserIdAsync(album.user_id).then((src) => {
             avatarState.value = src;
         });
 
@@ -205,11 +211,11 @@ export class AlbumTemplates {
                             .classes("flex-v", "small-gap")
                             .children(
                                 AlbumTemplates.title(album.name, album.id, icons),
-                                UserTemplates.userWidget(album.userId, album.user.username, album.user.displayname, avatarState,
+                                UserTemplates.userWidget(album.user_id, album.user.username, album.user.displayname, avatarState,
                                     Util.arrayPropertyMatchesUser(album.user.follows, "followingUserId", user)),
                                 create("span")
                                     .classes("date", "text-small", "nopointer", "color-dim")
-                                    .text(Time.ago(album.releaseDate))
+                                    .text(Time.ago(album.release_date))
                                     .build(),
                             ).build(),
                     ).build(),
@@ -237,15 +243,13 @@ export class AlbumTemplates {
             ).build();
     }
 
-    /**
-     *
-     * @param album {Album}
-     * @param overwriteWidth
-     * @returns {Promise<*>}
-     */
-    static albumCover(album, overwriteWidth = null) {
+    static albumCover(album: Album, overwriteWidth: string|null = null) {
+        if (!album.tracks) {
+            throw new Error(`Album ${album.id} has no tracks`);
+        }
+
         const srcState = signal(Images.DEFAULT_AVATAR);
-        Util.getCoverFileFromAlbumIdAsync(album.id, album.userId).then((src) => {
+        Util.getCoverFileFromAlbumIdAsync(album.id, album.user_id).then((src) => {
             srcState.value = src;
         });
 
@@ -256,8 +260,8 @@ export class AlbumTemplates {
             .id(album.id)
             .onclick(async () => {
                 PlayManager.playFrom("album", album.name, album.id);
-                QueueManager.setContextQueue(album.albumtracks.map(t => t.id));
-                const firstTrack = album.albumtracks[0];
+                QueueManager.setContextQueue(album.tracks!.map(t => t.id));
+                const firstTrack = album.tracks![0];
                 if (!firstTrack) {
                     Ui.notify("This album has no tracks", "error");
                     return;
@@ -279,38 +283,41 @@ export class AlbumTemplates {
             .build();
     }
 
-    static async smallAlbumCover(album) {
+    static async smallAlbumCover(album: Album) {
         return create("img")
             .classes("cover", "rounded", "nopointer", "blurOnParentHover")
             .styles("height", "var(--font-size-large)")
-            .src(await Util.getCoverFileFromAlbumIdAsync(album.id, album.userId))
+            .src(await Util.getCoverFileFromAlbumIdAsync(album.id, album.user_id))
             .alt(album.name)
             .build();
     }
 
-    static albumCardsContainer(children) {
+    static albumCardsContainer(children: AnyNode[]) {
         return create("div")
             .classes("profileContent", "albums", "flex")
             .children(...children)
             .build();
     }
 
-    static async albumPage(data, user) {
-        const album = data.album;
-        const tracks = album.albumtracks;
+    static async albumPage(data: any, user: User) {
+        const album = data.album as Album;
+        const tracks = album.tracks;
+        if (!tracks) {
+            throw new Error(`Album ${album.id} has no tracks`);
+        }
         const a_user = album.user;
         const trackChildren = [];
-        const positionMap = tracks.map(t => t.id);
+        const positionMap = tracks.map((t: Track) => t.id);
         const positionsState = signal(positionMap);
 
-        async function startCallback(trackId) {
+        async function startCallback(trackId: number) {
             await AlbumActions.startTrackInAlbum(album, trackId);
         }
 
         for (let i = 0; i < tracks.length; i++) {
             const track = tracks[i];
             if (data.canEdit) {
-                trackChildren.push(GenericTemplates.dragTargetInList((data) => {
+                trackChildren.push(GenericTemplates.dragTargetInList((data: any) => {
                     TrackActions.reorderTrack("album", album.id, data.id, positionsState, i);
                 }, i.toString()));
             }
