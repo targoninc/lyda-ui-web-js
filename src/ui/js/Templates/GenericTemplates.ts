@@ -629,9 +629,9 @@ export class GenericTemplates {
         });
     }
 
-    static addUserLinkSearchResult(entry, selectedState) {
+    static addUserLinkSearchResult(entry: { id: number, display: string, image: string }, selectedState: Signal<number>) {
         const selectedClassState = signal(selectedState.value === entry.id ? "active" : "_");
-        selectedState.onUpdate = (newSelected) => {
+        selectedState.onUpdate = (newSelected: number) => {
             selectedClassState.value = newSelected === entry.id ? "active" : "_";
         };
         return create("div")
@@ -649,129 +649,6 @@ export class GenericTemplates {
                     .text(entry.display)
                     .build()
             ).build();
-    }
-
-    static select(options, value, id = null, classes: string[] = []) {
-        const baseSelect = create("select")
-            .classes(...classes)
-            .id(id)
-            .value(value)
-            .build();
-
-        return create("div")
-            .children(
-                signalMap(options, baseSelect, option => GenericTemplates.selectOption(option))
-            ).build();
-    }
-
-    static selectOption(option) {
-        return create("option")
-            .text(option.name)
-            .value(option.id)
-            .build();
-    }
-
-    static searchableSelect(options, value, id = null, classes: string[] = []) {
-        const search = signal(options.value.find(o => o.id === value)?.name ?? "");
-        const optionsVisible = signal(false);
-        const filtered = signal(options.value);
-        const selectedIndex = signal(0);
-        const filter = () => {
-            filtered.value = options.value.filter(o => o.name.toLowerCase().includes(search.value.toLowerCase()));
-        }
-        options.subscribe(filter);
-        search.subscribe(filter);
-        filter();
-        const selectedId = signal(options.value[0].id);
-        const updateSelectedId = () => {
-            selectedId.value = filtered.value[selectedIndex.value]?.id;
-        }
-        selectedIndex.subscribe(updateSelectedId);
-        filtered.subscribe(updateSelectedId);
-        updateSelectedId();
-        const currentIcon = computedSignal(optionsVisible, vis => vis ? Icons.UP : Icons.DOWN);
-
-        return create("div")
-            .classes("search-select", "flex-v", "relative")
-            .children(
-                create("div")
-                    .classes("flex", "search-select-visible")
-                    .children(
-                        create("input")
-                            .classes("search-select-input")
-                            .value(search)
-                            .onfocus(() => {
-                                optionsVisible.value = true;
-                            })
-                            .onkeydown((e) => {
-                                switch (e.key) {
-                                    case "Enter":
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        const selectedOption = filtered.value[selectedIndex.value];
-                                        value.value = selectedOption?.id ?? value.value;
-                                        search.value = selectedOption?.name ?? search.value;
-                                        optionsVisible.value = false;
-                                        break;
-                                    case "ArrowDown":
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        selectedIndex.value = (selectedIndex.value + 1) % filtered.value.length;
-                                        break;
-                                    case "ArrowUp":
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        selectedIndex.value = (selectedIndex.value - 1 + filtered.value.length) % filtered.value.length;
-                                        break;
-                                    case "Escape":
-                                    case "Tab":
-                                        optionsVisible.value = false;
-                                        break;
-                                    default:
-                                        if ((e.keyCode > 32 && e.keyCode < 126) || e.key === "Backspace") {
-                                            setTimeout(() => {
-                                                search.value = e.target.value;
-                                                selectedIndex.value = 0;
-                                            });
-                                        }
-                                        break;
-                                }
-                            })
-                            .build(),
-                        create("div")
-                            .classes("search-select-dropdown")
-                            .onclick(() => {
-                                optionsVisible.value = !optionsVisible.value;
-                            })
-                            .children(
-                                GenericTemplates.icon(currentIcon)
-                            ).build()
-                    ).build(),
-                ifjs(optionsVisible, signalMap(filtered, create("div").classes("search-select-options", "flex-v"), option => GenericTemplates.searchSelectOption(option, value, search, optionsVisible, selectedId)))
-            ).build();
-    }
-
-    static searchSelectOption(option, value, search, optionsVisible, selectedId) {
-        let element;
-        const selectedClass = computedSignal(selectedId, (id) => {
-            element?.scrollIntoView({behavior: "smooth", block: "nearest"});
-            return id === option.id ? "selected" : "_";
-        });
-
-        element = create("div")
-            .classes("search-select-option", "padded", selectedClass)
-            .onclick(() => {
-                value.value = option.id;
-                search.value = option.name;
-                optionsVisible.value = false;
-            })
-            .children(
-                ifjs(option.image, GenericTemplates.icon(option.image)),
-                create("span")
-                    .text(option.name)
-                    .build()
-            ).build();
-        return element;
     }
 
     static addLinkedUserModal(title, text, currentValue, icon, confirmText, cancelText, confirmCallback, cancelCallback) {
