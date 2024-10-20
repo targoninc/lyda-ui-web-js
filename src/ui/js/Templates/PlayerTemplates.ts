@@ -171,7 +171,7 @@ export class PlayerTemplates {
         const loopingSingle = PlayManager.isLoopingSingle();
         const loopingContext = PlayManager.isLoopingContext();
         const cover = signal(Images.DEFAULT_AVATAR);
-        Util.getCoverFileFromTrackIdAsync(track.id, track.userId).then((src) => {
+        Util.getCoverFileFromTrackIdAsync(track.id, track.user_id).then((src) => {
             cover.value = src;
         });
 

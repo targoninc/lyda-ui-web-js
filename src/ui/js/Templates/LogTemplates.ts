@@ -8,9 +8,9 @@ export class LogTemplates {
     static async actionLogs(selfUser, data) {
         const users = {};
         for (const log of data) {
-            if (!users[log.userId]) {
-                users[log.userId] = await Util.getUserAsync(log.userId);
-                users[log.userId].avatarUrl = await Util.getAvatarFromUserIdAsync(log.userId);
+            if (!users[log.user_id]) {
+                users[log.user_id] = await Util.getUserAsync(log.user_id);
+                users[log.user_id].avatarUrl = await Util.getAvatarFromUserIdAsync(log.user_id);
             }
             if (!users[log.actionedUserId]) {
                 users[log.actionedUserId] = await Util.getUserAsync(log.actionedUserId);
@@ -62,7 +62,7 @@ export class LogTemplates {
                                     create("td")
                                         .classes("log-user")
                                         .children(
-                                            UserTemplates.userWidget(l.userId, users[l.userId].username, users[l.userId].displayname, users[l.userId].avatarUrl, users[l.userId].follows.some(f => f.followingUserId === selfUser.id)),
+                                            UserTemplates.userWidget(l.user_id, users[l.user_id].username, users[l.user_id].displayname, users[l.user_id].avatarUrl, users[l.user_id].follows.some(f => f.followingUserId === selfUser.id)),
                                         ).build(),
                                     create("td")
                                         .classes("log-action-name")

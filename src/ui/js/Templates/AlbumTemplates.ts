@@ -374,7 +374,7 @@ export class AlbumTemplates {
                                     .build()),
                                 create("img")
                                     .classes("cover", "blurOnParentHover", "nopointer")
-                                    .src(await Util.getCoverFileFromAlbumIdAsync(album.id, album.userId))
+                                    .src(await Util.getCoverFileFromAlbumIdAsync(album.id, album.user_id))
                                     .alt(album.name)
                                     .build()
                             )

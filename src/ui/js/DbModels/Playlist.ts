@@ -1,7 +1,9 @@
-import {Track} from "./Track.ts";
-import {User} from "./User.ts";
+import {Track} from "./Track.js";
+import {User} from "./User.js";
+import {PlaylistLike} from "./PlaylistLike.js";
 
 export interface Playlist {
+    likes?: PlaylistLike[];
     tracks?: Track[];
     user?: User;
     id: number;

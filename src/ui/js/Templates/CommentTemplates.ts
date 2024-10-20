@@ -167,7 +167,7 @@ export class CommentTemplates {
             actions.push(deleteAction);
         }
         const avatarState = signal(Images.DEFAULT_AVATAR);
-        Util.getAvatarFromUserIdAsync(comment.userId).then(avatar => {
+        Util.getAvatarFromUserIdAsync(comment.user_id).then(avatar => {
             avatarState.value = avatar;
         });
 
@@ -179,7 +179,7 @@ export class CommentTemplates {
                 create("div")
                     .classes("flex")
                     .children(
-                        UserTemplates.userWidget(comment.userId, comment.user.username, comment.user.displayname, avatarState,
+                        UserTemplates.userWidget(comment.user_id, comment.user.username, comment.user.displayname, avatarState,
                             Util.arrayPropertyMatchesUser(comment.user.follows, "followingUserId", user), ["comment_id", comment.id]),
                         create("span")
                             .classes("text", "text-small", "color-dim", "align-center")

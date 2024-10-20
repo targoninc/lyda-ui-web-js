@@ -15,7 +15,7 @@ import {Ui} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
 import {User} from "../DbModels/User.ts";
 import {Playlist} from "../DbModels/Playlist.ts";
-import {create, ifjs, signal, computedSignal} from "../../fjsc/f2.ts";
+import {create, ifjs, signal, computedSignal, AnyNode, HtmlPropertyValue} from "../../fjsc/f2.ts";
 import {Track} from "../DbModels/Track.ts";
 import {Album} from "../DbModels/Album.ts";
 
@@ -115,15 +115,14 @@ export class PlaylistTemplates {
             ).build();
     }
 
-    static async playlistInAddList(playlist, isChecked) {
+    static async playlistInAddList(playlist: Playlist, isChecked: boolean) {
+        const checked = signal(isChecked);
+
         return create("div")
             .classes("flex", "rounded", "padded", "card")
-            .onclick(() => {
-                let checkbox = document.getElementById("playlist_" + playlist.id);
-                checkbox.checked = !checkbox.checked;
-            })
+            .onclick(() => { checked.value = !checked.value })
             .children(
-                GenericTemplates.checkbox("playlist_" + playlist.id, isChecked, "", false),
+                GenericTemplates.checkbox("playlist_" + playlist.id, checked, "", false),
                 await PlaylistTemplates.smallPlaylistCover(playlist),
                 create("span")
                     .classes("nopointer")
@@ -134,13 +133,13 @@ export class PlaylistTemplates {
     }
 
     static newPlaylistModal() {
-        const state = signal({
+        const playlist = signal(<Playlist>{
             name: "",
             description: "",
             visibility: "public",
         });
-        const name = computedSignal(state, s => s.name);
-        const description = computedSignal(state, s => s.description);
+        const name = computedSignal<string>(playlist, (s: Playlist) => s.name);
+        const description = computedSignal<string>(playlist, (s: Playlist) => s.description);
 
         return create("div")
             .classes("flex-v")
@@ -157,12 +156,12 @@ export class PlaylistTemplates {
                     .id("newPlaylistForm")
                     .children(
                         FormTemplates.textField("Name", "name", "Playlist name", "text", name, true, v => {
-                            state.value = { ...state.value, name: v };
+                            playlist.value = { ...playlist.value, name: v };
                         }),
                         FormTemplates.textAreaField("Description", "description", "Description", description, false, 5, v => {
-                            state.value = { ...state.value, description: v };
+                            playlist.value = { ...playlist.value, description: v };
                         }),
-                        FormTemplates.visibility("public", state),
+                        FormTemplates.visibility("public", playlist),
                     ).build(),
                 create("div")
                     .classes("flex")
@@ -170,7 +169,7 @@ export class PlaylistTemplates {
                         FJSC.button({
                             text: "Create playlist",
                             onclick: async () => {
-                                await PlaylistActions.createNewPlaylist(state.value);
+                                await PlaylistActions.createNewPlaylist(playlist.value);
                                 Util.removeModal();
                             },
                             icon: {
@@ -215,9 +214,15 @@ export class PlaylistTemplates {
             icons.push(GenericTemplates.lock());
         }
         const coverState = signal(Images.DEFAULT_AVATAR);
-        Util.getCoverFileFromPlaylistIdAsync(playlist.id, playlist.userId).then(cover => {
+        Util.getCoverFileFromPlaylistIdAsync(playlist.id, playlist.user_id).then(cover => {
             coverState.value = cover;
         });
+        if (!playlist.user) {
+            throw new Error(`Playlist ${playlist.id} has no user`);
+        }
+        if (!playlist.likes) {
+            throw new Error(`Playlist ${playlist.id} has no likes`);
+        }
 
         return create("div")
             .classes("playlist-card", "padded", "flex-v", "small-gap", isSecondary ? "secondary" : "_")
@@ -230,25 +235,25 @@ export class PlaylistTemplates {
                             .classes("flex-v", "small-gap")
                             .children(
                                 PlaylistTemplates.title(playlist.name, playlist.id, icons),
-                                UserTemplates.userWidget(playlist.userId, playlist.user.username, playlist.user.displayname, coverState,
+                                UserTemplates.userWidget(playlist.user_id, playlist.user.username, playlist.user.displayname, coverState,
                                     Util.arrayPropertyMatchesUser(playlist.user.follows, "followingUserId", user)),
                                 create("span")
                                     .classes("date", "text-small", "nopointer", "color-dim")
-                                    .text(Time.ago(playlist.createdAt))
+                                    .text(Time.ago(playlist.created_at))
                                     .build(),
                             ).build(),
                     ).build(),
                 create("div")
                     .classes("stats-container", "flex", "rounded")
                     .children(
-                        StatisticsTemplates.likesIndicator("playlist", playlist.id, playlist.playlistlikes.length,
-                            Util.arrayPropertyMatchesUser(playlist.playlistlikes, "userId", user)),
-                        StatisticsTemplates.likeListOpener(playlist.id, playlist.playlistlikes, user),
+                        StatisticsTemplates.likesIndicator("playlist", playlist.id, playlist.likes.length,
+                            Util.arrayPropertyMatchesUser(playlist.likes, "userId", user)),
+                        StatisticsTemplates.likeListOpener(playlist.id, playlist.likes, user),
                     ).build()
             ).build();
     }
 
-    static title(title, id, icons) {
+    static title(title: HtmlPropertyValue, id: HtmlPropertyValue, icons: AnyNode[] = []) {
         return create("div")
             .classes("flex")
             .children(
@@ -262,11 +267,14 @@ export class PlaylistTemplates {
             ).build();
     }
 
-    static playlistCover(playlist, overwriteWidth = null) {
+    static playlistCover(playlist: Playlist, overwriteWidth: string|null = null) {
         const coverState = signal(Images.DEFAULT_AVATAR);
-        Util.getCoverFileFromPlaylistIdAsync(playlist.id, playlist.userId).then(cover => {
+        Util.getCoverFileFromPlaylistIdAsync(playlist.id, playlist.user_id).then(cover => {
             coverState.value = cover;
         });
+        if (!playlist.tracks) {
+            throw new Error(`Playlist ${playlist.id} has no tracks`);
+        }
 
         return create("div")
             .classes("cover-container", "relative", "pointer")
@@ -276,8 +284,8 @@ export class PlaylistTemplates {
             .onclick(async () => {
                 Ui.notify("Starting playlist " + playlist.id, "info");
                 PlayManager.playFrom("playlist", playlist.name, playlist.id);
-                QueueManager.setContextQueue(playlist.playlisttracks.map(t => t.id));
-                const firstTrack = playlist.playlisttracks[0];
+                QueueManager.setContextQueue(playlist.tracks!.map(t => t.id));
+                const firstTrack = playlist.tracks![0];
                 if (!firstTrack) {
                     Ui.notify("This playlist has no tracks", "error");
                     return;
@@ -295,41 +303,49 @@ export class PlaylistTemplates {
                     .classes("play-button-icon", "centeredInParent", "showOnParentHover", "inline-icon", "svgInverted", "nopointer")
                     .src(Icons.PLAY)
                     .build(),
-            )
-            .build();
+            ).build();
     }
 
-    static async smallPlaylistCover(playlist) {
+    static async smallPlaylistCover(playlist: Playlist) {
         return create("img")
             .classes("cover", "rounded", "nopointer", "blurOnParentHover")
             .styles("height", "var(--font-size-large)")
-            .src(await Util.getCoverFileFromPlaylistIdAsync(playlist.id, playlist.userId))
+            .src(await Util.getCoverFileFromPlaylistIdAsync(playlist.id, playlist.user_id))
             .alt(playlist.name)
             .build();
     }
 
-    static playlistCardsContainer(children) {
+    static playlistCardsContainer(children: AnyNode[]) {
         return create("div")
             .classes("profileContent", "playlists", "flex")
             .children(...children)
             .build();
     }
 
-    static async playlistPage(data, user) {
+    static async playlistPage(data: { playlist: Playlist, canEdit: boolean }, user: User) {
         const playlist = data.playlist;
-        const tracks = playlist.playlisttracks;
+        const tracks = playlist.tracks;
+        if (!tracks) {
+            throw new Error(`Playlist ${playlist.id} has no tracks`);
+        }
         const a_user = playlist.user;
+        if (!a_user) {
+            throw new Error(`Playlist ${playlist.id} has no user`);
+        }
+        if (!playlist.likes) {
+            throw new Error(`Playlist ${playlist.id} has no likes array`);
+        }
         const trackChildren = [];
         const positionMap = tracks.map(t => t.id);
         const positionsState = signal(positionMap);
 
-        async function startCallback(trackId) {
+        async function startCallback(trackId: number) {
             await PlaylistActions.startTrackInPlaylist(playlist, trackId);
         }
 
         for (let i = 0; i < tracks.length; i++) {
             const track = tracks[i];
-            trackChildren.push(GenericTemplates.dragTargetInList((data) => {
+            trackChildren.push(GenericTemplates.dragTargetInList((data: { id: number }) => {
                 TrackActions.reorderTrack("playlist", playlist.id, data.id, positionsState, i);
             }, i.toString()));
             trackChildren.push(TrackTemplates.listTrackInAlbumOrPlaylist(track, user, data.canEdit, playlist, positionsState, "playlist", startCallback));
@@ -349,7 +365,7 @@ export class PlaylistTemplates {
         if (data.canEdit) {
             editActions.push(
                 GenericTemplates.action(Icons.DELETE, "Delete", playlist.id, async (e) => {
-                    await Ui.getConfirmationModal("Delete playlist", "Are you sure you want to delete this playlist?", "Yes", "No", PlaylistActions.deletePlaylistFromElement.bind(null, e), () => {
+                    await Ui.getConfirmationModal("Delete playlist", "Are you sure you want to delete this playlist?", "Yes", "No", () => PlaylistActions.deletePlaylist(playlist.id), () => {
                     }, Icons.WARNING);
                 }, [], ["secondary", "negative"])
             );
@@ -367,10 +383,8 @@ export class PlaylistTemplates {
                             .text(playlist.name)
                             .build(),
                         UserTemplates.userWidget(a_user.id, a_user.username, a_user.displayname, await Util.getAvatarFromUserIdAsync(a_user.id),
-                            Util.arrayPropertyMatchesUser(a_user.follows, "followingUserId", user),
-                            [], ["widget-secondary"])
-                    )
-                    .build(),
+                            Util.arrayPropertyMatchesUser(a_user.follows, "followingUserId", user), [], ["widget-secondary"])
+                    ).build(),
                 create("div")
                     .classes("playlist-info-container", "flex")
                     .children(
@@ -385,7 +399,7 @@ export class PlaylistTemplates {
                                     .build()),
                                 create("img")
                                     .classes("cover", "blurOnParentHover", "nopointer")
-                                    .src(await Util.getCoverFileFromPlaylistIdAsync(playlist.id, playlist.userId))
+                                    .src(await Util.getCoverFileFromPlaylistIdAsync(playlist.id, playlist.user_id))
                                     .alt(playlist.name)
                                     .build()
                             )
@@ -399,16 +413,16 @@ export class PlaylistTemplates {
                                     .children(
                                         create("span")
                                             .classes("date", "text-small")
-                                            .text("Created " + Util.formatDate(playlist.createdAt))
+                                            .text("Created " + Util.formatDate(playlist.created_at))
                                             .build()
                                     )
                                     .build(),
                                 create("div")
                                     .classes("stats-container", "flex", "rounded")
                                     .children(
-                                        StatisticsTemplates.likesIndicator("playlist", playlist.id, playlist.playlistlikes.length,
-                                            Util.arrayPropertyMatchesUser(playlist.playlistlikes, "userId", user)),
-                                        StatisticsTemplates.likeListOpener(playlist.id, playlist.playlistlikes, user),
+                                        StatisticsTemplates.likesIndicator("playlist", playlist.id, playlist.likes.length,
+                                            Util.arrayPropertyMatchesUser(playlist.likes, "userId", user)),
+                                        StatisticsTemplates.likeListOpener(playlist.id, playlist.likes, user),
                                     ).build(),
                             )
                             .build()
@@ -423,28 +437,29 @@ export class PlaylistTemplates {
             .build();
     }
 
-    static audioActions(playlist, user, editActions = []) {
+    static audioActions(playlist: Playlist, user: User, editActions: AnyNode[] = []) {
+        if (!playlist.tracks) {
+            throw new Error(`Playlist ${playlist.id} has no tracks`);
+        }
+
         const inQueue = QueueManager.isInManualQueue(playlist.id);
         const playingFrom = PlayManager.getPlayingFrom();
-        const isPlaying =
-            playingFrom.type === "album" && playingFrom.id === playlist.id;
+        const isPlaying = playingFrom.type === "album" && playingFrom.id === playlist.id;
         const manualQueue = QueueManager.getManualQueue();
-        const allTracksInQueue = playlist.playlisttracks.every((t) =>
-            manualQueue.includes(t.trackId),
-        );
-        PlayManager.addStreamClientIfNotExists(playlist.id, playlist.duration);
+        const allTracksInQueue = playlist.tracks.every((t) => manualQueue.includes(t.id));
+        const duration = playlist.tracks.reduce((acc, t) => acc + t.length, 0);
 
-        let actions = [];
+        let actions: AnyNode[] = [];
         if (user) {
             actions = [
                 GenericTemplates.action(isPlaying ? Icons.PAUSE : Icons.PLAY, isPlaying ? "Pause" : "Play", playlist.id, async () => {
-                    const firstTrack = playlist.playlisttracks[0];
+                    const firstTrack = playlist.tracks![0];
                     await PlaylistActions.startTrackInPlaylist(playlist, firstTrack.id, true);
-                }, ["duration", playlist.duration], [playlist.playlisttracks.length === 0 ? "nonclickable" : "_", "secondary"]),
+                }, ["duration", duration.toString()], [playlist.tracks.length === 0 ? "nonclickable" : "_", "secondary"]),
                 GenericTemplates.action(allTracksInQueue ? Icons.UNQUEUE : Icons.QUEUE, allTracksInQueue ? "Unqueue" : "Queue", playlist.id, () => {
-                    for (let track of playlist.albumtracks) {
-                        if (!manualQueue.includes(track.trackId)) {
-                            QueueManager.addToManualQueue(track.trackId);
+                    for (let track of playlist.tracks!) {
+                        if (!manualQueue.includes(track.id)) {
+                            QueueManager.addToManualQueue(track.id);
                         }
                     }
                 }, [], [inQueue ? "audio-queueremove" : "audio-queueadd", "secondary"])
@@ -456,7 +471,6 @@ export class PlaylistTemplates {
             .children(
                 ...actions,
                 ...editActions
-            )
-            .build();
+            ).build();
     }
 }

@@ -1,4 +1,3 @@
-import {create, nullElement, signal} from "https://fjs.targoninc.com/f.js";
 import {Util} from "../Classes/Util.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
@@ -14,9 +13,10 @@ import {CustomText} from "../Classes/Helpers/CustomText.ts";
 import {Permissions} from "../Enums/Permissions.ts";
 import {Images} from "../Enums/Images.ts";
 import {navigate} from "../Routing/Router.ts";
+import {create, HtmlPropertyValue, nullElement, signal, StringOrSignal} from "../../fjsc/f2.ts";
 
 export class UserTemplates {
-    static userWidget(user_id, username, displayname, avatar, following, extraAttributes = undefined, extraClasses = undefined) {
+    static userWidget(user_id: number, username: string, displayname: string, avatar: StringOrSignal, following: boolean, extraAttributes: StringOrSignal[] = [], extraClasses: StringOrSignal[] = []) {
         const base = create("a");
         if (extraAttributes) {
             base.attributes(...extraAttributes);
@@ -91,7 +91,7 @@ export class UserTemplates {
             .build();
     }
 
-    static userIcon(user_id, avatar) {
+    static userIcon(user_id: HtmlPropertyValue, avatar: string) {
         return create("img")
             .classes("user-icon", "user-avatar", "align-center", "nopointer")
             .attributes("data-user-id", user_id)
@@ -99,7 +99,7 @@ export class UserTemplates {
             .build();
     }
 
-    static followButton(initialFollowing, user_id, noText = false) {
+    static followButton(initialFollowing: boolean, user_id: HtmlPropertyValue, noText = false) {
         const following = signal(initialFollowing);
 
         return create("div")
@@ -112,10 +112,10 @@ export class UserTemplates {
                     .build(),
                 noText ? null : create("span")
                     .classes("text-small", "nopointer")
-                    .text(initialFollowing === true ? "Unfollow" : "Follow")
+                    .text(initialFollowing ? "Unfollow" : "Follow")
                     .build()
             ).onclick(async (e) => {
-                await TrackActions.runFollowFunctionFromElement(e, userId, following);
+                await TrackActions.runFollowFunctionFromElement(e, user_id, following);
             })
             .build();
     }

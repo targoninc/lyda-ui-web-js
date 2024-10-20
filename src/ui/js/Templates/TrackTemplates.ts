@@ -33,9 +33,9 @@ export class TrackTemplates {
         if (isPrivate) {
             icons.push(GenericTemplates.lock());
         }
-        const collab = track.trackCollaborators.find(collab => collab.userId === profileId);
+        const collab = track.trackCollaborators.find(collab => collab.user_id === profileId);
         const avatarState = signal(Images.DEFAULT_AVATAR);
-        Util.getAvatarFromUserIdAsync(track.userId).then((src) => {
+        Util.getAvatarFromUserIdAsync(track.user_id).then((src) => {
             avatarState.value = src;
         });
 
@@ -56,7 +56,7 @@ export class TrackTemplates {
                         create("div")
                             .classes("flex-v", "small-gap")
                             .children(
-                                UserTemplates.userWidget(track.userId, track.user.username, track.user.displayname, avatarState,
+                                UserTemplates.userWidget(track.user_id, track.user.username, track.user.displayname, avatarState,
                                     Util.arrayPropertyMatchesUser(track.user.follows, "followingUserId", user)),
                                 create("span")
                                     .classes("date", "text-small", "nopointer", "color-dim")
@@ -120,7 +120,7 @@ export class TrackTemplates {
 
     static trackCover(track, overwriteWidth = null, startCallback = null) {
         const imageState = signal(Images.DEFAULT_AVATAR);
-        Util.getCoverFileFromTrackIdAsync(track.id, track.userId).then((src) => {
+        Util.getCoverFileFromTrackIdAsync(track.id, track.user_id).then((src) => {
             imageState.value = src;
         });
 
@@ -270,7 +270,7 @@ export class TrackTemplates {
     static repostIndicator(repost) {
         return create("div")
             .classes("pill", "padded-inline", "flex", "rounded-max", "repost-indicator", "clickable", "fakeButton")
-            .attributes("user_id", repost.userId, "username", repost.username)
+            .attributes("user_id", repost.user_id, "username", repost.username)
             .onclick(UserActions.openProfileFromElement)
             .children(
                 create("div")
@@ -298,7 +298,7 @@ export class TrackTemplates {
             graphics.push(TrackTemplates.waveform(track.id, track.processed, track.length, []));
         }
         const avatarState = signal(Images.DEFAULT_AVATAR);
-        Util.getAvatarFromUserIdAsync(track.userId).then((src) => {
+        Util.getAvatarFromUserIdAsync(track.user_id).then((src) => {
             avatarState.value = src;
         });
         const inQueue = signal(QueueManager.isInManualQueue(track.id));
@@ -333,7 +333,7 @@ export class TrackTemplates {
                                                 create("div")
                                                     .classes("flex")
                                                     .children(
-                                                        UserTemplates.userWidget(track.userId, track.user.username, track.user.displayname, avatarState,
+                                                        UserTemplates.userWidget(track.user_id, track.user.username, track.user.displayname, avatarState,
                                                             Util.arrayPropertyMatchesUser(track.user.follows, "followingUserId", user),
                                                             [], ["align-center", "widget-secondary"]),
                                                         create("span")
@@ -511,17 +511,17 @@ export class TrackTemplates {
      */
     static collaborator(track, user, collaborator) {
         const avatarState = signal(Images.DEFAULT_AVATAR);
-        Util.getAvatarFromUserIdAsync(collaborator.userId).then((src) => {
+        Util.getAvatarFromUserIdAsync(collaborator.user_id).then((src) => {
             avatarState.value = src;
         });
         let actionButton = null, classes = [];
-        if (user && user.id === track.userId) {
+        if (user && user.id === track.user_id) {
             actionButton = GenericTemplates.action(Icons.X, "Remove", track.id, async () => {
-                await TrackActions.removeCollaboratorFromTrack(track.id, collaborator.userId);
+                await TrackActions.removeCollaboratorFromTrack(track.id, collaborator.user_id);
             });
             classes.push("no-redirect");
         }
-        return UserTemplates.linkedUser(collaborator.userId, collaborator.user.username, collaborator.user.displayname, avatarState, collaborator.collaboratorType.name, actionButton, [], classes);
+        return UserTemplates.linkedUser(collaborator.user_id, collaborator.user.username, collaborator.user.displayname, avatarState, collaborator.collaboratorType.name, actionButton, [], classes);
     }
 
     static async trackPage(trackData, user) {
@@ -530,9 +530,9 @@ export class TrackTemplates {
          */
         const track = trackData.track;
         const trackState = signal(TrackProcessor.forDownload(track));
-        const liked = user ? track.tracklikes.some(like => like.userId === user.id) : false;
-        const reposted = user ? track.reposts.some(repost => repost.userId === user.id) : false;
-        const commented = user ? track.comments.some(comment => comment.userId === user.id) : false;
+        const liked = user ? track.tracklikes.some(like => like.user_id === user.id) : false;
+        const reposted = user ? track.reposts.some(repost => repost.user_id === user.id) : false;
+        const commented = user ? track.comments.some(comment => comment.user_id === user.id) : false;
         const collaborators = track.trackCollaborators ?? [];
         const toAppend = [];
         const linkedUserState = signal(collaborators);
@@ -796,7 +796,7 @@ export class TrackTemplates {
 
     static toBeApprovedTrack(collabType, music, user) {
         const avatarState = signal(Images.DEFAULT_AVATAR);
-        Util.getAvatarFromUserIdAsync(music.userId).then((src) => {
+        Util.getAvatarFromUserIdAsync(music.user_id).then((src) => {
             avatarState.value = src;
         });
 
@@ -815,7 +815,7 @@ export class TrackTemplates {
                             .classes("text-small")
                             .text(Time.ago(music.createdAt))
                             .build(),
-                        UserTemplates.userWidget(music.userId, music.user.username, music.user.displayname, avatarState, music.user.follows.some(follow => follow.followingUserId === user.id)),
+                        UserTemplates.userWidget(music.user_id, music.user.username, music.user.displayname, avatarState, music.user.follows.some(follow => follow.followingUserId === user.id)),
                         create("span")
                             .text("Requested you to be " + collabType.name)
                             .build(),

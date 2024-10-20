@@ -365,7 +365,7 @@ export class PlayManager {
     }
 
     static async parseTrackData(trackData: any) {
-        trackData.track.user = LydaCache.get("user:" + trackData.track.userId)?.content ?? await Util.getUserAsync(trackData.track.userId);
+        trackData.track.user = LydaCache.get("user:" + trackData.track.user_id)?.content ?? await Util.getUserAsync(trackData.track.user_id);
         trackData.user = await Util.getUserAsync();
         if (!window.trackInfo) {
             window.trackInfo = {};

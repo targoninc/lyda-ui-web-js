@@ -13,6 +13,7 @@ import {
 } from "../../fjsc/f2.js";
 import {SearchableSelectConfig} from "../../fjsc/Types.ts";
 import {Album} from "../DbModels/Album.ts";
+import {Playlist} from "../DbModels/Playlist.ts";
 
 export class FormTemplates {
     static fileField(title: string, text: string, name: string, accept: string, required = false, onchange = (v) => {}) {
@@ -27,7 +28,7 @@ export class FormTemplates {
             ).build();
     }
 
-    static visibility(value = "public", parentState: Signal<Album>, onchange = v => {}) {
+    static visibility(value = "public", parentState: Signal<Album|Playlist>, onchange = (v: string) => {}) {
         const state = computedSignal<string>(parentState, (p: Album) => p.visibility ?? "public");
         return GenericTemplates.toggle("Private", "visibility", () => {
             state.value = state.value === "public" ? "private" : "public";

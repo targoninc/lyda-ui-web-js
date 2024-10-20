@@ -89,10 +89,10 @@ export class StatisticsTemplates {
 
         const itemsList = items.map(item => {
             const avatar = signal(Images.DEFAULT_AVATAR);
-            Util.getAvatarFromUserIdAsync(item.userId).then(avatarUrl => {
+            Util.getAvatarFromUserIdAsync(item.user_id).then(avatarUrl => {
                 avatar.value = avatarUrl;
             });
-            return UserTemplates.userWidget(item.userId, item.user.username, item.user.displayname, avatar, Util.arrayPropertyMatchesUser(item.user.follows, "followingUserId", user));
+            return UserTemplates.userWidget(item.user_id, item.user.username, item.user.displayname, avatar, Util.arrayPropertyMatchesUser(item.user.follows, "followingUserId", user));
         });
 
         return create("div")

@@ -104,7 +104,7 @@ export class Lyda {
                 return selfUser ? f.followingUserId === selfUser.id : false;
             });
             const followsBack = user.following.some(f => {
-                return selfUser ? f.userId === selfUser.id : false;
+                return selfUser ? f.user_id === selfUser.id : false;
             });
             element.appendChild(UserTemplates.profileInfo(user, selfUser, isOwnProfile, permissions, following, followsBack));
             ProfilePage.addTabSectionAsync(element, user, selfUser, isOwnProfile).then();

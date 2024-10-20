@@ -7,26 +7,22 @@ import {PlayManager} from "../Streaming/PlayManager.ts";
 import {QueueManager} from "../Streaming/QueueManager.ts";
 import {navigate} from "../Routing/Router.ts";
 import {Signal} from "../../fjsc/f2.ts";
+import {Playlist} from "../DbModels/Playlist.ts";
+import {Track} from "../DbModels/Track.ts";
+import {Album} from "../DbModels/Album.ts";
 
 export class PlaylistActions {
-    static async deletePlaylistFromElement(e) {
-        if (!confirm) {
-            return;
-        }
-        await PlaylistActions.deletePlaylist(e.target.id);
-    }
-
-    static async openAddToPlaylistModal(objectToBeAdded, type) {
-        const res = await Api.getAsync(Api.endpoints.playlists.byUserId, {user_id: objectToBeAdded.userId});
+    static async openAddToPlaylistModal(objectToBeAdded: Album|Track, type: "track"|"album") {
+        const res = await Api.getAsync(Api.endpoints.playlists.byUserId, {user_id: objectToBeAdded.user_id});
         if (res.code !== 200) {
             console.error("Failed to get playlists: ", res.data);
             return;
         }
         let modal;
         if (type === "track") {
-            modal = GenericTemplates.modal([await PlaylistTemplates.addTrackToPlaylistModal(objectToBeAdded, res.data)]);
+            modal = GenericTemplates.modal([await PlaylistTemplates.addTrackToPlaylistModal(objectToBeAdded as Track, res.data)]);
         } else {
-            modal = GenericTemplates.modal([await PlaylistTemplates.addAlbumToPlaylistModal(objectToBeAdded, res.data)]);
+            modal = GenericTemplates.modal([await PlaylistTemplates.addAlbumToPlaylistModal(objectToBeAdded as Album, res.data)]);
         }
         Ui.addModal(modal);
     }
@@ -36,7 +32,7 @@ export class PlaylistActions {
         Ui.addModal(modal);
     }
 
-    static async createNewPlaylist(playlist) {
+    static async createNewPlaylist(playlist: Playlist) {
         const res = await Api.postAsync(Api.endpoints.playlists.actions.new, playlist);
         if (res.code !== 200) {
             Ui.notify("Failed to create playlist: " + res.data, "error");
@@ -84,7 +80,7 @@ export class PlaylistActions {
         return true;
     }
 
-    static async openPlaylistFromElement(e) {
+    static async openPlaylistFromElement(e: Event) {
         let trackId = Util.getPlaylistIdFromEvent(e);
         if (trackId === "") {
             return;
