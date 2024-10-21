@@ -7,19 +7,19 @@ import {TrackActions} from "../Actions/TrackActions.ts";
 import {
     create,
     signal,
-    computedSignal,
-    signalMap,
     HtmlPropertyValue,
     ifjs,
     StringOrSignal,
     TypeOrSignal,
-    Signal, nullElement, AnyNode, AnyElement
+    Signal,
+    AnyNode,
+    AnyElement
 } from "../../fjsc/f2.ts";
 import {FJSC} from "../../fjsc";
 import {SearchableSelectConfig} from "../../fjsc/Types.ts";
 import {Util} from "../Classes/Util.ts";
 import {CollaboratorType} from "../DbModels/CollaboratorType.ts";
-import {navigate, Router} from "../Routing/Router.ts";
+import {navigate} from "../Routing/Router.ts";
 
 export class GenericTemplates {
     static buttonWithIcon(text: HtmlPropertyValue, icon: HtmlPropertyValue, alt: HtmlPropertyValue, callback = () => {
@@ -38,6 +38,7 @@ export class GenericTemplates {
     }
 
     static icon(icon: HtmlPropertyValue, adaptive = false) {
+        // @ts-ignore
         const isMaterial = icon && (icon as string) && icon.includes && !icon.includes(window.location.origin);
         const iconClass = adaptive ? "adaptive-icon" : "inline-icon";
 
@@ -651,7 +652,9 @@ export class GenericTemplates {
             ).build();
     }
 
-    static addLinkedUserModal(title, text, currentValue, icon, confirmText, cancelText, confirmCallback, cancelCallback) {
+    static addLinkedUserModal(title: HtmlPropertyValue, text: HtmlPropertyValue, currentValue: HtmlPropertyValue,
+                              icon: HtmlPropertyValue, confirmText: StringOrSignal, cancelText: StringOrSignal,
+                              confirmCallback: Function, cancelCallback: Function) {
         const selectedState = signal(0);
         const userMap = new Map();
         const collabTypeOptions = signal(create("span").text("Loading collab types...").build());
@@ -689,7 +692,8 @@ export class GenericTemplates {
                             .id("addUserSearch")
                             .value(currentValue ?? "")
                             .oninput(async (e) => {
-                                const search = e.target.value;
+                                const target = e.target as HTMLInputElement;
+                                const search = target.value;
                                 const res = await Api.getAsync(Api.endpoints.search, {
                                     search,
                                     filters: JSON.stringify(["users"])
@@ -739,8 +743,8 @@ export class GenericTemplates {
         );
     }
 
-    static breadcrumbs(pageMap, history, stepState) {
-        return history.value.map((step) => {
+    static breadcrumbs(pageMap: any, history: Signal<any>, stepState: Signal<any>) {
+        return history.value.map((step: any) => {
             if (!pageMap[step]) {
                 return null;
             }
@@ -783,18 +787,18 @@ export class GenericTemplates {
             .build();
     }
 
-    static inlineLink(link, text, newTab = true) {
+    static inlineLink(link: Function|StringOrSignal, text: HtmlPropertyValue, newTab = true) {
         if (link.constructor === Function) {
             return create("a")
                 .classes("inlineLink")
-                .onclick(link)
+                .onclick(link as Function)
                 .text(text)
                 .build();
         }
 
         return create("a")
             .classes("inlineLink")
-            .href(link)
+            .href(link as StringOrSignal)
             .target(newTab ? "_blank" : "_self")
             .text(text)
             .build()
