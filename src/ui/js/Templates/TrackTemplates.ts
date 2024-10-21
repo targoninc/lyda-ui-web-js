@@ -431,7 +431,7 @@ export class TrackTemplates {
                 });
         }
 
-        const playingClasses = window.currentTrackId === track.id ? ["playing", "shadow"] : [];
+        const playingClasses = window.currentTrackId === track.id ? ["playing"] : [];
 
         return item.children(
             create("div")

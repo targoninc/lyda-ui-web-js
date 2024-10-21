@@ -94,7 +94,7 @@ export class CommentTemplates {
                     .classes("comment-box-input-container", "flex", "fullWidth")
                     .children(
                         create("input")
-                            .classes("comment-box-input", "flex", "fullWidth", "shadow")
+                            .classes("comment-box-input", "flex", "fullWidth")
                             .type("text")
                             .attributes("placeholder", "New comment...", "track_id", track_id)
                             .onkeydown(TrackActions.newCommentFromElement)
@@ -141,7 +141,7 @@ export class CommentTemplates {
                     })
                     .build(),
                 create("div")
-                    .classes("listFromStatsIndicator", "popout-below", "comments", "shadow", "flex-v", "hidden", "padded", "rounded")
+                    .classes("listFromStatsIndicator", "popout-below", "comments", "flex-v", "hidden", "padded", "rounded")
                     .children(
                         create("span")
                             .classes("comments-label", "text", "label", "padded-inline", "rounded", "text-small")

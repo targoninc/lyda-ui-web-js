@@ -111,7 +111,7 @@ export class StatisticsTemplates {
                     })
                     .build(),
                 create("div")
-                    .classes("listFromStatsIndicator", "popout-below", type, "shadow", "flex-v", "padded", "rounded", listClass)
+                    .classes("listFromStatsIndicator", "popout-below", type, "flex-v", "padded", "rounded", listClass)
                     .children(
                         create("span")
                             .classes("text", "label", "padded-inline", "rounded", "text-small")

@@ -243,7 +243,7 @@ export class NavTemplates {
         let unreadNotifications = notifications.filter(notification => notification.read === 0);
 
         const notificationContainer = create("div")
-            .classes("hidden", "shadow", "popout-below", "rounded", "absolute-align-right", "notification-list")
+            .classes("hidden", "popout-below", "rounded", "absolute-align-right", "notification-list")
             .children(...notificationList)
             .build();
 
