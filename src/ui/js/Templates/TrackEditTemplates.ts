@@ -21,6 +21,8 @@ import {
 } from "../../fjsc/f2.ts";
 import {Track} from "../DbModels/Track.ts";
 import {FJSC} from "../../fjsc";
+import {User} from "../DbModels/User.ts";
+import {InputType} from "../../fjsc/Types.ts";
 
 export class TrackEditTemplates {
     static getStateWithParentUpdate(key, value, parentState) {
@@ -253,9 +255,19 @@ export class TrackEditTemplates {
                             }),
                             ifjs(isPrivate, GenericTemplates.text("When your track is private, it will only be visible to you and people you share the secret link with.", ["warning"]))
                         ).build(),
-                    TrackEditTemplates.title(state, errorFields),
+                    FJSC.input<string>({
+                        type: InputType.text,
+                        required: true,
+                        name: "title",
+                        label: "Title",
+                        placeholder: "Track title",
+                        value: computedSignal(state, (s: Track) => s.title),
+                        onchange: (v) => {
+                            state.value = { ...state.value, title: v };
+                        }
+                    }),
                     TrackEditTemplates.collaborators(state.value.credits, state),
-                    ifjs(enableLinkedUsers, TrackEditTemplates.linkedUsers(state.value.linkedUsers, state)),
+                    ifjs(enableLinkedUsers, TrackEditTemplates.linkedUsers(state.value.collaborators, state)),
                     TrackEditTemplates.releaseDate(state.value.releaseDate, state),
                     FormTemplates.genre(state),
                     TrackEditTemplates.isrc(state.value.isrc, state),
@@ -435,7 +447,7 @@ export class TrackEditTemplates {
         });
     }
 
-    static linkedUsers(linkedUsers = [], parentState = null) {
+    static linkedUsers(linkedUsers = [], parentState: Signal<Track>|null = null) {
         const linkedUserState = signal(linkedUsers);
         const sendJson = signal(JSON.stringify(linkedUsers));
         const userMap = new Map();
@@ -454,10 +466,10 @@ export class TrackEditTemplates {
             }
             const sendValue = newValue.map((id: number) => userMap.get(id));
             sendJson.value = JSON.stringify(sendValue);
-            if (parentState && parentState.value.linkedUsers !== sendValue) {
+            if (parentState && parentState.value.collaborators !== sendValue) {
                 parentState.value = {
                     ...parentState.value,
-                    linkedUsers: sendValue
+                    collaborators: sendValue
                 };
             }
         };
@@ -480,7 +492,7 @@ export class TrackEditTemplates {
                             .value(sendJson)
                             .name("linked_users")
                             .build(),
-                        TrackEditTemplates.addLinkedUserButton((newUsername, newUser) => {
+                        TrackEditTemplates.addLinkedUserButton((newUsername: string, newUser: User) => {
                             userMap.set(newUser.id, newUser);
                             if (!linkedUserState.value.includes(newUser.id)) {
                                 linkedUserState.value = [...linkedUserState.value, newUser.id];
