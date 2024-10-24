@@ -299,6 +299,7 @@ export class TrackActions {
     }
 
     static replyToComment(e) {
+        // TODO: Refactor with signals and stuff
         const input = document.querySelector(".comment-box-input[track_id='" + e.target.getAttribute("track_id") + "']");
         if (e.target.innerText === "Reply") {
             const replyButtons = document.querySelectorAll(".replyButton[track_id='" + e.target.getAttribute("track_id") + "']");

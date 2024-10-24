@@ -180,7 +180,10 @@ export class Util {
         }
     }
 
-    static toggleClass(e, className, baseClass = null) {
+    static toggleClass(e: HTMLElement|null, className: string, baseClass: string|null = null) {
+        if (e === null) {
+            return;
+        }
         if (e.classList.contains(className)) {
             if (baseClass !== null) {
                 const list = document.querySelectorAll("." + baseClass);
@@ -208,7 +211,7 @@ export class Util {
         return date.toISOString().split("T")[0];
     }
 
-    static hideElementIfCondition(conditionFunc = () => false, className, e) {
+    static hideElementIfCondition(conditionFunc = () => false, className: string, e: Event) {
         if (conditionFunc(e)) {
             const target = e.target.parentElement.querySelector("." + className);
             if (target === null) {

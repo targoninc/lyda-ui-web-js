@@ -1,4 +1,3 @@
-import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {StatisticsTemplates} from "./StatisticsTemplates.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {Icons} from "../Enums/Icons.js";
@@ -8,9 +7,12 @@ import {UserTemplates} from "./UserTemplates.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
+import {create, ifjs, signal} from "../../fjsc/f2.ts";
+import {User} from "../DbModels/User.ts";
+import {Comment} from "../DbModels/Comment.ts";
 
 export class CommentTemplates {
-    static moderatableComment(comment, user) {
+    static moderatableComment(comment: any, user: User) {
         const id = comment.comment.id;
 
         const el = create("div")
@@ -31,7 +33,7 @@ export class CommentTemplates {
                             }
                         }, [], ["positive"]),
                         GenericTemplates.action(Icons.X, "Hide", "hideComment", async () => {
-                            const success = CommentActions.hideComment(id);
+                            const success = await CommentActions.hideComment(id);
                             if (success) {
                                 el.remove();
                             }
@@ -42,20 +44,19 @@ export class CommentTemplates {
         return el;
     }
 
-    static async moderatableCommentsList(comments, user) {
+    static async moderatableCommentsList(comments: any[], user: User) {
         const commentList = comments.map(c => CommentTemplates.moderatableComment(c, user));
 
         return create("div")
             .classes("flex-v")
-            .children(
-                commentList
-            ).build();
+            .children(...commentList)
+            .build();
     }
 
-    static commentListFullWidth(track_id, comments, user) {
+    static commentListFullWidth(track_id: number, comments: any, user: User) {
         let commentList;
         if (comments.length > 0) {
-            const actualComments = comments.map(comment => CommentTemplates.commentInList(comment, user));
+            const actualComments = comments.map((comment: any) => CommentTemplates.commentInList(comment, user));
 
             commentList = create("div")
                 .classes("flex-v", "comment-list")
@@ -86,7 +87,7 @@ export class CommentTemplates {
             .build();
     }
 
-    static commentBox(track_id) {
+    static commentBox(track_id: number) {
         return create("div")
             .classes("comment-box", "flex-v")
             .children(
@@ -103,12 +104,12 @@ export class CommentTemplates {
             ).build();
     }
 
-    static commentsIndicator(track_id, comment_count) {
+    static commentsIndicator(track_id: number, comment_count: number) {
         const toggleState = signal(false);
         return StatisticsTemplates.statsIndicator("comments", toggleState, comment_count, "Comment", Icons.COMMENT, track_id);
     }
 
-    static commentListOpener(track_id, comments, user) {
+    static commentListOpener(track_id: number, comments: Comment[], user: User) {
         let commentList;
         if (comments.length > 0) {
             commentList = comments.map(comment => CommentTemplates.commentInList(comment, user));
@@ -119,29 +120,24 @@ export class CommentTemplates {
                 .text("No comments yet")
                 .build()];
         }
+        const listShown = signal(false);
 
         return create("div")
             .classes("listFromStatsOpener", "comments", "flex", "relative")
             .children(
                 create("span")
                     .classes("stats-indicator-opener", "clickable", "rounded", "padded-inline")
+                    .onclick(() => {
+                        listShown.value = !listShown.value;
+                    })
                     .children(
                         create("img")
                             .classes("inline-icon", "svg", "nopointer")
                             .src(Icons.DROPDOWN)
                             .build(),
-                    )
-                    .onclick(e => {
-                        Util.toggleClass(e.target.parentElement.querySelector(".listFromStatsIndicator"), "hidden", "listFromStatsIndicator");
-
-                        document.addEventListener("click", Util.hideElementIfCondition.bind(null, e => {
-                            return !(e.target.parentElement.classList.contains("comments")
-                                || e.target.classList.contains("comments"));
-                        }, "listFromStatsIndicator.comments"), {once: true});
-                    })
-                    .build(),
-                create("div")
-                    .classes("listFromStatsIndicator", "popout-below", "comments", "flex-v", "hidden", "padded", "rounded")
+                    ).build(),
+                ifjs(listShown, create("div")
+                    .classes("listFromStatsIndicator", "popout-below", "comments", "flex-v", "padded", "rounded")
                     .children(
                         create("span")
                             .classes("comments-label", "text", "label", "padded-inline", "rounded", "text-small")
@@ -152,13 +148,11 @@ export class CommentTemplates {
                             .classes("flex-v", "comment-list")
                             .children(...commentList)
                             .build(),
-                    )
-                    .build()
-            )
-            .build();
+                    ).build())
+            ).build();
     }
 
-    static commentInList(commentData, user) {
+    static commentInList(commentData: any, user: User) {
         let actions = [];
         const comment = commentData.comment;
         const canEdit = commentData.canEdit;
@@ -204,7 +198,7 @@ export class CommentTemplates {
             .build();
     }
 
-    static commentContent(comment, fullWidth = false) {
+    static commentContent(comment: Comment, fullWidth = false) {
         if (comment.hidden) {
             return create("div")
                 .classes("flex", "hoverable", "hidden-comment", "rounded", "padded")
