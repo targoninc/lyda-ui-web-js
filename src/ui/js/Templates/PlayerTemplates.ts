@@ -17,6 +17,7 @@ import {Util} from "../Classes/Util.ts";
 import {create, signal} from "../../fjsc/f2.ts";
 import {Track} from "../DbModels/Track.ts";
 import {User} from "../DbModels/User.ts";
+import {navigate} from "../Routing/Router.ts";
 
 export class PlayerTemplates {
     static audioPlayer(track: Track) {
@@ -252,9 +253,9 @@ export class PlayerTemplates {
                 create("span")
                     .classes("title", "clickable", "padded-inline", "align-center")
                     .text(track.title)
-                    .attributes("track_id", track.id)
-                    .onclick(TrackActions.openTrackFromElement)
-                    .build(),
+                    .onclick(() => {
+                        navigate("track/" + track.id);
+                    }).build(),
                 ...icons,
                 UserTemplates.userWidget(trackUser.id, trackUser.username, trackUser.displayname, await Util.getAvatarFromUserIdAsync(trackUser.id),
                     Util.arrayPropertyMatchesUser(trackUser.follows, "followingUserId", user),

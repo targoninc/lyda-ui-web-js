@@ -1,10 +1,11 @@
-import {TrackLike} from "./TrackLike.ts";
-import {Album} from "./Album.ts";
-import {Playlist} from "./Playlist.ts";
-import {Notification} from "./Notification.ts";
-import {Comment} from "./Comment.ts";
-import {TrackCollaborator} from "./TrackCollaborator.ts";
-import {User} from "./User.ts";
+import {TrackLike} from "./TrackLike.js";
+import {Album} from "./Album.js";
+import {Playlist} from "./Playlist.js";
+import {Notification} from "./Notification.js";
+import {Comment} from "./Comment.js";
+import {TrackCollaborator} from "./TrackCollaborator.js";
+import {User} from "./User.js";
+import {Repost} from "./Repost.js";
 
 export interface Track {
     user?: User;
@@ -14,6 +15,7 @@ export interface Track {
     albums?: Album[];
     notifications?: Notification[];
     collaborators?: TrackCollaborator[];
+    reposts?: Repost[];
     id: number;
     user_id: number;
     title: string;

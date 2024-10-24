@@ -14,26 +14,23 @@ import {navigate} from "../Routing/Router.ts";
 import {Signal} from "../../fjsc/f2.ts";
 
 export class TrackActions {
-    static async savePlay(id) {
-        return await Api.postAsync(Api.endpoints.tracks.actions.savePlay, {
-            id: id,
-        });
+    static async savePlay(id: number) {
+        return await Api.postAsync(Api.endpoints.tracks.actions.savePlay, { id });
     }
 
-    static savePlayAfterTime(id, seconds) {
+    static savePlayAfterTime(id: number, seconds: number) {
         setTimeout(async () => {
             await TrackActions.savePlay(id);
         }, seconds * 1000);
     }
 
-    static async unfollowUserFromElement(userId) {
+    static async unfollowUser(userId: number) {
         const res = await Api.postAsync(Api.endpoints.user.actions.unfollow, {
             id: userId
         });
 
         if (res.code !== 200) {
             Ui.notify("Error while trying to unfollow user: " + res.data, "error");
-            return;
         }
 
         return res;
@@ -175,14 +172,14 @@ export class TrackActions {
         const span = button.querySelector("span");
         const img = button.querySelector("img");
         if (following.value) {
-            const res = await TrackActions.unfollowUserFromElement(userId);
+            const res = await TrackActions.unfollowUser(userId);
             if (res.code !== 200) {
                 return;
             }
             span.innerText = "Follow";
             img.src = Icons.FOLLOW;
         } else {
-            const res = await TrackActions.followUserFromElement(userId);
+            const res = await TrackActions.followUser(userId);
             if (res.code !== 200) {
                 return;
             }
@@ -192,14 +189,13 @@ export class TrackActions {
         following.value = !following.value;
     }
 
-    static async followUserFromElement(userId) {
+    static async followUser(userId: number) {
         const res = await Api.postAsync(Api.endpoints.user.actions.follow, {
             id: userId,
         });
 
         if (res.code !== 200) {
             Ui.notify("Error while trying to follow user: " + res.data, "error");
-            return res;
         }
 
         return res;
@@ -214,7 +210,7 @@ export class TrackActions {
         return res.data;
     }
 
-    static async toggleLike(id, isEnabled) {
+    static async toggleLike(id: number, isEnabled: boolean) {
         if (!Util.isLoggedIn()) {
             Ui.notify("You must be logged in to like tracks", "error");
             return false;
@@ -233,7 +229,7 @@ export class TrackActions {
         return true;
     }
 
-    static async toggleRepost(id, isEnabled) {
+    static async toggleRepost(id: number, isEnabled: boolean) {
         if (!Util.isLoggedIn()) {
             Ui.notify("You must be logged in to repost tracks", "error");
             return false;
@@ -252,7 +248,7 @@ export class TrackActions {
         return true;
     }
 
-    static async openTrackFromElement(e) {
+    static async openTrackFromElement(e: any) {
         if (e.target.classList.contains("cover-container")) {
             return;
         }
@@ -417,7 +413,7 @@ export class TrackActions {
         collaborator.remove();
     }
 
-    static async addCollaboratorToTrack(trackId, userId, collabType) {
+    static async addCollaboratorToTrack(trackId: number, userId: number, collabType: number) {
         const res = await Api.postAsync(Api.endpoints.tracks.actions.addCollaborator, {
             id: trackId,
             userId: userId,

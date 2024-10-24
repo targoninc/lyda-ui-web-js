@@ -394,7 +394,7 @@ export class TrackEditTemplates {
         }, [], ["secondary", "negative"]);
     }
 
-    static addLinkedUserButton(callback, classes = []) {
+    static addLinkedUserButton(callback: Function, classes: string[] = []) {
         return GenericTemplates.action("person_add", "Add User", "add_linked_user", () => {
             Ui.getAddLinkedUserModal("Link a user", "Enter the username of the user you want to link", "", "Link", "Cancel", callback, () => {
             }, "person_add");

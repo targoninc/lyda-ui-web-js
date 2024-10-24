@@ -18,7 +18,12 @@ import {UserActions} from "../Actions/UserActions.ts";
 import {CustomText} from "../Classes/Helpers/CustomText.ts";
 import {CommentTemplates} from "./CommentTemplates.ts";
 import {TrackProcessor} from "../Classes/Helpers/TrackProcessor.ts";
-import {create, ifjs, Signal, signal} from "../../fjsc/f2.js";
+import {create, HtmlPropertyValue, ifjs, Signal, signal, StringOrSignal} from "../../fjsc/f2.js";
+import {navigate} from "../Routing/Router.ts";
+import {Track} from "../DbModels/Track.ts";
+import {User} from "../DbModels/User.ts";
+import {TrackCollaborator} from "../DbModels/TrackCollaborator.ts";
+import {TrackLike} from "../DbModels/TrackLike.ts";
 
 export class TrackTemplates {
     /**
@@ -488,28 +493,21 @@ export class TrackTemplates {
         ).build();
     }
 
-    static title(title, id, icons) {
+    static title(title: HtmlPropertyValue, id: number, icons: any[]) {
         return create("div")
             .classes("flex")
             .children(
                 create("span")
                     .classes("clickable", "text-large", "pointer")
                     .text(title)
-                    .attributes("track_id", id)
-                    .onclick(TrackActions.openTrackFromElement)
-                    .build(),
+                    .onclick(() => {
+                        navigate("track/" + id);
+                    }).build(),
                 ...icons,
             ).build();
     }
 
-    /**
-     *
-     * @param track {Music}
-     * @param user {User}
-     * @param collaborator {TrackCollaborator}
-     * @returns {*}
-     */
-    static collaborator(track, user, collaborator) {
+    static collaborator(track: Track, user: User, collaborator: TrackCollaborator): any {
         const avatarState = signal(Images.DEFAULT_AVATAR);
         Util.getAvatarFromUserIdAsync(collaborator.user_id).then((src) => {
             avatarState.value = src;
@@ -525,25 +523,25 @@ export class TrackTemplates {
     }
 
     static async trackPage(trackData, user) {
-        /**
-         * @type {Music}
-         */
-        const track = trackData.track;
+        const track = trackData.track as Track;
         const trackState = signal(TrackProcessor.forDownload(track));
-        const liked = user ? track.tracklikes.some(like => like.user_id === user.id) : false;
+        if (!track.likes || !track.reposts || !track.comments) {
+            throw new Error(`Track ${track.id} is missing property likes, reposts or comments`);
+        }
+        const liked = user ? track.likes.some((like: TrackLike) => like.user_id === user.id) : false;
         const reposted = user ? track.reposts.some(repost => repost.user_id === user.id) : false;
         const commented = user ? track.comments.some(comment => comment.user_id === user.id) : false;
-        const collaborators = track.trackCollaborators ?? [];
+        const collaborators = track.collaborators ?? [];
         const toAppend = [];
         const linkedUserState = signal(collaborators);
 
-        function collabList(collaborators) {
+        function collabList(collaborators: TrackCollaborator[]) {
             return create("div")
                 .classes("flex")
                 .children(
                     ...collaborators.map(collaborator => TrackTemplates.collaborator(track, user, collaborator)),
-                    trackData.canEdit ? TrackEditTemplates.addLinkedUserButton(async (newUsername, newUser) => {
-                        const newCollab = await TrackActions.addCollaboratorToTrack(track.id, newUser.id, newUser.collab_type.id);
+                    trackData.canEdit ? TrackEditTemplates.addLinkedUserButton(async (newUsername: string, newUser: TrackCollaborator) => {
+                        const newCollab = await TrackActions.addCollaboratorToTrack(track.id, newUser.user_id, newUser.type);
                         if (!newCollab) {
                             return;
                         }

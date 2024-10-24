@@ -7,6 +7,7 @@ import {UserActions} from "../Actions/UserActions.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {DragActions} from "../Actions/DragActions.ts";
 import {Util} from "../Classes/Util.ts";
+import {navigate} from "../Routing/Router.ts";
 
 export class QueueTemplates {
     static async queueItem(track, index, totalCount, user, attributes = [], classes = []) {
@@ -87,8 +88,9 @@ export class QueueTemplates {
                         create("span")
                             .classes("align-center", "clickable", "flex-grow")
                             .text(track.title)
-                            .attributes("track_id", track.id)
-                            .onclick(TrackActions.openTrackFromElement)
+                            .onclick(() => {
+                                navigate("track/" + track.id);
+                            })
                             .build(),
                         create("div")
                             .classes("align-center", "fakeButton", "rounded", "padded-inline", "clickablePreserveWidth")
