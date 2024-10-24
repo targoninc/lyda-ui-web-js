@@ -106,6 +106,10 @@ export class AlbumTemplates {
         const description = computedSignal<string>(album, (s: Album) => s.description);
         const releaseDate = computedSignal<Date>(album, (s: Album) => s.release_date.toISOString().split("T")[0]);
         const visibility = computedSignal<boolean>(album, (s: Album) => s.visibility === "private");
+        const disabled = computedSignal<boolean>(album, (s: Album) => {
+            console.log(!s.name || (s.name === ""));
+            return !s.name || (s.name === "");
+        });
 
         return create("div")
             .classes("flex-v")
@@ -182,6 +186,7 @@ export class AlbumTemplates {
                     .children(
                         FJSC.button({
                             text: "Create album",
+                            disabled,
                             onclick: async () => {
                                 await AlbumActions.createNewAlbum(album.value);
                                 Util.removeModal();
