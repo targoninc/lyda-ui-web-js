@@ -365,9 +365,9 @@ export class TrackEditTemplates {
         });
     }
 
-    static title(parentState, errorFields) {
-        const value = computedSignal(parentState, s => s.title);
-        const errorClass = computedSignal(errorFields, e => e.includes("title") ? "error" : "_");
+    static title(parentState: Signal<any>, errorFields: Signal<any[]>) {
+        const value = computedSignal(parentState, (s: any) => s.title);
+        const errorClass = computedSignal(errorFields, (e: string[]) => e.includes("title") ? "error" : "_");
 
         return FormTemplates.textField("Title", "title", "Title", "text", value, true, v => {
             parentState.value = {...parentState.value, title: v};
@@ -403,9 +403,12 @@ export class TrackEditTemplates {
 
     static linkedUsers(linkedUsers = [], parentState = null) {
         const linkedUserState = signal(linkedUsers);
+        const sendJson = signal(JSON.stringify(linkedUsers));
         const userMap = new Map();
-        linkedUserState.onUpdate = (newValue) => {
-            const container = document.getElementById("linked_users_container");
+        const container = create("div")
+            .classes("flex")
+            .build();
+        linkedUserState.onUpdate = (newValue: any[]) => {
             container.innerHTML = "";
             for (const id of newValue) {
                 const user = userMap.get(id);
@@ -415,8 +418,8 @@ export class TrackEditTemplates {
                 });
                 container.appendChild(UserTemplates.linkedUser(user.id, user.username, user.displayname, avatarState, user.collab_type.name, TrackEditTemplates.removeLinkedUser(user.id, linkedUserState), [], ["no-redirect"]));
             }
-            const sendValue = newValue.map(id => userMap.get(id));
-            document.getElementsByName("linked_users")[0].value = JSON.stringify(sendValue);
+            const sendValue = newValue.map((id: number) => userMap.get(id));
+            sendJson.value = JSON.stringify(sendValue);
             if (parentState && parentState.value.linkedUsers !== sendValue) {
                 parentState.value = {
                     ...parentState.value,
@@ -440,7 +443,7 @@ export class TrackEditTemplates {
                             .build(),
                         create("input")
                             .classes("hidden")
-                            .value(linkedUsers)
+                            .value(sendJson)
                             .name("linked_users")
                             .build(),
                         TrackEditTemplates.addLinkedUserButton((newUsername, newUser) => {

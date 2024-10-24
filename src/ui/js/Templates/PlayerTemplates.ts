@@ -242,9 +242,9 @@ export class PlayerTemplates {
             icons.push(GenericTemplates.lock());
         }
 
-        if (!track.likes) {
-            track.likes = [];
-        }
+        track.likes = track.likes ?? [];
+        track.comments = track.comments ?? [];
+        track.reposts = track.reposts ?? [];
 
         return create("div")
             .classes("bottom-track-info", "flex")
@@ -267,13 +267,12 @@ export class PlayerTemplates {
                         StatisticsTemplates.likesIndicator("track", track.id, track.likes.length,
                             Util.arrayPropertyMatchesUser(track.likes, "userId", user)),
                         isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, Util.arrayPropertyMatchesUser(track.reposts, "userId", user)),
-                        CommentTemplates.commentsIndicator(track.id, track.comments.length,
-                            Util.arrayPropertyMatchesUser(track.comments, "userId", user)),
+                        CommentTemplates.commentsIndicator(track.id, track.comments.length),
                     ).build()
             ).build();
     }
 
-    static audioControls(loopingSingle, loopingContext) {
+    static audioControls(loopingSingle: boolean, loopingContext: boolean) {
         let src = Icons.LOOP_OFF;
         if (loopingContext) {
             src = Icons.LOOP_CONTEXT;
