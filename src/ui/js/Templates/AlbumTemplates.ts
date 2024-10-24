@@ -1,6 +1,5 @@
 import {Icons} from "../Enums/Icons.js";
 import {AlbumActions} from "../Actions/AlbumActions.ts";
-import {FormTemplates} from "./FormTemplates.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
@@ -16,7 +15,7 @@ import {Ui} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
 import {AnyNode, computedSignal, create, HtmlPropertyValue, ifjs, signal} from "../../fjsc/f2.ts";
 import {Album} from "../DbModels/Album.ts";
-import {CheckboxConfig, InputType} from "../../fjsc/Types.ts";
+import {BooleanConfig, InputType} from "../../fjsc/Types.ts";
 import {Track} from "../DbModels/Track.ts";
 import {User} from "../DbModels/User.ts";
 import {navigate} from "../Routing/Router.ts";
@@ -81,7 +80,7 @@ export class AlbumTemplates {
                 checked.value = !checked.value;
             })
             .children(
-                FJSC.checkbox(<CheckboxConfig>{
+                FJSC.checkbox(<BooleanConfig>{
                     name: "album_" + album.id,
                     checked,
                 }),
@@ -107,7 +106,6 @@ export class AlbumTemplates {
         const releaseDate = computedSignal<Date>(album, (s: Album) => s.release_date.toISOString().split("T")[0]);
         const visibility = computedSignal<boolean>(album, (s: Album) => s.visibility === "private");
         const disabled = computedSignal<boolean>(album, (s: Album) => {
-            console.log(!s.name || (s.name === ""));
             return !s.name || (s.name === "");
         });
 
@@ -268,7 +266,7 @@ export class AlbumTemplates {
             ).build();
     }
 
-    static title(title: HtmlPropertyValue, id: number, icons) {
+    static title(title: HtmlPropertyValue, id: number, icons: any[]) {
         return create("div")
             .classes("flex")
             .children(
@@ -346,6 +344,9 @@ export class AlbumTemplates {
             throw new Error(`Album ${album.id} has no tracks`);
         }
         const a_user = album.user;
+        if (!a_user) {
+            throw new Error(`Album ${album.id} has no user`);
+        }
         const trackChildren = [];
         const positionMap = tracks.map((t: Track) => t.id);
         const positionsState = signal(positionMap);
@@ -428,51 +429,50 @@ export class AlbumTemplates {
                                     .children(
                                         create("span")
                                             .classes("date", "text-small")
-                                            .text("Released " + Util.formatDate(album.releaseDate))
+                                            .text("Released " + Util.formatDate(album.release_date))
                                             .build()
-                                    )
-                                    .build(),
+                                    ).build(),
                                 create("div")
                                     .classes("stats-container", "flex", "rounded")
                                     .children(
-                                        StatisticsTemplates.likesIndicator("album", album.id, album.albumlikes.length,
-                                            Util.arrayPropertyMatchesUser(album.albumlikes, "userId", user)),
-                                        StatisticsTemplates.likeListOpener(album.id, album.albumlikes, user),
-                                    )
-                                    .build(),
-                            )
-                            .build()
-                    )
-                    .build(),
+                                        StatisticsTemplates.likesIndicator("album", album.id, album.likes.length,
+                                            Util.arrayPropertyMatchesUser(album.likes, "userId", user)),
+                                        StatisticsTemplates.likeListOpener(album.id, album.likes, user),
+                                    ).build(),
+                            ).build()
+                    ).build(),
                 create("div")
                     .classes("flex-v")
                     .children(
                         ...trackChildren
                     ).build()
-            )
-            .build();
+            ).build();
     }
 
-    static audioActions(album, user, editActions: AnyNode[] = []) {
+    static audioActions(album: Album, user: User, editActions: AnyNode[] = []) {
         const playingFrom = PlayManager.getPlayingFrom();
         const isPlaying =
             playingFrom.type === "album" && playingFrom.id === album.id;
         const manualQueue = QueueManager.getManualQueue();
-        const allTracksInQueue = album.albumtracks.every((t) =>
-            manualQueue.includes(t.trackId),
+        if (!album.tracks) {
+            throw new Error(`Album ${album.id} has no tracks`);
+        }
+        const allTracksInQueue = album.tracks.every((t) =>
+            manualQueue.includes(t.id),
         );
+        const duration = album.tracks.reduce((acc, t) => acc + t.length, 0);
 
         let actions: AnyNode[] = [];
         if (user) {
             actions = [
                 GenericTemplates.action(isPlaying ? Icons.PAUSE : Icons.PLAY, isPlaying ? "Pause" : "Play", album.id, async () => {
-                    const firstTrack = album.albumtracks[0];
+                    const firstTrack = (album.tracks!)[0];
                     await AlbumActions.startTrackInAlbum(album, firstTrack.id, true);
-                }, ["duration", album.duration], [album.albumtracks.length === 0 ? "nonclickable" : "_", "secondary"]),
+                }, ["duration", duration], [album.tracks.length === 0 ? "nonclickable" : "_", "secondary"]),
                 GenericTemplates.action(allTracksInQueue ? Icons.UNQUEUE : Icons.QUEUE, allTracksInQueue ? "Unqueue" : "Queue", album.id, () => {
-                    for (let track of album.albumtracks) {
-                        if (!manualQueue.includes(track.trackId)) {
-                            QueueManager.addToManualQueue(track.trackId);
+                    for (let track of album.tracks!) {
+                        if (!manualQueue.includes(track.id)) {
+                            QueueManager.addToManualQueue(track.id);
                         }
                     }
                 }, [], [allTracksInQueue ? "audio-queueremove" : "audio-queueadd", "secondary"]),
@@ -487,7 +487,6 @@ export class AlbumTemplates {
             .children(
                 ...actions,
                 ...editActions
-            )
-            .build();
+            ).build();
     }
 }

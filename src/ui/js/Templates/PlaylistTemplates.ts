@@ -19,6 +19,7 @@ import {create, ifjs, signal, computedSignal, AnyNode, HtmlPropertyValue} from "
 import {Track} from "../DbModels/Track.ts";
 import {Album} from "../DbModels/Album.ts";
 import {navigate} from "../Routing/Router.ts";
+import {InputType} from "../../fjsc/Types.ts";
 
 export class PlaylistTemplates {
     static async addTrackToPlaylistModal(track: Track, playlists: Playlist[]) {
@@ -141,6 +142,10 @@ export class PlaylistTemplates {
         });
         const name = computedSignal<string>(playlist, (s: Playlist) => s.name);
         const description = computedSignal<string>(playlist, (s: Playlist) => s.description);
+        const visibility = computedSignal<boolean>(playlist, (s: Playlist) => s.visibility === "private");
+        const disabled = computedSignal<boolean>(playlist, (s: Playlist) => {
+            return !s.name || (s.name === "");
+        });
 
         return create("div")
             .classes("flex-v")
@@ -159,19 +164,42 @@ export class PlaylistTemplates {
                     .classes("flex-v")
                     .id("newPlaylistForm")
                     .children(
-                        FormTemplates.textField("Name", "name", "Playlist name", "text", name, true, v => {
-                            playlist.value = { ...playlist.value, name: v };
+                        FJSC.input<string>({
+                            type: InputType.text,
+                            required: true,
+                            name: "name",
+                            label: "Name",
+                            placeholder: "Playlist name",
+                            value: name,
+                            onchange: (v) => {
+                                playlist.value = { ...playlist.value, name: v };
+                            }
                         }),
-                        FormTemplates.textAreaField("Description", "description", "Description", description, false, 5, v => {
-                            playlist.value = { ...playlist.value, description: v };
+                        FJSC.textarea({
+                            name: "description",
+                            label: "Description",
+                            placeholder: "My cool playlist",
+                            value: description,
+                            onchange: (v) => {
+                                playlist.value = { ...playlist.value, description: v };
+                            }
                         }),
-                        FormTemplates.visibility("public", playlist),
+                        FJSC.toggle({
+                            name: "visibility",
+                            label: "Private",
+                            text: "Private",
+                            checked: visibility,
+                            onchange: (v) => {
+                                playlist.value = { ...playlist.value, visibility: v ? "private" : "public" };
+                            }
+                        }),
                     ).build(),
                 create("div")
                     .classes("flex")
                     .children(
                         FJSC.button({
                             text: "Create playlist",
+                            disabled,
                             onclick: async () => {
                                 await PlaylistActions.createNewPlaylist(playlist.value);
                                 Util.removeModal();
@@ -266,8 +294,7 @@ export class PlaylistTemplates {
                     .text(title)
                     .onclick(() => {
                         navigate("playlist/" + id);
-                    })
-                    .build(),
+                    }).build(),
                 ...icons,
             ).build();
     }

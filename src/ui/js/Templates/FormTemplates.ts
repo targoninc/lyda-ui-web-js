@@ -1,7 +1,7 @@
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {Api} from "../Classes/Api";
 import {Ui} from "../Classes/Ui.ts";
-import {FJSC, SelectOption} from "../../fjsc";
+import {FJSC} from "../../fjsc";
 import {
     computedSignal,
     create,
@@ -11,12 +11,10 @@ import {
     StringOrSignal,
     TypeOrSignal
 } from "../../fjsc/f2.js";
-import {SearchableSelectConfig} from "../../fjsc/Types.ts";
-import {Album} from "../DbModels/Album.ts";
-import {Playlist} from "../DbModels/Playlist.ts";
+import {SearchableSelectConfig, SelectOption} from "../../fjsc/Types.ts";
 
 export class FormTemplates {
-    static fileField(title: string, text: string, name: string, accept: string, required = false, onchange = (v) => {}) {
+    static fileField(title: string, text: string, name: string, accept: string, required = false, onchange = (v: string) => {}) {
         return create("div")
             .classes("flex-v", "small-gap")
             .children(
@@ -26,14 +24,6 @@ export class FormTemplates {
                     .build(),
                 GenericTemplates.fileInput(name, name, accept, text, required, onchange)
             ).build();
-    }
-
-    static visibility(value = "public", parentState: Signal<Album|Playlist>, onchange = (v: string) => {}) {
-        const state = computedSignal<string>(parentState, (p: Album) => p.visibility ?? "public");
-        return GenericTemplates.toggle("Private", "visibility", () => {
-            state.value = state.value === "public" ? "private" : "public";
-            onchange(state.value);
-        }, [], value === "private");
     }
 
     static dropDownField<T>(title: string, options: Signal<SelectOption[]>, selectedValue: Signal<T>) {
@@ -76,8 +66,7 @@ export class FormTemplates {
                     .onchange((e) => onchange(e.target!.value))
                     .styles("flex-grow", "1")
                     .build(),
-            )
-            .build();
+            ).build();
     }
 
     static textField(title: string, name: string, placeholder: string, type = "text", value: StringOrSignal = "", required = false, onchange = (val: string) => {

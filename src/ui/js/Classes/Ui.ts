@@ -225,7 +225,7 @@ export class Ui {
         Ui.addModal(modal);
     }
 
-    static async getAddLinkedUserModal(title, text, currentValue, confirmText, cancelText, confirmCallback = () => {}, cancelCallback = () => {
+    static async getAddLinkedUserModal(title, text, currentValue, confirmText, cancelText, confirmCallback: Function = () => {}, cancelCallback: Function = () => {
     }, icon = "") {
         const confirmCallback2 = async (username, newUser, collabTypes) => {
             Util.removeModal();

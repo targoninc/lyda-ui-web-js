@@ -8,7 +8,19 @@ import {Genres} from "../Enums/Genres.ts";
 import {Util} from "../Classes/Util.ts";
 import {AudioUpload} from "../Classes/AudioUpload.ts";
 import {Ui} from "../Classes/Ui.ts";
-import {DomNode, HtmlPropertyValue, Signal, computedSignal, create, ifjs, signal} from "../../fjsc/f2.ts";
+import {
+    DomNode,
+    HtmlPropertyValue,
+    Signal,
+    computedSignal,
+    create,
+    ifjs,
+    signal,
+    AnyNode,
+    TypeOrSignal
+} from "../../fjsc/f2.ts";
+import {Track} from "../DbModels/Track.ts";
+import {FJSC} from "../../fjsc";
 
 export class TrackEditTemplates {
     static getStateWithParentUpdate(key, value, parentState) {
@@ -220,8 +232,8 @@ export class TrackEditTemplates {
             ).build();
     }
 
-    static infoSection(state, errorSections, errorFields, enableTos = true, enableLinkedUsers = true) {
-        const isPrivate = computedSignal(state, s => s.visibility === "private");
+    static infoSection(state: Signal<Track>, errorSections: Signal<string[]>, errorFields: Signal<string[]>, enableTos = true, enableLinkedUsers = true) {
+        const isPrivate = computedSignal<boolean>(state, (s: Track) => s.visibility === "private");
 
         return create("div")
             .classes("flex")
@@ -230,17 +242,33 @@ export class TrackEditTemplates {
                     create("div")
                         .classes("flex")
                         .children(
-                            FormTemplates.visibility(state.value.visibility, state),
+                            FJSC.toggle({
+                                name: "visibility",
+                                label: "Private",
+                                text: "Private",
+                                checked: isPrivate,
+                                onchange: (v) => {
+                                    state.value = { ...state.value, visibility: v ? "private" : "public" };
+                                }
+                            }),
                             ifjs(isPrivate, GenericTemplates.text("When your track is private, it will only be visible to you and people you share the secret link with.", ["warning"]))
                         ).build(),
                     TrackEditTemplates.title(state, errorFields),
-                    TrackEditTemplates.collaborators(state.value.collaborators, state),
-                    enableLinkedUsers ? TrackEditTemplates.linkedUsers(state.value.linkedUsers, state) : null,
+                    TrackEditTemplates.collaborators(state.value.credits, state),
+                    ifjs(enableLinkedUsers, TrackEditTemplates.linkedUsers(state.value.linkedUsers, state)),
                     TrackEditTemplates.releaseDate(state.value.releaseDate, state),
                     FormTemplates.genre(state),
                     TrackEditTemplates.isrc(state.value.isrc, state),
                     TrackEditTemplates.upc(state.value.upc, state),
-                    TrackEditTemplates.description(state.value.description, state),
+                    FJSC.textarea({
+                        name: "description",
+                        label: "Description",
+                        placeholder: "My cool track",
+                        value: computedSignal(state, (s: Track) => s.description),
+                        onchange: (v) => {
+                            state.value = { ...state.value, description: v };
+                        }
+                    }),
                 ], "info", ["flex-grow"]),
                 create("div")
                     .classes("flex-v")
@@ -257,9 +285,9 @@ export class TrackEditTemplates {
             ).build();
     }
 
-    static sectionCard(title, errorSections, id, children, icon = null, classes = []) {
-        const hasError = computedSignal(errorSections, e => e.includes(id));
-        const errorClass = computedSignal(hasError, h => h ? "error" : "_");
+    static sectionCard(title: HtmlPropertyValue, errorSections: Signal<string[]>, id: string, children: TypeOrSignal<(AnyNode|null)>[], icon: string|null = null, classes: HtmlPropertyValue[] = []) {
+        const hasError = computedSignal(errorSections, (e: string[]) => e.includes(id));
+        const errorClass = computedSignal(hasError, (h: boolean) => h ? "error" : "_");
 
         return create("div")
             .classes("border-card", "flex-v", ...classes)
@@ -395,10 +423,16 @@ export class TrackEditTemplates {
     }
 
     static addLinkedUserButton(callback: Function, classes: string[] = []) {
-        return GenericTemplates.action("person_add", "Add User", "add_linked_user", () => {
-            Ui.getAddLinkedUserModal("Link a user", "Enter the username of the user you want to link", "", "Link", "Cancel", callback, () => {
-            }, "person_add");
-        }, [], classes);
+        return FJSC.button({
+            text: "Add User",
+            id: "add_linked_user",
+            icon: { icon: "person_add" },
+            classes,
+            onclick: () => {
+                Ui.getAddLinkedUserModal("Link a user", "Enter the username of the user you want to link", "", "Link", "Cancel", callback, () => {
+                }, "person_add");
+            },
+        });
     }
 
     static linkedUsers(linkedUsers = [], parentState = null) {
@@ -453,7 +487,6 @@ export class TrackEditTemplates {
                             }
                         }, ["align-center", "secondary"])
                     ).build(),
-            )
-            .build();
+            ).build();
     }
 }
