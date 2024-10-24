@@ -16,7 +16,7 @@ import {Ui} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
 import {AnyNode, computedSignal, create, ifjs, signal} from "../../fjsc/f2.ts";
 import {Album} from "../DbModels/Album.ts";
-import {CheckboxConfig} from "../../fjsc/Types.ts";
+import {CheckboxConfig, InputType} from "../../fjsc/Types.ts";
 import {Track} from "../DbModels/Track.ts";
 import {User} from "../DbModels/User.ts";
 
@@ -103,7 +103,8 @@ export class AlbumTemplates {
         const name = computedSignal<string>(album, (s: Album) => s.name);
         const upc = computedSignal<string>(album, (s: Album) => s.upc);
         const description = computedSignal<string>(album, (s: Album) => s.description);
-        const releaseDate = computedSignal<string>(album, (s: Album) => s.release_date);
+        const releaseDate = computedSignal<Date>(album, (s: Album) => s.release_date.toISOString().split("T")[0]);
+        const visibility = computedSignal<boolean>(album, (s: Album) => s.visibility === "private");
 
         return create("div")
             .classes("flex-v")
@@ -125,20 +126,54 @@ export class AlbumTemplates {
                     .classes("flex-v")
                     .id("newAlbumForm")
                     .children(
-                        FormTemplates.textField("Name", "name", "Album name", "text", name, true, v => {
-                            album.value = { ...album.value, name: v };
+                        FJSC.input<string>({
+                            type: InputType.text,
+                            required: true,
+                            name: "name",
+                            label: "Name",
+                            placeholder: "Album name",
+                            value: name,
+                            onchange: (v) => {
+                                album.value = { ...album.value, name: v };
+                            }
                         }),
-                        FormTemplates.textField("UPC", "upc", "UPC", "text", upc, false, v => {
-                            album.value = { ...album.value, upc: v };
+                        FJSC.input<string>({
+                            type: InputType.text,
+                            name: "upc",
+                            label: "UPC",
+                            placeholder: "12-digit number",
+                            value: upc,
+                            onchange: (v) => {
+                                album.value = { ...album.value, upc: v };
+                            }
                         }),
-                        FormTemplates.textAreaField("Description", "description", "Description", description, false, 5, v => {
-                            album.value = { ...album.value, description: v };
+                        FJSC.textarea({
+                            name: "description",
+                            label: "Description",
+                            placeholder: "My cool album",
+                            value: description,
+                            onchange: (v) => {
+                                album.value = { ...album.value, description: v };
+                            }
                         }),
-                        FormTemplates.textField("Release Date", "release_date", "YYYY-MM-DD", "date", releaseDate, false, v => {
-                            album.value = { ...album.value, release_date: new Date(v) };
+                        FJSC.input<Date>({
+                            type: InputType.date,
+                            name: "release_date",
+                            label: "Release Date",
+                            placeholder: "YYYY-MM-DD",
+                            value: releaseDate,
+                            onchange: (v) => {
+                                album.value = { ...album.value, release_date: new Date(v) };
+                            }
                         }),
-                        FormTemplates.visibility("public", album, v => {
-                            album.value = { ...album.value, visibility: v ? "private" : "public" };
+                        FJSC.toggle({
+                            name: "visibility",
+                            label: "Private",
+                            text: "Private",
+                            checked: visibility,
+                            onchange: (v) => {
+                                album.value = { ...album.value, visibility: v ? "private" : "public" };
+                            }
                         }),
                     ).build(),
                 create("div")
@@ -150,9 +185,7 @@ export class AlbumTemplates {
                                 await AlbumActions.createNewAlbum(album.value);
                                 Util.removeModal();
                             },
-                            icon: {
-                                icon: "playlist_add"
-                            },
+                            icon: { icon: "playlist_add" },
                             classes: ["positive"],
                         }),
                         GenericTemplates.modalCancelButton()

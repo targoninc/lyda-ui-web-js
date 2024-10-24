@@ -146,7 +146,10 @@ export class PlaylistTemplates {
             .children(
                 create("h2")
                     .children(
-                        GenericTemplates.icon("playlist_add", true),
+                        FJSC.icon({
+                            icon: "playlist_add",
+                            adaptive: true,
+                        }),
                         create("span")
                             .text("New playlist")
                             .build(),
