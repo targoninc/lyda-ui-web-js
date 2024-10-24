@@ -357,7 +357,7 @@ export class TrackTemplates {
                                         isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, Util.arrayPropertyMatchesUser(track.reposts, "userId", user)),
                                         isPrivate ? null : StatisticsTemplates.repostListOpener(track.id, track.reposts, user),
                                         CommentTemplates.commentsIndicator(track.id, track.comments.length),
-                                        CommentTemplates.commentListOpener(track.id, track.comments, user),
+                                        CommentTemplates.commentListOpener(track.id, track.comments),
                                         GenericTemplates.action(queueSubState.icon, queueSubState.text, track.id, () => {
                                             QueueManager.toggleInManualQueue(track.id);
                                             inQueue.value = QueueManager.isInManualQueue(track.id);

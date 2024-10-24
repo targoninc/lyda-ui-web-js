@@ -206,10 +206,14 @@ export class PlayerTemplates {
             ).build();
     }
 
-    static playingFrom(playingFrom) {
-        const functionMap = {
-            "album": AlbumActions.openAlbumFromElement,
-            "playlist": PlaylistActions.openPlaylistFromElement,
+    static playingFrom(playingFrom: { id: string, type: string, name: string }) {
+        const functionMap: any = {
+            "album": () => {
+                navigate("album/" + playingFrom.id);
+            },
+            "playlist": () => {
+                navigate("playlist/" + playingFrom.id);
+            },
         };
 
         return create("div")
@@ -218,7 +222,6 @@ export class PlayerTemplates {
                 create("span")
                     .classes("text-small", "padded-inline", "align-center", "clickable", "rounded")
                     .onclick(functionMap[playingFrom.type])
-                    .attributes(playingFrom.type + "_id", playingFrom.id)
                     .text("Playing from " + playingFrom.name)
                     .build(),
             ).build();

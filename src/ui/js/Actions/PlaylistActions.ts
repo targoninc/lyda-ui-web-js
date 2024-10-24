@@ -80,14 +80,6 @@ export class PlaylistActions {
         return true;
     }
 
-    static async openPlaylistFromElement(e: Event) {
-        let trackId = Util.getPlaylistIdFromEvent(e);
-        if (trackId === "") {
-            return;
-        }
-        navigate("playlist/" + trackId);
-    }
-
     static async replaceCover(e: MouseEvent, loading: Signal<boolean>) {
         const target = e.target as HTMLImageElement;
         if (!target || target.getAttribute("canEdit") !== "true") {

@@ -18,6 +18,7 @@ import {Playlist} from "../DbModels/Playlist.ts";
 import {create, ifjs, signal, computedSignal, AnyNode, HtmlPropertyValue} from "../../fjsc/f2.ts";
 import {Track} from "../DbModels/Track.ts";
 import {Album} from "../DbModels/Album.ts";
+import {navigate} from "../Routing/Router.ts";
 
 export class PlaylistTemplates {
     static async addTrackToPlaylistModal(track: Track, playlists: Playlist[]) {
@@ -263,8 +264,9 @@ export class PlaylistTemplates {
                 create("span")
                     .classes("clickable", "text-large", "pointer")
                     .text(title)
-                    .attributes("playlist_id", id)
-                    .onclick(PlaylistActions.openPlaylistFromElement)
+                    .onclick(() => {
+                        navigate("playlist/" + id);
+                    })
                     .build(),
                 ...icons,
             ).build();

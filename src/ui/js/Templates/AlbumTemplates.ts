@@ -14,11 +14,12 @@ import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
-import {AnyNode, computedSignal, create, ifjs, signal} from "../../fjsc/f2.ts";
+import {AnyNode, computedSignal, create, HtmlPropertyValue, ifjs, signal} from "../../fjsc/f2.ts";
 import {Album} from "../DbModels/Album.ts";
 import {CheckboxConfig, InputType} from "../../fjsc/Types.ts";
 import {Track} from "../DbModels/Track.ts";
 import {User} from "../DbModels/User.ts";
+import {navigate} from "../Routing/Router.ts";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
@@ -221,7 +222,7 @@ export class AlbumTemplates {
 
     static albumCard(album: Album, user: User, isSecondary = false) {
         if (!album.user) {
-            throw new Error("Album has no user: ", album);
+            throw new Error(`Album has no user: ${album.id}`);
         }
 
         const icons = [];
@@ -255,22 +256,23 @@ export class AlbumTemplates {
                 create("div")
                     .classes("stats-container", "flex", "rounded")
                     .children(
-                        StatisticsTemplates.likesIndicator("album", album.id, album.albumlikes.length,
-                            Util.arrayPropertyMatchesUser(album.albumlikes, "userId", user)),
-                        StatisticsTemplates.likeListOpener(album.id, album.albumlikes, user),
+                        StatisticsTemplates.likesIndicator("album", album.id, album.likes.length,
+                            Util.arrayPropertyMatchesUser(album.likes, "userId", user)),
+                        StatisticsTemplates.likeListOpener(album.id, album.likes, user),
                     ).build()
             ).build();
     }
 
-    static title(title, id, icons) {
+    static title(title: HtmlPropertyValue, id: number, icons) {
         return create("div")
             .classes("flex")
             .children(
                 create("span")
                     .classes("clickable", "text-large", "pointer")
                     .text(title)
-                    .attributes("album_id", id)
-                    .onclick(AlbumActions.openAlbumFromElement)
+                    .onclick(() => {
+                        navigate("album/" + id);
+                    })
                     .build(),
                 ...icons,
             ).build();

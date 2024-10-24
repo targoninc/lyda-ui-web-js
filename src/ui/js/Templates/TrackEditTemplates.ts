@@ -387,9 +387,9 @@ export class TrackEditTemplates {
         }, [], ["negative"]);
     }
 
-    static deleteTrackButton(trackId) {
+    static deleteTrackButton(trackId: number) {
         return GenericTemplates.action(Icons.DELETE, "Delete", trackId, async (e) => {
-            await Ui.getConfirmationModal("Delete track", "Are you sure you want to delete this track?", "Yes", "No", TrackActions.deleteTrackFromElement.bind(null, e), () => {
+            await Ui.getConfirmationModal("Delete track", "Are you sure you want to delete this track?", "Yes", "No", () => TrackActions.deleteTrack(trackId), () => {
             }, Icons.WARNING);
         }, [], ["secondary", "negative"]);
     }

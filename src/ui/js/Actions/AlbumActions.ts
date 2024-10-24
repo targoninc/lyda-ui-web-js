@@ -82,14 +82,6 @@ export class AlbumActions {
         return true;
     }
 
-    static async openAlbumFromElement(e: Event) {
-        let trackId = Util.getAlbumIdFromEvent(e);
-        if (trackId === "") {
-            return;
-        }
-        navigate("album/" + trackId);
-    }
-
     static async replaceCover(e: MouseEvent, loading: Signal<boolean>) {
         const target = e.target as HTMLImageElement;
         if (target.getAttribute("canEdit") !== "true") {

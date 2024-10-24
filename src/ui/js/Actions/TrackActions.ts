@@ -36,16 +36,14 @@ export class TrackActions {
         return res;
     }
 
-    static async deleteTrackFromElement(e) {
+    static async deleteTrack(id: number) {
         if (!confirm) {
             return;
         }
-        const res = await Api.postAsync(Api.endpoints.tracks.actions.delete, {
-            id: e.target.id,
-        });
+        const res = await Api.postAsync(Api.endpoints.tracks.actions.delete, { id });
         if (res.code === 200) {
-            PlayManager.removeStreamClient(e.target.id);
-            QueueManager.removeFromManualQueue(e.target.id);
+            PlayManager.removeStreamClient(id);
+            QueueManager.removeFromManualQueue(id);
             Ui.notify(res.data, "success");
             navigate("profile");
         } else {
@@ -53,12 +51,8 @@ export class TrackActions {
         }
     }
 
-    static async deleteCommentFromElement(e) {
+    static async deleteComment(commentId: number) {
         await Ui.getConfirmationModal("Delete comment", "Are you sure you want to delete this comment?", "Yes", "No", async () => {
-            const commentId = e.target.getAttribute("id");
-            if (commentId === "") {
-                return;
-            }
             const res = await Api.postAsync(Api.endpoints.comments.actions.delete, {
                 id: commentId,
             });
@@ -68,10 +62,14 @@ export class TrackActions {
                 return;
             }
 
-            const commentCount = document.querySelector(".stats-count.comments");
-            commentCount.innerText = parseInt(commentCount.innerText) - 1;
+            const commentCount = document.querySelector(".stats-count.comments") as HTMLElement;
+            if (commentCount) {
+                commentCount.innerText = (parseInt(commentCount.innerText) - 1).toString();
+            }
             const comment = document.querySelector(".comment-in-list[id='" + commentId + "']");
-            comment.remove();
+            if (comment) {
+                comment.remove();
+            }
             if (document.querySelectorAll(".comment-in-list").length === 0) {
                 const noComments = document.querySelector(".no-comments");
                 if (noComments !== null) {
@@ -116,8 +114,10 @@ export class TrackActions {
         }
 
         const commentId = res.data;
-        const commentCount = document.querySelector(".stats-count.comments");
-        commentCount.innerText = parseInt(commentCount.innerText) + 1;
+        const commentCount = document.querySelector(".stats-count.comments") as HTMLElement;
+        if (commentCount) {
+            commentCount.innerText = (parseInt(commentCount.innerText) + 1).toString();
+        }
         const user = await Util.getUserAsync();
         const comment = {
             id: commentId,
@@ -134,7 +134,7 @@ export class TrackActions {
         };
         const commentData = {
             canEdit: true,
-            comment: Util.mapNullToEmptyString(comment, user)
+            comment: Util.mapNullToEmptyString(comment)
         };
         const commentElement = CommentTemplates.commentInList(commentData);
         const commentList = document.querySelector(".comment-list");

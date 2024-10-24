@@ -21,7 +21,7 @@ export class CommentTemplates {
                 create("div")
                     .classes("card")
                     .children(
-                        CommentTemplates.commentInList(comment, user),
+                        CommentTemplates.commentInList(comment),
                     ).build(),
                 create("div")
                     .classes("flex-v")
@@ -56,7 +56,7 @@ export class CommentTemplates {
     static commentListFullWidth(track_id: number, comments: any, user: User) {
         let commentList;
         if (comments.length > 0) {
-            const actualComments = comments.map((comment: any) => CommentTemplates.commentInList(comment, user));
+            const actualComments = comments.map((comment: any) => CommentTemplates.commentInList(comment));
 
             commentList = create("div")
                 .classes("flex-v", "comment-list")
@@ -109,10 +109,10 @@ export class CommentTemplates {
         return StatisticsTemplates.statsIndicator("comments", toggleState, comment_count, "Comment", Icons.COMMENT, track_id);
     }
 
-    static commentListOpener(track_id: number, comments: Comment[], user: User) {
+    static commentListOpener(track_id: number, comments: Comment[]) {
         let commentList;
         if (comments.length > 0) {
-            commentList = comments.map(comment => CommentTemplates.commentInList(comment, user));
+            commentList = comments.map(comment => CommentTemplates.commentInList(comment));
             Util.nestCommentElementsByParents();
         } else {
             commentList = [create("span")
@@ -152,12 +152,12 @@ export class CommentTemplates {
             ).build();
     }
 
-    static commentInList(commentData: any, user: User) {
+    static commentInList(commentData: any) {
         let actions = [];
         const comment = commentData.comment;
         const canEdit = commentData.canEdit;
         if (canEdit) {
-            const deleteAction = GenericTemplates.inlineAction("Delete", Icons.DELETE, "delete-comment", comment.id, TrackActions.deleteCommentFromElement);
+            const deleteAction = GenericTemplates.inlineAction("Delete", Icons.DELETE, "delete-comment", comment.id, () => TrackActions.deleteComment(comment.id));
             actions.push(deleteAction);
         }
         const avatarState = signal(Images.DEFAULT_AVATAR);
@@ -194,8 +194,7 @@ export class CommentTemplates {
                 create("div")
                     .classes("comment-children")
                     .build()
-            )
-            .build();
+            ).build();
     }
 
     static commentContent(comment: Comment, fullWidth = false) {

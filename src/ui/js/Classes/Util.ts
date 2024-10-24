@@ -311,7 +311,7 @@ export class Util {
         return userData;
     }
 
-    static mapNullToEmptyString(obj) {
+    static mapNullToEmptyString(obj: any) {
         for (const key in obj) {
             if (obj[key] === null) {
                 obj[key] = "";
