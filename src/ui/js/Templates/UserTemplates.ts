@@ -207,12 +207,8 @@ export class UserTemplates {
     }
 
     static profileHeader(user: User, isOwnProfile: boolean): AnyNode {
-        let bannerActions = [];
-        let avatarActions = [];
-        if (isOwnProfile) {
-            bannerActions.push(GenericTemplates.centeredDeleteButton("banner-delete-button", UserActions.deleteBanner, ["hidden", "showOnParentHover"]));
-            avatarActions.push(GenericTemplates.centeredDeleteButton("avatar-delete-button", UserActions.deleteAvatar, ["showOnParentHover"]));
-        }
+        let bannerDeleteButton = GenericTemplates.centeredDeleteButton("banner-delete-button", UserActions.deleteBanner, ["hidden", "showOnParentHover"]);
+        let avatarDeleteButton = GenericTemplates.centeredDeleteButton("avatar-delete-button", UserActions.deleteAvatar, ["showOnParentHover"]);
         const userBanner = signal(Images.DEFAULT_BANNER);
         Util.getBannerFromUserIdAsync(user.id).then(banner => {
             userBanner.value = banner;
@@ -221,24 +217,24 @@ export class UserTemplates {
         Util.getAvatarFromUserIdAsync(user.id).then(avatar => {
             userAvatar.value = avatar;
         });
+        const bannerContainer = create("div")
+                .classes("banner-container", "relative", isOwnProfile ? "clickable" : "_", isOwnProfile ? "blurOnParentHover" : "_")
+                .attributes("isOwnProfile", isOwnProfile.toString())
+                .onclick(UserActions.replaceBanner)
+                .children(
+                    create("img")
+                        .classes("nopointer", "user-banner", "banner-image")
+                        .attributes("data-user-id", user.id)
+                        .src(userBanner)
+                        .alt(user.username)
+                        .build()
+                ).build();
 
         return create("div")
             .classes("profile-header")
             .children(
-                create("div")
-                    .classes("banner-container", "relative", isOwnProfile ? "clickable" : "_", isOwnProfile ? "blurOnParentHover" : "_")
-                    .attributes("isOwnProfile", isOwnProfile.toString())
-                    .onclick(UserActions.replaceBanner)
-                    .children(
-                        create("img")
-                            .classes("nopointer", "user-banner", "banner-image")
-                            .attributes("data-user-id", user.id)
-                            .src(userBanner)
-                            .alt(user.username)
-                            .build()
-                    )
-                    .build(),
-                ...bannerActions,
+                bannerContainer,
+                ifjs(isOwnProfile, bannerDeleteButton),
                 create("div")
                     .classes("loader", "loader-small", "centeredInParent", "hidden")
                     .attributes("id", "banner-loader")
@@ -246,29 +242,33 @@ export class UserTemplates {
                 create("div")
                     .classes("header-info-container", "flex")
                     .attributes("isOwnProfile", isOwnProfile.toString())
-                    .onclick(UserActions.replaceBanner)
+                    .onclick((e) => {
+                        if (isOwnProfile) {
+                            UserActions.replaceBanner(e).then();
+                        }
+                    })
                     .children(
                         create("div")
                             .classes("avatar-container", "relative", isOwnProfile ? "pointer" : "_")
                             .attributes("isOwnProfile", isOwnProfile.toString())
-                            .onclick(UserActions.replaceAvatar)
+                            .onclick((e) => {
+                                if (isOwnProfile) {
+                                    UserActions.replaceAvatar(e).then();
+                                }
+                            })
                             .onmouseover(e => {
-                                if (e.currentTarget.getAttribute("isOwnProfile") === "false") {
+                                if (!isOwnProfile) {
                                     return;
                                 }
-                                const bannerContainer = document.querySelector(".banner-container");
                                 bannerContainer.classList.remove("blurOnParentHover");
-                                const button = document.querySelector("#banner-delete-button");
-                                button.classList.remove("showOnParentHover");
+                                bannerDeleteButton.classList.remove("showOnParentHover");
                             })
                             .onmouseleave(e => {
-                                if (e.currentTarget.getAttribute("isOwnProfile") === "false") {
+                                if (!isOwnProfile) {
                                     return;
                                 }
-                                const bannerContainer = document.querySelector(".banner-container");
                                 bannerContainer.classList.add("blurOnParentHover");
-                                const button = document.querySelector("#banner-delete-button");
-                                button.classList.add("showOnParentHover");
+                                bannerDeleteButton.classList.add("showOnParentHover");
                             })
                             .children(
                                 create("img")
@@ -277,7 +277,7 @@ export class UserTemplates {
                                     .attributes("src", userAvatar)
                                     .attributes("alt", user.username)
                                     .build(),
-                                ...avatarActions,
+                                ifjs(isOwnProfile, avatarDeleteButton),
                                 create("div")
                                     .classes("loader", "loader-small", "centeredInParent", "hidden")
                                     .attributes("id", "avatar-loader")
@@ -380,7 +380,7 @@ export class UserTemplates {
 
         const tabs = ["Tracks", "Albums", "Playlists"];
         const tabContents = [tracksContainer, albumsContainer, playlistsContainer];
-        const tabSelector = GenericTemplates.tabSelector(tabs, (i) => {
+        const tabSelector = GenericTemplates.tabSelector(tabs, (i: number) => {
             tabContents.forEach((c, j) => {
                 c.value.style.display = i === j ? "flex" : "none";
             });
@@ -491,7 +491,7 @@ export class UserTemplates {
 
         if (isOwnProfile) {
             base.onclick(async () => {
-                UserActions.editDisplayname(nameState, (newDisplayname: string) => {
+                UserActions.editDisplayname(user.displayname, (newDisplayname: string) => {
                     nameState.value = newDisplayname;
                 });
             });
@@ -501,7 +501,7 @@ export class UserTemplates {
         return base.build();
     }
 
-    static userDescription(user, selfUser, isOwnProfile, specialInfo) {
+    static userDescription(user: User, selfUser: User, isOwnProfile: boolean, specialInfo: AnyNode[]) {
         if (specialInfo.length === 0 && (user.description === null || user.description === "")) {
             return create("div").build();
         }
@@ -530,19 +530,22 @@ export class UserTemplates {
             ).build();
     }
 
-    static editDescriptionButton(currentDescription) {
+    static editDescriptionButton(currentDescription: string) {
         const descState = signal(currentDescription);
         return GenericTemplates.action(Icons.PEN, "Edit description", "edit-description", async e => {
             e.preventDefault();
-            UserActions.editDescription(descState.value, (newDescription) => {
+            UserActions.editDescription(descState.value, (newDescription: string) => {
                 const description = document.querySelector("#user-description");
+                if (!description) {
+                    return;
+                }
                 description.innerHTML = CustomText.renderToHtml(newDescription);
                 descState.value = newDescription;
             });
         }, [], ["secondary"]);
     }
 
-    static notPublicLibrary(name) {
+    static notPublicLibrary(name: string) {
         return create("div")
             .classes("card", "rounded", "padded", "flex-v")
             .children(

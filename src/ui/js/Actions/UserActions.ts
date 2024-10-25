@@ -46,7 +46,7 @@ export class UserActions {
         return response.status === 200;
     }
 
-    static async replaceAvatar(e) {
+    static async replaceAvatar(e: Event) {
         if (e.target.getAttribute("isOwnProfile") !== "true") {
             return;
         }
