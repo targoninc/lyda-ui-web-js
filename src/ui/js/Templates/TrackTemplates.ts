@@ -27,19 +27,28 @@ import {TrackLike} from "../DbModels/TrackLike.ts";
 import {Repost} from "../DbModels/Repost.ts";
 
 export class TrackTemplates {
-    /**
-     *
-     * @param track {Music}
-     * @param user {User}
-     * @param profileId {number}
-     */
-    static trackCard(track, user, profileId) {
+    static trackCard(track: Track, user: User, profileId: number) {
         const icons = [];
         const isPrivate = track.visibility === "private";
         if (isPrivate) {
             icons.push(GenericTemplates.lock());
         }
-        const collab = track.trackCollaborators.find(collab => collab.user_id === profileId);
+        if (!track.collaborators) {
+            throw new Error(`Track ${track.id} has no collaborators`);
+        }
+        if (!track.user) {
+            throw new Error(`Track ${track.id} has no user`);
+        }
+        if (!track.likes) {
+            throw new Error(`Track ${track.id} has no likes`);
+        }
+        if (!track.reposts) {
+            throw new Error(`Track ${track.id} has no reposts`);
+        }
+        if (!track.comments) {
+            throw new Error(`Track ${track.id} has no comments`);
+        }
+        const collab = track.collaborators!.find((collab: TrackCollaborator) => collab.user_id === profileId);
         const avatarState = signal(Images.DEFAULT_AVATAR);
         Util.getAvatarFromUserIdAsync(track.user_id).then((src) => {
             avatarState.value = src;
@@ -66,16 +75,15 @@ export class TrackTemplates {
                                     Util.arrayPropertyMatchesUser(track.user.follows, "followingUserId", user)),
                                 create("span")
                                     .classes("date", "text-small", "nopointer", "color-dim")
-                                    .text(Time.ago(track.releaseDate ?? track.createdAt))
+                                    .text(Time.ago(track.release_date ?? track.created_at))
                                     .build(),
                                 create("div")
                                     .classes("flex")
                                     .children(
-                                        StatisticsTemplates.likesIndicator("track", track.id, track.tracklikes.length,
-                                            Util.arrayPropertyMatchesUser(track.tracklikes, "userId", user)),
+                                        StatisticsTemplates.likesIndicator("track", track.id, track.likes.length,
+                                            Util.arrayPropertyMatchesUser(track.likes, "userId", user)),
                                         isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, Util.arrayPropertyMatchesUser(track.reposts, "userId", user)),
-                                        CommentTemplates.commentsIndicator(track.id, track.comments.length,
-                                            Util.arrayPropertyMatchesUser(track.comments, "userId", user)),
+                                        CommentTemplates.commentsIndicator(track.id, track.comments.length),
                                     ).build()
                             ).build(),
                     ).build(),
@@ -124,7 +132,7 @@ export class TrackTemplates {
             .build();
     }
 
-    static trackCover(track, overwriteWidth = null, startCallback = null) {
+    static trackCover(track, overwriteWidth: string|null = null, startCallback = null) {
         const imageState = signal(Images.DEFAULT_AVATAR);
         Util.getCoverFileFromTrackIdAsync(track.id, track.user_id).then((src) => {
             imageState.value = src;
