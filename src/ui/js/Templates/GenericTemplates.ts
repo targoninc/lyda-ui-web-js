@@ -484,7 +484,7 @@ export class GenericTemplates {
     }
 
     static textInputModal(title: HtmlPropertyValue, text: HtmlPropertyValue, currentValue: StringOrSignal,
-                          value: Signal<string>, icon: HtmlPropertyValue, confirmText: StringOrSignal, cancelText: StringOrSignal,
+                          newValue: Signal<string>, icon: HtmlPropertyValue, confirmText: StringOrSignal, cancelText: StringOrSignal,
                           confirmCallback: Function, cancelCallback: Function) {
         return GenericTemplates.modal([
                 create("div")
@@ -510,9 +510,9 @@ export class GenericTemplates {
                             name: "textInputModalInput",
                             label: "",
                             placeholder: "",
-                            value: currentValue ?? "",
+                            value: newValue,
                             onchange: (v) => {
-                                value.value = v;
+                                newValue.value = v;
                             }
                         }),
                         create("div")
@@ -536,7 +536,8 @@ export class GenericTemplates {
         );
     }
 
-    static textAreaInputModal(title: HtmlPropertyValue, text: HtmlPropertyValue, currentValue: HtmlPropertyValue, icon: HtmlPropertyValue, confirmText: StringOrSignal, cancelText: StringOrSignal,
+    static textAreaInputModal(title: HtmlPropertyValue, text: HtmlPropertyValue, currentValue: HtmlPropertyValue,
+                              newValue: Signal<string>, icon: HtmlPropertyValue, confirmText: StringOrSignal, cancelText: StringOrSignal,
                               confirmCallback: Function, cancelCallback: Function) {
         return GenericTemplates.modal([
                 create("div")
@@ -557,6 +558,15 @@ export class GenericTemplates {
                         create("p")
                             .text(text)
                             .build(),
+                        FJSC.textarea({
+                            name: "textInputModalInput",
+                            label: "",
+                            placeholder: "",
+                            value: newValue,
+                            onchange: (v) => {
+                                newValue.value = v;
+                            }
+                        }),
                         create("textarea")
                             .classes("full", "fullWidth")
                             .id("textAreaInputModalInput")

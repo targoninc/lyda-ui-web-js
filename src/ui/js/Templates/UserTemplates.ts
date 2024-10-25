@@ -27,6 +27,9 @@ import {Track} from "../DbModels/Track.ts";
 import {User} from "../DbModels/User.ts";
 import {UserPermission} from "../DbModels/UserPermission.ts";
 import {Permission} from "../DbModels/Permission.ts";
+import {Playlist} from "../DbModels/Playlist.ts";
+import {Album} from "../DbModels/Album.ts";
+import {Badge} from "../DbModels/Badge.ts";
 
 export class UserTemplates {
     static userWidget(user_id: number, username: string, displayname: string, avatar: StringOrSignal, following: boolean, extraAttributes: StringOrSignal[] = [], extraClasses: StringOrSignal[] = []) {
@@ -320,7 +323,7 @@ export class UserTemplates {
             ).build();
     }
 
-    static badges(badges) {
+    static badges(badges: Badge[]) {
         let children = [];
         for (let badge of badges) {
             children.push(UserTemplates.badge(badge));
@@ -331,12 +334,13 @@ export class UserTemplates {
             .build();
     }
 
-    static badge(badge) {
+    static badge(badge: Badge) {
         let addClasses = [];
         const colorBadges = ["staff", "cute", "vip"];
         if (colorBadges.includes(badge.name)) {
             addClasses.push("no-filter");
         }
+
         return create("img")
             .attributes("src", Badges.BADGE(badge.name))
             .attributes("alt", badge.name)
@@ -345,29 +349,29 @@ export class UserTemplates {
             .build();
     }
 
-    static albumCards(albums, user, isOwnProfile) {
+    static albumCards(albums: Album[], user: User, isOwnProfile: boolean) {
         let children = [];
         if (albums.length === 0) {
             return AlbumTemplates.noAlbumsYet(isOwnProfile);
         } else {
-            children = albums.map(album => AlbumTemplates.albumCard(album, user));
+            children = albums.map((album: Album) => AlbumTemplates.albumCard(album, user));
         }
 
         return AlbumTemplates.albumCardsContainer(children);
     }
 
-    static playlistCards(playlists, user, isOwnProfile) {
+    static playlistCards(playlists: Playlist[], user: User, isOwnProfile: boolean) {
         let children = [];
         if (playlists.length === 0) {
             return PlaylistTemplates.noPlaylistsYet(isOwnProfile);
         } else {
-            children = playlists.map(playlist => PlaylistTemplates.playlistCard(playlist, user));
+            children = playlists.map((playlist: Playlist) => PlaylistTemplates.playlistCard(playlist, user));
         }
 
         return PlaylistTemplates.playlistCardsContainer(children);
     }
 
-    static libraryPage(albums, playlists, tracks, user) {
+    static libraryPage(albums: Album[], playlists: Playlist[], tracks: Track[], user: User) {
         const container = create("div").build();
 
         const tracksContainer = UserTemplates.libraryTracks(tracks, user);
@@ -393,10 +397,10 @@ export class UserTemplates {
             ).build();
     }
 
-    static libraryAlbums(albums, user) {
+    static libraryAlbums(albums: Album[], user: User) {
         const template = signal(create("div").build());
-        const update = (albums) => {
-            let children = [];
+        const update = (albums: Album[]) => {
+            let children;
             if (albums.length === 0) {
                 children = [
                     create("span")
@@ -404,7 +408,7 @@ export class UserTemplates {
                         .build()
                 ];
             } else {
-                children = albums.map(album => AlbumTemplates.albumCard(album, user));
+                children = albums.map((album: Album) => AlbumTemplates.albumCard(album, user));
             }
 
             template.value = AlbumTemplates.albumCardsContainer(children);
@@ -414,9 +418,9 @@ export class UserTemplates {
         return template;
     }
 
-    static libraryTracks(tracks, user) {
+    static libraryTracks(tracks: Track[], user: User) {
         const template = signal(create("div").build());
-        const update = (tracks) => {
+        const update = (tracks: Track[]) => {
             let children;
             if (tracks.length === 0) {
                 children = [
@@ -425,7 +429,7 @@ export class UserTemplates {
                         .build()
                 ];
             } else {
-                children = tracks.map(track => TrackTemplates.trackCard(track, user, user.id));
+                children = tracks.map((track: Track) => TrackTemplates.trackCard(track, user, user.id));
             }
 
             template.value = TrackTemplates.trackCardsContainer(children);
@@ -435,11 +439,11 @@ export class UserTemplates {
         return template;
     }
 
-    static libraryPlaylists(playlists, user) {
+    static libraryPlaylists(playlists: Playlist[], user: User) {
         const template = signal(create("div").build());
 
-        const update = (playlists) => {
-            let children = [];
+        const update = (playlists: Playlist[]) => {
+            let children;
             if (playlists.length === 0) {
                 children = [
                     create("span")
@@ -447,7 +451,7 @@ export class UserTemplates {
                         .build()
                 ];
             } else {
-                children = playlists.map(playlist => PlaylistTemplates.playlistCard(playlist, user));
+                children = playlists.map((playlist: Playlist) => PlaylistTemplates.playlistCard(playlist, user));
             }
 
             template.value = PlaylistTemplates.playlistCardsContainer(children);
@@ -457,7 +461,7 @@ export class UserTemplates {
         return template;
     }
 
-    static username(user, selfUser, isOwnProfile) {
+    static username(user: User, selfUser: User, isOwnProfile: boolean) {
         const nameState = signal(user.username);
 
         const base = create("span")
@@ -467,7 +471,7 @@ export class UserTemplates {
 
         if (isOwnProfile) {
             base.onclick(async () => {
-                UserActions.editUsername(nameState, (newUsername) => {
+                UserActions.editUsername(nameState, (newUsername: string) => {
                     nameState.value = newUsername;
                 });
             });

@@ -196,7 +196,7 @@ export class Ui {
         Ui.addModal(modal);
     }
 
-    static async getTextInputModal(title: HtmlPropertyValue, text: HtmlPropertyValue, currentValue: string, confirmText: StringOrSignal, cancelText: StringOrSignal, confirmCallback: Function = () => {}, cancelCallback: Function = () => {
+    static async getTextInputModal(title: HtmlPropertyValue, text: HtmlPropertyValue, currentValue: string, confirmText: StringOrSignal, cancelText: StringOrSignal, confirmCallback: Function, cancelCallback: Function = () => {
     }, icon = "") {
         const value = signal(currentValue);
         const confirmCallback2 = () => {
@@ -211,18 +211,18 @@ export class Ui {
         Ui.addModal(modal);
     }
 
-    static async getTextAreaInputModal(title, text, currentValue, confirmText, cancelText, confirmCallback = () => {}, cancelCallback = () => {
+    static async getTextAreaInputModal(title: HtmlPropertyValue, text: HtmlPropertyValue, currentValue: string, confirmText: StringOrSignal, cancelText: StringOrSignal, confirmCallback: Function = () => {}, cancelCallback: Function = () => {
     }, icon = "") {
+        const value = signal(currentValue);
         const confirmCallback2 = () => {
-            const value = document.getElementById("textAreaInputModalInput").value;
-            confirmCallback(value);
+            confirmCallback(value.value);
             Util.removeModal();
         };
         const cancelCallback2 = () => {
             cancelCallback();
             Util.removeModal();
         };
-        const modal = GenericTemplates.textAreaInputModal(title, text, currentValue, icon, confirmText, cancelText, confirmCallback2, cancelCallback2);
+        const modal = GenericTemplates.textAreaInputModal(title, text, currentValue, value, icon, confirmText, cancelText, confirmCallback2, cancelCallback2);
         Ui.addModal(modal);
     }
 

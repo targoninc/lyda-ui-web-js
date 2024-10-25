@@ -8,6 +8,7 @@ import {NavTemplates} from "../Templates/NavTemplates.ts";
 import {Themes} from "../Enums/Themes.ts";
 import {UserSettings} from "../Enums/UserSettings.ts";
 import {navigate} from "../Routing/Router.ts";
+import {StringOrSignal} from "../../fjsc/f2.ts";
 
 export class UserActions {
     static updateAvatar(newSrc) {
@@ -326,8 +327,8 @@ export class UserActions {
         }, Icons.PEN).then();
     }
 
-    static editUsername(currentUsername, successCallback) {
-        Ui.getTextInputModal("Edit username", "Enter your new username", currentUsername, "Save", "Cancel", async (username) => {
+    static editUsername(currentUsername: StringOrSignal, successCallback: Function) {
+        Ui.getTextInputModal("Edit username", "Enter your new username", currentUsername, "Save", "Cancel", async (username: string) => {
             const res = await Api.postAsync(Api.endpoints.user.set.property, {
                 property: "username",
                 value: username
