@@ -24,6 +24,7 @@ import {Track} from "../DbModels/Track.ts";
 import {User} from "../DbModels/User.ts";
 import {TrackCollaborator} from "../DbModels/TrackCollaborator.ts";
 import {TrackLike} from "../DbModels/TrackLike.ts";
+import {Repost} from "../DbModels/Repost.ts";
 
 export class TrackTemplates {
     /**
@@ -272,15 +273,20 @@ export class TrackTemplates {
             ).build();
     }
 
-    static repostIndicator(repost) {
+    static repostIndicator(repost: Repost) {
+        if (!repost.user) {
+            throw new Error(`Repost has no user`);
+        }
+
         return create("div")
             .classes("pill", "padded-inline", "flex", "rounded-max", "repost-indicator", "clickable", "fakeButton")
-            .attributes("user_id", repost.user_id, "username", repost.username)
-            .onclick(UserActions.openProfileFromElement)
+            .onclick(() => {
+                navigate("profile/" + repost.user!.username);
+            })
             .children(
                 create("div")
                     .classes("align-center", "text-small", "nopointer")
-                    .text("@" + repost.username)
+                    .text("@" + repost.user.username)
                     .build(),
                 create("img")
                     .classes("inline-icon", "svg", "align-center", "nopointer")

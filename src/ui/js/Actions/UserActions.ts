@@ -257,22 +257,9 @@ export class UserActions {
         return await UserActions.toggleBooleanUserSetting(UserSettings.publicLikes);
     }
 
-    static async toggleNotificationSetting(key) {
+    static async toggleNotificationSetting(key: string) {
         const settingKey = "notification_" + key;
         return await UserActions.toggleBooleanUserSetting(settingKey);
-    }
-
-    static async openProfileFromElement(e) {
-        e.preventDefault();
-        let target = e.target;
-        if (e.target.classList.contains("follow-button")) {
-            return;
-        }
-        let username = target.getAttribute("username");
-        if (username === "") {
-            return;
-        }
-        navigate("profile/" + username);
     }
 
     static async unverifyUser(id: number) {
@@ -293,7 +280,7 @@ export class UserActions {
         return true;
     }
 
-    static editDescription(currentDescription, successCallback) {
+    static editDescription(currentDescription: string, successCallback: Function) {
         Ui.getTextAreaInputModal("Edit description", "Enter your new description", currentDescription, "Save", "Cancel", async (description) => {
             const res = await Api.postAsync(Api.endpoints.user.set.property, { property: "description", value: description });
             if (res.code !== 200) {

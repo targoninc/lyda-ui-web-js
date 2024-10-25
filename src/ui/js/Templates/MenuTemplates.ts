@@ -3,16 +3,14 @@ import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {Util} from "../Classes/Util.ts";
 import {navigate} from "../Routing/Router.ts";
-import {AnyElement, create, HtmlPropertyValue, signal} from "../../fjsc/f2.ts";
+import {AnyElement, computedSignal, create, HtmlPropertyValue, Signal, signal, StringOrSignal} from "../../fjsc/f2.ts";
+import {FJSC} from "../../fjsc";
 
 export class MenuTemplates {
     static genericMenu(title: HtmlPropertyValue, menuItems: any[]) {
         const indexState = signal(0);
         const menuItemCount = menuItems.length;
-        let modal = signal(MenuTemplates.getGenericModalWithSelectedIndex(indexState.value, title, menuItems));
-        indexState.onUpdate = (newIndex: number) => {
-            modal.value = MenuTemplates.getGenericModalWithSelectedIndex(newIndex, title, menuItems);
-        };
+        let modal = MenuTemplates.getGenericModalWithSelectedIndex(indexState, title, menuItems);
         const eventListener = (e: KeyboardEvent) => {
             if (e.code === "ArrowUp") {
                 e.preventDefault();
@@ -37,21 +35,24 @@ export class MenuTemplates {
         return modal;
     }
 
-    static getGenericModalWithSelectedIndex(index: number, title: HtmlPropertyValue, menuItems: any[]) {
+    static getGenericModalWithSelectedIndex(selectedIndex: Signal<number>, title: HtmlPropertyValue, menuItems: any[]) {
         return create("div")
             .classes("flex-v")
             .children(
                 GenericTemplates.title(title),
-                ...menuItems.map((menuItem, itemIndex) => MenuTemplates.menuItem(menuItem.text, menuItem.action, itemIndex === index))
+                ...menuItems.map((menuItem, itemIndex) => MenuTemplates.menuItem(menuItem.text, menuItem.action, selectedIndex, itemIndex))
             ).build();
     }
 
-    static menuItem(text: HtmlPropertyValue, action: Function, isSelected: boolean) {
-        return create("div")
-            .classes("fakeButton", "clickable", "rounded", "padded-inline", isSelected ? "active" : "_")
-            .text(text)
-            .onclick(action)
-            .build();
+    static menuItem(text: HtmlPropertyValue, action: Function, selectedIndex: Signal<number>, index: number) {
+        const isSelected = computedSignal(selectedIndex, (i: number) => i === index);
+        const selectedClass = computedSignal<string>(isSelected, (is: boolean) => is ? "active" : "_");
+
+        return FJSC.button({
+            text: text as StringOrSignal,
+            onclick: action,
+            classes: ["fakeButton", "clickable", "rounded", "padded-inline", selectedClass],
+        });
     }
 
     static createMenu() {

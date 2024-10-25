@@ -78,8 +78,9 @@ export class QueueTemplates {
                         create("span")
                             .classes("align-center", "clickable")
                             .text(track.user.displayname)
-                            .attributes("username", track.user.username)
-                            .onclick(UserActions.openProfileFromElement)
+                            .onclick(() => {
+                                navigate("profile/" + track.user.username);
+                            })
                             .build(),
                         create("span")
                             .classes("align-center")

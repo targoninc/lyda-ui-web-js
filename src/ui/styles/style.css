@@ -632,7 +632,7 @@ summary {
 }
 
 .fakeButton.active {
-    background: var(--color-9);
+    background: var(--color-9) !important;
     border-color: var(--color-1);
 }
 

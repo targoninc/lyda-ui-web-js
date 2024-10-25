@@ -44,7 +44,9 @@ export class UserTemplates {
         return base
             .classes("user-widget", "clickable", "rounded-max", "flex", "padded-inline")
             .attributes("user_id", user_id, "username", username)
-            .onclick(UserActions.openProfileFromElement)
+            .onclick(() => {
+                navigate("profile/" + username);
+            })
             .href(Links.PROFILE(username))
             .title(displayname + " (@" + username + ")")
             .children(
@@ -256,14 +258,14 @@ export class UserTemplates {
                                     UserActions.replaceAvatar(e).then();
                                 }
                             })
-                            .onmouseover(e => {
+                            .onmouseover(() => {
                                 if (!isOwnProfile) {
                                     return;
                                 }
                                 bannerContainer.classList.remove("blurOnParentHover");
                                 bannerDeleteButton.classList.remove("showOnParentHover");
                             })
-                            .onmouseleave(e => {
+                            .onmouseleave(() => {
                                 if (!isOwnProfile) {
                                     return;
                                 }

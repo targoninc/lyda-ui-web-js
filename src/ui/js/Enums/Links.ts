@@ -1,6 +1,6 @@
 export class Links {
     static get BASE_URL() {
-        return "https://lyda.app/";
+        return window.location.origin;
     }
 	
     static LINK(path: string) {
