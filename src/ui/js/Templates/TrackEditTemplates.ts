@@ -23,6 +23,8 @@ import {Track} from "../DbModels/Track.ts";
 import {FJSC} from "../../fjsc";
 import {User} from "../DbModels/User.ts";
 import {InputType} from "../../fjsc/Types.ts";
+import {TrackCollaborator} from "../DbModels/TrackCollaborator.ts";
+import {UploadableTrack} from "../Models/UploadableTrack.ts";
 
 export class TrackEditTemplates {
     static getStateWithParentUpdate(key, value, parentState) {
@@ -38,11 +40,11 @@ export class TrackEditTemplates {
         return state;
     }
 
-    static uploadForm(title, collaborators, releaseDate, visibility, genre, isrc, upc, description, monetization, price, linkedUsers, termsOfService) {
-        const state = signal({
+    static uploadForm(title, credits, releaseDate, visibility, genre, isrc, upc, description, monetization, price, linkedUsers, termsOfService) {
+        const state = signal(<UploadableTrack>{
             title: title ?? "",
-            collaborators: collaborators ?? "",
-            releaseDate: releaseDate ?? Util.getDateForPicker(new Date()),
+            credits: credits ?? "",
+            release_date: releaseDate ?? new Date(),
             visibility: visibility ?? "public",
             genre: genre ?? Genres.OTHER,
             isrc: isrc ?? "",
@@ -50,7 +52,8 @@ export class TrackEditTemplates {
             description: description ?? "",
             monetization: monetization ?? true,
             price: price ?? "1",
-            linkedUsers: linkedUsers ?? [],
+            collaborators: linkedUsers ?? [],
+            termsOfService: false
         });
         const errorSections = signal([]);
         const errorFields = signal([]);
@@ -234,7 +237,7 @@ export class TrackEditTemplates {
             ).build();
     }
 
-    static infoSection(state: Signal<Track>, errorSections: Signal<string[]>, errorFields: Signal<string[]>, enableTos = true, enableLinkedUsers = true) {
+    static infoSection(state: Signal<UploadableTrack>, errorSections: Signal<string[]>, errorFields: Signal<string[]>, enableTos = true, enableLinkedUsers = true) {
         const isPrivate = computedSignal<boolean>(state, (s: Track) => s.visibility === "private");
 
         return create("div")
@@ -266,12 +269,48 @@ export class TrackEditTemplates {
                             state.value = { ...state.value, title: v };
                         }
                     }),
-                    TrackEditTemplates.collaborators(state.value.credits, state),
+                    FJSC.input<string>({
+                        type: InputType.text,
+                        name: "credits",
+                        label: "Collaborators",
+                        placeholder: "John Music, Alice Frequency",
+                        value: computedSignal(state, (s: Track) => s.credits),
+                        onchange: (v) => {
+                            state.value = { ...state.value, credits: v };
+                        }
+                    }),
                     ifjs(enableLinkedUsers, TrackEditTemplates.linkedUsers(state.value.collaborators, state)),
-                    TrackEditTemplates.releaseDate(state.value.releaseDate, state),
+                    FJSC.input<string>({
+                        type: InputType.date,
+                        name: "release_date",
+                        label: "Release Date",
+                        placeholder: "YYYY-MM-DD",
+                        value: computedSignal(state, (s: Track) => s.release_date.toISOString().split("T")[0]),
+                        onchange: (v) => {
+                            state.value = { ...state.value, release_date: new Date(v) };
+                        }
+                    }),
                     FormTemplates.genre(state),
-                    TrackEditTemplates.isrc(state.value.isrc, state),
-                    TrackEditTemplates.upc(state.value.upc, state),
+                    FJSC.input<string>({
+                        type: InputType.text,
+                        name: "isrc",
+                        label: "ISRC",
+                        placeholder: "QZNWX2227540",
+                        value: computedSignal(state, (s: Track) => s.isrc),
+                        onchange: (v) => {
+                            state.value = { ...state.value, isrc: v };
+                        }
+                    }),
+                    FJSC.input<string>({
+                        type: InputType.text,
+                        name: "upc",
+                        label: "UPC",
+                        placeholder: "00888072469600",
+                        value: computedSignal(state, (s: Track) => s.upc),
+                        onchange: (v) => {
+                            state.value = { ...state.value, upc: v };
+                        }
+                    }),
                     FJSC.textarea({
                         name: "description",
                         label: "Description",
@@ -288,10 +327,34 @@ export class TrackEditTemplates {
                         TrackEditTemplates.filesSection(true, state, errorSections, errorFields),
                         TrackEditTemplates.sectionCard("Monetization", errorSections, "monetization", [
                             TrackEditTemplates.monetization(),
-                            TrackEditTemplates.price(state.value.price, state)
+                            FJSC.input<number>({
+                                type: InputType.number,
+                                name: "price",
+                                label: "Minimum track price in USD",
+                                placeholder: "1$",
+                                value: computedSignal(state, (s: Track) => s.price),
+                                validators: [
+                                    (v) => {
+                                        if (v < 0) {
+                                            return ["Minimum track price must be a positive number"];
+                                        }
+                                    }
+                                ],
+                                onchange: (v) => {
+                                    state.value = { ...state.value, price: v };
+                                }
+                            }),
                         ], "attach_money"),
                         enableTos ? TrackEditTemplates.sectionCard("Terms of Service", errorSections, "terms", [
-                            TrackEditTemplates.termsOfService(state.value.termsOfService, state)
+                            FJSC.checkbox({
+                                name: "termsOfService",
+                                text: "I have read and agree to the Terms of Service and Privacy Policy",
+                                checked: computedSignal(state, (s: UploadableTrack) => s.termsOfService),
+                                required: true,
+                                onchange: (v) => {
+                                    state.value = { ...state.value, termsOfService: v };
+                                }
+                            }),
                         ], "gavel") : null,
                     ).build()
             ).build();
@@ -447,7 +510,7 @@ export class TrackEditTemplates {
         });
     }
 
-    static linkedUsers(linkedUsers = [], parentState: Signal<Track>|null = null) {
+    static linkedUsers(linkedUsers: TrackCollaborator[] = [], parentState: Signal<Track>|null = null) {
         const linkedUserState = signal(linkedUsers);
         const sendJson = signal(JSON.stringify(linkedUsers));
         const userMap = new Map();
