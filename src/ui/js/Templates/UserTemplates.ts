@@ -471,7 +471,7 @@ export class UserTemplates {
 
         if (isOwnProfile) {
             base.onclick(async () => {
-                UserActions.editUsername(nameState, (newUsername: string) => {
+                UserActions.editUsername(user.username, (newUsername: string) => {
                     nameState.value = newUsername;
                 });
             });

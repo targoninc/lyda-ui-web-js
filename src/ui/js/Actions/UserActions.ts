@@ -327,7 +327,7 @@ export class UserActions {
         }, Icons.PEN).then();
     }
 
-    static editUsername(currentUsername: StringOrSignal, successCallback: Function) {
+    static editUsername(currentUsername: string, successCallback: Function) {
         Ui.getTextInputModal("Edit username", "Enter your new username", currentUsername, "Save", "Cancel", async (username: string) => {
             const res = await Api.postAsync(Api.endpoints.user.set.property, {
                 property: "username",
