@@ -477,7 +477,7 @@ export class UserTemplates {
         return base.build();
     }
 
-    static displayname(user, selfUser, isOwnProfile) {
+    static displayname(user: User, selfUser: User, isOwnProfile: boolean) {
         const nameState = signal(user.displayname);
 
         const base = create("h1")
@@ -487,7 +487,7 @@ export class UserTemplates {
 
         if (isOwnProfile) {
             base.onclick(async () => {
-                UserActions.editDisplayname(nameState, (newDisplayname) => {
+                UserActions.editDisplayname(nameState, (newDisplayname: string) => {
                     nameState.value = newDisplayname;
                 });
             });

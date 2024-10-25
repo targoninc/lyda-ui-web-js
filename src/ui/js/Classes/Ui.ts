@@ -6,6 +6,7 @@ import {NavTemplates} from "../Templates/NavTemplates.ts";
 import {GenericTemplates} from "../Templates/GenericTemplates.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {UserActions} from "../Actions/UserActions.ts";
+import {HtmlPropertyValue, signal, StringOrSignal} from "../../fjsc/f2.ts";
 
 export class Ui {
     static validUrlPaths = {
@@ -195,18 +196,18 @@ export class Ui {
         Ui.addModal(modal);
     }
 
-    static async getTextInputModal(title, text, currentValue, confirmText, cancelText, confirmCallback = () => {}, cancelCallback = () => {
+    static async getTextInputModal(title: HtmlPropertyValue, text: HtmlPropertyValue, currentValue: string, confirmText: StringOrSignal, cancelText: StringOrSignal, confirmCallback: Function = () => {}, cancelCallback: Function = () => {
     }, icon = "") {
+        const value = signal(currentValue);
         const confirmCallback2 = () => {
-            const value = document.getElementById("textInputModalInput").value;
-            confirmCallback(value);
+            confirmCallback(value.value);
             Util.removeModal();
         };
         const cancelCallback2 = () => {
             cancelCallback();
             Util.removeModal();
         };
-        const modal = GenericTemplates.textInputModal(title, text, currentValue, icon, confirmText, cancelText, confirmCallback2, cancelCallback2);
+        const modal = GenericTemplates.textInputModal(title, text, currentValue, value, icon, confirmText, cancelText, confirmCallback2, cancelCallback2);
         Ui.addModal(modal);
     }
 

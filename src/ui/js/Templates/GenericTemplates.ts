@@ -16,7 +16,7 @@ import {
     AnyElement
 } from "../../fjsc/f2.ts";
 import {FJSC} from "../../fjsc";
-import {SearchableSelectConfig} from "../../fjsc/Types.ts";
+import {InputType, SearchableSelectConfig} from "../../fjsc/Types.ts";
 import {Util} from "../Classes/Util.ts";
 import {CollaboratorType} from "../DbModels/CollaboratorType.ts";
 import {navigate} from "../Routing/Router.ts";
@@ -483,8 +483,8 @@ export class GenericTemplates {
             ).build();
     }
 
-    static textInputModal(title: HtmlPropertyValue, text: HtmlPropertyValue, currentValue: HtmlPropertyValue,
-                          icon: HtmlPropertyValue, confirmText: StringOrSignal, cancelText: StringOrSignal,
+    static textInputModal(title: HtmlPropertyValue, text: HtmlPropertyValue, currentValue: StringOrSignal,
+                          value: Signal<string>, icon: HtmlPropertyValue, confirmText: StringOrSignal, cancelText: StringOrSignal,
                           confirmCallback: Function, cancelCallback: Function) {
         return GenericTemplates.modal([
                 create("div")
@@ -505,6 +505,16 @@ export class GenericTemplates {
                         create("p")
                             .text(text)
                             .build(),
+                        FJSC.input<string>({
+                            type: InputType.text,
+                            name: "textInputModalInput",
+                            label: "",
+                            placeholder: "",
+                            value: currentValue ?? "",
+                            onchange: (v) => {
+                                value.value = v;
+                            }
+                        }),
                         create("input")
                             .classes("full")
                             .id("textInputModalInput")

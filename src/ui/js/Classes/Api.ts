@@ -237,17 +237,11 @@ export class Api {
         };
     }
 
-    /**
-     * @param {string} url - The url to post to
-     * @param {*} body - The body to post
-     * @param {*} authorizationHeaders - The authorization headers to use
-     * @returns {Promise<{code: number, data: any}>} - The response code and data
-     */
-    static async postAsync(url, body = {}, authorizationHeaders = {}) {
+    static async postAsync(url: string, body: any = {}, authorizationHeaders: any = {}): Promise<{ code: number; data: any; }> {
         return await Api.postRawAsync(url, JSON.stringify(body), authorizationHeaders);
     }
 
-    static async postRawAsync(url, body, authorizationHeaders = {}) {
+    static async postRawAsync(url: string, body: any = {}, authorizationHeaders = {}) {
         const headers = {
             "Content-Type": "application/json",
         };

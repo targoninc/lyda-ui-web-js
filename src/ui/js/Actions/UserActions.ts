@@ -307,8 +307,8 @@ export class UserActions {
         }, () => {}, Icons.PEN).then();
     }
 
-    static editDisplayname(currentDisplayname, successCallback) {
-        Ui.getTextInputModal("Edit displayname", "Enter your new displayname", currentDisplayname, "Save", "Cancel", async (displayname) => {
+    static editDisplayname(currentDisplayname: string, successCallback: Function) {
+        Ui.getTextInputModal("Edit displayname", "Enter your new displayname", currentDisplayname, "Save", "Cancel", async (displayname: string) => {
             const res = await Api.postAsync(Api.endpoints.user.set.property, {
                 property: "displayname",
                 value: displayname
