@@ -515,11 +515,6 @@ export class GenericTemplates {
                                 value.value = v;
                             }
                         }),
-                        create("input")
-                            .classes("full")
-                            .id("textInputModalInput")
-                            .value(currentValue ?? "")
-                            .build(),
                         create("div")
                             .classes("flex")
                             .children(
