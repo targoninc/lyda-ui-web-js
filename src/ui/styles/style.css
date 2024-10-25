@@ -63,6 +63,7 @@
     --button-bottom-border-size: 3px;
 
     --fjsc-text-color: var(--color-5);
+    --fjsc-error-color: var(--color-2);
 
     --fjsc-interactive-background: var(--color-4);
     --fjsc-interactive-background-hover: var(--color-3);
