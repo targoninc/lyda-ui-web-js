@@ -69,3 +69,8 @@ export function navigate(path: string) {
     // @ts-ignore
     (<Router>window.router).navigate(path).then();
 }
+
+export function reload() {
+    // @ts-ignore
+    (<Router>window.router).reload();
+}

@@ -12,8 +12,21 @@ import {PlaylistTemplates} from "./PlaylistTemplates.ts";
 import {CustomText} from "../Classes/Helpers/CustomText.ts";
 import {Permissions} from "../Enums/Permissions.ts";
 import {Images} from "../Enums/Images.ts";
-import {navigate} from "../Routing/Router.ts";
-import {create, HtmlPropertyValue, nullElement, signal, StringOrSignal} from "../../fjsc/f2.ts";
+import {navigate, reload} from "../Routing/Router.ts";
+import {
+    AnyNode,
+    computedSignal,
+    create,
+    HtmlPropertyValue,
+    ifjs,
+    nullElement,
+    signal,
+    StringOrSignal
+} from "../../fjsc/f2.ts";
+import {Track} from "../DbModels/Track.ts";
+import {User} from "../DbModels/User.ts";
+import {UserPermission} from "../DbModels/UserPermission.ts";
+import {Permission} from "../DbModels/Permission.ts";
 
 export class UserTemplates {
     static userWidget(user_id: number, username: string, displayname: string, avatar: StringOrSignal, following: boolean, extraAttributes: StringOrSignal[] = [], extraClasses: StringOrSignal[] = []) {
@@ -47,7 +60,7 @@ export class UserTemplates {
             ).build();
     }
 
-    static linkedUser(user_id, username, displayname, avatar, collab_type, actionButton = null, extraAttributes = undefined, extraClasses = []) {
+    static linkedUser(user_id: number, username: string, displayname: string, avatar: string, collab_type: HtmlPropertyValue, actionButton = null, extraAttributes: HtmlPropertyValue[] | undefined = undefined, extraClasses: HtmlPropertyValue[] = []) {
         const noredirect = extraClasses.includes("no-redirect");
         const base = noredirect ? create("div") : create("a");
         if (extraAttributes) {
@@ -91,7 +104,7 @@ export class UserTemplates {
             .build();
     }
 
-    static userIcon(user_id: HtmlPropertyValue, avatar: string) {
+    static userIcon(user_id: HtmlPropertyValue, avatar: StringOrSignal) {
         return create("img")
             .classes("user-icon", "user-avatar", "align-center", "nopointer")
             .attributes("data-user-id", user_id)
@@ -127,7 +140,7 @@ export class UserTemplates {
             .build();
     }
 
-    static trackCards(tracks, profileId, user, isOwnProfile) {
+    static trackCards(tracks: Track[], profileId: number, user: User, isOwnProfile: boolean) {
         let children = [];
         if (tracks.length === 0) {
             return TrackTemplates.noTracksUploadedYet(isOwnProfile);
@@ -144,7 +157,7 @@ export class UserTemplates {
             unapprovedTracks.value = tracks;
         });
         const link = signal(create("div").build());
-        unapprovedTracks.onUpdate = (tracks) => {
+        unapprovedTracks.onUpdate = (tracks: Track[]) => {
             link.value = tracks.length === 0 ? nullElement() : GenericTemplates.action(Icons.APPROVAL, "Unapproved tracks", "unapproved-tracks", async e => {
                 e.preventDefault();
                 navigate("unapproved-tracks");
@@ -154,7 +167,7 @@ export class UserTemplates {
         return link;
     }
 
-    static userActionsContainer(isOwnProfile) {
+    static userActionsContainer(isOwnProfile: boolean) {
         if (!isOwnProfile) {
             return create("div").build();
         }
@@ -190,13 +203,7 @@ export class UserTemplates {
             ).build();
     }
 
-    /**
-     *
-     * @param {User} user
-     * @param {boolean} isOwnProfile
-     * @returns {*}
-     */
-    static profileHeader(user, isOwnProfile) {
+    static profileHeader(user: User, isOwnProfile: boolean): AnyNode {
         let bannerActions = [];
         let avatarActions = [];
         if (isOwnProfile) {
@@ -277,33 +284,14 @@ export class UserTemplates {
             ).build();
     }
 
-    static profileInfo(user, selfUser, isOwnProfile, permissions, following, followsBack) {
-        let specialInfo = [];
-        if (user.badges.length > 0) {
+    static profileInfo(user: User, selfUser: User, isOwnProfile: boolean, permissions: Permission[], following: boolean, followsBack: boolean) {
+        let specialInfo: AnyNode[] = [];
+        const verified = signal(user.verified);
+        const canVerify = computedSignal(verified, (v: boolean) => !v && permissions.some(p => p.name === Permissions.canVerifyUsers));
+        const canUnverify = computedSignal(verified, (v: boolean) => v && permissions.some(p => p.name === Permissions.canVerifyUsers));
+
+        if (user.badges && user.badges.length > 0) {
             specialInfo = [UserTemplates.badges(user.badges)];
-        }
-        let verification = [];
-        if (user.verified) {
-            verification.push(UserTemplates.verificationbadge());
-            if (permissions.some(p => p.name === Permissions.canVerifyUsers)) {
-                verification.push(
-                    GenericTemplates.action(Icons.X, "Unverify", "unverify", async e => {
-                        e.preventDefault();
-                        await UserActions.unverifyUser(user.id);
-                        window.router.reload();
-                    }, [], ["negative"])
-                );
-            }
-        } else {
-            if (permissions.some(p => p.name === Permissions.canVerifyUsers)) {
-                verification.push(
-                    GenericTemplates.action(Icons.VERIFIED, "Verify", "verify", async e => {
-                        e.preventDefault();
-                        await UserActions.verifyUser(user.id);
-                        window.router.reload();
-                    }, [], ["positive"])
-                );
-            }
         }
 
         return create("div")
@@ -314,9 +302,19 @@ export class UserTemplates {
                     .classes("flex")
                     .children(
                         UserTemplates.username(user, selfUser, isOwnProfile),
-                        ...verification,
-                        isOwnProfile === false && selfUser ? UserTemplates.followButton(following, user.id) : null,
-                        isOwnProfile === false && followsBack === true ? UserTemplates.followsBackIndicator() : null,
+                        ifjs(verified, UserTemplates.verificationbadge()),
+                        ifjs(canVerify, GenericTemplates.action(Icons.VERIFIED, "Verify", "verify", async e => {
+                            e.preventDefault();
+                            await UserActions.verifyUser(user.id);
+                            verified.value = true;
+                        }, [], ["positive"])),
+                        ifjs(canUnverify, GenericTemplates.action(Icons.X, "Unverify", "unverify", async e => {
+                            e.preventDefault();
+                            await UserActions.unverifyUser(user.id);
+                            verified.value = false;
+                        }, [], ["negative"])),
+                        !isOwnProfile && selfUser ? UserTemplates.followButton(following, user.id) : null,
+                        !isOwnProfile && followsBack ? UserTemplates.followsBackIndicator() : null,
                     ).build(),
                 UserTemplates.userDescription(user, selfUser, isOwnProfile, specialInfo)
             ).build();

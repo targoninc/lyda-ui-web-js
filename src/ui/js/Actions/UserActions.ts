@@ -274,7 +274,7 @@ export class UserActions {
         navigate("profile/" + username);
     }
 
-    static async unverifyUser(id) {
+    static async unverifyUser(id: number) {
         const res = await Api.postAsync(Api.endpoints.user.actions.unverify, { id });
         if (res.code !== 200) {
             Ui.notify("Failed to unverify user", "error");
@@ -283,7 +283,7 @@ export class UserActions {
         return true;
     }
 
-    static async verifyUser(id) {
+    static async verifyUser(id: number) {
         const res = await Api.postAsync(Api.endpoints.user.actions.verify, { id });
         if (res.code !== 200) {
             Ui.notify("Failed to verify user", "error");
