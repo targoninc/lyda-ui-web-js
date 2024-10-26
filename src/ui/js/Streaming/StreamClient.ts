@@ -13,11 +13,12 @@ export class StreamClient {
     constructor(id: number) {
         this.id = id;
         const src = `${Api.endpoints.tracks.audio}?id=${this.id}`;
-        this.audio = new Audio(src);
+        this.audio = new Audio();
         this.duration = this.audio.duration;
         this.audio.crossOrigin = "anonymous";
         this.audio.preload = "auto";
         this.audio.autoplay = false;
+        this.audio.src = src;
         this.playing = false;
 
         const currentStreamClient = PlayManager.getStreamClient(window.currentTrackId);

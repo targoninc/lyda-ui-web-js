@@ -65,7 +65,7 @@ export class UserTemplates {
             ).build();
     }
 
-    static linkedUser(user_id: number, username: string, displayname: string, avatar: string, collab_type: HtmlPropertyValue, actionButton = null, extraAttributes: HtmlPropertyValue[] | undefined = undefined, extraClasses: HtmlPropertyValue[] = []) {
+    static linkedUser(user_id: number, username: string, displayname: string, avatar: StringOrSignal, collab_type: HtmlPropertyValue, actionButton: AnyNode|null = null, extraAttributes: HtmlPropertyValue[] | undefined = undefined, extraClasses: HtmlPropertyValue[] = []) {
         const noredirect = extraClasses.includes("no-redirect");
         const base = noredirect ? create("div") : create("a");
         if (extraAttributes) {

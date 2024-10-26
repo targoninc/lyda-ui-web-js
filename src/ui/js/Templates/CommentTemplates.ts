@@ -21,7 +21,7 @@ export class CommentTemplates {
                 create("div")
                     .classes("card")
                     .children(
-                        CommentTemplates.commentInList(comment),
+                        CommentTemplates.commentInList(comment, user),
                     ).build(),
                 create("div")
                     .classes("flex-v")
@@ -56,7 +56,7 @@ export class CommentTemplates {
     static commentListFullWidth(track_id: number, comments: any, user: User) {
         let commentList;
         if (comments.length > 0) {
-            const actualComments = comments.map((comment: any) => CommentTemplates.commentInList(comment));
+            const actualComments = comments.map((comment: any) => CommentTemplates.commentInList(comment, user));
 
             commentList = create("div")
                 .classes("flex-v", "comment-list")
@@ -106,13 +106,13 @@ export class CommentTemplates {
 
     static commentsIndicator(track_id: number, comment_count: number) {
         const toggleState = signal(false);
-        return StatisticsTemplates.statsIndicator("comments", toggleState, comment_count, "Comment", Icons.COMMENT, track_id);
+        return StatisticsTemplates.statsIndicator("comments", toggleState, comment_count, Icons.COMMENT, track_id);
     }
 
-    static commentListOpener(track_id: number, comments: Comment[]) {
+    static commentListOpener(track_id: number, comments: Comment[], user: User) {
         let commentList;
         if (comments.length > 0) {
-            commentList = comments.map(comment => CommentTemplates.commentInList(comment));
+            commentList = comments.map(comment => CommentTemplates.commentInList(comment, user));
             Util.nestCommentElementsByParents();
         } else {
             commentList = [create("span")
@@ -152,7 +152,7 @@ export class CommentTemplates {
             ).build();
     }
 
-    static commentInList(commentData: any) {
+    static commentInList(commentData: any, user: User) {
         let actions = [];
         const comment = commentData.comment;
         const canEdit = commentData.canEdit;

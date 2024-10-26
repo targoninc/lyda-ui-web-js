@@ -626,7 +626,7 @@ summary {
 }
 
 .fakeButton {
-    background: var(--color-3);
+    background: var(--color-6);
     border: 1px solid transparent;
     width: max-content;
 }

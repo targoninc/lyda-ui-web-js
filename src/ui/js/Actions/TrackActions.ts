@@ -136,7 +136,7 @@ export class TrackActions {
             canEdit: true,
             comment: Util.mapNullToEmptyString(comment)
         };
-        const commentElement = CommentTemplates.commentInList(commentData);
+        const commentElement = CommentTemplates.commentInList(commentData, user);
         const commentList = document.querySelector(".comment-list");
         commentList.appendChild(commentElement);
         const noComments = document.querySelector(".no-comments");

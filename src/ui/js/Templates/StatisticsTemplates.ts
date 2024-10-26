@@ -5,7 +5,8 @@ import {AlbumActions} from "../Actions/AlbumActions.ts";
 import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
-import {signal, create} from "../../fjsc/f2.ts";
+import {signal, create, HtmlPropertyValue, StringOrSignal, Signal} from "../../fjsc/f2.ts";
+import {User} from "../DbModels/User.ts";
 
 export class StatisticsTemplates {
     static likesIndicator(type: string, reference_id: number, like_count: number, liked: boolean) {
@@ -23,24 +24,24 @@ export class StatisticsTemplates {
                 imageState.value = value ? Icons.LIKE : Icons.LIKE_OUTLINE;
             }
         };
-        return StatisticsTemplates.statsIndicator("likes", toggleState, like_count, "Like", imageState, reference_id, functionMap[type], [toggleClass]);
+        // @ts-ignore
+        return StatisticsTemplates.statsIndicator("likes", toggleState, like_count, imageState, reference_id, functionMap[type], [toggleClass]);
     }
 
-    static repostIndicator(reference_id, repost_count, reposted) {
+    static repostIndicator(reference_id: number, repost_count: number, reposted: boolean) {
         const toggleState = signal(reposted);
         const toggleClass = signal(reposted ? "enabled" : "_");
-        toggleState.onUpdate = (value) => {
+        toggleState.onUpdate = (value: boolean) => {
             if (Util.isLoggedIn()) {
                 toggleClass.value = value ? "enabled" : "_";
             }
         };
-        return StatisticsTemplates.statsIndicator("reposts", toggleState, repost_count, "Repost", Icons.REPOST, reference_id, TrackActions.toggleRepost, [toggleClass]);
+        return StatisticsTemplates.statsIndicator("reposts", toggleState, repost_count, Icons.REPOST, reference_id, TrackActions.toggleRepost, [toggleClass]);
     }
 
-    static statsIndicator(stats_type, toggleObservable, count, statdisplay, image_src, reference_id = -1, clickFunc = () => {
-    }, extraClasses = []) {
+    static statsIndicator(stats_type: string, toggleObservable: Signal<boolean>, count: number, image_src: HtmlPropertyValue, reference_id = -1, clickFunc: Function = () => {}, extraClasses: StringOrSignal[] = []) {
         const countState = signal(count);
-        toggleObservable.onUpdate = (value) => {
+        toggleObservable.onUpdate = (value: boolean) => {
             if (!Util.isLoggedIn()) {
                 return;
             }
@@ -70,21 +71,22 @@ export class StatisticsTemplates {
                     .build(),
                 create("img")
                     .classes("nopointer", "inline-icon", "svg")
-                    .attributes("src", image_src, "alt", "Icon")
+                    .src(image_src)
+                    .alt("Icon")
                     .build()
             ).build();
     }
 
-    static genericUserListOpener(type, track_id, items, user) {
+    static genericUserListOpener(type: string, items: any[], user: User) {
         const openState = signal(false);
         const listClass = signal("hidden");
 
-        openState.onUpdate = (value) => {
+        openState.onUpdate = (value: boolean) => {
             listClass.value = value ? "visible" : "hidden";
-            document.addEventListener("click", Util.hideElementIfCondition.bind(null, e => {
+            document.addEventListener("click", e => Util.hideElementIfCondition((e: any) => {
                 return !(e.target.parentElement.classList.contains(type)
                     || e.target.classList.contains(type));
-            }, `listFromStatsIndicator.${type}`), {once: true});
+            }, `listFromStatsIndicator.${type}`, e), {once: true});
         };
 
         const itemsList = items.map(item => {
@@ -127,11 +129,11 @@ export class StatisticsTemplates {
             .build();
     }
 
-    static likeListOpener(track_id, likes, user) {
-        return this.genericUserListOpener("likes", track_id, likes, user);
+    static likeListOpener(likes: any[], user: User) {
+        return this.genericUserListOpener("likes", likes, user);
     }
 
-    static repostListOpener(track_id, reposts, user) {
-        return this.genericUserListOpener("reposts", track_id, reposts, user);
+    static repostListOpener(reposts: any[], user: User) {
+        return this.genericUserListOpener("reposts", reposts, user);
     }
 }

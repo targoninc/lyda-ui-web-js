@@ -25,6 +25,7 @@ import {User} from "../DbModels/User.ts";
 import {TrackCollaborator} from "../DbModels/TrackCollaborator.ts";
 import {TrackLike} from "../DbModels/TrackLike.ts";
 import {Repost} from "../DbModels/Repost.ts";
+import {Album} from "../DbModels/Album.ts";
 
 export class TrackTemplates {
     static trackCard(track: Track, user: User, profileId: number) {
@@ -365,13 +366,13 @@ export class TrackTemplates {
                                 create("div")
                                     .classes("flex")
                                     .children(
-                                        StatisticsTemplates.likesIndicator("track", track.id, track.tracklikes.length,
-                                            Util.arrayPropertyMatchesUser(track.tracklikes, "userId", user)),
-                                        StatisticsTemplates.likeListOpener(track.id, track.tracklikes, user),
+                                        StatisticsTemplates.likesIndicator("track", track.id, track.likes.length,
+                                            Util.arrayPropertyMatchesUser(track.likes, "userId", user)),
+                                        StatisticsTemplates.likeListOpener(track.likes, user),
                                         isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, Util.arrayPropertyMatchesUser(track.reposts, "userId", user)),
-                                        isPrivate ? null : StatisticsTemplates.repostListOpener(track.id, track.reposts, user),
+                                        isPrivate ? null : StatisticsTemplates.repostListOpener(track.reposts, user),
                                         CommentTemplates.commentsIndicator(track.id, track.comments.length),
-                                        CommentTemplates.commentListOpener(track.id, track.comments),
+                                        CommentTemplates.commentListOpener(track.id, track.comments, user),
                                         GenericTemplates.action(queueSubState.icon, queueSubState.text, track.id, () => {
                                             QueueManager.toggleInManualQueue(track.id);
                                             inQueue.value = QueueManager.isInManualQueue(track.id);
@@ -533,10 +534,17 @@ export class TrackTemplates {
             });
             classes.push("no-redirect");
         }
-        return UserTemplates.linkedUser(collaborator.user_id, collaborator.user.username, collaborator.user.displayname, avatarState, collaborator.collaboratorType.name, actionButton, [], classes);
+        if (!collaborator.user) {
+            throw new Error(`Collaborator ${collaborator.user_id} has no user`);
+        }
+        if (!collaborator.collab_type) {
+            throw new Error(`Collaborator ${collaborator.user_id} has no collab_type`);
+        }
+
+        return UserTemplates.linkedUser(collaborator.user_id, collaborator.user.username, collaborator.user.displayname, avatarState, collaborator.collab_type.name, actionButton, [], classes);
     }
 
-    static async trackPage(trackData, user) {
+    static async trackPage(trackData: any, user: User) {
         const track = trackData.track as Track;
         const trackState = signal(TrackProcessor.forDownload(track));
         if (!track.likes || !track.reposts || !track.comments) {
@@ -544,7 +552,6 @@ export class TrackTemplates {
         }
         const liked = user ? track.likes.some((like: TrackLike) => like.user_id === user.id) : false;
         const reposted = user ? track.reposts.some(repost => repost.user_id === user.id) : false;
-        const commented = user ? track.comments.some(comment => comment.user_id === user.id) : false;
         const collaborators = track.collaborators ?? [];
         const toAppend = [];
         const linkedUserState = signal(collaborators);
@@ -565,11 +572,11 @@ export class TrackTemplates {
         }
 
         const collaboratorChildren = signal(collabList(collaborators));
-        linkedUserState.onUpdate = newCollaborators => {
+        linkedUserState.onUpdate = (newCollaborators: TrackCollaborator[]) => {
             collaboratorChildren.value = collabList(newCollaborators);
         };
 
-        toAppend.push(TrackTemplates.collaboratorSection(collaboratorChildren, trackData, track, linkedUserState));
+        toAppend.push(TrackTemplates.collaboratorSection(collaboratorChildren, linkedUserState));
         const icons = [];
         const isPrivate = track.visibility === "private";
         if (isPrivate) {
@@ -577,15 +584,12 @@ export class TrackTemplates {
         }
         const graphics = [];
         if (track.processed) {
-            graphics.push(TrackTemplates.waveform(track.id, track.processed, track.length, JSON.parse(track.loudnessData)));
+            graphics.push(TrackTemplates.waveform(track.id, track.processed, track.length, JSON.parse(track.loudnes_data)));
         } else {
             graphics.push(TrackTemplates.waveform(track.id, track.processed, track.length, []));
         }
 
-        /**
-         * @type {User}
-         */
-        const trackUser = trackData.track.user;
+        const trackUser: User = trackData.track.user;
         const editActions = [];
         if (trackData.canEdit) {
             editActions.push(
@@ -650,8 +654,7 @@ export class TrackTemplates {
                                     .src(await Util.getCoverFileFromTrackIdAsync(track.id, trackUser.id))
                                     .alt(track.title)
                                     .build()
-                            )
-                            .build(),
+                            ).build(),
                         create("div")
                             .classes("flex-v")
                             .children(
@@ -661,7 +664,7 @@ export class TrackTemplates {
                                     .children(
                                         create("span")
                                             .classes("collaborators")
-                                            .text(track.collaborators)
+                                            .text(track.credits)
                                             .build(),
                                         description,
                                         create("div")
@@ -669,7 +672,7 @@ export class TrackTemplates {
                                             .children(
                                                 create("span")
                                                     .classes("date", "text-small")
-                                                    .text("Uploaded " + Util.formatDate(track.createdAt))
+                                                    .text("Uploaded " + Util.formatDate(track.created_at))
                                                     .build(),
                                                 create("span")
                                                     .classes("playcount", "text-small")
@@ -677,10 +680,8 @@ export class TrackTemplates {
                                                     .build()
                                             ).build()
                                     ).build(),
-                            )
-                            .build()
-                    )
-                    .build(),
+                            ).build()
+                    ).build(),
                 ...graphics,
                 create("div")
                     .classes("flex")
@@ -688,11 +689,11 @@ export class TrackTemplates {
                         create("div")
                             .classes("stats-container", "flex", "rounded")
                             .children(
-                                StatisticsTemplates.likesIndicator("track", track.id, track.tracklikes.length, liked),
-                                StatisticsTemplates.likeListOpener(track.id, track.tracklikes, user),
+                                StatisticsTemplates.likesIndicator("track", track.id, track.likes.length, liked),
+                                StatisticsTemplates.likeListOpener(track.likes, user),
                                 isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, reposted),
-                                isPrivate ? null : StatisticsTemplates.repostListOpener(track.id, track.reposts, user),
-                                CommentTemplates.commentsIndicator(track.id, track.comments.length, commented),
+                                isPrivate ? null : StatisticsTemplates.repostListOpener(track.reposts, user),
+                                CommentTemplates.commentsIndicator(track.id, track.comments.length),
                                 CommentTemplates.commentListSingleOpener()
                             ).build(),
                         CommentTemplates.commentListFullWidth(track.id, track.comments, user)
@@ -702,11 +703,11 @@ export class TrackTemplates {
             ).build();
     }
 
-    static collaboratorSection(collaboratorChildren, trackData, track, linkedUserState) {
+    static collaboratorSection(collaboratorChildren, linkedUserState: Signal<TrackCollaborator[]>) {
         const collabText = signal("");
-        linkedUserState.onUpdate = (newCollaborators) => {
+        linkedUserState.subscribe((newCollaborators: TrackCollaborator[]) => {
             collabText.value = newCollaborators.length > 0 ? "Collaborators" : "";
-        };
+        });
 
         return create("div")
             .classes("flex-v", "nogap")
@@ -723,14 +724,14 @@ export class TrackTemplates {
             ).build();
     }
 
-    static inAlbumsList(track, user) {
-        if (track.albumtracks && track.albumtracks.length === 0) {
+    static inAlbumsList(track: Track, user: User) {
+        if (!track.albums || track.albums.length === 0) {
             return create("div")
                 .classes("flex-v", "track-contained-list")
                 .build();
         }
 
-        const albumCards = track.albumtracks.map(album => {
+        const albumCards = track.albums.map((album: Album) => {
             return AlbumTemplates.albumCard(album, user, true);
         });
 
@@ -748,14 +749,14 @@ export class TrackTemplates {
             ).build();
     }
 
-    static async inPlaylistsList(track, user) {
-        if (track.playlisttracks && track.playlisttracks.length === 0) {
+    static async inPlaylistsList(track: Track, user: User) {
+        if (!track.playlists || track.playlists.length === 0) {
             return create("div")
                 .classes("flex-v", "track-contained-list")
                 .build();
         }
 
-        const playlistCards = track.playlisttracks.map(playlist => {
+        const playlistCards = track.playlists.map(playlist => {
             return PlaylistTemplates.playlistCard(playlist, user, true);
         });
 

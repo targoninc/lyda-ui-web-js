@@ -211,7 +211,7 @@ export class Util {
         return date.toISOString().split("T")[0];
     }
 
-    static hideElementIfCondition(conditionFunc = () => false, className: string, e: Event) {
+    static hideElementIfCondition(conditionFunc: Function, className: string, e: any) {
         if (conditionFunc(e)) {
             const target = e.target.parentElement.querySelector("." + className);
             if (target === null) {
@@ -222,7 +222,7 @@ export class Util {
             }
             target.classList.add("hidden");
         } else {
-            document.addEventListener("click", Util.hideElementIfCondition.bind(null, conditionFunc, className), { once: true });
+            document.addEventListener("click", e => Util.hideElementIfCondition(conditionFunc, className, e), { once: true });
         }
     }
 
