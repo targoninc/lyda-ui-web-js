@@ -1,4 +1,8 @@
+import {User} from "./User.ts";
+
 export interface Comment {
+    user?: User;
+    canEdit?: boolean;
     id: number;
     parent_id: number;
     track_id: number;

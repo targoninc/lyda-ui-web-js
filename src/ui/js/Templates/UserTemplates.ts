@@ -25,14 +25,13 @@ import {
 } from "../../fjsc/f2.ts";
 import {Track} from "../DbModels/Track.ts";
 import {User} from "../DbModels/User.ts";
-import {UserPermission} from "../DbModels/UserPermission.ts";
 import {Permission} from "../DbModels/Permission.ts";
 import {Playlist} from "../DbModels/Playlist.ts";
 import {Album} from "../DbModels/Album.ts";
 import {Badge} from "../DbModels/Badge.ts";
 
 export class UserTemplates {
-    static userWidget(user_id: number, username: string, displayname: string, avatar: StringOrSignal, following: boolean, extraAttributes: StringOrSignal[] = [], extraClasses: StringOrSignal[] = []) {
+    static userWidget(user_id: number, username: string, displayname: string, avatar: StringOrSignal, following: boolean, extraAttributes: HtmlPropertyValue[] = [], extraClasses: HtmlPropertyValue[] = []) {
         const base = create("a");
         if (extraAttributes) {
             base.attributes(...extraAttributes);

@@ -5,8 +5,9 @@ import {AlbumActions} from "../Actions/AlbumActions.ts";
 import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
-import {signal, create, HtmlPropertyValue, StringOrSignal, Signal} from "../../fjsc/f2.ts";
+import {signal, create, StringOrSignal, Signal} from "../../fjsc/f2.ts";
 import {User} from "../DbModels/User.ts";
+import {FJSC} from "../../fjsc";
 
 export class StatisticsTemplates {
     static likesIndicator(type: string, reference_id: number, like_count: number, liked: boolean) {
@@ -39,7 +40,7 @@ export class StatisticsTemplates {
         return StatisticsTemplates.statsIndicator("reposts", toggleState, repost_count, Icons.REPOST, reference_id, TrackActions.toggleRepost, [toggleClass]);
     }
 
-    static statsIndicator(stats_type: string, toggleObservable: Signal<boolean>, count: number, image_src: HtmlPropertyValue, reference_id = -1, clickFunc: Function = () => {}, extraClasses: StringOrSignal[] = []) {
+    static statsIndicator(stats_type: string, toggleObservable: Signal<boolean>, count: number, icon: StringOrSignal, reference_id = -1, clickFunc: Function = () => {}, extraClasses: StringOrSignal[] = []) {
         const countState = signal(count);
         toggleObservable.onUpdate = (value: boolean) => {
             if (!Util.isLoggedIn()) {
@@ -69,11 +70,12 @@ export class StatisticsTemplates {
                     .classes("stats-count", "nopointer", stats_type)
                     .text(countState)
                     .build(),
-                create("img")
-                    .classes("nopointer", "inline-icon", "svg")
-                    .src(image_src)
-                    .alt("Icon")
-                    .build()
+                FJSC.icon({
+                    icon: icon,
+                    adaptive: true,
+                    classes: ["inline-icon", "svg", "nopointer"],
+                    isUrl: (icon.subscribe && icon.value.startsWith("http")) || icon.startsWith("http"),
+                }),
             ).build();
     }
 
@@ -103,15 +105,14 @@ export class StatisticsTemplates {
                 create("span")
                     .classes("stats-indicator-opener", "clickable", "rounded", "padded-inline")
                     .children(
-                        create("img")
-                            .classes("inline-icon", "svg", "nopointer")
-                            .src(Icons.DROPDOWN)
-                            .build(),
-                    )
-                    .onclick(() => {
+                        FJSC.icon({
+                            icon: "arrow_drop_down",
+                            adaptive: true,
+                            classes: ["inline-icon", "svg", "nopointer"],
+                        }),
+                    ).onclick(() => {
                         openState.value = !openState.value;
-                    })
-                    .build(),
+                    }).build(),
                 create("div")
                     .classes("listFromStatsIndicator", "popout-below", type, "flex-v", "padded", "rounded", listClass)
                     .children(
@@ -123,10 +124,8 @@ export class StatisticsTemplates {
                             .classes("flex-v")
                             .children(...itemsList)
                             .build()
-                    )
-                    .build()
-            )
-            .build();
+                    ).build()
+            ).build();
     }
 
     static likeListOpener(likes: any[], user: User) {

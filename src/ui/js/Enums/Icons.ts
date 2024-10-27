@@ -21,7 +21,7 @@ export class Icons {
         return icon;
     }
 
-    static ICON(fileName) {
+    static ICON(fileName: string): string {
         return Icons.validateIcon(Icons.BASE_URL + fileName + Icons.IMAGE_FORMAT);
     }
 

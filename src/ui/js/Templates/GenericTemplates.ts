@@ -290,7 +290,7 @@ export class GenericTemplates {
             ).build();
     }
 
-    static inlineAction(text: HtmlPropertyValue, icon: HtmlPropertyValue, alt: HtmlPropertyValue, id = null, callback: Function, extraAttributes: string[] = [], extraClasses: string[] = []) {
+    static inlineAction(text: HtmlPropertyValue, icon: HtmlPropertyValue, alt: HtmlPropertyValue, id: HtmlPropertyValue = null, callback: Function, extraAttributes: HtmlPropertyValue[] = [], extraClasses: HtmlPropertyValue[] = []) {
         return create("div")
             .classes("inline-action", "flex", "clickable", "fakeButton", "padded-inline", "rounded", "align-center")
             .id(id)

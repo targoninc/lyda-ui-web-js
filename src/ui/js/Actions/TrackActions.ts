@@ -12,6 +12,7 @@ import {TrackEditTemplates} from "../Templates/TrackEditTemplates.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {navigate} from "../Routing/Router.ts";
 import {Signal} from "../../fjsc/f2.ts";
+import {Comment} from "../DbModels/Comment.ts";
 
 export class TrackActions {
     static async savePlay(id: number) {
@@ -80,7 +81,7 @@ export class TrackActions {
         }, Icons.WARNING);
     }
 
-    static async newCommentFromElement(e) {
+    static async newCommentFromElement(e: any, track_id: number) {
         if (e.key !== "Enter") {
             return;
         }
@@ -94,16 +95,12 @@ export class TrackActions {
             Ui.notify("Comment is too long", "error");
             return;
         }
-        const trackId = Util.getTrackIdFromEvent(e);
-        if (trackId === "") {
-            return;
-        }
         e.target.value = "";
 
         const parentId = e.target.getAttribute("parent_id");
 
         const res = await Api.postAsync(Api.endpoints.comments.actions.new, {
-            id: trackId,
+            id: track_id,
             content: content,
             parentId: parentId === "" ? 0 : parentId,
         });
@@ -119,26 +116,24 @@ export class TrackActions {
             commentCount.innerText = (parseInt(commentCount.innerText) + 1).toString();
         }
         const user = await Util.getUserAsync();
-        const comment = {
+        let nowUtc = new Date();
+        const offset = nowUtc.getTimezoneOffset() * 60000;
+        nowUtc = new Date(nowUtc.getTime() + offset);
+        const comment = <Comment>{
             id: commentId,
             content: content,
             user: user,
-            userId: user.id,
-            avatar: await Util.getAvatarFromUserIdAsync(user.id),
-            username: user.username,
-            displayname: user.displayname,
-            trackId: trackId,
-            parentId: parentId === "" ? 0 : parentId,
-            canEdit: true,
-            createdAt: new Date().toISOString()
+            user_id: user.id,
+            track_id: track_id,
+            parent_id: parentId === "" ? 0 : parentId,
+            created_at: nowUtc,
+            potentially_harmful: false,
+            hidden: false,
+            canEdit: true
         };
-        const commentData = {
-            canEdit: true,
-            comment: Util.mapNullToEmptyString(comment)
-        };
-        const commentElement = CommentTemplates.commentInList(commentData, user);
+        const commentElement = CommentTemplates.commentInList(comment, user);
         const commentList = document.querySelector(".comment-list");
-        commentList.appendChild(commentElement);
+        commentList && commentList.appendChild(commentElement);
         const noComments = document.querySelector(".no-comments");
         if (noComments !== null) {
             noComments.classList.add("hidden");
