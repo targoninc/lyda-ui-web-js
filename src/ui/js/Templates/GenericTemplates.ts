@@ -681,6 +681,9 @@ export class GenericTemplates {
             collabTypeOptions.value = FJSC.searchableSelect(<SearchableSelectConfig>{
                 options: signal(types),
                 value: collabType,
+                onchange: (v) => {
+                    collabType.value = v;
+                }
             });
         });
 
@@ -738,9 +741,9 @@ export class GenericTemplates {
                                 FJSC.button({
                                     text: confirmText ?? "Confirm",
                                     onclick: async () => {
-                                        const user = userMap.get(selectedState.value);
+                                        const user = userMap.get(selectedState.value); // TODO: Typing lol
                                         user.collab_type = parseInt(collabType.value);
-                                        confirmCallback(selectedState.value, user, collabTypes);
+                                        confirmCallback(selectedState.value, user, collabType);
                                     },
                                     icon: {
                                         icon: "person_add"

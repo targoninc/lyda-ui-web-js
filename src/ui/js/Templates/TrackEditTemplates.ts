@@ -262,7 +262,7 @@ export class TrackEditTemplates {
                         type: InputType.text,
                         required: true,
                         name: "title",
-                        label: "Title",
+                        label: "Title*",
                         placeholder: "Track title",
                         value: computedSignal(state, (s: Track) => s.title),
                         onchange: (v) => {
@@ -348,7 +348,7 @@ export class TrackEditTemplates {
                         enableTos ? TrackEditTemplates.sectionCard("Terms of Service", errorSections, "terms", [
                             FJSC.checkbox({
                                 name: "termsOfService",
-                                text: "I have read and agree to the Terms of Service and Privacy Policy",
+                                text: "I have read and agree to the Terms of Service and Privacy Policy*",
                                 checked: computedSignal(state, (s: UploadableTrack) => s.termsOfService),
                                 required: true,
                                 onchange: (v) => {
@@ -386,7 +386,7 @@ export class TrackEditTemplates {
     }
 
     static audioFile(canOverwriteTitle = false, parentState: Signal<any>) {
-        return FormTemplates.fileField("Audio File", "Choose file", "audio-file", "audio/*", true, (fileName: string) => {
+        return FormTemplates.fileField("Audio File*", "Choose file", "audio-file", "audio/*", true, (fileName: string) => {
             if (canOverwriteTitle) {
                 if (fileName) {
                     const titleInput = document.querySelector("input#title");
@@ -418,13 +418,6 @@ export class TrackEditTemplates {
             .id(name + "-preview")
             .classes("image-preview", "hidden")
             .build();
-    }
-
-    static termsOfService(checked = false, parentState = null) {
-        const state = computedSignal<boolean>(parentState, s => s.termsOfService);
-        return FormTemplates.checkBoxField("agreement", "I have read and agree to the Terms of Service and Privacy Policy", state, true, v => {
-            state.value = v;
-        });
     }
 
     static monetization() {
@@ -466,15 +459,6 @@ export class TrackEditTemplates {
         return FormTemplates.textField("Collaborators", "collaborators", "Collaborators", "text", state, false, v => {
             state.value = v;
         });
-    }
-
-    static title(parentState: Signal<any>, errorFields: Signal<any[]>) {
-        const value = computedSignal(parentState, (s: any) => s.title);
-        const errorClass = computedSignal(errorFields, (e: string[]) => e.includes("title") ? "error" : "_");
-
-        return FormTemplates.textField("Title", "title", "Title", "text", value, true, v => {
-            parentState.value = {...parentState.value, title: v};
-        }, false, () => {}, [errorClass]);
     }
 
     static price(value = "1", parentState) {
@@ -557,8 +541,14 @@ export class TrackEditTemplates {
                             .build(),
                         TrackEditTemplates.addLinkedUserButton((newUsername: string, newUser: User) => {
                             userMap.set(newUser.id, newUser);
-                            if (!linkedUserState.value.includes(newUser.id)) {
-                                linkedUserState.value = [...linkedUserState.value, newUser.id];
+                            if (!linkedUserState.value.some(tc => tc.user_id === newUser.id)) {
+                                linkedUserState.value = [...linkedUserState.value, <TrackCollaborator>{
+                                    user_id: newUser.id,
+                                    type: "user",
+                                    track_id: parentState.value.id,
+                                    approved: false,
+                                    denied: false,
+                                }];
                             }
                         }, ["align-center", "secondary"])
                     ).build(),
