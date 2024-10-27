@@ -485,8 +485,8 @@ export class TrackEditTemplates {
     }
 
     static removeLinkedUser(removeUserId, linkedUserState) {
-        return GenericTemplates.inlineAction("Remove", Icons.X, "", "remove_linked_user_" + removeUserId, () => {
-            linkedUserState.value = linkedUserState.value.filter(id => id !== removeUserId);
+        return GenericTemplates.inlineAction("Remove", "remove", "remove_linked_user_" + removeUserId, () => {
+            linkedUserState.value = linkedUserState.value.filter((id: number) => id !== removeUserId);
         }, [], ["negative"]);
     }
 

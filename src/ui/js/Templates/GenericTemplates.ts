@@ -290,7 +290,7 @@ export class GenericTemplates {
             ).build();
     }
 
-    static inlineAction(text: HtmlPropertyValue, icon: HtmlPropertyValue, alt: HtmlPropertyValue, id: HtmlPropertyValue = null, callback: Function, extraAttributes: HtmlPropertyValue[] = [], extraClasses: HtmlPropertyValue[] = []) {
+    static inlineAction(text: HtmlPropertyValue, icon: StringOrSignal, id: HtmlPropertyValue = null, callback: Function, extraAttributes: HtmlPropertyValue[] = [], extraClasses: HtmlPropertyValue[] = []) {
         return create("div")
             .classes("inline-action", "flex", "clickable", "fakeButton", "padded-inline", "rounded", "align-center")
             .id(id)
@@ -298,10 +298,12 @@ export class GenericTemplates {
             .classes(...extraClasses)
             .onclick(callback)
             .children(
-                create("img")
-                    .classes("inline-icon", "svg", "nopointer")
-                    .attributes("src", icon, "alt", alt)
-                    .build(),
+                FJSC.icon({
+                    icon: icon,
+                    adaptive: true,
+                    classes: ["inline-icon", "svg", "nopointer"],
+                    isUrl: false,
+                }),
                 create("span")
                     .classes("nopointer", "text-xsmall")
                     .text(text)

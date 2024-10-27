@@ -149,7 +149,7 @@ export class CommentTemplates {
             throw new Error(`Comment ${comment.id} has no user`);
         }
         if (comment.canEdit) {
-            const deleteAction = GenericTemplates.inlineAction("Delete", Icons.DELETE, "delete-comment", comment.id, () => TrackActions.deleteComment(comment.id));
+            const deleteAction = GenericTemplates.inlineAction("Delete", "delete", comment.id, () => TrackActions.deleteComment(comment.id));
             actions.push(deleteAction);
         }
         const avatarState = signal(Images.DEFAULT_AVATAR);
@@ -180,7 +180,7 @@ export class CommentTemplates {
                     .classes("flex", "comment_body")
                     .children(
                         CommentTemplates.commentContent(comment, true),
-                        Util.isLoggedIn() ? GenericTemplates.inlineAction("Reply", Icons.REPLY, "Reply", comment.id, TrackActions.replyToComment, ["track_id", comment.track_id], ["secondary"]) : null,
+                        Util.isLoggedIn() ? GenericTemplates.inlineAction("Reply", "prompt_suggestion", comment.id, TrackActions.replyToComment, ["track_id", comment.track_id], ["secondary"]) : null,
                     ).build(),
                 create("div")
                     .classes("comment-children")
