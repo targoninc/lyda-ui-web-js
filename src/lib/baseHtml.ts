@@ -12,10 +12,14 @@ export async function baseHtml(req: Request) {
     let image = "https://lyda.app/img/lyda_banner.png";
 
     async function getImageOrDefault(url: string, defaultImage: string) {
-        const res = await fetch(url);
-        if (res.status === 200) {
-            return url;
-        } else {
+        try {
+            const res = await fetch(url);
+            if (res.status === 200) {
+                return url;
+            } else {
+                return defaultImage;
+            }
+        } catch {
             return defaultImage;
         }
     }

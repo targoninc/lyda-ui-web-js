@@ -7,16 +7,16 @@ export class Icons {
         return ".svg";
     }
 
-    static validateIcon(icon) {
+    static validateIcon(icon: string) {
         if (icon === null || icon === undefined || icon === "") {
             return Icons.LYDA;
         }
 
-        fetch(icon).then((response) => {
+        /*fetch(icon).then((response) => {
             if (response.status === 404) {
                 console.error("Icon not found: ", icon);
             }
-        });
+        });*/
 
         return icon;
     }

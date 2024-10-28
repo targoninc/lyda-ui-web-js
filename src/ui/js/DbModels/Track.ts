@@ -23,7 +23,7 @@ export interface Track {
     upc: string;
     visibility: string;
     credits: string;
-    loudnes_data: string;
+    loudness_data: string;
     genre: string;
     version: string;
     versionid: number;

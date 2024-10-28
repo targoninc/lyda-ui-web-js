@@ -584,7 +584,7 @@ export class TrackTemplates {
         }
         const graphics = [];
         if (track.processed) {
-            graphics.push(TrackTemplates.waveform(track.id, track.processed, track.length, JSON.parse(track.loudnes_data)));
+            graphics.push(TrackTemplates.waveform(track.id, track.processed, track.length, JSON.parse(track.loudness_data)));
         } else {
             graphics.push(TrackTemplates.waveform(track.id, track.processed, track.length, []));
         }

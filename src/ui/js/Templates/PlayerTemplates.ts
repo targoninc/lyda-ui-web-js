@@ -18,6 +18,7 @@ import {create, signal} from "../../fjsc/f2.ts";
 import {Track} from "../DbModels/Track.ts";
 import {User} from "../DbModels/User.ts";
 import {navigate} from "../Routing/Router.ts";
+import {FJSC} from "../../fjsc";
 
 export class PlayerTemplates {
     static audioPlayer(track: Track) {
@@ -51,17 +52,18 @@ export class PlayerTemplates {
                                 PlayManager.togglePlayAsync(track.id).then();
                             })
                             .children(
-                                create("img")
-                                    .classes("audio-player-control-icon", "align-center", "inline-icon", "svg", "nopointer", isPlaying ? "pause-adjust" : "play-adjust")
-                                    .id(track.id)
-                                    .src(isPlaying ? Icons.PAUSE : Icons.PLAY)
-                                    .build(),
+                                FJSC.icon({
+                                    icon: isPlaying ? Icons.PAUSE : Icons.PLAY,
+                                    adaptive: true,
+                                    id: track.id,
+                                    isUrl: true,
+                                    classes: ["audio-player-control-icon", "align-center", "inline-icon", "svg", "nopointer", isPlaying ? "pause-adjust" : "play-adjust"]
+                                }),
                                 create("span")
                                     .classes("nopointer", "hidden")
                                     .text(isPlaying ? "Pause" : "Play")
                                     .build()
-                            )
-                            .build(),
+                            ).build(),
                         create("div")
                             .classes("audio-player-scrubber", "flex-grow", "clickable", "flex", "rounded", "padded-inline")
                             .id(track.id)

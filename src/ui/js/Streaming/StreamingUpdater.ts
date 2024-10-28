@@ -97,10 +97,10 @@ export class StreamingUpdater {
             const barsBefore = Math.floor(valueRelative * barCount);
             const barsAfter = barCount - barsBefore;
             for (let i = 0; i < barsBefore; i++) {
-                waveformBars[i].classList.add("active");
+                waveformBars[i]?.classList.add("active");
             }
             for (let i = barsBefore; i < barsBefore + barsAfter; i++) {
-                waveformBars[i].classList.remove("active");
+                waveformBars[i]?.classList.remove("active");
             }
         }
     }
