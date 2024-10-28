@@ -266,7 +266,7 @@ export class PlayManager {
 
         //await PlayManager.stopAllAsync(id);
         const streamClient = PlayManager.getStreamClient(id);
-        streamClient.scrubTo(value);
+        await streamClient.scrubTo(value);
 
         StreamingUpdater.updateScrubber(id);
         await StreamingUpdater.updatePlayState();
