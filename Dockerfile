@@ -1,5 +1,4 @@
-# Use the official Node.js 20 image from the Docker Hub
-FROM node:20-slim
+FROM oven/bun:1 AS base
 
 # Set the working directory
 WORKDIR /usr/src/app
@@ -8,10 +7,11 @@ WORKDIR /usr/src/app
 COPY . .
 
 # Install the project dependencies
-RUN npm install
+RUN bun install
+RUN bun run build-prod
 
 # Make the app's ports available to the outside world
 EXPOSE 3000
 
 # Define the command to run the app
-CMD ["npm", "run", "start"]
+CMD ["bun", "run", "start-bun-prod"]
