@@ -2,7 +2,7 @@ import {Config} from "./Config.ts";
 
 export interface ApiResponse<T> {
     code: number;
-    data: T;
+    data: T & { error?: string };
 }
 
 export class Api {

@@ -120,9 +120,14 @@ export class LandingPageTemplates {
     }
 
     static registeringBox(step: Signal<string>, user: Signal<AuthData>) {
-        AuthApi.register(user.value.username, user.value.displayname, user.value.email, user.value.password, (res: any) => {
+        AuthApi.register(user.value.username, user.value.displayname, user.value.email, user.value.password, (res: ApiResponse<any>) => {
             console.log(res);
-            step.value = "complete";
+            if (res.code === 200) {
+                step.value = "complete";
+            } else {
+                Ui.notify(`Failed to register: ${res.data.error}`, "error");
+                step.value = "email";
+            }
         });
 
         return LandingPageTemplates.waitingBox("Registering...", "Please wait");
@@ -275,9 +280,9 @@ export class LandingPageTemplates {
         return LandingPageTemplates.waitingBox("Checking E-mail address...", "Please wait");
     }
 
-    static errorList(errorState) {
+    static errorList(errorState: Signal<Set<string>>) {
         const container = signal(create("div").classes("flex-v").build());
-        errorState.subscribe((newErrors) => {
+        errorState.subscribe((newErrors: Set<string>) => {
             container.value = create("div")
                 .classes("flex-v", "nogap")
                 .children(
@@ -297,7 +302,8 @@ export class LandingPageTemplates {
         const errors = signal(new Set());
         const touchedFields = new Set<string>();
         for (const key in user.value) {
-            if (Object.hasOwn(user.value, key) && user.value.key !== "") {
+            // @ts-ignore
+            if (Object.hasOwn(user.value, key) && user.value[key] !== "") {
                 touchedFields.add(key);
             }
         }
@@ -307,9 +313,25 @@ export class LandingPageTemplates {
         const continueRegistration = () => {
             errors.value = UserValidator.validateRegistration(user.value, touchedFields);
             if (errors.value.size === 0) {
-                step.value = "registering";
+                AuthApi.userExists(user.value.email, () => {
+                    errors.value = new Set([
+                        ...errors.value,
+                        "This E-mail address is already in use. Please use a different one."
+                    ]);
+                }, () => {
+                    step.value = "registering";
+                });
             }
         };
+        if (user.value.email) {
+            AuthApi.userExists(user.value.email, () => {
+                errors.value = new Set([
+                    ...errors.value,
+                    "This E-mail address is already in use. Please use a different one."
+                ]);
+            });
+        }
+        let emailTemp = "";
 
         return create("div")
             .classes("flex-v", "align-center")
@@ -320,7 +342,7 @@ export class LandingPageTemplates {
                 create("div")
                     .classes("flex-v")
                     .children(
-                        FormTemplates.textField("Username", "username", "Username", "text", user.value.username, true, (value) => {
+                        FormTemplates.textField("Username", "username", "Username", "text", user.value.username, true, (value: string) => {
                             if (!touchedFields.has("username") && value) {
                                 touchedFields.add("username");
                             }
@@ -330,7 +352,7 @@ export class LandingPageTemplates {
                             };
                         }, true, () => {
                         }, ["auth-input", "flex-grow"]),
-                        FormTemplates.textField("Display name", "displayname", "Display name", "text", user.value.username, true, (value) => {
+                        FormTemplates.textField("Display name", "displayname", "Display name", "text", user.value.username, true, (value: string) => {
                             if (!touchedFields.has("displayname") && value) {
                                 touchedFields.add("displayname");
                             }
@@ -340,23 +362,25 @@ export class LandingPageTemplates {
                             };
                         }, false, () => {
                         }, ["auth-input", "flex-grow"]),
-                        FormTemplates.textField("Email", "email", "Email", "email", user.value.email, true, (value) => {
+                        FormTemplates.textField("Email", "email", "Email", "email", user.value.email, true, (value: string) => {
                             if (!touchedFields.has("email") && value) {
                                 touchedFields.add("email");
                             }
-                            user.value = {
-                                ...user.value,
-                                email: value
-                            };
+                            emailTemp = value;
                             AuthApi.userExists(value, () => {
                                 errors.value = new Set([
                                     ...errors.value,
                                     "This E-mail address is already in use. Please use a different one."
                                 ]);
+                            }, () => {
+                                user.value = {
+                                    ...user.value,
+                                    email: emailTemp
+                                };
                             });
                         }, false, () => {
                         }, ["auth-input", "flex-grow"]),
-                        FormTemplates.textField("Password", "password", "Password", "password", user.value.password, true, (value) => {
+                        FormTemplates.textField("Password", "password", "Password", "password", user.value.password, true, (value: string) => {
                             if (!touchedFields.has("password") && value) {
                                 touchedFields.add("password");
                             }
@@ -364,9 +388,10 @@ export class LandingPageTemplates {
                                 ...user.value,
                                 password: value
                             };
+                            console.log(user.value);
                         }, false, () => {
                         }, ["auth-input", "flex-grow"]),
-                        FormTemplates.textField("Repeat password", "password-2", "Repeat password", "password", user.value.password, true, (value) => {
+                        FormTemplates.textField("Repeat password", "password-2", "Repeat password", "password", user.value.password2, true, (value: string) => {
                             if (!touchedFields.has("password2") && value) {
                                 touchedFields.add("password2");
                             }
@@ -374,6 +399,7 @@ export class LandingPageTemplates {
                                 ...user.value,
                                 password2: value
                             };
+                            console.log(user.value);
                         }, false, () => {
                         }, ["auth-input", "flex-grow"]),
                         FormTemplates.checkBoxField("tos-checkbox", "I agree to the Terms of Service & Privacy Policy", false, true, () => {
