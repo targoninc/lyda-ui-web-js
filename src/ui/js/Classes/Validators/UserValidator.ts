@@ -1,5 +1,7 @@
+import {AuthData} from "../../Templates/LandingPageTemplates.ts";
+
 export class UserValidator {
-    static validateRegistration(state: any, touchedFields: Set<string>): Set<string> {
+    static validateRegistration(state: AuthData, touchedFields: Set<string>): Set<string> {
         let errors = new Set<string>();
         if (!state.username && touchedFields.has("username")) {
             errors.add("Username missing");
@@ -15,6 +17,9 @@ export class UserValidator {
         }
         if (state.password !== state.password2 && touchedFields.has("password2") && touchedFields.has("password")) {
             errors.add("Passwords do not match");
+        }
+        if (!state.termsOfService) {
+            errors.add("You must agree to the Terms of Service and Privacy Policy");
         }
         return errors;
     }

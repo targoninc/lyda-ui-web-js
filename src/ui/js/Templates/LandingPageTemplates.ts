@@ -11,7 +11,8 @@ import {User} from "../DbModels/User.ts";
 import {HtmlPropertyValue, Signal, create, signal, computedSignal} from "../../fjsc/f2.ts";
 import {ApiResponse} from "../Classes/Api.ts";
 
-interface AuthData {
+export interface AuthData {
+    termsOfService: boolean;
     username: string;
     displayname: string;
     email: string;
@@ -41,7 +42,8 @@ export class LandingPageTemplates {
             displayname: "",
             password: "",
             password2: "",
-            mfaCode: ""
+            mfaCode: "",
+            termsOfService: false
         });
         const history = signal(["email"]);
         const templateMap = {
@@ -180,6 +182,8 @@ export class LandingPageTemplates {
                 step.value = "checking-mfa";
             }
         };
+        const email = computedSignal<string>(user, (u: AuthData) => u.email);
+        const password = computedSignal<string>(user, (u: AuthData) => u.password);
 
         return create("div")
             .classes("flex-v", "align-center")
@@ -195,7 +199,7 @@ export class LandingPageTemplates {
                             name: "email",
                             label: "E-Mail",
                             placeholder: "E-Mail",
-                            value: user.value.email,
+                            value: email,
                             required: true,
                             classes: ["auth-input"],
                             onchange: (value) => {
@@ -212,25 +216,45 @@ export class LandingPageTemplates {
                                 });
                             },
                         }),
-                        FormTemplates.textField("Password", "password", "Password", "password", user.value.password, true, (value) => {
-                            user.value = {
-                                ...user.value,
-                                password: value
-                            };
-                        }, true, (e: KeyboardEvent) => {
-                            if (e.key === "Enter") {
+                        FJSC.input<string>({
+                            type: InputType.password,
+                            name: "password",
+                            label: "Password",
+                            placeholder: "Password",
+                            value: password,
+                            required: true,
+                            classes: ["auth-input"],
+                            onchange: (value) => {
                                 user.value = {
                                     ...user.value,
-                                    password: e.target?.value
+                                    password: value
                                 };
-                                step.value = "checking-mfa";
-                            }
-                        }, ["auth-input"]),
+                            },
+                            onkeydown: (e: KeyboardEvent) => {
+                                if (e.key === "Enter") {
+                                    user.value = {
+                                        ...user.value,
+                                        password: e.target?.value
+                                    };
+                                    step.value = "checking-mfa";
+                                }
+                            },
+                        }),
                         GenericTemplates.inlineLink("/forgot-password", "Change/forgot password?", false),
-                        GenericTemplates.inlineLink(continueLogin, "Register instead"),
-                        GenericTemplates.action(Icons.RIGHT, "Login", "mfaCheckTrigger", () => {
-                            step.value = "checking-mfa";
-                        }, [], ["secondary", "positive"]),
+                        GenericTemplates.inlineLink(() => {
+                            step.value = "register";
+                        }, "Register instead"),
+                        FJSC.button({
+                            text: "Login",
+                            id: "mfaCheckTrigger",
+                            disabled: computedSignal(user, (u: AuthData) => !u.email || !u.password || u.email.trim().length === 0 || u.password.trim().length === 0),
+                            onclick: continueLogin,
+                            icon: {
+                                icon: "login",
+                                adaptive: true
+                            },
+                            classes: ["secondary", "positive"]
+                        }),
                         LandingPageTemplates.errorList(errors),
                     ).build(),
             ).build();
@@ -269,15 +293,15 @@ export class LandingPageTemplates {
         return container;
     }
 
-    static registerBox(step, user) {
+    static registerBox(step: Signal<string>, user: Signal<AuthData>) {
         const errors = signal(new Set());
-        const touchedFields = new Set();
+        const touchedFields = new Set<string>();
         for (const key in user.value) {
             if (Object.hasOwn(user.value, key) && user.value.key !== "") {
                 touchedFields.add(key);
             }
         }
-        user.subscribe((newUser) => {
+        user.subscribe((newUser: AuthData) => {
             errors.value = UserValidator.validateRegistration(newUser, touchedFields);
         });
         const continueRegistration = () => {
@@ -325,10 +349,10 @@ export class LandingPageTemplates {
                                 email: value
                             };
                             AuthApi.userExists(value, () => {
-                                errors.value = [
+                                errors.value = new Set([
                                     ...errors.value,
                                     "This E-mail address is already in use. Please use a different one."
-                                ];
+                                ]);
                             });
                         }, false, () => {
                         }, ["auth-input", "flex-grow"]),
@@ -352,11 +376,24 @@ export class LandingPageTemplates {
                             };
                         }, false, () => {
                         }, ["auth-input", "flex-grow"]),
-                        FormTemplates.checkBoxField("tos-checkbox", "I agree to the Terms of Service & Privacy Policy", false, true),
+                        FormTemplates.checkBoxField("tos-checkbox", "I agree to the Terms of Service & Privacy Policy", false, true, () => {
+                            user.value = {
+                                ...user.value,
+                                termsOfService: !user.value.termsOfService
+                            };
+                        }),
                         GenericTemplates.inlineLink("https://targoninc.com/tos", "Read the Terms of Service / Privacy Policy"),
-                        GenericTemplates.action(Icons.RIGHT, "Register", "registerTrigger", () => {
-                            continueRegistration();
-                        }, [], ["secondary", "positive"]),
+                        FJSC.button({
+                            text: "Register",
+                            id: "registerTrigger",
+                            disabled: computedSignal(errors, (e: Set<string>) => e.size > 0),
+                            onclick: continueRegistration,
+                            icon: {
+                                icon: "person_add",
+                                adaptive: true
+                            },
+                            classes: ["secondary", "positive"]
+                        }),
                         LandingPageTemplates.errorList(errors),
                     ).build(),
             ).build();
@@ -364,7 +401,7 @@ export class LandingPageTemplates {
 
     static emailBox(step: Signal<string>, user: Signal<AuthData>) {
         const errors = signal(new Set<string>());
-        user.subscribe((newUser) => {
+        user.subscribe((newUser: AuthData) => {
             errors.value = UserValidator.validateEmailCheck(newUser);
         });
         const triggerLogin = () => {
