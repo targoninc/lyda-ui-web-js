@@ -69,9 +69,9 @@ export class FormTemplates {
             ).build();
     }
 
-    static textField(title: string, name: string, placeholder: string, type = "text", value: StringOrSignal = "", required = false, onchange = (val: string) => {
-    }, autofocus = false, onkeydown = () => {
-    }, classes = []) {
+    static textField(title: string, name: string, placeholder: string, type = "text", value: StringOrSignal = "", required = false, onchange: Function = (val: string) => {
+    }, autofocus = false, onkeydown: Function = () => {
+    }, classes: HtmlPropertyValue[] = []) {
         const input = create("input")
             .name(name)
             .id(name)

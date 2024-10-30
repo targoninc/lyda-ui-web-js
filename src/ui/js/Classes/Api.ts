@@ -1,5 +1,10 @@
 import {Config} from "./Config.ts";
 
+export interface ApiResponse<T> {
+    code: number;
+    data: T;
+}
+
 export class Api {
     static get endpoints() {
         const endpoints = {
@@ -237,7 +242,7 @@ export class Api {
         };
     }
 
-    static async postAsync(url: string, body: any = {}, authorizationHeaders: any = {}): Promise<{ code: number; data: any; }> {
+    static async postAsync<T>(url: string, body: any = {}, authorizationHeaders: any = {}): Promise<ApiResponse<T>> {
         return await Api.postRawAsync(url, JSON.stringify(body), authorizationHeaders);
     }
 

@@ -3,8 +3,8 @@ import {Util} from "./Util.ts";
 import {Ui} from "./Ui.ts";
 
 export class AuthApi {
-    static userExists(email, successCallback = () => {
-    }, errorCallback = () => {
+    static userExists(email: string, successCallback: Function = () => {
+    }, errorCallback: Function = () => {
     }) {
         Api.getAsync(Api.endpoints.user.userExists, {email: encodeURIComponent(email)}).then((response) => {
             if (response.code === 200) {
@@ -15,7 +15,7 @@ export class AuthApi {
         });
     }
 
-    static login(email, password, mfaCode, successCallback, errorCallback) {
+    static login(email: string, password: string, mfaCode: string, successCallback: Function, errorCallback: Function = () => {}) {
         Api.postAsync(Api.endpoints.user.actions.login, {
             email,
             password,
@@ -30,7 +30,7 @@ export class AuthApi {
         });
     }
 
-    static user(id, successCallback) {
+    static user(id: number, successCallback: Function) {
         Api.getAsync(Api.endpoints.user.get, {id}).then((response) => {
             if (response.code === 200) {
                 successCallback(response.data);
@@ -38,7 +38,7 @@ export class AuthApi {
         });
     }
 
-    static register(username, displayname, email, password, successCallback, errorCallback) {
+    static register(username: string, displayname: string, email: string, password: string, successCallback: Function, errorCallback: Function = () => {}) {
         Api.postAsync(Api.endpoints.user.actions.register, {
             username,
             displayname,
@@ -54,7 +54,7 @@ export class AuthApi {
         });
     }
 
-    static mfaRequest(email, password, successCallback, errorCallback) {
+    static mfaRequest(email: string, password: string, successCallback: Function, errorCallback: Function = () => {}) {
         Api.postAsync(Api.endpoints.user.actions.mfaRequest, {
             email,
             password

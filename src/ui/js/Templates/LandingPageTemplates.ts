@@ -1,4 +1,3 @@
-import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {Icons} from "../Enums/Icons.js";
 import {AuthApi} from "../Classes/AuthApi.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
@@ -6,6 +5,20 @@ import {FormTemplates} from "./FormTemplates.ts";
 import {UserValidator} from "../Classes/Validators/UserValidator.ts";
 import {finalizeLogin} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
+import {FJSC} from "../../fjsc";
+import {InputType} from "../../fjsc/Types.ts";
+import {User} from "../DbModels/User.ts";
+import {HtmlPropertyValue, Signal, create, signal, computedSignal} from "../../fjsc/f2.ts";
+import {ApiResponse} from "../Classes/Api.ts";
+
+interface AuthData {
+    username: string;
+    displayname: string;
+    email: string;
+    password: string;
+    password2: string;
+    mfaCode: string;
+}
 
 export class LandingPageTemplates {
     static newLandingPage() {
@@ -22,7 +35,14 @@ export class LandingPageTemplates {
 
     static registrationLoginBox() {
         const step = signal("email");
-        const user = signal({email: "", password: ""});
+        const user = signal<AuthData>({
+            email: "",
+            username: "",
+            displayname: "",
+            password: "",
+            password2: "",
+            mfaCode: ""
+        });
         const history = signal(["email"]);
         const templateMap = {
             "email": LandingPageTemplates.emailBox,
@@ -44,7 +64,7 @@ export class LandingPageTemplates {
         };
 
         const template = signal(templateMap[step.value](step, user));
-        step.subscribe((newStep) => {
+        step.subscribe((newStep: string) => {
             history.value = [
                 ...history.value,
                 newStep
@@ -70,7 +90,7 @@ export class LandingPageTemplates {
         return LandingPageTemplates.waitingBox("Complete", "Redirecting...");
     }
 
-    static mfaBox(step, user) {
+    static mfaBox(step: Signal<string>, user: Signal<AuthData>) {
         return create("div")
             .classes("flex-v", "align-center")
             .children(
@@ -97,8 +117,8 @@ export class LandingPageTemplates {
             ).build();
     }
 
-    static registeringBox(step, user) {
-        AuthApi.register(user.value.username, user.value.displayname, user.value.email, user.value.password, (res) => {
+    static registeringBox(step: Signal<string>, user: Signal<AuthData>) {
+        AuthApi.register(user.value.username, user.value.displayname, user.value.email, user.value.password, (res: any) => {
             console.log(res);
             step.value = "complete";
         });
@@ -106,8 +126,8 @@ export class LandingPageTemplates {
         return LandingPageTemplates.waitingBox("Registering...", "Please wait");
     }
 
-    static checkForMfaBox(step, user) {
-        AuthApi.mfaRequest(user.value.email, user.value.password, (res) => {
+    static checkForMfaBox(step: Signal<string>, user: Signal<AuthData>) {
+        AuthApi.mfaRequest(user.value.email, user.value.password, (res: ApiResponse<any>) => {
             if (res.data && res.data.user) {
                 finalizeLogin(step, res.data.user);
             } else if (res.data && res.data.mfa_needed) {
@@ -120,7 +140,7 @@ export class LandingPageTemplates {
         return LandingPageTemplates.waitingBox("Checking for MFA...", "Please wait");
     }
 
-    static loggingInBox(step, user) {
+    static loggingInBox(step: Signal<string>, user: Signal<AuthData>) {
         AuthApi.login(user.value.email, user.value.password, user.value.mfaCode, (data) => {
             Ui.notify("Logged in as " + data.username, "success");
             AuthApi.user(data.user_id, (user) => {
@@ -131,7 +151,7 @@ export class LandingPageTemplates {
         return LandingPageTemplates.waitingBox("Logging in...", "Please wait");
     }
 
-    static waitingBox(title, message) {
+    static waitingBox(title: HtmlPropertyValue, message: HtmlPropertyValue) {
         return create("div")
             .classes("flex-v", "align-center")
             .children(
@@ -149,9 +169,9 @@ export class LandingPageTemplates {
             ).build();
     }
 
-    static loginBox(step, user) {
-        const errors = signal(new Set());
-        user.subscribe((newUser) => {
+    static loginBox(step: Signal<string>, user: Signal<AuthData>) {
+        const errors = signal(new Set<string>());
+        user.subscribe((newUser: User) => {
             errors.value = UserValidator.validateLogin(newUser);
         });
         const continueLogin = () => {
@@ -170,30 +190,38 @@ export class LandingPageTemplates {
                 create("div")
                     .classes("flex-v")
                     .children(
-                        FormTemplates.textField("E-Mail", "email", "E-Mail", "email", user.value.email, true, (value) => {
-                            AuthApi.userExists(value, () => {
-                                user.value = {
-                                    ...user.value,
-                                    email: value
-                                };
-                            }, () => {
-                                errors.value = [
-                                    ...errors.value,
-                                    "This E-mail address is not registered. Please register instead."
-                                ];
-                            });
-                        }, false, () => {
-                        }, ["auth-input"]),
+                        FJSC.input<string>({
+                            type: InputType.text,
+                            name: "email",
+                            label: "E-Mail",
+                            placeholder: "E-Mail",
+                            value: user.value.email,
+                            required: true,
+                            classes: ["auth-input"],
+                            onchange: (value) => {
+                                AuthApi.userExists(value, () => {
+                                    user.value = {
+                                        ...user.value,
+                                        email: value
+                                    };
+                                }, () => {
+                                    errors.value = new Set([
+                                        ...errors.value,
+                                        "This E-mail address is not registered. Please register instead."
+                                    ]);
+                                });
+                            },
+                        }),
                         FormTemplates.textField("Password", "password", "Password", "password", user.value.password, true, (value) => {
                             user.value = {
                                 ...user.value,
                                 password: value
                             };
-                        }, true, (e) => {
+                        }, true, (e: KeyboardEvent) => {
                             if (e.key === "Enter") {
                                 user.value = {
                                     ...user.value,
-                                    password: e.target.value
+                                    password: e.target?.value
                                 };
                                 step.value = "checking-mfa";
                             }
@@ -208,8 +236,8 @@ export class LandingPageTemplates {
             ).build();
     }
 
-    static checkEmailBox(step, user) {
-        AuthApi.userExists(user.value.email, (data) => {
+    static checkEmailBox(step: Signal<string>, user: Signal<AuthData>) {
+        AuthApi.userExists(user.value.email, (data: User) => {
             user.value = {
                 ...user.value,
                 username: data.username,
@@ -334,8 +362,8 @@ export class LandingPageTemplates {
             ).build();
     }
 
-    static emailBox(step, user) {
-        const errors = signal([]);
+    static emailBox(step: Signal<string>, user: Signal<AuthData>) {
+        const errors = signal(new Set<string>());
         user.subscribe((newUser) => {
             errors.value = UserValidator.validateEmailCheck(newUser);
         });
@@ -358,43 +386,42 @@ export class LandingPageTemplates {
                         create("div")
                             .classes("flex", "space-outwards", "auth-input")
                             .children(
-                                create("label")
-                                    .text("E-Mail")
-                                    .for("email-input")
-                                    .build(),
-                                create("input")
-                                    .classes("flex-grow")
-                                    .name("email")
-                                    .id("email-input")
-                                    .type("text")
-                                    .placeholder("E-Mail")
-                                    .value(user.value.email)
-                                    .required(true)
-                                    .autocomplete("email")
-                                    .onchange((e) => {
+                                FJSC.input<string>({
+                                    type: InputType.text,
+                                    name: "email",
+                                    label: "E-Mail",
+                                    placeholder: "E-Mail",
+                                    value: user.value.email,
+                                    required: true,
+                                    classes: ["auth-input"],
+                                    onchange: (value) => {
                                         user.value = {
                                             ...user.value,
-                                            email: e.target.value
+                                            email: value
                                         };
-                                    })
-                                    .onkeydown((e) => {
+                                    },
+                                    onkeydown: (e: KeyboardEvent) => {
                                         if (e.key === "Enter") {
                                             user.value = {
                                                 ...user.value,
-                                                email: e.target.value
+                                                email: e.target?.value
                                             };
                                             triggerLogin();
                                         }
-                                    }).build(),
+                                    }
+                                }),
                             ).build(),
-                        GenericTemplates.action(Icons.RIGHT, "Next", "checkEmailTrigger", () => {
-                            const email = document.getElementById("email-input").value;
-                            user.value = {
-                                ...user.value,
-                                email
-                            };
-                            triggerLogin();
-                        }, [], ["secondary", "positive"])
+                        FJSC.button({
+                            text: "Next",
+                            id: "checkEmailTrigger",
+                            disabled: computedSignal(user, (u: AuthData) => !u.email || u.email.trim().length === 0),
+                            onclick: triggerLogin,
+                            icon: {
+                                icon: "arrow_forward",
+                                adaptive: true
+                            },
+                            classes: ["secondary", "positive"]
+                        }),
                     ).build(),
             ).build();
     }
