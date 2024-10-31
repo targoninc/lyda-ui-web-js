@@ -25,6 +25,7 @@ import {Util} from "./Classes/Util.ts";
 import {StatisticsWrapper} from "./Classes/StatisticsWrapper.ts";
 import {Ui} from "./Classes/Ui.ts";
 import {navigate} from "./Routing/Router.ts";
+import {Permission} from "./DbModels/Permission.ts";
 
 export class Lyda {
     static async getEndpointData(config, endpoint, params = "", refreshSessionRetry = false) {
@@ -77,10 +78,6 @@ export class Lyda {
         let data;
         if (endpoint !== null) {
             data = await Lyda.getEndpointData(config, endpoint, paramsString);
-            if (data.error) {
-                element.innerHTML = data.error;
-                return;
-            }
         }
         let user;
         const permissionData  = await Api.getAsync(Api.endpoints.user.permissions);
@@ -93,9 +90,17 @@ export class Lyda {
             user = await Util.getUserAsync();
             const feedType = element.getAttribute("feedType");
             this.loadFeed(feedType, element, user).then();
+            if (data.error) {
+                element.innerHTML = data.error;
+                return;
+            }
             break;
         case "profile":
             user = data;
+            if (user.error) {
+                navigate("login");
+                return;
+            }
             const selfUser = await Util.getUserAsync();
             const isOwnProfile = selfUser ? user.id === selfUser.id : false;
             element.appendChild(UserTemplates.userActionsContainer(isOwnProfile));
@@ -113,27 +118,51 @@ export class Lyda {
             const trackData = await PlayManager.parseTrackData(data);
             user = await Util.getUserAsync();
             element.appendChild(await TrackTemplates.trackPage(trackData, user));
+            if (data.error) {
+                element.innerHTML = data.error;
+                return;
+            }
             break;
         case "album":
             user = await Util.getUserAsync();
             element.appendChild(await AlbumTemplates.albumPage(data, user));
+            if (data.error) {
+                element.innerHTML = data.error;
+                return;
+            }
             break;
         case "playlist":
             user = await Util.getUserAsync();
             element.appendChild(await PlaylistTemplates.playlistPage(data, user));
+            if (data.error) {
+                element.innerHTML = data.error;
+                return;
+            }
             break;
         case "settings":
             user = await Util.getUserAsync();
+            if (user.error) {
+                navigate("login");
+                return;
+            }
             element.appendChild(SettingsTemplates.settingsPage(user));
             break;
         case "statistics":
             user = await Util.getUserAsync();
+            if (user.error) {
+                navigate("login");
+                return;
+            }
             const royaltyInfo = await Api.getAsync(Api.endpoints.statistics.royaltyInfo);
             element.append(await StatisticTemplates.statisticActions(user, royaltyInfo.data, permissions));
             element.append(create("div").classes("flex").children(...(await StatisticsWrapper.getStatistics())).build());
             break;
         case "library":
             user = await Util.getUserAsync();
+            if (user.error) {
+                navigate("login");
+                return;
+            }
             const name = params.name ?? "";
             const library = await LibraryActions.getLibrary(name);
             if (!library) {
@@ -145,7 +174,7 @@ export class Lyda {
             break;
         case "logs":
             user = await Util.getUserAsync();
-            if (!permissions.some(p => p.name === Permissions.canViewLogs)) {
+            if (!permissions.some((p: Permission) => p.name === Permissions.canViewLogs)) {
                 Ui.notify("You do not have permission to view logs", "error");
                 return;
             }
