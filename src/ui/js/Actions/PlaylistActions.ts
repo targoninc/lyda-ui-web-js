@@ -7,9 +7,9 @@ import {PlayManager} from "../Streaming/PlayManager.ts";
 import {QueueManager} from "../Streaming/QueueManager.ts";
 import {navigate} from "../Routing/Router.ts";
 import {Signal} from "../../fjsc/f2.ts";
-import {Playlist} from "../DbModels/Playlist.ts";
-import {Track} from "../DbModels/Track.ts";
-import {Album} from "../DbModels/Album.ts";
+import {Playlist} from "../Models/DbModels/Playlist.ts";
+import {Track} from "../Models/DbModels/Track.ts";
+import {Album} from "../Models/DbModels/Album.ts";
 
 export class PlaylistActions {
     static async openAddToPlaylistModal(objectToBeAdded: Album|Track, type: "track"|"album") {

@@ -18,7 +18,7 @@ import {
 import {FJSC} from "../../fjsc";
 import {InputType, SearchableSelectConfig} from "../../fjsc/Types.ts";
 import {Util} from "../Classes/Util.ts";
-import {CollaboratorType} from "../DbModels/CollaboratorType.ts";
+import {CollaboratorType} from "../Models/DbModels/CollaboratorType.ts";
 import {navigate} from "../Routing/Router.ts";
 
 export class GenericTemplates {

@@ -1,6 +1,6 @@
-import {Track} from "./Track.js";
-import {User} from "./User.js";
-import {AlbumLike} from "./AlbumLike.js";
+import {Track} from "./Track.ts";
+import {User} from "./User.ts";
+import {AlbumLike} from "./AlbumLike.ts";
 
 export interface Album {
     likes: AlbumLike[];

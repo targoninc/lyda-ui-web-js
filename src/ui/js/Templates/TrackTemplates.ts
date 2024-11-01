@@ -20,12 +20,12 @@ import {CommentTemplates} from "./CommentTemplates.ts";
 import {TrackProcessor} from "../Classes/Helpers/TrackProcessor.ts";
 import {create, HtmlPropertyValue, ifjs, Signal, signal, StringOrSignal} from "../../fjsc/f2.js";
 import {navigate} from "../Routing/Router.ts";
-import {Track} from "../DbModels/Track.ts";
-import {User} from "../DbModels/User.ts";
-import {TrackCollaborator} from "../DbModels/TrackCollaborator.ts";
-import {TrackLike} from "../DbModels/TrackLike.ts";
-import {Repost} from "../DbModels/Repost.ts";
-import {Album} from "../DbModels/Album.ts";
+import {Track} from "../Models/DbModels/Track.ts";
+import {User} from "../Models/DbModels/User.ts";
+import {TrackCollaborator} from "../Models/DbModels/TrackCollaborator.ts";
+import {TrackLike} from "../Models/DbModels/TrackLike.ts";
+import {Repost} from "../Models/DbModels/Repost.ts";
+import {Album} from "../Models/DbModels/Album.ts";
 
 export class TrackTemplates {
     static trackCard(track: Track, user: User, profileId: number) {
@@ -545,6 +545,11 @@ export class TrackTemplates {
     }
 
     static async trackPage(trackData: any, user: User) {
+        if (!trackData.track) {
+            console.log(trackData);
+            console.error("Invalid track data");
+            return;
+        }
         const track = trackData.track as Track;
         const trackState = signal(TrackProcessor.forDownload(track));
         if (!track.likes || !track.reposts || !track.comments) {
@@ -589,7 +594,10 @@ export class TrackTemplates {
             graphics.push(TrackTemplates.waveform(track.id, track.processed, track.length, []));
         }
 
-        const trackUser: User = trackData.track.user;
+        const trackUser: User = track.user;
+        if (!trackUser) {
+            throw new Error(`Track ${track.id} has no user`);
+        }
         const editActions = [];
         if (trackData.canEdit) {
             editActions.push(

@@ -7,6 +7,7 @@ import {TrackActions} from "../Actions/TrackActions.ts";
 import {StreamClient} from "./StreamClient.ts";
 import {userHasSettingValue, Util} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
+import {Track} from "../Models/DbModels/Track.ts";
 
 export class PlayManager {
     static async playCheck(track: any) {
@@ -364,14 +365,11 @@ export class PlayManager {
         await PlayManager.setLoudness(id, streamClient.getVolume() / PlayManager.config.controls.volumeChangeRelative);
     }
 
-    static async parseTrackData(trackData: any) {
-        trackData.track.user = LydaCache.get("user:" + trackData.track.user_id)?.content ?? await Util.getUserAsync(trackData.track.user_id);
-        trackData.user = await Util.getUserAsync();
+    static async cacheTrackData(trackData: { track: Track }) {
         if (!window.trackInfo) {
             window.trackInfo = {};
         }
         window.trackInfo[trackData.track.id] = trackData;
-        return trackData;
     }
 
     static async getTrackData(id: number, noCache = false) {
@@ -379,6 +377,6 @@ export class PlayManager {
             return window.trackInfo[id];
         }
         const res = await Api.getAsync(Api.endpoints.tracks.byId, { id });
-        return PlayManager.parseTrackData(res.data);
+        return PlayManager.cacheTrackData(res.data);
     }
 }

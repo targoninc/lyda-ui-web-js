@@ -13,11 +13,11 @@ import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
-import {User} from "../DbModels/User.ts";
-import {Playlist} from "../DbModels/Playlist.ts";
+import {User} from "../Models/DbModels/User.ts";
+import {Playlist} from "../Models/DbModels/Playlist.ts";
 import {create, ifjs, signal, computedSignal, AnyNode, HtmlPropertyValue} from "../../fjsc/f2.ts";
-import {Track} from "../DbModels/Track.ts";
-import {Album} from "../DbModels/Album.ts";
+import {Track} from "../Models/DbModels/Track.ts";
+import {Album} from "../Models/DbModels/Album.ts";
 import {navigate} from "../Routing/Router.ts";
 import {InputType} from "../../fjsc/Types.ts";
 

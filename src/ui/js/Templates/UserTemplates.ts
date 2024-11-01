@@ -23,12 +23,12 @@ import {
     signal,
     StringOrSignal
 } from "../../fjsc/f2.ts";
-import {Track} from "../DbModels/Track.ts";
-import {User} from "../DbModels/User.ts";
-import {Permission} from "../DbModels/Permission.ts";
-import {Playlist} from "../DbModels/Playlist.ts";
-import {Album} from "../DbModels/Album.ts";
-import {Badge} from "../DbModels/Badge.ts";
+import {Track} from "../Models/DbModels/Track.ts";
+import {User} from "../Models/DbModels/User.ts";
+import {Permission} from "../Models/DbModels/Permission.ts";
+import {Playlist} from "../Models/DbModels/Playlist.ts";
+import {Album} from "../Models/DbModels/Album.ts";
+import {Badge} from "../Models/DbModels/Badge.ts";
 
 export class UserTemplates {
     static userWidget(user_id: number, username: string, displayname: string, avatar: StringOrSignal, following: boolean, extraAttributes: HtmlPropertyValue[] = [], extraClasses: HtmlPropertyValue[] = []) {

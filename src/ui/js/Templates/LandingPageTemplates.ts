@@ -7,7 +7,7 @@ import {finalizeLogin} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
 import {InputType} from "../../fjsc/Types.ts";
-import {User} from "../DbModels/User.ts";
+import {User} from "../Models/DbModels/User.ts";
 import {HtmlPropertyValue, Signal, create, signal, computedSignal} from "../../fjsc/f2.ts";
 import {ApiResponse} from "../Classes/Api.ts";
 
@@ -148,9 +148,9 @@ export class LandingPageTemplates {
     }
 
     static loggingInBox(step: Signal<string>, user: Signal<AuthData>) {
-        AuthApi.login(user.value.email, user.value.password, user.value.mfaCode, (data) => {
-            Ui.notify("Logged in as " + data.username, "success");
-            AuthApi.user(data.user_id, (user) => {
+        AuthApi.login(user.value.email, user.value.password, user.value.mfaCode, (data: { user: User }) => {
+            Ui.notify("Logged in as " + data.user.username, "success");
+            AuthApi.user(data.user.id, (user: User) => {
                 finalizeLogin(step, user);
             });
         });

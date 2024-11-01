@@ -8,8 +8,8 @@ import {Time} from "../Classes/Helpers/Time.ts";
 import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
 import {computedSignal, create, ifjs, signal, signalMap} from "../../fjsc/f2.ts";
-import {User} from "../DbModels/User.ts";
-import {Comment} from "../DbModels/Comment.ts";
+import {User} from "../Models/DbModels/User.ts";
+import {Comment} from "../Models/DbModels/Comment.ts";
 import {FJSC} from "../../fjsc";
 
 export class CommentTemplates {

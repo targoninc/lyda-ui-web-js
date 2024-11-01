@@ -12,7 +12,7 @@ import {TrackEditTemplates} from "../Templates/TrackEditTemplates.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {navigate} from "../Routing/Router.ts";
 import {Signal} from "../../fjsc/f2.ts";
-import {Comment} from "../DbModels/Comment.ts";
+import {Comment} from "../Models/DbModels/Comment.ts";
 
 export class TrackActions {
     static async savePlay(id: number) {

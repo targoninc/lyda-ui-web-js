@@ -19,11 +19,11 @@ import {
     AnyNode,
     TypeOrSignal
 } from "../../fjsc/f2.ts";
-import {Track} from "../DbModels/Track.ts";
+import {Track} from "../Models/DbModels/Track.ts";
 import {FJSC} from "../../fjsc";
-import {User} from "../DbModels/User.ts";
+import {User} from "../Models/DbModels/User.ts";
 import {InputType} from "../../fjsc/Types.ts";
-import {TrackCollaborator} from "../DbModels/TrackCollaborator.ts";
+import {TrackCollaborator} from "../Models/DbModels/TrackCollaborator.ts";
 import {UploadableTrack} from "../Models/UploadableTrack.ts";
 
 export class TrackEditTemplates {

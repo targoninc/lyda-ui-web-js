@@ -25,7 +25,7 @@ import {Util} from "./Classes/Util.ts";
 import {StatisticsWrapper} from "./Classes/StatisticsWrapper.ts";
 import {Ui} from "./Classes/Ui.ts";
 import {navigate} from "./Routing/Router.ts";
-import {Permission} from "./DbModels/Permission.ts";
+import {Permission} from "./Models/DbModels/Permission.ts";
 
 export class Lyda {
     static async getEndpointData(config, endpoint, params = "", refreshSessionRetry = false) {
@@ -115,9 +115,9 @@ export class Lyda {
             ProfilePage.addTabSectionAsync(element, user, selfUser, isOwnProfile).then();
             break;
         case "track":
-            const trackData = await PlayManager.parseTrackData(data);
+            await PlayManager.cacheTrackData(data);
             user = await Util.getUserAsync();
-            element.appendChild(await TrackTemplates.trackPage(trackData, user));
+            element.appendChild(await TrackTemplates.trackPage(data, user));
             if (data.error) {
                 element.innerHTML = data.error;
                 return;
