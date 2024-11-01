@@ -8,7 +8,7 @@ import {Ui} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
 import {InputType} from "../../fjsc/Types.ts";
 import {User} from "../Models/DbModels/User.ts";
-import {HtmlPropertyValue, Signal, create, signal, computedSignal} from "../../fjsc/f2.ts";
+import {HtmlPropertyValue, Signal, create, signal, computedSignal, ifjs} from "../../fjsc/f2.ts";
 import {ApiResponse} from "../Classes/Api.ts";
 
 export interface AuthData {
@@ -332,6 +332,10 @@ export class LandingPageTemplates {
                 ]);
             });
         }
+        const allFieldsTouched = signal(false);
+        function checkAllFieldsTouched() {
+            allFieldsTouched.value = touchedFields.size === 6;
+        }
 
         return create("div")
             .classes("flex-v", "align-center")
@@ -345,6 +349,7 @@ export class LandingPageTemplates {
                         FormTemplates.textField("Username", "username", "Username", "text", user.value.username, true, (value: string) => {
                             if (!touchedFields.has("username") && value) {
                                 touchedFields.add("username");
+                                checkAllFieldsTouched();
                             }
                             user.value = {
                                 ...user.value,
@@ -355,6 +360,7 @@ export class LandingPageTemplates {
                         FormTemplates.textField("Display name", "displayname", "Display name", "text", user.value.username, true, (value: string) => {
                             if (!touchedFields.has("displayname") && value) {
                                 touchedFields.add("displayname");
+                                checkAllFieldsTouched();
                             }
                             user.value = {
                                 ...user.value,
@@ -392,12 +398,18 @@ export class LandingPageTemplates {
                             onchange: (value) => {
                                 if (!touchedFields.has("email") && value) {
                                     touchedFields.add("email");
+                                    checkAllFieldsTouched();
                                 }
+                                user.value = {
+                                    ...user.value,
+                                    email: value
+                                };
                             },
                         }),
                         FormTemplates.textField("Password", "password", "Password", "password", user.value.password, true, (value: string) => {
                             if (!touchedFields.has("password") && value) {
                                 touchedFields.add("password");
+                                checkAllFieldsTouched();
                             }
                             user.value = {
                                 ...user.value,
@@ -409,6 +421,7 @@ export class LandingPageTemplates {
                         FormTemplates.textField("Repeat password", "password-2", "Repeat password", "password", user.value.password2, true, (value: string) => {
                             if (!touchedFields.has("password2") && value) {
                                 touchedFields.add("password2");
+                                checkAllFieldsTouched();
                             }
                             user.value = {
                                 ...user.value,
@@ -418,6 +431,10 @@ export class LandingPageTemplates {
                         }, false, () => {
                         }, ["auth-input", "flex-grow"]),
                         FormTemplates.checkBoxField("tos-checkbox", "I agree to the Terms of Service & Privacy Policy", false, true, () => {
+                            if (!touchedFields.has("termsOfService")) {
+                                touchedFields.add("termsOfService");
+                                checkAllFieldsTouched();
+                            }
                             user.value = {
                                 ...user.value,
                                 termsOfService: !user.value.termsOfService
@@ -435,7 +452,9 @@ export class LandingPageTemplates {
                             },
                             classes: ["secondary", "positive"]
                         }),
-                        LandingPageTemplates.errorList(errors),
+                        ifjs(allFieldsTouched, create("div").classes("flex-v").children(
+                            LandingPageTemplates.errorList(errors)
+                        ).build()),
                     ).build(),
             ).build();
     }
