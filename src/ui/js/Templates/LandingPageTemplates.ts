@@ -299,7 +299,7 @@ export class LandingPageTemplates {
     }
 
     static registerBox(step: Signal<string>, user: Signal<AuthData>) {
-        const errors = signal(new Set());
+        const errors = signal(new Set<string>());
         const touchedFields = new Set<string>();
         for (const key in user.value) {
             // @ts-ignore
@@ -310,13 +310,14 @@ export class LandingPageTemplates {
         user.subscribe((newUser: AuthData) => {
             errors.value = UserValidator.validateRegistration(newUser, touchedFields);
         });
+        const emailInUseError = "This E-mail address is already in use. Please use a different one.";
         const continueRegistration = () => {
             errors.value = UserValidator.validateRegistration(user.value, touchedFields);
             if (errors.value.size === 0) {
                 AuthApi.userExists(user.value.email, () => {
                     errors.value = new Set([
                         ...errors.value,
-                        "This E-mail address is already in use. Please use a different one."
+                        emailInUseError
                     ]);
                 }, () => {
                     step.value = "registering";
@@ -327,11 +328,10 @@ export class LandingPageTemplates {
             AuthApi.userExists(user.value.email, () => {
                 errors.value = new Set([
                     ...errors.value,
-                    "This E-mail address is already in use. Please use a different one."
+                    emailInUseError
                 ]);
             });
         }
-        let emailTemp = "";
 
         return create("div")
             .classes("flex-v", "align-center")
@@ -362,24 +362,39 @@ export class LandingPageTemplates {
                             };
                         }, false, () => {
                         }, ["auth-input", "flex-grow"]),
-                        FormTemplates.textField("Email", "email", "Email", "email", user.value.email, true, (value: string) => {
-                            if (!touchedFields.has("email") && value) {
-                                touchedFields.add("email");
-                            }
-                            emailTemp = value;
-                            AuthApi.userExists(value, () => {
-                                errors.value = new Set([
-                                    ...errors.value,
-                                    "This E-mail address is already in use. Please use a different one."
-                                ]);
-                            }, () => {
-                                user.value = {
-                                    ...user.value,
-                                    email: emailTemp
-                                };
-                            });
-                        }, false, () => {
-                        }, ["auth-input", "flex-grow"]),
+                        FJSC.input<string>({
+                            type: InputType.email,
+                            name: "email",
+                            label: "Email",
+                            placeholder: "E-Mail",
+                            value: user.value.email,
+                            required: true,
+                            classes: ["auth-input"],
+                            debounce: 500,
+                            validators: [
+                                async (v) => {
+                                    return new Promise<string[] | null | undefined>((resolve) => {
+                                        AuthApi.userExists(v, () => {
+                                            errors.value = new Set([
+                                                ...errors.value,
+                                                emailInUseError
+                                            ]);
+                                            resolve([emailInUseError]);
+                                        }, () => {
+                                            const tmpErrors = [...errors.value];
+                                            tmpErrors.splice(tmpErrors.indexOf(emailInUseError), 1);
+                                            errors.value = new Set(tmpErrors);
+                                            resolve(null);
+                                        });
+                                    });
+                                }
+                            ],
+                            onchange: (value) => {
+                                if (!touchedFields.has("email") && value) {
+                                    touchedFields.add("email");
+                                }
+                            },
+                        }),
                         FormTemplates.textField("Password", "password", "Password", "password", user.value.password, true, (value: string) => {
                             if (!touchedFields.has("password") && value) {
                                 touchedFields.add("password");

@@ -26,6 +26,7 @@ import {StatisticsWrapper} from "./Classes/StatisticsWrapper.ts";
 import {Ui} from "./Classes/Ui.ts";
 import {navigate} from "./Routing/Router.ts";
 import {Permission} from "./Models/DbModels/Permission.ts";
+import {Follow} from "./Models/DbModels/Follow.ts";
 
 export class Lyda {
     static async getEndpointData(config, endpoint, params = "", refreshSessionRetry = false) {
@@ -105,8 +106,8 @@ export class Lyda {
             const isOwnProfile = selfUser ? user.id === selfUser.id : false;
             element.appendChild(UserTemplates.userActionsContainer(isOwnProfile));
             element.appendChild(UserTemplates.profileHeader(user, isOwnProfile));
-            const following = user.follows.some(f => {
-                return selfUser ? f.followingUserId === selfUser.id : false;
+            const following = user.follows.some((f: Follow) => {
+                return selfUser ? f.following_user_id === selfUser.id : false;
             });
             const followsBack = user.following.some(f => {
                 return selfUser ? f.user_id === selfUser.id : false;

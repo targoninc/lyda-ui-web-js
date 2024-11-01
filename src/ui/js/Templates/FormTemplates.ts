@@ -11,7 +11,7 @@ import {
     StringOrSignal,
     TypeOrSignal
 } from "../../fjsc/f2.js";
-import {SearchableSelectConfig, SelectOption} from "../../fjsc/Types.ts";
+import {InputType, SearchableSelectConfig, SelectOption} from "../../fjsc/Types.ts";
 
 export class FormTemplates {
     static fileField(title: string, text: string, name: string, accept: string, required = false, onchange = (v: string) => {}) {
@@ -71,29 +71,19 @@ export class FormTemplates {
 
     static textField(title: string, name: string, placeholder: string, type = "text", value: StringOrSignal = "", required = false, onchange: Function = (val: string) => {
     }, autofocus = false, onkeydown: Function = () => {
-    }, classes: HtmlPropertyValue[] = []) {
-        const input = create("input")
-            .name(name)
-            .id(name)
-            .type(type)
-            .placeholder(placeholder)
-            .value(value)
-            .required(required)
-            .onchange((e: any) => onchange(e.target.value))
-            .onkeydown(onkeydown);
-
-        if (autofocus) {
-            input.attributes("autofocus", "true");
-        }
-
-        return create("div")
-            .classes("flex-v", "small-gap", ...classes)
-            .children(
-                create("label")
-                    .text(title)
-                    .build(),
-                input.build(),
-            ).build();
+    }, classes: StringOrSignal[] = []) {
+        return FJSC.input<string>({
+            type: type as InputType,
+            name,
+            label: title,
+            placeholder,
+            value,
+            required,
+            onchange: onchange as (v: string) => void,
+            autofocus,
+            onkeydown,
+            classes
+        });
     }
 
     static genre(parentState: Signal<any>) {

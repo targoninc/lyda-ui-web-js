@@ -25,6 +25,10 @@
     --blue: #4385BE;
 }
 
+.fakeButton {
+    background: var(--color-3);
+}
+
 .fakeButton.positive:hover {
     background-color: var(--color-8);
     color: var(--color-5);

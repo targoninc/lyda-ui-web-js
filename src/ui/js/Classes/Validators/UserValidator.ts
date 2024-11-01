@@ -3,17 +3,17 @@ import {AuthData} from "../../Templates/LandingPageTemplates.ts";
 export class UserValidator {
     static validateRegistration(state: AuthData, touchedFields: Set<string>): Set<string> {
         let errors = new Set<string>();
-        if (!state.username && touchedFields.has("username")) {
+        if (!state.username) {
             errors.add("Username missing");
         }
-        if (!state.displayname && touchedFields.has("displayname")) {
-            errors.add("Display name missing");
-        }
-        if (!state.email && touchedFields.has("email")) {
+        if (!state.email) {
             errors.add("Email missing");
         }
-        if (!state.password && touchedFields.has("password")) {
+        if (!state.password) {
             errors.add("Password missing");
+        }
+        if (!state.password2) {
+            errors.add("Repeat password missing");
         }
         if (state.password !== state.password2 && touchedFields.has("password2") && touchedFields.has("password")) {
             errors.add("Passwords do not match");
