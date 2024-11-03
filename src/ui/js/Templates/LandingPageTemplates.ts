@@ -35,7 +35,13 @@ export class LandingPageTemplates {
     }
 
     static registrationLoginBox() {
-        const step = signal("email");
+        const altEntryPoints = ["password-reset"];
+        let firstStep: string | undefined = "email";
+        if (altEntryPoints.some(entryPoint => window.location.pathname.includes(entryPoint))) {
+            firstStep = altEntryPoints.find(entryPoint => window.location.pathname.includes(entryPoint));
+        }
+        console.log(firstStep);
+        const step = signal(firstStep ?? "email");
         const user = signal<AuthData>({
             email: "",
             username: "",
@@ -55,7 +61,10 @@ export class LandingPageTemplates {
             "logging-in": LandingPageTemplates.loggingInBox,
             "registering": LandingPageTemplates.registeringBox,
             "mfa": LandingPageTemplates.mfaBox,
-            "complete": LandingPageTemplates.completeBox
+            "complete": LandingPageTemplates.completeBox,
+            "reset-password": LandingPageTemplates.resetPasswordBox,
+            "password-reset": LandingPageTemplates.enterNewPasswordBox,
+            "password-reset-requested": LandingPageTemplates.passwordResetRequestedBox,
         };
         const pageMap = {
             "email": "E-Mail",
@@ -67,10 +76,12 @@ export class LandingPageTemplates {
 
         const template = signal(templateMap[step.value](step, user));
         step.subscribe((newStep: string) => {
-            history.value = [
-                ...history.value,
-                newStep
-            ];
+            if (pageMap[newStep]) {
+                history.value = [
+                    ...history.value,
+                    newStep
+                ];
+            }
             template.value = create("div")
                 .classes("flex-v")
                 .children(
@@ -245,7 +256,9 @@ export class LandingPageTemplates {
                                 }
                             },
                         }),
-                        GenericTemplates.inlineLink("/forgot-password", "Change/forgot password?", false),
+                        GenericTemplates.inlineLink(() => {
+                            step.value = "reset-password";
+                        }, "Change/forgot password?", false),
                         GenericTemplates.inlineLink(() => {
                             step.value = "register";
                         }, "Register instead"),
@@ -262,6 +275,187 @@ export class LandingPageTemplates {
                         }),
                         LandingPageTemplates.errorList(errors),
                     ).build(),
+            ).build();
+    }
+
+    static resetPasswordBox(step: Signal<string>, user: Signal<AuthData>) {
+        const errors = signal(new Set<string>());
+        user.subscribe((newUser: AuthData) => {
+            errors.value = UserValidator.validateLogin(newUser);
+        });
+        const email = computedSignal<string>(user, (u: AuthData) => u.email);
+
+        return create("div")
+            .classes("flex-v")
+            .children(
+                create("h1")
+                    .text("Forgot password")
+                    .build(),
+                create("div")
+                    .classes("flex-v")
+                    .children(
+                        create("div")
+                            .classes("flex", "space-outwards", "auth-input")
+                            .children(
+                                FJSC.input<string>({
+                                    type: InputType.text,
+                                    name: "email",
+                                    label: "E-Mail",
+                                    placeholder: "E-Mail",
+                                    value: email,
+                                    required: true,
+                                    classes: ["auth-input"],
+                                    onchange: (value) => {
+                                        user.value = {
+                                            ...user.value,
+                                            email: value
+                                        };
+                                    },
+                                    onkeydown: (e: KeyboardEvent) => {
+                                        if (e.key === "Enter") {
+                                            user.value = {
+                                                ...user.value,
+                                                email: e.target?.value
+                                            };
+                                        }
+                                    },
+                                }),
+                            ).build(),
+                        FJSC.button({
+                            text: "Next",
+                            id: "checkEmailTrigger",
+                            classes: ["positive"],
+                            disabled: computedSignal(user, (u: AuthData) => !u.email || u.email.trim().length === 0),
+                            onclick: async () => {
+                                const res = await AuthApi.requestPasswordReset(email.value);
+                                if (res.code === 200) {
+                                    Ui.notify("Password reset requested, check your email", "success");
+                                    step.value = "password-reset-requested";
+                                } else {
+                                    Ui.notify(`Failed to reset password: ${res.data.error}`, "error");
+                                    errors.value = new Set([
+                                        ...errors.value,
+                                        res.data.error
+                                    ]);
+                                }
+                            },
+                        }),
+                        LandingPageTemplates.errorList(errors),
+                    ).build(),
+            ).build();
+    }
+
+    static enterNewPasswordBox(step: Signal<string>, user: Signal<AuthData>) {
+        const errors = signal(new Set<string>());
+        user.subscribe((newUser: AuthData) => {
+            errors.value = UserValidator.validatePasswordReset(newUser);
+        });
+        const password = computedSignal<string>(user, (u: AuthData) => u.password);
+        const passwordConfirm = computedSignal<string>(user, (u: AuthData) => u.password2);
+        const searchParams = new URLSearchParams(window.location.search);
+        const token = searchParams.get("token");
+
+        return create("div")
+            .classes("flex-v")
+            .children(
+                create("h1")
+                    .text("Enter new password")
+                    .build(),
+                create("div")
+                    .classes("flex-v")
+                    .children(
+                        FJSC.input<string>({
+                            type: InputType.password,
+                            name: "password",
+                            label: "Password",
+                            placeholder: "Password",
+                            value: password,
+                            required: true,
+                            classes: ["auth-input"],
+                            onchange: (value) => {
+                                user.value = {
+                                    ...user.value,
+                                    password: value
+                                };
+                            },
+                            onkeydown: (e: KeyboardEvent) => {
+                                if (e.key === "Enter") {
+                                    user.value = {
+                                        ...user.value,
+                                        password: e.target?.value
+                                    };
+                                }
+                            },
+                        }),
+                        FJSC.input<string>({
+                            type: InputType.password,
+                            name: "password-confirm",
+                            label: "Confirm password",
+                            placeholder: "Confirm password",
+                            value: passwordConfirm,
+                            required: true,
+                            classes: ["auth-input"],
+                            onchange: (value) => {
+                                user.value = {
+                                    ...user.value,
+                                    password2: value
+                                };
+                            },
+                            onkeydown: (e: KeyboardEvent) => {
+                                if (e.key === "Enter") {
+                                    user.value = {
+                                        ...user.value,
+                                        password2: e.target?.value
+                                    };
+                                }
+                            },
+                        }),
+                        FJSC.button({
+                            text: "Next",
+                            classes: ["positive"],
+                            disabled: computedSignal(user, (u: AuthData) => !u.password || u.password.trim().length === 0 || u.password !== u.password2 || u.password2.trim().length === 0),
+                            onclick: async () => {
+                                const res = await AuthApi.resetPassword(token, user.value.password, user.value.password2);
+                                if (res.code === 200) {
+                                    Ui.notify("Password updated, you can now log in", "success");
+                                    step.value = "login";
+                                } else {
+                                    Ui.notify(`Failed to reset password: ${res.data.error}`, "error");
+                                    errors.value = new Set([
+                                        ...errors.value,
+                                        res.data.error
+                                    ]);
+                                }
+                            },
+                        }),
+                        LandingPageTemplates.errorList(errors),
+                    ).build(),
+            ).build();
+    }
+
+    static passwordResetRequestedBox(step: Signal<string>, user: Signal<AuthData>) {
+        return create("div")
+            .classes("flex-v")
+            .children(
+                create("h1")
+                    .text("Password reset requested")
+                    .build(),
+                create("div")
+                    .classes("flex")
+                    .children(
+                        create("span")
+                            .text("Please check your email for a password reset link. After you've reset your password, you can log in.")
+                            .build(),
+                        FJSC.button({
+                            text: "Go to Login",
+                            id: "mfaCheckTrigger",
+                            disabled: computedSignal(user, (u: AuthData) => !u.email || u.email.trim().length === 0),
+                            onclick: () => {
+                                step.value = "login";
+                            },
+                            classes: ["secondary", "positive"]
+                        }),
+                    ).build()
             ).build();
     }
 

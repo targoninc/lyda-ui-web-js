@@ -37,8 +37,14 @@ export class UserValidator {
 
     static validatePasswordReset(state: any): Set<string> {
         let errors = new Set<string>();
-        if (!state.email) {
-            errors.add("Email missing");
+        if (!state.password) {
+            errors.add("Password missing");
+        }
+        if (!state.password2) {
+            errors.add("Repeat password missing");
+        }
+        if (state.password !== state.password2) {
+            errors.add("Passwords do not match");
         }
         return errors;
     }

@@ -41,6 +41,9 @@ export class Api {
                     register: "register",
                     mfaRequest: "mfa-request",
                     updateSetting: "update-setting",
+                    changePassword: "change-password",
+                    requestPasswordReset: "request-password-reset",
+                    resetPassword: "reset-password",
                 },
                 set: {
                     property: "property",

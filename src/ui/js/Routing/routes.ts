@@ -63,5 +63,8 @@ export const routes = [
     },
     {
         path: "subscribe"
+    },
+    {
+        path: "password-reset"
     }
 ];

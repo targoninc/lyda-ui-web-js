@@ -27,6 +27,7 @@ export class PageTemplates {
         moderation: this.moderationPage,
         test: LandingPageTemplates.newLandingPage,
         subscribe: this.subscribePage,
+        "password-reset": LandingPageTemplates.newLandingPage,
     };
     static nonUserFallback = {
         library: this.loginPage,

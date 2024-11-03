@@ -1,4 +1,4 @@
-import {Api} from "./Api.ts";
+import {Api, ApiResponse} from "./Api.ts";
 import {Util} from "./Util.ts";
 import {Ui} from "./Ui.ts";
 
@@ -65,6 +65,20 @@ export class AuthApi {
                 Ui.notify(response.data, "error");
                 errorCallback && errorCallback(response);
             }
+        });
+    }
+
+    static async requestPasswordReset(email: string): Promise<ApiResponse<any>> {
+        return Api.postAsync(Api.endpoints.user.actions.requestPasswordReset, {
+            email
+        });
+    }
+
+    static async resetPassword(token: string, newPassword: string, newPasswordConfirm: string): Promise<ApiResponse<any>> {
+        return Api.postAsync(Api.endpoints.user.actions.resetPassword, {
+            token,
+            newPassword,
+            newPasswordConfirm
         });
     }
 }
