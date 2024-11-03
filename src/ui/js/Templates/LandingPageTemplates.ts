@@ -40,7 +40,6 @@ export class LandingPageTemplates {
         if (altEntryPoints.some(entryPoint => window.location.pathname.includes(entryPoint))) {
             firstStep = altEntryPoints.find(entryPoint => window.location.pathname.includes(entryPoint));
         }
-        console.log(firstStep);
         const step = signal(firstStep ?? "email");
         const user = signal<AuthData>({
             email: "",
@@ -76,7 +75,7 @@ export class LandingPageTemplates {
 
         const template = signal(templateMap[step.value](step, user));
         step.subscribe((newStep: string) => {
-            if (pageMap[newStep]) {
+            if (pageMap[newStep] && !history.value.includes(newStep)) {
                 history.value = [
                     ...history.value,
                     newStep
@@ -122,7 +121,7 @@ export class LandingPageTemplates {
                                 mfaCode: value
                             };
                         }, true, () => {
-                        }, ["auth-input"]),
+                        }),
                         GenericTemplates.action(Icons.RIGHT, "Submit", "loginTrigger", () => {
                             step.value = "logging-in";
                         }, [], ["secondary", "positive"])
@@ -132,7 +131,6 @@ export class LandingPageTemplates {
 
     static registeringBox(step: Signal<string>, user: Signal<AuthData>) {
         AuthApi.register(user.value.username, user.value.displayname, user.value.email, user.value.password, (res: ApiResponse<any>) => {
-            console.log(res);
             if (res.code === 200) {
                 step.value = "complete";
             } else {
@@ -217,7 +215,6 @@ export class LandingPageTemplates {
                             placeholder: "E-Mail",
                             value: email,
                             required: true,
-                            classes: ["auth-input"],
                             onchange: (value) => {
                                 AuthApi.userExists(value, () => {
                                     user.value = {
@@ -232,30 +229,7 @@ export class LandingPageTemplates {
                                 });
                             },
                         }),
-                        FJSC.input<string>({
-                            type: InputType.password,
-                            name: "password",
-                            label: "Password",
-                            placeholder: "Password",
-                            value: password,
-                            required: true,
-                            classes: ["auth-input"],
-                            onchange: (value) => {
-                                user.value = {
-                                    ...user.value,
-                                    password: value
-                                };
-                            },
-                            onkeydown: (e: KeyboardEvent) => {
-                                if (e.key === "Enter") {
-                                    user.value = {
-                                        ...user.value,
-                                        password: e.target?.value
-                                    };
-                                    step.value = "checking-mfa";
-                                }
-                            },
-                        }),
+                        LandingPageTemplates.passwordInput(password, user, () => step.value = "checking-mfa"),
                         GenericTemplates.inlineLink(() => {
                             step.value = "reset-password";
                         }, "Change/forgot password?", false),
@@ -295,7 +269,7 @@ export class LandingPageTemplates {
                     .classes("flex-v")
                     .children(
                         create("div")
-                            .classes("flex", "space-outwards", "auth-input")
+                            .classes("flex", "space-outwards")
                             .children(
                                 FJSC.input<string>({
                                     type: InputType.text,
@@ -304,7 +278,6 @@ export class LandingPageTemplates {
                                     placeholder: "E-Mail",
                                     value: email,
                                     required: true,
-                                    classes: ["auth-input"],
                                     onchange: (value) => {
                                         user.value = {
                                             ...user.value,
@@ -364,29 +337,7 @@ export class LandingPageTemplates {
                 create("div")
                     .classes("flex-v")
                     .children(
-                        FJSC.input<string>({
-                            type: InputType.password,
-                            name: "password",
-                            label: "Password",
-                            placeholder: "Password",
-                            value: password,
-                            required: true,
-                            classes: ["auth-input"],
-                            onchange: (value) => {
-                                user.value = {
-                                    ...user.value,
-                                    password: value
-                                };
-                            },
-                            onkeydown: (e: KeyboardEvent) => {
-                                if (e.key === "Enter") {
-                                    user.value = {
-                                        ...user.value,
-                                        password: e.target?.value
-                                    };
-                                }
-                            },
-                        }),
+                        LandingPageTemplates.passwordInput(password, user),
                         FJSC.input<string>({
                             type: InputType.password,
                             name: "password-confirm",
@@ -394,7 +345,6 @@ export class LandingPageTemplates {
                             placeholder: "Confirm password",
                             value: passwordConfirm,
                             required: true,
-                            classes: ["auth-input"],
                             onchange: (value) => {
                                 user.value = {
                                     ...user.value,
@@ -431,6 +381,32 @@ export class LandingPageTemplates {
                         LandingPageTemplates.errorList(errors),
                     ).build(),
             ).build();
+    }
+
+    private static passwordInput(password: Signal<string>, user: Signal<AuthData>, onEnter: Function = () => {}) {
+        return FJSC.input<string>({
+            type: InputType.password,
+            name: "password",
+            label: "Password",
+            placeholder: "Password",
+            value: password,
+            required: true,
+            onchange: (value) => {
+                user.value = {
+                    ...user.value,
+                    password: value
+                };
+            },
+            onkeydown: (e: KeyboardEvent) => {
+                if (e.key === "Enter") {
+                    user.value = {
+                        ...user.value,
+                        password: e.target?.value
+                    };
+                    onEnter();
+                }
+            },
+        });
     }
 
     static passwordResetRequestedBox(step: Signal<string>, user: Signal<AuthData>) {
@@ -550,7 +526,7 @@ export class LandingPageTemplates {
                                 username: value
                             };
                         }, true, () => {
-                        }, ["auth-input", "flex-grow"]),
+                        }, ["flex-grow"]),
                         FormTemplates.textField("Display name", "displayname", "Display name", "text", user.value.username, true, (value: string) => {
                             if (!touchedFields.has("displayname") && value) {
                                 touchedFields.add("displayname");
@@ -561,7 +537,7 @@ export class LandingPageTemplates {
                                 displayname: value
                             };
                         }, false, () => {
-                        }, ["auth-input", "flex-grow"]),
+                        }, ["flex-grow"]),
                         FJSC.input<string>({
                             type: InputType.email,
                             name: "email",
@@ -569,7 +545,6 @@ export class LandingPageTemplates {
                             placeholder: "E-Mail",
                             value: user.value.email,
                             required: true,
-                            classes: ["auth-input"],
                             debounce: 500,
                             validators: [
                                 async (v) => {
@@ -609,9 +584,8 @@ export class LandingPageTemplates {
                                 ...user.value,
                                 password: value
                             };
-                            console.log(user.value);
                         }, false, () => {
-                        }, ["auth-input", "flex-grow"]),
+                        }, ["flex-grow"]),
                         FormTemplates.textField("Repeat password", "password-2", "Repeat password", "password", user.value.password2, true, (value: string) => {
                             if (!touchedFields.has("password2") && value) {
                                 touchedFields.add("password2");
@@ -621,9 +595,8 @@ export class LandingPageTemplates {
                                 ...user.value,
                                 password2: value
                             };
-                            console.log(user.value);
                         }, false, () => {
-                        }, ["auth-input", "flex-grow"]),
+                        }, ["flex-grow"]),
                         FormTemplates.checkBoxField("tos-checkbox", "I agree to the Terms of Service & Privacy Policy", false, true, () => {
                             if (!touchedFields.has("termsOfService")) {
                                 touchedFields.add("termsOfService");
@@ -675,7 +648,7 @@ export class LandingPageTemplates {
                     .classes("flex-v")
                     .children(
                         create("div")
-                            .classes("flex", "space-outwards", "auth-input")
+                            .classes("flex", "space-outwards")
                             .children(
                                 FJSC.input<string>({
                                     type: InputType.text,
@@ -684,7 +657,6 @@ export class LandingPageTemplates {
                                     placeholder: "E-Mail",
                                     value: user.value.email,
                                     required: true,
-                                    classes: ["auth-input"],
                                     onchange: (value) => {
                                         user.value = {
                                             ...user.value,
