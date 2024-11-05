@@ -35,22 +35,6 @@ export class LandingPageTemplates {
     }
 
     static registrationLoginBox() {
-        const altEntryPoints = ["password-reset"];
-        let firstStep: string | undefined = "email";
-        if (altEntryPoints.some(entryPoint => window.location.pathname.includes(entryPoint))) {
-            firstStep = altEntryPoints.find(entryPoint => window.location.pathname.includes(entryPoint));
-        }
-        const step = signal(firstStep ?? "email");
-        const user = signal<AuthData>({
-            email: "",
-            username: "",
-            displayname: "",
-            password: "",
-            password2: "",
-            mfaCode: "",
-            termsOfService: false
-        });
-        const history = signal(["email"]);
         const templateMap = {
             "email": LandingPageTemplates.emailBox,
             "check-email": LandingPageTemplates.checkEmailBox,
@@ -65,6 +49,22 @@ export class LandingPageTemplates {
             "password-reset": LandingPageTemplates.enterNewPasswordBox,
             "password-reset-requested": LandingPageTemplates.passwordResetRequestedBox,
         };
+        const altEntryPoints = ["password-reset"];
+        let firstStep: keyof typeof templateMap | undefined = "email";
+        if (altEntryPoints.some(entryPoint => window.location.pathname.includes(entryPoint))) {
+            firstStep = altEntryPoints.find(entryPoint => window.location.pathname.includes(entryPoint)) as keyof typeof templateMap;
+        }
+        const step = signal<keyof typeof templateMap>(firstStep ?? "email");
+        const user = signal<AuthData>({
+            email: "",
+            username: "",
+            displayname: "",
+            password: "",
+            password2: "",
+            mfaCode: "",
+            termsOfService: false
+        });
+        const history = signal(["email"]);
         const pageMap = {
             "email": "E-Mail",
             "register": "Register",
@@ -74,7 +74,7 @@ export class LandingPageTemplates {
         };
 
         const template = signal(templateMap[step.value](step, user));
-        step.subscribe((newStep: string) => {
+        step.subscribe((newStep: keyof typeof pageMap) => {
             if (pageMap[newStep] && !history.value.includes(newStep)) {
                 history.value = [
                     ...history.value,
@@ -89,7 +89,7 @@ export class LandingPageTemplates {
                         .children(
                             GenericTemplates.breadcrumbs(pageMap, history, step)
                         ).build(),
-                    templateMap[newStep](step, user, history)
+                    templateMap[newStep](step, user)
                 ).build();
         });
 
@@ -115,7 +115,7 @@ export class LandingPageTemplates {
                         create("p")
                             .text("You have two-factor authentication enabled. Please enter the code from the e-mail you just got sent to continue.")
                             .build(),
-                        FormTemplates.textField("Code", "mfa-code", "Code", "text", "", true, (value) => {
+                        FormTemplates.textField("Code", "mfa-code", "Code", "text", "", true, (value: string) => {
                             user.value = {
                                 ...user.value,
                                 mfaCode: value
