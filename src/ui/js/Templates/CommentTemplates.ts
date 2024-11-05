@@ -7,14 +7,16 @@ import {UserTemplates} from "./UserTemplates.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
-import {computedSignal, create, ifjs, signal, signalMap} from "../../fjsc/f2.ts";
+import {computedSignal, create, ifjs, Signal, signal, signalMap} from "../../fjsc/f2.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {Comment} from "../Models/DbModels/Comment.ts";
 import {FJSC} from "../../fjsc";
+import {InputType} from "../../fjsc/Types.ts";
 
 export class CommentTemplates {
     static moderatableComment(comment: any, user: User) {
         const id = comment.comment.id;
+        const parentCommentId = signal(0);
 
         const el = create("div")
             .classes("flex")
@@ -22,7 +24,7 @@ export class CommentTemplates {
                 create("div")
                     .classes("card")
                     .children(
-                        CommentTemplates.commentInList(comment, user),
+                        CommentTemplates.commentInList(comment, parentCommentId, user),
                     ).build(),
                 create("div")
                     .classes("flex-v")
@@ -63,33 +65,37 @@ export class CommentTemplates {
         setTimeout(() => {
             Util.nestCommentElementsByParents();
         });
+        const parentCommentId = signal(0);
 
         return create("div")
             .classes("listFromStatsIndicator", "move-to-new-row", "comments", "flex-v", "hidden")
             .children(
                 GenericTemplates.cardLabel("Comments", "comment"),
-                CommentTemplates.commentBox(track_id),
+                CommentTemplates.commentBox(track_id, parentCommentId),
                 ifjs(hasComments, create("span")
                     .classes("text", "no-comments")
                     .text("No comments yet")
                     .build(), true),
-                ifjs(hasComments, signalMap(comments, create("div").classes("flex-v", "comment-list"), (comment: Comment) => CommentTemplates.commentInList(comment, user)))
+                ifjs(hasComments, signalMap(comments, create("div").classes("flex-v", "comment-list"), (comment: Comment) => CommentTemplates.commentInList(comment, parentCommentId, user)))
             ).build();
     }
 
-    static commentBox(track_id: number) {
+    static commentBox(track_id: number, parentCommentId: Signal<number>) {
         return create("div")
             .classes("comment-box", "flex-v")
             .children(
                 Util.isLoggedIn() ? create("div")
                     .classes("comment-box-input-container", "flex", "fullWidth")
                     .children(
-                        create("input")
-                            .classes("comment-box-input", "flex", "fullWidth")
-                            .type("text")
-                            .attributes("placeholder", "New comment...", "track_id", track_id)
-                            .onkeydown(e => TrackActions.newCommentFromElement(e, track_id))
-                            .build()
+                        FJSC.input({
+                            classes: ["comment-box-input"],
+                            name: "comment-box-input",
+                            type: InputType.text,
+                            placeholder: "New comment...",
+                            value: "",
+                            attributes: ["track_id", track_id.toString()],
+                            onkeydown: e => TrackActions.newCommentFromElement(e, track_id, parentCommentId)
+                        }),
                     ).build() : null
             ).build();
     }
@@ -101,8 +107,9 @@ export class CommentTemplates {
 
     static commentListOpener(track_id: number, comments: Comment[], user: User) {
         let commentList;
+        const parentCommentId = signal(0);
         if (comments.length > 0) {
-            commentList = comments.map(comment => CommentTemplates.commentInList(comment, user));
+            commentList = comments.map(comment => CommentTemplates.commentInList(comment, parentCommentId, user));
             Util.nestCommentElementsByParents();
         } else {
             commentList = [create("span")
@@ -134,7 +141,7 @@ export class CommentTemplates {
                             .classes("comments-label", "text", "label", "padded-inline", "rounded", "text-small")
                             .text("Comments")
                             .build(),
-                        CommentTemplates.commentBox(track_id),
+                        CommentTemplates.commentBox(track_id, parentCommentId),
                         create("div")
                             .classes("flex-v", "comment-list")
                             .children(...commentList)
@@ -143,7 +150,7 @@ export class CommentTemplates {
             ).build();
     }
 
-    static commentInList(comment: Comment, user: User) {
+    static commentInList(comment: Comment, parentCommentId: Signal<number>, user: User) {
         let actions = [];
         if (!comment.user) {
             throw new Error(`Comment ${comment.id} has no user`);
@@ -180,7 +187,7 @@ export class CommentTemplates {
                     .classes("flex", "comment_body")
                     .children(
                         CommentTemplates.commentContent(comment, true),
-                        Util.isLoggedIn() ? GenericTemplates.inlineAction("Reply", "prompt_suggestion", comment.id, TrackActions.replyToComment, ["track_id", comment.track_id], ["secondary"]) : null,
+                        Util.isLoggedIn() ? GenericTemplates.inlineAction("Reply", "prompt_suggestion", comment.id, (e: Event) => TrackActions.replyToComment(e, comment.track_id, comment.id, comment.user!.username, parentCommentId), ["track_id", comment.track_id], ["secondary"]) : null,
                     ).build(),
                 create("div")
                     .classes("comment-children")

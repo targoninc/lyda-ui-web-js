@@ -10,9 +10,10 @@ import {CacheItem} from "../Cache/CacheItem.ts";
 import {CommentTemplates} from "../Templates/CommentTemplates.ts";
 import {TrackEditTemplates} from "../Templates/TrackEditTemplates.ts";
 import {Ui} from "../Classes/Ui.ts";
-import {navigate} from "../Routing/Router.ts";
+import {navigate, reload} from "../Routing/Router.ts";
 import {Signal} from "../../fjsc/f2.ts";
 import {Comment} from "../Models/DbModels/Comment.ts";
+import {Track} from "../Models/DbModels/Track.ts";
 
 export class TrackActions {
     static async savePlay(id: number) {
@@ -81,7 +82,7 @@ export class TrackActions {
         }, Icons.WARNING);
     }
 
-    static async newCommentFromElement(e: any, track_id: number) {
+    static async newCommentFromElement(e: any, track_id: number, parentCommentId: Signal<number>) {
         if (e.key !== "Enter") {
             return;
         }
@@ -97,12 +98,10 @@ export class TrackActions {
         }
         e.target.value = "";
 
-        const parentId = e.target.getAttribute("parent_id");
-
         const res = await Api.postAsync(Api.endpoints.comments.actions.new, {
             id: track_id,
             content: content,
-            parentId: parentId === "" ? 0 : parentId,
+            parentId: parentCommentId.value,
         });
 
         if (res.code !== 200) {
@@ -125,13 +124,13 @@ export class TrackActions {
             user: user,
             user_id: user.id,
             track_id: track_id,
-            parent_id: parentId === "" ? 0 : parentId,
+            parent_id: parentCommentId.value,
             created_at: nowUtc,
             potentially_harmful: false,
             hidden: false,
             canEdit: true
         };
-        const commentElement = CommentTemplates.commentInList(comment, user);
+        const commentElement = CommentTemplates.commentInList(comment, parentCommentId, user);
         const commentList = document.querySelector(".comment-list");
         commentList && commentList.appendChild(commentElement);
         const noComments = document.querySelector(".no-comments");
@@ -146,23 +145,23 @@ export class TrackActions {
         Util.nestCommentElementsByParents();
     }
 
-    static async likeTrack(id) {
+    static async likeTrack(id: number) {
         return await Api.postAsync(Api.endpoints.tracks.actions.like, { id });
     }
 
-    static async unlikeTrack(id) {
+    static async unlikeTrack(id: number) {
         return await Api.postAsync(Api.endpoints.tracks.actions.unlike, { id });
     }
 
-    static async repostTrack(id) {
+    static async repostTrack(id: number) {
         return await Api.postAsync(Api.endpoints.tracks.actions.repost, { id });
     }
 
-    static async unrepostTrack(id) {
+    static async unrepostTrack(id: number) {
         return await Api.postAsync(Api.endpoints.tracks.actions.unrepost, { id });
     }
 
-    static async runFollowFunctionFromElement(e, userId, following) {
+    static async runFollowFunctionFromElement(e: any, userId: number, following: Signal<boolean>) {
         const button = e.target;
         const span = button.querySelector("span");
         const img = button.querySelector("img");
@@ -289,20 +288,19 @@ export class TrackActions {
         fileInput.click();
     }
 
-    static replyToComment(e) {
-        // TODO: Refactor with signals and stuff
-        const input = document.querySelector(".comment-box-input[track_id='" + e.target.getAttribute("track_id") + "']");
+    static replyToComment(e: any, trackId: number, commentId: number, username: string, parentCommentId: Signal<number>) {
+        const input = document.querySelector(".comment-box-input[track_id='" + trackId.toString() + "']") as HTMLInputElement;
         if (e.target.innerText === "Reply") {
-            const replyButtons = document.querySelectorAll(".replyButton[track_id='" + e.target.getAttribute("track_id") + "']");
-            replyButtons.forEach(button => {
+            const replyButtons = document.querySelectorAll(".replyButton[track_id='" + trackId.toString() + "']") as NodeListOf<HTMLButtonElement>;
+            replyButtons.forEach((button) => {
                 button.innerText = "Reply";
             });
-            input.setAttribute("parent_id", e.target.id);
-            input.placeholder = "Reply to " + document.querySelector(".user-widget[comment_id='" + e.target.id + "']").getAttribute("username") + "...";
+            parentCommentId.value = commentId;
+            input.placeholder = "Reply to " + username + "...";
             input.focus();
             e.target.innerText = "Cancel";
         } else {
-            input.setAttribute("parent_id", "0");
+            parentCommentId.value = 0;
             input.placeholder = "New comment...";
             e.target.innerText = "Reply";
         }
@@ -454,7 +452,7 @@ export class TrackActions {
         return res.data;
     }
 
-    static async approveCollab(id, name = "track") {
+    static async approveCollab(id: number, name = "track") {
         const res = await Api.postAsync(Api.endpoints.tracks.actions.approveCollab, {
             id: id,
         });
@@ -470,7 +468,7 @@ export class TrackActions {
         }
     }
 
-    static async denyCollab(id, name = "track") {
+    static async denyCollab(id: number, name = "track") {
         const res = await Api.postAsync(Api.endpoints.tracks.actions.denyCollab, {
             id: id,
         });
@@ -486,14 +484,14 @@ export class TrackActions {
         }
     }
 
-    static async updateTrackFull(track) {
+    static async updateTrackFull(track: Partial<Track>) {
         const res = await Api.postAsync(Api.endpoints.tracks.actions.updateFull, {
             id: track.id,
             title: track.title,
             collaborators: track.collaborators,
             description: track.description,
             genre: track.genre,
-            release_date: track.releaseDate,
+            release_date: track.release_date,
             visibility: track.visibility,
             isrc: track.isrc,
             upc: track.upc,
@@ -507,12 +505,12 @@ export class TrackActions {
         return res.data;
     }
 
-    static getTrackEditModal(track) {
-        const confirmCallback2 = async (newTrack) => {
+    static getTrackEditModal(track: Track) {
+        const confirmCallback2 = async (newTrack: Track) => {
             Util.removeModal();
             await TrackActions.updateTrackFull(newTrack);
             Ui.notify("Track updated", "success");
-            window.router.reload();
+            reload();
         };
         const cancelCallback2 = () => {
             Util.removeModal();

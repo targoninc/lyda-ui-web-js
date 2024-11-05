@@ -5,20 +5,19 @@ import {Links} from "../Enums/Links.ts";
 import {Api} from "../Classes/Api.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
 import {
+    AnyElement,
+    AnyNode,
     create,
-    signal,
     HtmlPropertyValue,
     ifjs,
-    StringOrSignal,
-    TypeOrSignal,
+    signal,
     Signal,
-    AnyNode,
-    AnyElement
+    StringOrSignal,
+    TypeOrSignal
 } from "../../fjsc/f2.ts";
 import {FJSC} from "../../fjsc";
 import {InputType, SearchableSelectConfig} from "../../fjsc/Types.ts";
 import {Util} from "../Classes/Util.ts";
-import {CollaboratorType} from "../Models/DbModels/CollaboratorType.ts";
 import {navigate} from "../Routing/Router.ts";
 
 export class GenericTemplates {
@@ -674,10 +673,8 @@ export class GenericTemplates {
         const selectedState = signal(0);
         const userMap = new Map();
         const collabTypeOptions = signal(create("span").text("Loading collab types...").build());
-        let collabTypes: CollaboratorType[] = [];
         const collabType = signal("1");
         TrackActions.getCollabTypes().then(types => {
-            collabTypes = types;
             collabTypeOptions.value = FJSC.searchableSelect(<SearchableSelectConfig>{
                 options: signal(types),
                 value: collabType,
@@ -706,11 +703,12 @@ export class GenericTemplates {
                         create("p")
                             .text(text)
                             .build(),
-                        create("input")
-                            .classes("full")
-                            .id("addUserSearch")
-                            .value(currentValue ?? "")
-                            .oninput(async (e) => {
+                        FJSC.input({
+                            id: "addUserSearch",
+                            name: "addUserSearch",
+                            type: InputType.text,
+                            value: currentValue ?? "",
+                            onkeydown: async (e) => {
                                 const target = e.target as HTMLInputElement;
                                 const search = target.value;
                                 const res = await Api.getAsync(Api.endpoints.search, {
@@ -727,8 +725,8 @@ export class GenericTemplates {
                                         }
                                     }
                                 }
-                            })
-                            .build(),
+                            },
+                        }),
                         create("div")
                             .classes("flex-v")
                             .styles("max-height", "200px", "overflow", "auto", "flex-wrap", "nowrap")

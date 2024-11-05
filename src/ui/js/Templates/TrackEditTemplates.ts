@@ -488,8 +488,7 @@ export class TrackEditTemplates {
             icon: { icon: "person_add" },
             classes,
             onclick: () => {
-                Ui.getAddLinkedUserModal("Link a user", "Enter the username of the user you want to link", "", "Link", "Cancel", callback, () => {
-                }, "person_add");
+                Ui.getAddLinkedUserModal("Link a user", "Enter the username of the user you want to link", "", "Link", "Cancel", callback, () => {}, "person_add");
             },
         });
     }
