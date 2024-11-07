@@ -594,7 +594,7 @@ export class GenericTemplates {
 
     static tabSelector(tabs: any[], callback: Function, selectedTab = 0) {
         const selectedState = signal(selectedTab);
-        selectedState.onUpdate = (newSelected: any) => {
+        selectedState.onUpdate = (newSelected: number) => {
             callback(newSelected);
         };
         callback(selectedTab);

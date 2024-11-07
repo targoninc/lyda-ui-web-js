@@ -858,21 +858,15 @@ export class TrackTemplates {
             ).build();
     }
 
-    /**
-     *
-     * @param tracks {TrackCollaborator[]}
-     * @param user
-     * @returns {*}
-     */
-    static unapprovedTracks(tracks, user) {
-        const trackList = tracks.map(track => TrackTemplates.toBeApprovedTrack(track.collaboratorType, track.music, user));
+    static unapprovedTracks(tracks: TrackCollaborator[], user: User) {
+        const trackList = tracks.map((track: TrackCollaborator) => TrackTemplates.toBeApprovedTrack(track.collaboratorType, track.music, user));
         return create("div")
             .classes("flex-v")
             .children(...trackList)
             .build();
     }
 
-    static copyPrivateLinkButton(id, code) {
+    static copyPrivateLinkButton(id: number, code: string) {
         return GenericTemplates.action(Icons.COPY, "Copy private link", id, async () => {
             await Util.copyToClipboard(window.location.origin + "/track/" + id + "/" + code);
         }, [], ["secondary"]);

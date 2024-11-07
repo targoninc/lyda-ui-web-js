@@ -68,7 +68,7 @@ export class FormTemplates {
 
     static genre(parentState: Signal<any>) {
         const genres = signal<SelectOption[]>([]);
-        Api.getAsync(ApiRoutes.listGenres).then((res) => {
+        Api.getAsync(ApiRoutes.getGenres).then((res) => {
             if (res.code !== 200) {
                 Ui.notify("Failed to load genres", "error");
             }

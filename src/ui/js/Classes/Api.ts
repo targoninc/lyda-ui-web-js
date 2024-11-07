@@ -10,8 +10,8 @@ export class ApiRoutes {
     private static auth = ApiRoutes.base + "/auth";
     static isLoggedIn = ApiRoutes.auth + "/isLoggedIn";
     private static audit = ApiRoutes.base + "/audit";
-    static logs = ApiRoutes.audit + "/logs";
-    static actionLogs = ApiRoutes.audit + "/actionLogs";
+    static getLogs = ApiRoutes.audit + "/logs";
+    static getActionLogs = ApiRoutes.audit + "/actionLogs";
     private static user = ApiRoutes.base + "/user";
     static getUser = ApiRoutes.user + "/get";
     static userSettings = ApiRoutes.user + "/settings";
@@ -39,7 +39,12 @@ export class ApiRoutes {
     private static notifications = ApiRoutes.base + "/notifications";
     static getAllNotifications = ApiRoutes.notifications + "/get";
     static markAllNotificationsAsRead = ApiRoutes.notifications + "/actions/markAllAsRead";
-    static listGenres = ApiRoutes.base + "/genres/list";
+    static getGenres = ApiRoutes.base + "/genres/list";
+    private static tracks = ApiRoutes.base + "/tracks";
+    static getTrackById = ApiRoutes.tracks + "/byId";
+    static getTrackByUserId = ApiRoutes.tracks + "/byUserId";
+    static getTrackAudio = ApiRoutes.tracks + "/audio";
+    static getTrackCollabTypes = ApiRoutes.tracks + "/collabTypes";
 }
 
 export class Api {
@@ -47,10 +52,6 @@ export class Api {
         const endpoints = {
             base: Config.apiBaseUrl,
             tracks: {
-                byId: "byId",
-                byUserId: "byUserId",
-                audio: "audio",
-                collabTypes: "collabTypes",
                 unapprovedCollabs: "unapprovedCollabs",
                 actions: {
                     new: "new",

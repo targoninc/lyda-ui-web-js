@@ -1,5 +1,5 @@
 import {LydaCache} from "../Cache/LydaCache.ts";
-import {Api} from "../Classes/Api.ts";
+import {Api, ApiRoutes} from "../Classes/Api.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {StreamingUpdater} from "./StreamingUpdater.ts";
 import {QueueManager} from "./QueueManager.ts";
@@ -376,7 +376,7 @@ export class PlayManager {
         if (window.trackInfo && window.trackInfo[id] && !noCache) {
             return window.trackInfo[id];
         }
-        const res = await Api.getAsync(Api.endpoints.tracks.byId, { id });
+        const res = await Api.getAsync(ApiRoutes.getTrackById, { id });
         return PlayManager.cacheTrackData(res.data);
     }
 }

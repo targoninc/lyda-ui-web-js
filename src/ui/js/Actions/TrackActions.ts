@@ -196,7 +196,7 @@ export class TrackActions {
     }
 
     static async getCollabTypes() {
-        const res = await Api.getAsync(Api.endpoints.tracks.collabTypes);
+        const res = await Api.getAsync(ApiRoutes.getTrackCollabTypes);
         if (res.code !== 200) {
             Ui.notify("Error while trying to get collab types: " + res.data, "error");
             return [];

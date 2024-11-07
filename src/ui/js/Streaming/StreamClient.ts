@@ -1,4 +1,4 @@
-import {Api} from "../Classes/Api.ts";
+import {Api, ApiRoutes} from "../Classes/Api.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {PlayManager} from "./PlayManager.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
@@ -12,7 +12,7 @@ export class StreamClient {
 
     constructor(id: number) {
         this.id = id;
-        const src = `${Api.endpoints.tracks.audio}?id=${this.id}`;
+        const src = `${ApiRoutes.getTrackAudio}?id=${this.id}`;
         this.audio = new Audio();
         this.duration = this.audio.duration;
         this.audio.crossOrigin = "anonymous";

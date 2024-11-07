@@ -1,10 +1,12 @@
-import {Api} from "./Api.ts";
+import {Api, ApiRoutes} from "./Api.ts";
 import {Ui} from "./Ui.ts";
 import {UserTemplates} from "../Templates/UserTemplates.ts";
 import {GenericTemplates} from "../Templates/GenericTemplates.ts";
+import {User} from "../Models/DbModels/User.ts";
+import {AnyElement} from "../../fjsc/f2.ts";
 
 export class ProfilePage {
-    static async addTabSectionAsync(element, user, selfUser, isOwnProfile) {
+    static async addTabSectionAsync(element: AnyElement, user: User, selfUser: User, isOwnProfile: boolean) {
         const container = document.createElement("div");
         container.classList.add("flex-v");
         element.appendChild(container);
@@ -15,7 +17,7 @@ export class ProfilePage {
 
         const tabs = ["Tracks", "Albums", "Playlists", "Reposts"];
         const tabContents = [tracksContainer, albumsContainer, playlistsContainer, repostsContainer];
-        const tabSelector = GenericTemplates.tabSelector(tabs, (i) => {
+        const tabSelector = GenericTemplates.tabSelector(tabs, (i: number) => {
             tabContents.forEach((c, j) => {
                 c.style.display = i === j ? "block" : "none";
             });
@@ -27,8 +29,8 @@ export class ProfilePage {
         ProfilePage.addRepostsAsync(repostsContainer, user, selfUser, isOwnProfile).then();
     }
 
-    static async addTracksAsync(element, user, selfUser, isOwnProfile) {
-        const tracksRes = await Api.getAsync(Api.endpoints.tracks.byUserId, { id: user.id, name: user.username });
+    static async addTracksAsync(element: AnyElement, user: User, selfUser: User, isOwnProfile: boolean) {
+        const tracksRes = await Api.getAsync(ApiRoutes.getTrackByUserId, { id: user.id, name: user.username });
         if (tracksRes.code !== 200) {
             Ui.notify(tracksRes.data, "error");
             return;
@@ -39,7 +41,7 @@ export class ProfilePage {
         element.appendChild(trackCards);
     }
 
-    static async addAlbumsAsync(element, user, selfUser, isOwnProfile, isLoggedIn) {
+    static async addAlbumsAsync(element: AnyElement, user: User, selfUser: User, isOwnProfile: boolean) {
         const albumsRes = await Api.getAsync(Api.endpoints.albums.byUserId, {
             id: user.id, name: user.username
         });
@@ -48,12 +50,12 @@ export class ProfilePage {
             return;
         }
         const albums = albumsRes.data;
-        const albumCards = UserTemplates.albumCards(albums, selfUser, isOwnProfile, isLoggedIn);
+        const albumCards = UserTemplates.albumCards(albums, selfUser, isOwnProfile);
         element.innerHTML = "";
         element.appendChild(albumCards);
     }
 
-    static async addPlaylistsAsync(element, user, selfUser, isOwnProfile, isLoggedIn) {
+    static async addPlaylistsAsync(element: AnyElement, user: User, selfUser: User, isOwnProfile: boolean) {
         const playlistsRes = await Api.getAsync(Api.endpoints.playlists.byUserId, {
             id: user.id, name: user.username
         });
@@ -62,12 +64,12 @@ export class ProfilePage {
             return;
         }
         const playlists = playlistsRes.data;
-        const playlistCards = UserTemplates.playlistCards(playlists, selfUser, isOwnProfile, isLoggedIn);
+        const playlistCards = UserTemplates.playlistCards(playlists, selfUser, isOwnProfile);
         element.innerHTML = "";
         element.appendChild(playlistCards);
     }
 
-    static async addRepostsAsync(element, user, selfUser, isOwnProfile) {
+    static async addRepostsAsync(element: AnyElement, user: User, selfUser: User, isOwnProfile: boolean) {
         const repostsRes = await Api.getAsync(Api.endpoints.reposts.byUserId, {
             id: user.id, name: user.username
         });

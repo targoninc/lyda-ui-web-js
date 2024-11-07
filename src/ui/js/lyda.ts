@@ -195,7 +195,7 @@ export class Lyda {
                 Ui.notify("You do not have permission to view action logs", "error");
                 return;
             }
-            const actionLogs = await Api.getAsync(Api.endpoints.audit.actionLogs);
+            const actionLogs = await Api.getAsync(ApiRoutes.getActionLogs);
             element.appendChild(await LogTemplates.actionLogs(user, actionLogs.data));
             break;
         case "unapprovedTracks":

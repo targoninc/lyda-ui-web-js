@@ -1,20 +1,17 @@
-import {Api} from "./Api.ts";
+import {Api, ApiRoutes} from "./Api.ts";
 import {Util} from "./Util.ts";
 import {Ui} from "./Ui.ts";
+import {Signal} from "../../fjsc/f2.ts";
 
 export class LydaApi {
-    /**
-     *
-     * @param filterState {FjsObservable}
-     * @param successCallback
-     */
-    static getLogs(filterState, successCallback) {
+    static getLogs(filterState: Signal<any>, successCallback: Function) {
         const errorText = "Failed to get logs";
-        Api.getAsync(Api.endpoints.audit.logs, {type: filterState.value}).then(logs => {
+        Api.getAsync(ApiRoutes.getLogs, {type: filterState.value}).then(logs => {
             LydaApi.handleResponse(logs, errorText, successCallback);
         });
+
         filterState.onUpdate = async (newValue) => {
-            Api.getAsync(Api.endpoints.audit.logs, {type: newValue}).then(logs => {
+            Api.getAsync(ApiRoutes.getLogs, {type: newValue}).then(logs => {
                 LydaApi.handleResponse(logs, errorText, successCallback);
             });
         };
