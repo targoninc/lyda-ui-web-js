@@ -42,7 +42,7 @@ export class FormTemplates {
             ).build();
     }
 
-    static checkBoxField(name: HtmlPropertyValue, text: HtmlPropertyValue, checked: TypeOrSignal<boolean> = false, required = false, onchange = (v) => {}) {
+    static checkBoxField(name: HtmlPropertyValue, text: HtmlPropertyValue, checked: TypeOrSignal<boolean> = false, required = false, onchange = (v: boolean) => {}) {
         return create("div")
             .classes("flex", "space-outwards")
             .children(GenericTemplates.checkbox(name, checked, text, required, onchange))

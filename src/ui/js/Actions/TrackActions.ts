@@ -377,21 +377,21 @@ export class TrackActions {
         }, Icons.WARNING);
     }
 
-    static reorderTrack(type, listId, trackId, positionsState, newPosition) {
+    static async reorderTrack(type, listId, trackId, positionsState, newPosition) {
         let success;
         if (type === "album") {
             success = AlbumActions.moveTrackInAlbum(listId, trackId, newPosition);
         } else {
             success = PlaylistActions.moveTrackInPlaylist(listId, trackId, newPosition);
         }
-        if (success) {
+        if (await success) {
             let map = positionsState.value;
-            const position = map.findIndex(id => id === trackId);
+            const position = map.findIndex((id: number) => id === trackId);
             this.moveTrackToPosition(map, position, newPosition, positionsState);
         }
     }
 
-    static async removeCollaboratorFromTrack(trackId, userId) {
+    static async removeCollaboratorFromTrack(trackId: number, userId: number) {
         const res = await Api.postAsync(Api.endpoints.tracks.actions.removeCollaborator, {
             id: trackId,
             userId: userId,

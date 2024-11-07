@@ -363,8 +363,12 @@ export class LandingPageTemplates {
                         FJSC.button({
                             text: "Next",
                             classes: ["positive"],
-                            disabled: computedSignal(user, (u: AuthData) => !u.password || u.password.trim().length === 0 || u.password !== u.password2 || u.password2.trim().length === 0),
+                            disabled: computedSignal(user, (u: AuthData) => !u.password || u.password.trim().length === 0 || u.password !== u.password2 || u.password2.trim().length === 0 || !token),
                             onclick: async () => {
+                                if (!token) {
+                                    Ui.notify("Token is missing", "error");
+                                    return;
+                                }
                                 const res = await AuthApi.resetPassword(token, user.value.password, user.value.password2);
                                 if (res.code === 200) {
                                     Ui.notify("Password updated, you can now log in", "success");
