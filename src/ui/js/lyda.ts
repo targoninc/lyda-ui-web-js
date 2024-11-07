@@ -26,7 +26,8 @@ import {Ui} from "./Classes/Ui.ts";
 import {navigate} from "./Routing/Router.ts";
 import {Permission} from "./Models/DbModels/Permission.ts";
 import {Follow} from "./Models/DbModels/Follow.ts";
-import {create, signal} from "../fjsc/f2.ts";
+import {AnyElement, create, signal} from "../fjsc/f2.ts";
+import {User} from "./Models/DbModels/User.ts";
 
 export class Lyda {
     static async getEndpointData(config, endpoint, params = "", refreshSessionRetry = false) {
@@ -234,8 +235,13 @@ export class Lyda {
         }
     }
 
-    static async loadFeed(type, element, user) {
-        const endpoint = Api.endpoints.tracks.feeds[type];
+    static async loadFeed(type: string, element: AnyElement, user: User) {
+        const feedMap = {
+            following: ApiRoutes.followingFeed,
+            explore: ApiRoutes.exploreFeed,
+            autoQueue: ApiRoutes.autoQueueFeed,
+        };
+        const endpoint = feedMap[type as keyof typeof feedMap];
         const pageState = signal(1);
         const tracksState = signal([]);
         const filterState = signal("all");

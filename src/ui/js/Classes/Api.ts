@@ -7,6 +7,7 @@ export interface ApiResponse<T> {
 
 export class ApiRoutes {
     static base = Config.apiBaseUrl;
+    // region User
     private static auth = ApiRoutes.base + "/auth";
     static isLoggedIn = ApiRoutes.auth + "/isLoggedIn";
     private static audit = ApiRoutes.base + "/audit";
@@ -33,12 +34,21 @@ export class ApiRoutes {
     static requestPasswordReset = ApiRoutes.userActions + "/request-password-reset";
     static resetPassword = ApiRoutes.userActions + "/reset-password";
     static updateUser = ApiRoutes.userActions + "/update";
+    // endregion
+
+    // region Media
     private static media = ApiRoutes.base + "/media";
     static uploadMedia = ApiRoutes.media + "/upload";
     static deleteMedia = ApiRoutes.media + "/delete";
+    // endregion
+
+    // region Notifications
     private static notifications = ApiRoutes.base + "/notifications";
     static getAllNotifications = ApiRoutes.notifications + "/get";
     static markAllNotificationsAsRead = ApiRoutes.notifications + "/actions/markAllAsRead";
+    // endregion
+
+    // region Tracks
     private static tracks = ApiRoutes.base + "/tracks";
     static getTrackById = ApiRoutes.tracks + "/byId";
     static getTrackByUserId = ApiRoutes.tracks + "/byUserId";
@@ -46,7 +56,27 @@ export class ApiRoutes {
     static getTrackCollabTypes = ApiRoutes.tracks + "/collabTypes";
     static getUnapprovedCollabs = ApiRoutes.tracks + "/unapprovedCollabs";
     static createTrack = ApiRoutes.tracks + "/create";
-    static likeTrack = ApiRoutes.tracks + "/actions/like";
+
+    private static tracksActions = ApiRoutes.tracks + "/actions";
+    static likeTrack = ApiRoutes.tracksActions + "/like";
+    static unlikeTrack = ApiRoutes.tracksActions + "/unlike";
+    static repostTrack = ApiRoutes.tracksActions + "/repost";
+    static unrepostTrack = ApiRoutes.tracksActions + "/unrepost";
+    static regenerateSecret = ApiRoutes.tracksActions + "/regenerateSecret";
+    static deleteTrack = ApiRoutes.tracksActions + "/delete";
+    static updateTrack = ApiRoutes.tracksActions + "/update";
+    static updateTrackFull = ApiRoutes.tracksActions + "/updateFull";
+    static saveTrackPlay = ApiRoutes.tracksActions + "/savePlay";
+    static removeCollaborator = ApiRoutes.tracksActions + "/removeCollaborator";
+    static addCollaborator = ApiRoutes.tracksActions + "/addCollaborator";
+    static approveCollab = ApiRoutes.tracksActions + "/approveCollab";
+    static denyCollab = ApiRoutes.tracksActions + "/denyCollab";
+
+    private static feeds = ApiRoutes.tracks + "/feeds";
+    static followingFeed = ApiRoutes.feeds + "/following";
+    static exploreFeed = ApiRoutes.feeds + "/explore";
+    static autoQueueFeed = ApiRoutes.feeds + "/autoQueue";
+    // endregion
 }
 
 export class Api {
@@ -54,22 +84,6 @@ export class Api {
         const endpoints = {
             base: Config.apiBaseUrl,
             tracks: {
-                actions: {
-                    like: "like",
-                    unlike: "unlike",
-                    repost: "repost",
-                    unrepost: "unrepost",
-                    uploadCover: "changeCover",
-                    regenerateSecret: "regenerateSecret",
-                    delete: "delete",
-                    update: "update",
-                    updateFull: "updateFull",
-                    savePlay: "savePlay",
-                    removeCollaborator: "removeCollaborator",
-                    addCollaborator: "addCollaborator",
-                    approveCollab: "approveCollab",
-                    denyCollab: "denyCollab",
-                },
                 feeds: {
                     following: "following",
                     explore: "explore",

@@ -14,10 +14,12 @@ import {navigate, reload} from "../Routing/Router.ts";
 import {Signal} from "../../fjsc/f2.ts";
 import {Comment} from "../Models/DbModels/Comment.ts";
 import {Track} from "../Models/DbModels/Track.ts";
+import {MediaFileType} from "../Enums/MediaFileType.ts";
+import {MediaUploader} from "../Classes/MediaUploader.ts";
 
 export class TrackActions {
     static async savePlay(id: number) {
-        return await Api.postAsync(Api.endpoints.tracks.actions.savePlay, { id });
+        return await Api.postAsync(ApiRoutes.saveTrackPlay, { id });
     }
 
     static savePlayAfterTime(id: number, seconds: number) {
@@ -42,7 +44,7 @@ export class TrackActions {
         if (!confirm) {
             return;
         }
-        const res = await Api.postAsync(Api.endpoints.tracks.actions.delete, { id });
+        const res = await Api.postAsync(ApiRoutes.deleteTrack, { id });
         if (res.code === 200) {
             PlayManager.removeStreamClient(id);
             QueueManager.removeFromManualQueue(id);
@@ -146,19 +148,19 @@ export class TrackActions {
     }
 
     static async likeTrack(id: number) {
-        return await Api.postAsync(Api.endpoints.tracks.actions.like, { id });
+        return await Api.postAsync(ApiRoutes.likeTrack, { id });
     }
 
     static async unlikeTrack(id: number) {
-        return await Api.postAsync(Api.endpoints.tracks.actions.unlike, { id });
+        return await Api.postAsync(ApiRoutes.unlikeTrack, { id });
     }
 
     static async repostTrack(id: number) {
-        return await Api.postAsync(Api.endpoints.tracks.actions.repost, { id });
+        return await Api.postAsync(ApiRoutes.repostTrack, { id });
     }
 
     static async unrepostTrack(id: number) {
-        return await Api.postAsync(Api.endpoints.tracks.actions.unrepost, { id });
+        return await Api.postAsync(ApiRoutes.unrepostTrack, { id });
     }
 
     static async runFollowFunctionFromElement(e: any, userId: number, following: Signal<boolean>) {
@@ -271,15 +273,9 @@ export class TrackActions {
                 loading.value = false;
                 return;
             }
-            let formData = new FormData();
-            formData.append("cover", file);
-            formData.append("id", id.toString());
-            let response = await fetch(Api.endpoints.tracks.actions.uploadCover, {
-                method: "POST",
-                body: formData,
-                credentials: "include"
-            });
-            if (response.status === 200) {
+
+            const response = await MediaUploader.upload(MediaFileType.trackCover, id, file);
+            if (response.code === 200) {
                 loading.value = false;
                 Ui.notify("Cover updated", "success");
                 await Util.updateImage(URL.createObjectURL(file), oldSrc);
@@ -392,7 +388,7 @@ export class TrackActions {
     }
 
     static async removeCollaboratorFromTrack(trackId: number, userId: number) {
-        const res = await Api.postAsync(Api.endpoints.tracks.actions.removeCollaborator, {
+        const res = await Api.postAsync(ApiRoutes.removeCollaborator, {
             id: trackId,
             userId: userId,
         });
@@ -407,7 +403,7 @@ export class TrackActions {
     }
 
     static async addCollaboratorToTrack(trackId: number, userId: number, collabType: number) {
-        const res = await Api.postAsync(Api.endpoints.tracks.actions.addCollaborator, {
+        const res = await Api.postAsync(ApiRoutes.addCollaborator, {
             id: trackId,
             userId: userId,
             collabType: collabType,
@@ -423,7 +419,7 @@ export class TrackActions {
 
     static async updateTrackProperty(trackId: number, property: string, initialValue: string, callback: Function|null = null) {
         Ui.getTextAreaInputModal("Edit " + property, "Enter new track " + property, initialValue, "Save", "Cancel", async (description) => {
-            const res = await Api.postAsync(Api.endpoints.tracks.actions.update, {
+            const res = await Api.postAsync(ApiRoutes.updateTrack, {
                 id: trackId,
                 field: property,
                 value: description
@@ -453,7 +449,7 @@ export class TrackActions {
     }
 
     static async approveCollab(id: number, name = "track") {
-        const res = await Api.postAsync(Api.endpoints.tracks.actions.approveCollab, {
+        const res = await Api.postAsync(ApiRoutes.approveCollab, {
             id: id,
         });
         if (res.code !== 200) {
@@ -469,7 +465,7 @@ export class TrackActions {
     }
 
     static async denyCollab(id: number, name = "track") {
-        const res = await Api.postAsync(Api.endpoints.tracks.actions.denyCollab, {
+        const res = await Api.postAsync(ApiRoutes.denyCollab, {
             id: id,
         });
         if (res.code !== 200) {
@@ -485,7 +481,7 @@ export class TrackActions {
     }
 
     static async updateTrackFull(track: Partial<Track>) {
-        const res = await Api.postAsync(Api.endpoints.tracks.actions.updateFull, {
+        const res = await Api.postAsync(ApiRoutes.updateTrackFull, {
             id: track.id,
             title: track.title,
             collaborators: track.collaborators,
