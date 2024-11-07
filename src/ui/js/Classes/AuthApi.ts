@@ -1,12 +1,11 @@
-import {Api, ApiResponse} from "./Api.ts";
-import {Util} from "./Util.ts";
+import {Api, ApiResponse, ApiRoutes} from "./Api.ts";
 import {Ui} from "./Ui.ts";
 
 export class AuthApi {
     static userExists(email: string, successCallback: Function = () => {
     }, errorCallback: Function = () => {
     }) {
-        Api.getAsync(Api.endpoints.user.userExists, {email: encodeURIComponent(email)}).then((response) => {
+        Api.getAsync(ApiRoutes.userExists, {email: encodeURIComponent(email)}).then((response) => {
             if (response.code === 200) {
                 successCallback(response.data);
             } else {
@@ -16,7 +15,7 @@ export class AuthApi {
     }
 
     static login(email: string, password: string, mfaCode: string, successCallback: Function, errorCallback: Function = () => {}) {
-        Api.postAsync(Api.endpoints.user.actions.login, {
+        Api.postAsync(ApiRoutes.login, {
             email,
             password,
             mfaCode
@@ -31,7 +30,7 @@ export class AuthApi {
     }
 
     static user(id: number, successCallback: Function) {
-        Api.getAsync(Api.endpoints.user.get, {id}).then((response) => {
+        Api.getAsync(ApiRoutes.getUser, {id}).then((response) => {
             if (response.code === 200) {
                 successCallback(response.data);
             }
@@ -39,7 +38,7 @@ export class AuthApi {
     }
 
     static register(username: string, displayname: string, email: string, password: string, successCallback: Function, errorCallback: Function = () => {}) {
-        Api.postAsync(Api.endpoints.user.actions.register, {
+        Api.postAsync(ApiRoutes.register, {
             username,
             displayname,
             email,
@@ -55,7 +54,7 @@ export class AuthApi {
     }
 
     static mfaRequest(email: string, password: string, successCallback: Function, errorCallback: Function = () => {}) {
-        Api.postAsync(Api.endpoints.user.actions.mfaRequest, {
+        Api.postAsync(ApiRoutes.mfaRequest, {
             email,
             password
         }).then((response) => {
@@ -69,13 +68,13 @@ export class AuthApi {
     }
 
     static async requestPasswordReset(email: string): Promise<ApiResponse<any>> {
-        return Api.postAsync(Api.endpoints.user.actions.requestPasswordReset, {
+        return Api.postAsync(ApiRoutes.requestPasswordReset, {
             email
         });
     }
 
     static async resetPassword(token: string, newPassword: string, newPasswordConfirm: string): Promise<ApiResponse<any>> {
-        return Api.postAsync(Api.endpoints.user.actions.resetPassword, {
+        return Api.postAsync(ApiRoutes.resetPassword, {
             token,
             newPassword,
             newPasswordConfirm

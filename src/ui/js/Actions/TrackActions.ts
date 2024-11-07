@@ -1,4 +1,4 @@
-import {Api} from "../Classes/Api.ts";
+import {Api, ApiRoutes} from "../Classes/Api.ts";
 import {Util} from "../Classes/Util.ts";
 import {Icons} from "../Enums/Icons.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
@@ -27,7 +27,7 @@ export class TrackActions {
     }
 
     static async unfollowUser(userId: number) {
-        const res = await Api.postAsync(Api.endpoints.user.actions.unfollow, {
+        const res = await Api.postAsync(ApiRoutes.unfollowUser, {
             id: userId
         });
 
@@ -184,7 +184,7 @@ export class TrackActions {
     }
 
     static async followUser(userId: number) {
-        const res = await Api.postAsync(Api.endpoints.user.actions.follow, {
+        const res = await Api.postAsync(ApiRoutes.followUser, {
             id: userId,
         });
 

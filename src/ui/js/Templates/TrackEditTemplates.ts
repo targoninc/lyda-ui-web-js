@@ -17,7 +17,8 @@ import {
     ifjs,
     signal,
     AnyNode,
-    TypeOrSignal
+    TypeOrSignal,
+    signalMap
 } from "../../fjsc/f2.ts";
 import {Track} from "../Models/DbModels/Track.ts";
 import {FJSC} from "../../fjsc";
@@ -25,6 +26,7 @@ import {User} from "../Models/DbModels/User.ts";
 import {InputType} from "../../fjsc/Types.ts";
 import {TrackCollaborator} from "../Models/DbModels/TrackCollaborator.ts";
 import {UploadableTrack} from "../Models/UploadableTrack.ts";
+import {UploadInfo} from "../Models/UploadInfo.ts";
 
 export class TrackEditTemplates {
     static getStateWithParentUpdate(key, value, parentState) {
@@ -57,6 +59,7 @@ export class TrackEditTemplates {
         });
         const errorSections = signal([]);
         const errorFields = signal([]);
+        const uploadInfo = signal<UploadInfo[]>([]);
 
         return create("div")
             .classes("card")
@@ -80,13 +83,13 @@ export class TrackEditTemplates {
                             .build(),
                         TrackEditTemplates.upDownButtons(state, true),
                         TrackEditTemplates.infoSection(state, errorSections, errorFields),
-                        TrackEditTemplates.uploadButton(state, errorSections, errorFields),
-                        TrackEditTemplates.uploadInfo(),
+                        TrackEditTemplates.uploadButton(state, errorSections, errorFields, uploadInfo),
+                        TrackEditTemplates.uploadInfo(uploadInfo),
                     ).build(),
             ).build();
     }
 
-    static openEditPageButton(track) {
+    static openEditPageButton(track: Track) {
         return GenericTemplates.action(Icons.PEN, "Edit", "editTrack", async () => {
             TrackActions.getTrackEditModal(track);
         }, [], ["secondary"]);
@@ -161,32 +164,28 @@ export class TrackEditTemplates {
             .build();
     }
 
-    static uploadInfo() {
+    static uploadInfo(uploadInfo: Signal<UploadInfo[]>) {
         return create("div")
             .id("upload-info")
-            .classes("flex-v")
             .children(
-                TrackEditTemplates.uploadInfoItem("info", "0%"),
-                TrackEditTemplates.uploadInfoItem("cover", "0%"),
-                TrackEditTemplates.uploadInfoItem("audio", "0%"),
+                signalMap(uploadInfo, create("div").classes("flex-v"), (info: UploadInfo) => TrackEditTemplates.uploadInfoItem(info)),
             ).build();
     }
 
-    static uploadInfoItem(type, value) {
+    static uploadInfoItem(info: UploadInfo) {
         return create("div")
             .classes("flex-v")
             .children(
                 create("span")
-                    .id("upload-info-" + type)
-                    .classes("upload-info-item", "hidden")
-                    .text(value)
+                    .id("upload-info-" + info.type)
+                    .classes("upload-info-item", ...(info.classes ?? []))
+                    .text(info.value)
                     .build()
-            )
-            .build();
+            ).build();
     }
 
-    static uploadButton(state, errorSections, errorFields) {
-        const disabled = computedSignal(state, s => {
+    static uploadButton(state: Signal<UploadableTrack>, errorSections: Signal<string[]>, errorFields: Signal<string[]>, uploadInfo: Signal<UploadInfo[]>) {
+        const disabled = computedSignal<boolean>(state, (s: UploadableTrack) => {
             const errors = [];
             const requiredProps = [
                 { section: "audio", field: "audioFile" },
@@ -203,29 +202,22 @@ export class TrackEditTemplates {
 
             return errors.length > 0;
         });
-        const buttonClass = computedSignal(disabled, d => d ? "disabled" : "positive");
+        const buttonClass = computedSignal<string>(disabled, (d: boolean) => d ? "disabled" : "positive");
 
-        return create("button")
-            .classes(buttonClass)
-            .disabled(disabled)
-            .onclick(e => {
+        return FJSC.button({
+            text: "Upload",
+            disabled: disabled,
+            classes: [buttonClass, "positive"],
+            onclick: (e) => {
                 Util.showButtonLoader(e);
                 Util.closeAllDetails();
-                new AudioUpload(e, state);
-            })
-            .children(
-                create("span")
-                    .classes("nopointer")
-                    .text("Upload")
-                    .build(),
-                create("div")
-                    .classes("loader", "bright", "hidden")
-                    .build()
-            )
-            .build();
+                new AudioUpload(e, state, uploadInfo);
+            },
+            icon: { icon: "upload" },
+        });
     }
 
-    static filesSection(isNewTrack = false, state, errorSections, errorFields) {
+    static filesSection(isNewTrack = false, state: Signal<UploadableTrack>, errorSections: Signal<string[]>, errorFields: Signal<string[]>) {
         return create("div")
             .classes("flex-v")
             .children(
@@ -385,31 +377,40 @@ export class TrackEditTemplates {
             .build();
     }
 
-    static audioFile(canOverwriteTitle = false, parentState: Signal<any>) {
-        return FormTemplates.fileField("Audio File*", "Choose file", "audio-file", "audio/*", true, (fileName: string) => {
+    static audioFile(canOverwriteTitle = false, parentState: Signal<UploadableTrack>) {
+        return FormTemplates.fileField("Audio File*", "Choose file", "audio-file", "audio/*", true, async (fileName: string, files) => {
             if (canOverwriteTitle) {
                 if (fileName) {
-                    const titleInput = document.querySelector("input#title");
-                    if (titleInput) {
-                        const safeName = fileName.replace(/\.[^/.]+$/, "");
-                        titleInput.value = safeName;
-                        if (parentState) {
-                            parentState.value = {...parentState.value, title: titleInput.value, audioFile: safeName};
-                        }
+                    const safeName = fileName.replace(/\.[^/.]+$/, "");
+                    if (parentState) {
+                        parentState.value = {...parentState.value, title: safeName, audioFileName: safeName};
                     }
                 }
             }
+            parentState.value = {
+                ...parentState.value,
+                audioFiles: files
+            };
         });
     }
 
-    static coverFile(parentState: Signal<any>) {
-        return FormTemplates.fileField("Cover File", "Choose file (.jpg,.jpeg,.png,.gif)", "cover-file", "jpg,jpeg,png,gif", false, (fileName: string) => {
+    static coverFile(parentState: Signal<UploadableTrack>) {
+        return FormTemplates.fileField("Cover File", "Choose file (.jpg,.jpeg,.png,.gif)", "cover-file", "jpg,jpeg,png,gif", false, async (fileName: string, files) => {
             if (fileName) {
                 if (parentState) {
                     const safeName = fileName.replace(/\.[^/.]+$/, "");
-                    parentState.value = {...parentState.value, coverFile: safeName};
+                    parentState.value = {...parentState.value, coverArtFileName: safeName};
                 }
             }
+            let blob = null;
+            if (files && files[0]) {
+                const buffer = await files[0].arrayBuffer();
+                blob = new Blob([buffer], { type: files[0].type });
+            }
+            parentState.value = {
+                ...parentState.value,
+                coverArtFiles: blob
+            };
         });
     }
 
@@ -424,13 +425,6 @@ export class TrackEditTemplates {
         return create("span")
             .text("This track will be monetized through streaming subscriptions and available for buying.")
             .build();
-    }
-
-    static description(value = "", parentState = null) {
-        const state = this.getStateWithParentUpdate("description", value, parentState);
-        return FormTemplates.textAreaField("Description", "description", "Description", state, false, 5, v => {
-            state.value = v;
-        });
     }
 
     static upc(value = "", parentState = null) {

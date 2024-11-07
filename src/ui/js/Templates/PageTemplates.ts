@@ -1,8 +1,8 @@
-import {create, signal} from "https://fjs.targoninc.com/f.js";
+import {create, signal} from "../../fjsc/f2.ts";
 import {AuthActions} from "../Actions/AuthActions.ts";
 import {LandingPageTemplates} from "./LandingPageTemplates.ts";
 import {UserTemplates} from "./UserTemplates.ts";
-import {Api} from "../Classes/Api.ts";
+import {Api, ApiRoutes} from "../Classes/Api.ts";
 import {Util} from "../Classes/Util.ts";
 
 export class PageTemplates {
@@ -193,7 +193,7 @@ export class PageTemplates {
 
     static notFoundPage() {
         const randomUserWidget = signal(create("span").text("loading...").build());
-        Api.getAsync(Api.endpoints.user.random).then(async data => {
+        Api.getAsync(ApiRoutes.randomUser).then(async data => {
             if (data.code !== 200) {
                 randomUserWidget.value = create("span").text("Failed to load random user").build();
                 return;

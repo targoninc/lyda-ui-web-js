@@ -1,11 +1,11 @@
 import {Chart, registerables} from "https://cdn.jsdelivr.net/npm/chart.js@4.3.0/+esm";
 import {BoxPlotChart} from "https://cdn.jsdelivr.net/npm/@sgratzl/chartjs-chart-boxplot@4.2.7/+esm";
-import {create, signal} from "https://fjs.targoninc.com/f.js";
+import {create, signal} from "../../fjsc/f2.ts";
 import {Colors} from "../Classes/Colors.ts";
 import {ChartOptions} from "../Classes/ChartOptions.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {Icons} from "../Enums/Icons.js";
-import {Api} from "../Classes/Api.ts";
+import {Api, ApiRoutes} from "../Classes/Api.ts";
 import {Num} from "../Classes/Helpers/Num.ts";
 import {Permissions} from "../Enums/Permissions.ts";
 import {FormTemplates} from "./FormTemplates.ts";
@@ -209,7 +209,7 @@ export class StatisticTemplates {
 
             actions.push(GenericTemplates.action(Icons.PAYPAL, "Set PayPal mail", "setPaypalMail", async () => {
                 await Ui.getTextInputModal("Set PayPal mail", "The account you will receive payments with", "", "Save", "Cancel", async (address) => {
-                    const res = await Api.postAsync(Api.endpoints.user.set.paypalMail, {address});
+                    const res = await Api.postAsync(ApiRoutes.updateUser, {address});
                     if (res.code !== 200) {
                         Ui.notify(res.data, "error");
                         return;
@@ -221,7 +221,10 @@ export class StatisticTemplates {
             }, [], [invertVisibilityClass, "secondary"]));
             actions.push(GenericTemplates.action(Icons.PAYPAL, "Remove PayPal mail", "removePaypalMail", async () => {
                 await Ui.getConfirmationModal("Remove PayPal mail", "Are you sure you want to remove your paypal mail? You'll have to add it again manually.", "Yes", "No", async () => {
-                    const res = await Api.postAsync(Api.endpoints.user.remove.paypalMail);
+                    const res = await Api.postAsync(ApiRoutes.updateUserSetting, {
+                        setting: "paypalMail",
+                        value: ""
+                    });
                     if (res.code !== 200) {
                         Ui.notify(res.data, "error");
                         return;

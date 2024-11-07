@@ -1,5 +1,5 @@
 import {GenericTemplates} from "./GenericTemplates.ts";
-import {Api} from "../Classes/Api";
+import {Api, ApiRoutes} from "../Classes/Api";
 import {Ui} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
 import {
@@ -14,7 +14,7 @@ import {
 import {InputType, SearchableSelectConfig, SelectOption} from "../../fjsc/Types.ts";
 
 export class FormTemplates {
-    static fileField(title: string, text: string, name: string, accept: string, required = false, onchange = (v: string) => {}) {
+    static fileField(title: string, text: string, name: string, accept: string, required = false, onchange = (v: string, files: FileList | null) => {}) {
         return create("div")
             .classes("flex-v", "small-gap")
             .children(
@@ -49,26 +49,6 @@ export class FormTemplates {
             .build();
     }
 
-    static textAreaField(title: HtmlPropertyValue, name: HtmlPropertyValue, placeholder: HtmlPropertyValue, value: StringOrSignal = "", required = false, rows = 3, onchange = (v: string) => {}) {
-        return create("div")
-            .classes("flex-v", "small-gap")
-            .children(
-                create("label")
-                    .text(title)
-                    .build(),
-                create("textarea")
-                    .name(name)
-                    .id(name)
-                    .attributes("rows", rows.toString())
-                    .placeholder(placeholder)
-                    .value(value)
-                    .required(required)
-                    .onchange((e) => onchange(e.target!.value))
-                    .styles("flex-grow", "1")
-                    .build(),
-            ).build();
-    }
-
     static textField(title: string, name: string, placeholder: string, type = "text", value: StringOrSignal = "", required = false, onchange: Function = (val: string) => {
     }, autofocus = false, onkeydown: Function = () => {
     }, classes: StringOrSignal[] = []) {
@@ -88,7 +68,7 @@ export class FormTemplates {
 
     static genre(parentState: Signal<any>) {
         const genres = signal<SelectOption[]>([]);
-        Api.getAsync(Api.endpoints.genres.list).then((res) => {
+        Api.getAsync(ApiRoutes.listGenres).then((res) => {
             if (res.code !== 200) {
                 Ui.notify("Failed to load genres", "error");
             }

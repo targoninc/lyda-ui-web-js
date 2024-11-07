@@ -1,9 +1,8 @@
 import {Ui} from "./Ui.ts";
-import {UrlHandler} from "./UrlHandler.ts";
 import {Images} from "../Enums/Images.ts";
 import {Config} from "./Config.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
-import {Api} from "./Api.ts";
+import {Api, ApiRoutes} from "./Api.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {Icons} from "../Enums/Icons.js";
 import {AnyElement} from "../../fjsc/f2.ts";
@@ -45,7 +44,7 @@ export class Util {
         });
     }
 
-    static toHexString(id) {
+    static toHexString(id: number|string) {
         if (id === null || id === undefined) {
             return "";
         }
@@ -56,7 +55,7 @@ export class Util {
         return id.toString(16); // This accepts a parameter, radix, which is an integer between 2 and 36 that represents the base of the number in the string.
     }
 
-    static initializeDraggable(draggable) {
+    static initializeDraggable(draggable: HTMLElement) {
         window.dragging = false;
         let thisIsDragged = false;
         let offset = { x: 0, y: 0 };
@@ -250,7 +249,7 @@ export class Util {
                     return Util.mapNullToEmptyString(userData);
                 }
             }
-            const res = await Api.getAsync(Api.endpoints.user.get, { id: nullIfEmpty(id) });
+            const res = await Api.getAsync(ApiRoutes.getUser, { id: nullIfEmpty(id) });
             if (res.code === 401) {
                 return null;
             }
@@ -269,8 +268,8 @@ export class Util {
         return array.some((e) => e[property] === user.id);
     }
 
-    static async getUserByNameAsync(name) {
-        const res = await Api.getAsync(Api.endpoints.user.get, { name: nullIfEmpty(name) });
+    static async getUserByNameAsync(name: string) {
+        const res = await Api.getAsync(ApiRoutes.getUser, { name: nullIfEmpty(name) });
         if (res.code === 401) {
             return null;
         }
@@ -323,7 +322,7 @@ export class Util {
     static async getUser() {
         const cacheKey = "user";
         let userData;
-        const res = await Api.getAsync(Api.endpoints.user.get);
+        const res = await Api.getAsync(ApiRoutes.getUser);
         if (res.code === 401) {
             return null;
         }

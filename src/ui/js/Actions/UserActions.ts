@@ -1,14 +1,16 @@
-import {Api} from "../Classes/Api.ts";
+import {Api, ApiRoutes} from "../Classes/Api.ts";
 import {getUserSettingValue, updateUserSetting, Util} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {Icons} from "../Enums/Icons.js";
 import {NavTemplates} from "../Templates/NavTemplates.ts";
-import {Themes} from "../Enums/Themes.ts";
+import {Theme} from "../Enums/Theme.ts";
 import {UserSettings} from "../Enums/UserSettings.ts";
-import {navigate} from "../Routing/Router.ts";
-import {StringOrSignal} from "../../fjsc/f2.ts";
+import {MediaFileType} from "../Enums/MediaFileType.ts";
+import {MediaUploader} from "../Classes/MediaUploader.ts";
+import {User} from "../Models/DbModels/User.ts";
+import {Signal} from "../../fjsc/f2.ts";
 
 export class UserActions {
     static updateAvatar(newSrc) {
@@ -46,26 +48,29 @@ export class UserActions {
         return response.status === 200;
     }
 
-    static async replaceAvatar(e: Event) {
-        if (e.target.getAttribute("isOwnProfile") !== "true") {
+    static async replaceAvatar(e: Event, isOwnProfile: boolean, user: User, loading: Signal<boolean>) {
+        if (!isOwnProfile) {
             return;
         }
         let fileInput = document.createElement("input");
         fileInput.type = "file";
         fileInput.accept = "image/*";
         fileInput.onchange = async (e) => {
-            const loader = document.querySelector("#avatar-loader");
-            loader.classList.remove("hidden");
-            let file = e.target.files[0];
+            loading.value = true;
+            const file = e.target!.files[0];
+            /*
             let formData = new FormData();
-            formData.append("avatar", file);
-            let response = await fetch(Api.endpoints.user.actions.avatar.upload, {
+            formData.append("type", MediaFileType.userAvatar);
+            formData.append("referenceId", user.id);
+            formData.append("file", file);
+            let response = await fetch(ApiRoutes.uploadMedia, {
                 method: "POST",
                 body: formData,
                 credentials: "include"
-            });
-            if (response.status === 200) {
-                loader.classList.add("hidden");
+            });*/
+            const response = await MediaUploader.upload(MediaFileType.userAvatar, user.id, file);
+            loading.value = false;
+            if (response.code === 200) {
                 const user = LydaCache.get("user").content;
                 LydaCache.set("user", new CacheItem(user));
                 Ui.notify("Avatar updated", "success");
@@ -75,18 +80,15 @@ export class UserActions {
         fileInput.click();
     }
 
-    static async deleteAvatar() {
+    static async deleteAvatar(user: User, loading: Signal<boolean>) {
         await Ui.getConfirmationModal("Remove avatar", "Are you sure you want to remove your avatar?", "Yes", "No", async () => {
-            const loader = document.querySelector("#avatar-loader");
-            loader.classList.remove("hidden");
-            let response = await fetch(Api.endpoints.user.actions.avatar.delete, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                }
+            loading.value = true;
+            let response = await Api.postAsync(ApiRoutes.deleteMedia, {
+                type: MediaFileType.userAvatar,
+                referenceId: user.id
             });
-            if (response.status === 200) {
-                loader.classList.add("hidden");
+            loading.value = false;
+            if (response.code === 200) {
                 const user = LydaCache.get("user").content;
                 LydaCache.set("user", new CacheItem(user));
                 Ui.notify("Avatar removed", "success");
@@ -95,67 +97,61 @@ export class UserActions {
         }, () => {}, Icons.WARNING);
     }
 
-    static async replaceBanner(e) {
-        if (e.target.getAttribute("isOwnProfile") !== "true") {
+    static async replaceBanner(e: Event, isOwnProfile: boolean, user: User, loading: Signal<boolean>) {
+        if (!isOwnProfile || e.target!.classList.contains("avatar-container")) {
             return;
         }
-        if (e.target.classList.contains("avatar-container")) {
-            return;
-        }
+
         let fileInput = document.createElement("input");
         fileInput.type = "file";
         fileInput.accept = "image/*";
         fileInput.onchange = async (e) => {
-            const loader = document.querySelector("#banner-loader");
-            loader.classList.remove("hidden");
-            let file = e.target.files[0];
-            let formData = new FormData();
-            formData.append("banner", file);
-            let response = await fetch(Api.endpoints.user.actions.banner.upload, {
-                method: "POST",
-                body: formData
-            });
-            if (response.status === 200) {
-                loader.classList.add("hidden");
+            loading.value = true;
+            let file = e.target!.files[0];
+
+            const response = await MediaUploader.upload(MediaFileType.userBanner, user.id, file);
+            loading.value = false;
+            if (response.code === 200) {
                 const user = LydaCache.get("user").content;
                 LydaCache.set("user", new CacheItem(user));
                 Ui.notify("Banner updated", "success");
                 UserActions.updateBanner(await Util.getBannerFromUserIdAsync(user.id) + "?t=" + Date.now());
+            } else {
+                Ui.notify(`Failed to update banner: ${response.data.error}`, "error");
             }
         };
         fileInput.click();
     }
 
-    static async deleteBanner() {
+    static async deleteBanner(user: User, loading: Signal<boolean>) {
         await Ui.getConfirmationModal("Remove banner", "Are you sure you want to remove your banner?", "Yes", "No",
             async () => {
-                const loader = document.querySelector("#banner-loader");
-                loader.classList.remove("hidden");
-                let response = await fetch(Api.endpoints.user.actions.banner.delete, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    }
+                loading.value = true;
+                let response = await Api.postAsync(ApiRoutes.deleteMedia, {
+                    type: MediaFileType.userBanner,
+                    referenceId: user.id
                 });
-                if (response.status === 200) {
-                    loader.classList.add("hidden");
+                loading.value = false;
+                if (response.code === 200) {
                     const user = LydaCache.get("user").content;
                     LydaCache.set("user", new CacheItem(user));
                     Ui.notify("Banner removed", "success");
                     UserActions.updateBanner(await Util.getBannerFromUserIdAsync(user.id));
+                } else {
+                    Ui.notify(`Failed to remove banner: ${response.data.error}`, "error");
                 }
             },
             () => {}, Icons.WARNING
         );
     }
 
-    static getNotificationsPeriodically(e) {
+    static getNotificationsPeriodically(e: HTMLElement) {
         setInterval(async () => {
             const timestamp = document.querySelector(".listNotification")?.getAttribute("data-created_at");
             if (!timestamp) {
                 return;
             }
-            const res = await Api.getAsync(Api.endpoints.notifications.get, { after: timestamp });
+            const res = await Api.getAsync(ApiRoutes.getAllNotifications, { after: timestamp });
             if (res.code !== 200) {
                 return;
             }
@@ -176,7 +172,7 @@ export class UserActions {
         }, 60000);
     }
 
-    static async markNotificationsAsRead(e) {
+    static async markNotificationsAsRead(e: Event) {
         let notificationList = document.querySelector(".notification-list");
         notificationList.classList.toggle("hidden");
         let timestamp;
@@ -186,26 +182,27 @@ export class UserActions {
             console.warn(e);
             return;
         }
-        if (e.target.getAttribute("markedAsRead") === "true" || !timestamp) {
+        const target = e.target as HTMLElement;
+        if (target.getAttribute("markedAsRead") === "true" || !timestamp) {
             return;
         }
-        await Api.postAsync(Api.endpoints.notifications.actions.markAllAsRead, {newest: timestamp});
-        e.target.setAttribute("markedAsRead", "true");
+        await Api.postAsync(ApiRoutes.markAllNotificationsAsRead, {newest: timestamp});
+        target.setAttribute("markedAsRead", "true");
         const notificationBubble = document.querySelector(".notification-bubble");
         if (notificationBubble) {
             notificationBubble.classList.add("hidden");
         }
     }
 
-    static async setTheme(theme) {
+    static async setTheme(theme: Theme) {
         let user = await Util.getUserAsync();
         user.settings = updateUserSetting(user, UserSettings.theme, theme);
         LydaCache.set("user", new CacheItem(user));
         await UserActions.setUiTheme(theme);
     }
 
-    static async setUiTheme(themeName, onlyLocal = false) {
-        const themes = Object.values(Themes);
+    static async setUiTheme(themeName: Theme, onlyLocal = false) {
+        const themes = Object.values(Theme);
         if (!themes.includes(themeName)) {
             console.warn("Unknown theme: ", themeName);
             return;
@@ -220,14 +217,14 @@ export class UserActions {
         if (onlyLocal) {
             return;
         }
-        const res = await Api.postAsync(Api.endpoints.user.actions.updateSetting, { setting: UserSettings.theme, value: themeName });
+        const res = await Api.postAsync(ApiRoutes.updateUserSetting, { setting: UserSettings.theme, value: themeName });
         if (res.code !== 200) {
             Ui.notify("Failed to update theme", "error");
         }
     }
 
     static async setBooleanUserSetting(key, value) {
-        const res = await Api.postAsync(Api.endpoints.user.actions.updateSetting, {
+        const res = await Api.postAsync(ApiRoutes.updateUserSetting, {
             setting: key,
             value
         });
@@ -263,7 +260,7 @@ export class UserActions {
     }
 
     static async unverifyUser(id: number) {
-        const res = await Api.postAsync(Api.endpoints.user.actions.unverify, { id });
+        const res = await Api.postAsync(ApiRoutes.unverifyUser, { id });
         if (res.code !== 200) {
             Ui.notify("Failed to unverify user", "error");
             return false;
@@ -272,7 +269,7 @@ export class UserActions {
     }
 
     static async verifyUser(id: number) {
-        const res = await Api.postAsync(Api.endpoints.user.actions.verify, { id });
+        const res = await Api.postAsync(ApiRoutes.verifyUser, { id });
         if (res.code !== 200) {
             Ui.notify("Failed to verify user", "error");
             return false;
@@ -281,8 +278,8 @@ export class UserActions {
     }
 
     static editDescription(currentDescription: string, successCallback: Function) {
-        Ui.getTextAreaInputModal("Edit description", "Enter your new description", currentDescription, "Save", "Cancel", async (description) => {
-            const res = await Api.postAsync(Api.endpoints.user.set.property, { property: "description", value: description });
+        Ui.getTextAreaInputModal("Edit description", "Enter your new description", currentDescription, "Save", "Cancel", async (description: string) => {
+            const res = await Api.postAsync(ApiRoutes.updateUser, <Partial<User>>{ description: description });
             if (res.code !== 200) {
                 Ui.notify("Failed to update description", "error");
                 return;
@@ -297,10 +294,7 @@ export class UserActions {
 
     static editDisplayname(currentDisplayname: string, successCallback: Function) {
         Ui.getTextInputModal("Edit displayname", "Enter your new displayname", currentDisplayname, "Save", "Cancel", async (displayname: string) => {
-            const res = await Api.postAsync(Api.endpoints.user.set.property, {
-                property: "displayname",
-                value: displayname
-            });
+            const res = await Api.postAsync(ApiRoutes.updateUser, <Partial<User>>{ displayname: displayname });
             if (res.code !== 200) {
                 Ui.notify("Failed to update displayname", "error");
                 return;
@@ -316,10 +310,7 @@ export class UserActions {
 
     static editUsername(currentUsername: string, successCallback: Function) {
         Ui.getTextInputModal("Edit username", "Enter your new username", currentUsername, "Save", "Cancel", async (username: string) => {
-            const res = await Api.postAsync(Api.endpoints.user.set.property, {
-                property: "username",
-                value: username
-            });
+            const res = await Api.postAsync(ApiRoutes.updateUser, <Partial<User>>{ username: username });
             if (res.code !== 200) {
                 Ui.notify("Failed to update username", "error");
                 return;

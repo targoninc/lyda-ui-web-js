@@ -1,6 +1,6 @@
-import {create, signal} from "https://fjs.targoninc.com/f.js";
+import {create, signal} from "../../fjsc/f2.ts";
 import {UserActions} from "../Actions/UserActions.ts";
-import {Themes} from "../Enums/Themes.ts";
+import {Theme} from "../Enums/Theme.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {getUserSettingValue} from "../Classes/Util.ts";
 import {UserSettings} from "../Enums/UserSettings.ts";
@@ -67,7 +67,7 @@ export class SettingsTemplates {
     }
 
     static themeSection(currentTheme) {
-        const themes = Object.values(Themes);
+        const themes = Object.values(Theme);
         const currentTheme$ = signal(currentTheme);
         return create("div")
             .classes("card", "flex-v")

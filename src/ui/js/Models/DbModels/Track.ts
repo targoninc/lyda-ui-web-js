@@ -34,10 +34,8 @@ export interface Track {
     created_at: Date;
     plays: number;
     secretcode: string;
-    has_audio: boolean;
     monetization: boolean;
-    extension: string;
-    filename: string;
     price: number;
+    has_audio: boolean;
     processed: boolean;
 }

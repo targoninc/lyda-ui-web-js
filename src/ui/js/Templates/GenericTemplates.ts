@@ -336,55 +336,53 @@ export class GenericTemplates {
             .build();
     }
 
-    static fileInput(id: HtmlPropertyValue, name: HtmlPropertyValue, accept: HtmlPropertyValue, text: HtmlPropertyValue, required = false, changeCallback = (v: string) => {
+    static fileInput(id: HtmlPropertyValue, name: HtmlPropertyValue, accept: string, initialText: string, required = false, changeCallback = (v: string, files: FileList | null) => {
     }) {
         // TODO: Use signals
+        const text = signal(initialText);
+        const button = FJSC.button({
+            text: text,
+            onclick: () => {
+                text.value = "Choosing file...";
+                input.click();
+            }
+        }) as HTMLButtonElement;
+        const input = create("input")
+            .type("file")
+            .styles("display", "none")
+            .id(id)
+            .name(name)
+            .required(required)
+            .attributes("accept", accept)
+            .onchange(e => {
+                let fileName = input.value;
+                if (accept && !accept.includes("*")) {
+                    const accepts = accept.split(",");
+                    const extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+                    if (!accepts.includes(extension)) {
+                        fileName = "Not supported type.";
+                    }
+                }
+                button.value = truncate(fileName);
+                button.title = fileName;
+                const probableName = fileName.substring(fileName.lastIndexOf("\\") + 1);
+                changeCallback(probableName, input.files);
+
+                const preview = document.getElementById(name + "-preview") as HTMLImageElement;
+                if (preview && input.files) {
+                    preview.src = URL.createObjectURL(input.files[0]);
+                    preview.style.display = "initial";
+                }
+
+                function truncate(text: string) {
+                    return text.length > 20 ? text.substring(0, 20) + "..." : text;
+                }
+            }).build() as HTMLInputElement;
 
         return create("div")
             .children(
-                create("input")
-                    .type("button")
-                    .classes("full")
-                    .value(text)
-                    .onclick((e: Event) => {
-                        const target = e.target as HTMLInputElement;
-                        (<HTMLInputElement>target.nextElementSibling).click();
-                        target.value = "Choosing...";
-                    }).build(),
-                create("input")
-                    .type("file")
-                    .styles("display", "none")
-                    .id(id)
-                    .name(name)
-                    .required(required)
-                    .attributes("accept", accept)
-                    .onchange(e => {
-                        const target = e.target as HTMLInputElement;
-                        const accept = target!.getAttribute("accept");
-                        let fileName = target!.value;
-                        if (accept && !accept.includes("*")) {
-                            const accepts = accept.split(",");
-                            const extension = fileName.substring(fileName.lastIndexOf(".") + 1);
-                            if (!accepts.includes(extension)) {
-                                fileName = "Not supported type.";
-                            }
-                        }
-                        const previous = target.previousElementSibling as HTMLInputElement;
-                        previous.value = truncate(fileName);
-                        previous.title = fileName;
-                        const probableName = fileName.substring(fileName.lastIndexOf("\\") + 1);
-                        changeCallback(probableName);
-
-                        const preview = document.getElementById(name + "-preview") as HTMLImageElement;
-                        if (preview && target.files) {
-                            preview.src = URL.createObjectURL(target.files[0]);
-                            preview.style.display = "initial";
-                        }
-
-                        function truncate(text: string) {
-                            return text.length > 20 ? text.substring(0, 20) + "..." : text;
-                        }
-                    }).build()
+                button,
+                input
             ).build();
     };
 

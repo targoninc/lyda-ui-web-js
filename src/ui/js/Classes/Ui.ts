@@ -1,6 +1,5 @@
-import {userHasSettingValue, Util} from "./Util.ts";
-import {UrlHandler} from "./UrlHandler.ts";
-import {Api} from "./Api.ts";
+import {Util} from "./Util.ts";
+import {Api, ApiRoutes} from "./Api.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {NavTemplates} from "../Templates/NavTemplates.ts";
 import {GenericTemplates} from "../Templates/GenericTemplates.ts";
@@ -34,7 +33,7 @@ export class Ui {
         if (document.getElementById("navTop") === null) {
             let userTemplateRender;
             if (signedIn) {
-                const res = await Api.getAsync(Api.endpoints.notifications.get);
+                const res = await Api.getAsync(ApiRoutes.getAllNotifications);
                 let notifications = [];
                 if (res.code !== 200) {
                     userTemplateRender = NavTemplates.notSignedInNote();

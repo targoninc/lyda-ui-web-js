@@ -5,54 +5,47 @@ export interface ApiResponse<T> {
     data: T & { error?: string };
 }
 
+export class ApiRoutes {
+    static base = Config.apiBaseUrl;
+    private static auth = ApiRoutes.base + "/auth";
+    static isLoggedIn = ApiRoutes.auth + "/isLoggedIn";
+    private static audit = ApiRoutes.base + "/audit";
+    static logs = ApiRoutes.audit + "/logs";
+    static actionLogs = ApiRoutes.audit + "/actionLogs";
+    private static user = ApiRoutes.base + "/user";
+    static getUser = ApiRoutes.user + "/get";
+    static userSettings = ApiRoutes.user + "/settings";
+    static userPermissions = ApiRoutes.user + "/permissions";
+    static randomUser = ApiRoutes.user + "/random";
+    static userExists = ApiRoutes.user + "/exists";
+    private static userActions = ApiRoutes.user + "/actions";
+    static followUser = ApiRoutes.userActions + "/follow";
+    static unfollowUser = ApiRoutes.userActions + "/unfollow";
+    static verifyUser = ApiRoutes.userActions + "/verify";
+    static unverifyUser = ApiRoutes.userActions + "/unverify";
+    static requestVerification = ApiRoutes.userActions + "/requestVerification";
+    static login = ApiRoutes.userActions + "/login";
+    static logout = ApiRoutes.userActions + "/logout";
+    static register = ApiRoutes.userActions + "/register";
+    static mfaRequest = ApiRoutes.userActions + "/mfa-request";
+    static updateUserSetting = ApiRoutes.userActions + "/update-setting";
+    static changePassword = ApiRoutes.userActions + "/change-password";
+    static requestPasswordReset = ApiRoutes.userActions + "/request-password-reset";
+    static resetPassword = ApiRoutes.userActions + "/reset-password";
+    static updateUser = ApiRoutes.userActions + "/update";
+    private static media = ApiRoutes.base + "/media";
+    static uploadMedia = ApiRoutes.media + "/upload";
+    static deleteMedia = ApiRoutes.media + "/delete";
+    private static notifications = ApiRoutes.base + "/notifications";
+    static getAllNotifications = ApiRoutes.notifications + "/get";
+    static markAllNotificationsAsRead = ApiRoutes.notifications + "/actions/markAllAsRead";
+    static listGenres = ApiRoutes.base + "/genres/list";
+}
+
 export class Api {
     static get endpoints() {
         const endpoints = {
             base: Config.apiBaseUrl,
-            auth: {
-                isLoggedIn: "isLoggedIn"
-            },
-            audit: {
-                logs: "logs",
-                actionLogs: "actionLogs",
-            },
-            user: {
-                get: "get",
-                settings: "settings",
-                permissions: "permissions",
-                random: "random",
-                userExists: "exists",
-                actions: {
-                    follow: "follow",
-                    unfollow: "unfollow",
-                    avatar: {
-                        upload: "upload",
-                        delete: "delete",
-                    },
-                    banner: {
-                        upload: "upload",
-                        delete: "delete",
-                    },
-                    verify: "verify",
-                    unverify: "unverify",
-                    requestVerification: "requestVerification",
-                    login: "login",
-                    logout: "logout",
-                    register: "register",
-                    mfaRequest: "mfa-request",
-                    updateSetting: "update-setting",
-                    changePassword: "change-password",
-                    requestPasswordReset: "request-password-reset",
-                    resetPassword: "reset-password",
-                },
-                set: {
-                    property: "property",
-                    paypalMail: "paypalMail",
-                },
-                remove: {
-                    paypalMail: "paypalMail",
-                }
-            },
             tracks: {
                 byId: "byId",
                 byUserId: "byUserId",
@@ -82,9 +75,6 @@ export class Api {
                     autoQueue: "autoQueue",
                 }
             },
-            genres: {
-                list: "list",
-            },
             albums: {
                 byId: "byId",
                 byUserId: "byUserId",
@@ -97,12 +87,6 @@ export class Api {
                     reorderTracks: "reorderTracks",
                     like: "like",
                     unlike: "unlike",
-                }
-            },
-            notifications: {
-                get: "get",
-                actions: {
-                    markAllAsRead: "markAllAsRead",
                 }
             },
             reposts: {

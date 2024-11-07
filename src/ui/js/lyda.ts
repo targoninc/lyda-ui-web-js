@@ -8,10 +8,9 @@ import {TrackEditTemplates} from "./Templates/TrackEditTemplates.ts";
 import {TrackTemplates} from "./Templates/TrackTemplates.ts";
 import {ProfilePage} from "./Classes/ProfilePage.ts";
 import {AlbumTemplates} from "./Templates/AlbumTemplates.ts";
-import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {PlaylistTemplates} from "./Templates/PlaylistTemplates.ts";
 import {LibraryActions} from "./Actions/LibraryActions.ts";
-import {Api} from "./Classes/Api.ts";
+import {Api, ApiRoutes} from "./Classes/Api.ts";
 import {StatisticTemplates} from "./Templates/StatisticTemplates.ts";
 import {LogTemplates} from "./Templates/LogTemplates.ts";
 import {Permissions} from "./Enums/Permissions.ts";
@@ -27,6 +26,7 @@ import {Ui} from "./Classes/Ui.ts";
 import {navigate} from "./Routing/Router.ts";
 import {Permission} from "./Models/DbModels/Permission.ts";
 import {Follow} from "./Models/DbModels/Follow.ts";
+import {create, signal} from "../fjsc/f2.ts";
 
 export class Lyda {
     static async getEndpointData(config, endpoint, params = "", refreshSessionRetry = false) {
@@ -81,7 +81,7 @@ export class Lyda {
             data = await Lyda.getEndpointData(config, endpoint, paramsString);
         }
         let user;
-        const permissionData  = await Api.getAsync(Api.endpoints.user.permissions);
+        const permissionData  = await Api.getAsync(ApiRoutes.userPermissions);
         const permissions = permissionData.data;
         switch (element.getAttribute("datatype")) {
         case "uploadForm":

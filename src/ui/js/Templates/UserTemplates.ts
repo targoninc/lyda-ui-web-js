@@ -208,8 +208,10 @@ export class UserTemplates {
     }
 
     static profileHeader(user: User, isOwnProfile: boolean): AnyNode {
-        let bannerDeleteButton = GenericTemplates.centeredDeleteButton("banner-delete-button", UserActions.deleteBanner, ["hidden", "showOnParentHover"]);
-        let avatarDeleteButton = GenericTemplates.centeredDeleteButton("avatar-delete-button", UserActions.deleteAvatar, ["showOnParentHover"]);
+        const avatarLoading = signal(false);
+        const bannerLoading = signal(false);
+        let bannerDeleteButton = GenericTemplates.centeredDeleteButton("banner-delete-button", () => UserActions.deleteBanner(user, bannerLoading), ["hidden", "showOnParentHover"]);
+        let avatarDeleteButton = GenericTemplates.centeredDeleteButton("avatar-delete-button", () => UserActions.deleteAvatar(user, avatarLoading), ["showOnParentHover"]);
         const userBanner = signal(Images.DEFAULT_BANNER);
         Util.getBannerFromUserIdAsync(user.id).then(banner => {
             userBanner.value = banner;
@@ -236,16 +238,16 @@ export class UserTemplates {
             .children(
                 bannerContainer,
                 ifjs(isOwnProfile, bannerDeleteButton),
-                create("div")
+                ifjs(bannerLoading, create("div")
                     .classes("loader", "loader-small", "centeredInParent", "hidden")
                     .attributes("id", "banner-loader")
-                    .build(),
+                    .build()),
                 create("div")
                     .classes("header-info-container", "flex")
                     .attributes("isOwnProfile", isOwnProfile.toString())
                     .onclick((e) => {
                         if (isOwnProfile) {
-                            UserActions.replaceBanner(e).then();
+                            UserActions.replaceBanner(e, isOwnProfile, user, bannerLoading).then();
                         }
                     })
                     .children(
@@ -254,7 +256,7 @@ export class UserTemplates {
                             .attributes("isOwnProfile", isOwnProfile.toString())
                             .onclick((e) => {
                                 if (isOwnProfile) {
-                                    UserActions.replaceAvatar(e).then();
+                                    UserActions.replaceAvatar(e, isOwnProfile, user, avatarLoading).then();
                                 }
                             })
                             .onmouseover(() => {
@@ -279,10 +281,10 @@ export class UserTemplates {
                                     .attributes("alt", user.username)
                                     .build(),
                                 ifjs(isOwnProfile, avatarDeleteButton),
-                                create("div")
+                                ifjs(avatarLoading, create("div")
                                     .classes("loader", "loader-small", "centeredInParent", "hidden")
                                     .attributes("id", "avatar-loader")
-                                    .build()
+                                    .build())
                             ).build(),
                     ).build()
             ).build();
