@@ -4,7 +4,7 @@ import {Icons} from "../Enums/Icons.ts";
 import {UserTemplates} from "./UserTemplates.ts";
 import {Images} from "../Enums/Images.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
-import {Genres} from "../Enums/Genres.ts";
+import {Genre} from "../Enums/Genre.ts";
 import {Util} from "../Classes/Util.ts";
 import {AudioUpload} from "../Classes/AudioUpload.ts";
 import {Ui} from "../Classes/Ui.ts";
@@ -42,13 +42,13 @@ export class TrackEditTemplates {
         return state;
     }
 
-    static uploadForm(title, credits, releaseDate, visibility, genre, isrc, upc, description, monetization, price, linkedUsers, termsOfService) {
+    static uploadForm(title: string, credits: string, releaseDate: Date, visibility: string, genre: Genre, isrc, upc, description, monetization, price, linkedUsers, termsOfService) {
         const state = signal(<UploadableTrack>{
             title: title ?? "",
             credits: credits ?? "",
             release_date: releaseDate ?? new Date(),
             visibility: visibility ?? "public",
-            genre: genre ?? Genres.OTHER,
+            genre: genre ?? Genre.OTHER,
             isrc: isrc ?? "",
             upc: upc ?? "",
             description: description ?? "",

@@ -39,12 +39,14 @@ export class ApiRoutes {
     private static notifications = ApiRoutes.base + "/notifications";
     static getAllNotifications = ApiRoutes.notifications + "/get";
     static markAllNotificationsAsRead = ApiRoutes.notifications + "/actions/markAllAsRead";
-    static getGenres = ApiRoutes.base + "/genres/list";
     private static tracks = ApiRoutes.base + "/tracks";
     static getTrackById = ApiRoutes.tracks + "/byId";
     static getTrackByUserId = ApiRoutes.tracks + "/byUserId";
     static getTrackAudio = ApiRoutes.tracks + "/audio";
     static getTrackCollabTypes = ApiRoutes.tracks + "/collabTypes";
+    static getUnapprovedCollabs = ApiRoutes.tracks + "/unapprovedCollabs";
+    static createTrack = ApiRoutes.tracks + "/create";
+    static likeTrack = ApiRoutes.tracks + "/actions/like";
 }
 
 export class Api {
@@ -52,9 +54,7 @@ export class Api {
         const endpoints = {
             base: Config.apiBaseUrl,
             tracks: {
-                unapprovedCollabs: "unapprovedCollabs",
                 actions: {
-                    new: "new",
                     like: "like",
                     unlike: "unlike",
                     repost: "repost",

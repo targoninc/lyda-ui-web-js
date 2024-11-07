@@ -421,7 +421,7 @@ export class TrackActions {
         return res.data;
     }
 
-    static async updateTrackProperty(trackId, property, initialValue, callback = null) {
+    static async updateTrackProperty(trackId: number, property: string, initialValue: string, callback: Function|null = null) {
         Ui.getTextAreaInputModal("Edit " + property, "Enter new track " + property, initialValue, "Save", "Cancel", async (description) => {
             const res = await Api.postAsync(Api.endpoints.tracks.actions.update, {
                 id: trackId,
@@ -444,7 +444,7 @@ export class TrackActions {
     }
 
     static async getUnapprovedTracks() {
-        const res = await Api.getAsync(Api.endpoints.tracks.unapprovedCollabs);
+        const res = await Api.getAsync(ApiRoutes.getUnapprovedCollabs);
         if (res.code !== 200) {
             Ui.notify("Error while trying to get unapproved tracks: " + res.data, "error");
             return [];

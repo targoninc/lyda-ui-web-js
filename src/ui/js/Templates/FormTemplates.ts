@@ -12,6 +12,7 @@ import {
     TypeOrSignal
 } from "../../fjsc/f2.js";
 import {InputType, SearchableSelectConfig, SelectOption} from "../../fjsc/Types.ts";
+import {Genre} from "../Enums/Genre.ts";
 
 export class FormTemplates {
     static fileField(title: string, text: string, name: string, accept: string, required = false, onchange = (v: string, files: FileList | null) => {}) {
@@ -67,16 +68,10 @@ export class FormTemplates {
     }
 
     static genre(parentState: Signal<any>) {
-        const genres = signal<SelectOption[]>([]);
-        Api.getAsync(ApiRoutes.getGenres).then((res) => {
-            if (res.code !== 200) {
-                Ui.notify("Failed to load genres", "error");
-            }
-            genres.value = res.data.map((genre: any) => {
-                return {name: genre.genre, id: genre.genre};
-            }) as SelectOption[];
-        });
+        const genres = Object.values(Genre).map((genre: string) => {
+            return { name: genre, id: genre };
+        }) as SelectOption[];
         const value = computedSignal<String>(parentState, (p: any) => p.genre ?? "other");
-        return FormTemplates.dropDownField<String>("Genre", genres, value);
+        return FormTemplates.dropDownField<String>("Genre", signal(genres), value);
     }
 }

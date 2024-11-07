@@ -85,6 +85,7 @@ export class Lyda {
         const permissions = permissionData.data;
         switch (element.getAttribute("datatype")) {
         case "uploadForm":
+            // @ts-ignore
             element.appendChild(TrackEditTemplates.uploadForm());
             break;
         case "tracks":

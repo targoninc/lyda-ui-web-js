@@ -1,4 +1,4 @@
-import {Api} from "./Api.ts";
+import {Api, ApiRoutes} from "./Api.ts";
 import {Ui} from "./Ui.ts";
 import {navigate} from "../Routing/Router.ts";
 import {Signal} from "../../fjsc/f2.ts";
@@ -12,7 +12,7 @@ export class AudioUpload {
     triggerEvent: Event;
     state: Signal<UploadableTrack>;
     uploadInfo: Signal<UploadInfo[]>;
-    id: number;
+    id: number | undefined;
     ws: any;
     api: Api|undefined;
     coverFile: File|undefined;
@@ -148,7 +148,7 @@ export class AudioUpload {
     async createTrack() {
         const state = this.state.value;
 
-        const res = await Api.postAsync<Track>(Api.endpoints.tracks.actions.new, {
+        const res = await Api.postAsync<Track>(ApiRoutes.createTrack, {
             title: state.title,
             isrc: state.isrc,
             upc: state.upc,
