@@ -1,5 +1,5 @@
-import {Api} from "../Classes/Api.ts";
-import {ApiRoutes} from "../Classes/ApiRoutes.ts";
+import {Api} from "../Api/Api.ts";
+import {ApiRoutes} from "../Api/ApiRoutes.ts";
 
 export class QueueActions {
     static async getNewAutoQueueTracks() {

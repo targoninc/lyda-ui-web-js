@@ -1,5 +1,5 @@
 import {Icons} from "../Enums/Icons.js";
-import {AuthApi} from "../Classes/AuthApi.ts";
+import {AuthApi} from "../Api/AuthApi.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {FormTemplates} from "./FormTemplates.ts";
 import {UserValidator} from "../Classes/Validators/UserValidator.ts";
@@ -9,9 +9,9 @@ import {FJSC} from "../../fjsc";
 import {InputType} from "../../fjsc/Types.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {HtmlPropertyValue, Signal, create, signal, computedSignal, ifjs} from "../../fjsc/f2.ts";
-import {Api, ApiResponse} from "../Classes/Api.ts";
+import {Api, ApiResponse} from "../Api/Api.ts";
 import {navigate} from "../Routing/Router.ts";
-import {ApiRoutes} from "../Classes/ApiRoutes.ts";
+import {ApiRoutes} from "../Api/ApiRoutes.ts";
 
 export interface AuthData {
     termsOfService: boolean;

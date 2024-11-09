@@ -1,6 +1,6 @@
 import {Api} from "./Api.ts";
-import {Util} from "./Util.ts";
-import {Ui} from "./Ui.ts";
+import {Util} from "../Classes/Util.ts";
+import {Ui} from "../Classes/Ui.ts";
 import {Signal} from "../../fjsc/f2.ts";
 import {ApiRoutes} from "./ApiRoutes.ts";
 

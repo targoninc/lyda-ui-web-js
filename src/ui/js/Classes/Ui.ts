@@ -1,12 +1,14 @@
 import {Util} from "./Util.ts";
-import {Api} from "./Api.ts";
+import {Api} from "../Api/Api.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {NavTemplates} from "../Templates/NavTemplates.ts";
 import {GenericTemplates} from "../Templates/GenericTemplates.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {UserActions} from "../Actions/UserActions.ts";
 import {HtmlPropertyValue, signal, StringOrSignal} from "../../fjsc/f2.ts";
-import {ApiRoutes} from "./ApiRoutes.ts";
+import {ApiRoutes} from "../Api/ApiRoutes.ts";
+import {Theme} from "../Enums/Theme.ts";
+import {navigate} from "../Routing/Router.ts";
 
 export class Ui {
     static validUrlPaths = {
@@ -58,7 +60,7 @@ export class Ui {
     static notify(text, type = "info", time = 7000) {
         const notifications = document.querySelector(".notifications");
         const notification = GenericTemplates.notification(type, text);
-        const previousNotifications = document.querySelectorAll(".notification");
+        const previousNotifications = document.querySelectorAll(".notification") as NodeListOf<HTMLElement>;
         if (previousNotifications) {
             const lastNotification = previousNotifications[previousNotifications.length - 1];
             if (lastNotification) {
@@ -69,16 +71,6 @@ export class Ui {
         setTimeout(() => {
             notification.remove();
         }, time);
-    }
-
-    waitForImage(imgElem) {
-        return new Promise(res => {
-            if (imgElem.complete) {
-                return res();
-            }
-            imgElem.onload = () => res();
-            imgElem.onerror = () => res();
-        });
     }
 
     static async getPageHtml(page) {
@@ -128,13 +120,13 @@ export class Ui {
     static async loadTheme(user) {
         const darkPreferred = window.matchMedia("(prefers-color-scheme: dark)");
         if (!user) {
-            await UserActions.setUiTheme("dark", true);
+            await UserActions.setUiTheme(Theme.dark, true);
             return;
         }
         const existingSetting = user.settings.find(s => s.key === "theme");
         if (!existingSetting) {
             const newTheme = darkPreferred.matches ? "dark" : "light";
-            await UserActions.setUiTheme(newTheme);
+            await UserActions.setUiTheme(newTheme as Theme);
             LydaCache.set("user", new CacheItem(user));
         } else {
             await UserActions.setUiTheme(existingSetting.value, true);
@@ -161,14 +153,14 @@ export class Ui {
     }
 
     static setImagesSource(userId, className, source) {
-        let images = document.querySelectorAll("." + className + "[data-user-id='" + userId + "']");
+        let images = document.querySelectorAll("." + className + "[data-user-id='" + userId + "']") as NodeListOf<HTMLImageElement>;
         for (let i = 0; i < images.length; i++) {
             images[i].src = source;
         }
     }
 
     static fillClassWithValue(userId, className, value, newPage = "", params = []) {
-        let elements = document.querySelectorAll("." + className + "[data-user-id='" + userId + "']");
+        let elements = document.querySelectorAll("." + className + "[data-user-id='" + userId + "']") as NodeListOf<HTMLElement>;
         for (let element of elements) {
             element.innerHTML = value;
             element.onclick = async () => {

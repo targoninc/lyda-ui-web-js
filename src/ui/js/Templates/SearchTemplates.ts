@@ -1,8 +1,8 @@
 import {create, signal} from "../../fjsc/f2.ts";
-import {Api} from "../Classes/Api.ts";
+import {Api} from "../Api/Api.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {navigate} from "../Routing/Router.ts";
-import {ApiRoutes} from "../Classes/ApiRoutes.ts";
+import {ApiRoutes} from "../Api/ApiRoutes.ts";
 
 export class SearchTemplates {
     static search() {

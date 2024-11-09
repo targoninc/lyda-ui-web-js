@@ -1,6 +1,6 @@
 import {GenericTemplates} from "../Templates/GenericTemplates.ts";
 import {AlbumTemplates} from "../Templates/AlbumTemplates.ts";
-import {Api} from "../Classes/Api.ts";
+import {Api} from "../Api/Api.ts";
 import {Util} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
@@ -9,9 +9,9 @@ import {navigate} from "../Routing/Router.ts";
 import {Signal} from "../../fjsc/f2.ts";
 import {Album} from "../Models/DbModels/Album.ts";
 import {Track} from "../Models/DbModels/Track.ts";
-import {MediaUploader} from "../Classes/MediaUploader.ts";
+import {MediaUploader} from "../Api/MediaUploader.ts";
 import {MediaFileType} from "../Enums/MediaFileType.ts";
-import {ApiRoutes} from "../Classes/ApiRoutes.ts";
+import {ApiRoutes} from "../Api/ApiRoutes.ts";
 
 export class AlbumActions {
     static async deleteAlbumFromElement(e: any) {

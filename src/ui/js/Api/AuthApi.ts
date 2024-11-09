@@ -1,5 +1,5 @@
 import {Api, ApiResponse} from "./Api.ts";
-import {Ui} from "./Ui.ts";
+import {Ui} from "../Classes/Ui.ts";
 import {ApiRoutes} from "./ApiRoutes.ts";
 
 export class AuthApi {

@@ -1,8 +1,8 @@
 import {StatisticTemplates} from "../Templates/StatisticTemplates.ts";
-import {Api} from "./Api.ts";
+import {Api} from "../Api/Api.ts";
 import {Ui} from "./Ui.ts";
 import {Num} from "./Helpers/Num.ts";
-import {ApiRoutes} from "./ApiRoutes.ts";
+import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {signal} from "../../fjsc/f2.ts";
 
 export class StatisticsWrapper {

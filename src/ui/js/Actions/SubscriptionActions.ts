@@ -1,7 +1,7 @@
-import {Api} from "../Classes/Api.ts";
+import {Api} from "../Api/Api.ts";
 import {SubscriptionTemplates} from "../Templates/SubscriptionTemplates.ts";
 import {Ui} from "../Classes/Ui.ts";
-import {ApiRoutes} from "../Classes/ApiRoutes.ts";
+import {ApiRoutes} from "../Api/ApiRoutes.ts";
 
 export class SubscriptionActions {
     static clientId = "AUw6bB-HQTIfqy5fhk-s5wZOaEQdaCIjRnCyIC3WDCRxVKc9Qvz1c6xLw7etCit1CD1qSHY5Pv-3xgQN";

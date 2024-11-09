@@ -65,7 +65,10 @@ export class Router {
     }
 }
 
-export function navigate(path: string) {
+export function navigate(path: string, params: string[] = []) {
+    if (params.length > 0) {
+        path += "?" + params.join("&");
+    }
     // @ts-ignore
     (<Router>window.router).navigate(path).then();
 }

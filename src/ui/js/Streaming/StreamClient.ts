@@ -1,9 +1,9 @@
-import {Api} from "../Classes/Api.ts";
+import {Api} from "../Api/Api.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {PlayManager} from "./PlayManager.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {Util} from "../Classes/Util.ts";
-import {ApiRoutes} from "../Classes/ApiRoutes.ts";
+import {ApiRoutes} from "../Api/ApiRoutes.ts";
 
 export class StreamClient {
     id: number;

@@ -2,7 +2,7 @@ import {Icons} from "../Enums/Icons.ts";
 import {AlbumActions} from "../Actions/AlbumActions.ts";
 import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {Links} from "../Enums/Links.ts";
-import {Api} from "../Classes/Api.ts";
+import {Api} from "../Api/Api.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
 import {
     AnyElement,
@@ -19,7 +19,7 @@ import {FJSC} from "../../fjsc";
 import {InputType, SearchableSelectConfig} from "../../fjsc/Types.ts";
 import {Util} from "../Classes/Util.ts";
 import {navigate} from "../Routing/Router.ts";
-import {ApiRoutes} from "../Classes/ApiRoutes.ts";
+import {ApiRoutes} from "../Api/ApiRoutes.ts";
 
 export class GenericTemplates {
     static buttonWithIcon(text: HtmlPropertyValue, icon: HtmlPropertyValue, alt: HtmlPropertyValue, callback = () => {

@@ -1,4 +1,4 @@
-import {Config} from "./Config.ts";
+import {Config} from "../Classes/Config.ts";
 
 export class ApiRoutes {
     static base = Config.apiBaseUrl;

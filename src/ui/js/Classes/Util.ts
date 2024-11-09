@@ -2,11 +2,11 @@ import {Ui} from "./Ui.ts";
 import {Images} from "../Enums/Images.ts";
 import {Config} from "./Config.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
-import {Api} from "./Api.ts";
+import {Api} from "../Api/Api.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {Icons} from "../Enums/Icons.js";
 import {AnyElement} from "../../fjsc/f2.ts";
-import {ApiRoutes} from "./ApiRoutes.ts";
+import {ApiRoutes} from "../Api/ApiRoutes.ts";
 
 export class Util {
     static capitalizeFirstLetter(string) {

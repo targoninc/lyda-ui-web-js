@@ -1,13 +1,13 @@
-import {Api} from "./Api.ts";
+import {Api} from "../Api/Api.ts";
 import {Ui} from "./Ui.ts";
 import {navigate} from "../Routing/Router.ts";
 import {Signal} from "../../fjsc/f2.ts";
 import {UploadableTrack} from "../Models/UploadableTrack.ts";
 import {UploadInfo} from "../Models/UploadInfo.ts";
 import {Track} from "../Models/DbModels/Track.ts";
-import {MediaUploader} from "./MediaUploader.ts";
+import {MediaUploader} from "../Api/MediaUploader.ts";
 import {MediaFileType} from "../Enums/MediaFileType.ts";
-import {ApiRoutes} from "./ApiRoutes.ts";
+import {ApiRoutes} from "../Api/ApiRoutes.ts";
 
 export class AudioUpload {
     triggerEvent: Event;

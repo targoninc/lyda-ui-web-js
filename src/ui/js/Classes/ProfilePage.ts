@@ -1,10 +1,10 @@
-import {Api} from "./Api.ts";
+import {Api} from "../Api/Api.ts";
 import {Ui} from "./Ui.ts";
 import {UserTemplates} from "../Templates/UserTemplates.ts";
 import {GenericTemplates} from "../Templates/GenericTemplates.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {AnyElement} from "../../fjsc/f2.ts";
-import {ApiRoutes} from "./ApiRoutes.ts";
+import {ApiRoutes} from "../Api/ApiRoutes.ts";
 
 export class ProfilePage {
     static async addTabSectionAsync(element: AnyElement, user: User, selfUser: User, isOwnProfile: boolean) {

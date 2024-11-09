@@ -1,4 +1,4 @@
-import {Api} from "../Classes/Api.ts";
+import {Api} from "../Api/Api.ts";
 import {Util} from "../Classes/Util.ts";
 import {Icons} from "../Enums/Icons.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
@@ -15,8 +15,8 @@ import {Signal} from "../../fjsc/f2.ts";
 import {Comment} from "../Models/DbModels/Comment.ts";
 import {Track} from "../Models/DbModels/Track.ts";
 import {MediaFileType} from "../Enums/MediaFileType.ts";
-import {MediaUploader} from "../Classes/MediaUploader.ts";
-import {ApiRoutes} from "../Classes/ApiRoutes.ts";
+import {MediaUploader} from "../Api/MediaUploader.ts";
+import {ApiRoutes} from "../Api/ApiRoutes.ts";
 
 export class TrackActions {
     static async savePlay(id: number) {
