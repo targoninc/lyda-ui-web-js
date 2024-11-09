@@ -1,59 +1,9 @@
-import {Config} from "./Config.ts";
-
 export interface ApiResponse<T> {
     code: number;
     data: T & { error?: string };
 }
 
 export class Api {
-    static get endpoints() {
-        const endpoints = {
-            base: Config.apiBaseUrl,
-            library: {
-                get: "get",
-            },
-            subscriptions: {
-                options: "options",
-                actions: {
-                    create: "create",
-                    delete: "delete",
-                }
-            }
-        };
-        return this.resolveEndpoints(endpoints, endpoints.base + "/");
-    }
-
-    static resolveEndpoints(endpoints, base) {
-        for (let key in endpoints) {
-            if (endpoints[key].constructor === Object) {
-                endpoints[key] = this.resolveEndpoints(endpoints[key], base + key + "/");
-                continue;
-            }
-            if (key !== "base") {
-                endpoints[key] = base + endpoints[key];
-            }
-        }
-        return endpoints;
-    }
-
-    websockets = {
-        base: "wss://ws.lyda.app/",
-        uploadAudio: "uploadAudio",
-    };
-
-    constructor() {
-        for (let endpoint in Api.endpoints) {
-            if (endpoint !== "base") {
-                Api.endpoints[endpoint] = Api.endpoints.base + Api.endpoints[endpoint];
-            }
-        }
-        for (let endpoint in this.websockets) {
-            if (endpoint !== "base") {
-                this.websockets[endpoint] = this.websockets.base + this.websockets[endpoint];
-            }
-        }
-    }
-
     /**
      * @param {Object} params - The params to build
      * @returns {string} - The params as a string
@@ -133,21 +83,4 @@ export class Api {
             data: await Api.getDataFromHttpResponse(res)
         };
     }
-
-    /**
-     * @param {string} endpoint - The endpoint to connect to
-     * @param {Function} onMessage - The function to call when a message is received
-     * @param {Function} onError - The function to call when an error occurs
-     * @param {Function} onClose - The function to call when the connection is closed
-     * @param {Function} onOpen - The function to call when the connection is opened
-     * @returns {WebSocket} - The websocket connection
-     */
-    connectToWebsocket = (endpoint, onMessage, onError, onClose, onOpen) => {
-        const socket = new WebSocket(endpoint);
-        socket.onmessage = onMessage;
-        socket.onerror = onError;
-        socket.onclose = onClose;
-        socket.onopen = onOpen;
-        return socket;
-    };
 }

@@ -2,13 +2,15 @@ import {Config} from "./Config.ts";
 
 export class ApiRoutes {
     static base = Config.apiBaseUrl;
-    // region User
-    private static auth = ApiRoutes.base + "/auth";
-    static isLoggedIn = ApiRoutes.auth + "/isLoggedIn";
-
+    // region Audit
     private static audit = ApiRoutes.base + "/audit";
     static getLogs = ApiRoutes.audit + "/logs";
     static getActionLogs = ApiRoutes.audit + "/actionLogs";
+    // endregion
+
+    // region User
+    private static auth = ApiRoutes.base + "/auth";
+    static isLoggedIn = ApiRoutes.auth + "/isLoggedIn";
 
     private static user = ApiRoutes.base + "/user";
     static getUser = ApiRoutes.user + "/get";
@@ -16,6 +18,7 @@ export class ApiRoutes {
     static userPermissions = ApiRoutes.user + "/permissions";
     static randomUser = ApiRoutes.user + "/random";
     static userExists = ApiRoutes.user + "/exists";
+    static getLibrary = ApiRoutes.user + "/library";
 
     private static userActions = ApiRoutes.user + "/actions";
     static followUser = ApiRoutes.userActions + "/follow";
@@ -33,6 +36,15 @@ export class ApiRoutes {
     static resetPassword = ApiRoutes.userActions + "/reset-password";
     static updateUser = ApiRoutes.userActions + "/update";
     static activateAccount = ApiRoutes.userActions + "/activate-account";
+    // endregion
+
+    // region Subscriptions
+    private static subscriptions = ApiRoutes.base + "/subscriptions";
+    static getSubscriptionOptions = ApiRoutes.subscriptions + "/options";
+
+    private static subscriptionActions = ApiRoutes.subscriptions + "/actions";
+    static subscribe = ApiRoutes.subscriptionActions + "/subscribe";
+    static unsubscribe = ApiRoutes.subscriptionActions + "/unsubscribe";
     // endregion
 
     // region Media

@@ -1,4 +1,4 @@
-import {computedSignal, create, ifjs, signal, signalMap} from "https://fjs.targoninc.com/f.js";
+import {computedSignal, create, ifjs, signal, signalMap} from "../../fjsc/f2.ts";
 import {Num as NumberFormatter} from "../Classes/Helpers/Num.ts";
 import {SubscriptionActions} from "../Actions/SubscriptionActions.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";

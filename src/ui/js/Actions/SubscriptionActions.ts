@@ -1,7 +1,7 @@
 import {Api} from "../Classes/Api.ts";
 import {SubscriptionTemplates} from "../Templates/SubscriptionTemplates.ts";
-import {Util} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
+import {ApiRoutes} from "../Classes/ApiRoutes.ts";
 
 export class SubscriptionActions {
     static clientId = "AUw6bB-HQTIfqy5fhk-s5wZOaEQdaCIjRnCyIC3WDCRxVKc9Qvz1c6xLw7etCit1CD1qSHY5Pv-3xgQN";
@@ -35,15 +35,6 @@ export class SubscriptionActions {
         }
     }
 
-    static async getPlanId(id) {
-        const response = await Api.getAsync(Api.endpoints.subscriptions.byId, {id: id});
-        if (response.code !== 200) {
-            Ui.notify("Failed to get plan id", "error");
-            return null;
-        }
-        return response.data.plan_id;
-    }
-
     static initializePaypalButton(client_id, plan_id, button_id, message, onApprove) {
         const buttons = window.paypal.Buttons({
             createSubscription: function (data, actions) {
@@ -73,7 +64,7 @@ export class SubscriptionActions {
     }
 
     static async subscriptionSuccess(data, parameters) {
-        const response = await Api.postAsync(Api.endpoints.subscriptions.create, {...parameters});
+        const response = await Api.postAsync(ApiRoutes.subscribe, {...parameters});
         if (response.code === 200) {
             Ui.notify("Subscription started", "success");
         } else {
@@ -86,13 +77,13 @@ export class SubscriptionActions {
             "Cancel subscription",
             "Are you sure you want to cancel this subscription?",
             "Yes", "No",
-            SubscriptionActions.cancelSubscriptionAsync.bind(this, id), () => {
-            }
+            () => SubscriptionActions.cancelSubscriptionAsync(id),
+            () => {}
         );
     }
 
     static async cancelSubscriptionAsync(id) {
-        const response = await Api.postAsync(Api.endpoints.subscriptions.delete, {id});
+        const response = await Api.postAsync(ApiRoutes.unsubscribe, {id});
         if (response.code !== 200) {
             Ui.notify(response.data, "error");
             return false;
@@ -109,7 +100,7 @@ export class SubscriptionActions {
     }
 
     static async loadSubscriptionOptions() {
-        const res = await Api.getAsync(Api.endpoints.subscriptions.options);
+        const res = await Api.getAsync(ApiRoutes.getSubscriptionOptions);
         if (res.code !== 200) {
             Ui.notify("Failed to load subscription options", "error");
             return;

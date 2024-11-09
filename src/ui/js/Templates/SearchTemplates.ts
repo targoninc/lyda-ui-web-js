@@ -1,4 +1,4 @@
-import {create, signal} from "https://fjs.targoninc.com/f.js";
+import {create, signal} from "../../fjsc/f2.ts";
 import {Api} from "../Classes/Api.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {navigate} from "../Routing/Router.ts";
