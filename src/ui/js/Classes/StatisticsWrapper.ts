@@ -3,6 +3,7 @@ import {signal} from "https://fjs.targoninc.com/f.js";
 import {Api} from "./Api.ts";
 import {Ui} from "./Ui.ts";
 import {Num} from "./Helpers/Num.ts";
+import {ApiRoutes} from "./ApiRoutes.ts";
 
 export class StatisticsWrapper {
     static async getStatistics() {
@@ -15,75 +16,40 @@ export class StatisticsWrapper {
         ];
     }
 
-    static async getRoyaltiesByMonth() {
-        const chartObservable = signal(StatisticTemplates.royaltiesByMonthChart([], []));
-        Api.getAsync(Api.endpoints.statistics.royaltiesByMonth).then((res) => {
+    static async getSingleStat(template: Function, endpoint: string, keyProperty: string, valueProperty: string, reverse: boolean = false) {
+        const chart = signal(template([], []));
+        Api.getAsync(endpoint).then((res) => {
             if (res.code !== 200) {
                 Ui.notify(res.data, "error");
                 return;
             }
-            res.data.reverse();
-            const labels = res.data.map((item) => item.month);
-            const values = Num.shortenInArray(res.data.map((item) => item.amount));
-            chartObservable.value = StatisticTemplates.royaltiesByMonthChart(labels, values);
+            if (reverse) {
+                res.data.reverse();
+            }
+            const labels = res.data.map((item) => item[keyProperty]);
+            const values = Num.shortenInArray(res.data.map((item) => item[valueProperty]));
+            chart.value = template(labels, values);
         });
-        return chartObservable;
+        return chart;
+    }
+
+    static async getRoyaltiesByMonth() {
+        return StatisticsWrapper.getSingleStat(StatisticTemplates.royaltiesByMonthChart, ApiRoutes.getRoyaltiesByMonth, "month", "amount", true);
     }
 
     static async getRoyaltiesByTrack() {
-        const chartObservable = signal(StatisticTemplates.royaltiesByTrackChart([], []));
-        Api.getAsync(Api.endpoints.statistics.royaltiesByTrack).then((res) => {
-            if (res.code !== 200) {
-                Ui.notify(res.data, "error");
-                return;
-            }
-            const labels = res.data.map((item) => item.title);
-            const values = Num.shortenInArray(res.data.map((item) => item.amount));
-            chartObservable.value = StatisticTemplates.royaltiesByTrackChart(labels, values);
-        });
-        return chartObservable;
+        return StatisticsWrapper.getSingleStat(StatisticTemplates.royaltiesByTrackChart, ApiRoutes.getRoyaltiesByTrack, "title", "amount");
     }
 
     static async getPlayCountByTracks() {
-        const chartObservable = signal(StatisticTemplates.playCountByTrackChart([], []));
-        Api.getAsync(Api.endpoints.statistics.playCountByTrack).then((res) => {
-            if (res.code !== 200) {
-                Ui.notify(res.data, "error");
-                return;
-            }
-            const labels = res.data.map((item) => item.title);
-            const values = Num.shortenInArray(res.data.map((item) => item.plays));
-            chartObservable.value = StatisticTemplates.playCountByTrackChart(labels, values);
-        });
-        return chartObservable;
+        return StatisticsWrapper.getSingleStat(StatisticTemplates.playCountByTrackChart, ApiRoutes.getPlayCountByTrack, "title", "plays");
     }
 
     static async getPlayCountByMonth() {
-        const chartObservable = signal(StatisticTemplates.playCountByMonthChart([], []));
-        Api.getAsync(Api.endpoints.statistics.playCountByMonth).then((res) => {
-            if (res.code !== 200) {
-                Ui.notify(res.data, "error");
-                return;
-            }
-            res.data.reverse();
-            const labels = res.data.map((item) => item.month);
-            const values = Num.shortenInArray(res.data.map((item) => item.plays));
-            chartObservable.value = StatisticTemplates.playCountByMonthChart(labels, values);
-        });
-        return chartObservable;
+        return StatisticsWrapper.getSingleStat(StatisticTemplates.playCountByMonthChart, ApiRoutes.getPlayCountByMonth, "title", "plays", true);
     }
 
     static async getLikesByTrack() {
-        const chartObservable = signal(StatisticTemplates.likesByTrackChart([], []));
-        Api.getAsync(Api.endpoints.statistics.likesByTrack).then((res) => {
-            if (res.code !== 200) {
-                Ui.notify(res.data, "error");
-                return;
-            }
-            const labels = res.data.map((item) => item.title);
-            const values = Num.shortenInArray(res.data.map((item) => item.likes));
-            chartObservable.value = StatisticTemplates.likesByTrackChart(labels, values);
-        });
-        return chartObservable;
+        return StatisticsWrapper.getSingleStat(StatisticTemplates.likesByTrackChart, ApiRoutes.getLikesByTrack, "title", "plays", true);
     }
 }

@@ -118,4 +118,14 @@ export class ApiRoutes {
     static markCommentSafe = ApiRoutes.commentActions + "/markSafe";
     static markCommentUnsafe = ApiRoutes.commentActions + "/markUnsafe";
     // endregion
+
+    // region Statistics
+    private static statistics = ApiRoutes.base + "/statistics";
+    static getPlayCountByTrack = ApiRoutes.statistics + "/playCountByTrack";
+    static getPlayCountByMonth = ApiRoutes.statistics + "/playCountByMonth";
+    static getLikesByTrack = ApiRoutes.statistics + "/likesByTrack";
+    static getRoyaltiesByMonth = ApiRoutes.statistics + "/royaltiesByMonth";
+    static getRoyaltiesByTrack = ApiRoutes.statistics + "/royaltiesByTrack";
+    static getRoyaltyInfo = ApiRoutes.statistics + "/royaltyInfo";
+    // endregion
 }

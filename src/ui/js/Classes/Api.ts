@@ -9,14 +9,6 @@ export class Api {
     static get endpoints() {
         const endpoints = {
             base: Config.apiBaseUrl,
-            statistics: {
-                playCountByTrack: "playCountByTrack",
-                playCountByMonth: "playCountByMonth",
-                likesByTrack: "likesByTrack",
-                royaltiesByMonth: "royaltiesByMonth",
-                royaltiesByTrack: "royaltiesByTrack",
-                royaltyInfo: "royaltyInfo",
-            },
             royalties: {
                 requestPayment: "requestPayment",
                 calculateRoyalties: "calculateRoyalties",
