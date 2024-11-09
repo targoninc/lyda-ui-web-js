@@ -1,9 +1,10 @@
-import {Api, ApiRoutes} from "./Api.ts";
+import {Api} from "./Api.ts";
 import {Ui} from "./Ui.ts";
 import {UserTemplates} from "../Templates/UserTemplates.ts";
 import {GenericTemplates} from "../Templates/GenericTemplates.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {AnyElement} from "../../fjsc/f2.ts";
+import {ApiRoutes} from "./ApiRoutes.ts";
 
 export class ProfilePage {
     static async addTabSectionAsync(element: AnyElement, user: User, selfUser: User, isOwnProfile: boolean) {
@@ -56,7 +57,7 @@ export class ProfilePage {
     }
 
     static async addPlaylistsAsync(element: AnyElement, user: User, selfUser: User, isOwnProfile: boolean) {
-        const playlistsRes = await Api.getAsync(Api.endpoints.playlists.byUserId, {
+        const playlistsRes = await Api.getAsync(ApiRoutes.getPlaylistsByUserId, {
             id: user.id, name: user.username
         });
         if (playlistsRes.code !== 200) {
@@ -70,7 +71,7 @@ export class ProfilePage {
     }
 
     static async addRepostsAsync(element: AnyElement, user: User, selfUser: User, isOwnProfile: boolean) {
-        const repostsRes = await Api.getAsync(Api.endpoints.reposts.byUserId, {
+        const repostsRes = await Api.getAsync(ApiRoutes.getRepostsByUserId, {
             id: user.id, name: user.username
         });
         if (repostsRes.code !== 200) {

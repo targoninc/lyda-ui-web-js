@@ -1,10 +1,11 @@
-import {Api, ApiRoutes} from "../Classes/Api.ts";
+import {Api} from "../Classes/Api.ts";
 import {Util} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {Icons} from "../Enums/Icons.js";
 import {PlayManager} from "../Streaming/PlayManager.ts";
 import {navigate} from "../Routing/Router.ts";
+import {ApiRoutes} from "../Classes/ApiRoutes.ts";
 
 export class AuthActions {
     static resetUiState() {

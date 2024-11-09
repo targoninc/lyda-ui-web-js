@@ -1,7 +1,8 @@
-import {Api, ApiRoutes} from "./Api.ts";
+import {Api} from "./Api.ts";
 import {Util} from "./Util.ts";
 import {Ui} from "./Ui.ts";
 import {Signal} from "../../fjsc/f2.ts";
+import {ApiRoutes} from "./ApiRoutes.ts";
 
 export class LydaApi {
     static getLogs(filterState: Signal<any>, successCallback: Function) {

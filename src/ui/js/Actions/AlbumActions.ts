@@ -1,6 +1,6 @@
 import {GenericTemplates} from "../Templates/GenericTemplates.ts";
 import {AlbumTemplates} from "../Templates/AlbumTemplates.ts";
-import {Api, ApiRoutes} from "../Classes/Api.ts";
+import {Api} from "../Classes/Api.ts";
 import {Util} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
@@ -11,6 +11,7 @@ import {Album} from "../Models/DbModels/Album.ts";
 import {Track} from "../Models/DbModels/Track.ts";
 import {MediaUploader} from "../Classes/MediaUploader.ts";
 import {MediaFileType} from "../Enums/MediaFileType.ts";
+import {ApiRoutes} from "../Classes/ApiRoutes.ts";
 
 export class AlbumActions {
     static async deleteAlbumFromElement(e: any) {
@@ -36,7 +37,7 @@ export class AlbumActions {
     }
 
     static async createNewAlbum(album: Album) {
-        const res = await Api.postAsync(ApiRoutes.createAlbum, album);
+        const res = await Api.postAsync(ApiRoutes.newAlbum, album);
         if (res.code !== 200) {
             Ui.notify("Failed to create album: " + res.data, "error");
             return;
@@ -117,11 +118,11 @@ export class AlbumActions {
     }
 
     static async likeAlbum(id: number) {
-        return await Api.postAsync(Api.endpoints.albums.actions.like, { id });
+        return await Api.postAsync(ApiRoutes.likeAlbum, { id });
     }
 
     static async unlikeAlbum(id: number) {
-        return await Api.postAsync(Api.endpoints.albums.actions.unlike, { id });
+        return await Api.postAsync(ApiRoutes.unlikeAlbum, { id });
     }
 
     static async toggleLike(id: number, isEnabled: boolean) {

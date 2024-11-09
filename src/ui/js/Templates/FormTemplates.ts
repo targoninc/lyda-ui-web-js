@@ -1,5 +1,5 @@
 import {GenericTemplates} from "./GenericTemplates.ts";
-import {Api, ApiRoutes} from "../Classes/Api";
+import {Api} from "../Classes/Api";
 import {Ui} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
 import {
@@ -13,6 +13,7 @@ import {
 } from "../../fjsc/f2.js";
 import {InputType, SearchableSelectConfig, SelectOption} from "../../fjsc/Types.ts";
 import {Genre} from "../Enums/Genre.ts";
+import {ApiRoutes} from "../Classes/ApiRoutes.ts";
 
 export class FormTemplates {
     static fileField(title: string, text: string, name: string, accept: string, required = false, onchange = (v: string, files: FileList | null) => {}) {

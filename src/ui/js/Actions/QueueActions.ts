@@ -1,4 +1,5 @@
-import {Api, ApiRoutes} from "../Classes/Api.ts";
+import {Api} from "../Classes/Api.ts";
+import {ApiRoutes} from "../Classes/ApiRoutes.ts";
 
 export class QueueActions {
     static async getNewAutoQueueTracks() {

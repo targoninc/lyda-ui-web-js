@@ -10,7 +10,7 @@ import {ProfilePage} from "./Classes/ProfilePage.ts";
 import {AlbumTemplates} from "./Templates/AlbumTemplates.ts";
 import {PlaylistTemplates} from "./Templates/PlaylistTemplates.ts";
 import {LibraryActions} from "./Actions/LibraryActions.ts";
-import {Api, ApiRoutes} from "./Classes/Api.ts";
+import {Api} from "./Classes/Api.ts";
 import {StatisticTemplates} from "./Templates/StatisticTemplates.ts";
 import {LogTemplates} from "./Templates/LogTemplates.ts";
 import {Permissions} from "./Enums/Permissions.ts";
@@ -28,6 +28,7 @@ import {Permission} from "./Models/DbModels/Permission.ts";
 import {Follow} from "./Models/DbModels/Follow.ts";
 import {AnyElement, create, signal} from "../fjsc/f2.ts";
 import {User} from "./Models/DbModels/User.ts";
+import {ApiRoutes} from "./Classes/ApiRoutes.ts";
 
 export class Lyda {
     static async getEndpointData(config, endpoint, params = "", refreshSessionRetry = false) {

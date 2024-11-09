@@ -1,9 +1,10 @@
 import {Api} from "../Classes/Api.ts";
 import {Ui} from "../Classes/Ui.ts";
+import {ApiRoutes} from "../Classes/ApiRoutes.ts";
 
 export class CommentActions {
     static async getPotentiallyHarmful() {
-        const res = await Api.getAsync(Api.endpoints.comments.potentiallyHarmful);
+        const res = await Api.getAsync(ApiRoutes.getPotentiallyHarmful);
         if (res.code !== 200) {
             Ui.notify("Error while trying to get comments: " + res.data, "error");
             return [];
@@ -12,7 +13,7 @@ export class CommentActions {
     }
 
     static async hideComment(id) {
-        const res = await Api.postAsync(Api.endpoints.comments.actions.hide, {id});
+        const res = await Api.postAsync(ApiRoutes.hideComment, {id});
         if (res.code !== 200) {
             Ui.notify("Error while trying to hide comment: " + res.data, "error");
             return false;
@@ -21,7 +22,7 @@ export class CommentActions {
     }
 
     static async unhideComment(id) {
-        const res = await Api.postAsync(Api.endpoints.comments.actions.unhide, {id});
+        const res = await Api.postAsync(ApiRoutes.unhideComment, {id});
         if (res.code !== 200) {
             Ui.notify("Error while trying to unhide comment: " + res.data, "error");
             return false;
@@ -30,7 +31,7 @@ export class CommentActions {
     }
 
     static async markSafe(id) {
-        const res = await Api.postAsync(Api.endpoints.comments.actions.markSafe, {id});
+        const res = await Api.postAsync(ApiRoutes.markCommentSafe, {id});
         if (res.code !== 200) {
             Ui.notify("Error while trying to mark comment as safe: " + res.data, "error");
             return false;
@@ -39,7 +40,7 @@ export class CommentActions {
     }
 
     static async markUnsafe(id) {
-        const res = await Api.postAsync(Api.endpoints.comments.actions.markUnsafe, {id});
+        const res = await Api.postAsync(ApiRoutes.markCommentUnsafe, {id});
         if (res.code !== 200) {
             Ui.notify("Error while trying to mark comment as unsafe: " + res.data, "error");
             return false;

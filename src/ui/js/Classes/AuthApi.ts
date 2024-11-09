@@ -1,5 +1,6 @@
-import {Api, ApiResponse, ApiRoutes} from "./Api.ts";
+import {Api, ApiResponse} from "./Api.ts";
 import {Ui} from "./Ui.ts";
+import {ApiRoutes} from "./ApiRoutes.ts";
 
 export class AuthApi {
     static userExists(email: string, successCallback: Function = () => {

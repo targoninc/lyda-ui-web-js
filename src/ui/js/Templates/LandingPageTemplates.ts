@@ -9,8 +9,9 @@ import {FJSC} from "../../fjsc";
 import {InputType} from "../../fjsc/Types.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {HtmlPropertyValue, Signal, create, signal, computedSignal, ifjs} from "../../fjsc/f2.ts";
-import {Api, ApiResponse, ApiRoutes} from "../Classes/Api.ts";
+import {Api, ApiResponse} from "../Classes/Api.ts";
 import {navigate} from "../Routing/Router.ts";
+import {ApiRoutes} from "../Classes/ApiRoutes.ts";
 
 export interface AuthData {
     termsOfService: boolean;

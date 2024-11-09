@@ -1,5 +1,6 @@
 import {MediaFileType} from "../Enums/MediaFileType.ts";
-import {Api, ApiRoutes} from "./Api.ts";
+import {Api} from "./Api.ts";
+import {ApiRoutes} from "./ApiRoutes.ts";
 
 export class MediaUploader {
     static async upload(type: MediaFileType, referenceId: number, file: File) {

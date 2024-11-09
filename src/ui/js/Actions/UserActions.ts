@@ -1,4 +1,4 @@
-import {Api, ApiRoutes} from "../Classes/Api.ts";
+import {Api} from "../Classes/Api.ts";
 import {getUserSettingValue, updateUserSetting, Util} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
@@ -11,6 +11,7 @@ import {MediaFileType} from "../Enums/MediaFileType.ts";
 import {MediaUploader} from "../Classes/MediaUploader.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {Signal} from "../../fjsc/f2.ts";
+import {ApiRoutes} from "../Classes/ApiRoutes.ts";
 
 export class UserActions {
     static updateAvatar(newSrc) {

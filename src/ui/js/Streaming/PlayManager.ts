@@ -1,5 +1,5 @@
 import {LydaCache} from "../Cache/LydaCache.ts";
-import {Api, ApiRoutes} from "../Classes/Api.ts";
+import {Api} from "../Classes/Api.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {StreamingUpdater} from "./StreamingUpdater.ts";
 import {QueueManager} from "./QueueManager.ts";
@@ -8,6 +8,7 @@ import {StreamClient} from "./StreamClient.ts";
 import {userHasSettingValue, Util} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {Track} from "../Models/DbModels/Track.ts";
+import {ApiRoutes} from "../Classes/ApiRoutes.ts";
 
 export class PlayManager {
     static async playCheck(track: any) {

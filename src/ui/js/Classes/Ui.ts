@@ -1,11 +1,12 @@
 import {Util} from "./Util.ts";
-import {Api, ApiRoutes} from "./Api.ts";
+import {Api} from "./Api.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {NavTemplates} from "../Templates/NavTemplates.ts";
 import {GenericTemplates} from "../Templates/GenericTemplates.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {UserActions} from "../Actions/UserActions.ts";
 import {HtmlPropertyValue, signal, StringOrSignal} from "../../fjsc/f2.ts";
+import {ApiRoutes} from "./ApiRoutes.ts";
 
 export class Ui {
     static validUrlPaths = {

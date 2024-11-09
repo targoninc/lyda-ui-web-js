@@ -10,10 +10,13 @@ import {Signal} from "../../fjsc/f2.ts";
 import {Playlist} from "../Models/DbModels/Playlist.ts";
 import {Track} from "../Models/DbModels/Track.ts";
 import {Album} from "../Models/DbModels/Album.ts";
+import {ApiRoutes} from "../Classes/ApiRoutes.ts";
+import {MediaUploader} from "../Classes/MediaUploader.ts";
+import {MediaFileType} from "../Enums/MediaFileType.ts";
 
 export class PlaylistActions {
     static async openAddToPlaylistModal(objectToBeAdded: Album|Track, type: "track"|"album") {
-        const res = await Api.getAsync(Api.endpoints.playlists.byUserId, {user_id: objectToBeAdded.user_id});
+        const res = await Api.getAsync(ApiRoutes.getPlaylistsByUserId, {user_id: objectToBeAdded.user_id});
         if (res.code !== 200) {
             console.error("Failed to get playlists: ", res.data);
             return;
@@ -33,7 +36,7 @@ export class PlaylistActions {
     }
 
     static async createNewPlaylist(playlist: Playlist) {
-        const res = await Api.postAsync(Api.endpoints.playlists.actions.new, playlist);
+        const res = await Api.postAsync(ApiRoutes.newPlaylist, playlist);
         if (res.code !== 200) {
             Ui.notify("Failed to create playlist: " + res.data, "error");
             return;
@@ -42,7 +45,7 @@ export class PlaylistActions {
     }
 
     static async deletePlaylist(id: number) {
-        const res = await Api.postAsync(Api.endpoints.playlists.actions.delete, {id});
+        const res = await Api.postAsync(ApiRoutes.deletePlaylist, {id});
         if (res.code === 200) {
             PlayManager.removeStreamClient(id);
             QueueManager.removeFromManualQueue(id);
@@ -61,7 +64,7 @@ export class PlaylistActions {
                 playlistIds.push(playlist.id.split("_")[1]);
             }
         }
-        const res = await Api.postAsync(Api.endpoints.playlists.actions.addTrack, {playlist_ids: playlistIds, track_id: id});
+        const res = await Api.postAsync(ApiRoutes.addTrackToPlaylists, {playlist_ids: playlistIds, track_id: id});
         Util.removeModal();
         if (res.code !== 200) {
             Ui.notify("Failed to add track to playlists: " + res.data, "error");
@@ -71,7 +74,7 @@ export class PlaylistActions {
     }
 
     static async removeTrackFromPlaylist(track_id: number, playlist_id: number) {
-        const res = await Api.postAsync(Api.endpoints.playlists.actions.removeTrack, {id: playlist_id, track_id});
+        const res = await Api.postAsync(ApiRoutes.removeTrackFromPlaylist, {id: playlist_id, track_id});
         if (res.code !== 200) {
             Ui.notify("Failed to remove track from playlist: " + res.data, "error");
             return false;
@@ -93,19 +96,8 @@ export class PlaylistActions {
         fileInput.accept = "image/*";
         fileInput.onchange = async (e) => {
             const fileTarget = e.target as HTMLInputElement;
-            let file = fileTarget.files![0];
-            if (!file) {
-                loading.value = false;
-                return;
-            }
-            let formData = new FormData();
-            formData.append("cover", file);
-            formData.append("id", id.toString());
-            let response = await fetch(Api.endpoints.playlists.actions.uploadCover, {
-                method: "POST",
-                body: formData,
-                credentials: "include"
-            });
+            const file = fileTarget.files![0];
+            const response = await MediaUploader.upload(MediaFileType.playlistCover, id, file);
             if (response.status === 200) {
                 loading.value = false;
                 Ui.notify("Cover updated", "success");
@@ -116,7 +108,7 @@ export class PlaylistActions {
     }
 
     static async moveTrackInPlaylist(playlistId, trackId, newPosition) {
-        const res = await Api.postAsync(Api.endpoints.playlists.actions.reorderTracks, {id: playlistId, track_id: trackId, new_position: newPosition});
+        const res = await Api.postAsync(ApiRoutes.reorderPlaylistTracks, {id: playlistId, track_id: trackId, new_position: newPosition});
         if (res.code !== 200) {
             Ui.notify("Failed to move track in playlist: " + res.data, "error");
             return false;
@@ -125,11 +117,11 @@ export class PlaylistActions {
     }
 
     static async likePlaylist(id) {
-        return await Api.postAsync(Api.endpoints.playlists.actions.like, { id });
+        return await Api.postAsync(ApiRoutes.likePlaylist, { id });
     }
 
     static async unlikePlaylist(id) {
-        return await Api.postAsync(Api.endpoints.playlists.actions.unlike, { id });
+        return await Api.postAsync(ApiRoutes.unlikePlaylist, { id });
     }
 
     static async toggleLike(id, isEnabled) {
@@ -178,7 +170,7 @@ export class PlaylistActions {
                 playlistIds.push(playlist.id.split("_")[1]);
             }
         }
-        const res = await Api.postAsync(Api.endpoints.playlists.actions.addAlbum, {playlist_ids: playlistIds, album_id: id});
+        const res = await Api.postAsync(ApiRoutes.addAlbumToPlaylists, {playlist_ids: playlistIds, album_id: id});
         Util.removeModal();
         if (res.code !== 200) {
             Ui.notify(res.data, "error");
