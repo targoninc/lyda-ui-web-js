@@ -9,7 +9,8 @@ import {FJSC} from "../../fjsc";
 import {InputType} from "../../fjsc/Types.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {HtmlPropertyValue, Signal, create, signal, computedSignal, ifjs} from "../../fjsc/f2.ts";
-import {ApiResponse} from "../Classes/Api.ts";
+import {Api, ApiResponse, ApiRoutes} from "../Classes/Api.ts";
+import {navigate} from "../Routing/Router.ts";
 
 export interface AuthData {
     termsOfService: boolean;
@@ -48,8 +49,9 @@ export class LandingPageTemplates {
             "reset-password": LandingPageTemplates.resetPasswordBox,
             "password-reset": LandingPageTemplates.enterNewPasswordBox,
             "password-reset-requested": LandingPageTemplates.passwordResetRequestedBox,
+            "activate-account": LandingPageTemplates.activateAccountBox,
         };
-        const altEntryPoints = ["password-reset"];
+        const altEntryPoints = ["password-reset", "activate-account"];
         let firstStep: keyof typeof templateMap | undefined = "email";
         if (altEntryPoints.some(entryPoint => window.location.pathname.includes(entryPoint))) {
             firstStep = altEntryPoints.find(entryPoint => window.location.pathname.includes(entryPoint)) as keyof typeof templateMap;
@@ -126,6 +128,44 @@ export class LandingPageTemplates {
                             step.value = "logging-in";
                         }, [], ["secondary", "positive"])
                     ).build(),
+            ).build();
+    }
+
+    static activateAccountBox(step: Signal<string>, user: Signal<AuthData>) {
+        const urlSearchParams = new URLSearchParams(window.location.search);
+        const code = urlSearchParams.get("code");
+        const error = signal(null);
+        const done = signal(false);
+        const activating = signal(true);
+
+        Api.postAsync(ApiRoutes.activateAccount, {
+            activationCode: code
+        }).then(res => {
+            activating.value = false;
+            if (res.code !== 200) {
+                error.value = res.data.error;
+            } else {
+                done.value = true;
+            }
+        });
+
+        return create("div")
+            .classes("flex-v", "align-center")
+            .children(
+                create("h1")
+                    .text("Activating your account")
+                    .build(),
+                create("div")
+                    .classes("flex-v")
+                    .children(
+                        ifjs(activating, create("p")
+                            .text(`We're activating your account with code ${code}...`)
+                            .build()),
+                        ifjs(done, create("p")
+                            .text(`Your account is now activated!`)
+                            .build()),
+                        ifjs(error, FJSC.error(error))
+                    ).build()
             ).build();
     }
 

@@ -34,6 +34,7 @@ export class ApiRoutes {
     static requestPasswordReset = ApiRoutes.userActions + "/request-password-reset";
     static resetPassword = ApiRoutes.userActions + "/reset-password";
     static updateUser = ApiRoutes.userActions + "/update";
+    static activateAccount = ApiRoutes.userActions + "/activate-account";
     // endregion
 
     // region Media

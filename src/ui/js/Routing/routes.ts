@@ -66,5 +66,8 @@ export const routes = [
     },
     {
         path: "password-reset"
+    },
+    {
+        path: "activate-account"
     }
 ];

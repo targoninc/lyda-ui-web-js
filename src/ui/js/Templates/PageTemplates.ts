@@ -28,6 +28,7 @@ export class PageTemplates {
         test: LandingPageTemplates.newLandingPage,
         subscribe: this.subscribePage,
         "password-reset": LandingPageTemplates.newLandingPage,
+        "activate-account": LandingPageTemplates.newLandingPage,
     };
     static nonUserFallback = {
         library: this.loginPage,
