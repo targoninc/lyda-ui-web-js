@@ -1,6 +1,6 @@
 import {GenericTemplates} from "../Templates/GenericTemplates.ts";
 import {AlbumTemplates} from "../Templates/AlbumTemplates.ts";
-import {Api} from "../Classes/Api.ts";
+import {Api, ApiRoutes} from "../Classes/Api.ts";
 import {Util} from "../Classes/Util.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
@@ -9,6 +9,8 @@ import {navigate} from "../Routing/Router.ts";
 import {Signal} from "../../fjsc/f2.ts";
 import {Album} from "../Models/DbModels/Album.ts";
 import {Track} from "../Models/DbModels/Track.ts";
+import {MediaUploader} from "../Classes/MediaUploader.ts";
+import {MediaFileType} from "../Enums/MediaFileType.ts";
 
 export class AlbumActions {
     static async deleteAlbumFromElement(e: any) {
@@ -19,7 +21,7 @@ export class AlbumActions {
     }
 
     static async openAddToAlbumModal(track: Track) {
-        const res = await Api.getAsync(Api.endpoints.albums.byUserId, {user_id: track.user_id});
+        const res = await Api.getAsync(ApiRoutes.getAlbumByUserId, {user_id: track.user_id});
         if (res.code !== 200) {
             console.error("Failed to get albums: ", res.data);
             return;
@@ -34,7 +36,7 @@ export class AlbumActions {
     }
 
     static async createNewAlbum(album: Album) {
-        const res = await Api.postAsync(Api.endpoints.albums.actions.new, album);
+        const res = await Api.postAsync(ApiRoutes.createAlbum, album);
         if (res.code !== 200) {
             Ui.notify("Failed to create album: " + res.data, "error");
             return;
@@ -43,7 +45,7 @@ export class AlbumActions {
     }
 
     static async deleteAlbum(id: number) {
-        const res = await Api.postAsync(Api.endpoints.albums.actions.delete, {id});
+        const res = await Api.postAsync(ApiRoutes.deleteAlbum, {id});
         if (res.code === 200) {
             PlayManager.removeStreamClient(id);
             QueueManager.removeFromManualQueue(id);
@@ -63,7 +65,7 @@ export class AlbumActions {
                 albumIds.push(parseInt(albumId));
             }
         }
-        const res = await Api.postAsync(Api.endpoints.albums.actions.addTrack, {album_ids: albumIds, track_id});
+        const res = await Api.postAsync(ApiRoutes.addTrackToAlbums, {album_ids: albumIds, track_id});
         Util.removeModal();
         if (res.code !== 200) {
             Ui.notify("Failed to add track to albums: " + res.data, "error");
@@ -73,7 +75,7 @@ export class AlbumActions {
     }
 
     static async removeTrackFromAlbum(track_id: number, album_id: number) {
-        const res = await Api.postAsync(Api.endpoints.albums.actions.removeTrack, {id: album_id, track_id});
+        const res = await Api.postAsync(ApiRoutes.removeTrackFromAlbum, {id: album_id, track_id});
         if (res.code !== 200) {
             Ui.notify("Failed to remove track from album: " + res.data, "error");
             return false;
@@ -82,7 +84,7 @@ export class AlbumActions {
         return true;
     }
 
-    static async replaceCover(e: MouseEvent, loading: Signal<boolean>) {
+    static async replaceCover(e: MouseEvent, id: number, loading: Signal<boolean>) {
         const target = e.target as HTMLImageElement;
         if (target.getAttribute("canEdit") !== "true") {
             return;
@@ -90,25 +92,13 @@ export class AlbumActions {
         const oldSrc = target.src;
         loading.value = true;
         let fileInput = document.createElement("input");
-        const id = parseInt(Util.getAlbumIdFromEvent(e));
         fileInput.type = "file";
         fileInput.accept = "image/*";
         fileInput.onchange = async (e) => {
             const fileTarget = e.target as HTMLInputElement;
-            let file = fileTarget.files![0];
-            if (!file) {
-                loading.value = false;
-                return;
-            }
-            let formData = new FormData();
-            formData.append("cover", file);
-            formData.append("id", id.toString());
-            let response = await fetch(Api.endpoints.albums.actions.uploadCover, {
-                method: "POST",
-                body: formData,
-                credentials: "include"
-            });
-            if (response.status === 200) {
+            const file = fileTarget.files![0];
+            const response = await MediaUploader.upload(MediaFileType.albumCover, id, file);
+            if (response.code === 200) {
                 loading.value = false;
                 Ui.notify("Cover updated", "success");
                 await Util.updateImage(URL.createObjectURL(file), oldSrc);
@@ -118,7 +108,7 @@ export class AlbumActions {
     }
 
     static async moveTrackInAlbum(albumId: number, trackId: number, newPosition: number) {
-        const res = await Api.postAsync(Api.endpoints.albums.actions.reorderTracks, {id: albumId, track_id: trackId, new_position: newPosition});
+        const res = await Api.postAsync(ApiRoutes.reorderAlbumTracks, {id: albumId, track_id: trackId, new_position: newPosition});
         if (res.code !== 200) {
             Ui.notify("Failed to move track in album: " + res.data, "error");
             return false;

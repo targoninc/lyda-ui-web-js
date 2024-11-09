@@ -407,7 +407,7 @@ export class AlbumTemplates {
                         create("div")
                             .classes("cover-container", "relative", data.canEdit ? "pointer" : "_")
                             .attributes("album_id", album.id, "canEdit", data.canEdit)
-                            .onclick(e => AlbumActions.replaceCover(e, coverLoading))
+                            .onclick(e => AlbumActions.replaceCover(e, album.id, coverLoading))
                             .children(
                                 ifjs(coverLoading, create("div")
                                     .classes("loader", "loader-small", "centeredInParent")

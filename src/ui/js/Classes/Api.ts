@@ -78,29 +78,28 @@ export class ApiRoutes {
     static exploreFeed = ApiRoutes.feeds + "/explore";
     static autoQueueFeed = ApiRoutes.feeds + "/autoQueue";
     // endregion
+
+    // region Albums
+    private static albums = ApiRoutes.base + "/albums";
+    static getAlbumById = ApiRoutes.albums + "/byId";
+    static getAlbumByUserId = ApiRoutes.albums + "/byUserId";
+
+    private static albumActions = ApiRoutes.albums + "/actions";
+    static createAlbum = ApiRoutes.albumActions + "/new";
+    static deleteAlbum = ApiRoutes.albumActions + "/delete";
+    static addTrackToAlbums = ApiRoutes.albumActions + "/addTrack";
+    static removeTrackFromAlbum = ApiRoutes.albumActions + "/removeTrack";
+    static reorderAlbumTracks = ApiRoutes.albumActions + "/reorderTracks";
+    // endregion
 }
 
 export class Api {
     static get endpoints() {
         const endpoints = {
             base: Config.apiBaseUrl,
-            tracks: {
-                feeds: {
-                    following: "following",
-                    explore: "explore",
-                    autoQueue: "autoQueue",
-                }
-            },
             albums: {
-                byId: "byId",
-                byUserId: "byUserId",
                 actions: {
-                    new: "new",
-                    delete: "delete",
-                    addTrack: "addTrack",
                     uploadCover: "changeCover",
-                    removeTrack: "removeTrack",
-                    reorderTracks: "reorderTracks",
                     like: "like",
                     unlike: "unlike",
                 }
