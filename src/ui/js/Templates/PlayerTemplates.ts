@@ -5,14 +5,11 @@ import {Time} from "../Classes/Helpers/Time.ts";
 import {QueueManager} from "../Streaming/QueueManager.ts";
 import {Images} from "../Enums/Images.ts";
 import {QueueTemplates} from "./QueueTemplates.ts";
-import {AlbumActions} from "../Actions/AlbumActions.ts";
-import {PlaylistActions} from "../Actions/PlaylistActions.ts";
-import {TrackActions} from "../Actions/TrackActions.ts";
 import {UserTemplates} from "./UserTemplates.ts";
 import {StatisticsTemplates} from "./StatisticsTemplates.ts";
 import {CommentTemplates} from "./CommentTemplates.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
-import {Ui} from "../Classes/Ui.ts";
+import {notify, Ui} from "../Classes/Ui.ts";
 import {Util} from "../Classes/Util.ts";
 import {create, signal} from "../../fjsc/f2.ts";
 import {Track} from "../Models/DbModels/Track.ts";
@@ -235,9 +232,8 @@ export class PlayerTemplates {
             .text("Listening in 96kbps. Subscribe for up to 320kbps.")
             .onclick(() => {
                 window.open("https://finance.targoninc.com", "_blank");
-                Ui.notify("Subscriptions page opened in new tab.");
-            })
-            .build();
+                notify("Subscriptions page opened in new tab.");
+            }).build();
     }
 
     static async bottomTrackInfo(track: Track, trackUser: User, user: User, playingFrom: any) {

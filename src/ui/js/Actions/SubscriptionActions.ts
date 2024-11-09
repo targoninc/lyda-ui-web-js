@@ -1,6 +1,6 @@
 import {Api} from "../Api/Api.ts";
 import {SubscriptionTemplates} from "../Templates/SubscriptionTemplates.ts";
-import {Ui} from "../Classes/Ui.ts";
+import {notify, Ui} from "../Classes/Ui.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 
 export class SubscriptionActions {
@@ -46,11 +46,11 @@ export class SubscriptionActions {
                 onApprove(data, actions);
             },
             onError: function (err) {
-                Ui.notify("Failed to start subscription: " + err, "error");
+                notify("Failed to start subscription: " + err, "error");
                 message.value = "Failed to start subscription";
             },
             onCancel: function () {
-                Ui.notify("Subscription cancelled", "info");
+                notify("Subscription cancelled", "info");
                 message.value = "Subscription cancelled";
             },
             style: {
@@ -66,9 +66,9 @@ export class SubscriptionActions {
     static async subscriptionSuccess(data, parameters) {
         const response = await Api.postAsync(ApiRoutes.subscribe, {...parameters});
         if (response.code === 200) {
-            Ui.notify("Subscription started", "success");
+            notify("Subscription started", "success");
         } else {
-            Ui.notify(response.data, "error");
+            notify(response.data, "error");
         }
     }
 
@@ -85,11 +85,11 @@ export class SubscriptionActions {
     static async cancelSubscriptionAsync(id) {
         const response = await Api.postAsync(ApiRoutes.unsubscribe, {id});
         if (response.code !== 200) {
-            Ui.notify(response.data, "error");
+            notify(response.data, "error");
             return false;
         }
 
-        Ui.notify("Subscription cancelled", "success");
+        notify("Subscription cancelled", "success");
         return true;
     }
 
@@ -102,7 +102,7 @@ export class SubscriptionActions {
     static async loadSubscriptionOptions() {
         const res = await Api.getAsync(ApiRoutes.getSubscriptionOptions);
         if (res.code !== 200) {
-            Ui.notify("Failed to load subscription options", "error");
+            notify("Failed to load subscription options", "error");
             return;
         }
 

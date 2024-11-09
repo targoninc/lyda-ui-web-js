@@ -9,7 +9,7 @@ import {LydaCache} from "../Cache/LydaCache.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {CommentTemplates} from "../Templates/CommentTemplates.ts";
 import {TrackEditTemplates} from "../Templates/TrackEditTemplates.ts";
-import {Ui} from "../Classes/Ui.ts";
+import {notify, Ui} from "../Classes/Ui.ts";
 import {navigate, reload} from "../Routing/Router.ts";
 import {Signal} from "../../fjsc/f2.ts";
 import {Comment} from "../Models/DbModels/Comment.ts";
@@ -35,7 +35,7 @@ export class TrackActions {
         });
 
         if (res.code !== 200) {
-            Ui.notify("Error while trying to unfollow user: " + res.data, "error");
+            notify("Error while trying to unfollow user: " + res.data, "error");
         }
 
         return res;
@@ -49,10 +49,10 @@ export class TrackActions {
         if (res.code === 200) {
             PlayManager.removeStreamClient(id);
             QueueManager.removeFromManualQueue(id);
-            Ui.notify(res.data, "success");
+            notify(res.data, "success");
             navigate("profile");
         } else {
-            Ui.notify("Error trying to delete track: " + res.data, "error");
+            notify("Error trying to delete track: " + res.data, "error");
         }
     }
 
@@ -63,7 +63,7 @@ export class TrackActions {
             });
 
             if (res.code !== 200) {
-                Ui.notify(res.data, "error");
+                notify(res.data, "error");
                 return;
             }
 
@@ -96,7 +96,7 @@ export class TrackActions {
             return;
         }
         if (content.length > 1000) {
-            Ui.notify("Comment is too long", "error");
+            notify("Comment is too long", "error");
             return;
         }
         e.target.value = "";
@@ -108,7 +108,7 @@ export class TrackActions {
         });
 
         if (res.code !== 200) {
-            Ui.notify(res.data, "error");
+            notify(res.data, "error");
             return;
         }
 
@@ -192,7 +192,7 @@ export class TrackActions {
         });
 
         if (res.code !== 200) {
-            Ui.notify("Error while trying to follow user: " + res.data, "error");
+            notify("Error while trying to follow user: " + res.data, "error");
         }
 
         return res;
@@ -201,7 +201,7 @@ export class TrackActions {
     static async getCollabTypes() {
         const res = await Api.getAsync(ApiRoutes.getTrackCollabTypes);
         if (res.code !== 200) {
-            Ui.notify("Error while trying to get collab types: " + res.data, "error");
+            notify("Error while trying to get collab types: " + res.data, "error");
             return [];
         }
         return res.data;
@@ -209,7 +209,7 @@ export class TrackActions {
 
     static async toggleLike(id: number, isEnabled: boolean) {
         if (!Util.isLoggedIn()) {
-            Ui.notify("You must be logged in to like tracks", "error");
+            notify("You must be logged in to like tracks", "error");
             return false;
         }
         if (isEnabled) {
@@ -228,7 +228,7 @@ export class TrackActions {
 
     static async toggleRepost(id: number, isEnabled: boolean) {
         if (!Util.isLoggedIn()) {
-            Ui.notify("You must be logged in to repost tracks", "error");
+            notify("You must be logged in to repost tracks", "error");
             return false;
         }
         if (isEnabled) {
@@ -278,7 +278,7 @@ export class TrackActions {
             const response = await MediaUploader.upload(MediaFileType.trackCover, id, file);
             if (response.code === 200) {
                 loading.value = false;
-                Ui.notify("Cover updated", "success");
+                notify("Cover updated", "success");
                 await Util.updateImage(URL.createObjectURL(file), oldSrc);
             }
         };
@@ -395,7 +395,7 @@ export class TrackActions {
         });
 
         if (res.code !== 200) {
-            Ui.notify("Error while trying to remove collaborator: " + res.data, "error");
+            notify("Error while trying to remove collaborator: " + res.data, "error");
             return;
         }
 
@@ -411,7 +411,7 @@ export class TrackActions {
         });
 
         if (res.code !== 200) {
-            Ui.notify("Error while trying to add collaborator: " + res.data, "error");
+            notify("Error while trying to add collaborator: " + res.data, "error");
             return;
         }
 
@@ -426,13 +426,13 @@ export class TrackActions {
                 value: description
             });
             if (res.code !== 200) {
-                Ui.notify("Failed to update " + property, "error");
+                notify("Failed to update " + property, "error");
                 return;
             }
             const user = LydaCache.get("user").content;
             user.description = description;
             LydaCache.set("user", new CacheItem(user));
-            Ui.notify(property + " updated", "success");
+            notify(property + " updated", "success");
             if (callback) {
                 callback(description);
             }
@@ -443,7 +443,7 @@ export class TrackActions {
     static async getUnapprovedTracks() {
         const res = await Api.getAsync(ApiRoutes.getUnapprovedCollabs);
         if (res.code !== 200) {
-            Ui.notify("Error while trying to get unapproved tracks: " + res.data, "error");
+            notify("Error while trying to get unapproved tracks: " + res.data, "error");
             return [];
         }
         return res.data;
@@ -454,11 +454,11 @@ export class TrackActions {
             id: id,
         });
         if (res.code !== 200) {
-            Ui.notify("Error while trying to approve collab: " + res.data, "error");
+            notify("Error while trying to approve collab: " + res.data, "error");
             return;
         }
 
-        Ui.notify(`Collab on ${name} approved`, "success");
+        notify(`Collab on ${name} approved`, "success");
         const collab = document.querySelector(".collab[id='" + id + "']");
         if (collab) {
             collab.remove();
@@ -470,11 +470,11 @@ export class TrackActions {
             id: id,
         });
         if (res.code !== 200) {
-            Ui.notify("Error while trying to deny collab: " + res.data, "error");
+            notify("Error while trying to deny collab: " + res.data, "error");
             return;
         }
 
-        Ui.notify(`Collab on ${name} denied`, "success");
+        notify(`Collab on ${name} denied`, "success");
         const collab = document.querySelector(".collab[id='" + id + "']");
         if (collab) {
             collab.remove();
@@ -495,7 +495,7 @@ export class TrackActions {
             price: track.price,
         });
         if (res.code !== 200) {
-            Ui.notify("Error while trying to update track: " + res.data, "error");
+            notify("Error while trying to update track: " + res.data, "error");
             return;
         }
 
@@ -506,7 +506,7 @@ export class TrackActions {
         const confirmCallback2 = async (newTrack: Track) => {
             Util.removeModal();
             await TrackActions.updateTrackFull(newTrack);
-            Ui.notify("Track updated", "success");
+            notify("Track updated", "success");
             reload();
         };
         const cancelCallback2 = () => {

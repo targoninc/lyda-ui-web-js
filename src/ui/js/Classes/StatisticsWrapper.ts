@@ -1,6 +1,6 @@
 import {StatisticTemplates} from "../Templates/StatisticTemplates.ts";
 import {Api} from "../Api/Api.ts";
-import {Ui} from "./Ui.ts";
+import {notify, Ui} from "./Ui.ts";
 import {Num} from "./Helpers/Num.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {signal} from "../../fjsc/f2.ts";
@@ -20,7 +20,7 @@ export class StatisticsWrapper {
         const chart = signal(template([], []));
         Api.getAsync(endpoint).then((res) => {
             if (res.code !== 200) {
-                Ui.notify(res.data, "error");
+                notify(res.data, "error");
                 return;
             }
             if (reverse) {

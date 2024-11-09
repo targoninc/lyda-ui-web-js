@@ -11,7 +11,7 @@ import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {StatisticsTemplates} from "./StatisticsTemplates.ts";
 import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
-import {Ui} from "../Classes/Ui.ts";
+import {notify, Ui} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
 import {AnyNode, computedSignal, create, HtmlPropertyValue, ifjs, signal} from "../../fjsc/f2.ts";
 import {Album} from "../Models/DbModels/Album.ts";
@@ -301,7 +301,7 @@ export class AlbumTemplates {
                 QueueManager.setContextQueue(album.tracks!.map(t => t.id));
                 const firstTrack = album.tracks![0];
                 if (!firstTrack) {
-                    Ui.notify("This album has no tracks", "error");
+                    notify("This album has no tracks", "error");
                     return;
                 }
                 PlayManager.addStreamClientIfNotExists(firstTrack.id, firstTrack.length);

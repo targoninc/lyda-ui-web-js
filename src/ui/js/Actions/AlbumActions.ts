@@ -2,7 +2,7 @@ import {GenericTemplates} from "../Templates/GenericTemplates.ts";
 import {AlbumTemplates} from "../Templates/AlbumTemplates.ts";
 import {Api} from "../Api/Api.ts";
 import {Util} from "../Classes/Util.ts";
-import {Ui} from "../Classes/Ui.ts";
+import {notify, Ui} from "../Classes/Ui.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
 import {QueueManager} from "../Streaming/QueueManager.ts";
 import {navigate} from "../Routing/Router.ts";
@@ -39,10 +39,10 @@ export class AlbumActions {
     static async createNewAlbum(album: Album) {
         const res = await Api.postAsync(ApiRoutes.newAlbum, album);
         if (res.code !== 200) {
-            Ui.notify("Failed to create album: " + res.data, "error");
+            notify("Failed to create album: " + res.data, "error");
             return;
         }
-        Ui.notify("Created album", "success");
+        notify("Created album", "success");
     }
 
     static async deleteAlbum(id: number) {
@@ -50,10 +50,10 @@ export class AlbumActions {
         if (res.code === 200) {
             PlayManager.removeStreamClient(id);
             QueueManager.removeFromManualQueue(id);
-            Ui.notify("Successfully deleted album", "success");
+            notify("Successfully deleted album", "success");
             navigate("profile");
         } else {
-            Ui.notify("Error trying to delete album: " + res.data, "error");
+            notify("Error trying to delete album: " + res.data, "error");
         }
     }
 
@@ -69,19 +69,19 @@ export class AlbumActions {
         const res = await Api.postAsync(ApiRoutes.addTrackToAlbums, {album_ids: albumIds, track_id});
         Util.removeModal();
         if (res.code !== 200) {
-            Ui.notify("Failed to add track to albums: " + res.data, "error");
+            notify("Failed to add track to albums: " + res.data, "error");
             return;
         }
-        Ui.notify("Added track to albums", "success");
+        notify("Added track to albums", "success");
     }
 
     static async removeTrackFromAlbum(track_id: number, album_id: number) {
         const res = await Api.postAsync(ApiRoutes.removeTrackFromAlbum, {id: album_id, track_id});
         if (res.code !== 200) {
-            Ui.notify("Failed to remove track from album: " + res.data, "error");
+            notify("Failed to remove track from album: " + res.data, "error");
             return false;
         }
-        Ui.notify("Removed track from album", "success");
+        notify("Removed track from album", "success");
         return true;
     }
 
@@ -101,7 +101,7 @@ export class AlbumActions {
             const response = await MediaUploader.upload(MediaFileType.albumCover, id, file);
             if (response.code === 200) {
                 loading.value = false;
-                Ui.notify("Cover updated", "success");
+                notify("Cover updated", "success");
                 await Util.updateImage(URL.createObjectURL(file), oldSrc);
             }
         };
@@ -111,7 +111,7 @@ export class AlbumActions {
     static async moveTrackInAlbum(albumId: number, trackId: number, newPosition: number) {
         const res = await Api.postAsync(ApiRoutes.reorderAlbumTracks, {id: albumId, track_id: trackId, new_position: newPosition});
         if (res.code !== 200) {
-            Ui.notify("Failed to move track in album: " + res.data, "error");
+            notify("Failed to move track in album: " + res.data, "error");
             return false;
         }
         return true;
@@ -127,7 +127,7 @@ export class AlbumActions {
 
     static async toggleLike(id: number, isEnabled: boolean) {
         if (!Util.isLoggedIn()) {
-            Ui.notify("You must be logged in to like albums", "error");
+            notify("You must be logged in to like albums", "error");
             return false;
         }
         if (isEnabled) {
@@ -158,7 +158,7 @@ export class AlbumActions {
             QueueManager.setContextQueue(album.tracks.map(t => t.id));
             const track = album.tracks.find(t => t.id === trackId);
             if (!track) {
-                Ui.notify("This track could not be found in this album", "error");
+                notify("This track could not be found in this album", "error");
                 return;
             }
             PlayManager.addStreamClientIfNotExists(track.id, track.length);

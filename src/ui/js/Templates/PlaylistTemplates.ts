@@ -1,7 +1,6 @@
 import {Icons} from "../Enums/Icons.js";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {PlaylistActions} from "../Actions/PlaylistActions.ts";
-import {FormTemplates} from "./FormTemplates.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {TrackTemplates} from "./TrackTemplates.ts";
 import {UserTemplates} from "./UserTemplates.ts";
@@ -11,7 +10,7 @@ import {PlayManager} from "../Streaming/PlayManager.ts";
 import {StatisticsTemplates} from "./StatisticsTemplates.ts";
 import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
-import {Ui} from "../Classes/Ui.ts";
+import {notify, Ui} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
 import {User} from "../Models/DbModels/User.ts";
 import {Playlist} from "../Models/DbModels/Playlist.ts";
@@ -280,7 +279,7 @@ export class PlaylistTemplates {
                     .children(
                         StatisticsTemplates.likesIndicator("playlist", playlist.id, playlist.likes.length,
                             Util.arrayPropertyMatchesUser(playlist.likes, "userId", user)),
-                        StatisticsTemplates.likeListOpener(playlist.id, playlist.likes, user),
+                        StatisticsTemplates.likeListOpener(playlist.likes, user),
                     ).build()
             ).build();
     }
@@ -314,12 +313,12 @@ export class PlaylistTemplates {
             .styles("width", overwriteWidth ?? "min(200px, 100%)")
             .id(playlist.id)
             .onclick(async () => {
-                Ui.notify("Starting playlist " + playlist.id, "info");
+                notify("Starting playlist " + playlist.id, "info");
                 PlayManager.playFrom("playlist", playlist.name, playlist.id);
                 QueueManager.setContextQueue(playlist.tracks!.map(t => t.id));
                 const firstTrack = playlist.tracks![0];
                 if (!firstTrack) {
-                    Ui.notify("This playlist has no tracks", "error");
+                    notify("This playlist has no tracks", "error");
                     return;
                 }
                 PlayManager.addStreamClientIfNotExists(firstTrack.id, firstTrack.length);
@@ -454,19 +453,16 @@ export class PlaylistTemplates {
                                     .children(
                                         StatisticsTemplates.likesIndicator("playlist", playlist.id, playlist.likes.length,
                                             Util.arrayPropertyMatchesUser(playlist.likes, "userId", user)),
-                                        StatisticsTemplates.likeListOpener(playlist.id, playlist.likes, user),
+                                        StatisticsTemplates.likeListOpener(playlist.likes, user),
                                     ).build(),
-                            )
-                            .build()
-                    )
-                    .build(),
+                            ).build()
+                    ).build(),
                 create("div")
                     .classes("flex-v")
                     .children(
                         ...trackChildren
                     ).build()
-            )
-            .build();
+            ).build();
     }
 
     static audioActions(playlist: Playlist, user: User, editActions: AnyNode[] = []) {

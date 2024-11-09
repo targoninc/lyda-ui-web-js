@@ -6,7 +6,7 @@ import {QueueManager} from "./QueueManager.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
 import {StreamClient} from "./StreamClient.ts";
 import {userHasSettingValue, Util} from "../Classes/Util.ts";
-import {Ui} from "../Classes/Ui.ts";
+import {notify, Ui} from "../Classes/Ui.ts";
 import {Track} from "../Models/DbModels/Track.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 
@@ -168,7 +168,7 @@ export class PlayManager {
         await PlayManager.stopAllAsync();
 
         if (!Util.isLoggedIn()) {
-            Ui.notify("You need to be logged in to play music", "error");
+            notify("You need to be logged in to play music", "error");
             return;
         }
 

@@ -1,7 +1,7 @@
 export class TrackProcessor {
     /**
      *
-     * @param input {Music}
+     * @param input {Track}
      */
     static forDownload(input) {
         const track = structuredClone(input);

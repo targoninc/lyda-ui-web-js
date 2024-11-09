@@ -1,4 +1,4 @@
-import {Ui} from "./Ui.ts";
+import {notify, Ui} from "./Ui.ts";
 import {Images} from "../Enums/Images.ts";
 import {Config} from "./Config.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
@@ -128,7 +128,7 @@ export class Util {
 
     static async copyToClipboard(text: string) {
         await navigator.clipboard.writeText(text);
-        Ui.notify("Copied to clipboard", "success");
+        notify("Copied to clipboard", "success");
     }
 
     static async fileExists(url: string) {
@@ -255,7 +255,7 @@ export class Util {
                 return null;
             }
             if (res.code === 500) {
-                Ui.notify("An error occurred while fetching the user", "error");
+                notify("An error occurred while fetching the user", "error");
                 return null;
             }
             return Util.mapNullToEmptyString(res.data);
@@ -275,7 +275,7 @@ export class Util {
             return null;
         }
         if (res.code === 500) {
-            Ui.notify("An error occurred while fetching the user", "error");
+            notify("An error occurred while fetching the user", "error");
             return null;
         }
         return Util.mapNullToEmptyString(res.data);

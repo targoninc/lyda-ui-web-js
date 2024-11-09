@@ -1,5 +1,5 @@
 import {Api} from "../Api/Api.ts";
-import {Ui} from "./Ui.ts";
+import {notify, Ui} from "./Ui.ts";
 import {navigate} from "../Routing/Router.ts";
 import {Signal} from "../../fjsc/f2.ts";
 import {UploadableTrack} from "../Models/UploadableTrack.ts";
@@ -80,7 +80,7 @@ export class AudioUpload {
             this.setInfoSuccess("cover");
         }
 
-        Ui.notify("Track upload completed", "success");
+        notify("Track upload completed", "success");
         navigate(`track/${this.id}`);
     }
 
@@ -138,7 +138,7 @@ export class AudioUpload {
 
     validateCondition(condition: boolean, message: string, type: string) {
         if (!condition) {
-            Ui.notify(message, "error");
+            notify(message, "error");
             this.writeToInfo(message, type);
             this.setInfoError(type);
             return false;

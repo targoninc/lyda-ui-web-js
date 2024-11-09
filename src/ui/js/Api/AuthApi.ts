@@ -1,5 +1,5 @@
 import {Api, ApiResponse} from "./Api.ts";
-import {Ui} from "../Classes/Ui.ts";
+import {notify, Ui} from "../Classes/Ui.ts";
 import {ApiRoutes} from "./ApiRoutes.ts";
 
 export class AuthApi {
@@ -24,7 +24,7 @@ export class AuthApi {
             if (response.code === 200) {
                 successCallback(response.data);
             } else {
-                Ui.notify(response.data, "error");
+                notify(response.data, "error");
                 errorCallback(response.code, response.data);
             }
         });
@@ -48,7 +48,7 @@ export class AuthApi {
             if (response.code === 200) {
                 successCallback(response);
             } else {
-                Ui.notify(response.data, "error");
+                notify(response.data, "error");
                 errorCallback(response);
             }
         });
@@ -62,7 +62,7 @@ export class AuthApi {
             if (response.code === 200 || response.code === 204) {
                 successCallback && successCallback(response);
             } else {
-                Ui.notify(response.data, "error");
+                notify(response.data, "error");
                 errorCallback && errorCallback(response);
             }
         });

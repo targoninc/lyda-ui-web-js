@@ -1,6 +1,6 @@
 import {create, signal} from "../../fjsc/f2.ts";
 import {Api} from "../Api/Api.ts";
-import {Ui} from "../Classes/Ui.ts";
+import {notify, Ui} from "../Classes/Ui.ts";
 import {navigate} from "../Routing/Router.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 
@@ -26,7 +26,7 @@ export class SearchTemplates {
                 create("input")
                     .classes("search-input")
                     .placeholder("Search")
-                    .onkeydown((e) => {
+                    .onkeydown((e: KeyboardEvent) => {
                         const list = results.value;
                         const pressedKey = e.key;
                         if (pressedKey === "ArrowDown") {
@@ -55,7 +55,7 @@ export class SearchTemplates {
                             selectedResult.value = list[index - 1];
                         }
                     })
-                    .onkeyup(async (e) => {
+                    .onkeyup(async (e: KeyboardEvent) => {
                         const pressedKey = e.key;
                         if (pressedKey === "Enter") {
                             if (selectedResult.value === null) {
@@ -65,7 +65,8 @@ export class SearchTemplates {
                             return;
                         }
 
-                        let search = e.target.value;
+                        const target = e.target as HTMLInputElement;
+                        let search = target.value;
                         if (pressedKey !== "Backspace" && pressedKey !== "Delete" && pressedKey.length > 1) {
                             return;
                         }
@@ -79,7 +80,7 @@ export class SearchTemplates {
                         // TODO: Change search so it searches all 4 endpoints
                         const res = await Api.getAsync(ApiRoutes.searchTracks, { search, filters });
                         if (res.code !== 200) {
-                            Ui.notify("Failed to search, status code " + res.code, "error");
+                            notify("Failed to search, status code " + res.code, "error");
                             return;
                         }
                         if (tempCount === resultCount + 1) {

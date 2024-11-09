@@ -22,7 +22,7 @@ import {SubscriptionTemplates} from "./Templates/SubscriptionTemplates.ts";
 import {SubscriptionActions} from "./Actions/SubscriptionActions.ts";
 import {Util} from "./Classes/Util.ts";
 import {StatisticsWrapper} from "./Classes/StatisticsWrapper.ts";
-import {Ui} from "./Classes/Ui.ts";
+import {notify, Ui} from "./Classes/Ui.ts";
 import {navigate} from "./Routing/Router.ts";
 import {Permission} from "./Models/DbModels/Permission.ts";
 import {Follow} from "./Models/DbModels/Follow.ts";
@@ -179,7 +179,7 @@ export class Lyda {
         case "logs":
             user = await Util.getUserAsync();
             if (!permissions.some((p: Permission) => p.name === Permissions.canViewLogs)) {
-                Ui.notify("You do not have permission to view logs", "error");
+                notify("You do not have permission to view logs", "error");
                 return;
             }
             const filterState = signal("all");
@@ -195,7 +195,7 @@ export class Lyda {
         case "actionLogs":
             user = await Util.getUserAsync();
             if (!permissions.some(p => p.name === Permissions.canViewActionLogs)) {
-                Ui.notify("You do not have permission to view action logs", "error");
+                notify("You do not have permission to view action logs", "error");
                 return;
             }
             const actionLogs = await Api.getAsync(ApiRoutes.getActionLogs);
@@ -210,7 +210,7 @@ export class Lyda {
         case "moderation":
             user = await Util.getUserAsync();
             if (!permissions.some(p => p.name === Permissions.canDeleteComments)) {
-                Ui.notify("You do not have permission to moderate", "error");
+                notify("You do not have permission to moderate", "error");
                 return;
             }
             const comments = await CommentActions.getPotentiallyHarmful();
@@ -256,7 +256,7 @@ export class Lyda {
             loadingState.value = true;
             const res = await Api.getAsync(endpoint, params);
             if (res.code !== 200) {
-                Ui.notify("Failed to get tracks", "error");
+                notify("Failed to get tracks", "error");
                 loadingState.value = false;
                 return;
             }

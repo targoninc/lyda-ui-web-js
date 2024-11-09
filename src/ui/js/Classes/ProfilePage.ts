@@ -1,5 +1,5 @@
 import {Api} from "../Api/Api.ts";
-import {Ui} from "./Ui.ts";
+import {notify, Ui} from "./Ui.ts";
 import {UserTemplates} from "../Templates/UserTemplates.ts";
 import {GenericTemplates} from "../Templates/GenericTemplates.ts";
 import {User} from "../Models/DbModels/User.ts";
@@ -33,7 +33,7 @@ export class ProfilePage {
     static async addTracksAsync(element: AnyElement, user: User, selfUser: User, isOwnProfile: boolean) {
         const tracksRes = await Api.getAsync(ApiRoutes.getTrackByUserId, { id: user.id, name: user.username });
         if (tracksRes.code !== 200) {
-            Ui.notify(tracksRes.data, "error");
+            notify(tracksRes.data, "error");
             return;
         }
         const tracks = tracksRes.data;
@@ -47,7 +47,7 @@ export class ProfilePage {
             id: user.id, name: user.username
         });
         if (albumsRes.code !== 200) {
-            Ui.notify(albumsRes.data, "error");
+            notify(albumsRes.data, "error");
             return;
         }
         const albums = albumsRes.data;
@@ -61,7 +61,7 @@ export class ProfilePage {
             id: user.id, name: user.username
         });
         if (playlistsRes.code !== 200) {
-            Ui.notify(playlistsRes.data, "error");
+            notify(playlistsRes.data, "error");
             return;
         }
         const playlists = playlistsRes.data;
@@ -75,7 +75,7 @@ export class ProfilePage {
             id: user.id, name: user.username
         });
         if (repostsRes.code !== 200) {
-            Ui.notify(repostsRes.data, "error");
+            notify(repostsRes.data, "error");
             return;
         }
         const reposts = repostsRes.data;

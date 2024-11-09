@@ -1,6 +1,6 @@
 import {Api} from "../Api/Api.ts";
 import {getUserSettingValue, updateUserSetting, Util} from "../Classes/Util.ts";
-import {Ui} from "../Classes/Ui.ts";
+import {notify, Ui} from "../Classes/Ui.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {Icons} from "../Enums/Icons.js";
@@ -12,11 +12,12 @@ import {MediaUploader} from "../Api/MediaUploader.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {Signal} from "../../fjsc/f2.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
+import {Notification} from "../Models/DbModels/Notification.ts";
 
 export class UserActions {
     static updateAvatar(newSrc) {
         if (newSrc === "") {
-            const avatar = document.querySelector(".avatar-container img");
+            const avatar = document.querySelector(".avatar-container img") as HTMLImageElement;
             avatar.src = newSrc;
         }
         if (!this.fileExists(newSrc)) {
@@ -24,14 +25,14 @@ export class UserActions {
                 this.updateAvatar(newSrc);
             }, 1000);
         } else {
-            const avatar = document.querySelector(".avatar-container img");
+            const avatar = document.querySelector(".avatar-container img") as HTMLImageElement;
             avatar.src = newSrc;
         }
     }
 
     static updateBanner(newSrc) {
         if (newSrc === "") {
-            const banner = document.querySelector(".banner-container img");
+            const banner = document.querySelector(".banner-container img") as HTMLImageElement;
             banner.src = newSrc;
         }
         if (!this.fileExists(newSrc)) {
@@ -39,7 +40,7 @@ export class UserActions {
                 this.updateBanner(newSrc);
             }, 1000);
         } else {
-            const banner = document.querySelector(".banner-container img");
+            const banner = document.querySelector(".banner-container img") as HTMLImageElement;
             banner.src = newSrc;
         }
     }
@@ -58,7 +59,10 @@ export class UserActions {
         fileInput.accept = "image/*";
         fileInput.onchange = async (e) => {
             loading.value = true;
-            const file = e.target!.files[0];
+            if (!fileInput.files) {
+                return;
+            }
+            const file = fileInput.files![0];
             /*
             let formData = new FormData();
             formData.append("type", MediaFileType.userAvatar);
@@ -74,7 +78,7 @@ export class UserActions {
             if (response.code === 200) {
                 const user = LydaCache.get("user").content;
                 LydaCache.set("user", new CacheItem(user));
-                Ui.notify("Avatar updated", "success");
+                notify("Avatar updated", "success");
                 UserActions.updateAvatar(URL.createObjectURL(file));
             }
         };
@@ -92,7 +96,7 @@ export class UserActions {
             if (response.code === 200) {
                 const user = LydaCache.get("user").content;
                 LydaCache.set("user", new CacheItem(user));
-                Ui.notify("Avatar removed", "success");
+                notify("Avatar removed", "success");
                 UserActions.updateAvatar(await Util.getAvatarFromUserIdAsync(user.id));
             }
         }, () => {}, Icons.WARNING);
@@ -108,17 +112,20 @@ export class UserActions {
         fileInput.accept = "image/*";
         fileInput.onchange = async (e) => {
             loading.value = true;
-            let file = e.target!.files[0];
+            if (!fileInput.files) {
+                return;
+            }
+            let file = fileInput.files![0];
 
             const response = await MediaUploader.upload(MediaFileType.userBanner, user.id, file);
             loading.value = false;
             if (response.code === 200) {
                 const user = LydaCache.get("user").content;
                 LydaCache.set("user", new CacheItem(user));
-                Ui.notify("Banner updated", "success");
+                notify("Banner updated", "success");
                 UserActions.updateBanner(await Util.getBannerFromUserIdAsync(user.id) + "?t=" + Date.now());
             } else {
-                Ui.notify(`Failed to update banner: ${response.data.error}`, "error");
+                notify(`Failed to update banner: ${response.data.error}`, "error");
             }
         };
         fileInput.click();
@@ -136,10 +143,10 @@ export class UserActions {
                 if (response.code === 200) {
                     const user = LydaCache.get("user").content;
                     LydaCache.set("user", new CacheItem(user));
-                    Ui.notify("Banner removed", "success");
+                    notify("Banner removed", "success");
                     UserActions.updateBanner(await Util.getBannerFromUserIdAsync(user.id));
                 } else {
-                    Ui.notify(`Failed to remove banner: ${response.data.error}`, "error");
+                    notify(`Failed to remove banner: ${response.data.error}`, "error");
                 }
             },
             () => {}, Icons.WARNING
@@ -156,12 +163,12 @@ export class UserActions {
             if (res.code !== 200) {
                 return;
             }
-            const notifications = res.data;
+            const notifications = res.data as Notification[];
             if (notifications.length > 0) {
                 const notificationList = document.querySelector(".notification-list");
                 if (notificationList) {
                     for (const notification of notifications) {
-                        notificationList.prepend(NavTemplates.notificationInList(notification.type, notification.isRead, notification.createdAt, notification.message, notification.data));
+                        notificationList.prepend(NavTemplates.notificationInList(notification.type, notification.is_read, notification.created_at, notification.message, notification.data));
                     }
                     const notificationBubble = document.querySelector(".notification-bubble");
                     if (notificationBubble) {
@@ -220,7 +227,7 @@ export class UserActions {
         }
         const res = await Api.postAsync(ApiRoutes.updateUserSetting, { setting: UserSettings.theme, value: themeName });
         if (res.code !== 200) {
-            Ui.notify("Failed to update theme", "error");
+            notify("Failed to update theme", "error");
         }
     }
 
@@ -230,7 +237,7 @@ export class UserActions {
             value
         });
         if (res.code !== 200) {
-            Ui.notify("Failed to update user setting", "error");
+            notify("Failed to update user setting", "error");
             return false;
         }
         return true;
@@ -263,7 +270,7 @@ export class UserActions {
     static async unverifyUser(id: number) {
         const res = await Api.postAsync(ApiRoutes.unverifyUser, { id });
         if (res.code !== 200) {
-            Ui.notify("Failed to unverify user", "error");
+            notify("Failed to unverify user", "error");
             return false;
         }
         return true;
@@ -272,7 +279,7 @@ export class UserActions {
     static async verifyUser(id: number) {
         const res = await Api.postAsync(ApiRoutes.verifyUser, { id });
         if (res.code !== 200) {
-            Ui.notify("Failed to verify user", "error");
+            notify("Failed to verify user", "error");
             return false;
         }
         return true;
@@ -282,13 +289,13 @@ export class UserActions {
         Ui.getTextAreaInputModal("Edit description", "Enter your new description", currentDescription, "Save", "Cancel", async (description: string) => {
             const res = await Api.postAsync(ApiRoutes.updateUser, <Partial<User>>{ description: description });
             if (res.code !== 200) {
-                Ui.notify("Failed to update description", "error");
+                notify("Failed to update description", "error");
                 return;
             }
             const user = LydaCache.get("user").content;
             user.description = description;
             LydaCache.set("user", new CacheItem(user));
-            Ui.notify("Description updated", "success");
+            notify("Description updated", "success");
             successCallback(description);
         }, () => {}, Icons.PEN).then();
     }
@@ -297,13 +304,13 @@ export class UserActions {
         Ui.getTextInputModal("Edit displayname", "Enter your new displayname", currentDisplayname, "Save", "Cancel", async (displayname: string) => {
             const res = await Api.postAsync(ApiRoutes.updateUser, <Partial<User>>{ displayname: displayname });
             if (res.code !== 200) {
-                Ui.notify("Failed to update displayname", "error");
+                notify("Failed to update displayname", "error");
                 return;
             }
             const user = LydaCache.get("user").content;
             user.displayname = displayname;
             LydaCache.set("user", new CacheItem(user));
-            Ui.notify("Displayname updated", "success");
+            notify("Displayname updated", "success");
             successCallback(displayname);
         }, () => {
         }, Icons.PEN).then();
@@ -313,13 +320,13 @@ export class UserActions {
         Ui.getTextInputModal("Edit username", "Enter your new username", currentUsername, "Save", "Cancel", async (username: string) => {
             const res = await Api.postAsync(ApiRoutes.updateUser, <Partial<User>>{ username: username });
             if (res.code !== 200) {
-                Ui.notify("Failed to update username", "error");
+                notify("Failed to update username", "error");
                 return;
             }
             const user = LydaCache.get("user").content;
             user.username = username;
             LydaCache.set("user", new CacheItem(user));
-            Ui.notify("Username updated", "success");
+            notify("Username updated", "success");
             successCallback(username);
         }, () => {
         }, Icons.PEN).then();

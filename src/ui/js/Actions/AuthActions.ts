@@ -1,6 +1,6 @@
 import {Api} from "../Api/Api.ts";
 import {Util} from "../Classes/Util.ts";
-import {Ui} from "../Classes/Ui.ts";
+import {notify, Ui} from "../Classes/Ui.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {Icons} from "../Enums/Icons.js";
 import {PlayManager} from "../Streaming/PlayManager.ts";
@@ -23,7 +23,7 @@ export class AuthActions {
         const res = await Api.postAsync(ApiRoutes.logout);
         if (res.code === 200) {
             window.router.reload();
-            Ui.notify("Logged out!", "success");
+            notify("Logged out!", "success");
         }
         return res;
     }
@@ -33,7 +33,7 @@ export class AuthActions {
         if (r.code === 200) {
             navigate("login");
         } else {
-            Ui.notify("Failed to log out. Please try again later.", "error");
+            notify("Failed to log out. Please try again later.", "error");
         }
     }
 

@@ -2,7 +2,7 @@ import {GenericTemplates} from "../Templates/GenericTemplates.ts";
 import {PlaylistTemplates} from "../Templates/PlaylistTemplates.ts";
 import {Api} from "../Api/Api.ts";
 import {Util} from "../Classes/Util.ts";
-import {Ui} from "../Classes/Ui.ts";
+import {notify, Ui} from "../Classes/Ui.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
 import {QueueManager} from "../Streaming/QueueManager.ts";
 import {navigate} from "../Routing/Router.ts";
@@ -38,10 +38,10 @@ export class PlaylistActions {
     static async createNewPlaylist(playlist: Playlist) {
         const res = await Api.postAsync(ApiRoutes.newPlaylist, playlist);
         if (res.code !== 200) {
-            Ui.notify("Failed to create playlist: " + res.data, "error");
+            notify("Failed to create playlist: " + res.data, "error");
             return;
         }
-        Ui.notify("Created playlist", "success");
+        notify("Created playlist", "success");
     }
 
     static async deletePlaylist(id: number) {
@@ -49,10 +49,10 @@ export class PlaylistActions {
         if (res.code === 200) {
             PlayManager.removeStreamClient(id);
             QueueManager.removeFromManualQueue(id);
-            Ui.notify("Successfully deleted playlist", "success");
+            notify("Successfully deleted playlist", "success");
             navigate("profile");
         } else {
-            Ui.notify("Error trying to delete playlist: " + res.data, "error");
+            notify("Error trying to delete playlist: " + res.data, "error");
         }
     }
 
@@ -67,19 +67,19 @@ export class PlaylistActions {
         const res = await Api.postAsync(ApiRoutes.addTrackToPlaylists, {playlist_ids: playlistIds, track_id: id});
         Util.removeModal();
         if (res.code !== 200) {
-            Ui.notify("Failed to add track to playlists: " + res.data, "error");
+            notify("Failed to add track to playlists: " + res.data, "error");
             return;
         }
-        Ui.notify("Added track to playlist(s)", "success");
+        notify("Added track to playlist(s)", "success");
     }
 
     static async removeTrackFromPlaylist(track_id: number, playlist_id: number) {
         const res = await Api.postAsync(ApiRoutes.removeTrackFromPlaylist, {id: playlist_id, track_id});
         if (res.code !== 200) {
-            Ui.notify("Failed to remove track from playlist: " + res.data, "error");
+            notify("Failed to remove track from playlist: " + res.data, "error");
             return false;
         }
-        Ui.notify("Removed track from playlist", "success");
+        notify("Removed track from playlist", "success");
         return true;
     }
 
@@ -98,9 +98,9 @@ export class PlaylistActions {
             const fileTarget = e.target as HTMLInputElement;
             const file = fileTarget.files![0];
             const response = await MediaUploader.upload(MediaFileType.playlistCover, id, file);
-            if (response.status === 200) {
+            if (response.code === 200) {
                 loading.value = false;
-                Ui.notify("Cover updated", "success");
+                notify("Cover updated", "success");
                 await Util.updateImage(URL.createObjectURL(file), oldSrc);
             }
         };
@@ -110,7 +110,7 @@ export class PlaylistActions {
     static async moveTrackInPlaylist(playlistId, trackId, newPosition) {
         const res = await Api.postAsync(ApiRoutes.reorderPlaylistTracks, {id: playlistId, track_id: trackId, new_position: newPosition});
         if (res.code !== 200) {
-            Ui.notify("Failed to move track in playlist: " + res.data, "error");
+            notify("Failed to move track in playlist: " + res.data, "error");
             return false;
         }
         return true;
@@ -126,7 +126,7 @@ export class PlaylistActions {
 
     static async toggleLike(id, isEnabled) {
         if (!Util.isLoggedIn()) {
-            Ui.notify("You must be logged in to like playlists", "error");
+            notify("You must be logged in to like playlists", "error");
             return false;
         }
         if (isEnabled) {
@@ -154,7 +154,7 @@ export class PlaylistActions {
             QueueManager.setContextQueue(playlist.playlisttracks.map(t => t.id));
             const track = playlist.playlisttracks.find(t => t.id === trackId);
             if (!track) {
-                Ui.notify("This track could not be found in this playlist", "error");
+                notify("This track could not be found in this playlist", "error");
                 return;
             }
             PlayManager.addStreamClientIfNotExists(track.id, track.length);
@@ -163,7 +163,7 @@ export class PlaylistActions {
     }
 
     static async addAlbumToPlaylists(id) {
-        const playlists = document.querySelectorAll("input[id^=playlist_]");
+        const playlists = document.querySelectorAll("input[id^=playlist_]") as NodeListOf<HTMLInputElement>;
         let playlistIds = [];
         for (let playlist of playlists) {
             if (playlist.checked) {
@@ -173,9 +173,9 @@ export class PlaylistActions {
         const res = await Api.postAsync(ApiRoutes.addAlbumToPlaylists, {playlist_ids: playlistIds, album_id: id});
         Util.removeModal();
         if (res.code !== 200) {
-            Ui.notify(res.data, "error");
+            notify(res.data, "error");
             return;
         }
-        Ui.notify("Added album to playlist(s)", "success");
+        notify("Added album to playlist(s)", "success");
     }
 }

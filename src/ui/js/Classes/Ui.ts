@@ -57,22 +57,6 @@ export class Ui {
         }
     }
 
-    static notify(text, type = "info", time = 7000) {
-        const notifications = document.querySelector(".notifications");
-        const notification = GenericTemplates.notification(type, text);
-        const previousNotifications = document.querySelectorAll(".notification") as NodeListOf<HTMLElement>;
-        if (previousNotifications) {
-            const lastNotification = previousNotifications[previousNotifications.length - 1];
-            if (lastNotification) {
-                notification.style.top = lastNotification.offsetTop + lastNotification.clientHeight + "px";
-            }
-        }
-        notifications.appendChild(notification);
-        setTimeout(() => {
-            notification.remove();
-        }, time);
-    }
-
     static async getPageHtml(page) {
         let cachedContent = LydaCache.get("page/" + page).content;
         if (cachedContent) {
@@ -88,7 +72,7 @@ export class Ui {
             LydaCache.set("page/" + page, new CacheItem(pageContent));
             return pageContent;
         } else {
-            Ui.notify("Could not load page.", "error");
+            notify("Could not load page.", "error");
             throw new Error(`No content for page ${page}.`);
         }
     }
@@ -233,4 +217,20 @@ export class Ui {
         const modal = GenericTemplates.addLinkedUserModal(title, text, currentValue, icon, confirmText, cancelText, confirmCallback2, cancelCallback2);
         Ui.addModal(modal);
     }
+}
+
+export function notify(text, type = "info", time = 7000) {
+    const notifications = document.querySelector(".notifications");
+    const notification = GenericTemplates.notification(type, text);
+    const previousNotifications = document.querySelectorAll(".notification") as NodeListOf<HTMLElement>;
+    if (previousNotifications) {
+        const lastNotification = previousNotifications[previousNotifications.length - 1];
+        if (lastNotification) {
+            notification.style.top = lastNotification.offsetTop + lastNotification.clientHeight + "px";
+        }
+    }
+    notifications.appendChild(notification);
+    setTimeout(() => {
+        notification.remove();
+    }, time);
 }

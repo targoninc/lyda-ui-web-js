@@ -1,6 +1,5 @@
 import {Api} from "./Api.ts";
-import {Util} from "../Classes/Util.ts";
-import {Ui} from "../Classes/Ui.ts";
+import {notify, Ui} from "../Classes/Ui.ts";
 import {Signal} from "../../fjsc/f2.ts";
 import {ApiRoutes} from "./ApiRoutes.ts";
 
@@ -20,7 +19,7 @@ export class LydaApi {
 
     static handleResponse(response, errorText, successCallback) {
         if (response.code !== 200) {
-            Ui.notify(errorText, "error");
+            notify(errorText, "error");
             return;
         }
         successCallback(response.data);

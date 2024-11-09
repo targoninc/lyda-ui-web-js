@@ -4,13 +4,12 @@ import {GenericTemplates} from "./GenericTemplates.ts";
 import {FormTemplates} from "./FormTemplates.ts";
 import {UserValidator} from "../Classes/Validators/UserValidator.ts";
 import {finalizeLogin} from "../Classes/Util.ts";
-import {Ui} from "../Classes/Ui.ts";
+import {notify, Ui} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
 import {InputType} from "../../fjsc/Types.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {HtmlPropertyValue, Signal, create, signal, computedSignal, ifjs} from "../../fjsc/f2.ts";
 import {Api, ApiResponse} from "../Api/Api.ts";
-import {navigate} from "../Routing/Router.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 
 export interface AuthData {
@@ -175,7 +174,7 @@ export class LandingPageTemplates {
             if (res.code === 200) {
                 step.value = "complete";
             } else {
-                Ui.notify(`Failed to register: ${res.data.error}`, "error");
+                notify(`Failed to register: ${res.data.error}`, "error");
                 step.value = "email";
             }
         });
@@ -199,7 +198,7 @@ export class LandingPageTemplates {
 
     static loggingInBox(step: Signal<string>, user: Signal<AuthData>) {
         AuthApi.login(user.value.email, user.value.password, user.value.mfaCode, (data: { user: User }) => {
-            Ui.notify("Logged in as " + data.user.username, "success");
+            notify("Logged in as " + data.user.username, "success");
             AuthApi.user(data.user.id, (user: User) => {
                 finalizeLogin(step, user);
             });
@@ -343,10 +342,10 @@ export class LandingPageTemplates {
                             onclick: async () => {
                                 const res = await AuthApi.requestPasswordReset(email.value);
                                 if (res.code === 200) {
-                                    Ui.notify("Password reset requested, check your email", "success");
+                                    notify("Password reset requested, check your email", "success");
                                     step.value = "password-reset-requested";
                                 } else {
-                                    Ui.notify(`Failed to reset password: ${res.data.error}`, "error");
+                                    notify(`Failed to reset password: ${res.data.error}`, "error");
                                     errors.value = new Set([
                                         ...errors.value,
                                         res.data.error
@@ -407,15 +406,15 @@ export class LandingPageTemplates {
                             disabled: computedSignal(user, (u: AuthData) => !u.password || u.password.trim().length === 0 || u.password !== u.password2 || u.password2.trim().length === 0 || !token),
                             onclick: async () => {
                                 if (!token) {
-                                    Ui.notify("Token is missing", "error");
+                                    notify("Token is missing", "error");
                                     return;
                                 }
                                 const res = await AuthApi.resetPassword(token, user.value.password, user.value.password2);
                                 if (res.code === 200) {
-                                    Ui.notify("Password updated, you can now log in", "success");
+                                    notify("Password updated, you can now log in", "success");
                                     step.value = "login";
                                 } else {
-                                    Ui.notify(`Failed to reset password: ${res.data.error}`, "error");
+                                    notify(`Failed to reset password: ${res.data.error}`, "error");
                                     errors.value = new Set([
                                         ...errors.value,
                                         res.data.error
