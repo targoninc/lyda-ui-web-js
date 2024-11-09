@@ -5,15 +5,18 @@ export class ApiRoutes {
     // region User
     private static auth = ApiRoutes.base + "/auth";
     static isLoggedIn = ApiRoutes.auth + "/isLoggedIn";
+
     private static audit = ApiRoutes.base + "/audit";
     static getLogs = ApiRoutes.audit + "/logs";
     static getActionLogs = ApiRoutes.audit + "/actionLogs";
+
     private static user = ApiRoutes.base + "/user";
     static getUser = ApiRoutes.user + "/get";
     static userSettings = ApiRoutes.user + "/settings";
     static userPermissions = ApiRoutes.user + "/permissions";
     static randomUser = ApiRoutes.user + "/random";
     static userExists = ApiRoutes.user + "/exists";
+
     private static userActions = ApiRoutes.user + "/actions";
     static followUser = ApiRoutes.userActions + "/follow";
     static unfollowUser = ApiRoutes.userActions + "/unfollow";
@@ -23,7 +26,7 @@ export class ApiRoutes {
     static login = ApiRoutes.userActions + "/login";
     static logout = ApiRoutes.userActions + "/logout";
     static register = ApiRoutes.userActions + "/register";
-    static mfaRequest = ApiRoutes.userActions + "/mfa-request";
+    static requestMfaCode = ApiRoutes.userActions + "/mfa-request";
     static updateUserSetting = ApiRoutes.userActions + "/update-setting";
     static changePassword = ApiRoutes.userActions + "/change-password";
     static requestPasswordReset = ApiRoutes.userActions + "/request-password-reset";
@@ -127,5 +130,19 @@ export class ApiRoutes {
     static getRoyaltiesByMonth = ApiRoutes.statistics + "/royaltiesByMonth";
     static getRoyaltiesByTrack = ApiRoutes.statistics + "/royaltiesByTrack";
     static getRoyaltyInfo = ApiRoutes.statistics + "/royaltyInfo";
+    // endregion
+
+    // region Royalties
+    private static royalties = ApiRoutes.base + "/royalties";
+    static requestPayment = ApiRoutes.royalties + "/requestPayment";
+    static calculateRoyalties = ApiRoutes.royalties + "/calculate";
+    // endregion
+
+    // region Search
+    private static search = ApiRoutes.base + "/search";
+    static searchTracks = ApiRoutes.search + "/tracks";
+    static searchAlbums = ApiRoutes.search + "/albums";
+    static searchPlaylists = ApiRoutes.search + "/playlists";
+    static searchUsers = ApiRoutes.search + "/users";
     // endregion
 }

@@ -2,6 +2,7 @@ import {create, signal} from "https://fjs.targoninc.com/f.js";
 import {Api} from "../Classes/Api.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {navigate} from "../Routing/Router.ts";
+import {ApiRoutes} from "../Classes/ApiRoutes.ts";
 
 export class SearchTemplates {
     static search() {
@@ -75,7 +76,8 @@ export class SearchTemplates {
                             return;
                         }
                         const tempCount = resultCount + 1;
-                        const res = await Api.getAsync(Api.endpoints.search, { search, filters });
+                        // TODO: Change search so it searches all 4 endpoints
+                        const res = await Api.getAsync(ApiRoutes.searchTracks, { search, filters });
                         if (res.code !== 200) {
                             Ui.notify("Failed to search, status code " + res.code, "error");
                             return;

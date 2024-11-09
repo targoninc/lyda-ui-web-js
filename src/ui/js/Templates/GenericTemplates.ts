@@ -19,6 +19,7 @@ import {FJSC} from "../../fjsc";
 import {InputType, SearchableSelectConfig} from "../../fjsc/Types.ts";
 import {Util} from "../Classes/Util.ts";
 import {navigate} from "../Routing/Router.ts";
+import {ApiRoutes} from "../Classes/ApiRoutes.ts";
 
 export class GenericTemplates {
     static buttonWithIcon(text: HtmlPropertyValue, icon: HtmlPropertyValue, alt: HtmlPropertyValue, callback = () => {
@@ -709,7 +710,7 @@ export class GenericTemplates {
                             onkeydown: async (e) => {
                                 const target = e.target as HTMLInputElement;
                                 const search = target.value;
-                                const res = await Api.getAsync(Api.endpoints.search, {
+                                const res = await Api.getAsync(ApiRoutes.searchUsers, {
                                     search,
                                     filters: JSON.stringify(["users"])
                                 });

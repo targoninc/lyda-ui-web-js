@@ -176,11 +176,9 @@ export class StatisticTemplates {
         const selectedState = signal(months[0]);
 
         return [
-            FormTemplates.dropDownField("Month", months, selectedState, true, (value) => {
-                selectedState.value = value;
-            }),
+            FormTemplates.dropDownField("Month", months, selectedState),
             GenericTemplates.action(Icons.CALCULATE, "Calculate royalties", "calculateRoyalties", async () => {
-                const res = await Api.postAsync(Api.endpoints.royalties.calculateRoyalties, {
+                const res = await Api.postAsync(ApiRoutes.calculateRoyalties, {
                     month: selectedState.value
                 });
                 if (res.code !== 200) {
@@ -236,7 +234,7 @@ export class StatisticTemplates {
                 }, Icons.WARNING);
             }, [], [visibilityClass, "secondary"]));
             actions.push(GenericTemplates.action(Icons.PAY, "Request payment", "requestPayment", async () => {
-                const res = await Api.postAsync(Api.endpoints.royalties.requestPayment);
+                const res = await Api.postAsync(ApiRoutes.requestPayment);
                 if (res.code !== 200) {
                     Ui.notify(res.data, "error");
                     return;

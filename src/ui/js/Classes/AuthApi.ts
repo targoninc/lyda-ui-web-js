@@ -55,7 +55,7 @@ export class AuthApi {
     }
 
     static mfaRequest(email: string, password: string, successCallback: Function, errorCallback: Function = () => {}) {
-        Api.postAsync(ApiRoutes.mfaRequest, {
+        Api.postAsync(ApiRoutes.requestMfaCode, {
             email,
             password
         }).then((response) => {

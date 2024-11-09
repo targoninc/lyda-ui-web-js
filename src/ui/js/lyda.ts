@@ -157,7 +157,7 @@ export class Lyda {
                 navigate("login");
                 return;
             }
-            const royaltyInfo = await Api.getAsync(Api.endpoints.statistics.royaltyInfo);
+            const royaltyInfo = await Api.getAsync(ApiRoutes.getRoyaltyInfo);
             element.append(await StatisticTemplates.statisticActions(user, royaltyInfo.data, permissions));
             element.append(create("div").classes("flex").children(...(await StatisticsWrapper.getStatistics())).build());
             break;

@@ -9,11 +9,6 @@ export class Api {
     static get endpoints() {
         const endpoints = {
             base: Config.apiBaseUrl,
-            royalties: {
-                requestPayment: "requestPayment",
-                calculateRoyalties: "calculateRoyalties",
-            },
-            search: "search",
             library: {
                 get: "get",
             },
