@@ -2,6 +2,9 @@ import {Api} from "./Api.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {Signal} from "../../fjsc/f2.ts";
 import {ApiRoutes} from "./ApiRoutes.ts";
+import {User} from "../Models/DbModels/User.ts";
+import {LydaCache} from "../Cache/LydaCache.ts";
+import {CacheItem} from "../Cache/CacheItem.ts";
 
 export class LydaApi {
     static getLogs(filterState: Signal<any>, successCallback: Function) {
@@ -27,5 +30,18 @@ export class LydaApi {
 
     static async deleteUser() {
         return await Api.postAsync(ApiRoutes.deleteUser);
+    }
+
+    static async updateUser(user: Partial<User>) {
+        const res = await Api.postAsync(ApiRoutes.updateUser, { user });
+        if (res.code !== 200) {
+            notify("Failed to update account", "error");
+            return false;
+        }
+        let newUser = LydaCache.get("user").content;
+        newUser = {...newUser, ...user};
+        LydaCache.set("user", new CacheItem(newUser));
+        notify("Account updated", "success");
+        return true;
     }
 }

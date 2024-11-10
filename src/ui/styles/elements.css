@@ -132,6 +132,10 @@
     max-width: var(--card-width);
 }
 
+.small-card {
+    max-width: var(--card-width);
+}
+
 .track-card.secondary, .playlist-card.secondary, .album-card.secondary {
     background: var(--color-4);
 }

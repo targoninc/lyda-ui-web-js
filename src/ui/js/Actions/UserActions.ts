@@ -13,6 +13,8 @@ import {User} from "../Models/DbModels/User.ts";
 import {Signal} from "../../fjsc/f2.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {Notification} from "../Models/DbModels/Notification.ts";
+import {LydaApi} from "../Api/LydaApi.ts";
+import {reload} from "../Routing/Router.ts";
 
 export class UserActions {
     static updateAvatar(newSrc) {
@@ -287,47 +289,26 @@ export class UserActions {
 
     static editDescription(currentDescription: string, successCallback: Function) {
         Ui.getTextAreaInputModal("Edit description", "Enter your new description", currentDescription, "Save", "Cancel", async (description: string) => {
-            const res = await Api.postAsync(ApiRoutes.updateUser, <Partial<User>>{ description: description });
-            if (res.code !== 200) {
-                notify("Failed to update description", "error");
-                return;
+            if (await LydaApi.updateUser({ description })) {
+                successCallback(description);
             }
-            const user = LydaCache.get("user").content;
-            user.description = description;
-            LydaCache.set("user", new CacheItem(user));
-            notify("Description updated", "success");
-            successCallback(description);
         }, () => {}, Icons.PEN).then();
     }
 
     static editDisplayname(currentDisplayname: string, successCallback: Function) {
         Ui.getTextInputModal("Edit displayname", "Enter your new displayname", currentDisplayname, "Save", "Cancel", async (displayname: string) => {
-            const res = await Api.postAsync(ApiRoutes.updateUser, <Partial<User>>{ displayname: displayname });
-            if (res.code !== 200) {
-                notify("Failed to update displayname", "error");
-                return;
+            if (await LydaApi.updateUser({ displayname })) {
+                successCallback(displayname);
             }
-            const user = LydaCache.get("user").content;
-            user.displayname = displayname;
-            LydaCache.set("user", new CacheItem(user));
-            notify("Displayname updated", "success");
-            successCallback(displayname);
         }, () => {
         }, Icons.PEN).then();
     }
 
     static editUsername(currentUsername: string, successCallback: Function) {
         Ui.getTextInputModal("Edit username", "Enter your new username", currentUsername, "Save", "Cancel", async (username: string) => {
-            const res = await Api.postAsync(ApiRoutes.updateUser, <Partial<User>>{ username: username });
-            if (res.code !== 200) {
-                notify("Failed to update username", "error");
-                return;
+            if (await LydaApi.updateUser({ username })) {
+                successCallback(username);
             }
-            const user = LydaCache.get("user").content;
-            user.username = username;
-            LydaCache.set("user", new CacheItem(user));
-            notify("Username updated", "success");
-            successCallback(username);
         }, () => {
         }, Icons.PEN).then();
     }
