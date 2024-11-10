@@ -248,7 +248,6 @@ export class TrackEditTemplates {
                                     state.value = { ...state.value, visibility: v ? "private" : "public" };
                                 }
                             }),
-                            ifjs(isPrivate, GenericTemplates.text("When your track is private, it will only be visible to you and people you share the secret link with.", ["warning"]))
                         ).build(),
                     FJSC.input<string>({
                         type: InputType.text,
