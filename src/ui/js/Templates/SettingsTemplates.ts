@@ -4,6 +4,8 @@ import {Theme} from "../Enums/Theme.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {getUserSettingValue} from "../Classes/Util.ts";
 import {UserSettings} from "../Enums/UserSettings.ts";
+import {FJSC} from "../../fjsc";
+import {ButtonConfig} from "../../fjsc/Types.ts";
 
 export class SettingsTemplates {
     static settingsPage(user) {
@@ -57,13 +59,16 @@ export class SettingsTemplates {
         currentTheme$.onUpdate = (currentTheme) => {
             active$.value = currentTheme === theme ? "active" : "_";
         };
-        return create("div")
-            .classes("fakeButton", "secondary", "rounded", "padded-inline", "flex", "clickable", "theme-selector", active$)
-            .text(theme.toUpperCase())
-            .onclick(async () => {
+
+        return FJSC.button(<ButtonConfig>{
+            classes: [active$],
+            name: `theme-selector-${theme}`,
+            text: theme.toUpperCase(),
+            onclick: async () => {
                 currentTheme$.value = theme;
                 await UserActions.setTheme(theme);
-            }).build();
+            }
+        });
     }
 
     static themeSection(currentTheme) {

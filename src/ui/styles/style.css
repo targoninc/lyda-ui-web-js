@@ -67,11 +67,12 @@
 
     --fjsc-interactive-background: var(--color-4);
     --fjsc-interactive-background-hover: var(--color-3);
-    --fjsc-interactive-background-active: var(--fjsc-primary-300);
+    --fjsc-interactive-background-active: var(--color-9);
     --fjsc-interactive-color: var(--color-5);
     --fjsc-interactive-color-active: var(--color-4);
     --fjsc-interactive-border: var(--color-7);
     --fjsc-interactive-border-focused: var(--blue);
+    --fjsc-interactive-border-active: var(--color-1);
 }
 
 /* fallback */

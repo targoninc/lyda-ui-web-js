@@ -12,8 +12,8 @@
     --color-5: #100F0F;
     --color-5-rgb: 16, 15, 15;
     --filter-5: sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%) invert(0%);
-    --color-6: #B7B5AC;
-    --color-6-rgb: 183, 181, 172;
+    --color-6: #403E3C;
+    --color-6-rgb: 64, 62, 60;
     --color-7: #6F6E69;
     --color-7-rgb: 111, 110, 105;
     --color-8: #879A39;
@@ -47,5 +47,13 @@
 }
 
 .border-card {
+    background: var(--color-4);
+}
+
+.tab {
+    background: var(--color-9);
+}
+
+.clickable.secondary.padded-inline:hover {
     background: var(--color-4);
 }

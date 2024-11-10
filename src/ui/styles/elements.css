@@ -775,6 +775,12 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     border: none !important;
     color: var(--color-5);
     border-radius: 0;
+    padding: var(--fjsc-input-padding-y) var(--fjsc-input-padding-x);
+}
+
+.tab:hover {
+    background: var(--color-3);
+    color: var(--color-5);
 }
 
 .tab.selected {
