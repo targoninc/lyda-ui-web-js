@@ -1,5 +1,5 @@
-import {Chart, registerables} from "https://cdn.jsdelivr.net/npm/chart.js@4.3.0/+esm";
-import {BoxPlotChart} from "https://cdn.jsdelivr.net/npm/@sgratzl/chartjs-chart-boxplot@4.2.7/+esm";
+import {Chart, registerables} from "chart.js";
+import {BoxPlotChart} from "@sgratzl/chartjs-chart-boxplot";
 import {create, signal} from "../../fjsc/f2.ts";
 import {Colors} from "../Classes/Colors.ts";
 import {ChartOptions} from "../Classes/ChartOptions.ts";
@@ -14,10 +14,10 @@ import {ApiRoutes} from "../Api/ApiRoutes.ts";
 
 Chart.register(...registerables);
 
-export class StatisticTemplates {
-    static usedColors = Colors.themedList;
+const usedColors = Colors.themedList;
 
-    static donutChart(labels, values, valueTitle, title, id, colors = this.usedColors) {
+export class StatisticTemplates {
+    static donutChart(labels, values, valueTitle, title, id, colors = usedColors) {
         const ctx = create("canvas")
             .classes("chart")
             .id(id)
@@ -55,7 +55,7 @@ export class StatisticTemplates {
             ).build();
     }
 
-    static barChart(labels, values, valueTitle, title, id, colors = this.usedColors) {
+    static barChart(labels, values, valueTitle, title, id, colors = usedColors) {
         const ctx = create("canvas")
             .classes("chart")
             .id(id)
@@ -90,7 +90,7 @@ export class StatisticTemplates {
             ).build();
     }
 
-    static boxPlotChart(values, title, id, colors = this.usedColors) {
+    static boxPlotChart(values, title, id, colors = usedColors) {
         const ctx = create("canvas")
             .classes("chart")
             .id(id)
@@ -141,21 +141,21 @@ export class StatisticTemplates {
             ).build();
     }
 
-    static playCountByTrackChart(trackNames, playCounts, trackColors = this.usedColors) {
+    static playCountByTrackChart(trackNames, playCounts, trackColors = usedColors) {
         if (trackNames.length === 0) {
             return StatisticTemplates.noData("Play count by track");
         }
         return StatisticTemplates.donutChart(trackNames, playCounts, "Plays", "Play count by track", "playCountByTrackChart", trackColors);
     }
 
-    static playCountByMonthChart(monthNames, playCounts, trackColors = this.usedColors) {
+    static playCountByMonthChart(monthNames, playCounts, trackColors = usedColors) {
         if (monthNames.length === 0) {
             return StatisticTemplates.noData("Play count by month");
         }
         return StatisticTemplates.barChart(monthNames, playCounts, "Plays", "Play count by month", "playCountByMonthChart", [trackColors[0]]);
     }
 
-    static likesByTrackChart(trackNames, likeCounts, trackColors = this.usedColors) {
+    static likesByTrackChart(trackNames, likeCounts, trackColors = usedColors) {
         if (trackNames.length === 0) {
             return StatisticTemplates.noData("Likes by track");
         }
@@ -294,7 +294,7 @@ export class StatisticTemplates {
                 create("div")
                     .classes("flex-v")
                     .children(
-                        StatisticTemplates.boxPlotChart([royaltyInfo.trackRoyaltyValues], "Average track royalty", "averageTrackRoyaltyChart", this.usedColors)
+                        StatisticTemplates.boxPlotChart([royaltyInfo.trackRoyaltyValues], "Average track royalty", "averageTrackRoyaltyChart", usedColors)
                     ).build(),
             ).build();
     }
@@ -303,13 +303,13 @@ export class StatisticTemplates {
         if (labels.length === 0) {
             return StatisticTemplates.noData("Royalties by month");
         }
-        return StatisticTemplates.barChart(labels, values, "Royalties", "Royalties by month", "royaltiesByMonthChart", [this.usedColors[8]]);
+        return StatisticTemplates.barChart(labels, values, "Royalties", "Royalties by month", "royaltiesByMonthChart", [usedColors[8]]);
     }
 
     static royaltiesByTrackChart(labels, values) {
         if (labels.length === 0) {
             return StatisticTemplates.noData("Royalties by track");
         }
-        return StatisticTemplates.donutChart(labels, values, "Royalties", "Royalties by track", "royaltiesByTrackChart", this.usedColors);
+        return StatisticTemplates.donutChart(labels, values, "Royalties", "Royalties by track", "royaltiesByTrackChart", usedColors);
     }
 }

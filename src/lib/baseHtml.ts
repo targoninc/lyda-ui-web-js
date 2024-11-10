@@ -60,8 +60,6 @@ export async function baseHtml(req: Request) {
     <link rel="stylesheet" type="text/css" href="/styles/shared_targon.css"/>
     <link rel="apple-touch-icon" href="/img/icons/favicon_128.png">
     <link rel="icon" href="/img/icons/favicon_128.png" sizes="128x128">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-
     <meta name="twitter:card" content="summary_large_image"/>
     <meta name="twitter:site" content="@streamlyda"/>
     <meta name="twitter:creator" content="@streamlyda"/>

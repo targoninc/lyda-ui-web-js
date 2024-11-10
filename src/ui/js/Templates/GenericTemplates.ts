@@ -351,12 +351,14 @@ export class GenericTemplates {
                     const accepts = accept.split(",");
                     const extension = fileName.substring(fileName.lastIndexOf(".") + 1);
                     if (!accepts.includes(extension)) {
-                        fileName = "Not supported type.";
+                        text.value = "Not supported type.";
+                        return;
                     }
                 }
                 button.value = truncate(fileName);
                 button.title = fileName;
                 const probableName = fileName.substring(fileName.lastIndexOf("\\") + 1);
+                text.value = probableName;
                 changeCallback(probableName, input.files);
 
                 const preview = document.getElementById(name + "-preview") as HTMLImageElement;

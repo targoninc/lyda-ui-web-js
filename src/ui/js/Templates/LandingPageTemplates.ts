@@ -287,7 +287,7 @@ export class LandingPageTemplates {
                             },
                             classes: ["secondary", "positive"]
                         }),
-                        LandingPageTemplates.errorList(errors),
+                        FJSC.errorList(errors),
                     ).build(),
             ).build();
     }
@@ -353,7 +353,7 @@ export class LandingPageTemplates {
                                 }
                             },
                         }),
-                        LandingPageTemplates.errorList(errors),
+                        FJSC.errorList(errors),
                     ).build(),
             ).build();
     }
@@ -422,7 +422,7 @@ export class LandingPageTemplates {
                                 }
                             },
                         }),
-                        LandingPageTemplates.errorList(errors),
+                        FJSC.errorList(errors),
                     ).build(),
             ).build();
     }
@@ -492,24 +492,6 @@ export class LandingPageTemplates {
         });
 
         return LandingPageTemplates.waitingBox("Checking E-mail address...", "Please wait");
-    }
-
-    static errorList(errorState: Signal<Set<string>>) {
-        const container = signal(create("div").classes("flex-v").build());
-        errorState.subscribe((newErrors: Set<string>) => {
-            container.value = create("div")
-                .classes("flex-v", "nogap")
-                .children(
-                    ...[...newErrors].map((error) => {
-                        return create("div")
-                            .classes("error")
-                            .text(error)
-                            .build();
-                    })
-                ).build();
-        });
-
-        return container;
     }
 
     static registerBox(step: Signal<string>, user: Signal<AuthData>) {
@@ -664,7 +646,7 @@ export class LandingPageTemplates {
                             classes: ["secondary", "positive"]
                         }),
                         ifjs(allFieldsTouched, create("div").classes("flex-v").children(
-                            LandingPageTemplates.errorList(errors)
+                            FJSC.errorList(errors)
                         ).build()),
                     ).build(),
             ).build();

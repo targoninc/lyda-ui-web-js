@@ -185,36 +185,46 @@ export class TrackEditTemplates {
     }
 
     static uploadButton(state: Signal<UploadableTrack>, errorSections: Signal<string[]>, errorFields: Signal<string[]>, uploadInfo: Signal<UploadInfo[]>) {
+        const errors = signal<string[]>([]);
         const disabled = computedSignal<boolean>(state, (s: UploadableTrack) => {
-            const errors = [];
+            const newErrors = [];
             const requiredProps = [
-                { section: "audio", field: "audioFile" },
+                { section: "audio", field: "audioFileName" },
                 { section: "info", field: "title" },
                 { section: "info", field: "genre" },
                 { section: "terms", field: "termsOfService" },
             ];
             if (requiredProps.some(p => !s[p.field])) {
-                errors.push("Missing required fields");
+                newErrors.push("Missing required fields");
                 const errorProps = requiredProps.filter(p => !s[p.field]);
                 errorSections.value = errorProps.map(p => p.section);
                 errorFields.value = errorProps.map(p => p.field);
+            } else {
+                errorSections.value = [];
+                errorFields.value = [];
             }
+            errors.value = newErrors;
 
-            return errors.length > 0;
+            return newErrors.length > 0;
         });
         const buttonClass = computedSignal<string>(disabled, (d: boolean) => d ? "disabled" : "positive");
 
-        return FJSC.button({
-            text: "Upload",
-            disabled: disabled,
-            classes: [buttonClass, "positive"],
-            onclick: (e) => {
-                Util.showButtonLoader(e);
-                Util.closeAllDetails();
-                new AudioUpload(e, state, uploadInfo);
-            },
-            icon: { icon: "upload" },
-        });
+        return create("div")
+            .classes("flex-v")
+            .children(
+                FJSC.button({
+                    text: "Upload",
+                    disabled: disabled,
+                    classes: [buttonClass, "positive"],
+                    onclick: (e) => {
+                        Util.showButtonLoader(e);
+                        Util.closeAllDetails();
+                        new AudioUpload(e, state, uploadInfo);
+                    },
+                    icon: { icon: "upload" },
+                }),
+                FJSC.errorList(errors)
+            ).build();
     }
 
     static filesSection(isNewTrack = false, state: Signal<UploadableTrack>, errorSections: Signal<string[]>, errorFields: Signal<string[]>) {
