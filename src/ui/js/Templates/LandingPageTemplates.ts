@@ -3,7 +3,7 @@ import {AuthApi} from "../Api/AuthApi.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {FormTemplates} from "./FormTemplates.ts";
 import {UserValidator} from "../Classes/Validators/UserValidator.ts";
-import {finalizeLogin} from "../Classes/Util.ts";
+import {finalizeLogin, Util} from "../Classes/Util.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
 import {InputType} from "../../fjsc/Types.ts";
@@ -132,8 +132,7 @@ export class LandingPageTemplates {
     }
 
     static activateAccountBox(step: Signal<string>, user: Signal<AuthData>) {
-        const urlSearchParams = new URLSearchParams(window.location.search);
-        const code = urlSearchParams.get("code");
+        const code = Util.getUrlParameter("code");
         const error = signal(null);
         const done = signal(false);
         const activating = signal(true);
@@ -365,8 +364,7 @@ export class LandingPageTemplates {
         });
         const password = computedSignal<string>(user, (u: AuthData) => u.password);
         const passwordConfirm = computedSignal<string>(user, (u: AuthData) => u.password2);
-        const searchParams = new URLSearchParams(window.location.search);
-        const token = searchParams.get("token");
+        const token = Util.getUrlParameter("token");
 
         return create("div")
             .classes("flex-v")

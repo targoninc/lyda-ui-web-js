@@ -49,6 +49,7 @@ window.router = new Router(routes, async (route, params) => {
     }
 }, () => {
     setTimeout(() => {
+        console.log("No route found, attempting to redirect to profile");
         const path = window.location.pathname;
         navigate("profile" + path);
     }, 100);
