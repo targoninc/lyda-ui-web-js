@@ -18,6 +18,6 @@ export class MediaUploader {
             throw new Error(`Failed to upload media: ${response.statusText}`);
         }
 
-        return await response.json();
+        return await response.text();
     }
 }

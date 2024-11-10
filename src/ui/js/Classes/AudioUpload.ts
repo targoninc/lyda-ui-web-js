@@ -67,7 +67,13 @@ export class AudioUpload {
             return;
         }
         this.writeToInfo("Uploading audio...", "audio");
-        await this.uploadMedia(MediaFileType.audio, this.id, this.state.value.audioFiles![0]);
+        try {
+            await this.uploadMedia(MediaFileType.audio, this.id, this.state.value.audioFiles![0]);
+        } catch (e) {
+            this.writeToInfo("Failed to upload audio: " + e, "audio");
+            this.setInfoError("audio");
+            return;
+        }
         this.writeToInfo("Uploaded audio", "audio");
 
         if (this.coverFile) {
