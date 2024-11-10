@@ -5,7 +5,7 @@ export class Router {
     postRouteChange: Function = () => {};
     onNoRouteFound: Function = () => {};
 
-    constructor(routes: Route[], preRouteChange = () => {}, postRouteChange = () => {}, onNoRouteFound = () => {}) {
+    constructor(routes: Route[], preRouteChange: Function = () => {}, postRouteChange: Function = () => {}, onNoRouteFound: Function = () => {}) {
         this.routes = routes;
         this.preRouteChange = preRouteChange;
         this.postRouteChange = postRouteChange;
@@ -56,7 +56,7 @@ export class Router {
         if (!path.startsWith("/")) {
             path = "/" + path;
         }
-        history.pushState({}, "", path);
+        history.pushState({}, "", window.location.origin + path);
         await this.handleRouteChange();
     }
 
