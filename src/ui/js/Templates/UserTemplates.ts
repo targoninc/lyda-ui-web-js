@@ -12,7 +12,7 @@ import {PlaylistTemplates} from "./PlaylistTemplates.ts";
 import {CustomText} from "../Classes/Helpers/CustomText.ts";
 import {Permissions} from "../Enums/Permissions.ts";
 import {Images} from "../Enums/Images.ts";
-import {navigate, reload} from "../Routing/Router.ts";
+import {navigate} from "../Routing/Router.ts";
 import {
     AnyNode,
     computedSignal,

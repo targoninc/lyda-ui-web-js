@@ -1,4 +1,4 @@
-import {Router} from "./js/Routing/Router.ts";
+import {navigate, Router} from "./js/Routing/Router.ts";
 import {PageTemplates} from "./js/Templates/PageTemplates.ts";
 import {KeyBinds} from "./js/Classes/KeyBindHandler.ts";
 import {LydaCache} from "./js/Cache/LydaCache.ts";
@@ -50,7 +50,7 @@ window.router = new Router(routes, async (route, params) => {
 }, () => {
     setTimeout(() => {
         const path = window.location.pathname;
-        window.router.navigate("profile" + path);
+        navigate("profile" + path);
     }, 100);
 });
 
