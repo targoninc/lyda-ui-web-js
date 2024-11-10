@@ -24,4 +24,8 @@ export class LydaApi {
         }
         successCallback(response.data);
     }
+
+    static async deleteUser() {
+        return await Api.postAsync(ApiRoutes.deleteUser);
+    }
 }

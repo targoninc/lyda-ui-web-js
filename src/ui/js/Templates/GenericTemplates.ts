@@ -419,20 +419,21 @@ export class GenericTemplates {
             ).build();
     }
 
-    static confirmationModal(title: HtmlPropertyValue, text: HtmlPropertyValue, icon: HtmlPropertyValue,
+    static confirmationModal(title: HtmlPropertyValue, text: HtmlPropertyValue, icon: StringOrSignal,
                              confirmText: StringOrSignal, cancelText: StringOrSignal, confirmCallback: Function,
                              cancelCallback: Function) {
         return GenericTemplates.modal([
                 create("div")
                     .classes("flex")
                     .children(
-                        create("img")
-                            .styles("width", "30px", "height", "auto")
-                            .attributes("src", icon)
-                            .build(),
                         create("h2")
-                            .text(title)
-                            .build()
+                            .classes("flex")
+                            .children(
+                                GenericTemplates.icon(icon, true),
+                                create("span")
+                                    .text(title)
+                                    .build()
+                            ).build()
                     ).build(),
                 create("p")
                     .text(text)

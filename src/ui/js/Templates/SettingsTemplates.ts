@@ -6,6 +6,9 @@ import {getUserSettingValue} from "../Classes/Util.ts";
 import {UserSettings} from "../Enums/UserSettings.ts";
 import {FJSC} from "../../fjsc";
 import {ButtonConfig} from "../../fjsc/Types.ts";
+import {notify, Ui} from "../Classes/Ui.ts";
+import {LydaApi} from "../Api/LydaApi.ts";
+import {navigate, reload} from "../Routing/Router.ts";
 
 export class SettingsTemplates {
     static settingsPage(user) {
@@ -17,7 +20,8 @@ export class SettingsTemplates {
                     .build(),
                 SettingsTemplates.themeSection(getUserSettingValue(user, UserSettings.theme)),
                 SettingsTemplates.behaviourSection(user),
-                SettingsTemplates.notificationsSection(user)
+                SettingsTemplates.notificationsSection(user),
+                SettingsTemplates.dangerSection(user)
             ).build();
     }
 
@@ -98,5 +102,36 @@ export class SettingsTemplates {
         return GenericTemplates.toggle("Make my library public", UserSettings.publicLikes, async () => {
             await UserActions.togglePublicLikes();
         }, [], currentValue);
+    }
+
+    private static dangerSection(user) {
+        return create("div")
+            .classes("card", "flex-v")
+            .children(
+                create("h2")
+                    .text("Danger Zone")
+                    .build(),
+                create("div")
+                    .classes("flex-v")
+                    .children(
+                        FJSC.button({
+                            text: "Delete account",
+                            classes: ["negative"],
+                            onclick: () => {
+                                Ui.getConfirmationModal("Delete account", "Are you sure you want to delete your account? This action cannot be undone.",
+                                    "Yes, delete my account", "No, keep account", async () => {
+                                    LydaApi.deleteUser().then(res => {
+                                        if (res.code === 200) {
+                                            notify("Account deleted", "success");
+                                            navigate("login");
+                                        } else {
+                                            notify("Account deletion failed", "error");
+                                        }
+                                    })
+                                }, () => {}, "delete").then();
+                            }
+                        })
+                    ).build()
+            ).build();
     }
 }

@@ -6,9 +6,7 @@ export class MediaUploader {
         const formData = new FormData();
         formData.append("type", type);
         formData.append("referenceId", referenceId.toString());
-        const buffer = await file.arrayBuffer();
-        const blob = new Blob([buffer], { type: file.type });
-        formData.append("file", blob);
+        formData.append("file", file);
 
         const response = await fetch(ApiRoutes.uploadMedia, {
             method: "POST",

@@ -159,7 +159,7 @@ export class Ui {
     }
 
     static async getConfirmationModal(title, text, confirmText, cancelText, confirmCallback = () => {}, cancelCallback = () => {
-    }, icon = "") {
+    }, icon: StringOrSignal = "") {
         const confirmCallback2 = () => {
             confirmCallback();
             Util.removeModal();
