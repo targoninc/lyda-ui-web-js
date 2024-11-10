@@ -23,6 +23,8 @@
     --filter-8: brightness(0) saturate(100%) invert(29%) sepia(96%) saturate(1386%) hue-rotate(53deg) brightness(107%) contrast(91%);
     --color-9: #DAD8CE;
     --blue: #4385BE;
+
+    --fjsc-interactive-background: var(--color-3);
 }
 
 .fakeButton {
@@ -43,11 +45,11 @@
 }
 
 .card-label {
-    background: var(--color-9);
+    background: var(--color-3);
 }
 
 .border-card {
-    background: var(--color-4);
+    background: var(--color-9);
 }
 
 .tab {

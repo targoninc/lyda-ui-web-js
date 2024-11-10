@@ -546,12 +546,12 @@ export class TrackEditTemplates {
                                 linkedUserState.value = [...linkedUserState.value, <TrackCollaborator>{
                                     user_id: newUser.id,
                                     type: "user",
-                                    track_id: parentState.value.id,
+                                    track_id: parentState ? parentState.value.id : null,
                                     approved: false,
                                     denied: false,
                                 }];
                             }
-                        }, ["align-center", "secondary"])
+                        }, ["align-center"])
                     ).build(),
             ).build();
     }
