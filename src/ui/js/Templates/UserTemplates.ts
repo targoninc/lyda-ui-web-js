@@ -43,8 +43,11 @@ export class UserTemplates {
         return base
             .classes("user-widget", "clickable", "rounded-max", "flex", "padded-inline")
             .attributes("user_id", user_id, "username", username)
-            .onclick(() => {
-                navigate("profile/" + username);
+            .onclick((e: MouseEvent) => {
+                if (e.button === 0) {
+                    e.preventDefault();
+                    navigate("profile/" + username);
+                }
             })
             .href(Links.PROFILE(username))
             .title(displayname + " (@" + username + ")")

@@ -56,9 +56,8 @@ export class Router {
         if (!path.startsWith("/")) {
             path = "/" + path;
         }
-        console.log(window.location.origin + path);
-        /*history.pushState({}, "", window.location.origin + path);
-        await this.handleRouteChange();*/
+        history.pushState({}, "", window.location.origin + path);
+        await this.handleRouteChange();
     }
 
     reload() {

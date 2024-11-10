@@ -4,7 +4,7 @@ export class Links {
     }
 	
     static LINK(path: string) {
-        return Links.BASE_URL + path;
+        return Links.BASE_URL + "/" + path;
     }
 
     static PROFILE(path: string) {
