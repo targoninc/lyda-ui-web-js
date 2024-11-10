@@ -6,7 +6,7 @@ import {Api} from "../Api/Api.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
 import {
     AnyElement,
-    AnyNode,
+    AnyNode, computedSignal,
     create,
     HtmlPropertyValue,
     ifjs,
@@ -22,47 +22,37 @@ import {navigate} from "../Routing/Router.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 
 export class GenericTemplates {
-    static buttonWithIcon(text: HtmlPropertyValue, icon: HtmlPropertyValue, alt: HtmlPropertyValue, callback = () => {
-    }, extraClasses: string[] = [], id = null) {
-        return create("button")
-            .classes(...extraClasses)
-            .id(id)
-            .onclick(callback)
-            .alt(alt)
-            .children(
-                GenericTemplates.icon(icon),
-                create("span")
-                    .text(text)
-                    .build()
-            ).build()
-    }
-
-    static icon(icon: HtmlPropertyValue, adaptive = false) {
+    static icon(icon: StringOrSignal, adaptive = false, classes: StringOrSignal[] = [], title = "") {
+        const urlIndicators = [window.location.origin, "http", "data:", "blob:"];
         // @ts-ignore
-        const isMaterial = icon && (icon as string) && icon.includes && !icon.includes(window.location.origin);
+        const isMaterial = icon && (icon as string) && icon.includes && !urlIndicators.some(i => icon.includes(i));
         const iconClass = adaptive ? "adaptive-icon" : "inline-icon";
+        const svgClass = isMaterial ? "_" : "svg";
 
-        if (isMaterial) {
-            return create("i")
-                .classes(iconClass, "material-symbols-outlined", "nopointer")
-                .text(icon)
-                .build();
-        }
-
-        return create("img")
-            .classes(iconClass, "svg", "nopointer")
-            .attributes("src", icon)
-            .build();
+        return FJSC.icon({
+            icon,
+            adaptive,
+            title,
+            isUrl: !isMaterial,
+            classes: [iconClass, svgClass, ...classes],
+        });
     }
 
-    static cardLabel(text: HtmlPropertyValue, icon: HtmlPropertyValue = null, classes: string[] = []) {
+    static cardLabel(text: HtmlPropertyValue, icon: StringOrSignal = null, hasError: Signal<boolean> = signal(false)) {
+        const errorClass = computedSignal<string>(hasError, (h: boolean) => h ? "error" : "_");
+
         return create("div")
-            .classes("card-label", "flex", "small-gap", ...classes)
+            .classes("flex")
             .children(
-                ifjs(icon, GenericTemplates.icon(icon)),
-                create("span")
-                    .text(text)
-                    .build(),
+                create("div")
+                    .classes("card-label", "flex", "small-gap", errorClass)
+                    .children(
+                        ifjs(icon, GenericTemplates.icon(icon)),
+                        create("span")
+                            .text(text)
+                            .build(),
+                    ).build(),
+                ifjs(hasError, GenericTemplates.icon("warning", true, ["error"], "This section has errors"))
             ).build();
     }
 
@@ -173,7 +163,7 @@ export class GenericTemplates {
             ).build();
     }
 
-    static action(icon: HtmlPropertyValue, text: HtmlPropertyValue, id: HtmlPropertyValue, onclick: (e: any) => void, attributes: HtmlPropertyValue[] = [], classes: StringOrSignal[] = [], link: StringOrSignal|null = null) {
+    static action(icon: StringOrSignal, text: HtmlPropertyValue, id: HtmlPropertyValue, onclick: (e: any) => void, attributes: HtmlPropertyValue[] = [], classes: StringOrSignal[] = [], link: StringOrSignal|null = null) {
         return create(link ? "a" : "div")
             .classes("flex", "small-gap", "clickable", "fakeButton", "padded-inline", "rounded")
             .children(
@@ -667,7 +657,7 @@ export class GenericTemplates {
     }
 
     static addLinkedUserModal(title: HtmlPropertyValue, text: HtmlPropertyValue, currentValue: HtmlPropertyValue,
-                              icon: HtmlPropertyValue, confirmText: StringOrSignal, cancelText: StringOrSignal,
+                              icon: StringOrSignal, confirmText: StringOrSignal, cancelText: StringOrSignal,
                               confirmCallback: Function, cancelCallback: Function) {
         const selectedState = signal(0);
         const userMap = new Map();

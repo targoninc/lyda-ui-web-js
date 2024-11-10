@@ -5,7 +5,7 @@ export class Router {
     postRouteChange: Function = () => {};
     onNoRouteFound: Function = () => {};
 
-    constructor(routes: any[], preRouteChange = () => {}, postRouteChange = () => {}, onNoRouteFound = () => {}) {
+    constructor(routes: Route[], preRouteChange = () => {}, postRouteChange = () => {}, onNoRouteFound = () => {}) {
         this.routes = routes;
         this.preRouteChange = preRouteChange;
         this.postRouteChange = postRouteChange;
@@ -76,4 +76,10 @@ export function navigate(path: string, params: string[] = []) {
 export function reload() {
     // @ts-ignore
     (<Router>window.router).reload();
+}
+
+export interface Route {
+    path: string;
+    params?: string[];
+    aliases?: string[];
 }

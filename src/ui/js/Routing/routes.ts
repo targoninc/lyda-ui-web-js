@@ -1,4 +1,6 @@
-export const routes = [
+import {Route} from "./Router.ts";
+
+export const routes: Route[] = [
     {
         path: "404",
         aliases: ["error", "not-found"]

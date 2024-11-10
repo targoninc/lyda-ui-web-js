@@ -353,13 +353,12 @@ export class TrackEditTemplates {
     }
 
     static sectionCard(title: HtmlPropertyValue, errorSections: Signal<string[]>, id: string, children: TypeOrSignal<(AnyNode|null)>[], icon: string|null = null, classes: HtmlPropertyValue[] = []) {
-        const hasError = computedSignal(errorSections, (e: string[]) => e.includes(id));
-        const errorClass = computedSignal(hasError, (h: boolean) => h ? "error" : "_");
+        const hasError = computedSignal<boolean>(errorSections, (e: string[]) => e.includes(id));
 
         return create("div")
             .classes("border-card", "flex-v", ...classes)
             .children(
-                GenericTemplates.cardLabel(title, icon, [errorClass]),
+                GenericTemplates.cardLabel(title, icon, hasError),
                 ...children
             ).build();
     }
