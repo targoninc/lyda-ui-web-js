@@ -206,6 +206,16 @@ export class StreamingUpdater {
             const img = target.querySelector("img");
             const text = target.querySelector("span");
             if (!img || !text) {
+                const i = target.querySelector("i");
+                if (i) {
+                    if (streamClient.playing) {
+                        i.innerText = "pause";
+                        text.innerText = "Pause";
+                    } else {
+                        i.innerText = "play_arrow";
+                        text.innerText = "Play";
+                    }
+                }
                 continue;
             }
             if (streamClient.playing) {

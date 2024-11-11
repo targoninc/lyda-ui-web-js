@@ -57,8 +57,10 @@
 }
 
 .single-page .cover-container {
-    width: min(200px, 100%);
+    width: min(150px, 100%);
     border-radius: var(--border-radius);
+    display: flex;
+    flex-direction: column;
 }
 
 .cover-container .cover {
@@ -67,6 +69,7 @@
     height: auto;
     border-radius: var(--border-radius);
     background: var(--color-5);
+    align-self: end;
 }
 
 .single-page .title {
@@ -923,6 +926,16 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 .progress-section-part.inProgress {
     border-color: var(--blue);
     color: var(--blue);
+    animation: progress 1s alternate infinite;
+}
+
+@keyframes progress {
+    0% {
+        border-color: var(--blue);
+    }
+    100% {
+        border-color: var(--color-6);
+    }
 }
 
 .progress-section-part.complete {

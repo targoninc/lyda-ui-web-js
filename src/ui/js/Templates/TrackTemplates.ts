@@ -18,7 +18,7 @@ import {UserActions} from "../Actions/UserActions.ts";
 import {CustomText} from "../Classes/Helpers/CustomText.ts";
 import {CommentTemplates} from "./CommentTemplates.ts";
 import {TrackProcessor} from "../Classes/Helpers/TrackProcessor.ts";
-import {create, HtmlPropertyValue, ifjs, Signal, signal, StringOrSignal} from "../../fjsc/f2.js";
+import {AnyNode, create, HtmlPropertyValue, ifjs, Signal, signal, StringOrSignal} from "../../fjsc/f2.js";
 import {navigate} from "../Routing/Router.ts";
 import {Track} from "../Models/DbModels/Track.ts";
 import {User} from "../Models/DbModels/User.ts";
@@ -26,6 +26,7 @@ import {TrackCollaborator} from "../Models/DbModels/TrackCollaborator.ts";
 import {TrackLike} from "../Models/DbModels/TrackLike.ts";
 import {Repost} from "../Models/DbModels/Repost.ts";
 import {Album} from "../Models/DbModels/Album.ts";
+import {FJSC} from "../../fjsc";
 
 export class TrackTemplates {
     static trackCard(track: Track, user: User, profileId: number) {
@@ -587,12 +588,6 @@ export class TrackTemplates {
         if (isPrivate) {
             icons.push(GenericTemplates.lock());
         }
-        const graphics = [];
-        if (track.processed) {
-            graphics.push(TrackTemplates.waveform(track.id, track.processed, track.length, JSON.parse(track.loudness_data)));
-        } else {
-            graphics.push(TrackTemplates.waveform(track.id, track.processed, track.length, []));
-        }
 
         const trackUser: User = track.user;
         if (!trackUser) {
@@ -634,7 +629,7 @@ export class TrackTemplates {
                             .classes("flex")
                             .children(
                                 create("span")
-                                    .classes("text-large")
+                                    .classes("text-xlarge")
                                     .text(track.title)
                                     .attributes("track_id", track.id)
                                     .build(),
@@ -646,7 +641,28 @@ export class TrackTemplates {
                     ).build(),
                 ...toAppend,
                 create("div")
-                    .classes("track-info-container", "flex")
+                    .classes("track-title-container", "flex-v", "small-gap")
+                    .children(
+                        create("span")
+                            .classes("collaborators")
+                            .text(track.credits)
+                            .build(),
+                        description,
+                        create("div")
+                            .classes("flex")
+                            .children(
+                                create("span")
+                                    .classes("date", "text-small")
+                                    .text("Uploaded " + Util.formatDate(track.created_at))
+                                    .build(),
+                                create("span")
+                                    .classes("playcount", "text-small")
+                                    .text(track.plays + " plays")
+                                    .build()
+                            ).build()
+                    ).build(),
+                create("div")
+                    .classes("track-info-container", "flex", "align-bottom")
                     .children(
                         create("div")
                             .classes("cover-container", "relative", trackData.canEdit ? "pointer" : "_")
@@ -666,44 +682,28 @@ export class TrackTemplates {
                         create("div")
                             .classes("flex-v")
                             .children(
-                                TrackTemplates.audioActions(track, user, editActions),
+                                TrackTemplates.waveform(track.id, track.processed, track.length, track.processed ? JSON.parse(track.loudness_data) : []),
                                 create("div")
-                                    .classes("track-title-container", "flex-v", "small-gap")
+                                    .classes("flex")
                                     .children(
-                                        create("span")
-                                            .classes("collaborators")
-                                            .text(track.credits)
-                                            .build(),
-                                        description,
+                                        TrackTemplates.playButton(track),
                                         create("div")
-                                            .classes("flex")
+                                            .classes("stats-container", "flex", "rounded")
                                             .children(
-                                                create("span")
-                                                    .classes("date", "text-small")
-                                                    .text("Uploaded " + Util.formatDate(track.created_at))
-                                                    .build(),
-                                                create("span")
-                                                    .classes("playcount", "text-small")
-                                                    .text(track.plays + " plays")
-                                                    .build()
-                                            ).build()
-                                    ).build(),
-                            ).build()
+                                                StatisticsTemplates.likesIndicator("track", track.id, track.likes.length, liked),
+                                                StatisticsTemplates.likeListOpener(track.likes, user),
+                                                isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, reposted),
+                                                isPrivate ? null : StatisticsTemplates.repostListOpener(track.reposts, user),
+                                                CommentTemplates.commentsIndicator(track.id, track.comments.length),
+                                                CommentTemplates.commentListSingleOpener()
+                                            ).build(),
+                                    ).build()
+                            ).build(),
                     ).build(),
-                ...graphics,
+                TrackTemplates.audioActions(track, user, editActions),
                 create("div")
                     .classes("flex")
                     .children(
-                        create("div")
-                            .classes("stats-container", "flex", "rounded")
-                            .children(
-                                StatisticsTemplates.likesIndicator("track", track.id, track.likes.length, liked),
-                                StatisticsTemplates.likeListOpener(track.likes, user),
-                                isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, reposted),
-                                isPrivate ? null : StatisticsTemplates.repostListOpener(track.reposts, user),
-                                CommentTemplates.commentsIndicator(track.id, track.comments.length),
-                                CommentTemplates.commentListSingleOpener()
-                            ).build(),
                         CommentTemplates.commentListFullWidth(track.id, track.comments, user)
                     ).build(),
                 TrackTemplates.inAlbumsList(track, user),
@@ -782,9 +782,7 @@ export class TrackTemplates {
             ).build();
     }
 
-    static audioActions(track, user, editActions) {
-        const isPlaying = PlayManager.isPlaying(track.id);
-        PlayManager.addStreamClientIfNotExists(track.id, track.length);
+    static audioActions(track: Track, user: User, editActions: AnyNode[]) {
         const inQueue = signal(QueueManager.isInManualQueue(track.id));
         const queueSubState = inQueue.boolValues({
             text: {onTrue: "Unqueue", onFalse: "Queue"},
@@ -794,9 +792,6 @@ export class TrackTemplates {
         let actions = [];
         if (user) {
             actions = [
-                GenericTemplates.action(isPlaying ? Icons.PAUSE : Icons.PLAY, isPlaying ? "Pause" : "Play", track.id, async (e) => {
-                    await PlayManager.togglePlayAsync(e.target.id);
-                }, ["duration", track.duration], ["audio-player-toggle", "secondary"]),
                 GenericTemplates.action(queueSubState.icon, queueSubState.text, track.id, () => {
                     QueueManager.toggleInManualQueue(track.id);
                     inQueue.value = QueueManager.isInManualQueue(track.id);
@@ -813,6 +808,19 @@ export class TrackTemplates {
                 ...actions,
                 ...editActions
             ).build();
+    }
+
+    static playButton(track: Track) {
+        const isPlaying = PlayManager.isPlaying(track.id);
+        PlayManager.addStreamClientIfNotExists(track.id, track.length);
+
+        return FJSC.button({
+            text: isPlaying ? "Pause": "Play",
+            icon: { icon: isPlaying ? "pause" : "play_arrow" },
+            classes: ["audio-player-toggle"],
+            id: track.id,
+            onclick: () => PlayManager.togglePlayAsync(track.id),
+        });
     }
 
     static toBeApprovedTrack(collabType, music, user) {

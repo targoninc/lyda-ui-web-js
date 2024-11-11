@@ -610,6 +610,10 @@ summary {
     align-self: center;
 }
 
+.align-bottom {
+    align-items: end;
+}
+
 .text-center {
     text-align: center;
 }
