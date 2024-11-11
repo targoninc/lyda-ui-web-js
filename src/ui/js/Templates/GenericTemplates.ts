@@ -563,11 +563,6 @@ export class GenericTemplates {
                                 newValue.value = v;
                             }
                         }),
-                        create("textarea")
-                            .classes("full", "fullWidth")
-                            .id("textAreaInputModalInput")
-                            .value(currentValue ?? "")
-                            .build(),
                         create("div")
                             .classes("flex")
                             .children(

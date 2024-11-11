@@ -5,10 +5,11 @@ import {GenericTemplates} from "./GenericTemplates.ts";
 import {getUserSettingValue} from "../Classes/Util.ts";
 import {UserSettings} from "../Enums/UserSettings.ts";
 import {FJSC} from "../../fjsc";
-import {ButtonConfig, InputConfig, InputType} from "../../fjsc/Types.ts";
+import {ButtonConfig, InputConfig, InputType, TextareaConfig} from "../../fjsc/Types.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {LydaApi} from "../Api/LydaApi.ts";
 import {User} from "../Models/DbModels/User.ts";
+import {reload} from "../Routing/Router.ts";
 
 export class SettingsTemplates {
     static settingsPage(user: User) {
@@ -27,7 +28,7 @@ export class SettingsTemplates {
     }
 
     static accountSection(user: User) {
-        const updatedUser = signal<Partial<User>>(user);
+        const updatedUser = signal<Partial<User>>({});
         const saveDisabled = computedSignal(updatedUser, u => {
             const keys = Object.keys(u);
             return !keys.some(k => u[k] !== user[k]);
@@ -75,6 +76,14 @@ export class SettingsTemplates {
                                 updatedUser.value = { ...updatedUser.value, email: v };
                             }
                         }),
+                        FJSC.textarea(<TextareaConfig>{
+                            label: "Description",
+                            name: "description",
+                            value: user.description,
+                            onchange: v => {
+                                updatedUser.value = { ...updatedUser.value, description: v };
+                            }
+                        }),
                     ).build(),
                 FJSC.button(<ButtonConfig>{
                     disabled: saveDisabled,
@@ -84,6 +93,7 @@ export class SettingsTemplates {
                     onclick: async () => {
                         if (await LydaApi.updateUser(updatedUser.value)) {
                             user = { ...user, ...updatedUser.value };
+                            window.location.reload();
                         }
                     }
                 })
