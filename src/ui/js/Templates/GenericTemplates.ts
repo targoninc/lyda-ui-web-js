@@ -86,7 +86,7 @@ export class GenericTemplates {
             ).build();
     }
 
-    static button(text: HtmlPropertyValue, callback = () => {
+    static button(text: HtmlPropertyValue, callback: Function = () => {
     }, extraClasses: string[] = [], id: HtmlPropertyValue | null = null) {
         return create("button")
             .classes(...extraClasses)

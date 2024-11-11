@@ -1,21 +1,18 @@
+import {Track} from "../../Models/DbModels/Track.ts";
+
 export class TrackProcessor {
-    /**
-     *
-     * @param input {Track}
-     */
-    static forDownload(input) {
+    static forDownload(input: Track) {
         const track = structuredClone(input);
         delete track.user;
-        delete track.loudnessData;
+        delete track.loudness_data;
         delete track.secretcode;
-        delete track.analyzedFrequencyRatios;
         delete track.comments;
-        delete track.tracklikes;
+        delete track.likes;
         delete track.plays;
-        delete track.playlisttracks;
-        delete track.albumtracks;
-        delete track.hasAudio;
-        delete track.trackCollaborators;
+        delete track.playlists;
+        delete track.albums;
+        delete track.has_audio;
+        delete track.collaborators;
         return track;
     }
 }

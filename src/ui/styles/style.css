@@ -309,18 +309,23 @@ h3 {
 
 .card-label {
     margin: 0;
-    background: var(--color-7);
     width: max-content;
-    padding: 0.1em .66em;
-    border-radius: 999px 999px 999px 0;
+    padding: 0.1em 1em 0.1em .5em;
+    border-radius: var(--border-radius) 2em 2em var(--border-radius);
     color: var(--color-5);
     font-weight: normal;
     align-items: center;
+    border: 1px solid var(--color-5);
+    border-width: 1px 1px 1px .5em;
 }
 
 .card-label.error {
-    border-bottom: 3px solid var(--color-2);
-    color: var(--color-5);
+    border-color: var(--color-2);
+    color: var(--color-2);
+}
+
+.card-label i {
+    color: inherit;
 }
 
 h5 {
@@ -690,6 +695,7 @@ summary {
 .fullWidth {
     width: 100%;
     max-width: 100% !important;
+    box-sizing: border-box;
 }
 
 textarea.fullWidth {
@@ -845,6 +851,8 @@ td:last-child, th:last-child {
     transform: translate(-50%, -50%);
     z-index: 5;
     border-radius: calc(var(--border-radius) * 2);
+    max-height: calc(100% - 100px);
+    overflow: auto;
 }
 
 .modal-overlay {

@@ -44,10 +44,6 @@
     background: var(--color-3);
 }
 
-.card-label {
-    background: var(--color-3);
-}
-
 .border-card {
     background: var(--color-9);
 }

@@ -18,7 +18,7 @@ import {UserActions} from "../Actions/UserActions.ts";
 import {CustomText} from "../Classes/Helpers/CustomText.ts";
 import {CommentTemplates} from "./CommentTemplates.ts";
 import {TrackProcessor} from "../Classes/Helpers/TrackProcessor.ts";
-import {AnyNode, create, HtmlPropertyValue, ifjs, Signal, signal, StringOrSignal} from "../../fjsc/f2.js";
+import {AnyElement, AnyNode, create, HtmlPropertyValue, ifjs, Signal, signal, StringOrSignal} from "../../fjsc/f2.js";
 import {navigate} from "../Routing/Router.ts";
 import {Track} from "../Models/DbModels/Track.ts";
 import {User} from "../Models/DbModels/User.ts";
@@ -27,6 +27,7 @@ import {TrackLike} from "../Models/DbModels/TrackLike.ts";
 import {Repost} from "../Models/DbModels/Repost.ts";
 import {Album} from "../Models/DbModels/Album.ts";
 import {FJSC} from "../../fjsc";
+import {UploadableTrack} from "../Models/UploadableTrack.ts";
 
 export class TrackTemplates {
     static trackCard(track: Track, user: User, profileId: number) {
@@ -134,7 +135,7 @@ export class TrackTemplates {
             .build();
     }
 
-    static trackCover(track, overwriteWidth: string|null = null, startCallback = null) {
+    static trackCover(track, overwriteWidth: string | null = null, startCallback = null) {
         const imageState = signal(Images.DEFAULT_AVATAR);
         Util.getCoverFileFromTrackIdAsync(track.id, track.user_id).then((src) => {
             imageState.value = src;
@@ -182,7 +183,7 @@ export class TrackTemplates {
             .children(...children)
             .build();
     }
-    
+
     static async trackList(tracksState, pageState, type, filterState, loadingState, user) {
         const trackList = tracksState.value.map(track => TrackTemplates.feedTrack(track, user));
         const trackListContainer = signal(TrackTemplates.#trackList(trackList));
@@ -393,7 +394,7 @@ export class TrackTemplates {
             ).build();
     }
 
-    static listTrackInAlbumOrPlaylist(track, user, canEdit, list, positionsState: Signal<any>, type: string, startCallback: Function|null = null) {
+    static listTrackInAlbumOrPlaylist(track, user, canEdit, list, positionsState: Signal<any>, type: string, startCallback: Function | null = null) {
         const icons = [];
         if (track.visibility === "private") {
             icons.push(GenericTemplates.lock());
@@ -595,14 +596,10 @@ export class TrackTemplates {
         }
         const editActions = [];
         if (trackData.canEdit) {
-            editActions.push(
-                GenericTemplates.action(Icons.ALBUM_ADD, "Add to album", track.id, async () => {
-                    await AlbumActions.openAddToAlbumModal(track);
-                }, [], ["secondary"]),
-            );
+            editActions.push(TrackEditTemplates.addToAlbumsButton(track));
             editActions.push(TrackTemplates.copyPrivateLinkButton(track.id, track.secretcode));
             editActions.push(TrackEditTemplates.openEditPageButton(track));
-            editActions.push(TrackEditTemplates.upDownButtons(trackState));
+            editActions.push(TrackEditTemplates.upDownButtons(trackState as Signal<UploadableTrack>));
             editActions.push(TrackEditTemplates.deleteTrackButton(track.id));
         }
 
@@ -786,19 +783,27 @@ export class TrackTemplates {
         const inQueue = signal(QueueManager.isInManualQueue(track.id));
         const queueSubState = inQueue.boolValues({
             text: {onTrue: "Unqueue", onFalse: "Queue"},
-            icon: {onTrue: Icons.UNQUEUE, onFalse: Icons.QUEUE},
+            icon: {onTrue: "remove", onFalse: "switch_access_shortcut_add"},
         });
 
-        let actions = [];
+        let actions: AnyElement[] = [];
         if (user) {
             actions = [
-                GenericTemplates.action(queueSubState.icon, queueSubState.text, track.id, () => {
-                    QueueManager.toggleInManualQueue(track.id);
-                    inQueue.value = QueueManager.isInManualQueue(track.id);
-                }, [], ["secondary"]),
-                GenericTemplates.action(Icons.PLAYLIST_ADD, "Add to playlist", track.id, async () => {
-                    await PlaylistActions.openAddToPlaylistModal(track, "track");
-                }, [], ["secondary"])
+                FJSC.button({
+                    text: queueSubState.text,
+                    icon: { icon: queueSubState.icon },
+                    onclick: () => {
+                        QueueManager.toggleInManualQueue(track.id);
+                        inQueue.value = QueueManager.isInManualQueue(track.id);
+                    }
+                }),
+                FJSC.button({
+                    text: "Add to playlist",
+                    icon: { icon: "playlist_add" },
+                    onclick: async () => {
+                        await PlaylistActions.openAddToPlaylistModal(track, "track");
+                    }
+                })
             ];
         }
 
@@ -816,7 +821,11 @@ export class TrackTemplates {
 
         return FJSC.button({
             text: isPlaying ? "Pause": "Play",
-            icon: { icon: isPlaying ? "pause" : "play_arrow" },
+            icon: {
+                icon: isPlaying ? Icons.PAUSE : Icons.PLAY,
+                classes: ["inline-icon", "svg", "nopointer", isPlaying ? "pause-adjust" : "play-adjust"],
+                isUrl: true
+            },
             classes: ["audio-player-toggle"],
             id: track.id,
             onclick: () => PlayManager.togglePlayAsync(track.id),
@@ -875,8 +884,12 @@ export class TrackTemplates {
     }
 
     static copyPrivateLinkButton(id: number, code: string) {
-        return GenericTemplates.action(Icons.COPY, "Copy private link", id, async () => {
-            await Util.copyToClipboard(window.location.origin + "/track/" + id + "/" + code);
-        }, [], ["secondary"]);
+        return FJSC.button({
+            text: "Copy private link",
+            icon: { icon: "link" },
+            onclick: async () => {
+                await Util.copyToClipboard(window.location.origin + "/track/" + id + "/" + code);
+            }
+        });
     }
 }

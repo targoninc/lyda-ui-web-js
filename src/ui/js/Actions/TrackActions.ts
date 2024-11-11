@@ -85,21 +85,14 @@ export class TrackActions {
         }, Icons.WARNING);
     }
 
-    static async newCommentFromElement(e: any, track_id: number, parentCommentId: Signal<number>) {
-        if (e.key !== "Enter") {
+    static async newComment(content: Signal<string>, comments: Signal<Comment[]>, track_id: number, parentCommentId: Signal<number>) {
+        if (!content.value || content.value === "") {
             return;
         }
-        e.preventDefault();
-
-        const content = e.target.value;
-        if (content === "") {
-            return;
-        }
-        if (content.length > 1000) {
+        if (content.value.length > 1000) {
             notify("Comment is too long", "error");
             return;
         }
-        e.target.value = "";
 
         const res = await Api.postAsync(ApiRoutes.newComment, {
             id: track_id,
@@ -112,18 +105,15 @@ export class TrackActions {
             return;
         }
 
-        const commentId = res.data;
-        const commentCount = document.querySelector(".stats-count.comments") as HTMLElement;
-        if (commentCount) {
-            commentCount.innerText = (parseInt(commentCount.innerText) + 1).toString();
-        }
         const user = await Util.getUserAsync();
+
         let nowUtc = new Date();
         const offset = nowUtc.getTimezoneOffset() * 60000;
         nowUtc = new Date(nowUtc.getTime() + offset);
+
         const comment = <Comment>{
-            id: commentId,
-            content: content,
+            id: res.data,
+            content: content.value,
             user: user,
             user_id: user.id,
             track_id: track_id,
@@ -133,19 +123,8 @@ export class TrackActions {
             hidden: false,
             canEdit: true
         };
-        const commentElement = CommentTemplates.commentInList(comment, parentCommentId, user);
-        const commentList = document.querySelector(".comment-list");
-        commentList && commentList.appendChild(commentElement);
-        const noComments = document.querySelector(".no-comments");
-        if (noComments !== null) {
-            noComments.classList.add("hidden");
-        }
-
-        const allCommentLists = document.querySelectorAll(".comment-list");
-        allCommentLists.forEach((c) => {
-            Util.nestCommentElementsByCommentList(c);
-        });
-        Util.nestCommentElementsByParents();
+        comments.value = [...comments.value, comment];
+        content.value = "";
     }
 
     static async likeTrack(id: number) {
@@ -275,12 +254,14 @@ export class TrackActions {
                 return;
             }
 
-            const response = await MediaUploader.upload(MediaFileType.trackCover, id, file);
-            if (response.code === 200) {
-                loading.value = false;
+            try {
+                await MediaUploader.upload(MediaFileType.trackCover, id, file);
                 notify("Cover updated", "success");
                 await Util.updateImage(URL.createObjectURL(file), oldSrc);
+            } catch (e) {
+                notify("Failed to upload cover", "error");
             }
+            loading.value = false;
         };
         fileInput.click();
     }
@@ -374,7 +355,7 @@ export class TrackActions {
         }, Icons.WARNING);
     }
 
-    static async reorderTrack(type, listId, trackId, positionsState, newPosition) {
+    static async reorderTrack(type: string, listId: number, trackId: number, positionsState: Signal<any>, newPosition: number) {
         let success;
         if (type === "album") {
             success = AlbumActions.moveTrackInAlbum(listId, trackId, newPosition);
@@ -419,22 +400,19 @@ export class TrackActions {
     }
 
     static async updateTrackProperty(trackId: number, property: string, initialValue: string, callback: Function|null = null) {
-        Ui.getTextAreaInputModal("Edit " + property, "Enter new track " + property, initialValue, "Save", "Cancel", async (description) => {
+        Ui.getTextAreaInputModal("Edit " + property, "Enter new track " + property, initialValue, "Save", "Cancel", async (value: string) => {
             const res = await Api.postAsync(ApiRoutes.updateTrack, {
                 id: trackId,
                 field: property,
-                value: description
+                value
             });
             if (res.code !== 200) {
                 notify("Failed to update " + property, "error");
                 return;
             }
-            const user = LydaCache.get("user").content;
-            user.description = description;
-            LydaCache.set("user", new CacheItem(user));
             notify(property + " updated", "success");
             if (callback) {
-                callback(description);
+                callback(value);
             }
         }, () => {
         }, Icons.PEN).then();

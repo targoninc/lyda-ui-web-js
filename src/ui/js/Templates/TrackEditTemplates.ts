@@ -29,6 +29,7 @@ import {UploadableTrack} from "../Models/UploadableTrack.ts";
 import {UploadInfo} from "../Models/UploadInfo.ts";
 import {ProgressState} from "../Enums/ProgressState.ts";
 import {ProgressPart} from "../Models/ProgressPart.ts";
+import {AlbumActions} from "../Actions/AlbumActions.ts";
 
 export class TrackEditTemplates {
     static getStateWithParentUpdate(key, value, parentState) {
@@ -48,7 +49,7 @@ export class TrackEditTemplates {
         const state = signal(<UploadableTrack>{
             title: title ?? "",
             credits: credits ?? "",
-            release_date: releaseDate ?? new Date(),
+            release_date: releaseDate ? new Date(releaseDate) : new Date(),
             visibility: visibility ?? "public",
             genre: genre ?? Genre.OTHER,
             isrc: isrc ?? "",
@@ -92,13 +93,30 @@ export class TrackEditTemplates {
     }
 
     static openEditPageButton(track: Track) {
-        return GenericTemplates.action(Icons.PEN, "Edit", "editTrack", async () => {
-            TrackActions.getTrackEditModal(track);
-        }, [], ["secondary"]);
+        return FJSC.button({
+            text: "Edit",
+            icon: { icon: "edit" },
+            onclick: async () => {
+                TrackActions.getTrackEditModal(track);
+            }
+        });
     }
 
-    static editTrackModal(track, confirmCallback, cancelCallback) {
-        const state = signal(track);
+    static addToAlbumsButton(track: Track) {
+        return FJSC.button({
+            text: "Add to albums",
+            icon: { icon: "forms_add_on" },
+            onclick: async () => {
+                await AlbumActions.openAddToAlbumModal(track);
+            }
+        });
+    }
+
+    static editTrackModal(track: Track, confirmCallback: Function, cancelCallback: Function) {
+        const state = signal(<UploadableTrack>{
+            ...track,
+            release_date: new Date(track.release_date)
+        });
 
         return GenericTemplates.modal([
             create("div")
@@ -123,41 +141,58 @@ export class TrackEditTemplates {
                     create("div")
                         .classes("flex")
                         .children(
-                            GenericTemplates.button("Save", () => {
-                                confirmCallback(state.value);
-                            }, ["positive"]),
-                            GenericTemplates.button("Cancel", cancelCallback, ["negative"])
+                            FJSC.button({
+                                text: "Save",
+                                icon: { icon: "check" },
+                                classes: ["positive"],
+                                onclick: () => {
+                                    confirmCallback(state.value);
+                                }
+                            }),
+                            FJSC.button({
+                                text: "Cancel",
+                                icon: { icon: "close" },
+                                classes: ["negative"],
+                                onclick: cancelCallback
+                            }),
                         ).build()
                 ).build(),
         ], ["confirmationModal"]
         );
     }
 
-    static upDownButtons(state, uploadEnabled = false) {
+    static upDownButtons(state: Signal<UploadableTrack>, uploadEnabled = false) {
         const buttons = [
-            GenericTemplates.action("file_save", "Download Info", "downloadInfo", () => {
-                const json = JSON.stringify(state.value);
-                Util.downloadFile(`${state.value.title}_${Date.now()}.json`, json);
-            }, [
-                "title", "At the moment, linked users are not included in the download. This will be fixed soon™️."
-            ], ["secondary"]),
+            FJSC.button({
+                text: "Download Info",
+                icon: { icon: "file_save" },
+                title: "At the moment, linked users are not included in the download. This will be fixed soon™️.",
+                onclick: () => {
+                    const json = JSON.stringify(state.value);
+                    Util.downloadFile(`${state.value.title}_${Date.now()}.json`, json);
+                }
+            }),
         ];
 
         if (uploadEnabled) {
-            buttons.push(GenericTemplates.action("upload_file", "Upload Info", "uploadInfo", () => {
-                const fileInput = document.createElement("input");
-                fileInput.type = "file";
-                fileInput.onchange = async (e) => {
-                    const file = e.target.files[0];
-                    const reader = new FileReader();
-                    reader.onload = async (e) => {
-                        const jsonString = e.target.result;
-                        state.value = JSON.parse(jsonString);
+            buttons.push(FJSC.button({
+                text: "Upload Info",
+                icon: { icon: "upload_file" },
+                onclick: () => {
+                    const fileInput = document.createElement("input");
+                    fileInput.type = "file";
+                    fileInput.onchange = async (e) => {
+                        const file = e.target.files[0];
+                        const reader = new FileReader();
+                        reader.onload = async (e) => {
+                            const jsonString = e.target.result;
+                            state.value = JSON.parse(jsonString);
+                        };
+                        reader.readAsText(file);
                     };
-                    reader.readAsText(file);
-                };
-                fileInput.click();
-            }, [], ["secondary"]));
+                    fileInput.click();
+                },
+            }));
         }
 
         return create("div")
@@ -479,10 +514,15 @@ export class TrackEditTemplates {
     }
 
     static deleteTrackButton(trackId: number) {
-        return GenericTemplates.action(Icons.DELETE, "Delete", trackId, async (e) => {
-            await Ui.getConfirmationModal("Delete track", "Are you sure you want to delete this track?", "Yes", "No", () => TrackActions.deleteTrack(trackId), () => {
-            }, Icons.WARNING);
-        }, [], ["secondary", "negative"]);
+        return FJSC.button({
+            text: "Delete",
+            icon: { icon: "delete" },
+            classes: ["negative"],
+            onclick: async (e) => {
+                await Ui.getConfirmationModal("Delete track", "Are you sure you want to delete this track?", "Yes", "No", () => TrackActions.deleteTrack(trackId), () => {
+                }, Icons.WARNING);
+            }
+        });
     }
 
     static addLinkedUserButton(callback: Function, classes: string[] = []) {

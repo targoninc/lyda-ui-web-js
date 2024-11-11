@@ -71,7 +71,7 @@ export class CommentTemplates {
             .classes("listFromStatsIndicator", "move-to-new-row", "comments", "flex-v", "hidden")
             .children(
                 GenericTemplates.cardLabel("Comments", "comment"),
-                CommentTemplates.commentBox(track_id, parentCommentId),
+                CommentTemplates.commentBox(track_id, parentCommentId, comments),
                 ifjs(hasComments, create("span")
                     .classes("text", "no-comments")
                     .text("No comments yet")
@@ -80,23 +80,30 @@ export class CommentTemplates {
             ).build();
     }
 
-    static commentBox(track_id: number, parentCommentId: Signal<number>) {
+    static commentBox(track_id: number, parentCommentId: Signal<number>, comments: Signal<Comment[]>) {
+        const newComment = signal("");
+
         return create("div")
             .classes("comment-box", "flex-v")
             .children(
-                Util.isLoggedIn() ? create("div")
-                    .classes("comment-box-input-container", "flex", "fullWidth")
+                ifjs(Util.isLoggedIn(), create("div")
+                    .classes("comment-box-input-container", "flex-v", "fullWidth", "card", "secondary")
                     .children(
-                        FJSC.input({
+                        FJSC.textarea({
                             classes: ["comment-box-input"],
                             name: "comment-box-input",
-                            type: InputType.text,
                             placeholder: "New comment...",
-                            value: "",
+                            value: newComment,
                             attributes: ["track_id", track_id.toString()],
-                            onkeydown: e => TrackActions.newCommentFromElement(e, track_id, parentCommentId)
+                            onchange: v => newComment.value = v,
                         }),
-                    ).build() : null
+                        FJSC.button({
+                            text: "Post",
+                            icon: { icon: "send" },
+                            classes: ["positive"],
+                            onclick: () => TrackActions.newComment(newComment, comments, track_id, parentCommentId)
+                        }),
+                    ).build())
             ).build();
     }
 
@@ -105,18 +112,16 @@ export class CommentTemplates {
         return StatisticsTemplates.statsIndicator("comments", toggleState, comment_count, "comment", track_id);
     }
 
-    static commentListOpener(track_id: number, comments: Comment[], user: User) {
-        let commentList;
+    static commentListOpener(track_id: number, initial_comments: Comment[], user: User) {
         const parentCommentId = signal(0);
-        if (comments.length > 0) {
-            commentList = comments.map(comment => CommentTemplates.commentInList(comment, parentCommentId, user));
+        const comments = signal(initial_comments);
+        const hasComments = computedSignal<boolean>(comments, (c: Comment[]) => c.length > 0);
+        hasComments.subscribe(() => {
             Util.nestCommentElementsByParents();
-        } else {
-            commentList = [create("span")
-                .classes("text", "no-comments")
-                .text("No comments yet")
-                .build()];
-        }
+        });
+        setTimeout(() => {
+            Util.nestCommentElementsByParents();
+        });
         const listShown = signal(false);
 
         return create("div")
@@ -141,11 +146,16 @@ export class CommentTemplates {
                             .classes("comments-label", "text", "label", "padded-inline", "rounded", "text-small")
                             .text("Comments")
                             .build(),
-                        CommentTemplates.commentBox(track_id, parentCommentId),
+                        CommentTemplates.commentBox(track_id, parentCommentId, comments),
                         create("div")
                             .classes("flex-v", "comment-list")
-                            .children(...commentList)
-                            .build(),
+                            .children(
+                                ifjs(hasComments, create("span")
+                                    .classes("text", "no-comments")
+                                    .text("No comments yet")
+                                    .build(), true),
+                                ifjs(hasComments, signalMap(comments, create("div").classes("flex-v", "comment-list"), (comment: Comment) => CommentTemplates.commentInList(comment, parentCommentId, user)))
+                            ).build(),
                     ).build())
             ).build();
     }
@@ -156,8 +166,12 @@ export class CommentTemplates {
             throw new Error(`Comment ${comment.id} has no user`);
         }
         if (comment.canEdit) {
-            const deleteAction = GenericTemplates.inlineAction("Delete", "delete", comment.id, () => TrackActions.deleteComment(comment.id));
-            actions.push(deleteAction);
+            actions.push(FJSC.button({
+                text: "Delete",
+                icon: { icon: "delete" },
+                classes: ["negative"],
+                onclick: () => TrackActions.deleteComment(comment.id)
+            }));
         }
         const avatarState = signal(Images.DEFAULT_AVATAR);
         Util.getAvatarFromUserIdAsync(comment.user_id).then(avatar => {
