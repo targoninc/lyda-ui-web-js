@@ -9,16 +9,16 @@ import {Util} from "../Classes/Util.ts";
 import {AudioUpload} from "../Classes/AudioUpload.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {
-    DomNode,
-    HtmlPropertyValue,
-    Signal,
+    AnyNode,
     computedSignal,
     create,
+    DomNode,
+    HtmlPropertyValue,
     ifjs,
+    Signal,
     signal,
-    AnyNode,
-    TypeOrSignal,
-    signalMap
+    signalMap,
+    TypeOrSignal
 } from "../../fjsc/f2.ts";
 import {Track} from "../Models/DbModels/Track.ts";
 import {FJSC} from "../../fjsc";
@@ -27,6 +27,8 @@ import {InputType} from "../../fjsc/Types.ts";
 import {TrackCollaborator} from "../Models/DbModels/TrackCollaborator.ts";
 import {UploadableTrack} from "../Models/UploadableTrack.ts";
 import {UploadInfo} from "../Models/UploadInfo.ts";
+import {ProgressState} from "../Enums/ProgressState.ts";
+import {ProgressPart} from "../Models/ProgressPart.ts";
 
 export class TrackEditTemplates {
     static getStateWithParentUpdate(key, value, parentState) {
@@ -208,6 +210,7 @@ export class TrackEditTemplates {
             return newErrors.length > 0;
         });
         const buttonClass = computedSignal<string>(disabled, (d: boolean) => d ? "disabled" : "positive");
+        const progressState = signal<ProgressPart[]>([]);
 
         return create("div")
             .classes("flex-v")
@@ -217,13 +220,12 @@ export class TrackEditTemplates {
                     disabled: disabled,
                     classes: [buttonClass, "positive"],
                     onclick: (e) => {
-                        Util.showButtonLoader(e);
-                        Util.closeAllDetails();
-                        new AudioUpload(e, state, uploadInfo);
+                        new AudioUpload(e, state, progressState);
                     },
                     icon: { icon: "upload" },
                 }),
-                FJSC.errorList(errors)
+                FJSC.errorList(errors),
+                GenericTemplates.progressSections(progressState)
             ).build();
     }
 

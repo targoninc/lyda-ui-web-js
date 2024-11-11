@@ -6,12 +6,13 @@ import {Api} from "../Api/Api.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
 import {
     AnyElement,
-    AnyNode, computedSignal,
+    AnyNode,
+    computedSignal,
     create,
     HtmlPropertyValue,
     ifjs,
     signal,
-    Signal,
+    Signal, signalMap,
     StringOrSignal,
     TypeOrSignal
 } from "../../fjsc/f2.ts";
@@ -20,6 +21,8 @@ import {InputType, SearchableSelectConfig} from "../../fjsc/Types.ts";
 import {Util} from "../Classes/Util.ts";
 import {navigate} from "../Routing/Router.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
+import {ProgressState} from "../Enums/ProgressState.ts";
+import {ProgressPart} from "../Models/ProgressPart.ts";
 
 export class GenericTemplates {
     static icon(icon: StringOrSignal, adaptive = false, classes: StringOrSignal[] = [], title = "") {
@@ -811,5 +814,40 @@ export class GenericTemplates {
             .target(newTab ? "_blank" : "_self")
             .text(text)
             .build()
+    }
+
+    static progressSections(progressState: Signal<ProgressPart[]>) {
+        return create("div")
+            .classes("progress-sections")
+            .children(
+                signalMap(progressState, create("div").classes("flex", "small-gap"), part => GenericTemplates.progressSectionPart(part))
+            ).build();
+    }
+
+    static progressSectionPart(part: ProgressPart) {
+        return create("div")
+            .classes("flex-v", "progress-section-part-container")
+            .title(part.title ?? "")
+            .children(
+                create("div")
+                    .classes("progress-section-part", "small-gap", "flex", part.state)
+                    .children(
+                        GenericTemplates.icon(part.icon, true, [part.state]),
+                        create("span")
+                            .classes("progress-section-part-text")
+                            .text(part.text)
+                            .build(),
+                    ).build(),
+                ifjs(part.retryFunction && part.state === ProgressState.error, create("div")
+                    .classes("progress-section-retry", "flex", "small-gap")
+                    .children(
+                        GenericTemplates.icon("refresh", true, [part.state]),
+                        create("span")
+                            .classes("progress-section-part-text")
+                            .text("Retry")
+                            .onclick(() => part.retryFunction ? part.retryFunction() : () => {})
+                            .build()
+                    ).build())
+            ).build();
     }
 }

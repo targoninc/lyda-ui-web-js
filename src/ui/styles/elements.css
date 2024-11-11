@@ -904,6 +904,50 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     resize: vertical;
 }
 
+.progress-section-part {
+    border: 1px solid transparent;
+    padding: var(--inline-padding);
+}
+
+.progress-section-part.notStarted {
+    border-color: var(--color-6);
+    color: var(--color-6);
+    opacity: .8;
+    pointer-events: none;
+}
+
+.progress-section-part i {
+    color: inherit;
+}
+
+.progress-section-part.inProgress {
+    border-color: var(--blue);
+    color: var(--blue);
+}
+
+.progress-section-part.complete {
+    border-color: var(--color-8);
+    background: var(--color-8);
+    color: var(--color-4);
+}
+
+.progress-section-part.error, .progress-section-part.cancelled {
+    border-color: var(--color-2);
+    color: var(--color-2);
+}
+
+.progress-section-retry {
+    color: var(--color-2);
+}
+
+.progress-section-part-container:first-child .progress-section-part {
+    border-radius: 999px 0 0 999px;
+}
+
+.progress-section-part-container:last-child .progress-section-part {
+    border-radius: 0 999px 999px 0;
+}
+
 @keyframes pulse-glow {
     0% {
         box-shadow: 0 0 0 0 var(--color-8);

@@ -1,149 +1,119 @@
 import {Api} from "../Api/Api.ts";
-import {notify, Ui} from "./Ui.ts";
+import {notify} from "./Ui.ts";
 import {navigate} from "../Routing/Router.ts";
 import {Signal} from "../../fjsc/f2.ts";
 import {UploadableTrack} from "../Models/UploadableTrack.ts";
-import {UploadInfo} from "../Models/UploadInfo.ts";
 import {Track} from "../Models/DbModels/Track.ts";
 import {MediaUploader} from "../Api/MediaUploader.ts";
 import {MediaFileType} from "../Enums/MediaFileType.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
+import {ProgressPart} from "../Models/ProgressPart.ts";
+import {ProgressState} from "../Enums/ProgressState.ts";
 
 export class AudioUpload {
     triggerEvent: Event;
     state: Signal<UploadableTrack>;
-    uploadInfo: Signal<UploadInfo[]>;
     id: number | undefined;
     ws: any;
     api: Api|undefined;
-    coverFile: File|undefined;
-    audioFile: File|undefined;
+    private progress: Signal<ProgressPart[]>;
 
-    constructor(e: Event, state: Signal<UploadableTrack>, uploadInfo: Signal<UploadInfo[]>) {
+    constructor(e: Event, state: Signal<UploadableTrack>, progress: Signal<ProgressPart[]>) {
         this.triggerEvent = e;
         this.state = state;
-        this.uploadInfo = uploadInfo;
+        this.progress = progress;
 
-        if (!this.validate()) {
-            return;
-        }
-
-        try {
-            this.uploadInfo.value = [
-                {
-                    type: "info",
-                    value: "0%"
-                },
-                {
-                    type: "cover",
-                    value: "0%"
-                },
-                {
-                    type: "audio",
-                    value: "0%"
-                },
-            ];
-        } catch (e) {
-            console.error(e);
-            return;
-        }
+        this.progress.value = [
+            {
+                id: "details",
+                icon: "info",
+                text: "Details",
+                state: ProgressState.notStarted,
+                retryFunction: () => this.createTrackThenNext()
+            },
+            {
+                id: "audio",
+                icon: "music_note",
+                text: "Audio",
+                state: ProgressState.notStarted,
+                retryFunction: () => this.uploadAudioThenNext()
+            },
+            {
+                id: "cover",
+                icon: "add_photo_alternate",
+                text: "Cover",
+                state: ProgressState.notStarted,
+                retryFunction: () => this.uploadCoverThenNext()
+            }
+        ]
 
         this.uploadTrack().then();
     }
 
+    setProgressPartState(id: string, state: ProgressState, title?: string) {
+        this.progress.value = this.progress.value.map(p => {
+            if (p.id === id) {
+                p.state = state;
+                p.title = title;
+            }
+            return p;
+        });
+    }
+
     async uploadTrack() {
-        this.writeToInfo("Creating track...", "info");
-        const track = await this.createTrack();
-        if (!track) {
-            this.writeToInfo("Failed to create track", "info");
-            this.setInfoError("info");
-            return;
-        }
-        this.id = track.id;
-
-        if (!this.audioFile) {
-            this.writeToInfo("No audio file, aborting upload", "audio");
-            this.setInfoError("audio");
-            return;
-        }
-        this.writeToInfo("Uploading audio...", "audio");
-        await this.uploadMedia(MediaFileType.audio, this.id, this.state.value.audioFiles![0]);
-        this.writeToInfo("Uploaded audio", "audio");
-
-        if (this.coverFile) {
-            this.writeToInfo("Uploading cover...", "cover");
-            await this.uploadMedia(MediaFileType.trackCover, this.id, this.coverFile);
-            this.writeToInfo("Cover uploaded!", "cover");
-            this.setInfoSuccess("cover");
-        } else {
-            this.writeToInfo("No cover file, skipping step.", "cover");
-            this.setInfoSuccess("cover");
-        }
+        await this.createTrackThenNext();
 
         notify("Track upload completed", "success");
         navigate(`track/${this.id}`);
     }
 
-    writeToInfo(text: string, type: string|null|undefined = null) {
-        if (type === undefined || type === "all" || type === null) {
-            this.uploadInfo.value = this.uploadInfo.value.map((info: UploadInfo) => {
-                info.value = text;
-                return info;
-            });
+    async uploadAudioThenNext() {
+        this.setProgressPartState("audio", ProgressState.inProgress, "Uploading audio");
+        if (!this.state.value.audioFiles) {
+            this.setProgressPartState("audio", ProgressState.error, "No audio file");
+            return;
+        }
+
+        if (!this.id) {
+            this.setProgressPartState("audio", ProgressState.error, "No track id");
+            return;
+        }
+
+        if (!await this.uploadMedia(MediaFileType.audio, this.id, this.state.value.audioFiles![0])) {
+            this.setProgressPartState("audio", ProgressState.error, "Failed to upload audio");
         } else {
-            this.uploadInfo.value = this.uploadInfo.value.map((info: UploadInfo) => {
-                if (info.type === type) {
-                    info.value = text;
-                }
-                return info;
-            });
+            this.setProgressPartState("audio", ProgressState.complete);
+            await this.uploadCoverThenNext();
         }
     }
 
-    setInfoError(type: string) {
-        this.uploadInfo.value = this.uploadInfo.value.map((info: UploadInfo) => {
-            if (info.type === type) {
-                info.classes = ["error"];
-            }
-            return info;
-        });
-    }
-
-    setInfoSuccess(type: string) {
-        this.uploadInfo.value = this.uploadInfo.value.map((info: UploadInfo) => {
-            if (info.type === type) {
-                info.classes = ["success"];
-            }
-            return info;
-        });
-    }
-
-    // Maybe move this info input validation so user knows earlier what's wrong
-    validate() {
-        let success = true;
+    async uploadCoverThenNext() {
+        this.setProgressPartState("cover", ProgressState.inProgress, "Uploading cover");
         if (this.state.value.coverArtFiles) {
-            this.coverFile = this.state.value.coverArtFiles![0];
-            success = !success ?? this.validateCondition(this.coverFile.type.startsWith("image/"), "Invalid file type", "cover");
-            success = !success ?? this.validateCondition(this.coverFile.size < 20 * 1024 * 1024, "Cover file too big", "cover");
+            if (!this.id) {
+                this.setProgressPartState("cover", ProgressState.error, "No track id");
+                return;
+            }
+
+            if (!await this.uploadMedia(MediaFileType.trackCover, this.id, this.state.value.coverArtFiles![0])) {
+                this.setProgressPartState("cover", ProgressState.error, "Failed to upload cover");
+                return;
+            }
         }
 
-        if (this.state.value.audioFiles) {
-            this.audioFile = this.state.value.audioFiles![0];
-            success = !success ?? this.validateCondition(this.audioFile.type.startsWith("audio/"), "Invalid file type", "audio");
-            success = !success ?? this.validateCondition(this.audioFile.size < 1000 * 1024 * 1024, "Audio file too big", "audio");
-        }
-
-        return success;
+        this.setProgressPartState("cover", ProgressState.complete);
     }
 
-    validateCondition(condition: boolean, message: string, type: string) {
-        if (!condition) {
-            notify(message, "error");
-            this.writeToInfo(message, type);
-            this.setInfoError(type);
-            return false;
+    async createTrackThenNext() {
+        this.setProgressPartState("details", ProgressState.inProgress, "Creating track...");
+        const track = await this.createTrack();
+        if (!track) {
+            this.setProgressPartState("details", ProgressState.error);
+        } else {
+            this.id = track.id;
+            this.setProgressPartState("details", ProgressState.complete);
+            await this.uploadAudioThenNext();
         }
-        return true;
     }
 
     async createTrack() {
@@ -163,17 +133,18 @@ export class AudioUpload {
         });
 
         if (res.code !== 200) {
-            this.writeToInfo("Failed to create track: " + res.data, "info");
-            this.setInfoError("info");
             return null;
         }
 
-        this.writeToInfo("Track created!", "info");
-        this.setInfoSuccess("info");
         return res.data;
     }
 
     private async uploadMedia(type: MediaFileType, id: number, file: File) {
-        return await MediaUploader.upload(type, id, file);
+        try {
+            await MediaUploader.upload(type, id, file);
+            return true;
+        } catch (e) {
+            return false;
+        }
     }
 }
