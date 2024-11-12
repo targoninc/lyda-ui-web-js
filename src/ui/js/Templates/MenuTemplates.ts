@@ -40,18 +40,19 @@ export class MenuTemplates {
             .classes("flex-v")
             .children(
                 GenericTemplates.title(title),
-                ...menuItems.map((menuItem, itemIndex) => MenuTemplates.menuItem(menuItem.text, menuItem.action, selectedIndex, itemIndex))
+                ...menuItems.map((menuItem, itemIndex) => MenuTemplates.menuItem(menuItem.text, menuItem.action, menuItem.icon, selectedIndex, itemIndex))
             ).build();
     }
 
-    static menuItem(text: HtmlPropertyValue, action: Function, selectedIndex: Signal<number>, index: number) {
+    static menuItem(text: HtmlPropertyValue, action: Function, icon: string, selectedIndex: Signal<number>, index: number) {
         const isSelected = computedSignal(selectedIndex, (i: number) => i === index);
         const selectedClass = computedSignal<string>(isSelected, (is: boolean) => is ? "active" : "_");
 
         return FJSC.button({
             text: text as StringOrSignal,
+            icon: { icon },
             onclick: action,
-            classes: ["fakeButton", "clickable", "rounded", "padded-inline", selectedClass],
+            classes: [selectedClass],
         });
     }
 
@@ -61,6 +62,7 @@ export class MenuTemplates {
         const items = [
             {
                 text: "New Album",
+                icon: "forms_add_on",
                 action: async () => {
                     Util.removeModal(modal);
                     await AlbumActions.openNewAlbumModal();
@@ -68,6 +70,7 @@ export class MenuTemplates {
             },
             {
                 text: "New Track",
+                icon: "upload",
                 action: async () => {
                     Util.removeModal(modal);
                     navigate("upload");
@@ -75,6 +78,7 @@ export class MenuTemplates {
             },
             {
                 text: "New Playlist",
+                icon: "playlist_add",
                 action: async () => {
                     Util.removeModal(modal);
                     await PlaylistActions.openNewPlaylistModal();

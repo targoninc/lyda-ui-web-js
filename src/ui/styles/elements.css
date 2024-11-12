@@ -661,7 +661,6 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     height: calc(var(--icon-size) - (var(--padding) * 2));
     align-content: center;
     display: flex;
-    align-self: center;
 }
 
 .verification-badge img {

@@ -29,6 +29,7 @@ import {Permission} from "../Models/DbModels/Permission.ts";
 import {Playlist} from "../Models/DbModels/Playlist.ts";
 import {Album} from "../Models/DbModels/Album.ts";
 import {Badge} from "../Models/DbModels/Badge.ts";
+import {FJSC} from "../../fjsc";
 
 export class UserTemplates {
     static userWidget(user_id: number, username: string, displayname: string, avatar: StringOrSignal, following: boolean, extraAttributes: HtmlPropertyValue[] = [], extraClasses: HtmlPropertyValue[] = []) {
@@ -185,14 +186,20 @@ export class UserTemplates {
                 GenericTemplates.newTrackButton(),
                 GenericTemplates.newAlbumButton(),
                 GenericTemplates.newPlaylistButton(),
-                GenericTemplates.action(Icons.SETTINGS, "Settings", "settings", async e => {
-                    e.preventDefault();
-                    navigate("settings");
-                }, [], [], Links.LINK("settings")),
-                GenericTemplates.action(Icons.STATISTICS, "Statistics", "statistics", async e => {
-                    e.preventDefault();
-                    navigate("statistics");
-                }, [], [], Links.LINK("statistics")),
+                FJSC.button({
+                    text: "Settings",
+                    icon: { icon: "settings" },
+                    onclick: async () => {
+                        navigate("settings");
+                    }
+                }),
+                FJSC.button({
+                    text: "Statistics",
+                    icon: { icon: "finance" },
+                    onclick: async () => {
+                        navigate("statistics");
+                    }
+                }),
                 UserTemplates.unapprovedTracksLink(),
             )
             .build();
@@ -312,16 +319,24 @@ export class UserTemplates {
                     .children(
                         UserTemplates.username(user, selfUser, isOwnProfile),
                         ifjs(verified, UserTemplates.verificationbadge()),
-                        ifjs(canVerify, GenericTemplates.action(Icons.VERIFIED, "Verify", "verify", async e => {
-                            e.preventDefault();
-                            await UserActions.verifyUser(user.id);
-                            verified.value = true;
-                        }, [], ["positive"])),
-                        ifjs(canUnverify, GenericTemplates.action(Icons.X, "Unverify", "unverify", async e => {
-                            e.preventDefault();
-                            await UserActions.unverifyUser(user.id);
-                            verified.value = false;
-                        }, [], ["negative"])),
+                        ifjs(canVerify, FJSC.button({
+                            text: "Verify",
+                            icon: { icon: "verified" },
+                            classes: ["positive"],
+                            onclick: async () => {
+                                await UserActions.verifyUser(user.id);
+                                verified.value = true;
+                            }
+                        })),
+                        ifjs(canUnverify, FJSC.button({
+                            text: "Unverify",
+                            icon: { icon: "close" },
+                            classes: ["negative"],
+                            onclick: async () => {
+                                await UserActions.unverifyUser(user.id);
+                                verified.value = false;
+                            }
+                        })),
                         !isOwnProfile && selfUser ? UserTemplates.followButton(following, user.id) : null,
                         !isOwnProfile && followsBack ? UserTemplates.followsBackIndicator() : null,
                     ).build(),

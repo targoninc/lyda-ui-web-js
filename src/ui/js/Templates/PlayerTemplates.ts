@@ -101,13 +101,10 @@ export class PlayerTemplates {
                                     .classes("audio-player-time-total", "nopointer", "align-center")
                                     .text(Time.format(track.length))
                                     .build()
-                            )
-                            .build(),
+                            ).build(),
                         PlayerTemplates.loudnessControl(track)
-                    )
-                    .build()
-            )
-            .build();
+                    ).build()
+            ).build();
     }
 
     static loudnessControl(track: Track) {

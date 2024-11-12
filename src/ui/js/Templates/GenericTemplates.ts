@@ -184,24 +184,36 @@ export class GenericTemplates {
     }
 
     static newAlbumButton(classes: string[] = []) {
-        return GenericTemplates.action(Icons.ALBUM_ADD, "New album", "new_album", (e: any) => {
-            e.preventDefault();
-            AlbumActions.openNewAlbumModal().then();
-        }, [], ["positive", ...classes]);
+        return FJSC.button({
+            text: "New album",
+            icon: { icon: "forms_add_on" },
+            classes: ["positive", ...classes],
+            onclick: async () => {
+                await AlbumActions.openNewAlbumModal();
+            }
+        });
     }
 
     static newPlaylistButton(classes: string[] = []) {
-        return GenericTemplates.action(Icons.PLAYLIST_ADD, "New playlist", "new_playlist", e => {
-            e.preventDefault();
-            PlaylistActions.openNewPlaylistModal().then();
-        }, [], ["positive", ...classes]);
+        return FJSC.button({
+            text: "New playlist",
+            icon: { icon: "playlist_add" },
+            classes: ["positive", ...classes],
+            onclick: async () => {
+                await PlaylistActions.openNewPlaylistModal();
+            }
+        });
     }
 
     static newTrackButton(classes: string[] = []) {
-        return GenericTemplates.action(Icons.UPLOAD, "Upload", "upload", async e => {
-            e.preventDefault();
-            navigate("upload");
-        }, [], ["positive", ...classes], Links.LINK("upload"));
+        return FJSC.button({
+            text: "Upload",
+            icon: { icon: "upload" },
+            classes: ["positive", ...classes],
+            onclick: async () => {
+                navigate("upload");
+            }
+        });
     }
 
     static openPageButton(text: HtmlPropertyValue, page: string) {
