@@ -7,6 +7,7 @@ import {CacheItem} from "../Cache/CacheItem.ts";
 import {Icons} from "../Enums/Icons.js";
 import {AnyElement} from "../../fjsc/f2.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
+import {MediaFileType} from "../Enums/MediaFileType.ts";
 
 export class Util {
     static capitalizeFirstLetter(string) {
@@ -91,31 +92,31 @@ export class Util {
         if (id === null) {
             return Images.DEFAULT_AVATAR;
         }
-        const baseUrl = Config.getKey("storageBaseUrl") + "/storage/v2/avatars/";
-        return await this.getFileOrBackupAsync(baseUrl + Util.toHexString(id) + Images.FORMAT, Images.DEFAULT_AVATAR);
+        const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.userAvatar}`;
+        return await this.getFileOrBackupAsync(url, Images.DEFAULT_AVATAR);
     }
 
     static async getBannerFromUserIdAsync(id: number|null) {
         if (id === null) {
             return Images.DEFAULT_BANNER;
         }
-        const baseUrl = Config.getKey("storageBaseUrl") + "/storage/v2/banners/";
-        return await this.getFileOrBackupAsync(baseUrl + Util.toHexString(id) + Images.FORMAT, Images.DEFAULT_BANNER);
+        const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.userBanner}`;
+        return await this.getFileOrBackupAsync(url, Images.DEFAULT_BANNER);
     }
 
     static async getCoverFileFromTrackIdAsync(id: number, user_id: number|null = null) {
-        const baseUrl = Config.getKey("storageBaseUrl") + "/storage/v2/covers/tracks/";
-        return await this.getFileOrBackupAsync(baseUrl + Util.toHexString(id) + Images.FORMAT, Util.getAvatarFromUserIdAsync(user_id));
+        const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.trackCover}`;
+        return await this.getFileOrBackupAsync(url, Util.getAvatarFromUserIdAsync(user_id));
     }
 
     static async getCoverFileFromAlbumIdAsync(id: number, user_id: number|null = null) {
-        const baseUrl = Config.getKey("storageBaseUrl") + "/storage/v2/covers/albums/";
-        return await this.getFileOrBackupAsync(baseUrl + Util.toHexString(id) + Images.FORMAT, Util.getAvatarFromUserIdAsync(user_id));
+        const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.albumCover}`;
+        return await this.getFileOrBackupAsync(url, Util.getAvatarFromUserIdAsync(user_id));
     }
 
     static async getCoverFileFromPlaylistIdAsync(id: number, user_id: number|null = null) {
-        const baseUrl = Config.getKey("storageBaseUrl") + "/storage/v2/covers/playlists/";
-        return await this.getFileOrBackupAsync(baseUrl + Util.toHexString(id) + Images.FORMAT, Util.getAvatarFromUserIdAsync(user_id));
+        const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.playlistCover}`;
+        return await this.getFileOrBackupAsync(url, Util.getAvatarFromUserIdAsync(user_id));
     }
 
     static async getFileOrBackupAsync(url: string, backupUrl: string) {

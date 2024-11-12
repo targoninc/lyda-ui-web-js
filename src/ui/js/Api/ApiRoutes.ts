@@ -52,6 +52,7 @@ export class ApiRoutes {
     private static media = ApiRoutes.base + "/media";
     static uploadMedia = ApiRoutes.media + "/upload";
     static deleteMedia = ApiRoutes.media + "/delete";
+    static getImageMedia = ApiRoutes.media + "/image";
     // endregion
 
     // region Notifications
