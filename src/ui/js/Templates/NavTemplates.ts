@@ -10,7 +10,7 @@ import {AuthActions} from "../Actions/AuthActions.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {Util} from "../Classes/Util.ts";
 import {navigate} from "../Routing/Router.ts";
-import {create, signal} from "../../fjsc/f2.ts";
+import {create, ifjs, signal} from "../../fjsc/f2.ts";
 
 export class NavTemplates {
     static navTop(userTemplate) {
@@ -170,7 +170,7 @@ export class NavTemplates {
             .classes("listNotification", "flex", type, "rounded", "padded-inline", "hoverable", "text-left", read === true ? "read" : "unread")
             .attributes("data-created_at", created_at)
             .children(
-                NavTemplates.notificationImage(result.image),
+                //ifjs(result, NavTemplates.notificationImage(result.image)),
                 create("div")
                     .classes("flex-v", "no-gap")
                     .children(
