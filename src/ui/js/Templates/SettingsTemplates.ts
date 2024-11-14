@@ -1,4 +1,4 @@
-import {computedSignal, create, signal} from "../../fjsc/f2.ts";
+import {computedSignal, create, Signal, signal} from "../../fjsc/f2.ts";
 import {UserActions} from "../Actions/UserActions.ts";
 import {Theme} from "../Enums/Theme.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
@@ -100,7 +100,7 @@ export class SettingsTemplates {
             ).build();
     }
 
-    static notificationsSection(user) {
+    static notificationsSection(user: User) {
         return create("div")
             .classes("card", "flex-v")
             .children(
@@ -115,13 +115,13 @@ export class SettingsTemplates {
             ).build();
     }
 
-    static notificationToggle(text, key, currentValue) {
+    static notificationToggle(text: string, key: string, currentValue: boolean) {
         return GenericTemplates.toggle(text, "notification_" + key, async () => {
             await UserActions.toggleNotificationSetting(key);
         }, [], currentValue);
     }
 
-    static behaviourSection(user) {
+    static behaviourSection(user: User) {
         return create("div")
             .classes("card", "flex-v")
             .children(
@@ -133,11 +133,11 @@ export class SettingsTemplates {
             ).build();
     }
 
-    static themeSelector(theme, currentTheme$) {
+    static themeSelector(theme: Theme, currentTheme$: Signal<Theme>) {
         const active$ = signal(currentTheme$.value === theme ? "active" : "_");
-        currentTheme$.onUpdate = (currentTheme) => {
+        currentTheme$.subscribe((currentTheme: Theme) => {
             active$.value = currentTheme === theme ? "active" : "_";
-        };
+        });
 
         return FJSC.button(<ButtonConfig>{
             classes: [active$],
@@ -150,7 +150,7 @@ export class SettingsTemplates {
         });
     }
 
-    static themeSection(currentTheme) {
+    static themeSection(currentTheme: Theme) {
         const themes = Object.values(Theme);
         const currentTheme$ = signal(currentTheme);
         return create("div")
@@ -167,13 +167,13 @@ export class SettingsTemplates {
             ).build();
     }
 
-    static playFromAutoQueueToggle(currentValue) {
+    static playFromAutoQueueToggle(currentValue: boolean) {
         return GenericTemplates.toggle("Play from auto queue", UserSettings.playFromAutoQueue, async () => {
             await UserActions.togglePlayFromAutoQueue();
         }, [], currentValue);
     }
 
-    static publicLikesToggle(currentValue) {
+    static publicLikesToggle(currentValue: boolean) {
         return GenericTemplates.toggle("Make my library public", UserSettings.publicLikes, async () => {
             await UserActions.togglePublicLikes();
         }, [], currentValue);
