@@ -179,7 +179,7 @@ export class SettingsTemplates {
         }, [], currentValue);
     }
 
-    private static dangerSection(user) {
+    private static dangerSection(user: User) {
         return create("div")
             .classes("card", "flex-v")
             .children(
@@ -187,10 +187,11 @@ export class SettingsTemplates {
                     .text("Danger Zone")
                     .build(),
                 create("div")
-                    .classes("flex-v")
+                    .classes("flex")
                     .children(
                         FJSC.button({
                             text: "Delete account",
+                            icon: { icon: "delete" },
                             classes: ["negative"],
                             onclick: () => {
                                 Ui.getConfirmationModal("Delete account", "Are you sure you want to delete your account? This action cannot be undone.",
@@ -204,6 +205,25 @@ export class SettingsTemplates {
                                         }
                                     })
                                 }, () => {}, "delete").then();
+                            }
+                        }),
+                        FJSC.button({
+                            text: "Download data",
+                            icon: { icon: "download" },
+                            onclick: () => {
+                                LydaApi.exportUser().then(res => {
+                                    if (res.code === 200) {
+                                        const blob = new Blob([JSON.stringify(res.data)], { type: 'application/octet-stream' });
+                                        const url = URL.createObjectURL(blob);
+                                        const a = document.createElement('a');
+                                        a.href = url;
+                                        a.download = `userdata-${user.username}.json`;
+                                        document.body.appendChild(a);
+                                        a.click();
+                                        document.body.removeChild(a);
+                                        URL.revokeObjectURL(url);
+                                    }
+                                });
                             }
                         })
                     ).build()

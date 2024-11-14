@@ -19,6 +19,7 @@ export class ApiRoutes {
     static randomUser = ApiRoutes.user + "/random";
     static userExists = ApiRoutes.user + "/exists";
     static getLibrary = ApiRoutes.user + "/library";
+    static exportUser = ApiRoutes.user + "/export";
 
     private static userActions = ApiRoutes.user + "/actions";
     static followUser = ApiRoutes.userActions + "/follow";

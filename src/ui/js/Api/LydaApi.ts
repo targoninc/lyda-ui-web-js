@@ -44,4 +44,8 @@ export class LydaApi {
         notify("Account updated", "success");
         return true;
     }
+
+    static async exportUser() {
+        return await Api.getAsync(ApiRoutes.exportUser);
+    }
 }
