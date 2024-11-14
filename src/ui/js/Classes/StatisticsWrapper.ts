@@ -1,6 +1,6 @@
 import {StatisticTemplates} from "../Templates/StatisticTemplates.ts";
 import {Api} from "../Api/Api.ts";
-import {notify, Ui} from "./Ui.ts";
+import {notify} from "./Ui.ts";
 import {Num} from "./Helpers/Num.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {signal} from "../../fjsc/f2.ts";
@@ -26,8 +26,8 @@ export class StatisticsWrapper {
             if (reverse) {
                 res.data.reverse();
             }
-            const labels = res.data.map((item) => item[keyProperty]);
-            const values = Num.shortenInArray(res.data.map((item) => item[valueProperty]));
+            const labels = res.data.map((item: any) => item[keyProperty]);
+            const values = Num.shortenInArray(res.data.map((item: any) => item[valueProperty]));
             chart.value = template(labels, values);
         });
         return chart;
@@ -46,10 +46,10 @@ export class StatisticsWrapper {
     }
 
     static async getPlayCountByMonth() {
-        return StatisticsWrapper.getSingleStat(StatisticTemplates.playCountByMonthChart, ApiRoutes.getPlayCountByMonth, "title", "plays", true);
+        return StatisticsWrapper.getSingleStat(StatisticTemplates.playCountByMonthChart, ApiRoutes.getPlayCountByMonth, "month", "plays", true);
     }
 
     static async getLikesByTrack() {
-        return StatisticsWrapper.getSingleStat(StatisticTemplates.likesByTrackChart, ApiRoutes.getLikesByTrack, "title", "plays", true);
+        return StatisticsWrapper.getSingleStat(StatisticTemplates.likesByTrackChart, ApiRoutes.getLikesByTrack, "title", "likes", true);
     }
 }

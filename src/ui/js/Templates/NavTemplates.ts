@@ -10,10 +10,10 @@ import {AuthActions} from "../Actions/AuthActions.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {Util} from "../Classes/Util.ts";
 import {navigate} from "../Routing/Router.ts";
-import {create, ifjs, signal} from "../../fjsc/f2.ts";
+import {AnyNode, create, signal} from "../../fjsc/f2.ts";
 
 export class NavTemplates {
-    static navTop(userTemplate) {
+    static navTop(userTemplate: AnyNode) {
         return create("nav")
             .id("navTop")
             .children(
@@ -35,9 +35,9 @@ export class NavTemplates {
                         SearchTemplates.search(),
                     ).build(),
                 userTemplate
-            )
-            .build();
+            ).build();
     }
+
     static navLogo() {
         return create("div")
             .classes("nav-logo", "hideOnMidBreakpoint", "pointer")
@@ -45,25 +45,19 @@ export class NavTemplates {
                 navigate("explore");
             })
             .children(
-                create("img")
-                    .classes("icon", "svg")
-                    .attributes("src", Icons.LYDA, "alt", "Lyda")
-                    .build()
-            )
-            .build();
+                GenericTemplates.icon(Icons.LYDA, true, ["icon", "svg"]),
+            ).build();
     }
+
     static burgerMenu() {
         return create("div")
             .classes("burger-menu", "flexOnMidBreakpoint", "flex", "clickable")
             .onclick(NavActions.openBurgerMenu)
             .children(
-                create("img")
-                    .classes("nopointer", "icon", "svg", "align-center")
-                    .attributes("src", Icons.BURGER, "alt", "Menu")
-                    .build()
-            )
-            .build();
+                GenericTemplates.icon(Icons.BURGER, true, ["nopointer", "icon", "svg", "align-center"], "Open Menu")
+            ).build();
     }
+
     static burgerMenuContent() {
         return create("div")
             .classes("burger-menu-content", "hidden", "padded-page", "flex-v")

@@ -15,20 +15,13 @@
     display: flex;
 }
 
-.heading-logo {
-    height: 45px;
-    width: 45px;
-    margin: auto 0;
-    display: flex;
-}
-
 .search-result-header {
     padding: 4px 10px 0 10px;
     font-size: 14px;
     font-weight: bold;
 }
 
-.nav-logo img, .heading-logo img {
+.nav-logo i {
     margin: auto;
 }
 
