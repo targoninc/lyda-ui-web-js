@@ -84,7 +84,7 @@ export class TrackTemplates {
                                     .classes("flex")
                                     .children(
                                         StatisticsTemplates.likesIndicator("track", track.id, track.likes.length,
-                                            Util.arrayPropertyMatchesUser(track.likes, "userId", user)),
+                                            Util.arrayPropertyMatchesUser(track.likes, "user_id", user)),
                                         isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, Util.arrayPropertyMatchesUser(track.reposts, "userId", user)),
                                         CommentTemplates.commentsIndicator(track.id, track.comments.length),
                                     ).build()
