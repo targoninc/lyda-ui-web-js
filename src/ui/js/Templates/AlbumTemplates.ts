@@ -260,7 +260,7 @@ export class AlbumTemplates {
                     .classes("stats-container", "flex", "rounded")
                     .children(
                         StatisticsTemplates.likesIndicator("album", album.id, album.likes.length,
-                            Util.arrayPropertyMatchesUser(album.likes, "userId", user)),
+                            Util.arrayPropertyMatchesUser(album.likes, "user_id", user)),
                         StatisticsTemplates.likeListOpener(album.likes, album.user),
                     ).build()
             ).build();
