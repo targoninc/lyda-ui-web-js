@@ -468,6 +468,7 @@ button.secondary {
     border-radius: var(--border-radius);
     color: var(--color-4);
     padding: 5px 10px;
+    max-width: 100dvw;
 }
 
 .notification.error {

@@ -247,7 +247,7 @@ export class AlbumTemplates {
                         create("div")
                             .classes("flex-v", "small-gap")
                             .children(
-                                AlbumTemplates.title(album.name, album.id, icons),
+                                AlbumTemplates.title(album.title, album.id, icons),
                                 UserTemplates.userWidget(album.user_id, album.user.username, album.user.displayname, avatarState,
                                     Util.arrayPropertyMatchesUser(album.user.follows, "followingUserId", user)),
                                 create("span")
@@ -261,7 +261,7 @@ export class AlbumTemplates {
                     .children(
                         StatisticsTemplates.likesIndicator("album", album.id, album.likes.length,
                             Util.arrayPropertyMatchesUser(album.likes, "userId", user)),
-                        StatisticsTemplates.likeListOpener(album.id, album.likes, user),
+                        StatisticsTemplates.likeListOpener(album.likes, album.user),
                     ).build()
             ).build();
     }
