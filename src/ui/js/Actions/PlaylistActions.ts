@@ -150,7 +150,7 @@ export class PlaylistActions {
         if (isPlaying && stopIfPlaying) {
             await PlayManager.stopAllAsync();
         } else {
-            PlayManager.playFrom("playlist", playlist.name, playlist.id);
+            PlayManager.playFrom("playlist", playlist.title, playlist.id);
             QueueManager.setContextQueue(playlist.playlisttracks.map(t => t.id));
             const track = playlist.playlisttracks.find(t => t.id === trackId);
             if (!track) {

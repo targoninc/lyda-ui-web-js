@@ -87,7 +87,7 @@ export class AlbumTemplates {
                 await AlbumTemplates.smallAlbumCover(album),
                 create("span")
                     .classes("nopointer")
-                    .text(album.name)
+                    .text(album.title)
                     .build(),
             ).build();
     }
@@ -100,13 +100,13 @@ export class AlbumTemplates {
             release_date: new Date(),
             visibility: "private",
         });
-        const name = computedSignal<string>(album, (s: Album) => s.name);
+        const name = computedSignal<string>(album, (s: Album) => s.title);
         const upc = computedSignal<string>(album, (s: Album) => s.upc);
         const description = computedSignal<string>(album, (s: Album) => s.description);
         const releaseDate = computedSignal<Date>(album, (s: Album) => s.release_date.toISOString().split("T")[0]);
         const visibility = computedSignal<boolean>(album, (s: Album) => s.visibility === "private");
         const disabled = computedSignal<boolean>(album, (s: Album) => {
-            return !s.name || (s.name === "");
+            return !s.title || (s.title === "");
         });
 
         return create("div")
@@ -297,7 +297,7 @@ export class AlbumTemplates {
             .styles("width", overwriteWidth ?? "min(200px, 100%)")
             .id(album.id)
             .onclick(async () => {
-                PlayManager.playFrom("album", album.name, album.id);
+                PlayManager.playFrom("album", album.title, album.id);
                 QueueManager.setContextQueue(album.tracks!.map(t => t.id));
                 const firstTrack = album.tracks![0];
                 if (!firstTrack) {
@@ -311,7 +311,7 @@ export class AlbumTemplates {
                 create("img")
                     .classes("cover", "nopointer", "blurOnParentHover")
                     .src(srcState)
-                    .alt(album.name)
+                    .alt(album.title)
                     .build(),
                 create("img")
                     .classes("play-button-icon", "centeredInParent", "showOnParentHover", "inline-icon", "svgInverted", "nopointer")
@@ -326,7 +326,7 @@ export class AlbumTemplates {
             .classes("cover", "rounded", "nopointer", "blurOnParentHover")
             .styles("height", "var(--font-size-large)")
             .src(await Util.getCoverFileFromAlbumIdAsync(album.id, album.user_id))
-            .alt(album.name)
+            .alt(album.title)
             .build();
     }
 
@@ -394,7 +394,7 @@ export class AlbumTemplates {
                     .children(
                         create("span")
                             .classes("title", "wordwrap")
-                            .text(album.name)
+                            .text(album.title)
                             .build(),
                         UserTemplates.userWidget(a_user.id, a_user.username, a_user.displayname, await Util.getAvatarFromUserIdAsync(a_user.id),
                             Util.arrayPropertyMatchesUser(a_user.follows, "followingUserId", user),
@@ -416,7 +416,7 @@ export class AlbumTemplates {
                                 create("img")
                                     .classes("cover", "blurOnParentHover", "nopointer")
                                     .src(await Util.getCoverFileFromAlbumIdAsync(album.id, album.user_id))
-                                    .alt(album.name)
+                                    .alt(album.title)
                                     .build()
                             )
                             .build(),
