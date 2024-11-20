@@ -19,6 +19,7 @@ import {BooleanConfig, InputType} from "../../fjsc/Types.ts";
 import {Track} from "../Models/DbModels/Track.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {navigate} from "../Routing/Router.ts";
+import {AlbumTrack} from "../Models/DbModels/AlbumTrack.ts";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
@@ -348,7 +349,7 @@ export class AlbumTemplates {
             throw new Error(`Album ${album.id} has no user`);
         }
         const trackChildren = [];
-        const positionMap = tracks.map((t: Track) => t.id);
+        const positionMap = tracks.map(t => t.track_id);
         const positionsState = signal(positionMap);
 
         async function startCallback(trackId: number) {
@@ -436,8 +437,8 @@ export class AlbumTemplates {
                                     .classes("stats-container", "flex", "rounded")
                                     .children(
                                         StatisticsTemplates.likesIndicator("album", album.id, album.likes.length,
-                                            Util.arrayPropertyMatchesUser(album.likes, "userId", user)),
-                                        StatisticsTemplates.likeListOpener(album.id, album.likes, user),
+                                            Util.arrayPropertyMatchesUser(album.likes, "user_id", user)),
+                                        StatisticsTemplates.likeListOpener(album.likes, user),
                                     ).build(),
                             ).build()
                     ).build(),
