@@ -342,7 +342,7 @@ export class PlaylistTemplates {
             .classes("cover", "rounded", "nopointer", "blurOnParentHover")
             .styles("height", "var(--font-size-large)")
             .src(await Util.getCoverFileFromPlaylistIdAsync(playlist.id, playlist.user_id))
-            .alt(playlist.name)
+            .alt(playlist.title)
             .build();
     }
 
@@ -367,7 +367,7 @@ export class PlaylistTemplates {
             throw new Error(`Playlist ${playlist.id} has no likes array`);
         }
         const trackChildren = [];
-        const positionMap = tracks.map(t => t.id);
+        const positionMap = tracks.map(t => t.track_id);
         const positionsState = signal(positionMap);
 
         async function startCallback(trackId: number) {
@@ -411,7 +411,7 @@ export class PlaylistTemplates {
                     .children(
                         create("span")
                             .classes("title", "wordwrap")
-                            .text(playlist.name)
+                            .text(playlist.title)
                             .build(),
                         UserTemplates.userWidget(a_user.id, a_user.username, a_user.displayname, await Util.getAvatarFromUserIdAsync(a_user.id),
                             Util.arrayPropertyMatchesUser(a_user.follows, "followingUserId", user), [], ["widget-secondary"])
@@ -431,10 +431,9 @@ export class PlaylistTemplates {
                                 create("img")
                                     .classes("cover", "blurOnParentHover", "nopointer")
                                     .src(await Util.getCoverFileFromPlaylistIdAsync(playlist.id, playlist.user_id))
-                                    .alt(playlist.name)
+                                    .alt(playlist.title)
                                     .build()
-                            )
-                            .build(),
+                            ).build(),
                         create("div")
                             .classes("flex-v")
                             .children(
@@ -446,8 +445,7 @@ export class PlaylistTemplates {
                                             .classes("date", "text-small")
                                             .text("Created " + Util.formatDate(playlist.created_at))
                                             .build()
-                                    )
-                                    .build(),
+                                    ).build(),
                                 create("div")
                                     .classes("stats-container", "flex", "rounded")
                                     .children(

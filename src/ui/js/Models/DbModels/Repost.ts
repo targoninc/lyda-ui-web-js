@@ -1,4 +1,4 @@
-import {User} from "./User.ts";
+import {User} from "./User.js";
 
 export interface Repost {
     user?: User;

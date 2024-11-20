@@ -28,6 +28,9 @@ import {Repost} from "../Models/DbModels/Repost.ts";
 import {Album} from "../Models/DbModels/Album.ts";
 import {FJSC} from "../../fjsc";
 import {UploadableTrack} from "../Models/UploadableTrack.ts";
+import {PlaylistTrack} from "../Models/DbModels/PlaylistTrack.ts";
+import {AlbumTrack} from "../Models/DbModels/AlbumTrack.ts";
+import {Playlist} from "../Models/DbModels/Playlist.ts";
 
 export class TrackTemplates {
     static trackCard(track: Track, user: User, profileId: number) {
@@ -173,7 +176,7 @@ export class TrackTemplates {
         return TrackTemplates.trackCover(track, "var(--inline-track-height)");
     }
 
-    static smallListTrackCover(track, startCallback = null) {
+    static smallListTrackCover(track: Track, startCallback: Function = null) {
         return TrackTemplates.trackCover(track, "var(--small-track-height)", startCallback);
     }
 
@@ -394,15 +397,23 @@ export class TrackTemplates {
             ).build();
     }
 
-    static listTrackInAlbumOrPlaylist(track, user, canEdit, list, positionsState: Signal<any>, type: string, startCallback: Function | null = null) {
+    static listTrackInAlbumOrPlaylist(playlistTrack: PlaylistTrack|AlbumTrack, user: User, canEdit: boolean, list: Album|Playlist, positionsState: Signal<any>, type: string, startCallback: Function | null = null) {
         const icons = [];
+        const track = playlistTrack.track;
+        if (!track) {
+            throw new Error("Track is missing on list track");
+        }
+        if (!track.likes) {
+            throw new Error("Track on list track is missing likes");
+        }
+
         if (track.visibility === "private") {
             icons.push(GenericTemplates.lock());
         }
 
         const graphics = [];
         if (track.processed) {
-            graphics.push(TrackTemplates.waveform(track.id, track.processed, track.length, JSON.parse(track.loudnessData), true));
+            graphics.push(TrackTemplates.waveform(track.id, track.processed, track.length, JSON.parse(track.loudness_data), true));
         } else {
             graphics.push(TrackTemplates.waveform(track.id, track.processed, track.length, [], true));
         }
@@ -417,14 +428,14 @@ export class TrackTemplates {
         };
         if (canEdit) {
             trackActions.push(GenericTemplates.action(Icons.ARROW_UP, "Move up", list.id, async () => {
-                await TrackActions.moveTrackUpInList(positionsState, track, type, list);
+                await TrackActions.moveTrackUpInList(positionsState, playlistTrack, type, list);
             }, [], [upState]));
             trackActions.push(GenericTemplates.action(Icons.ARROW_DOWN, "Move down", list.id, async () => {
-                await TrackActions.moveTrackDownInList(positionsState, track, type, list);
+                await TrackActions.moveTrackDownInList(positionsState, playlistTrack, type, list);
             }, [], [downState]));
 
             trackActions.push(GenericTemplates.action(Icons.X, "Remove from " + type, list.id, async () => {
-                await TrackActions.removeTrackFromList(positionsState, track, type, list);
+                await TrackActions.removeTrackFromList(positionsState, playlistTrack, type, list);
             }));
         }
 
@@ -489,10 +500,10 @@ export class TrackTemplates {
                                                         .build(),
                                                     create("span")
                                                         .classes("date", "text-small", "nopointer", "color-dim", "align-center")
-                                                        .text(Time.ago(track.createdAt))
+                                                        .text(Time.ago(track.created_at))
                                                         .build(),
-                                                    StatisticsTemplates.likesIndicator("track", track.id, track.tracklikes.length,
-                                                        Util.arrayPropertyMatchesUser(track.tracklikes, "userId", user)),
+                                                    StatisticsTemplates.likesIndicator("track", track.id, track.likes.length ?? [],
+                                                        Util.arrayPropertyMatchesUser(track.likes, "user_id", user)),
                                                     create("div")
                                                         .classes("flex-grow")
                                                         .build(),
