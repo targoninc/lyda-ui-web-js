@@ -73,6 +73,7 @@ export class AlbumTemplates {
                             text: buttonText,
                             classes: ["positive"],
                             icon: { icon: "forms_add_on" },
+                            disabled: computedSignal(checkedAlbums, (ch: number[]) => ch.length === 0),
                             onclick: async () => {
                                 await AlbumActions.addTrackToAlbums(track.id);
                             }
