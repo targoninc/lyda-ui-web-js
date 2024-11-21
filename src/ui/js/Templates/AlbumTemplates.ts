@@ -13,16 +13,20 @@ import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
-import {AnyNode, computedSignal, create, HtmlPropertyValue, ifjs, signal} from "../../fjsc/f2.ts";
+import {AnyNode, computedSignal, create, HtmlPropertyValue, ifjs, Signal, signal} from "../../fjsc/f2.ts";
 import {Album} from "../Models/DbModels/Album.ts";
-import {BooleanConfig, InputType} from "../../fjsc/Types.ts";
+import {InputType} from "../../fjsc/Types.ts";
 import {Track} from "../Models/DbModels/Track.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {navigate} from "../Routing/Router.ts";
-import {AlbumTrack} from "../Models/DbModels/AlbumTrack.ts";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
+        if (albums.some(a => !a.tracks)) {
+            throw new Error(`No album tracks for some of ids ${albums.map(a => a.id)}`);
+        }
+
+        const checkedAlbums = signal(albums.filter(a => a.tracks!.some(t => t.track_id === track.id)).map(a => a.id));
         let albumList: AnyNode[] = [];
         if (albums.length === 0) {
             albumList.push(create("span")
@@ -36,9 +40,10 @@ export class AlbumTemplates {
                     return;
                 }
 
-                return await AlbumTemplates.albumInAddList(album, album.tracks.find((t: Track) => t.id === track.id) !== undefined);
+                return await AlbumTemplates.albumInAddList(album, checkedAlbums);
             })) as AnyNode[];
         }
+        const buttonText = computedSignal<string>(checkedAlbums, (ch: number[]) => `Add to ${ch.length} albums`);
 
         return create("div")
             .classes("flex-v")
@@ -57,45 +62,55 @@ export class AlbumTemplates {
                     )
                     .build(),
                 create("div")
-                    .classes("flex-v")
+                    .classes("check-list")
                     .children(
                         ...albumList,
                     ).build(),
                 create("div")
                     .classes("flex")
                     .children(
-                        GenericTemplates.button("Ok", async () => {
-                            await AlbumActions.addTrackToAlbums(track.id);
-                        }, ["positive"]),
-                        GenericTemplates.button("Cancel", Util.removeModal, ["negative"])
+                        FJSC.button({
+                            text: buttonText,
+                            classes: ["positive"],
+                            icon: { icon: "forms_add_on" },
+                            onclick: async () => {
+                                await AlbumActions.addTrackToAlbums(track.id);
+                            }
+                        }),
+                        FJSC.button({
+                            text: "Cancel",
+                            classes: ["negative"],
+                            icon: { icon: "close" },
+                            onclick: Util.removeModal
+                        }),
                     ).build()
             ).build();
     }
 	
-    static async albumInAddList(album: Album, isChecked: boolean) {
-        const checked = signal(isChecked);
+    static async albumInAddList(album: Album, checkedAlbums: Signal<number[]>) {
+        const checked = computedSignal(checkedAlbums, (ch: number[]) => ch.includes(album.id));
+        const checkedClass = computedSignal<string>(checked, (c: boolean) => c ? "active" : "_");
 
         return create("div")
-            .classes("flex", "rounded", "padded", "card")
+            .classes("flex", "padded", "check-list-item", checkedClass)
             .onclick(() => {
-                checked.value = !checked.value;
+                if (checked.value) {
+                    checkedAlbums.value = checkedAlbums.value.filter(id => id !== album.id);
+                } else {
+                    checkedAlbums.value = [...checkedAlbums.value, album.id];
+                }
             })
             .children(
-                FJSC.checkbox(<BooleanConfig>{
-                    name: "album_" + album.id,
-                    checked,
-                }),
                 await AlbumTemplates.smallAlbumCover(album),
                 create("span")
-                    .classes("nopointer")
                     .text(album.title)
                     .build(),
             ).build();
     }
 
     static newAlbumModal() {
-        const album = signal(<Album>{
-            name: "",
+        const album = signal(<Partial<Album>>{
+            title: "",
             upc: "",
             description: "",
             release_date: new Date(),
@@ -138,7 +153,7 @@ export class AlbumTemplates {
                             placeholder: "Album name",
                             value: name,
                             onchange: (v) => {
-                                album.value = { ...album.value, name: v };
+                                album.value = { ...album.value, title: v };
                             }
                         }),
                         FJSC.input<string>({
@@ -299,14 +314,14 @@ export class AlbumTemplates {
             .id(album.id)
             .onclick(async () => {
                 PlayManager.playFrom("album", album.title, album.id);
-                QueueManager.setContextQueue(album.tracks!.map(t => t.id));
+                QueueManager.setContextQueue(album.tracks!.map(t => t.track_id));
                 const firstTrack = album.tracks![0];
                 if (!firstTrack) {
                     notify("This album has no tracks", "error");
                     return;
                 }
-                PlayManager.addStreamClientIfNotExists(firstTrack.id, firstTrack.length);
-                await PlayManager.startAsync(firstTrack.id);
+                PlayManager.addStreamClientIfNotExists(firstTrack.track_id, firstTrack.track?.length ?? 0);
+                await PlayManager.startAsync(firstTrack.track_id);
             })
             .children(
                 create("img")
@@ -459,21 +474,21 @@ export class AlbumTemplates {
             throw new Error(`Album ${album.id} has no tracks`);
         }
         const allTracksInQueue = album.tracks.every((t) =>
-            manualQueue.includes(t.id),
+            manualQueue.includes(t.track_id),
         );
-        const duration = album.tracks.reduce((acc, t) => acc + t.length, 0);
+        const duration = album.tracks.reduce((acc, t) => acc + (t.track?.length ?? 0), 0);
 
         let actions: AnyNode[] = [];
         if (user) {
             actions = [
                 GenericTemplates.action(isPlaying ? Icons.PAUSE : Icons.PLAY, isPlaying ? "Pause" : "Play", album.id, async () => {
                     const firstTrack = (album.tracks!)[0];
-                    await AlbumActions.startTrackInAlbum(album, firstTrack.id, true);
+                    await AlbumActions.startTrackInAlbum(album, firstTrack.track_id, true);
                 }, ["duration", duration], [album.tracks.length === 0 ? "nonclickable" : "_", "secondary"]),
                 GenericTemplates.action(allTracksInQueue ? Icons.UNQUEUE : Icons.QUEUE, allTracksInQueue ? "Unqueue" : "Queue", album.id, () => {
                     for (let track of album.tracks!) {
-                        if (!manualQueue.includes(track.id)) {
-                            QueueManager.addToManualQueue(track.id);
+                        if (!manualQueue.includes(track.track_id)) {
+                            QueueManager.addToManualQueue(track.track_id);
                         }
                     }
                 }, [], [allTracksInQueue ? "audio-queueremove" : "audio-queueadd", "secondary"]),

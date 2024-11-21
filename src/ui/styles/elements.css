@@ -212,11 +212,11 @@
 }
 
 .stats-indicator.reposts {
-    border-color: var(--color-8);
+    border-color: var(--green);
 }
 
 .stats-indicator.reposts.enabled {
-    background: var(--color-8);
+    background: var(--green);
 }
 
 .stats-indicator.clickable:hover, .stats-indicator-opener:hover {
@@ -224,7 +224,7 @@
 }
 
 .text-positive {
-    color: var(--color-8);
+    color: var(--green);
 }
 
 .stats-indicator-opener {
@@ -317,7 +317,7 @@ label {
 }
 
 .audio-player-scrubbar-buffered {
-    background: var(--color-8);
+    background: var(--green);
     position: absolute;
     height: 4px;
     top: 50%;
@@ -378,7 +378,7 @@ label {
 }
 
 .subStarter.selected {
-    background: radial-gradient(var(--blue) 0%, var(--color-8) 100%);
+    background: radial-gradient(var(--blue) 0%, var(--green) 100%);
 }
 
 .toggle-container {
@@ -403,7 +403,7 @@ label {
 }
 
 .corner-check {
-    background: var(--color-8);
+    background: var(--green);
     border-radius: 50%;
     width: 16px;
     height: 16px;
@@ -493,7 +493,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .listNotification.unread {
-    background: color-mix(in oklab, var(--color-8), transparent 85%);
+    background: color-mix(in oklab, var(--green), transparent 85%);
 }
 
 .notification-bubble {
@@ -671,7 +671,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .list-track.playing, .inlineTrack.playing, .track-card.playing {
-    border: 1px solid var(--color-8);
+    border: 1px solid var(--green);
     animation: pulse-glow 4s ease infinite;
 }
 
@@ -763,7 +763,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .search-result-type.playlist {
-    background: color-mix(in oklab, var(--color-8), transparent 50%)
+    background: color-mix(in oklab, var(--green), transparent 50%)
 }
 
 .search-result-type.track {
@@ -871,7 +871,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .search-select-input:focus-visible {
     outline: none;
-    border-color: var(--color-8);
+    border-color: var(--green);
 }
 
 .modal img.full {
@@ -932,8 +932,8 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .progress-section-part.complete {
-    border-color: var(--color-8);
-    background: var(--color-8);
+    border-color: var(--green);
+    background: var(--green);
     color: var(--color-4);
 }
 
@@ -954,45 +954,85 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     border-radius: 0 999px 999px 0;
 }
 
+.check-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.check-list-item:first-child {
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    border-width: 1px 1px 1px 1px;
+}
+
+.check-list-item:last-child {
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+}
+
+.check-list-item {
+    border-color: var(--color-5);
+    border-style: solid;
+    align-items: center;
+    border-width: 0 1px 1px 1px;
+    cursor: pointer;
+    transition: border-left-width .2s, border-left-color .2s, border-right-width .2s, border-right-color .2s;
+}
+
+.check-list-item:hover:not(.active) {
+    border-left: 1em solid var(--blue);
+}
+
+.check-list-item.active {
+    border-left: 1em solid var(--green);
+    background: var(--color-3);
+}
+
+.check-list-item:hover {
+    background: var(--color-6);
+}
+
+.check-list-item.active:hover {
+    border-right: 1em solid var(--color-2);
+}
+
 @keyframes pulse-glow {
     0% {
-        box-shadow: 0 0 0 0 var(--color-8);
+        box-shadow: 0 0 0 0 var(--green);
     }
     50% {
-        box-shadow: 0 0 20px -7px var(--color-8);
+        box-shadow: 0 0 20px -7px var(--green);
     }
     100% {
-        box-shadow: 0 0 0 0 var(--color-8);
+        box-shadow: 0 0 0 0 var(--green);
     }
 }
 
 @keyframes flow-glow {
     0% {
-        box-shadow: 0 -5px 20px -7px var(--color-8);
+        box-shadow: 0 -5px 20px -7px var(--green);
     }
     12.5% {
-        box-shadow: 3px -2px 20px -7px var(--color-8);
+        box-shadow: 3px -2px 20px -7px var(--green);
     }
     25% {
-        box-shadow: 5px 0 20px -7px var(--color-8);
+        box-shadow: 5px 0 20px -7px var(--green);
     }
     37.5% {
-        box-shadow: 3px 2px 20px -7px var(--color-8);
+        box-shadow: 3px 2px 20px -7px var(--green);
     }
     50% {
-        box-shadow: 0 5px 20px -7px var(--color-8);
+        box-shadow: 0 5px 20px -7px var(--green);
     }
     62.5% {
-        box-shadow: -3px 2px 20px -7px var(--color-8);
+        box-shadow: -3px 2px 20px -7px var(--green);
     }
     75% {
-        box-shadow: -5px 0 20px -7px var(--color-8);
+        box-shadow: -5px 0 20px -7px var(--green);
     }
     87.5% {
-        box-shadow: -3px -2px 20px -7px var(--color-8);
+        box-shadow: -3px -2px 20px -7px var(--green);
     }
     100% {
-        box-shadow: 0 -5px 20px -7px var(--color-8);
+        box-shadow: 0 -5px 20px -7px var(--green);
     }
 }
 

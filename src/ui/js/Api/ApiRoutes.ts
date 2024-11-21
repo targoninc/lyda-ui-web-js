@@ -96,7 +96,7 @@ export class ApiRoutes {
     // region Albums
     private static albums = ApiRoutes.base + "/albums";
     static getAlbumById = ApiRoutes.albums + "/byId";
-    static getAlbumByUserId = ApiRoutes.albums + "/byUserId";
+    static getAlbumsByUserId = ApiRoutes.albums + "/byUserId";
 
     private static albumActions = ApiRoutes.albums + "/actions";
     static newAlbum = ApiRoutes.albumActions + "/new";

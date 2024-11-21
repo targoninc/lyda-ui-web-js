@@ -43,7 +43,7 @@ export class ProfilePage {
     }
 
     static async addAlbumsAsync(element: AnyElement, user: User, selfUser: User, isOwnProfile: boolean) {
-        const albumsRes = await Api.getAsync(ApiRoutes.getAlbumByUserId, {
+        const albumsRes = await Api.getAsync(ApiRoutes.getAlbumsByUserId, {
             id: user.id, name: user.username
         });
         if (albumsRes.code !== 200) {

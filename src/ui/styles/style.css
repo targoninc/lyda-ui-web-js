@@ -18,14 +18,14 @@
     --color-6-rgb: 42, 42, 42;
     --color-7: #4a4a4a;
     --color-7-rgb: 74, 74, 74;
-    --color-8: #70c926;
+    --green: #70c926;
     --color-8-rgb: 142, 255, 60;
     --color-8-dark: #5aa21a;
     --color-8-dark-rgb: 90, 162, 26;
     --color-9: #dcdce0;
     --filter-8: invert(74%) sepia(50%) saturate(854%) hue-rotate(40deg) brightness(94%) contrast(75%);
     --color-attention: var(--color-1);
-    --color-state: var(--color-8);
+    --color-state: var(--green);
     --blue: #317eef;
     --verified: var(--blue);
     --stats-1: var(--color-1);
@@ -33,13 +33,13 @@
     --stats-3: color-mix(in oklab, var(--color-1) 50%, var(--color-2) 50%);
     --stats-4: color-mix(in oklab, var(--color-1) 25%, var(--color-2) 75%);
     --stats-5: var(--color-2);
-    --stats-6: color-mix(in oklab, var(--color-2) 75%, var(--color-8) 25%);
-    --stats-7: color-mix(in oklab, var(--color-2) 50%, var(--color-8) 50%);
-    --stats-8: color-mix(in oklab, var(--color-2) 25%, var(--color-8) 75%);
-    --stats-9: var(--color-8);
-    --stats-10: color-mix(in oklab, var(--color-8) 75%, var(--color-1) 25%);
-    --stats-11: color-mix(in oklab, var(--color-8) 50%, var(--color-1) 50%);
-    --stats-12: color-mix(in oklab, var(--color-8) 25%, var(--color-1) 75%);
+    --stats-6: color-mix(in oklab, var(--color-2) 75%, var(--green) 25%);
+    --stats-7: color-mix(in oklab, var(--color-2) 50%, var(--green) 50%);
+    --stats-8: color-mix(in oklab, var(--color-2) 25%, var(--green) 75%);
+    --stats-9: var(--green);
+    --stats-10: color-mix(in oklab, var(--green) 75%, var(--color-1) 25%);
+    --stats-11: color-mix(in oklab, var(--green) 50%, var(--color-1) 50%);
+    --stats-12: color-mix(in oklab, var(--green) 25%, var(--color-1) 75%);
     --breakpoint-big: 1301px;
     --breakpoint-mid: 1110px;
     --breakpoint-small: 300px;
@@ -366,7 +366,7 @@ input, textarea, select {
 }
 
 input:focus-visible, textarea:focus-visible, select:focus-visible {
-    border-color: var(--color-8);
+    border-color: var(--green);
     outline: none;
 }
 
@@ -423,7 +423,7 @@ button.negative:hover {
 }
 
 button.positive {
-    border-color: var(--color-8);
+    border-color: var(--green);
 }
 
 button.positive:hover {
@@ -516,7 +516,7 @@ button.secondary {
 }
 
 .card.active {
-    border: 1px solid var(--color-8);
+    border: 1px solid var(--green);
 }
 
 .card.secondary {
@@ -726,8 +726,8 @@ textarea.fullWidth {
 }
 
 .fakeButton.positive:hover {
-    border-color: var(--color-8);
-    color: var(--color-8);
+    border-color: var(--green);
+    color: var(--green);
 }
 
 .fakeButton.positive:hover .svg {

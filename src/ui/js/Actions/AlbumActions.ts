@@ -22,7 +22,7 @@ export class AlbumActions {
     }
 
     static async openAddToAlbumModal(track: Track) {
-        const res = await Api.getAsync(ApiRoutes.getAlbumByUserId, {user_id: track.user_id});
+        const res = await Api.getAsync(ApiRoutes.getAlbumsByUserId, {id: track.user_id});
         if (res.code !== 200) {
             console.error("Failed to get albums: ", res.data);
             return;
@@ -36,7 +36,7 @@ export class AlbumActions {
         Ui.addModal(modal);
     }
 
-    static async createNewAlbum(album: Album) {
+    static async createNewAlbum(album: Partial<Album>) {
         const res = await Api.postAsync(ApiRoutes.newAlbum, album);
         if (res.code !== 200) {
             notify("Failed to create album: " + res.data, "error");
@@ -98,11 +98,14 @@ export class AlbumActions {
         fileInput.onchange = async (e) => {
             const fileTarget = e.target as HTMLInputElement;
             const file = fileTarget.files![0];
-            const response = await MediaUploader.upload(MediaFileType.albumCover, id, file);
-            if (response.code === 200) {
+            try {
+                await MediaUploader.upload(MediaFileType.albumCover, id, file)
                 loading.value = false;
                 notify("Cover updated", "success");
                 await Util.updateImage(URL.createObjectURL(file), oldSrc);
+            } catch (e) {
+                loading.value = false;
+                notify(e, "error");
             }
         };
         fileInput.click();
@@ -155,14 +158,14 @@ export class AlbumActions {
                 throw new Error(`Invalid album (${album.id}), has no tracks.`);
             }
             PlayManager.playFrom("album", album.title, album.id);
-            QueueManager.setContextQueue(album.tracks.map(t => t.id));
-            const track = album.tracks.find(t => t.id === trackId);
+            QueueManager.setContextQueue(album.tracks.map(t => t.track_id));
+            const track = album.tracks.find(t => t.track_id === trackId);
             if (!track) {
                 notify("This track could not be found in this album", "error");
                 return;
             }
-            PlayManager.addStreamClientIfNotExists(track.id, track.length);
-            await PlayManager.startAsync(track.id);
+            PlayManager.addStreamClientIfNotExists(track.track_id, track.track?.length ?? 0);
+            await PlayManager.startAsync(track.track_id);
         }
     }
 }

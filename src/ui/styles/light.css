@@ -3,7 +3,7 @@
 }
 
 .fakeButton.positive:hover {
-    background-color: var(--color-8);
+    background-color: var(--green);
     color: var(--color-5);
 }
 
