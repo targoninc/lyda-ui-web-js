@@ -41,6 +41,37 @@ export class GenericTemplates {
         });
     }
 
+    static gif8831(url: StringOrSignal, link: StringOrSignal = null) {
+        let item;
+        if (link) {
+            item = create("a")
+                .href(link)
+                .target("_blank")
+                .children(
+                    create("img")
+                        .styles("width", "88", "height", "31")
+                        .width(88)
+                        .height(31)
+                        .src(url)
+                        .alt("88x31")
+                        .build()
+                ).build();
+        } else {
+            item = create("img")
+                .styles("width", "88", "height", "31")
+                .width(88)
+                .height(31)
+                .src(url)
+                .alt("88x31")
+                .build();
+        }
+
+        return create("div")
+            .classes("gif8831")
+            .children(item)
+            .build();
+    }
+
     static cardLabel(text: HtmlPropertyValue, icon: StringOrSignal = null, hasError: Signal<boolean> = signal(false)) {
         const errorClass = computedSignal<string>(hasError, (h: boolean) => h ? "error" : "_");
 
@@ -827,7 +858,7 @@ export class GenericTemplates {
         return create("div")
             .classes("progress-sections")
             .children(
-                signalMap(progressState, create("div").classes("flex", "small-gap"), part => GenericTemplates.progressSectionPart(part))
+                signalMap(progressState, create("div").classes("flex", "small-gap"), (part: ProgressPart) => GenericTemplates.progressSectionPart(part))
             ).build();
     }
 

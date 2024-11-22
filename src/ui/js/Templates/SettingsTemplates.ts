@@ -23,7 +23,8 @@ export class SettingsTemplates {
                 SettingsTemplates.themeSection(getUserSettingValue(user, UserSettings.theme)),
                 SettingsTemplates.behaviourSection(user),
                 SettingsTemplates.notificationsSection(user),
-                SettingsTemplates.dangerSection(user)
+                SettingsTemplates.dangerSection(user),
+                SettingsTemplates.linksSection(user),
             ).build();
     }
 
@@ -226,6 +227,25 @@ export class SettingsTemplates {
                                 });
                             }
                         })
+                    ).build()
+            ).build();
+    }
+
+    private static linksSection(user: User) {
+        return create("div")
+            .classes("card", "flex-v")
+            .children(
+                create("h2")
+                    .text("Links")
+                    .build(),
+                create("div")
+                    .classes("flex")
+                    .children(
+                        GenericTemplates.gif8831("/img/88x31/targoninc.gif", "https://targoninc.com"),
+                        GenericTemplates.gif8831("/img/88x31/firefox.gif", "https://www.mozilla.org/en-US/firefox/new/"),
+                        GenericTemplates.gif8831("/img/88x31/discord.gif", "https://discord.gg/QeNU8b7Hbb"),
+                        GenericTemplates.gif8831("/img/88x31/ubuntu.gif", "https://ubuntu.com/"),
+                        GenericTemplates.gif8831("/img/88x31/hetzner.gif", "https://www.hetzner.com/"),
                     ).build()
             ).build();
     }

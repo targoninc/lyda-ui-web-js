@@ -994,6 +994,11 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     border-right: 1em solid var(--color-2);
 }
 
+.gif8831:hover img {
+    transform: translateY(-2px);
+    border-bottom: 2px solid var(--blue);
+}
+
 @keyframes pulse-glow {
     0% {
         box-shadow: 0 0 0 0 var(--green);
