@@ -5,6 +5,7 @@ import {UserTemplates} from "./UserTemplates.ts";
 import {Api} from "../Api/Api.ts";
 import {Util} from "../Classes/Util.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
+import {Follow} from "../Models/DbModels/Follow.ts";
 
 export class PageTemplates {
     static mapping = {
@@ -45,7 +46,7 @@ export class PageTemplates {
     static albumPage() {
         return create("div")
             .attributes("lyda", "")
-            .attributes("endpoint", "albums/byId")
+            .attributes("endpoint", ApiRoutes.getAlbumById)
             .attributes("params", "id")
             .attributes("datatype", "album")
             .build();
@@ -81,7 +82,7 @@ export class PageTemplates {
         return create("div")
             .classes("playlistPage")
             .attributes("lyda", "")
-            .attributes("endpoint", "playlists/byId")
+            .attributes("endpoint", ApiRoutes.getPlaylistById)
             .attributes("params", "id")
             .attributes("datatype", "playlist")
             .build();
@@ -91,7 +92,7 @@ export class PageTemplates {
         return create("div")
             .classes("profile", "flex-v")
             .attributes("lyda", "")
-            .attributes("endpoint", "user/get")
+            .attributes("endpoint", ApiRoutes.getUser)
             .attributes("params", "name")
             .attributes("datatype", "profile")
             .build();
@@ -117,7 +118,7 @@ export class PageTemplates {
         return create("div")
             .classes("trackPage")
             .attributes("lyda", "")
-            .attributes("endpoint", "tracks/byId")
+            .attributes("endpoint", ApiRoutes.getTrackById)
             .attributes("params", "id,code")
             .attributes("datatype", "track")
             .build();
@@ -202,7 +203,7 @@ export class PageTemplates {
             }
             const user = data.data;
             const selfUser = await Util.getUserAsync();
-            const following = user.follows.some(f => selfUser ? f.followingUserId === selfUser.id : false);
+            const following = user.follows.some((f: Follow) => selfUser ? f.following_user_id === selfUser.id : false);
             randomUserWidget.value = UserTemplates.userWidget(user.id, user.username, user.displayname, await Util.getAvatarFromUserIdAsync(user.id), following);
         });
 

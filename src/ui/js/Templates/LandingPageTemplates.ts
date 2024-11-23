@@ -190,6 +190,8 @@ export class LandingPageTemplates {
             } else {
                 step.value = "logging-in";
             }
+        }, () => {
+            step.value = "login";
         });
 
         return LandingPageTemplates.waitingBox("Checking for MFA...", "Please wait");
@@ -201,6 +203,8 @@ export class LandingPageTemplates {
             AuthApi.user(data.user.id, (user: User) => {
                 finalizeLogin(step, user);
             });
+        }, () => {
+            step.value = "login";
         });
 
         return LandingPageTemplates.waitingBox("Logging in...", "Please wait");

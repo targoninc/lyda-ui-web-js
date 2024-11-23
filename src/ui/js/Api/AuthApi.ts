@@ -24,7 +24,7 @@ export class AuthApi {
             if (response.code === 200) {
                 successCallback(response.data);
             } else {
-                notify(response.data, "error");
+                notify(response.data.error, "error");
                 errorCallback(response.code, response.data);
             }
         });
@@ -48,7 +48,7 @@ export class AuthApi {
             if (response.code === 200) {
                 successCallback(response);
             } else {
-                notify(response.data, "error");
+                notify(response.data.error, "error");
                 errorCallback(response);
             }
         });
@@ -62,7 +62,7 @@ export class AuthApi {
             if (response.code === 200 || response.code === 204) {
                 successCallback && successCallback(response);
             } else {
-                notify(response.data, "error");
+                notify(response.data.error, "error");
                 errorCallback && errorCallback(response);
             }
         });

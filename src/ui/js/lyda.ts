@@ -31,7 +31,7 @@ import {User} from "./Models/DbModels/User.ts";
 import {ApiRoutes} from "./Api/ApiRoutes.ts";
 
 export class Lyda {
-    static async getEndpointData(config, endpoint, params = "", refreshSessionRetry = false) {
+    static async getEndpointData(endpoint: string, params = "") {
         const cacheItem = LydaCache.get("api/" + endpoint + params).content;
         if (cacheItem) {
             const cacheExpiration = cacheItem.createTime + cacheItem.reFetchTtlInSeconds * 1000;
@@ -39,7 +39,8 @@ export class Lyda {
                 return cacheItem.content;
             }
         }
-        let r = await fetch(config["apiBaseUrl"] + "/" + endpoint + params, {
+
+        let r = await fetch(endpoint + params, {
             method: "GET",
             mode: "cors",
             headers: {
@@ -59,15 +60,14 @@ export class Lyda {
         return JSON.parse(text);
     }
 
-    static async initPage(params) {
-        const config = Config.get();
-        let elements = document.querySelectorAll("[lyda]");
+    static async initPage(params: any) {
+        let elements = document.querySelectorAll("[lyda]") as NodeListOf<AnyElement>;
         for (let element of elements) {
-            await Lyda.loadPagePart(element, config, params);
+            await Lyda.loadPagePart(element, params);
         }
     }
 
-    static async loadPagePart(element, config, params) {
+    static async loadPagePart(element: AnyElement, params: any) {
         const endpoint = element.getAttribute("endpoint");
         const neededParams = element.getAttribute("params");
         let paramsString = "";
@@ -80,9 +80,9 @@ export class Lyda {
         }
         let data;
         if (endpoint !== null) {
-            data = await Lyda.getEndpointData(config, endpoint, paramsString);
+            data = await Lyda.getEndpointData(endpoint, paramsString);
         }
-        let user;
+        let user: User;
         const permissionData  = await Api.getAsync(ApiRoutes.userPermissions);
         const permissions = permissionData.data;
         switch (element.getAttribute("datatype")) {
@@ -93,6 +93,9 @@ export class Lyda {
         case "tracks":
             user = await Util.getUserAsync();
             const feedType = element.getAttribute("feedType");
+            if (!feedType) {
+                throw new Error("Missing feed type");
+            }
             this.loadFeed(feedType, element, user).then();
             if (data.error) {
                 element.innerHTML = data.error;

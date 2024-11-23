@@ -9,7 +9,6 @@ import {ButtonConfig, InputConfig, InputType, TextareaConfig} from "../../fjsc/T
 import {notify, Ui} from "../Classes/Ui.ts";
 import {LydaApi} from "../Api/LydaApi.ts";
 import {User} from "../Models/DbModels/User.ts";
-import {reload} from "../Routing/Router.ts";
 
 export class SettingsTemplates {
     static settingsPage(user: User) {
