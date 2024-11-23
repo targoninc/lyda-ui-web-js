@@ -133,7 +133,7 @@ export class LandingPageTemplates {
 
     static activateAccountBox(step: Signal<string>, user: Signal<AuthData>) {
         const code = Util.getUrlParameter("code");
-        const error = signal(null);
+        const error = signal<string|null>(null);
         const done = signal(false);
         const activating = signal(true);
 
@@ -142,7 +142,7 @@ export class LandingPageTemplates {
         }).then(res => {
             activating.value = false;
             if (res.code !== 200) {
-                error.value = res.data.error;
+                error.value = res.data.error ?? "Unknown error";
             } else {
                 done.value = true;
             }

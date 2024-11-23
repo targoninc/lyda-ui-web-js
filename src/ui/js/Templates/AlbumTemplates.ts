@@ -75,7 +75,7 @@ export class AlbumTemplates {
                             icon: { icon: "forms_add_on" },
                             disabled: computedSignal(checkedAlbums, (ch: number[]) => ch.length === 0),
                             onclick: async () => {
-                                await AlbumActions.addTrackToAlbums(track.id);
+                                await AlbumActions.addTrackToAlbums(track.id, checkedAlbums.value);
                             }
                         }),
                         FJSC.button({

@@ -57,16 +57,8 @@ export class AlbumActions {
         }
     }
 
-    static async addTrackToAlbums(track_id: number) {
-        const albums = document.querySelectorAll("input[id^=album_]") as NodeListOf<HTMLInputElement>;
-        let albumIds = [];
-        for (let album of albums) {
-            if (album.checked) {
-                const albumId = album.id.split("_")[1];
-                albumIds.push(parseInt(albumId));
-            }
-        }
-        const res = await Api.postAsync(ApiRoutes.addTrackToAlbums, {album_ids: albumIds, track_id});
+    static async addTrackToAlbums(track_id: number, album_ids: number[]) {
+        const res = await Api.postAsync(ApiRoutes.addTrackToAlbums, {album_ids, track_id});
         Util.removeModal();
         if (res.code !== 200) {
             notify("Failed to add track to albums: " + res.data, "error");
