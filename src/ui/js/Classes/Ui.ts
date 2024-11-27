@@ -5,10 +5,11 @@ import {NavTemplates} from "../Templates/NavTemplates.ts";
 import {GenericTemplates} from "../Templates/GenericTemplates.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {UserActions} from "../Actions/UserActions.ts";
-import {HtmlPropertyValue, signal, StringOrSignal} from "../../fjsc/src/f2.ts";
+import {HtmlPropertyValue, StringOrSignal} from "../../fjsc/src/f2.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {Theme} from "../Enums/Theme.ts";
 import {navigate} from "../Routing/Router.ts";
+import {signal} from "../../fjsc/src/signals.ts";
 
 export class Ui {
     static validUrlPaths = {
