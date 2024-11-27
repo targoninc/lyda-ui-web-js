@@ -133,7 +133,7 @@ export class QueueManager {
         }
     }
 
-    static getManualQueue() {
+    static getManualQueue(): number[] {
         PlayManager.ensureWindowObjects();
         let manualQueue = window.manualQueue;
         if (manualQueue.length === 0) {

@@ -1,4 +1,4 @@
-import {create, signal} from "../../fjsc/src/f2.ts";
+import {create} from "../../fjsc/src/f2.ts";
 import {AuthActions} from "../Actions/AuthActions.ts";
 import {LandingPageTemplates} from "./LandingPageTemplates.ts";
 import {UserTemplates} from "./UserTemplates.ts";
@@ -6,6 +6,7 @@ import {Api} from "../Api/Api.ts";
 import {Util} from "../Classes/Util.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {Follow} from "../Models/DbModels/Follow.ts";
+import {signal} from "../../fjsc/src/signals.ts";
 
 export class PageTemplates {
     static mapping = {
