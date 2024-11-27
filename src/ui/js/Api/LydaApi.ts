@@ -1,6 +1,6 @@
 import {Api} from "./Api.ts";
-import {notify, Ui} from "../Classes/Ui.ts";
-import {Signal} from "../../fjsc/src/f2.ts";
+import {notify} from "../Classes/Ui.ts";
+import {Signal} from "../../fjsc/src/signals.ts";
 import {ApiRoutes} from "./ApiRoutes.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";

@@ -11,7 +11,7 @@ import {CommentTemplates} from "../Templates/CommentTemplates.ts";
 import {TrackEditTemplates} from "../Templates/TrackEditTemplates.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {navigate, reload} from "../Routing/Router.ts";
-import {Signal} from "../../fjsc/src/f2.ts";
+import {Signal} from "../../fjsc/src/signals.ts";
 import {Comment} from "../Models/DbModels/Comment.ts";
 import {Track} from "../Models/DbModels/Track.ts";
 import {MediaFileType} from "../Enums/MediaFileType.ts";

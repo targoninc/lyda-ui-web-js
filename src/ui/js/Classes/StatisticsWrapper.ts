@@ -3,7 +3,7 @@ import {Api} from "../Api/Api.ts";
 import {notify} from "./Ui.ts";
 import {Num} from "./Helpers/Num.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {signal} from "../../fjsc/src/f2.ts";
+import {signal} from "../../fjsc/src/signals.ts";
 
 export class StatisticsWrapper {
     static async getStatistics() {
