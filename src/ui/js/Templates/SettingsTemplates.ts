@@ -9,7 +9,7 @@ import {ButtonConfig, InputConfig, InputType, TextareaConfig} from "../../fjsc/s
 import {notify, Ui} from "../Classes/Ui.ts";
 import {LydaApi} from "../Api/LydaApi.ts";
 import {User} from "../Models/DbModels/User.ts";
-import {compute, computedSignal, Signal, signal} from "../../fjsc/src/signals.ts";
+import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 
 export class SettingsTemplates {
     static settingsPage(user: User) {

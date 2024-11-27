@@ -14,7 +14,7 @@ import {
     DomNode,
     HtmlPropertyValue,
     ifjs,
-    signalMap,
+    signalMap, StringOrSignal,
     TypeOrSignal
 } from "../../fjsc/src/f2.ts";
 import {Track} from "../Models/DbModels/Track.ts";
@@ -322,7 +322,7 @@ export class TrackEditTemplates {
                         name: "release_date",
                         label: "Release Date",
                         placeholder: "YYYY-MM-DD",
-                        value: computedSignal(state, (s: Track) => s.release_date.toISOString().split("T")[0]),
+                        value: compute(s => s.release_date.toISOString().split("T")[0], state),
                         onchange: (v) => {
                             state.value = { ...state.value, release_date: new Date(v) };
                         }
@@ -333,7 +333,7 @@ export class TrackEditTemplates {
                         name: "isrc",
                         label: "ISRC",
                         placeholder: "QZNWX2227540",
-                        value: computedSignal(state, (s: Track) => s.isrc),
+                        value: compute(s => s.isrc, state),
                         onchange: (v) => {
                             state.value = { ...state.value, isrc: v };
                         }
@@ -343,7 +343,7 @@ export class TrackEditTemplates {
                         name: "upc",
                         label: "UPC",
                         placeholder: "00888072469600",
-                        value: computedSignal(state, (s: Track) => s.upc),
+                        value: compute(s => s.upc, state),
                         onchange: (v) => {
                             state.value = { ...state.value, upc: v };
                         }
@@ -352,7 +352,7 @@ export class TrackEditTemplates {
                         name: "description",
                         label: "Description",
                         placeholder: "My cool track",
-                        value: computedSignal(state, (s: Track) => s.description),
+                        value: compute(s => s.description, state),
                         onchange: (v) => {
                             state.value = { ...state.value, description: v };
                         }
@@ -369,7 +369,7 @@ export class TrackEditTemplates {
                                 name: "price",
                                 label: "Minimum track price in USD",
                                 placeholder: "1$",
-                                value: computedSignal(state, (s: Track) => s.price),
+                                value: compute(s => s.price, state),
                                 validators: [
                                     (v) => {
                                         if (v < 0) {
@@ -386,7 +386,7 @@ export class TrackEditTemplates {
                             FJSC.checkbox({
                                 name: "termsOfService",
                                 text: "I have read and agree to the Terms of Service and Privacy Policy*",
-                                checked: computedSignal(state, (s: UploadableTrack) => s.termsOfService),
+                                checked: compute(s => s.termsOfService, state),
                                 required: true,
                                 onchange: (v) => {
                                     state.value = { ...state.value, termsOfService: v };
@@ -397,8 +397,8 @@ export class TrackEditTemplates {
             ).build();
     }
 
-    static sectionCard(title: HtmlPropertyValue, errorSections: Signal<string[]>, id: string, children: TypeOrSignal<(AnyNode|null)>[], icon: string|null = null, classes: HtmlPropertyValue[] = []) {
-        const hasError = compute((e: string[]) => e.includes(id, errorSections));
+    static sectionCard(title: HtmlPropertyValue, errorSections: Signal<string[]>, id: string, children: TypeOrSignal<(AnyNode|null)>[], icon: string|null = null, classes: StringOrSignal[] = []) {
+        const hasError = compute((e: string[]) => e.includes(id), errorSections);
 
         return create("div")
             .classes("border-card", "flex-v", ...classes)
@@ -446,14 +446,9 @@ export class TrackEditTemplates {
                     parentState.value = {...parentState.value, coverArtFileName: safeName};
                 }
             }
-            let blob = null;
-            if (files && files[0]) {
-                const buffer = await files[0].arrayBuffer();
-                blob = new Blob([buffer], { type: files[0].type });
-            }
             parentState.value = {
                 ...parentState.value,
-                coverArtFiles: blob
+                coverArtFiles: files
             };
         });
     }
@@ -499,14 +494,14 @@ export class TrackEditTemplates {
         });
     }
 
-    static price(value = "1", parentState) {
+    static price(value = "1", parentState: Signal<Track>) {
         const state = this.getStateWithParentUpdate("price", value, parentState);
         return FormTemplates.textField("Minimum track price in USD", "price", "1", "number", state, false, v => {
             state.value = v;
         });
     }
 
-    static removeLinkedUser(removeUserId, linkedUserState) {
+    static removeLinkedUser(removeUserId: number, linkedUserState) {
         return GenericTemplates.inlineAction("Remove", "remove", "remove_linked_user_" + removeUserId, () => {
             linkedUserState.value = linkedUserState.value.filter((id: number) => id !== removeUserId);
         }, [], ["negative"]);

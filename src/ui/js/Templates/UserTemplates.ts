@@ -15,12 +15,10 @@ import {Images} from "../Enums/Images.ts";
 import {navigate} from "../Routing/Router.ts";
 import {
     AnyNode,
-    computedSignal,
     create,
     HtmlPropertyValue,
     ifjs,
     nullElement,
-    signal,
     StringOrSignal
 } from "../../fjsc/src/f2.ts";
 import {Track} from "../Models/DbModels/Track.ts";
@@ -30,6 +28,7 @@ import {Playlist} from "../Models/DbModels/Playlist.ts";
 import {Album} from "../Models/DbModels/Album.ts";
 import {Badge} from "../Models/DbModels/Badge.ts";
 import {FJSC} from "../../fjsc";
+import {compute, signal} from "../../fjsc/src/signals.ts";
 
 export class UserTemplates {
     static userWidget(user_id: number, username: string, displayname: string, avatar: StringOrSignal, following: boolean, extraAttributes: HtmlPropertyValue[] = [], extraClasses: HtmlPropertyValue[] = []) {
@@ -108,8 +107,7 @@ export class UserTemplates {
                             .build(),
                         actionButton
                     ).build(),
-            )
-            .build();
+            ).build();
     }
 
     static userIcon(user_id: HtmlPropertyValue, avatar: StringOrSignal) {
@@ -137,8 +135,7 @@ export class UserTemplates {
                     .build()
             ).onclick(async (e) => {
                 await TrackActions.runFollowFunctionFromElement(e, user_id, following);
-            })
-            .build();
+            }).build();
     }
 
     static followsBackIndicator() {
@@ -303,8 +300,8 @@ export class UserTemplates {
     static profileInfo(user: User, selfUser: User, isOwnProfile: boolean, permissions: Permission[], following: boolean, followsBack: boolean) {
         let specialInfo: AnyNode[] = [];
         const verified = signal(user.verified);
-        const canVerify = computedSignal(verified, (v: boolean) => !v && permissions.some(p => p.name === Permissions.canVerifyUsers));
-        const canUnverify = computedSignal(verified, (v: boolean) => v && permissions.some(p => p.name === Permissions.canVerifyUsers));
+        const canVerify = compute(v => !v && permissions.some(p => p.name === Permissions.canVerifyUsers), verified);
+        const canUnverify = compute(v => v && permissions.some(p => p.name === Permissions.canVerifyUsers), verified);
 
         if (user.badges && user.badges.length > 0) {
             specialInfo = [UserTemplates.badges(user.badges)];
