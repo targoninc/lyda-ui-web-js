@@ -1,7 +1,7 @@
 import {AuthData} from "../../Templates/LandingPageTemplates.ts";
 
 export class UserValidator {
-    static validateRegistration(state: AuthData, touchedFields: Set<string>): Set<string> {
+    static validateRegistration(state: AuthData, touchedFields: Set<string>): string[] {
         let errors = new Set<string>();
         if (!state.username) {
             errors.add("Username missing");
@@ -21,10 +21,10 @@ export class UserValidator {
         if (!state.termsOfService) {
             errors.add("You must agree to the Terms of Service and Privacy Policy");
         }
-        return errors;
+        return [...errors];
     }
 
-    static validateLogin(state: any): Set<string> {
+    static validateLogin(state: any): string[] {
         let errors = new Set<string>();
         if (!state.email) {
             errors.add("E-Mail address missing");
@@ -32,10 +32,10 @@ export class UserValidator {
         if (!state.password) {
             errors.add("Password missing");
         }
-        return errors;
+        return [...errors];
     }
 
-    static validatePasswordReset(state: any): Set<string> {
+    static validatePasswordReset(state: any): string[] {
         let errors = new Set<string>();
         if (!state.password) {
             errors.add("Password missing");
@@ -46,14 +46,14 @@ export class UserValidator {
         if (state.password !== state.password2) {
             errors.add("Passwords do not match");
         }
-        return errors;
+        return [...errors];
     }
 
-    static validateEmailCheck(state: any): Set<string> {
+    static validateEmailCheck(state: any): string[] {
         let errors = new Set<string>();
         if (!state.email) {
             errors.add("E-Mail address missing");
         }
-        return errors;
+        return [...errors];
     }
 }

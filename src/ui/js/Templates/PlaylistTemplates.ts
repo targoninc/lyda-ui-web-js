@@ -14,11 +14,12 @@ import {notify, Ui} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
 import {User} from "../Models/DbModels/User.ts";
 import {Playlist} from "../Models/DbModels/Playlist.ts";
-import {create, ifjs, signal, computedSignal, AnyNode, HtmlPropertyValue} from "../../fjsc/f2.ts";
+import {create, ifjs, AnyNode, HtmlPropertyValue} from "../../fjsc/src/f2.ts";
 import {Track} from "../Models/DbModels/Track.ts";
 import {Album} from "../Models/DbModels/Album.ts";
 import {navigate} from "../Routing/Router.ts";
-import {InputType} from "../../fjsc/Types.ts";
+import {InputType} from "../../fjsc/src/Types.ts";
+import {compute, signal} from "../../fjsc/src/signals.ts";
 
 export class PlaylistTemplates {
     static async addTrackToPlaylistModal(track: Track, playlists: Playlist[]) {
@@ -95,7 +96,7 @@ export class PlaylistTemplates {
                             .attributes("src", Icons.PLAYLIST_ADD)
                             .build(),
                         create("h5")
-                            .text(`Add ${album.name} to playlist`)
+                            .text(`Add ${album.title} to playlist`)
                             .build()
                     ).build(),
                 create("div")
@@ -127,24 +128,24 @@ export class PlaylistTemplates {
                 await PlaylistTemplates.smallPlaylistCover(playlist),
                 create("span")
                     .classes("nopointer")
-                    .text(playlist.name)
+                    .text(playlist.title)
                     .build(),
             )
             .build();
     }
 
     static newPlaylistModal() {
-        const playlist = signal(<Playlist>{
-            name: "",
+        const playlist = signal(<Partial<Playlist>>{
+            title: "",
             description: "",
             visibility: "public",
         });
-        const name = computedSignal<string>(playlist, (s: Playlist) => s.name);
-        const description = computedSignal<string>(playlist, (s: Playlist) => s.description);
-        const visibility = computedSignal<boolean>(playlist, (s: Playlist) => s.visibility === "private");
-        const disabled = computedSignal<boolean>(playlist, (s: Playlist) => {
-            return !s.name || (s.name === "");
-        });
+        const name = compute(s => s.title ?? "", playlist);
+        const description = compute(s => s.description ?? "", playlist);
+        const visibility = compute(s => s.visibility === "private", playlist);
+        const disabled = compute(s => {
+            return !s.title || s.title === "";
+        }, playlist);
 
         return create("div")
             .classes("flex-v")
@@ -171,7 +172,7 @@ export class PlaylistTemplates {
                             placeholder: "Playlist name",
                             value: name,
                             onchange: (v) => {
-                                playlist.value = { ...playlist.value, name: v };
+                                playlist.value = { ...playlist.value, title: v };
                             }
                         }),
                         FJSC.textarea({
@@ -265,7 +266,7 @@ export class PlaylistTemplates {
                         create("div")
                             .classes("flex-v", "small-gap")
                             .children(
-                                PlaylistTemplates.title(playlist.name, playlist.id, icons),
+                                PlaylistTemplates.title(playlist.title, playlist.id, icons),
                                 UserTemplates.userWidget(playlist.user_id, playlist.user.username, playlist.user.displayname, coverState,
                                     Util.arrayPropertyMatchesUser(playlist.user.follows, "followingUserId", user)),
                                 create("span")
@@ -314,7 +315,7 @@ export class PlaylistTemplates {
             .id(playlist.id)
             .onclick(async () => {
                 notify("Starting playlist " + playlist.id, "info");
-                PlayManager.playFrom("playlist", playlist.name, playlist.id);
+                PlayManager.playFrom("playlist", playlist.title, playlist.id);
                 QueueManager.setContextQueue(playlist.tracks!.map(t => t.id));
                 const firstTrack = playlist.tracks![0];
                 if (!firstTrack) {
@@ -328,7 +329,7 @@ export class PlaylistTemplates {
                 create("img")
                     .classes("cover", "nopointer", "blurOnParentHover")
                     .src(coverState)
-                    .alt(playlist.name)
+                    .alt(playlist.title)
                     .build(),
                 create("img")
                     .classes("play-button-icon", "centeredInParent", "showOnParentHover", "inline-icon", "svgInverted", "nopointer")
@@ -367,7 +368,7 @@ export class PlaylistTemplates {
             throw new Error(`Playlist ${playlist.id} has no likes array`);
         }
         const trackChildren = [];
-        const positionMap = tracks.map(t => t.track_id);
+        const positionMap = tracks.map(t => t.id);
         const positionsState = signal(positionMap);
 
         async function startCallback(trackId: number) {

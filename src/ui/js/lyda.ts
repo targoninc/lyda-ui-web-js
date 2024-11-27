@@ -1,5 +1,4 @@
 import {LydaCache} from "./Cache/LydaCache.ts";
-import {Config} from "./Classes/Config.ts";
 import {PlayManager} from "./Streaming/PlayManager.ts";
 import {CacheItem} from "./Cache/CacheItem.ts";
 import {UserTemplates} from "./Templates/UserTemplates.ts";
@@ -22,13 +21,14 @@ import {SubscriptionTemplates} from "./Templates/SubscriptionTemplates.ts";
 import {SubscriptionActions} from "./Actions/SubscriptionActions.ts";
 import {Util} from "./Classes/Util.ts";
 import {StatisticsWrapper} from "./Classes/StatisticsWrapper.ts";
-import {notify, Ui} from "./Classes/Ui.ts";
+import {notify} from "./Classes/Ui.ts";
 import {navigate} from "./Routing/Router.ts";
 import {Permission} from "./Models/DbModels/Permission.ts";
 import {Follow} from "./Models/DbModels/Follow.ts";
-import {AnyElement, create, signal} from "../fjsc/f2.ts";
+import {AnyElement, create} from "../fjsc/src/f2.ts";
 import {User} from "./Models/DbModels/User.ts";
 import {ApiRoutes} from "./Api/ApiRoutes.ts";
+import {signal} from "../fjsc/src/signals.ts";
 
 export class Lyda {
     static async getEndpointData(endpoint: string, params = "") {
@@ -104,7 +104,7 @@ export class Lyda {
             break;
         case "profile":
             user = data;
-            if (user.error) {
+            if (!user || user.error) {
                 navigate("login");
                 return;
             }
@@ -112,12 +112,12 @@ export class Lyda {
             const isOwnProfile = selfUser ? user.id === selfUser.id : false;
             element.appendChild(UserTemplates.userActionsContainer(isOwnProfile));
             element.appendChild(UserTemplates.profileHeader(user, isOwnProfile));
-            const following = user.follows.some((f: Follow) => {
+            const following = user.follows?.some((f: Follow) => {
                 return selfUser ? f.following_user_id === selfUser.id : false;
-            });
-            const followsBack = user.following.some(f => {
+            }) ?? false;
+            const followsBack = user.following?.some(f => {
                 return selfUser ? f.user_id === selfUser.id : false;
-            });
+            }) ?? false;
             element.appendChild(UserTemplates.profileInfo(user, selfUser, isOwnProfile, permissions, following, followsBack));
             ProfilePage.addTabSectionAsync(element, user, selfUser, isOwnProfile).then();
             break;
@@ -148,7 +148,7 @@ export class Lyda {
             break;
         case "settings":
             user = await Util.getUserAsync();
-            if (user.error) {
+            if (!user || user.error) {
                 navigate("login");
                 return;
             }
@@ -156,7 +156,7 @@ export class Lyda {
             break;
         case "statistics":
             user = await Util.getUserAsync();
-            if (user.error) {
+            if (!user || user.error) {
                 navigate("login");
                 return;
             }
@@ -166,7 +166,7 @@ export class Lyda {
             break;
         case "library":
             user = await Util.getUserAsync();
-            if (user.error) {
+            if (!user || user.error) {
                 navigate("login");
                 return;
             }

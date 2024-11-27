@@ -1,14 +1,15 @@
-import {computedSignal, create, Signal, signal} from "../../fjsc/f2.ts";
+import {create} from "../../fjsc/src/f2.ts";
 import {UserActions} from "../Actions/UserActions.ts";
 import {Theme} from "../Enums/Theme.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {getUserSettingValue} from "../Classes/Util.ts";
 import {UserSettings} from "../Enums/UserSettings.ts";
 import {FJSC} from "../../fjsc";
-import {ButtonConfig, InputConfig, InputType, TextareaConfig} from "../../fjsc/Types.ts";
+import {ButtonConfig, InputConfig, InputType, TextareaConfig} from "../../fjsc/src/Types.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {LydaApi} from "../Api/LydaApi.ts";
 import {User} from "../Models/DbModels/User.ts";
+import {compute, computedSignal, Signal, signal} from "../../fjsc/src/signals.ts";
 
 export class SettingsTemplates {
     static settingsPage(user: User) {
@@ -29,10 +30,10 @@ export class SettingsTemplates {
 
     static accountSection(user: User) {
         const updatedUser = signal<Partial<User>>({});
-        const saveDisabled = computedSignal(updatedUser, u => {
+        const saveDisabled = compute(u => {
             const keys = Object.keys(u);
             return !keys.some(k => u[k] !== user[k]);
-        });
+        }, updatedUser);
 
         return create("div")
             .classes("card", "flex-v")

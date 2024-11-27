@@ -6,11 +6,13 @@ import {DragActions} from "../Actions/DragActions.ts";
 import {Util} from "../Classes/Util.ts";
 import {navigate} from "../Routing/Router.ts";
 import {Track} from "../Models/DbModels/Track.ts";
-import {computedSignal, create, signal} from "../../fjsc/f2.ts";
+import {create} from "../../fjsc/src/f2.ts";
 import {FJSC} from "../../fjsc";
+import {User} from "../Models/DbModels/User.ts";
+import {compute, signal} from "../../fjsc/src/signals.ts";
 
 export class QueueTemplates {
-    static async queueItem(track: Track, index, totalCount, user, attributes = [], classes = []) {
+    static async queueItem(track: Track, index: number, totalCount: number, user: User, attributes = [], classes = []) {
         const upButton = create("div")
             .classes("align-center", "fakeButton", "rounded", "padded-inline", "clickablePreserveWidth")
             .alt("Move up in queue")
@@ -136,7 +138,7 @@ export class QueueTemplates {
             queueText = "Queue is empty";
         }
         const queueListHidden = signal(true);
-        const queueListVisClass = computedSignal<string>(queueListHidden, (h: boolean) => h ? "hidden" : "_");
+        const queueListVisClass = compute((h): string => h ? "hidden" : "_", queueListHidden);
 
         return create("div")
             .classes("queue", "flex", "relative", "align-center")

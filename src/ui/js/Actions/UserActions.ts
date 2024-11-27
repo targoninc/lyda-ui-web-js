@@ -10,7 +10,7 @@ import {UserSettings} from "../Enums/UserSettings.ts";
 import {MediaFileType} from "../Enums/MediaFileType.ts";
 import {MediaUploader} from "../Api/MediaUploader.ts";
 import {User} from "../Models/DbModels/User.ts";
-import {Signal} from "../../fjsc/f2.ts";
+import {Signal} from "../../fjsc/src/f2.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {Notification} from "../Models/DbModels/Notification.ts";
 import {LydaApi} from "../Api/LydaApi.ts";

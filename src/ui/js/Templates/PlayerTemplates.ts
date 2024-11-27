@@ -11,7 +11,7 @@ import {CommentTemplates} from "./CommentTemplates.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {Util} from "../Classes/Util.ts";
-import {create, signal} from "../../fjsc/f2.ts";
+import {create, signal} from "../../fjsc/src/f2.ts";
 import {Track} from "../Models/DbModels/Track.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {navigate} from "../Routing/Router.ts";

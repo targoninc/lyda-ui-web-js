@@ -13,12 +13,13 @@ import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
-import {AnyNode, computedSignal, create, HtmlPropertyValue, ifjs, Signal, signal} from "../../fjsc/f2.ts";
+import {AnyNode, create, HtmlPropertyValue, ifjs} from "../../fjsc/src/f2.ts";
 import {Album} from "../Models/DbModels/Album.ts";
-import {InputType} from "../../fjsc/Types.ts";
+import {InputType} from "../../fjsc/src/Types.ts";
 import {Track} from "../Models/DbModels/Track.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {navigate} from "../Routing/Router.ts";
+import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
@@ -43,7 +44,7 @@ export class AlbumTemplates {
                 return await AlbumTemplates.albumInAddList(album, checkedAlbums);
             })) as AnyNode[];
         }
-        const buttonText = computedSignal<string>(checkedAlbums, (ch: number[]) => `Add to ${ch.length} albums`);
+        const buttonText = compute((ch: number[]) => `Add to ${ch.length} albums`, checkedAlbums);
 
         return create("div")
             .classes("flex-v")
@@ -73,7 +74,7 @@ export class AlbumTemplates {
                             text: buttonText,
                             classes: ["positive"],
                             icon: { icon: "forms_add_on" },
-                            disabled: computedSignal(checkedAlbums, (ch: number[]) => ch.length === 0),
+                            disabled: compute((ch: number[]) => ch.length === 0, checkedAlbums),
                             onclick: async () => {
                                 await AlbumActions.addTrackToAlbums(track.id, checkedAlbums.value);
                             }
@@ -89,8 +90,8 @@ export class AlbumTemplates {
     }
 	
     static async albumInAddList(album: Album, checkedAlbums: Signal<number[]>) {
-        const checked = computedSignal(checkedAlbums, (ch: number[]) => ch.includes(album.id));
-        const checkedClass = computedSignal<string>(checked, (c: boolean) => c ? "active" : "_");
+        const checked = compute((ch) => ch.includes(album.id), checkedAlbums);
+        const checkedClass = compute((c): string => c ? "active" : "_", checked);
 
         return create("div")
             .classes("flex", "padded", "check-list-item", checkedClass)
@@ -117,14 +118,14 @@ export class AlbumTemplates {
             release_date: new Date(),
             visibility: "private",
         });
-        const name = computedSignal<string>(album, (s: Album) => s.title);
-        const upc = computedSignal<string>(album, (s: Album) => s.upc);
-        const description = computedSignal<string>(album, (s: Album) => s.description);
-        const releaseDate = computedSignal<Date>(album, (s: Album) => s.release_date.toISOString().split("T")[0]);
-        const visibility = computedSignal<boolean>(album, (s: Album) => s.visibility === "private");
-        const disabled = computedSignal<boolean>(album, (s: Album) => {
-            return !s.title || (s.title === "");
-        });
+        const name = compute((s) => s.title ?? "", album);
+        const upc = compute((s) => s.upc ?? "", album);
+        const description = compute((s) => s.description ?? "", album);
+        const releaseDate = compute((s) => s.release_date?.toISOString().split("T")[0] ?? "", album);
+        const visibility = compute((s) => s.visibility === "private", album);
+        const disabled = compute((s) => {
+            return !s.title || s.title === "";
+        }, album);
 
         return create("div")
             .classes("flex-v")
@@ -181,7 +182,7 @@ export class AlbumTemplates {
                             name: "release_date",
                             label: "Release Date",
                             placeholder: "YYYY-MM-DD",
-                            value: releaseDate,
+                            value: compute(d => new Date(d), releaseDate),
                             onchange: (v) => {
                                 album.value = { ...album.value, release_date: new Date(v) };
                             }

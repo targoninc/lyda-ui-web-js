@@ -22,7 +22,7 @@ import {
     nullElement,
     signal,
     StringOrSignal
-} from "../../fjsc/f2.ts";
+} from "../../fjsc/src/f2.ts";
 import {Track} from "../Models/DbModels/Track.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {Permission} from "../Models/DbModels/Permission.ts";
@@ -217,7 +217,7 @@ export class UserTemplates {
             ).build();
     }
 
-    static profileHeader(user: User, isOwnProfile: boolean): AnyNode {
+    static profileHeader(user: User, isOwnProfile: boolean) {
         const avatarLoading = signal(false);
         const bannerLoading = signal(false);
         let bannerDeleteButton = GenericTemplates.centeredDeleteButton("banner-delete-button", () => UserActions.deleteBanner(user, bannerLoading), ["hidden", "showOnParentHover"]);

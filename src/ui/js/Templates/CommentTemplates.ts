@@ -7,11 +7,13 @@ import {UserTemplates} from "./UserTemplates.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
-import {computedSignal, create, ifjs, Signal, signal, signalMap} from "../../fjsc/f2.ts";
+import {create, ifjs, signalMap} from "../../fjsc/src/f2.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {Comment} from "../Models/DbModels/Comment.ts";
 import {FJSC} from "../../fjsc";
-import {InputType} from "../../fjsc/Types.ts";
+import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
+
+;
 
 export class CommentTemplates {
     static moderatableComment(comment: any, user: User) {
@@ -58,7 +60,7 @@ export class CommentTemplates {
 
     static commentListFullWidth(track_id: number, initial_comments: Comment[], user: User) {
         const comments = signal(initial_comments);
-        const hasComments = computedSignal<boolean>(comments, (c: Comment[]) => c.length > 0);
+        const hasComments = compute(c => c.length > 0, comments);
         hasComments.subscribe(() => {
             Util.nestCommentElementsByParents();
         });
@@ -115,7 +117,7 @@ export class CommentTemplates {
     static commentListOpener(track_id: number, initial_comments: Comment[], user: User) {
         const parentCommentId = signal(0);
         const comments = signal(initial_comments);
-        const hasComments = computedSignal<boolean>(comments, (c: Comment[]) => c.length > 0);
+        const hasComments = compute((c: Comment[]) => c.length > 0, comments);
         hasComments.subscribe(() => {
             Util.nestCommentElementsByParents();
         });

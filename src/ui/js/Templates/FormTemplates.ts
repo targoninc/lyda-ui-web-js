@@ -1,19 +1,9 @@
 import {GenericTemplates} from "./GenericTemplates.ts";
-import {Api} from "../Api/Api.ts";
-import {Ui} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
-import {
-    computedSignal,
-    create,
-    HtmlPropertyValue,
-    signal,
-    Signal,
-    StringOrSignal,
-    TypeOrSignal
-} from "../../fjsc/f2.js";
-import {InputType, SearchableSelectConfig, SelectOption} from "../../fjsc/Types.ts";
+import {InputType, SelectOption} from "../../fjsc/src/Types.ts";
 import {Genre} from "../Enums/Genre.ts";
-import {ApiRoutes} from "../Api/ApiRoutes.ts";
+import {create, HtmlPropertyValue, StringOrSignal, TypeOrSignal} from "../../fjsc/src/f2.ts";
+import {compute, signal, Signal} from "../../fjsc/src/signals.ts";
 
 export class FormTemplates {
     static fileField(title: string, text: string, name: string, accept: string, required = false, onchange = (v: string, files: FileList | null) => {}) {
@@ -28,8 +18,8 @@ export class FormTemplates {
             ).build();
     }
 
-    static dropDownField<T>(title: string, options: Signal<SelectOption[]>, selectedValue: Signal<T>) {
-        const optionsState = options.constructor === Signal ? options : signal(options);
+    static dropDownField(title: string, options: TypeOrSignal<SelectOption[]>, selectedValue: Signal<string>) {
+        const optionsState = options.constructor === Signal ? (options as Signal<SelectOption[]>) : signal(options as SelectOption[]);
 
         return create("div")
             .classes("flex-v", "small-gap")
@@ -37,7 +27,7 @@ export class FormTemplates {
                 create("label")
                     .text(title)
                     .build(),
-                FJSC.searchableSelect(<SearchableSelectConfig>{
+                FJSC.searchableSelect({
                     options: optionsState as Signal<SelectOption[]>,
                     value: selectedValue
                 })
@@ -72,7 +62,7 @@ export class FormTemplates {
         const genres = Object.values(Genre).map((genre: string) => {
             return { name: genre, id: genre };
         }) as SelectOption[];
-        const value = computedSignal<String>(parentState, (p: any) => p.genre ?? "other");
-        return FormTemplates.dropDownField<String>("Genre", signal(genres), value);
+        const value = compute((p: any) => p.genre ?? "other", parentState);
+        return FormTemplates.dropDownField("Genre", signal(genres), value);
     }
 }

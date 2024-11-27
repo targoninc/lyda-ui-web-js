@@ -7,22 +7,21 @@ import {TrackActions} from "../Actions/TrackActions.ts";
 import {
     AnyElement,
     AnyNode,
-    computedSignal,
     create,
     HtmlPropertyValue,
     ifjs,
-    signal,
-    Signal, signalMap,
+    signalMap,
     StringOrSignal,
     TypeOrSignal
-} from "../../fjsc/f2.ts";
+} from "../../fjsc/src/f2.ts";
 import {FJSC} from "../../fjsc";
-import {InputType, SearchableSelectConfig} from "../../fjsc/Types.ts";
+import {InputType, SearchableSelectConfig} from "../../fjsc/src/Types.ts";
 import {Util} from "../Classes/Util.ts";
 import {navigate} from "../Routing/Router.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {ProgressState} from "../Enums/ProgressState.ts";
 import {ProgressPart} from "../Models/ProgressPart.ts";
+import {compute, signal, Signal} from "../../fjsc/src/signals.ts";
 
 export class GenericTemplates {
     static icon(icon: StringOrSignal, adaptive = false, classes: StringOrSignal[] = [], title = "") {
@@ -72,8 +71,8 @@ export class GenericTemplates {
             .build();
     }
 
-    static cardLabel(text: HtmlPropertyValue, icon: StringOrSignal = null, hasError: Signal<boolean> = signal(false)) {
-        const errorClass = computedSignal<string>(hasError, (h: boolean) => h ? "error" : "_");
+    static cardLabel(text: HtmlPropertyValue, icon: StringOrSignal|null = null, hasError: Signal<boolean> = signal(false)) {
+        const errorClass = compute((h): string => h ? "error" : "_", hasError);
 
         return create("div")
             .classes("flex")
@@ -81,7 +80,7 @@ export class GenericTemplates {
                 create("div")
                     .classes("card-label", "flex", "small-gap", errorClass)
                     .children(
-                        ifjs(icon, GenericTemplates.icon(icon)),
+                        ifjs(icon, GenericTemplates.icon(icon ?? "")),
                         create("span")
                             .text(text)
                             .build(),
@@ -275,7 +274,7 @@ export class GenericTemplates {
             .build();
     }
 
-    static actionWithMidBreakpoint(icon: HtmlPropertyValue, text: HtmlPropertyValue, id: HtmlPropertyValue, onclick: Function, attributes = [], classes: string[] = [], link = null) {
+    static actionWithMidBreakpoint(icon: HtmlPropertyValue, text: HtmlPropertyValue, id: HtmlPropertyValue, onclick: Function, attributes = [], classes: string[] = [], link: HtmlPropertyValue = null) {
         return create(link ? "a" : "div")
             .classes("flex", "small-gap", "clickable", "fakeButton", "padded-inline", "rounded")
             .children(
@@ -385,7 +384,7 @@ export class GenericTemplates {
             }
         }) as HTMLButtonElement;
         const input = create("input")
-            .type("file")
+            .type(InputType.file)
             .styles("display", "none")
             .id(id)
             .name(name)
@@ -432,7 +431,7 @@ export class GenericTemplates {
             .text(text)
             .children(
                 create("input")
-                    .type("checkbox")
+                    .type(InputType.checkbox)
                     .name(name)
                     .id(name)
                     .required(required)

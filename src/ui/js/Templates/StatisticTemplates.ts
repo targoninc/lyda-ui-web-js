@@ -1,6 +1,6 @@
 import {Chart, registerables} from "chart.js";
 import {BoxPlotChart} from "@sgratzl/chartjs-chart-boxplot";
-import {create, signal} from "../../fjsc/f2.ts";
+import {create, HtmlPropertyValue} from "../../fjsc/src/f2.ts";
 import {Colors} from "../Classes/Colors.ts";
 import {ChartOptions} from "../Classes/ChartOptions.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
@@ -11,6 +11,8 @@ import {Permissions} from "../Enums/Permissions.ts";
 import {FormTemplates} from "./FormTemplates.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
+import {signal} from "../../fjsc/src/signals.ts";
+import {User} from "../Models/DbModels/User.ts";
 
 Chart.register(...registerables);
 
@@ -122,7 +124,7 @@ export class StatisticTemplates {
             ).build();
     }
 
-    static noData(title) {
+    static noData(title: HtmlPropertyValue) {
         return create("div")
             .classes("chart-container", "flex-v")
             .children(
@@ -141,21 +143,21 @@ export class StatisticTemplates {
             ).build();
     }
 
-    static playCountByTrackChart(trackNames, playCounts, trackColors = usedColors) {
+    static playCountByTrackChart(trackNames: string[], playCounts: number[], trackColors = usedColors) {
         if (trackNames.length === 0) {
             return StatisticTemplates.noData("Play count by track");
         }
         return StatisticTemplates.donutChart(trackNames, playCounts, "Plays", "Play count by track", "playCountByTrackChart", trackColors);
     }
 
-    static playCountByMonthChart(monthNames, playCounts, trackColors = usedColors) {
+    static playCountByMonthChart(monthNames: string[], playCounts: number[], trackColors = usedColors) {
         if (monthNames.length === 0) {
             return StatisticTemplates.noData("Play count by month");
         }
         return StatisticTemplates.barChart(monthNames, playCounts, "Plays", "Play count by month", "playCountByMonthChart", [trackColors[0]]);
     }
 
-    static likesByTrackChart(trackNames, likeCounts, trackColors = usedColors) {
+    static likesByTrackChart(trackNames: string[], likeCounts: number[], trackColors = usedColors) {
         if (trackNames.length === 0) {
             return StatisticTemplates.noData("Likes by track");
         }
@@ -190,7 +192,7 @@ export class StatisticTemplates {
         ];
     }
 
-    static statisticActions(user, royaltyInfo, permissions) {
+    static statisticActions(user: User, royaltyInfo, permissions) {
         let actions = [];
 
         if (permissions.find(p => p.name === Permissions.canCalculateRoyalties)) {
@@ -299,14 +301,14 @@ export class StatisticTemplates {
             ).build();
     }
 
-    static royaltiesByMonthChart(labels, values) {
+    static royaltiesByMonthChart(labels: string[], values: number[]) {
         if (labels.length === 0) {
             return StatisticTemplates.noData("Royalties by month");
         }
         return StatisticTemplates.barChart(labels, values, "Royalties", "Royalties by month", "royaltiesByMonthChart", [usedColors[8]]);
     }
 
-    static royaltiesByTrackChart(labels, values) {
+    static royaltiesByTrackChart(labels: string[], values: number[]) {
         if (labels.length === 0) {
             return StatisticTemplates.noData("Royalties by track");
         }

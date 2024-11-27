@@ -10,7 +10,8 @@ import {AuthActions} from "../Actions/AuthActions.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {Util} from "../Classes/Util.ts";
 import {navigate} from "../Routing/Router.ts";
-import {AnyNode, create, signal} from "../../fjsc/f2.ts";
+import {AnyNode, create} from "../../fjsc/src/f2.ts";
+import {signal} from "../../fjsc/src/signals.ts";
 
 export class NavTemplates {
     static navTop(userTemplate: AnyNode) {

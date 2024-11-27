@@ -1,7 +1,9 @@
 import {User} from "./User.js";
 import {CollaboratorType} from "./CollaboratorType.js";
+import {Track} from "./Track.ts";
 
 export interface TrackCollaborator {
+    track?: Track;
     collab_type?: CollaboratorType;
     user?: User;
     track_id: number;

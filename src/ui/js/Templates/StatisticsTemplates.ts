@@ -5,9 +5,10 @@ import {AlbumActions} from "../Actions/AlbumActions.ts";
 import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
-import {signal, create, StringOrSignal, Signal} from "../../fjsc/f2.ts";
+import {create, StringOrSignal} from "../../fjsc/src/f2.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {FJSC} from "../../fjsc";
+import {Signal, signal} from "../../fjsc/src/signals.ts";
 
 export class StatisticsTemplates {
     static likesIndicator(type: string, reference_id: number, like_count: number, liked: boolean) {

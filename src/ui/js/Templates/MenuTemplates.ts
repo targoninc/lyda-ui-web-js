@@ -3,8 +3,9 @@ import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {Util} from "../Classes/Util.ts";
 import {navigate} from "../Routing/Router.ts";
-import {AnyElement, computedSignal, create, HtmlPropertyValue, Signal, signal, StringOrSignal} from "../../fjsc/f2.ts";
+import {AnyElement, create, HtmlPropertyValue, StringOrSignal} from "../../fjsc/src/f2.ts";
 import {FJSC} from "../../fjsc";
+import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 
 export class MenuTemplates {
     static genericMenu(title: HtmlPropertyValue, menuItems: any[]) {
@@ -45,8 +46,8 @@ export class MenuTemplates {
     }
 
     static menuItem(text: HtmlPropertyValue, action: Function, icon: string, selectedIndex: Signal<number>, index: number) {
-        const isSelected = computedSignal(selectedIndex, (i: number) => i === index);
-        const selectedClass = computedSignal<string>(isSelected, (is: boolean) => is ? "active" : "_");
+        const isSelected = compute(i => i === index, selectedIndex);
+        const selectedClass = compute((is): string => is ? "active" : "_", isSelected);
 
         return FJSC.button({
             text: text as StringOrSignal,

@@ -3,7 +3,7 @@ import {notify, Ui} from "./Ui.ts";
 import {UserTemplates} from "../Templates/UserTemplates.ts";
 import {GenericTemplates} from "../Templates/GenericTemplates.ts";
 import {User} from "../Models/DbModels/User.ts";
-import {AnyElement} from "../../fjsc/f2.ts";
+import {AnyElement} from "../../fjsc/src/f2.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 
 export class ProfilePage {

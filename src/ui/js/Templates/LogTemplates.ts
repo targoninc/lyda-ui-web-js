@@ -2,10 +2,11 @@ import {Time} from "../Classes/Helpers/Time.ts";
 import {UserTemplates} from "./UserTemplates.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {Util} from "../Classes/Util.ts";
-import {create} from "../../fjsc/f2.ts";
+import {create} from "../../fjsc/src/f2.ts";
+import {User} from "../Models/DbModels/User.ts";
 
 export class LogTemplates {
-    static async actionLogs(selfUser, data) {
+    static async actionLogs(selfUser: User, data: any[]) {
         const users = {};
         for (const log of data) {
             if (!users[log.user_id]) {
@@ -161,7 +162,7 @@ export class LogTemplates {
             .styles("position", "relative")
             .text("Info")
             .onclick(e => {
-                if (!e.target.classList.contains("clickable")) {
+                if (!e.target?.classList.contains("clickable")) {
                     return;
                 }
                 document.getElementById("properties-container" + id).classList.toggle("hidden");
@@ -199,7 +200,7 @@ export class LogTemplates {
                     create("div")
                         .classes("property-value", "flex-v")
                         .children(
-                            ...Object.keys(value).map(k => {
+                            ...Object.keys(value).map((k: string) => {
                                 return LogTemplates.property(k, value[k]);
                             })
                         ).build()

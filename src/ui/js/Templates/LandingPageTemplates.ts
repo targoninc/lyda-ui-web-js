@@ -4,13 +4,15 @@ import {GenericTemplates} from "./GenericTemplates.ts";
 import {FormTemplates} from "./FormTemplates.ts";
 import {UserValidator} from "../Classes/Validators/UserValidator.ts";
 import {finalizeLogin, Util} from "../Classes/Util.ts";
-import {notify, Ui} from "../Classes/Ui.ts";
+import {notify} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
-import {InputType} from "../../fjsc/Types.ts";
+import {InputType} from "../../fjsc/src/Types.ts";
 import {User} from "../Models/DbModels/User.ts";
-import {HtmlPropertyValue, Signal, create, signal, computedSignal, ifjs} from "../../fjsc/f2.ts";
+import {HtmlPropertyValue, create, ifjs, AnyNode} from "../../fjsc/src/f2.ts";
 import {Api, ApiResponse} from "../Api/Api.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
+import {globalStyles} from "../styles/globalStyleSwag.ts";
+import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 
 export interface AuthData {
     termsOfService: boolean;
@@ -36,7 +38,7 @@ export class LandingPageTemplates {
     }
 
     static registrationLoginBox() {
-        const templateMap = {
+        const templateMap: Record<string, (step: Signal<string>, user: Signal<AuthData>) => AnyNode> = {
             "email": LandingPageTemplates.emailBox,
             "check-email": LandingPageTemplates.checkEmailBox,
             "register": LandingPageTemplates.registerBox,
@@ -76,7 +78,8 @@ export class LandingPageTemplates {
         };
 
         const template = signal(templateMap[step.value](step, user));
-        step.subscribe((newStep: keyof typeof pageMap) => {
+        step.subscribe((newStep: keyof typeof templateMap) => {
+            // @ts-ignore
             if (pageMap[newStep] && !history.value.includes(newStep)) {
                 history.value = [
                     ...history.value,
@@ -133,7 +136,7 @@ export class LandingPageTemplates {
 
     static activateAccountBox(step: Signal<string>, user: Signal<AuthData>) {
         const code = Util.getUrlParameter("code");
-        const error = signal<string|null>(null);
+        const error = signal<string>("");
         const done = signal(false);
         const activating = signal(true);
 
@@ -163,7 +166,7 @@ export class LandingPageTemplates {
                         ifjs(done, create("p")
                             .text(`Your account is now activated!`)
                             .build()),
-                        ifjs(error, FJSC.error(error))
+                        ifjs(compute(e => e.length > 0, error), FJSC.error(error))
                     ).build()
             ).build();
     }
@@ -229,24 +232,25 @@ export class LandingPageTemplates {
     }
 
     static loginBox(step: Signal<string>, user: Signal<AuthData>) {
-        const errors = signal(new Set<string>());
-        user.subscribe((newUser: User) => {
+        const errors = signal<string[]>([]);
+        user.subscribe(newUser => {
             errors.value = UserValidator.validateLogin(newUser);
         });
         const continueLogin = () => {
             errors.value = UserValidator.validateLogin(user.value);
-            if (errors.value.size === 0) {
+            if (errors.value.length === 0) {
                 step.value = "checking-mfa";
             }
         };
-        const email = computedSignal<string>(user, (u: AuthData) => u.email);
-        const password = computedSignal<string>(user, (u: AuthData) => u.password);
+        const email = compute((u: AuthData) => u.email, user);
+        const password = compute((u: AuthData) => u.password, user);
 
         return create("div")
             .classes("flex-v", "align-center")
             .children(
                 create("h1")
                     .text("Log in")
+                    .css(globalStyles.foo)
                     .build(),
                 create("div")
                     .classes("flex-v")
@@ -265,10 +269,9 @@ export class LandingPageTemplates {
                                         email: value
                                     };
                                 }, () => {
-                                    errors.value = new Set([
-                                        ...errors.value,
+                                    errors.value = [
                                         "This E-mail address is not registered. Please register instead."
-                                    ]);
+                                    ];
                                 });
                             },
                         }),
@@ -282,7 +285,7 @@ export class LandingPageTemplates {
                         FJSC.button({
                             text: "Login",
                             id: "mfaCheckTrigger",
-                            disabled: computedSignal(user, (u: AuthData) => !u.email || !u.password || u.email.trim().length === 0 || u.password.trim().length === 0),
+                            disabled: compute(u => !u.email || !u.password || u.email.trim().length === 0 || u.password.trim().length === 0, user),
                             onclick: continueLogin,
                             icon: {
                                 icon: "login",
@@ -296,11 +299,11 @@ export class LandingPageTemplates {
     }
 
     static resetPasswordBox(step: Signal<string>, user: Signal<AuthData>) {
-        const errors = signal(new Set<string>());
-        user.subscribe((newUser: AuthData) => {
+        const errors = signal<string[]>([]);
+        user.subscribe(newUser => {
             errors.value = UserValidator.validateLogin(newUser);
         });
-        const email = computedSignal<string>(user, (u: AuthData) => u.email);
+        const email = compute((u: AuthData) => u.email, user);
 
         return create("div")
             .classes("flex-v")
@@ -341,7 +344,7 @@ export class LandingPageTemplates {
                             text: "Next",
                             id: "checkEmailTrigger",
                             classes: ["positive"],
-                            disabled: computedSignal(user, (u: AuthData) => !u.email || u.email.trim().length === 0),
+                            disabled: compute(u => !u.email || u.email.trim().length === 0, user),
                             onclick: async () => {
                                 const res = await AuthApi.requestPasswordReset(email.value);
                                 if (res.code === 200) {
@@ -349,10 +352,7 @@ export class LandingPageTemplates {
                                     step.value = "password-reset-requested";
                                 } else {
                                     notify(`Failed to reset password: ${res.data.error}`, "error");
-                                    errors.value = new Set([
-                                        ...errors.value,
-                                        res.data.error
-                                    ]);
+                                    errors.value = [res.data.error];
                                 }
                             },
                         }),
@@ -362,12 +362,12 @@ export class LandingPageTemplates {
     }
 
     static enterNewPasswordBox(step: Signal<string>, user: Signal<AuthData>) {
-        const errors = signal(new Set<string>());
+        const errors = signal<string[]>([]);
         user.subscribe((newUser: AuthData) => {
             errors.value = UserValidator.validatePasswordReset(newUser);
         });
-        const password = computedSignal<string>(user, (u: AuthData) => u.password);
-        const passwordConfirm = computedSignal<string>(user, (u: AuthData) => u.password2);
+        const password = compute((u: AuthData) => u.password, user);
+        const passwordConfirm = compute((u: AuthData) => u.password2, user);
         const token = Util.getUrlParameter("token");
 
         return create("div")
@@ -405,7 +405,7 @@ export class LandingPageTemplates {
                         FJSC.button({
                             text: "Next",
                             classes: ["positive"],
-                            disabled: computedSignal(user, (u: AuthData) => !u.password || u.password.trim().length === 0 || u.password !== u.password2 || u.password2.trim().length === 0 || !token),
+                            disabled: compute(u => !u.password || u.password.trim().length === 0 || u.password !== u.password2 || u.password2.trim().length === 0 || !token, user),
                             onclick: async () => {
                                 if (!token) {
                                     notify("Token is missing", "error");
@@ -417,10 +417,7 @@ export class LandingPageTemplates {
                                     step.value = "login";
                                 } else {
                                     notify(`Failed to reset password: ${res.data.error}`, "error");
-                                    errors.value = new Set([
-                                        ...errors.value,
-                                        res.data.error
-                                    ]);
+                                    errors.value = [res.data.error];
                                 }
                             },
                         }),
@@ -471,7 +468,7 @@ export class LandingPageTemplates {
                         FJSC.button({
                             text: "Go to Login",
                             id: "mfaCheckTrigger",
-                            disabled: computedSignal(user, (u: AuthData) => !u.email || u.email.trim().length === 0),
+                            disabled: compute(u => !u.email || u.email.trim().length === 0, user),
                             onclick: () => {
                                 step.value = "login";
                             },
@@ -497,7 +494,7 @@ export class LandingPageTemplates {
     }
 
     static registerBox(step: Signal<string>, user: Signal<AuthData>) {
-        const errors = signal(new Set<string>());
+        const errors = signal<string[]>([]);
         const touchedFields = new Set<string>();
         for (const key in user.value) {
             // @ts-ignore
@@ -505,18 +502,15 @@ export class LandingPageTemplates {
                 touchedFields.add(key);
             }
         }
-        user.subscribe((newUser: AuthData) => {
+        user.subscribe(newUser => {
             errors.value = UserValidator.validateRegistration(newUser, touchedFields);
         });
         const emailInUseError = "This E-mail address is already in use. Please use a different one.";
         const continueRegistration = () => {
             errors.value = UserValidator.validateRegistration(user.value, touchedFields);
-            if (errors.value.size === 0) {
+            if (errors.value.length === 0) {
                 AuthApi.userExists(user.value.email, () => {
-                    errors.value = new Set([
-                        ...errors.value,
-                        emailInUseError
-                    ]);
+                    errors.value = [emailInUseError];
                 }, () => {
                     step.value = "registering";
                 });
@@ -524,10 +518,7 @@ export class LandingPageTemplates {
         };
         if (user.value.email) {
             AuthApi.userExists(user.value.email, () => {
-                errors.value = new Set([
-                    ...errors.value,
-                    emailInUseError
-                ]);
+                errors.value = [emailInUseError];
             });
         }
         const allFieldsTouched = signal(false);
@@ -578,15 +569,12 @@ export class LandingPageTemplates {
                                 async (v) => {
                                     return new Promise<string[] | null | undefined>((resolve) => {
                                         AuthApi.userExists(v, () => {
-                                            errors.value = new Set([
-                                                ...errors.value,
-                                                emailInUseError
-                                            ]);
+                                            errors.value = [emailInUseError];
                                             resolve([emailInUseError]);
                                         }, () => {
                                             const tmpErrors = [...errors.value];
                                             tmpErrors.splice(tmpErrors.indexOf(emailInUseError), 1);
-                                            errors.value = new Set(tmpErrors);
+                                            errors.value = tmpErrors;
                                             resolve(null);
                                         });
                                     });
@@ -639,7 +627,7 @@ export class LandingPageTemplates {
                         FJSC.button({
                             text: "Register",
                             id: "registerTrigger",
-                            disabled: computedSignal(errors, (e: Set<string>) => e.size > 0),
+                            disabled: compute(e => e.length > 0, errors),
                             onclick: continueRegistration,
                             icon: {
                                 icon: "person_add",
@@ -655,13 +643,13 @@ export class LandingPageTemplates {
     }
 
     static emailBox(step: Signal<string>, user: Signal<AuthData>) {
-        const errors = signal(new Set<string>());
-        user.subscribe((newUser: AuthData) => {
+        const errors = signal<string[]>([]);
+        user.subscribe(newUser => {
             errors.value = UserValidator.validateEmailCheck(newUser);
         });
         const triggerLogin = () => {
             errors.value = UserValidator.validateEmailCheck(user.value);
-            if (errors.value.size === 0) {
+            if (errors.value.length === 0) {
                 step.value = "check-email";
             }
         };
@@ -705,7 +693,7 @@ export class LandingPageTemplates {
                         FJSC.button({
                             text: "Next",
                             id: "checkEmailTrigger",
-                            disabled: computedSignal(user, (u: AuthData) => !u.email || u.email.trim().length === 0),
+                            disabled: compute(u => !u.email || u.email.trim().length === 0, user),
                             onclick: triggerLogin,
                             icon: {
                                 icon: "arrow_forward",

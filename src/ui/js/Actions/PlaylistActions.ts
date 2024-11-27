@@ -6,7 +6,7 @@ import {notify, Ui} from "../Classes/Ui.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
 import {QueueManager} from "../Streaming/QueueManager.ts";
 import {navigate} from "../Routing/Router.ts";
-import {Signal} from "../../fjsc/f2.ts";
+import {Signal} from "../../fjsc/src/f2.ts";
 import {Playlist} from "../Models/DbModels/Playlist.ts";
 import {Track} from "../Models/DbModels/Track.ts";
 import {Album} from "../Models/DbModels/Album.ts";
@@ -35,7 +35,7 @@ export class PlaylistActions {
         Ui.addModal(modal);
     }
 
-    static async createNewPlaylist(playlist: Playlist) {
+    static async createNewPlaylist(playlist: Partial<Playlist>) {
         const res = await Api.postAsync(ApiRoutes.newPlaylist, playlist);
         if (res.code !== 200) {
             notify("Failed to create playlist: " + res.data, "error");

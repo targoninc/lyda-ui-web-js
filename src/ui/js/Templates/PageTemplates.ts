@@ -1,4 +1,4 @@
-import {create, signal} from "../../fjsc/f2.ts";
+import {create, signal} from "../../fjsc/src/f2.ts";
 import {AuthActions} from "../Actions/AuthActions.ts";
 import {LandingPageTemplates} from "./LandingPageTemplates.ts";
 import {UserTemplates} from "./UserTemplates.ts";

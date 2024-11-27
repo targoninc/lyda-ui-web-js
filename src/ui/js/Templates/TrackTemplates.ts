@@ -4,7 +4,6 @@ import {Util} from "../Classes/Util.ts";
 import {Icons} from "../Enums/Icons.js";
 import {PlayManager} from "../Streaming/PlayManager.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
-import {AlbumActions} from "../Actions/AlbumActions.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {QueueManager} from "../Streaming/QueueManager.ts";
 import {StatisticsTemplates} from "./StatisticsTemplates.ts";
@@ -14,11 +13,10 @@ import {PlaylistTemplates} from "./PlaylistTemplates.ts";
 import {DragActions} from "../Actions/DragActions.ts";
 import {Images} from "../Enums/Images.ts";
 import {TrackEditTemplates} from "./TrackEditTemplates.ts";
-import {UserActions} from "../Actions/UserActions.ts";
 import {CustomText} from "../Classes/Helpers/CustomText.ts";
 import {CommentTemplates} from "./CommentTemplates.ts";
 import {TrackProcessor} from "../Classes/Helpers/TrackProcessor.ts";
-import {AnyElement, AnyNode, create, HtmlPropertyValue, ifjs, Signal, signal, StringOrSignal} from "../../fjsc/f2.js";
+import {AnyElement, AnyNode, create, HtmlPropertyValue, ifjs} from "../../fjsc/src/f2.ts";
 import {navigate} from "../Routing/Router.ts";
 import {Track} from "../Models/DbModels/Track.ts";
 import {User} from "../Models/DbModels/User.ts";
@@ -31,6 +29,8 @@ import {UploadableTrack} from "../Models/UploadableTrack.ts";
 import {PlaylistTrack} from "../Models/DbModels/PlaylistTrack.ts";
 import {AlbumTrack} from "../Models/DbModels/AlbumTrack.ts";
 import {Playlist} from "../Models/DbModels/Playlist.ts";
+import {Signal, signal} from "../../fjsc/src/signals.ts";
+import {CollaboratorType} from "../Models/DbModels/CollaboratorType.ts";
 
 export class TrackTemplates {
     static trackCard(track: Track, user: User, profileId: number) {
@@ -138,7 +138,7 @@ export class TrackTemplates {
             .build();
     }
 
-    static trackCover(track, overwriteWidth: string | null = null, startCallback = null) {
+    static trackCover(track: Track, overwriteWidth: string | null = null, startCallback: Function|null = null) {
         const imageState = signal(Images.DEFAULT_AVATAR);
         Util.getCoverFileFromTrackIdAsync(track.id, track.user_id).then((src) => {
             imageState.value = src;
@@ -172,22 +172,22 @@ export class TrackTemplates {
             .build();
     }
 
-    static feedTrackCover(track) {
+    static feedTrackCover(track: Track) {
         return TrackTemplates.trackCover(track, "var(--inline-track-height)");
     }
 
-    static smallListTrackCover(track: Track, startCallback: Function = null) {
+    static smallListTrackCover(track: Track, startCallback: Function|null = null) {
         return TrackTemplates.trackCover(track, "var(--small-track-height)", startCallback);
     }
 
-    static trackCardsContainer(children) {
+    static trackCardsContainer(children: AnyNode[]) {
         return create("div")
             .classes("profileContent", "tracks", "flex")
             .children(...children)
             .build();
     }
 
-    static async trackList(tracksState, pageState, type, filterState, loadingState, user) {
+    static async trackList(tracksState: Signal<Track[]>, pageState, type, filterState, loadingState, user) {
         const trackList = tracksState.value.map(track => TrackTemplates.feedTrack(track, user));
         const trackListContainer = signal(TrackTemplates.#trackList(trackList));
         tracksState.onUpdate = async (newTracks) => {
@@ -610,7 +610,7 @@ export class TrackTemplates {
             editActions.push(TrackEditTemplates.addToAlbumsButton(track));
             editActions.push(TrackTemplates.copyPrivateLinkButton(track.id, track.secretcode));
             editActions.push(TrackEditTemplates.openEditPageButton(track));
-            editActions.push(TrackEditTemplates.upDownButtons(trackState as Signal<UploadableTrack>));
+            editActions.push(TrackEditTemplates.upDownButtons(trackState));
             editActions.push(TrackEditTemplates.deleteTrackButton(track.id));
         }
 
@@ -843,28 +843,37 @@ export class TrackTemplates {
         });
     }
 
-    static toBeApprovedTrack(collabType, music, user) {
+    static toBeApprovedTrack(collabType: CollaboratorType, track: TrackCollaborator, user: User) {
         const avatarState = signal(Images.DEFAULT_AVATAR);
-        Util.getAvatarFromUserIdAsync(music.user_id).then((src) => {
+        Util.getAvatarFromUserIdAsync(track.user_id).then((src) => {
             avatarState.value = src;
         });
+        if (!track.user) {
+            throw new Error("User not set on to be approved track with ID ${track.track_id}");
+        }
+        if (!track.track) {
+            throw new Error(`Track not set on to be approved track with ID ${track.track_id}`);
+        }
+        if (!track.user.follows) {
+            throw new Error(`User follows not set on to be approved track with ID ${track.track_id}`);
+        }
 
         return create("div")
             .classes("flex", "card", "collab")
-            .id(music.id)
+            .id(track.track_id)
             .children(
                 create("div")
                     .classes("flex-v")
                     .children(
                         create("span")
                             .classes("text-large")
-                            .text(music.title)
+                            .text(track.track.title)
                             .build(),
                         create("span")
                             .classes("text-small")
-                            .text(Time.ago(music.createdAt))
+                            .text(Time.ago(track.created_at))
                             .build(),
-                        UserTemplates.userWidget(music.user_id, music.user.username, music.user.displayname, avatarState, music.user.follows.some(follow => follow.followingUserId === user.id)),
+                        UserTemplates.userWidget(track.user_id, track.user.username, track.user.displayname, avatarState, track.user.follows.some(follow => follow.following_user_id === user.id)),
                         create("span")
                             .text("Requested you to be " + collabType.name)
                             .build(),
@@ -875,11 +884,11 @@ export class TrackTemplates {
                         create("div")
                             .classes("flex")
                             .children(
-                                GenericTemplates.action(Icons.CHECK, "Approve", music.id, async () => {
-                                    await TrackActions.approveCollab(music.id, music.title);
+                                GenericTemplates.action(Icons.CHECK, "Approve", track.track_id, async () => {
+                                    await TrackActions.approveCollab(track.track_id, track.track!.title);
                                 }, [], ["secondary", "positive"]),
-                                GenericTemplates.action(Icons.X, "Deny", music.id, async () => {
-                                    await TrackActions.denyCollab(music.id, music.title);
+                                GenericTemplates.action(Icons.X, "Deny", track.track_id, async () => {
+                                    await TrackActions.denyCollab(track.track_id, track.track!.title);
                                 }, [], ["secondary", "negative"]),
                             ).build(),
                     ).build(),
@@ -887,7 +896,12 @@ export class TrackTemplates {
     }
 
     static unapprovedTracks(tracks: TrackCollaborator[], user: User) {
-        const trackList = tracks.map((track: TrackCollaborator) => TrackTemplates.toBeApprovedTrack(track.collaboratorType, track.music, user));
+        const trackList = tracks.map((track: TrackCollaborator) => {
+            if (!track.collab_type) {
+                throw new Error(`Track Collab type is not set for unapproved track with ID ${track.track_id}`);
+            }
+            return TrackTemplates.toBeApprovedTrack(track.collab_type, track, user);
+        });
         return create("div")
             .classes("flex-v")
             .children(...trackList)

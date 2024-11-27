@@ -6,7 +6,7 @@ import {notify, Ui} from "../Classes/Ui.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
 import {QueueManager} from "../Streaming/QueueManager.ts";
 import {navigate} from "../Routing/Router.ts";
-import {Signal} from "../../fjsc/f2.ts";
+import {Signal} from "../../fjsc/src/f2.ts";
 import {Album} from "../Models/DbModels/Album.ts";
 import {Track} from "../Models/DbModels/Track.ts";
 import {MediaUploader} from "../Api/MediaUploader.ts";

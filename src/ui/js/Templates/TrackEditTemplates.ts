@@ -10,29 +10,26 @@ import {AudioUpload} from "../Classes/AudioUpload.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {
     AnyNode,
-    computedSignal,
     create,
     DomNode,
     HtmlPropertyValue,
     ifjs,
-    Signal,
-    signal,
     signalMap,
     TypeOrSignal
-} from "../../fjsc/f2.ts";
+} from "../../fjsc/src/f2.ts";
 import {Track} from "../Models/DbModels/Track.ts";
 import {FJSC} from "../../fjsc";
 import {User} from "../Models/DbModels/User.ts";
-import {InputType} from "../../fjsc/Types.ts";
+import {InputType} from "../../fjsc/src/Types.ts";
 import {TrackCollaborator} from "../Models/DbModels/TrackCollaborator.ts";
 import {UploadableTrack} from "../Models/UploadableTrack.ts";
 import {UploadInfo} from "../Models/UploadInfo.ts";
-import {ProgressState} from "../Enums/ProgressState.ts";
 import {ProgressPart} from "../Models/ProgressPart.ts";
 import {AlbumActions} from "../Actions/AlbumActions.ts";
+import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 
 export class TrackEditTemplates {
-    static getStateWithParentUpdate(key, value, parentState) {
+    static getStateWithParentUpdate(key: any, value: any, parentState: Signal<any>) {
         const state = signal(value);
         state.onUpdate = (newValue) => {
             if (parentState) parentState.value = {...parentState.value, [key]: newValue};
@@ -45,7 +42,9 @@ export class TrackEditTemplates {
         return state;
     }
 
-    static uploadForm(title: string, credits: string, releaseDate: Date, visibility: string, genre: Genre, isrc, upc, description, monetization, price, linkedUsers, termsOfService) {
+    static uploadForm(title: string, credits: string, releaseDate: Date, visibility: string, genre: Genre,
+                      isrc: string, upc: string, description: string, monetization: boolean, price: number,
+                      linkedUsers: TrackCollaborator[], termsOfService: boolean) {
         const state = signal(<UploadableTrack>{
             title: title ?? "",
             credits: credits ?? "",
@@ -60,8 +59,8 @@ export class TrackEditTemplates {
             collaborators: linkedUsers ?? [],
             termsOfService: false
         });
-        const errorSections = signal([]);
-        const errorFields = signal([]);
+        const errorSections = signal<string[]>([]);
+        const errorFields = signal<string[]>([]);
         const uploadInfo = signal<UploadInfo[]>([]);
 
         return create("div")
@@ -137,7 +136,7 @@ export class TrackEditTemplates {
                     create("p")
                         .text("Edit the track details below")
                         .build(),
-                    TrackEditTemplates.infoSection(state, signal([]), signal([]), false, false),
+                    TrackEditTemplates.infoSection(state, signal<string[]>([]), signal<string[]>([]), false, false),
                     create("div")
                         .classes("flex")
                         .children(
@@ -182,10 +181,10 @@ export class TrackEditTemplates {
                     const fileInput = document.createElement("input");
                     fileInput.type = "file";
                     fileInput.onchange = async (e) => {
-                        const file = e.target.files[0];
+                        const file = e.target!.files[0];
                         const reader = new FileReader();
                         reader.onload = async (e) => {
-                            const jsonString = e.target.result;
+                            const jsonString = e.target!.result as string;
                             state.value = JSON.parse(jsonString);
                         };
                         reader.readAsText(file);
@@ -223,7 +222,7 @@ export class TrackEditTemplates {
 
     static uploadButton(state: Signal<UploadableTrack>, errorSections: Signal<string[]>, errorFields: Signal<string[]>, uploadInfo: Signal<UploadInfo[]>) {
         const errors = signal<string[]>([]);
-        const disabled = computedSignal<boolean>(state, (s: UploadableTrack) => {
+        const disabled = compute((s: UploadableTrack) => {
             const newErrors = [];
             const requiredProps = [
                 { section: "audio", field: "audioFileName" },
@@ -243,8 +242,8 @@ export class TrackEditTemplates {
             errors.value = newErrors;
 
             return newErrors.length > 0;
-        });
-        const buttonClass = computedSignal<string>(disabled, (d: boolean) => d ? "disabled" : "positive");
+        }, state);
+        const buttonClass = compute((d): string => d ? "disabled" : "positive", disabled);
         const progressState = signal<ProgressPart[]>([]);
 
         return create("div")
@@ -277,7 +276,7 @@ export class TrackEditTemplates {
     }
 
     static infoSection(state: Signal<UploadableTrack>, errorSections: Signal<string[]>, errorFields: Signal<string[]>, enableTos = true, enableLinkedUsers = true) {
-        const isPrivate = computedSignal<boolean>(state, (s: Track) => s.visibility === "private");
+        const isPrivate = compute((s) => s.visibility === "private", state);
 
         return create("div")
             .classes("flex")
@@ -302,7 +301,7 @@ export class TrackEditTemplates {
                         name: "title",
                         label: "Title*",
                         placeholder: "Track title",
-                        value: computedSignal(state, (s: Track) => s.title),
+                        value: compute(s => s.title, state),
                         onchange: (v) => {
                             state.value = { ...state.value, title: v };
                         }
@@ -312,7 +311,7 @@ export class TrackEditTemplates {
                         name: "credits",
                         label: "Collaborators",
                         placeholder: "John Music, Alice Frequency",
-                        value: computedSignal(state, (s: Track) => s.credits),
+                        value: compute(s => s.credits, state),
                         onchange: (v) => {
                             state.value = { ...state.value, credits: v };
                         }
@@ -399,7 +398,7 @@ export class TrackEditTemplates {
     }
 
     static sectionCard(title: HtmlPropertyValue, errorSections: Signal<string[]>, id: string, children: TypeOrSignal<(AnyNode|null)>[], icon: string|null = null, classes: HtmlPropertyValue[] = []) {
-        const hasError = computedSignal<boolean>(errorSections, (e: string[]) => e.includes(id));
+        const hasError = compute((e: string[]) => e.includes(id, errorSections));
 
         return create("div")
             .classes("border-card", "flex-v", ...classes)
@@ -537,7 +536,7 @@ export class TrackEditTemplates {
         });
     }
 
-    static linkedUsers(linkedUsers: TrackCollaborator[] = [], parentState: Signal<Track>|null = null) {
+    static linkedUsers(linkedUsers: Partial<TrackCollaborator>[] = [], parentState: Signal<Track>|null = null) {
         const linkedUserState = signal(linkedUsers);
         const sendJson = signal(JSON.stringify(linkedUsers));
         const userMap = new Map();
@@ -585,9 +584,9 @@ export class TrackEditTemplates {
                         TrackEditTemplates.addLinkedUserButton((newUsername: string, newUser: User) => {
                             userMap.set(newUser.id, newUser);
                             if (!linkedUserState.value.some(tc => tc.user_id === newUser.id)) {
-                                linkedUserState.value = [...linkedUserState.value, <TrackCollaborator>{
+                                linkedUserState.value = [...linkedUserState.value, <Partial<TrackCollaborator>>{
                                     user_id: newUser.id,
-                                    type: "user",
+                                    type: -1, // TODO: Use actual type?
                                     track_id: parentState ? parentState.value.id : null,
                                     approved: false,
                                     denied: false,

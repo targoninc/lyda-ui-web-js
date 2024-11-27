@@ -1,12 +1,14 @@
-import {computedSignal, create, ifjs, signal, signalMap} from "../../fjsc/f2.ts";
+import {create, ifjs, signalMap} from "../../fjsc/src/f2.ts";
 import {Num as NumberFormatter} from "../Classes/Helpers/Num.ts";
 import {SubscriptionActions} from "../Actions/SubscriptionActions.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
+import {compute, signal, Signal} from "../../fjsc/src/signals.ts";
+import {User} from "../Models/DbModels/User.ts";
 
 export class SubscriptionTemplates {
-    static page(user, currency, options) {
-        const anyActive = computedSignal(options, (opts) => opts.some((o) => o.active));
+    static page(user: User, currency: string, options: Signal<any[]>) {
+        const anyActive = compute(opts => opts.some((o) => o.active), options);
         const selectedOption = signal(null);
 
         return create("div")
@@ -42,12 +44,12 @@ export class SubscriptionTemplates {
             ).build();
     }
 
-    static option(user, anyActive, selectedOption, currency, option) {
-        const enabled = computedSignal(anyActive, (active) => !active);
+    static option(user, anyActive: Signal<boolean>, selectedOption: Signal<number>, currency: string, option) {
         const active = signal(!!option.active);
-        const activeClass = computedSignal(active, (a) => a ? "active" : "_");
         const optionMessage = signal(null);
-        const paypalButtonShown = computedSignal(selectedOption, (selected) => selected === option.id);
+        const enabled = compute(active => !active, anyActive);
+        const activeClass = compute((a): string => a ? "active" : "_", active);
+        const paypalButtonShown = compute(selected => selected === option.id, selectedOption);
         const gifted = signal(!!option.gifted);
 
         return create("div")
@@ -102,7 +104,7 @@ export class SubscriptionTemplates {
             ).build();
     }
 
-    static subscribedFor(created_at) {
+    static subscribedFor(created_at: number | string | Date) {
         const subscribedAgo = Time.ago(created_at);
 
         return create("div")
