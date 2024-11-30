@@ -699,7 +699,7 @@ export class GenericTemplates {
             ).build();
     }
 
-    static addLinkedUserModal(title: HtmlPropertyValue, text: HtmlPropertyValue, currentValue: HtmlPropertyValue,
+    static addLinkedUserModal(title: HtmlPropertyValue, text: HtmlPropertyValue, currentValue: string,
                               icon: StringOrSignal, confirmText: StringOrSignal, cancelText: StringOrSignal,
                               confirmCallback: Function, cancelCallback: Function) {
         const selectedState = signal(0);
@@ -854,31 +854,46 @@ export class GenericTemplates {
     }
 
     static progressSections(progressState: Signal<ProgressPart[]>) {
+        const parts = signal(progressState.value.map(part => part.id));
+        progressState.subscribe(p => {
+            const newList = p.map(part => part.id);
+            if (newList.length !== parts.value.length) {
+                parts.value = newList;
+            }
+        });
+
         return create("div")
             .classes("progress-sections")
             .children(
-                signalMap(progressState, create("div").classes("flex", "small-gap"), (part: ProgressPart) => GenericTemplates.progressSectionPart(part))
+                signalMap(parts, create("div").classes("flex", "small-gap"), (id: string) => GenericTemplates.progressSectionPart(progressState.value.find(p => p.id === id)!))
             ).build();
     }
 
     static progressSectionPart(part: ProgressPart) {
+        const retryable = compute((state): boolean => {
+            return state && state === ProgressState.error && (part.retryFunction !== undefined);
+        }, part.state);
+
         return create("div")
-            .classes("flex-v", "progress-section-part-container")
+            .classes("flex-v", "progress-section-part-container", "relative")
             .title(part.title ?? "")
             .children(
+                ifjs(part.progress, create("div").classes("progress-section-part-progress").css({
+                        width: compute(p => p + "%", part.progress ?? signal(0))
+                    }).build()),
                 create("div")
-                    .classes("progress-section-part", "small-gap", "flex", part.state)
+                    .classes("progress-section-part", "small-gap", "flex", part.state as Signal<string>)
                     .children(
-                        GenericTemplates.icon(part.icon, true, [part.state]),
+                        GenericTemplates.icon(part.icon, true, [part.state as Signal<string>]),
                         create("span")
                             .classes("progress-section-part-text")
                             .text(part.text)
                             .build(),
                     ).build(),
-                ifjs(part.retryFunction && part.state === ProgressState.error, create("div")
+                ifjs(retryable, create("div")
                     .classes("progress-section-retry", "flex", "small-gap")
                     .children(
-                        GenericTemplates.icon("refresh", true, [part.state]),
+                        GenericTemplates.icon("refresh", true, [part.state as Signal<string>]),
                         create("span")
                             .classes("progress-section-part-text")
                             .text("Retry")

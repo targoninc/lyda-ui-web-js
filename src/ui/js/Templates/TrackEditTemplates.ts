@@ -251,7 +251,7 @@ export class TrackEditTemplates {
             .children(
                 FJSC.button({
                     text: "Upload",
-                    disabled: disabled,
+                    disabled,
                     classes: [buttonClass, "positive"],
                     onclick: (e) => {
                         new AudioUpload(e, state, progressState);
@@ -389,7 +389,8 @@ export class TrackEditTemplates {
                                 checked: compute(s => s.termsOfService, state),
                                 required: true,
                                 onchange: (v) => {
-                                    state.value = { ...state.value, termsOfService: v };
+                                    const old = state.value;
+                                    state.value = { ...old, termsOfService: !old.termsOfService };
                                 }
                             }),
                         ], "gavel") : null,
