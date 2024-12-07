@@ -17,6 +17,11 @@ import {Track} from "../Models/DbModels/Track.ts";
 import {MediaFileType} from "../Enums/MediaFileType.ts";
 import {MediaUploader} from "../Api/MediaUploader.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
+import {PlaylistTrack} from "../Models/DbModels/PlaylistTrack.ts";
+import {AlbumTrack} from "../Models/DbModels/AlbumTrack.ts";
+import {Album} from "../Models/DbModels/Album.ts";
+import {Playlist} from "../Models/DbModels/Playlist.ts";
+import {AnyElement} from "../../fjsc/src/f2.ts";
 
 export class TrackActions {
     static async savePlay(id: number) {
@@ -340,13 +345,13 @@ export class TrackActions {
         positionsState.value = map;
     }
 
-    static async removeTrackFromList(positionsState, track, type, list, elementReference) {
+    static async removeTrackFromList(positionsState: Signal<any>, track: PlaylistTrack | AlbumTrack, type: string, list: Playlist | Album, elementReference: AnyElement) {
         await Ui.getConfirmationModal("Remove track from " + type, "Are you sure you want to remove this track from " + list.title +"?", "Yes", "No", async () => {
             let success;
             if (type === "album") {
-                success = await AlbumActions.removeTrackFromAlbum(track.id, list.id);
+                success = await AlbumActions.removeTrackFromAlbum(track.track_id, [list.id]);
             } else {
-                success = await PlaylistActions.removeTrackFromPlaylist(track.id, list.id);
+                success = await PlaylistActions.removeTrackFromPlaylist(track.track_id, [list.id]);
             }
             if (success && elementReference) {
                 elementReference.remove();

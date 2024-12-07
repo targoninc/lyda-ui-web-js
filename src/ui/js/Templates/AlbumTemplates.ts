@@ -395,12 +395,15 @@ export class AlbumTemplates {
         }
         const editActions = [];
         if (data.canEdit) {
-            editActions.push(
-                GenericTemplates.action(Icons.DELETE, "Delete", album.id, async (e) => {
+            editActions.push(FJSC.button({
+                text: "Delete",
+                icon: { icon: "delete" },
+                classes: ["negative"],
+                onclick: async (e) => {
                     await Ui.getConfirmationModal("Delete album", "Are you sure you want to delete this album?", "Yes", "No", AlbumActions.deleteAlbumFromElement.bind(null, e), () => {
                     }, Icons.WARNING);
-                }, [], ["secondary", "negative"])
-            );
+                }
+            }));
         }
         const coverLoading = signal(false);
 
@@ -483,20 +486,52 @@ export class AlbumTemplates {
         let actions: AnyNode[] = [];
         if (user) {
             actions = [
-                GenericTemplates.action(isPlaying ? Icons.PAUSE : Icons.PLAY, isPlaying ? "Pause" : "Play", album.id, async () => {
-                    const firstTrack = (album.tracks!)[0];
-                    await AlbumActions.startTrackInAlbum(album, firstTrack.track_id, true);
-                }, ["duration", duration], [album.tracks.length === 0 ? "nonclickable" : "_", "secondary"]),
-                GenericTemplates.action(allTracksInQueue ? Icons.UNQUEUE : Icons.QUEUE, allTracksInQueue ? "Unqueue" : "Queue", album.id, () => {
-                    for (let track of album.tracks!) {
-                        if (!manualQueue.includes(track.track_id)) {
-                            QueueManager.addToManualQueue(track.track_id);
+                FJSC.button({
+                    text: isPlaying ? "Pause" : "Play",
+                    icon: {
+                        icon: isPlaying ? Icons.PAUSE : Icons.PLAY,
+                        classes: ["inline-icon", "svg", "nopointer", isPlaying ? "pause-adjust" : "play-adjust"],
+                        adaptive: true,
+                        isUrl: true
+                    },
+                    classes: [album.tracks.length === 0 ? "nonclickable" : "_", "secondary"],
+                    attributes: ["duration", duration.toString()],
+                    id: album.id,
+                    onclick: async () => {
+                        const firstTrack = (album.tracks!)[0];
+                        await AlbumActions.startTrackInAlbum(album, firstTrack.track_id, true);
+                    },
+                }),
+                FJSC.button({
+                    text: allTracksInQueue ? "Unqueue" : "Queue",
+                    icon: {
+                        icon: isPlaying ? Icons.UNQUEUE : Icons.QUEUE,
+                        classes: ["inline-icon", "svg", "nopointer"],
+                        adaptive: true,
+                        isUrl: true
+                    },
+                    classes: [allTracksInQueue ? "audio-queueremove" : "audio-queueadd", "secondary"],
+                    onclick: async () => {
+                        for (let track of album.tracks!) {
+                            if (!manualQueue.includes(track.track_id)) {
+                                QueueManager.addToManualQueue(track.track_id);
+                            }
                         }
-                    }
-                }, [], [allTracksInQueue ? "audio-queueremove" : "audio-queueadd", "secondary"]),
-                GenericTemplates.action(Icons.PLAYLIST_ADD, "Add to playlist", album.id, async () => {
-                    await PlaylistActions.openAddToPlaylistModal(album, "album");
-                }, [], ["secondary"])
+                    },
+                }),
+                FJSC.button({
+                    text: "Add to playlist",
+                    icon: {
+                        icon: Icons.PLAYLIST_ADD,
+                        classes: ["inline-icon", "svg", "nopointer"],
+                        adaptive: true,
+                        isUrl: true
+                    },
+                    classes: ["secondary"],
+                    onclick: async () => {
+                        await PlaylistActions.openAddToPlaylistModal(album, "album");
+                    },
+                }),
             ];
         }
 

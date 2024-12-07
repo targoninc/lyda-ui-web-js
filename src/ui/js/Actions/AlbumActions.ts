@@ -67,8 +67,8 @@ export class AlbumActions {
         notify("Added track to albums", "success");
     }
 
-    static async removeTrackFromAlbum(track_id: number, album_id: number) {
-        const res = await Api.postAsync(ApiRoutes.removeTrackFromAlbum, {id: album_id, track_id});
+    static async removeTrackFromAlbum(track_id: number, album_ids: number[]) {
+        const res = await Api.postAsync(ApiRoutes.removeTrackFromAlbums, {album_ids, track_id});
         if (res.code !== 200) {
             notify("Failed to remove track from album: " + res.data, "error");
             return false;

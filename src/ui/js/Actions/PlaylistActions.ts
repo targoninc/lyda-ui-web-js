@@ -73,8 +73,8 @@ export class PlaylistActions {
         notify("Added track to playlist(s)", "success");
     }
 
-    static async removeTrackFromPlaylist(track_id: number, playlist_id: number) {
-        const res = await Api.postAsync(ApiRoutes.removeTrackFromPlaylist, {id: playlist_id, track_id});
+    static async removeTrackFromPlaylist(track_id: number, playlist_ids: number[]) {
+        const res = await Api.postAsync(ApiRoutes.removeTrackFromPlaylists, {playlist_ids, track_id});
         if (res.code !== 200) {
             notify("Failed to remove track from playlist: " + res.data, "error");
             return false;

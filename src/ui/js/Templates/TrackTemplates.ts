@@ -426,6 +426,7 @@ export class TrackTemplates {
             upState.value = (newMap[0] !== track.id && canEdit) ? "_" : "nonclickable";
             downState.value = (canEdit && newMap[newMap.length - 1] !== track.id) ? "_" : "nonclickable";
         };
+        let itemNode: AnyElement;
         if (canEdit) {
             trackActions.push(GenericTemplates.action(Icons.ARROW_UP, "Move up", list.id, async () => {
                 await TrackActions.moveTrackUpInList(positionsState, playlistTrack, type, list);
@@ -435,7 +436,7 @@ export class TrackTemplates {
             }, [], [downState]));
 
             trackActions.push(GenericTemplates.action(Icons.X, "Remove from " + type, list.id, async () => {
-                await TrackActions.removeTrackFromList(positionsState, playlistTrack, type, list);
+                await TrackActions.removeTrackFromList(positionsState, playlistTrack, type, list, itemNode);
             }));
         }
 
@@ -466,7 +467,7 @@ export class TrackTemplates {
 
         const playingClasses = window.currentTrackId === track.id ? ["playing"] : [];
 
-        return item.children(
+        itemNode = item.children(
             create("div")
                 .classes("list-track", "flex", "padded", "rounded", "fullWidth", "card", ...playingClasses)
                 .attributes("track_id", track.id)
@@ -519,6 +520,8 @@ export class TrackTemplates {
                         ).build()
                 ).build()
         ).build();
+
+        return itemNode;
     }
 
     static title(title: HtmlPropertyValue, id: number, icons: any[]) {

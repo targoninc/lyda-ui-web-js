@@ -102,7 +102,7 @@ export class ApiRoutes {
     static newAlbum = ApiRoutes.albumActions + "/new";
     static deleteAlbum = ApiRoutes.albumActions + "/delete";
     static addTrackToAlbums = ApiRoutes.albumActions + "/addTrack";
-    static removeTrackFromAlbum = ApiRoutes.albumActions + "/removeTrack";
+    static removeTrackFromAlbums = ApiRoutes.albumActions + "/removeTrack";
     static reorderAlbumTracks = ApiRoutes.albumActions + "/reorderTracks";
     static likeAlbum = ApiRoutes.albumActions + "/like";
     static unlikeAlbum = ApiRoutes.albumActions + "/unlike";
@@ -118,7 +118,7 @@ export class ApiRoutes {
     static deletePlaylist = ApiRoutes.playlistActions + "/delete";
     static addTrackToPlaylists = ApiRoutes.playlistActions + "/addTrack";
     static addAlbumToPlaylists = ApiRoutes.playlistActions + "/addAlbum";
-    static removeTrackFromPlaylist = ApiRoutes.playlistActions + "/removeTrack";
+    static removeTrackFromPlaylists = ApiRoutes.playlistActions + "/removeTrack";
     static reorderPlaylistTracks = ApiRoutes.playlistActions + "/reorderTracks";
     static likePlaylist = ApiRoutes.playlistActions + "/like";
     static unlikePlaylist = ApiRoutes.playlistActions + "/unlike";
