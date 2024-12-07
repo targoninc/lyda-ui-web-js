@@ -11,7 +11,6 @@ import {User} from "../Models/DbModels/User.ts";
 import {HtmlPropertyValue, create, ifjs, AnyNode} from "../../fjsc/src/f2.ts";
 import {Api, ApiResponse} from "../Api/Api.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {globalStyles} from "../styles/globalStyleSwag.ts";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 
 export interface AuthData {
@@ -250,7 +249,6 @@ export class LandingPageTemplates {
             .children(
                 create("h1")
                     .text("Log in")
-                    .css(globalStyles.foo)
                     .build(),
                 create("div")
                     .classes("flex-v")
