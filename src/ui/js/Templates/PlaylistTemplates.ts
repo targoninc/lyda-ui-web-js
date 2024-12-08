@@ -63,7 +63,7 @@ export class PlaylistTemplates {
                         FJSC.button({
                             text: "Ok",
                             onclick: async () => PlaylistActions.addTrackToPlaylists(track.id),
-                            icon: { icon: "playlist_add" },
+                            icon: {icon: "playlist_add"},
                             classes: ["positive"],
                         }),
                         GenericTemplates.modalCancelButton()
@@ -109,7 +109,7 @@ export class PlaylistTemplates {
                         FJSC.button({
                             text: "Ok",
                             onclick: async () => PlaylistActions.addAlbumToPlaylists(album.id),
-                            icon: { icon: "playlist_add" },
+                            icon: {icon: "playlist_add"},
                             classes: ["positive"],
                         }),
                         GenericTemplates.modalCancelButton()
@@ -122,7 +122,9 @@ export class PlaylistTemplates {
 
         return create("div")
             .classes("flex", "rounded", "padded", "card")
-            .onclick(() => { checked.value = !checked.value })
+            .onclick(() => {
+                checked.value = !checked.value
+            })
             .children(
                 GenericTemplates.checkbox("playlist_" + playlist.id, checked, "", false),
                 await PlaylistTemplates.smallPlaylistCover(playlist),
@@ -172,7 +174,7 @@ export class PlaylistTemplates {
                             placeholder: "Playlist name",
                             value: name,
                             onchange: (v) => {
-                                playlist.value = { ...playlist.value, title: v };
+                                playlist.value = {...playlist.value, title: v};
                             }
                         }),
                         FJSC.textarea({
@@ -181,7 +183,7 @@ export class PlaylistTemplates {
                             placeholder: "My cool playlist",
                             value: description,
                             onchange: (v) => {
-                                playlist.value = { ...playlist.value, description: v };
+                                playlist.value = {...playlist.value, description: v};
                             }
                         }),
                         FJSC.toggle({
@@ -190,7 +192,7 @@ export class PlaylistTemplates {
                             text: "Private",
                             checked: visibility,
                             onchange: (v) => {
-                                playlist.value = { ...playlist.value, visibility: v ? "private" : "public" };
+                                playlist.value = {...playlist.value, visibility: v ? "private" : "public"};
                             }
                         }),
                     ).build(),
@@ -299,7 +301,7 @@ export class PlaylistTemplates {
             ).build();
     }
 
-    static playlistCover(playlist: Playlist, overwriteWidth: string|null = null) {
+    static playlistCover(playlist: Playlist, overwriteWidth: string | null = null) {
         const coverState = signal(Images.DEFAULT_AVATAR);
         Util.getCoverFileFromPlaylistIdAsync(playlist.id, playlist.user_id).then(cover => {
             coverState.value = cover;
@@ -397,7 +399,7 @@ export class PlaylistTemplates {
         if (data.canEdit) {
             editActions.push(FJSC.button({
                 text: "Delete",
-                icon: { icon: "delete" },
+                icon: {icon: "delete"},
                 classes: ["negative"],
                 onclick: async (e) => {
                     await Ui.getConfirmationModal("Delete playlist", "Are you sure you want to delete this playlist?", "Yes", "No", () => PlaylistActions.deletePlaylist(playlist.id), () => {
@@ -482,17 +484,39 @@ export class PlaylistTemplates {
         let actions: AnyNode[] = [];
         if (user) {
             actions = [
-                GenericTemplates.action(isPlaying ? Icons.PAUSE : Icons.PLAY, isPlaying ? "Pause" : "Play", playlist.id, async () => {
-                    const firstTrack = playlist.tracks![0];
-                    await PlaylistActions.startTrackInPlaylist(playlist, firstTrack.id, true);
-                }, ["duration", duration.toString()], [playlist.tracks.length === 0 ? "nonclickable" : "_", "secondary"]),
-                GenericTemplates.action(allTracksInQueue ? Icons.UNQUEUE : Icons.QUEUE, allTracksInQueue ? "Unqueue" : "Queue", playlist.id, () => {
-                    for (let track of playlist.tracks!) {
-                        if (!manualQueue.includes(track.id)) {
-                            QueueManager.addToManualQueue(track.id);
-                        }
+                FJSC.button({
+                    text: isPlaying ? "Pause" : "Play",
+                    icon: {
+                        icon: isPlaying ? Icons.PAUSE : Icons.PLAY,
+                        classes: ["inline-icon", "svg", "nopointer", isPlaying ? "pause-adjust" : "play-adjust"],
+                        adaptive: true,
+                        isUrl: true
+                    },
+                    attributes: ["duration", duration.toString()],
+                    id: playlist.id,
+                    classes: [playlist.tracks.length === 0 ? "nonclickable" : "_", "secondary"],
+                    onclick: async (e) => {
+                        const firstTrack = playlist.tracks![0];
+                        await PlaylistActions.startTrackInPlaylist(playlist, firstTrack.id, true);
                     }
-                }, [], [inQueue ? "audio-queueremove" : "audio-queueadd", "secondary"])
+                }),
+                FJSC.button({
+                    text: allTracksInQueue ? "Unqueue" : "Queue",
+                    icon: {
+                        icon: isPlaying ? Icons.UNQUEUE : Icons.QUEUE,
+                        classes: ["inline-icon", "svg", "nopointer"],
+                        adaptive: true,
+                        isUrl: true
+                    },
+                    classes: [allTracksInQueue ? "audio-queueremove" : "audio-queueadd", "secondary"],
+                    onclick: async (e) => {
+                        for (let track of playlist.tracks!) {
+                            if (!manualQueue.includes(track.id)) {
+                                QueueManager.addToManualQueue(track.id);
+                            }
+                        }
+                    },
+                }),
             ];
         }
 
