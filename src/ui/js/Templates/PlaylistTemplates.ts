@@ -395,12 +395,15 @@ export class PlaylistTemplates {
         }
         const editActions = [];
         if (data.canEdit) {
-            editActions.push(
-                GenericTemplates.action(Icons.DELETE, "Delete", playlist.id, async (e) => {
+            editActions.push(FJSC.button({
+                text: "Delete",
+                icon: { icon: "delete" },
+                classes: ["negative"],
+                onclick: async (e) => {
                     await Ui.getConfirmationModal("Delete playlist", "Are you sure you want to delete this playlist?", "Yes", "No", () => PlaylistActions.deletePlaylist(playlist.id), () => {
                     }, Icons.WARNING);
-                }, [], ["secondary", "negative"])
-            );
+                }
+            }));
         }
         const coverLoading = signal(false);
 
