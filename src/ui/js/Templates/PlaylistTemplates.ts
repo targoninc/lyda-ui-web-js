@@ -31,7 +31,7 @@ export class PlaylistTemplates {
                 .build());
         } else {
             playlistList = await Promise.all(playlists.map(async (playlist: Playlist) => {
-                return await PlaylistTemplates.playlistInAddList(playlist, playlist.tracks?.find((t: Track) => t.id === track.id) !== undefined);
+                return await PlaylistTemplates.playlistInAddList(playlist, playlist.tracks?.some((pt) => pt.track_id === track.id) || false);
             }));
         }
 
@@ -80,7 +80,7 @@ export class PlaylistTemplates {
                 .build());
         } else {
             playlistList = await Promise.all(playlists.map(async (playlist: Playlist) => {
-                return await PlaylistTemplates.playlistInAddList(playlist, playlist.tracks?.find((t: Track) => t.id === album.id) !== undefined);
+                return await PlaylistTemplates.playlistInAddList(playlist, playlist.tracks?.some((pt) => album.tracks?.some(ata => ata.track_id === pt.track_id) || false) || false);
             }));
         }
 
@@ -318,14 +318,14 @@ export class PlaylistTemplates {
             .onclick(async () => {
                 notify("Starting playlist " + playlist.id, "info");
                 PlayManager.playFrom("playlist", playlist.title, playlist.id);
-                QueueManager.setContextQueue(playlist.tracks!.map(t => t.id));
+                QueueManager.setContextQueue(playlist.tracks!.map(t => t.track_id));
                 const firstTrack = playlist.tracks![0];
                 if (!firstTrack) {
                     notify("This playlist has no tracks", "error");
                     return;
                 }
-                PlayManager.addStreamClientIfNotExists(firstTrack.id, firstTrack.length);
-                await PlayManager.startAsync(firstTrack.id);
+                PlayManager.addStreamClientIfNotExists(firstTrack.track_id, firstTrack.track?.length ?? 0);
+                await PlayManager.startAsync(firstTrack.track_id);
             })
             .children(
                 create("img")
@@ -370,7 +370,7 @@ export class PlaylistTemplates {
             throw new Error(`Playlist ${playlist.id} has no likes array`);
         }
         const trackChildren = [];
-        const positionMap = tracks.map(t => t.id);
+        const positionMap = tracks.map(t => t.track_id);
         const positionsState = signal(positionMap);
 
         async function startCallback(trackId: number) {
@@ -401,7 +401,7 @@ export class PlaylistTemplates {
                 text: "Delete",
                 icon: {icon: "delete"},
                 classes: ["negative"],
-                onclick: async (e) => {
+                onclick: async () => {
                     await Ui.getConfirmationModal("Delete playlist", "Are you sure you want to delete this playlist?", "Yes", "No", () => PlaylistActions.deletePlaylist(playlist.id), () => {
                     }, Icons.WARNING);
                 }
@@ -474,12 +474,11 @@ export class PlaylistTemplates {
             throw new Error(`Playlist ${playlist.id} has no tracks`);
         }
 
-        const inQueue = QueueManager.isInManualQueue(playlist.id);
         const playingFrom = PlayManager.getPlayingFrom();
         const isPlaying = playingFrom.type === "album" && playingFrom.id === playlist.id;
         const manualQueue = QueueManager.getManualQueue();
-        const allTracksInQueue = playlist.tracks.every((t) => manualQueue.includes(t.id));
-        const duration = playlist.tracks.reduce((acc, t) => acc + t.length, 0);
+        const allTracksInQueue = playlist.tracks.every((t) => manualQueue.includes(t.track_id));
+        const duration = playlist.tracks.reduce((acc, t) => acc + (t.track?.length ?? 0), 0);
 
         let actions: AnyNode[] = [];
         if (user) {
@@ -495,9 +494,9 @@ export class PlaylistTemplates {
                     attributes: ["duration", duration.toString()],
                     id: playlist.id,
                     classes: [playlist.tracks.length === 0 ? "nonclickable" : "_", "secondary"],
-                    onclick: async (e) => {
+                    onclick: async () => {
                         const firstTrack = playlist.tracks![0];
-                        await PlaylistActions.startTrackInPlaylist(playlist, firstTrack.id, true);
+                        await PlaylistActions.startTrackInPlaylist(playlist, firstTrack.track_id, true);
                     }
                 }),
                 FJSC.button({
@@ -509,10 +508,10 @@ export class PlaylistTemplates {
                         isUrl: true
                     },
                     classes: [allTracksInQueue ? "audio-queueremove" : "audio-queueadd", "secondary"],
-                    onclick: async (e) => {
+                    onclick: async () => {
                         for (let track of playlist.tracks!) {
-                            if (!manualQueue.includes(track.id)) {
-                                QueueManager.addToManualQueue(track.id);
+                            if (!manualQueue.includes(track.track_id)) {
+                                QueueManager.addToManualQueue(track.track_id);
                             }
                         }
                     },

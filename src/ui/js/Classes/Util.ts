@@ -1,6 +1,5 @@
-import {notify, Ui} from "./Ui.ts";
+import {notify} from "./Ui.ts";
 import {Images} from "../Enums/Images.ts";
-import {Config} from "./Config.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {Api} from "../Api/Api.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
