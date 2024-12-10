@@ -1,5 +1,5 @@
 import {Api} from "../Api/Api.ts";
-import {getUserSettingValue, updateUserSetting, Util} from "../Classes/Util.ts";
+import {getUserSettingValue, target, updateUserSetting, Util} from "../Classes/Util.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
@@ -14,10 +14,9 @@ import {Signal} from "../../fjsc/src/signals.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {Notification} from "../Models/DbModels/Notification.ts";
 import {LydaApi} from "../Api/LydaApi.ts";
-import {reload} from "../Routing/Router.ts";
 
 export class UserActions {
-    static updateAvatar(newSrc) {
+    static updateAvatar(newSrc: string) {
         if (newSrc === "") {
             const avatar = document.querySelector(".avatar-container img") as HTMLImageElement;
             avatar.src = newSrc;
@@ -32,7 +31,7 @@ export class UserActions {
         }
     }
 
-    static updateBanner(newSrc) {
+    static updateBanner(newSrc: string) {
         if (newSrc === "") {
             const banner = document.querySelector(".banner-container img") as HTMLImageElement;
             banner.src = newSrc;
@@ -47,7 +46,7 @@ export class UserActions {
         }
     }
 
-    static async fileExists(url) {
+    static async fileExists(url: string) {
         let response = await fetch(url);
         return response.status === 200;
     }
@@ -64,24 +63,17 @@ export class UserActions {
             if (!fileInput.files) {
                 return;
             }
+
             const file = fileInput.files![0];
-            /*
-            let formData = new FormData();
-            formData.append("type", MediaFileType.userAvatar);
-            formData.append("referenceId", user.id);
-            formData.append("file", file);
-            let response = await fetch(ApiRoutes.uploadMedia, {
-                method: "POST",
-                body: formData,
-                credentials: "include"
-            });*/
-            const response = await MediaUploader.upload(MediaFileType.userAvatar, user.id, file);
-            loading.value = false;
-            if (response.code === 200) {
-                const user = LydaCache.get("user").content;
-                LydaCache.set("user", new CacheItem(user));
+            try {
+                await MediaUploader.upload(MediaFileType.userAvatar, user.id, file)
                 notify("Avatar updated", "success");
                 UserActions.updateAvatar(URL.createObjectURL(file));
+            } catch (e: any) {
+                notify(`Failed to upload avatar: ${e}`, "error");
+                return;
+            } finally {
+                loading.value = false;
             }
         };
         fileInput.click();
@@ -105,29 +97,29 @@ export class UserActions {
     }
 
     static async replaceBanner(e: Event, isOwnProfile: boolean, user: User, loading: Signal<boolean>) {
-        if (!isOwnProfile || e.target!.classList.contains("avatar-container")) {
+        if (!isOwnProfile || target(e).classList.contains("avatar-container")) {
             return;
         }
 
         let fileInput = document.createElement("input");
         fileInput.type = "file";
         fileInput.accept = "image/*";
-        fileInput.onchange = async (e) => {
+        fileInput.onchange = async () => {
             loading.value = true;
             if (!fileInput.files) {
                 return;
             }
             let file = fileInput.files![0];
 
-            const response = await MediaUploader.upload(MediaFileType.userBanner, user.id, file);
-            loading.value = false;
-            if (response.code === 200) {
-                const user = LydaCache.get("user").content;
-                LydaCache.set("user", new CacheItem(user));
+            try {
+                await MediaUploader.upload(MediaFileType.userBanner, user.id, file);
                 notify("Banner updated", "success");
                 UserActions.updateBanner(await Util.getBannerFromUserIdAsync(user.id) + "?t=" + Date.now());
-            } else {
-                notify(`Failed to update banner: ${response.data.error}`, "error");
+            } catch (e: any) {
+                notify(`Failed to upload banner: ${e}`, "error");
+                return;
+            } finally {
+                loading.value = false;
             }
         };
         fileInput.click();
@@ -170,7 +162,8 @@ export class UserActions {
                 const notificationList = document.querySelector(".notification-list");
                 if (notificationList) {
                     for (const notification of notifications) {
-                        notificationList.prepend(NavTemplates.notificationInList(notification.type, notification.is_read, notification.created_at, notification.message, notification.data));
+                        // TODO: Add data
+                        notificationList.prepend(NavTemplates.notificationInList(notification.type, notification.is_read, notification.created_at, notification.message, {}));
                     }
                     const notificationBubble = document.querySelector(".notification-bubble");
                     if (notificationBubble) {
@@ -184,7 +177,7 @@ export class UserActions {
 
     static async markNotificationsAsRead(e: Event) {
         let notificationList = document.querySelector(".notification-list");
-        notificationList.classList.toggle("hidden");
+        notificationList?.classList.toggle("hidden");
         let timestamp;
         try {
             timestamp = document.querySelector(".listNotification.unread")?.getAttribute("data-created_at");
@@ -227,13 +220,14 @@ export class UserActions {
         if (onlyLocal) {
             return;
         }
+
         const res = await Api.postAsync(ApiRoutes.updateUserSetting, { setting: UserSettings.theme, value: themeName });
         if (res.code !== 200) {
             notify("Failed to update theme", "error");
         }
     }
 
-    static async setBooleanUserSetting(key, value) {
+    static async setBooleanUserSetting(key: string, value: boolean) {
         const res = await Api.postAsync(ApiRoutes.updateUserSetting, {
             setting: key,
             value
@@ -245,11 +239,11 @@ export class UserActions {
         return true;
     }
 
-    static async toggleBooleanUserSetting(key) {
+    static async toggleBooleanUserSetting(key: string) {
         const user = await Util.getUserAsync();
         const newValue = !getUserSettingValue(user, key);
         if (await UserActions.setBooleanUserSetting(key, newValue)) {
-            user.settings = updateUserSetting(user, key, newValue);
+            user.settings = updateUserSetting(user, key, newValue.toString());
             LydaCache.set("user", new CacheItem(user));
             return true;
         }
