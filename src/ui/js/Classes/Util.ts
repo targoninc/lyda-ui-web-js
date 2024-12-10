@@ -9,25 +9,27 @@ import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {MediaFileType} from "../Enums/MediaFileType.ts";
 
 export class Util {
-    static capitalizeFirstLetter(string) {
+    static capitalizeFirstLetter(string: string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
 
-    static getUrlParameter(name) {
+    static getUrlParameter(name: string) {
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
         return urlParams.get(name);
     }
 
-    static showButtonLoader(e) {
-        try { 
-            e.target.querySelector(".loader").classList.remove("hidden"); e.target.querySelector("span").classList.add("hidden"); 
+    static showButtonLoader(e: Event) {
+        try {
+            target(e).querySelector(".loader")?.classList.remove("hidden");
+            target(e).querySelector("span")?.classList.add("hidden");
         } catch (e) { /* empty */ }
     }
 
-    static hideButtonLoader(t) {
+    static hideButtonLoader(t: HTMLInputElement) {
         try { 
-            t.querySelector(".loader").classList.add("hidden"); t.querySelector("span").classList.remove("hidden"); 
+            t.querySelector(".loader")?.classList.add("hidden");
+            t.querySelector("span")?.classList.remove("hidden");
         } catch (e) { /* empty */ }
     }
 
@@ -82,7 +84,7 @@ export class Util {
             if (window.dragging && thisIsDragged) {
                 draggable.style.left = (event.clientX + offset.x) + "px";
                 draggable.style.top = (event.clientY + offset.y) + "px";
-                window.getSelection().removeAllRanges();
+                window.getSelection()?.removeAllRanges();
             }
         }, true);
     }
@@ -105,17 +107,17 @@ export class Util {
 
     static async getCoverFileFromTrackIdAsync(id: number, user_id: number|null = null) {
         const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.trackCover}`;
-        return await this.getFileOrBackupAsync(url, Util.getAvatarFromUserIdAsync(user_id));
+        return await this.getFileOrBackupAsync(url, await Util.getAvatarFromUserIdAsync(user_id));
     }
 
     static async getCoverFileFromAlbumIdAsync(id: number, user_id: number|null = null) {
         const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.albumCover}`;
-        return await this.getFileOrBackupAsync(url, Util.getAvatarFromUserIdAsync(user_id));
+        return await this.getFileOrBackupAsync(url, await Util.getAvatarFromUserIdAsync(user_id));
     }
 
     static async getCoverFileFromPlaylistIdAsync(id: number, user_id: number|null = null) {
         const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.playlistCover}`;
-        return await this.getFileOrBackupAsync(url, Util.getAvatarFromUserIdAsync(user_id));
+        return await this.getFileOrBackupAsync(url, await Util.getAvatarFromUserIdAsync(user_id));
     }
 
     static async getFileOrBackupAsync(url: string, backupUrl: string) {
@@ -152,28 +154,27 @@ export class Util {
         }
     }
 
-    static getTrackIdFromEvent(e) {
+    static getTrackIdFromEvent(e: Event) {
         try {
-            return e.target.getAttribute("track_id");
+            return target(e).getAttribute("track_id");
         } catch (e) {
             console.error(e);
             return "";
         }
     }
 
-    static getAlbumIdFromEvent(e) {
+    static getAlbumIdFromEvent(e: Event) {
         try {
-            return e.target.getAttribute("album_id");
+            return target(e).getAttribute("album_id");
         } catch (e) {
-
             console.error(e);
             return "";
         }
     }
 
-    static getPlaylistIdFromEvent(e) {
+    static getPlaylistIdFromEvent(e: Event) {
         try {
-            return e.target.getAttribute("playlist_id");
+            return target(e).getAttribute("playlist_id");
         } catch (e) {
             console.error(e);
             return "";
@@ -495,4 +496,8 @@ export function updateUserSetting(user, key, value) {
         }
         return s;
     })
+}
+
+export function target(e: Event) {
+    return e.target as HTMLInputElement;
 }

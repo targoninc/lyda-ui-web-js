@@ -1,5 +1,5 @@
 import {Api} from "../Api/Api.ts";
-import {notify, Ui} from "./Ui.ts";
+import {notify} from "./Ui.ts";
 import {UserTemplates} from "../Templates/UserTemplates.ts";
 import {GenericTemplates} from "../Templates/GenericTemplates.ts";
 import {User} from "../Models/DbModels/User.ts";
