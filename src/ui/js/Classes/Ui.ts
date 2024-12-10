@@ -5,11 +5,13 @@ import {NavTemplates} from "../Templates/NavTemplates.ts";
 import {GenericTemplates} from "../Templates/GenericTemplates.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {UserActions} from "../Actions/UserActions.ts";
-import {HtmlPropertyValue, StringOrSignal} from "../../fjsc/src/f2.ts";
+import {AnyElement, HtmlPropertyValue, StringOrSignal} from "../../fjsc/src/f2.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {Theme} from "../Enums/Theme.ts";
 import {navigate} from "../Routing/Router.ts";
 import {signal} from "../../fjsc/src/signals.ts";
+import {navInitialized} from "../state.ts";
+import {User} from "../Models/DbModels/User.ts";
 
 export class Ui {
     static validUrlPaths = {
@@ -23,7 +25,7 @@ export class Ui {
         profile: "profile",
     };
 
-    static addModal(modal) {
+    static addModal(modal: AnyElement) {
         document.body.appendChild(modal);
         Util.initializeModalRemove(modal);
     }
@@ -58,7 +60,7 @@ export class Ui {
         }
     }
 
-    static async getPageHtml(page) {
+    static async getPageHtml(page: string) {
         let cachedContent = LydaCache.get("page/" + page).content;
         if (cachedContent) {
             return cachedContent;
@@ -78,7 +80,7 @@ export class Ui {
         }
     }
 
-    static updateNavBar(currentPage) {
+    static updateNavBar(currentPage: string) {
         let navs = document.querySelectorAll(".nav");
         for (let nav of navs) {
             nav.classList.remove("active");
@@ -89,36 +91,36 @@ export class Ui {
     }
 
     static async windowResize() {
-        let pageBackground = document.querySelector(".page-background");
+        let pageBackground = document.querySelector(".page-background") as HTMLElement;
         let nav = document.querySelector("nav");
         let footer = document.querySelector("footer");
-        if (nav === null && !window.navInitialized) {
-            window.navInitialized = true;
+        if (nav === null && !navInitialized.value) {
+            navInitialized.value = true;
             await Ui.initializeNavBar();
             nav = document.querySelector("nav");
         }
-        if (nav && footer) {
+        if (nav && footer && pageBackground) {
             pageBackground.style.height = (window.innerHeight - nav.clientHeight - footer.clientHeight - 1) + "px";
         }
     }
 
-    static async loadTheme(user) {
+    static async loadTheme(user: User|null) {
         const darkPreferred = window.matchMedia("(prefers-color-scheme: dark)");
         if (!user) {
             await UserActions.setUiTheme(Theme.dark, true);
             return;
         }
-        const existingSetting = user.settings.find(s => s.key === "theme");
+        const existingSetting = user.settings?.find(s => s.key === "theme");
         if (!existingSetting) {
             const newTheme = darkPreferred.matches ? "dark" : "light";
             await UserActions.setUiTheme(newTheme as Theme);
             LydaCache.set("user", new CacheItem(user));
         } else {
-            await UserActions.setUiTheme(existingSetting.value, true);
+            await UserActions.setUiTheme(existingSetting.value as Theme, true);
         }
     }
 
-    static async initUser(userToShow) {
+    static async initUser(userToShow: string|null) {
         if (!userToShow) {
             return false;
         }
@@ -144,7 +146,7 @@ export class Ui {
         }
     }
 
-    static fillClassWithValue(userId, className, value, newPage = "", params = []) {
+    static fillClassWithValue(userId, className, value, newPage = "", params: string[] = []) {
         let elements = document.querySelectorAll("." + className + "[data-user-id='" + userId + "']") as NodeListOf<HTMLElement>;
         for (let element of elements) {
             element.innerHTML = value;
