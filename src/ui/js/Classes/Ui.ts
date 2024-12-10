@@ -12,6 +12,8 @@ import {navigate} from "../Routing/Router.ts";
 import {signal} from "../../fjsc/src/signals.ts";
 import {navInitialized} from "../state.ts";
 import {User} from "../Models/DbModels/User.ts";
+import {CollaboratorType} from "../Models/DbModels/CollaboratorType.ts";
+import {TrackCollaborator} from "../Models/DbModels/TrackCollaborator.ts";
 
 export class Ui {
     static validUrlPaths = {
@@ -139,14 +141,14 @@ export class Ui {
         return true;
     }
 
-    static setImagesSource(userId, className, source) {
+    static setImagesSource(userId: number, className: string, source: string) {
         let images = document.querySelectorAll("." + className + "[data-user-id='" + userId + "']") as NodeListOf<HTMLImageElement>;
         for (let i = 0; i < images.length; i++) {
             images[i].src = source;
         }
     }
 
-    static fillClassWithValue(userId, className, value, newPage = "", params: string[] = []) {
+    static fillClassWithValue(userId: number, className: string, value: string, newPage = "", params: string[] = []) {
         let elements = document.querySelectorAll("." + className + "[data-user-id='" + userId + "']") as NodeListOf<HTMLElement>;
         for (let element of elements) {
             element.innerHTML = value;
@@ -156,12 +158,13 @@ export class Ui {
         }
     }
 
-    static getImageModal(imageUrl) {
+    static getImageModal(imageUrl: string) {
         const modal = GenericTemplates.imageModal(imageUrl);
         Ui.addModal(modal);
     }
 
-    static async getConfirmationModal(title, text, confirmText, cancelText, confirmCallback = () => {}, cancelCallback = () => {
+    static async getConfirmationModal(title: StringOrSignal, text: StringOrSignal, confirmText: StringOrSignal,
+                                      cancelText: StringOrSignal, confirmCallback = () => {}, cancelCallback = () => {
     }, icon: StringOrSignal = "") {
         const confirmCallback2 = () => {
             confirmCallback();
@@ -205,12 +208,14 @@ export class Ui {
         Ui.addModal(modal);
     }
 
-    static async getAddLinkedUserModal(title, text, currentValue, confirmText, cancelText, confirmCallback: Function = () => {}, cancelCallback: Function = () => {
-    }, icon = "") {
-        const confirmCallback2 = async (username, newUser, collabTypes) => {
+    static async getAddLinkedUserModal(title: StringOrSignal, text: StringOrSignal, currentValue: string,
+                                       confirmText: StringOrSignal, cancelText: StringOrSignal,
+                                       confirmCallback: Function = () => {}, cancelCallback: Function = () => {},
+                                       icon = "") {
+        const confirmCallback2 = async (username: string, newUser: TrackCollaborator, collabTypes: CollaboratorType[]) => {
             Util.removeModal();
             const user = await Util.getUserByNameAsync(username);
-            user.collab_type = collabTypes.find(x => x.id === newUser.collab_type);
+            user.collab_type = collabTypes.find(x => x.id === newUser.collab_type?.id);
             confirmCallback(username, user);
         };
         const cancelCallback2 = () => {
@@ -222,7 +227,7 @@ export class Ui {
     }
 }
 
-export function notify(text, type = "info", time = 7000) {
+export function notify(text: string, type = "info", time = 7000) {
     const notifications = document.querySelector(".notifications");
     const notification = GenericTemplates.notification(type, text);
     const previousNotifications = document.querySelectorAll(".notification") as NodeListOf<HTMLElement>;
@@ -232,7 +237,7 @@ export function notify(text, type = "info", time = 7000) {
             notification.style.top = lastNotification.offsetTop + lastNotification.clientHeight + "px";
         }
     }
-    notifications.appendChild(notification);
+    notifications?.appendChild(notification);
     setTimeout(() => {
         notification.remove();
     }, time);
