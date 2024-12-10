@@ -3,10 +3,12 @@ import {Images} from "../Enums/Images.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {Api} from "../Api/Api.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
-import {Icons} from "../Enums/Icons.js";
 import {AnyElement} from "../../fjsc/src/f2.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {MediaFileType} from "../Enums/MediaFileType.ts";
+import {User} from "../Models/DbModels/User.ts";
+import {dragging} from "../state.ts";
+import {Signal} from "../../fjsc/src/signals.ts";
 
 export class Util {
     static capitalizeFirstLetter(string: string) {
@@ -59,14 +61,14 @@ export class Util {
     }
 
     static initializeDraggable(draggable: HTMLElement) {
-        window.dragging = false;
+        dragging.value = false;
         let thisIsDragged = false;
         let offset = { x: 0, y: 0 };
         draggable.addEventListener("mousedown", function(e) {
-            if (window.dragging && !thisIsDragged) {
+            if (dragging.value && !thisIsDragged) {
                 return;
             }
-            window.dragging = true;
+            dragging.value = true;
             thisIsDragged = true;
             offset = {
                 x: draggable.offsetLeft - e.clientX,
@@ -75,13 +77,13 @@ export class Util {
         }, true);
 
         document.addEventListener("mouseup", function() {
-            window.dragging = false;
+            dragging.value = false;
             thisIsDragged = false;
         }, true);
 
         document.addEventListener("mousemove", function(event) {
             event.preventDefault();
-            if (window.dragging && thisIsDragged) {
+            if (dragging.value && thisIsDragged) {
                 draggable.style.left = (event.clientX + offset.x) + "px";
                 draggable.style.top = (event.clientY + offset.y) + "px";
                 window.getSelection()?.removeAllRanges();
@@ -198,18 +200,18 @@ export class Util {
         }
     }
 
-    static formatDate(date) {
+    static formatDate(date: string|Date) {
         if (date.constructor === String) {
             date = new Date(date);
         }
-        return date.toLocaleDateString();
+        return (date as Date).toLocaleDateString();
     }
 
-    static getDateForPicker(date) {
+    static getDateForPicker(date: string|Date) {
         if (date.constructor === String) {
             date = new Date(date);
         }
-        return date.toISOString().split("T")[0];
+        return (date as Date).toISOString().split("T")[0];
     }
 
     static hideElementIfCondition(conditionFunc: Function, className: string, e: any) {
@@ -263,7 +265,7 @@ export class Util {
         }
     }
 
-    static arrayPropertyMatchesUser(array, property, user) {
+    static arrayPropertyMatchesUser(array: any[], property: any, user: User) {
         if (!array || !property || !user) {
             return false;
         }
@@ -282,11 +284,11 @@ export class Util {
         return Util.mapNullToEmptyString(res.data);
     }
 
-    static initializeModalRemove(modalContainer) {
+    static initializeModalRemove(modalContainer: AnyElement) {
         setTimeout(() => {
             document.addEventListener("click", e => {
                 const foundModal = document.querySelector(".modal");
-                if (foundModal && !foundModal.contains(e.target)) {
+                if (foundModal && !foundModal.contains(target(e))) {
                     Util.removeModal(modalContainer);
                 }
             }, {once: true});
@@ -302,10 +304,10 @@ export class Util {
         }
     }
 
-    static parseCachedUser(rawCachedUser) {
+    static parseCachedUser(rawCachedUser: string|User) {
         let userData;
         try {
-            userData = JSON.parse(rawCachedUser);
+            userData = JSON.parse(rawCachedUser as string);
         } catch(e) {
             userData = rawCachedUser;
         }
@@ -336,16 +338,16 @@ export class Util {
         return Util.mapNullToEmptyString(userData);
     }
 
-    static mergeObjects(obj1, obj2) {
+    static mergeObjects(obj1: any, obj2: any) {
         for (const key in obj2) {
             obj1[key] = obj2[key];
         }
         return obj1;
     }
 
-    static mergeObjectList(objList) {
+    static mergeObjectList(objList: any) {
         let obj = {};
-        objList.forEach((o) => {
+        objList.forEach((o: any) => {
             obj = Util.mergeObjects(obj, o);
         });
         return obj;
@@ -366,9 +368,8 @@ export class Util {
 
     /**
      * Nest comments by their parent_id recursively
-     * @param commentList
      */
-    static nestCommentElementsByCommentList(commentList) {
+    static nestCommentElementsByCommentList(commentList: HTMLElement) {
         const comments = commentList.querySelectorAll(".comment-in-list");
         const commentMap = {};
         comments.forEach((c) => {
@@ -406,26 +407,15 @@ export class Util {
         nestComments(0);
     }
 
-    static getUserIdFromEvent(e) {
-        const userId = e.target.getAttribute("user_id");
+    static getUserIdFromEvent(e: Event) {
+        const userId = target(e).getAttribute("user_id");
         if (userId === null) {
             return "";
         }
         return userId;
     }
 
-    static updateUiThemeToggle(uiTheme) {
-        const modeSwitch = document.querySelector(".dark-mode-switch");
-        if (modeSwitch) {
-            modeSwitch.setAttribute("theme", uiTheme);
-        }
-        const lamp = document.querySelector(".dark-mode-switch img");
-        if (lamp) {
-            lamp.src = uiTheme === "dark" ? Icons.LAMP_OFF : Icons.LAMP_ON;
-        }
-    }
-
-    static includeStylesheet(css) {
+    static includeStylesheet(css: string) {
         const links = document.head.querySelectorAll("link[href='" + css + "']");
         if (links !== null && links.length > 0) {
             return;
@@ -436,7 +426,7 @@ export class Util {
         document.head.appendChild(link);
     }
 
-    static removeStylesheet(css) {
+    static removeStylesheet(css: string) {
         const links = document.head.querySelectorAll("link[href='" + css + "']");
         if (links !== null) {
             links.forEach((l) => {
@@ -450,7 +440,7 @@ export class Util {
         return cacheUser !== null && cacheUser.content !== null;
     }
 
-    static downloadFile(fileName, content) {
+    static downloadFile(fileName: string, content: string) {
         const link = document.createElement("a");
         link.href = "data:text/plain;charset=utf-8," + encodeURIComponent(content);
         link.download = fileName;
@@ -458,7 +448,7 @@ export class Util {
     }
 }
 
-export function nullIfEmpty(value) {
+export function nullIfEmpty(value: any) {
     if (value === undefined) {
         return null;
     }
@@ -466,7 +456,7 @@ export function nullIfEmpty(value) {
     return value;
 }
 
-export function finalizeLogin(step, user) {
+export function finalizeLogin(step: Signal<string>, user: User) {
     LydaCache.set("user", new CacheItem(JSON.stringify(user)));
     step.value = "complete";
 
@@ -478,19 +468,19 @@ export function finalizeLogin(step, user) {
     }
 }
 
-export function getUserSettingValue(user, key) {
-    const val = user.settings.find(s => s.key === key)?.value;
+export function getUserSettingValue(user: User, key: string) {
+    const val = user.settings?.find(s => s.key === key)?.value;
     if (val === "true") return true;
     if (val === "false") return false;
     return val;
 }
 
-export function userHasSettingValue(user, key, value) {
+export function userHasSettingValue(user: User, key: string, value: string) {
     return getUserSettingValue(user, key) === value;
 }
 
-export function updateUserSetting(user, key, value) {
-    return user.settings.map(s => {
+export function updateUserSetting(user: User, key: string, value: string) {
+    return user.settings?.map(s => {
         if (s.key === key) {
             s.value = value;
         }

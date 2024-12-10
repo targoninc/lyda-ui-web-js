@@ -529,19 +529,6 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     height: 30px;
 }
 
-.dark-mode-switch {
-    align-content: end;
-    width: 30px;
-    max-width: 30px;
-}
-
-.dark-mode-switch .icon {
-    position: absolute;
-    transform: translateY(-20px);
-    width: 30px;
-    height: 48px;
-}
-
 .burger-menu-content {
     position: absolute;
     top: 0;
