@@ -9,6 +9,8 @@ import {userHasSettingValue, Util} from "../Classes/Util.ts";
 import {notify} from "../Classes/Ui.ts";
 import {Track} from "../Models/DbModels/Track.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
+import {trackInfo, currentTrackId, playingFrom, streamClients, volume} from "../state.ts";
+import {PlayingFrom} from "../Models/PlayingFrom.ts";
 
 export class PlayManager {
     static async playCheck(track: any) {
@@ -42,7 +44,7 @@ export class PlayManager {
             const contextQueue = QueueManager.getContextQueue();
             if (contextQueue.length > 0) {
                 let nextTrackId = QueueManager.getNextTrackInContextQueue(currentTrack.id);
-                if (nextTrackId !== undefined) {
+                if (nextTrackId !== undefined && nextTrackId !== null) {
                     await PlayManager.safeStartAsync(nextTrackId);
                 } else {
                     if (loopingContext) {
@@ -55,7 +57,7 @@ export class PlayManager {
             } else {
                 const user = await Util.getUserAsync();
                 const autoQueue = QueueManager.getAutoQueue();
-                if (autoQueue.length > 0 && user && userHasSettingValue(user, "playFromAutoQueue", true)) {
+                if (autoQueue.length > 0 && user && userHasSettingValue(user, "playFromAutoQueue", "true")) {
                     await PlayManager.playNextInAutoQueue();
                 } else {
                     await PlayManager.stopAllAsync();
@@ -65,63 +67,32 @@ export class PlayManager {
     }
 
     static addStreamClient(id: number, streamClient: StreamClient) {
-        PlayManager.ensureWindowObjects();
-        window.streamClients[id] = streamClient;
+        streamClients.value[id] = streamClient;
     }
 
     static removeStreamClient(id: number) {
-        PlayManager.ensureWindowObjects();
-        delete window.streamClients[id];
+        delete streamClients.value[id];
     }
 
     static getStreamClient(id: number): StreamClient {
-        PlayManager.ensureWindowObjects();
-        return window.streamClients[id];
-    }
-
-    static ensureWindowObjects() {
-        if (window.streamClients === undefined) {
-            window.streamClients = {};
-        }
-
-        if (window.manualQueue === undefined) {
-            window.manualQueue = [];
-        }
-
-        if (window.autoQueue === undefined) {
-            window.autoQueue = [];
-        }
-
-        if (window.contextQueue === undefined) {
-            window.contextQueue = [];
-        }
-
-        if (window.trackInfo === undefined) {
-            window.trackInfo = {};
-        }
-
-        if (window.playingFrom === undefined) {
-            window.playingFrom = {};
-        }
+        return streamClients.value[id];
     }
 
     static playFrom(type: string, name: string, id: number) {
-        PlayManager.ensureWindowObjects();
-        window.playingFrom = { type, name, id };
-        LydaCache.set("playingFrom", new CacheItem(window.playingFrom));
+        playingFrom.value = { type, name, id };
+        LydaCache.set("playingFrom", new CacheItem(playingFrom.value));
     }
 
     static getPlayingFrom() {
-        PlayManager.ensureWindowObjects();
-        let playingFrom = window.playingFrom;
-        if (Object.keys(playingFrom).length === 0) {
-            const cachedPlayingFrom = LydaCache.get("playingFrom").content ?? {};
+        let playingFromTmp = playingFrom.value;
+        if (Object.keys(playingFromTmp as any).length === 0) {
+            const cachedPlayingFrom = LydaCache.get<PlayingFrom>("playingFrom").content ?? null;
             if (cachedPlayingFrom) {
-                playingFrom = cachedPlayingFrom;
-                window.playingFrom = playingFrom;
+                playingFromTmp = cachedPlayingFrom;
+                playingFrom.value = playingFromTmp;
             }
         }
-        return playingFrom;
+        return playingFromTmp;
     }
 
     static isPlaying(id: number) {
@@ -173,7 +144,7 @@ export class PlayManager {
         }
 
         const track = await PlayManager.getTrackData(id);
-        const streamClient = PlayManager.addStreamClientIfNotExists(id, track.length);
+        const streamClient = PlayManager.addStreamClientIfNotExists(id, track.track.length);
 
         await streamClient.startAsync();
         await StreamingUpdater.updatePlayState();
@@ -216,12 +187,11 @@ export class PlayManager {
     }
 
     static async stopAllAsync(exclusionId = null) {
-        PlayManager.ensureWindowObjects();
-        for (const key in window.streamClients) {
+        for (const key in streamClients.value) {
             if (key === exclusionId) {
                 continue;
             }
-            await window.streamClients[key].stopAsync();
+            await streamClients.value[key].stopAsync();
         }
 
         await StreamingUpdater.updatePlayState();
@@ -229,18 +199,18 @@ export class PlayManager {
 
     static async scrubFromElement(e: any) {
         const value = e.offsetX / e.target.offsetWidth;
-        if (e.target.id !== window.currentTrackId) {
+        if (e.target.id !== currentTrackId.value) {
             await PlayManager.startAsync(e.target.id);
         }
         await PlayManager.scrubTo(e.target.id, value);
     }
 
     static isLoopingSingle() {
-        return LydaCache.get("loopSingle").content ?? false;
+        return LydaCache.get<boolean>("loopSingle").content ?? false;
     }
 
     static isLoopingContext() {
-        return LydaCache.get("loopContext").content ?? false;
+        return LydaCache.get<boolean>("loopContext").content ?? false;
     }
 
     static async toggleLoop() {
@@ -260,7 +230,7 @@ export class PlayManager {
 
         LydaCache.set("loopSingle", new CacheItem(loopingSingle));
         LydaCache.set("loopContext", new CacheItem(loopingContext));
-        await StreamingUpdater.updateLoopStates(loopingSingle, loopingContext);
+        StreamingUpdater.updateLoopStates(loopingSingle, loopingContext);
     }
 
     static async scrubTo(id: number, value: number) {
@@ -298,12 +268,12 @@ export class PlayManager {
     static toggleMute(id: number) {
         const streamClient = PlayManager.getStreamClient(id);
         if (streamClient.getVolume() > 0) {
-            window.trackInfo[id].volume = streamClient.getVolume();
+            volume.value = streamClient.getVolume();
             streamClient.setVolume(0);
             StreamingUpdater.updateLoudness(id, 0);
         } else {
-            streamClient.setVolume(window.trackInfo[id].volume);
-            StreamingUpdater.updateLoudness(id, window.trackInfo[id].volume);
+            streamClient.setVolume(volume.value);
+            StreamingUpdater.updateLoudness(id, volume.value);
         }
         StreamingUpdater.updateMuteState(id);
     }
@@ -367,17 +337,15 @@ export class PlayManager {
     }
 
     static async cacheTrackData(trackData: { track: Track }) {
-        if (!window.trackInfo) {
-            window.trackInfo = {};
-        }
-        window.trackInfo[trackData.track.id] = trackData;
+        trackInfo.value[trackData.track.id] = trackData;
     }
 
     static async getTrackData(id: number, noCache = false) {
-        if (window.trackInfo && window.trackInfo[id] && !noCache) {
-            return window.trackInfo[id];
+        if (trackInfo.value[id] && !noCache) {
+            return trackInfo.value[id];
         }
-        const res = await Api.getAsync(ApiRoutes.getTrackById, { id });
-        return PlayManager.cacheTrackData(res.data);
+        const res = await Api.getAsync<{ track: Track }>(ApiRoutes.getTrackById, { id });
+        await PlayManager.cacheTrackData(res.data);
+        return res.data;
     }
 }

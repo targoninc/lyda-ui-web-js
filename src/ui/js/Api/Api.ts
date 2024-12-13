@@ -4,11 +4,7 @@ export interface ApiResponse<T> {
 }
 
 export class Api {
-    /**
-     * @param {Object} params - The params to build
-     * @returns {string} - The params as a string
-     */
-    static buildParams(params) {
+    static buildParams(params: any): string {
         if (Object.keys(params).length === 0) {
             return "";
         }
@@ -19,27 +15,17 @@ export class Api {
         return paramStr.substring(0, paramStr.length - 1);
     }
 
-    /**
-     * @param {Response} res - The response to get data from
-     * @returns {Promise<*>} - The data from the response, parsed if possible
-     */
-    static async getDataFromHttpResponse(res) {
+    static async getDataFromHttpResponse<T = any>(res: Response): Promise<T> {
         let data = await res.text();
         try {
             data = JSON.parse(data);
         } catch (e) {
             // Ignore
         }
-        return data;
+        return data as T;
     }
 
-    /**
-     * @param {string} url - The url to post to
-     * @param {Object} params - The params to post
-     * @param authorizationHeaders
-     * @returns {Promise<{code: number, data: any}>} - The response code and data
-     */
-    static async getAsync(url, params = {}, authorizationHeaders = {}) {
+    static async getAsync<T>(url: string, params: object = {}, authorizationHeaders = {}): Promise<ApiResponse<T>> {
         if (!url) {
             throw new Error("url is required");
         }
@@ -66,6 +52,7 @@ export class Api {
             "Content-Type": "application/json",
         };
         if (body.constructor === FormData) {
+            // @ts-ignore
             delete headers["Content-Type"];
         }
         const res = await fetch(url, {

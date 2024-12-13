@@ -3,7 +3,7 @@ import {ApiRoutes} from "../Api/ApiRoutes.ts";
 
 export class QueueActions {
     static async getNewAutoQueueTracks() {
-        const response = await Api.getAsync(ApiRoutes.autoQueueFeed);
+        const response = await Api.getAsync<any[]>(ApiRoutes.autoQueueFeed);
         return response.data;
     }
 }

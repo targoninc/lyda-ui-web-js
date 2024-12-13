@@ -1,5 +1,5 @@
-export class CacheItem {
-    content: any;
+export class CacheItem<T> {
+    content: T;
     reFetchUrl: string;
     reFetchMethod;
     reFetchHeaders;
@@ -9,7 +9,7 @@ export class CacheItem {
     refetchCount;
     createTime;
 
-    constructor(content: any, reFetchUrl = null, reFetchMethod = "GET", reFetchHeaders = {}, reFetchBody = "", reFetchTtlInSeconds = 60, maximumRefetchCount = 0) {
+    constructor(content: T, reFetchUrl = null, reFetchMethod = "GET", reFetchHeaders = {}, reFetchBody = "", reFetchTtlInSeconds = 60, maximumRefetchCount = 0) {
         this.content = content;
         this.reFetchUrl = reFetchUrl ?? "";
         this.reFetchMethod = reFetchMethod;

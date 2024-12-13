@@ -4,7 +4,7 @@ export class LydaCache {
     static disable = false;
     static cacheImplementation = sessionStorage;
 
-    static get(cacheKey: string): CacheItem {
+    static get<T>(cacheKey: string): CacheItem<T|null> {
         if (this.disable) {
             return new CacheItem(null);
         }

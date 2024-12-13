@@ -7,79 +7,82 @@ import {QueueTemplates} from "../Templates/QueueTemplates.ts";
 import {QueueManager} from "./QueueManager.ts";
 import {PlayerTemplates} from "../Templates/PlayerTemplates.ts";
 import {Util} from "../Classes/Util.ts";
+import {currentTrackId, manualQueue, trackInfo} from "../state.ts";
+import {signal} from "../../fjsc/src/signals.ts";
+
+const updatingPlayState = signal(false);
 
 export class StreamingUpdater {
-
     static updatePlayingIndicators() {
         const playingElements = document.querySelectorAll(".playing");
         for (const playingElement of playingElements) {
             playingElement.classList.remove("playing");
         }
-        const listTracks = document.querySelectorAll(".list-track[track_id='" + window.currentTrackId + "']");
+        const listTracks = document.querySelectorAll(".list-track[track_id='" + currentTrackId.value + "']");
         for (const listTrack of listTracks) {
             listTrack.classList.add("playing");
         }
-        const inlineTracks = document.querySelectorAll(".inlineTrack[track_id='" + window.currentTrackId + "']");
+        const inlineTracks = document.querySelectorAll(".inlineTrack[track_id='" + currentTrackId.value + "']");
         for (const inlineTrack of inlineTracks) {
             inlineTrack.classList.add("playing");
         }
-        const trackCards = document.querySelectorAll(".track-card[track_id='" + window.currentTrackId + "']");
+        const trackCards = document.querySelectorAll(".track-card[track_id='" + currentTrackId.value + "']");
         for (const trackCard of trackCards) {
             trackCard.classList.add("playing");
         }
     }
 
     static async updatePermanentPlayer() {
-        if (window.currentTrackId === undefined) {
+        if (!currentTrackId.value) {
             return;
         }
-        const streamClient = PlayManager.getStreamClient(window.currentTrackId);
-        StreamingUpdater.updateBuffers(window.currentTrackId, streamClient.getBufferedLength(), streamClient.duration);
-        StreamingUpdater.updateScrubber(window.currentTrackId);
+        const streamClient = PlayManager.getStreamClient(currentTrackId.value);
+        StreamingUpdater.updateBuffers(currentTrackId.value, streamClient.getBufferedLength(), streamClient.duration);
+        StreamingUpdater.updateScrubber(currentTrackId.value);
 
-        let trackInfo = window.trackInfo[window.currentTrackId];
-        if (trackInfo === undefined) {
-            trackInfo = await PlayManager.getTrackData(window.currentTrackId);
+        let trackInfoTmp = trackInfo.value[currentTrackId.value];
+        if (trackInfoTmp === undefined) {
+            trackInfoTmp = await PlayManager.getTrackData(currentTrackId.value);
         }
 
         const footer = document.querySelector("footer");
         if (!footer) {
             return;
         }
-        const existingPlayer = footer.querySelector("#player_" + window.currentTrackId);
+        const existingPlayer = footer.querySelector("#player_" + currentTrackId.value);
         if (existingPlayer !== null) {
             return;
         }
         footer.innerHTML = "";
         if (footer.querySelector(".bottom-track-info") === null) {
             const user = await Util.getUserAsync();
-            const player = await PlayerTemplates.player(trackInfo.track, trackInfo.track.user, user);
+            const player = await PlayerTemplates.player(trackInfoTmp.track, trackInfoTmp.track.user, user);
             footer.appendChild(player);
         }
     }
 
     static updateLoopStates(loopingSingle: boolean, loopingContext: boolean) {
-        const loopSingleButtons = document.querySelectorAll(".loop-button-img");
+        const loopSingleButtons = document.querySelectorAll(".loop-button-img") as NodeListOf<HTMLImageElement>;
         for (const loopButton of loopSingleButtons) {
             loopButton.src = loopingSingle ? Icons.LOOP_SINGLE : Icons.LOOP_OFF;
             loopButton.src = loopingContext ? Icons.LOOP_CONTEXT : loopButton.src;
         }
 
-        const streamClient = PlayManager.getStreamClient(window.currentTrackId);
+        const streamClient = PlayManager.getStreamClient(currentTrackId.value);
         streamClient.audio.loop = loopingSingle;
     }
 
     static updateScrubber(id: number) {
         const valueRelative = PlayManager.getCurrentTime(id, true);
         const value = PlayManager.getCurrentTime(id, false);
-        const scrubHeads = document.querySelectorAll(".audio-player-scrubhead");
+        const scrubHeads = document.querySelectorAll(".audio-player-scrubhead") as NodeListOf<HTMLDivElement>;
         for (const scrubHead of scrubHeads) {
             if (scrubHead.id !== id.toString()) {
                 continue;
             }
             scrubHead.style.left = `${valueRelative * 100}%`;
         }
-        const scrubTimesCurrent = document.querySelectorAll(".audio-player-time-current");
+        const scrubTimesCurrent = document.querySelectorAll(".audio-player-time-current") as NodeListOf<HTMLSpanElement>;
         for (const scrubTimeCurrent of scrubTimesCurrent) {
             if (scrubTimeCurrent.id !== id.toString()) {
                 continue;
@@ -106,7 +109,7 @@ export class StreamingUpdater {
     }
 
     static updateBuffers(id: number, bufferedLength: number, duration: number) {
-        const buffers = document.querySelectorAll(".audio-player-scrubbar-buffered");
+        const buffers = document.querySelectorAll(".audio-player-scrubbar-buffered") as NodeListOf<HTMLDivElement>;
         let cssWidth = (bufferedLength / duration) * 100;
         if (cssWidth > 100) {
             console.warn("Buffered length is greater than duration");
@@ -127,7 +130,7 @@ export class StreamingUpdater {
 
     static updateMuteState(id: number) {
         const streamClient = PlayManager.getStreamClient(id);
-        const targets = document.querySelectorAll(".loudness-control-icon");
+        const targets = document.querySelectorAll(".loudness-control-icon") as NodeListOf<HTMLImageElement>;
         for (const target of targets) {
             if (target.id !== id.toString()) {
                 continue;
@@ -141,7 +144,7 @@ export class StreamingUpdater {
     }
 
     static updateLoudness(id: number, value: number) {
-        const loudnessBars = document.querySelectorAll(".audio-player-loudnesshead");
+        const loudnessBars = document.querySelectorAll(".audio-player-loudnesshead") as NodeListOf<HTMLDivElement>;
         const cssWidth = value * 100;
         for (const loudnessBar of loudnessBars) {
             if (loudnessBar.id !== id.toString()) {
@@ -152,14 +155,14 @@ export class StreamingUpdater {
     }
 
     static async updateQueue() {
-        LydaCache.set("manualQueue", new CacheItem(window.manualQueue));
+        LydaCache.set("manualQueue", new CacheItem(manualQueue.value));
 
         const queue = QueueManager.getManualQueue();
-        const queueDom = document.querySelectorAll(".audio-queueadd");
+        const queueDom = document.querySelectorAll(".audio-queueadd") as NodeListOf<HTMLDivElement>;
         for (const queueItem of queueDom) {
             const img = queueItem.querySelector("img");
             const text = queueItem.querySelector("span");
-            if (queue.includes(queueItem.id)) {
+            if (queue.includes(parseInt(queueItem.id))) {
                 queueItem.classList.remove("audio-queueadd");
                 queueItem.classList.add("audio-queueremove");
                 img && (img.src = Icons.UNQUEUE);
@@ -170,7 +173,7 @@ export class StreamingUpdater {
         for (const unqueueItem of unqueueDom) {
             const img = unqueueItem.querySelector("img");
             const text = unqueueItem.querySelector("span");
-            if (!queue.includes(unqueueItem.id)) {
+            if (!queue.includes(parseInt(unqueueItem.id))) {
                 unqueueItem.classList.remove("audio-queueremove");
                 unqueueItem.classList.add("audio-queueadd");
                 img && (img.src = Icons.QUEUE);
@@ -193,18 +196,18 @@ export class StreamingUpdater {
     }
 
     static async updatePlayState() {
-        if (window.updatingPlayState) {
+        if (updatingPlayState.value) {
             return;
         }
-        window.updatingPlayState = true;
+        updatingPlayState.value = true;
         const targets = document.querySelectorAll(".audio-player-toggle");
         for (const target of targets) {
-            const streamClient = PlayManager.getStreamClient(target.id);
+            const streamClient = PlayManager.getStreamClient(parseInt(target.id));
             if (streamClient === undefined) {
                 continue;
             }
-            const img = target.querySelector("img");
-            const text = target.querySelector("span");
+            const img = target.querySelector("img") as HTMLImageElement;
+            const text = target.querySelector("span") as HTMLSpanElement;
             if (!img || !text) {
                 const i = target.querySelector("i");
                 if (i) {
@@ -236,7 +239,7 @@ export class StreamingUpdater {
 
         StreamingUpdater.updatePlayingIndicators();
         await StreamingUpdater.updatePermanentPlayer();
-        window.updatingPlayState = false;
+        updatingPlayState.value = false;
     }
 
     static enableBuffering() {
