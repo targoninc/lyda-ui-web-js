@@ -9,8 +9,9 @@ import {userHasSettingValue, Util} from "../Classes/Util.ts";
 import {notify} from "../Classes/Ui.ts";
 import {Track} from "../Models/DbModels/Track.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {trackInfo, currentTrackId, playingFrom, streamClients, volume} from "../state.ts";
+import {trackInfo, currentTrackId, playingFrom, streamClients, volume, playingHere} from "../state.ts";
 import {PlayingFrom} from "../Models/PlayingFrom.ts";
+import {StreamingBroadcaster, StreamingEvent} from "./StreamingBroadcaster.ts";
 
 export class PlayManager {
     static async playCheck(track: any) {
@@ -127,6 +128,7 @@ export class PlayManager {
             currentTrackId.value = 0;
             delete trackInfo.value[id];
             document.querySelector("#permanent-player")?.remove();
+            StreamingBroadcaster.send(StreamingEvent.trackStop, id);
         }
         if (trackInfo.value[id]) {
             delete trackInfo.value[id];
@@ -141,9 +143,13 @@ export class PlayManager {
 
         if (streamClient.playing) {
             await streamClient.stopAsync();
+            playingHere.value = false;
+            StreamingBroadcaster.send(StreamingEvent.trackStop, id);
         } else {
             await PlayManager.stopAllAsync();
             await streamClient.startAsync();
+            StreamingBroadcaster.send(StreamingEvent.trackStart, id);
+            playingHere.value = true;
         }
 
         await StreamingUpdater.updatePlayState();
@@ -197,6 +203,7 @@ export class PlayManager {
         }
 
         await streamClient.stopAsync();
+        playingHere.value = false;
         await StreamingUpdater.updatePlayState();
     }
 
@@ -207,6 +214,7 @@ export class PlayManager {
             }
             await streamClients.value[key].stopAsync();
         }
+        playingHere.value = false;
 
         await StreamingUpdater.updatePlayState();
     }

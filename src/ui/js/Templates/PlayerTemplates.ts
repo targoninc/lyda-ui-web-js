@@ -17,7 +17,7 @@ import {User} from "../Models/DbModels/User.ts";
 import {navigate} from "../Routing/Router.ts";
 import {FJSC} from "../../fjsc";
 import {compute, signal} from "../../fjsc/src/signals.ts";
-import {currentlyBuffered, currentTrackId, currentTrackPosition, playingFrom} from "../state.ts";
+import {currentlyBuffered, currentTrackId, currentTrackPosition, playingElsewhere, playingFrom} from "../state.ts";
 
 export class PlayerTemplates {
     static audioPlayer(track: Track) {
@@ -176,11 +176,17 @@ export class PlayerTemplates {
             cover.value = src;
         });
 
+
+
         return create("div")
             .classes("flex-v")
             .id("permanent-player")
             .children(
-                create("div")
+                ifjs(playingElsewhere, FJSC.heading({
+                    text: "Playing on another instance of Lyda",
+                    level: 2,
+                })),
+                ifjs(playingElsewhere, create("div")
                     .classes("flex-v", "fullWidth")
                     .children(
                         create("div")
@@ -202,7 +208,7 @@ export class PlayerTemplates {
                                     .build(),
                                 PlayerTemplates.audioPlayer(track),
                             ).build(),
-                    ).build()
+                    ).build(), true)
             ).build();
     }
 

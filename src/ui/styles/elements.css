@@ -268,7 +268,7 @@ label {
 
 .audio-player-scrubhead {
     width: var(--border-radius);
-    height: var(--font-size-large);
+    height: 16px;
     background: var(--color-5);
     border-radius: var(--border-radius);
     z-index: 1;
@@ -346,9 +346,8 @@ label {
 }
 
 .audio-player-controls {
-    background: var(--color-4);
+    background: var(--color-3);
     border-radius: 27px;
-    border: 1px solid;
 }
 
 .loudness-control:hover .loudness-bar {

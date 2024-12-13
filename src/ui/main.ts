@@ -10,6 +10,7 @@ import {Util} from "./js/Classes/Util.ts";
 import {routes} from "./js/Routing/routes.js";
 import {GenericTemplates} from "./js/Templates/GenericTemplates.ts";
 import {currentTrackId} from "./js/state.ts";
+import {StreamingBroadcaster} from "./js/Streaming/StreamingBroadcaster.ts";
 
 //LydaCache.clear();
 let pageContainer = document.querySelector(".page-container");
@@ -61,3 +62,4 @@ export const router = new Router(routes, async (route: Route, params: any) => {
 
 KeyBinds.initiate();
 UiActions.runMobileCheck();
+StreamingBroadcaster.initializeReceiver();
