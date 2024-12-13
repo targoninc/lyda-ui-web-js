@@ -18,14 +18,14 @@
     --color-6-rgb: 42, 42, 42;
     --color-7: #4a4a4a;
     --color-7-rgb: 74, 74, 74;
-    --color-8: #70c926;
+    --green: #70c926;
     --color-8-rgb: 142, 255, 60;
     --color-8-dark: #5aa21a;
     --color-8-dark-rgb: 90, 162, 26;
     --color-9: #dcdce0;
     --filter-8: invert(74%) sepia(50%) saturate(854%) hue-rotate(40deg) brightness(94%) contrast(75%);
     --color-attention: var(--color-1);
-    --color-state: var(--color-8);
+    --color-state: var(--green);
     --blue: #317eef;
     --verified: var(--blue);
     --stats-1: var(--color-1);
@@ -33,13 +33,13 @@
     --stats-3: color-mix(in oklab, var(--color-1) 50%, var(--color-2) 50%);
     --stats-4: color-mix(in oklab, var(--color-1) 25%, var(--color-2) 75%);
     --stats-5: var(--color-2);
-    --stats-6: color-mix(in oklab, var(--color-2) 75%, var(--color-8) 25%);
-    --stats-7: color-mix(in oklab, var(--color-2) 50%, var(--color-8) 50%);
-    --stats-8: color-mix(in oklab, var(--color-2) 25%, var(--color-8) 75%);
-    --stats-9: var(--color-8);
-    --stats-10: color-mix(in oklab, var(--color-8) 75%, var(--color-1) 25%);
-    --stats-11: color-mix(in oklab, var(--color-8) 50%, var(--color-1) 50%);
-    --stats-12: color-mix(in oklab, var(--color-8) 25%, var(--color-1) 75%);
+    --stats-6: color-mix(in oklab, var(--color-2) 75%, var(--green) 25%);
+    --stats-7: color-mix(in oklab, var(--color-2) 50%, var(--green) 50%);
+    --stats-8: color-mix(in oklab, var(--color-2) 25%, var(--green) 75%);
+    --stats-9: var(--green);
+    --stats-10: color-mix(in oklab, var(--green) 75%, var(--color-1) 25%);
+    --stats-11: color-mix(in oklab, var(--green) 50%, var(--color-1) 50%);
+    --stats-12: color-mix(in oklab, var(--green) 25%, var(--color-1) 75%);
     --breakpoint-big: 1301px;
     --breakpoint-mid: 1110px;
     --breakpoint-small: 300px;
@@ -56,9 +56,47 @@
     --large-padding: calc(var(--base-padding) * 2);
     --page-padding: 20px 30px;
     --inline-padding: 2px 8px;
-    --gap: 10px;
+    --gap: 5px;
+    --layout-gap: 10px;
     --anti-gap-margin: -7px;
     --default-shadow: 0 0 15px -7px var(--color-5);
+    --button-bottom-border-size: 3px;
+
+    --fjsc-text-color: var(--color-5);
+    --fjsc-error-color: var(--color-2);
+
+    --fjsc-interactive-background: var(--color-4);
+    --fjsc-interactive-background-hover: var(--color-3);
+    --fjsc-interactive-background-active: var(--color-9);
+    --fjsc-interactive-color: var(--color-5);
+    --fjsc-interactive-color-active: var(--color-4);
+    --fjsc-interactive-border: var(--color-7);
+    --fjsc-interactive-border-focused: var(--blue);
+    --fjsc-interactive-border-active: var(--color-1);
+}
+
+/* fallback */
+@font-face {
+    font-family: 'Material Symbols Outlined';
+    font-style: normal;
+    font-weight: 400;
+    src: url(../fonts/material-icons.woff) format('woff');
+}
+
+.material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -moz-font-feature-settings: 'liga';
+    -moz-osx-font-smoothing: grayscale;
 }
 
 a {
@@ -104,12 +142,12 @@ a {
 
 .flex, .flex-v {
     display: flex;
-    gap: var(--gap);
+    gap: var(--layout-gap);
     flex-wrap: wrap;
 }
 
 .small-gap {
-    gap: calc(var(--gap) / 2) !important;
+    gap: var(--gap) !important;
 }
 
 .no-gap {
@@ -249,38 +287,45 @@ footer {
     position: relative;
 }
 
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    padding: 0;
+}
+
 h1 {
     font-size: var(--font-size-xxlarge);
     font-weight: 300;
-    margin: 0;
     padding: 0;
 }
 
 h2 {
     font-size: var(--font-size-xlarge);
-    margin: 10px 0;
 }
 
 h3 {
     font-size: 2.2rem;
     font-weight: normal;
-    margin: 0;
 }
 
 .card-label {
     margin: 0;
-    background: var(--color-7);
     width: max-content;
-    padding: 0.1em .66em;
-    border-radius: 999px 999px 999px 0;
+    padding: 0.1em 1em 0.1em .5em;
+    border-radius: var(--border-radius) 2em 2em var(--border-radius);
     color: var(--color-5);
     font-weight: normal;
     align-items: center;
+    border: 1px solid var(--color-5);
+    border-width: 1px 1px 1px .5em;
 }
 
 .card-label.error {
-    border-bottom: 3px solid var(--color-2);
-    color: var(--color-5);
+    border-color: var(--color-2);
+    color: var(--color-2);
+}
+
+.card-label i {
+    color: inherit;
 }
 
 h5 {
@@ -317,12 +362,11 @@ input, textarea, select {
     color: var(--color-5);
     border-radius: var(--border-radius);
     padding: 5px 10px;
-    height: max-content;
     font-size: var(--font-size-medium);
 }
 
 input:focus-visible, textarea:focus-visible, select:focus-visible {
-    border-color: var(--color-8);
+    border-color: var(--green);
     outline: none;
 }
 
@@ -351,51 +395,48 @@ input[type="button"]:hover {
 .button-container-sideways {
     display: flex;
     justify-content: space-between;
-    gap: var(--gap);
+    gap: var(--layout-gap);
 }
 
 button {
     background: var(--color-7);
     color: var(--color-4);
     border: 1px solid var(--color-7);
+    border-bottom: var(--button-bottom-border-size) solid var(--color-7);
     border-radius: var(--border-radius);
+    padding: var(--inline-padding);
+    font-size: var(--font-size-medium);
+    font-family: inherit;
     cursor: pointer;
-    font-weight: bold;
-    padding: 5px 10px;
     width: max-content;
+    display: flex;
+    align-items: center;
+    gap: var(--gap);
 }
 
 button.negative {
-    background: var(--color-2);
     border-color: var(--color-2);
-    color: var(--color-4);
 }
 
 button.negative:hover {
-    background: var(--color-2-dark);
     border-color: var(--color-2-dark);
 }
 
 button.positive {
-    background: var(--color-8);
-    border-color: var(--color-8);
-    color: var(--color-4);
+    border-color: var(--green);
 }
 
 button.positive:hover {
-    background: var(--color-8-dark);
     border-color: var(--color-8-dark);
 }
 
 button:hover, button.secondary:hover {
-    background: var(--color-1);
-    border: 1px solid var(--color-1);
+    border-color: var(--color-1);
 }
 
 button.secondary {
     background: transparent;
     color: var(--color-7);
-    border: 1px solid var(--color-7);
 }
 
 .fadeIn {
@@ -427,6 +468,7 @@ button.secondary {
     border-radius: var(--border-radius);
     color: var(--color-4);
     padding: 5px 10px;
+    max-width: 100dvw;
 }
 
 .notification.error {
@@ -474,7 +516,7 @@ button.secondary {
 }
 
 .card.active {
-    border: 1px solid var(--color-8);
+    border: 1px solid var(--green);
 }
 
 .card.secondary {
@@ -496,7 +538,7 @@ button.secondary {
 .button-container {
     display: flex;
     justify-content: space-between;
-    gap: var(--gap);
+    gap: var(--layout-gap);
 }
 
 .button-container button {
@@ -516,7 +558,6 @@ summary {
     justify-content: space-between;
 }
 
-/* The container */
 .checkbox-container {
     display: block;
     position: relative;
@@ -525,7 +566,6 @@ summary {
     user-select: none;
 }
 
-/* Hide the browser's default checkbox */
 .checkbox-container input {
     position: absolute;
     opacity: 0;
@@ -538,7 +578,6 @@ summary {
     border: 2px solid var(--color-1);
 }
 
-/* Create a custom checkbox */
 .checkmark {
     position: absolute;
     top: 2px;
@@ -569,12 +608,16 @@ summary {
 .widest-fill-right {
     margin-left: auto;
     display: flex;
-    gap: var(--gap);
+    gap: var(--layout-gap);
     justify-content: right;
 }
 
 .align-center {
     align-self: center;
+}
+
+.align-bottom {
+    align-items: end;
 }
 
 .text-center {
@@ -595,10 +638,6 @@ summary {
 
 .padded-inline {
     padding: var(--inline-padding);
-}
-
-.shadow {
-    box-shadow: var(--default-shadow);
 }
 
 .rounded {
@@ -622,13 +661,13 @@ summary {
 }
 
 .fakeButton {
-    background: var(--color-3);
+    background: var(--color-6);
     border: 1px solid transparent;
     width: max-content;
 }
 
 .fakeButton.active {
-    background: var(--color-9);
+    background: var(--color-9) !important;
     border-color: var(--color-1);
 }
 
@@ -657,6 +696,7 @@ summary {
 .fullWidth {
     width: 100%;
     max-width: 100% !important;
+    box-sizing: border-box;
 }
 
 textarea.fullWidth {
@@ -686,8 +726,8 @@ textarea.fullWidth {
 }
 
 .fakeButton.positive:hover {
-    border-color: var(--color-8);
-    color: var(--color-8);
+    border-color: var(--green);
+    color: var(--green);
 }
 
 .fakeButton.positive:hover .svg {
@@ -732,8 +772,9 @@ td:last-child, th:last-child {
     z-index: 3;
     top: calc(100% + 3px);
     width: max-content;
-    background: var(--color-4);
-    border: 1px solid var(--color-5);
+    background: var(--color-3);
+    border: 1px solid var(--color-7);
+    border-radius: var(--border-radius) 0 var(--border-radius) var(--border-radius);
 }
 
 .absolute-align-right {
@@ -804,19 +845,21 @@ td:last-child, th:last-child {
 
 .modal {
     position: absolute;
-    background: var(--color-4);
-    box-shadow: var(--default-shadow);
-    border: 1px solid var(--color-5);
+    background: var(--color-3);
+    border: 1px solid var(--color-7);
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 5;
+    border-radius: calc(var(--border-radius) * 2);
+    max-height: calc(100% - 100px);
+    overflow: auto;
 }
 
 .modal-overlay {
     position: absolute;
     background: var(--color-4);
-    opacity: .5;
+    opacity: .95;
     top: 0;
     left: 0;
     width: 100%;
@@ -831,10 +874,6 @@ td:last-child, th:last-child {
 .auth-box {
     max-width: 600px;
     margin: auto;
-}
-
-.auth-input {
-    max-width: 300px;
 }
 
 .spinner {

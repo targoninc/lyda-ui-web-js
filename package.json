@@ -1,15 +1,22 @@
 {
+  "type": "module",
   "scripts": {
-    "build-web": "bun build ./src/ui/main.mjs --outdir ./out --sourcemap=linked --minify --watch",
+    "build-web": "bun build src/ui/main.ts --outdir ./out --sourcemap=linked --minify --watch",
     "start": "npm run build && node dist/server.js",
-    "start-bun": "bun --watch ./src/server.ts"
+    "start-bun": "bun --watch ./src/server.ts",
+    "build-prod": "bun build src/ui/main.ts --outdir ./out --sourcemap=linked --minify",
+    "start-bun-prod": "bun ./src/server.ts",
+    "fetch-submodules": "git submodule update --init",
+    "update-submodules": "git submodule update --remote --merge"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
     "three": "^0.156.1"
   },
   "dependencies": {
+    "@sgratzl/chartjs-chart-boxplot": "^4.4.3",
     "@types/bun": "^1.1.11",
+    "chart.js": "^4.4.6",
     "dotenv": "^16.4.5",
     "express": "^5.0.0",
     "typescript": "^5.5.3"

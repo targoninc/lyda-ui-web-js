@@ -1,0 +1,41 @@
+import {TrackLike} from "./TrackLike.js";
+import {Album} from "./Album.js";
+import {Playlist} from "./Playlist.js";
+import {Notification} from "./Notification.js";
+import {Comment} from "./Comment.js";
+import {TrackCollaborator} from "./TrackCollaborator.js";
+import {User} from "./User.js";
+import {Repost} from "./Repost.js";
+
+export interface Track {
+    user?: User;
+    comments?: Comment[];
+    likes?: TrackLike[];
+    playlists?: Playlist[];
+    albums?: Album[];
+    notifications?: Notification[];
+    collaborators?: TrackCollaborator[];
+    reposts?: Repost[];
+    id: number;
+    user_id: number;
+    title: string;
+    isrc: string;
+    upc: string;
+    visibility: string;
+    credits: string;
+    loudness_data: string;
+    genre: string;
+    version: string;
+    versionid: number;
+    length: number;
+    description: string;
+    release_date: Date;
+    updated_at: Date;
+    created_at: Date;
+    plays: number;
+    secretcode: string;
+    monetization: boolean;
+    price: number;
+    has_audio: boolean;
+    processed: boolean;
+}

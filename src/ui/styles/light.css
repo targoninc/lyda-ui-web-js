@@ -1,5 +1,9 @@
+.fakeButton {
+    background: var(--color-3);
+}
+
 .fakeButton.positive:hover {
-    background-color: var(--color-8);
+    background-color: var(--green);
     color: var(--color-5);
 }
 
@@ -12,13 +16,13 @@
 }
 
 .border-card {
-    background: var(--color-4);
-}
-
-.card-label {
     background: var(--color-9);
 }
 
 .tab {
     background: var(--color-9);
+}
+
+.audio-player-scrubbar {
+    background: var(--color-3);
 }
