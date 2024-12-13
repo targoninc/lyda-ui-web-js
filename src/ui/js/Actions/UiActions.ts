@@ -21,11 +21,6 @@ export class UiActions {
         Ui.addModal(modal);
     }
 
-    static runMenuIndexAction(index: number) {
-        const menuItem = document.querySelector(".modal-container")?.querySelector(`.menu-item:nth-child(${index + 1})`);
-        menuItem?.click();
-    }
-
     static runMobileCheck() {
         if (FeatureDetector.isMobile()) {
             const metaTag = document.createElement("meta");

@@ -52,8 +52,7 @@ export class TrackActions {
         }
         const res = await Api.postAsync(ApiRoutes.deleteTrack, { id });
         if (res.code === 200) {
-            PlayManager.removeStreamClient(id);
-            QueueManager.removeFromManualQueue(id);
+            await PlayManager.removeTrackFromAllStates(id);
             notify(res.data, "success");
             navigate("profile");
         } else {
@@ -117,7 +116,7 @@ export class TrackActions {
         nowUtc = new Date(nowUtc.getTime() + offset);
 
         const comment = <Comment>{
-            id: res.data,
+            id: parseInt(res.data),
             content: content.value,
             user: user,
             user_id: user.id,
@@ -240,15 +239,12 @@ export class TrackActions {
         navigate("track/" + trackId);
     }
 
-    static async replaceCover(e: MouseEvent, loading: Signal<boolean>) {
-        const target = e.target as HTMLImageElement;
-        if (target.getAttribute("canEdit") !== "true") {
+    static async replaceCover(id: number, canEdit: boolean, oldSrc: Signal<string>, loading: Signal<boolean>) {
+        if (!canEdit) {
             return;
         }
-        const oldSrc = target.src;
         loading.value = true;
         let fileInput = document.createElement("input");
-        const id = parseInt(Util.getTrackIdFromEvent(e));
         fileInput.type = "file";
         fileInput.accept = "image/*";
         fileInput.onchange = async (e) => {
@@ -262,7 +258,7 @@ export class TrackActions {
             try {
                 await MediaUploader.upload(MediaFileType.trackCover, id, file);
                 notify("Cover updated", "success");
-                await Util.updateImage(URL.createObjectURL(file), oldSrc);
+                await Util.updateImage(URL.createObjectURL(file), oldSrc.value);
             } catch (e) {
                 notify("Failed to upload cover", "error");
             }

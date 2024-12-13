@@ -624,6 +624,10 @@ export class TrackTemplates {
             }
         }, 200);
         const coverLoading = signal(false);
+        const coverFile = signal(Images.DEFAULT_AVATAR);
+        Util.getCoverFileFromTrackIdAsync(track.id, track.user_id).then((src) => {
+            coverFile.value = src;
+        });
 
         return create("div")
             .classes("single-page", "noflexwrap", "padded-large", "rounded-large", "flex-v")
@@ -672,8 +676,7 @@ export class TrackTemplates {
                     .children(
                         create("div")
                             .classes("cover-container", "relative", trackData.canEdit ? "pointer" : "_")
-                            .attributes("track_id", track.id, "canEdit", trackData.canEdit)
-                            .onclick(e => TrackActions.replaceCover(e, coverLoading))
+                            .onclick(() => TrackActions.replaceCover(track.id, trackData.canEdit, coverFile, coverLoading))
                             .children(
                                 ifjs(coverLoading, create("div")
                                     .classes("loader", "loader-small", "centeredInParent")
@@ -681,7 +684,7 @@ export class TrackTemplates {
                                     .build()),
                                 create("img")
                                     .classes("cover", "blurOnParentHover", "nopointer")
-                                    .src(await Util.getCoverFileFromTrackIdAsync(track.id, trackUser.id))
+                                    .src(coverFile)
                                     .alt(track.title)
                                     .build()
                             ).build(),

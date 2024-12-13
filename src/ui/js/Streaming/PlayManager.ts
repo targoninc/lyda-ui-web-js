@@ -119,6 +119,20 @@ export class PlayManager {
         return streamClient;
     }
 
+    static async removeTrackFromAllStates(id: number) {
+        QueueManager.removeFromAllQueues(id);
+        if (currentTrackId.value === id) {
+            await PlayManager.stopAsync(id);
+            PlayManager.removeStreamClient(id);
+            currentTrackId.value = 0;
+            delete trackInfo.value[id];
+            document.querySelector("#permanent-player")?.remove();
+        }
+        if (trackInfo.value[id]) {
+            delete trackInfo.value[id];
+        }
+    }
+
     static async togglePlayAsync(id: number) {
         const streamClient = PlayManager.getStreamClient(id);
         if (streamClient === undefined) {

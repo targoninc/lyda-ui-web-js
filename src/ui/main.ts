@@ -47,7 +47,7 @@ export const router = new Router(routes, async (route: Route, params: any) => {
     Ui.updateNavBar(page);
 
     const currentTrackIdTmp = LydaCache.get<number>("currentTrackId").content;
-    if (currentTrackIdTmp !== null) {
+    if (currentTrackIdTmp) {
         currentTrackId.value = currentTrackIdTmp;
         await PlayManager.initializeTrackAsync(currentTrackIdTmp);
     }

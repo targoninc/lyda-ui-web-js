@@ -43,7 +43,7 @@ export class Api {
         };
     }
 
-    static async postAsync<T>(url: string, body: any = {}, authorizationHeaders: any = {}): Promise<ApiResponse<T>> {
+    static async postAsync<T = string>(url: string, body: any = {}, authorizationHeaders: any = {}): Promise<ApiResponse<T>> {
         return await Api.postRawAsync(url, JSON.stringify(body), authorizationHeaders);
     }
 

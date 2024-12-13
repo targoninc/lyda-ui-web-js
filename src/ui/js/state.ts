@@ -2,6 +2,8 @@ import {signal} from "../fjsc/src/signals.ts";
 import {StreamClient} from "./Streaming/StreamClient.ts";
 import {PlayingFrom} from "./Models/PlayingFrom.ts";
 import {Track} from "./Models/DbModels/Track.ts";
+import {LydaCache} from "./Cache/LydaCache.ts";
+import {CacheItem} from "./Cache/CacheItem.ts";
 
 export const dragging = signal(false);
 
@@ -10,6 +12,12 @@ export const navInitialized = signal(false);
 export const streamClients = signal<Record<number, StreamClient>>({});
 
 export const currentTrackId = signal(0);
+currentTrackId.subscribe((id, changed) => {
+    if (!changed) {
+        return;
+    }
+    LydaCache.set("currentTrackId", new CacheItem(id));
+});
 
 export const trackInfo = signal<Record<number, { track: Track }>>({});
 

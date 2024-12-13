@@ -35,7 +35,6 @@ export class StreamClient {
     async startAsync() {
         this.playing = true;
         currentTrackId.value = this.id;
-        LydaCache.set("currentTrackId", new CacheItem(this.id));
         await this.audio.play();
         this.duration = this.audio.duration;
     }

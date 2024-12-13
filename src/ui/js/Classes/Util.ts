@@ -238,7 +238,7 @@ export class Util {
     static async getUserAsync(id = null, noCache = false) {
         if (!id) {
             if (!noCache) {
-                const rawCachedUser = LydaCache.get("user").content;
+                const rawCachedUser = LydaCache.get<string|User>("user").content;
                 const userData = Util.parseCachedUser(rawCachedUser);
                 if (userData !== null) {
                     return Util.mapNullToEmptyString(userData);
@@ -247,7 +247,7 @@ export class Util {
             return await Util.getUser();
         } else {
             if (!noCache) {
-                const cachedUser = LydaCache.get("user:" + id).content;
+                const cachedUser = LydaCache.get<string|User>("user:" + id).content;
                 const userData = Util.parseCachedUser(cachedUser);
                 if (userData !== null) {
                     return Util.mapNullToEmptyString(userData);
@@ -304,7 +304,7 @@ export class Util {
         }
     }
 
-    static parseCachedUser(rawCachedUser: string|User) {
+    static parseCachedUser(rawCachedUser: string|User|null) {
         let userData;
         try {
             userData = JSON.parse(rawCachedUser as string);

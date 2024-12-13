@@ -55,7 +55,7 @@ export class StreamingUpdater {
             return;
         }
         footer.innerHTML = "";
-        if (footer.querySelector(".bottom-track-info") === null) {
+        if (footer.querySelector("#permanent-player") === null) {
             const user = await Util.getUserAsync();
             if (!trackInfoTmp.track.user) {
                 throw new Error(`Track ${trackInfoTmp.track.id} has no user`);

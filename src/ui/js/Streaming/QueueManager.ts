@@ -108,6 +108,14 @@ export class QueueManager {
         StreamingUpdater.updateQueue().then();
     }
 
+    static removeFromAllQueues(id: number) {
+        manualQueue.value = manualQueue.value.filter((queueId) => queueId !== id);
+        contextQueue.value = contextQueue.value.filter((queueId) => queueId !== id);
+        autoQueue.value = autoQueue.value.filter((queueId) => queueId !== id);
+
+        StreamingUpdater.updateQueue().then();
+    }
+
     static toggleInManualQueue(id: number) {
         if (QueueManager.isInManualQueue(id)) {
             QueueManager.removeFromManualQueue(id);
