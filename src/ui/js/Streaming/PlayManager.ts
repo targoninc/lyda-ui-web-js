@@ -15,9 +15,9 @@ import {PlayingFrom} from "../Models/PlayingFrom.ts";
 export class PlayManager {
     static async playCheck(track: any) {
         if (PlayManager.isPlaying(track.id)) {
-            const value = PlayManager.getCurrentTime(track.id, false);
+            const currentTime = PlayManager.getCurrentTime(track.id);
 
-            if (value >= PlayManager.getDuration(track.id)) {
+            if (currentTime.absolute >= PlayManager.getDuration(track.id)) {
                 const secondsBeforePlaySave = 5;
                 const loopingSingle = PlayManager.isLoopingSingle();
                 if (loopingSingle) {
@@ -113,7 +113,7 @@ export class PlayManager {
             streamClient = PlayManager.getStreamClient(id);
             if (streamClient.duration === 0) {
                 streamClient.duration = duration;
-                StreamingUpdater.updateBuffers(id, streamClient.getBufferedLength(), streamClient.duration);
+                StreamingUpdater.updateBuffers(streamClient.getBufferedLength(), streamClient.duration);
             }
         }
         return streamClient;
@@ -152,7 +152,7 @@ export class PlayManager {
 
     static async safeStartAsync(id: number) {
         await PlayManager.startAsync(id);
-        if (PlayManager.getCurrentTime(id) > .1) {
+        if (PlayManager.getCurrentTime(id).relative > .1) {
             await PlayManager.scrubTo(id, 0);
         }
     }
@@ -244,9 +244,12 @@ export class PlayManager {
         await StreamingUpdater.updatePlayState();
     }
 
-    static getCurrentTime(id: number, relative = false) {
+    static getCurrentTime(id: number) {
         const streamClient = PlayManager.getStreamClient(id);
-        return streamClient.getCurrentTime(relative);
+        return {
+            relative: streamClient.getCurrentTime(true),
+            absolute: streamClient.getCurrentTime(false)
+        };
     }
 
     static getDuration(id: number) {

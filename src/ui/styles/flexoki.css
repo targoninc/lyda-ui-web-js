@@ -55,3 +55,11 @@
 .clickable.secondary.padded-inline:hover {
     background: var(--color-4);
 }
+
+.audio-player-scrubbar {
+    background: var(--color-7);
+}
+
+.audio-player-buffer-indicator {
+    background: var(--color-6);
+}

@@ -22,6 +22,7 @@ import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {ProgressState} from "../Enums/ProgressState.ts";
 import {ProgressPart} from "../Models/ProgressPart.ts";
 import {compute, signal, Signal} from "../../fjsc/src/signals.ts";
+import {SearchResult} from "../Models/SearchResult.ts";
 
 export class GenericTemplates {
     static icon(icon: StringOrSignal, adaptive = false, classes: StringOrSignal[] = [], title = "") {
@@ -40,7 +41,7 @@ export class GenericTemplates {
         });
     }
 
-    static gif8831(url: StringOrSignal, link: StringOrSignal = null) {
+    static gif8831(url: StringOrSignal, link: StringOrSignal|null = null) {
         let item;
         if (link) {
             item = create("a")
@@ -96,7 +97,7 @@ export class GenericTemplates {
             .for(id)
             .children(
                 create("input")
-                    .type("checkbox")
+                    .type(InputType.checkbox)
                     .classes("hidden", "slider")
                     .id(id)
                     .checked(checked)
@@ -247,7 +248,7 @@ export class GenericTemplates {
     }
 
     static openPageButton(text: HtmlPropertyValue, page: string) {
-        return GenericTemplates.action(Icons.STARS, text, page, async e => {
+        return GenericTemplates.action(Icons.STARS, text, page, async (e: MouseEvent) => {
             e.preventDefault();
             navigate(page);
         }, [], ["positive", "secondary"], Links.LINK(page));
@@ -325,7 +326,7 @@ export class GenericTemplates {
             ).build();
     }
 
-    static inlineAction(text: HtmlPropertyValue, icon: StringOrSignal, id: HtmlPropertyValue = null, callback: Function, extraAttributes: HtmlPropertyValue[] = [], extraClasses: HtmlPropertyValue[] = []) {
+    static inlineAction(text: HtmlPropertyValue, icon: StringOrSignal, id: HtmlPropertyValue = null, callback: Function, extraAttributes: HtmlPropertyValue[] = [], extraClasses: StringOrSignal[] = []) {
         return create("div")
             .classes("inline-action", "flex", "clickable", "fakeButton", "padded-inline", "rounded", "align-center")
             .id(id)
@@ -435,7 +436,7 @@ export class GenericTemplates {
                     .name(name)
                     .id(name)
                     .required(required)
-                    .checked(checked)
+                    .checked(checked as HtmlPropertyValue)
                     .onchange((e) => onchange((e.target as HTMLInputElement).checked))
                     .build(),
                 create("span")
@@ -743,7 +744,7 @@ export class GenericTemplates {
                             onkeydown: async (e) => {
                                 const target = e.target as HTMLInputElement;
                                 const search = target.value;
-                                const res = await Api.getAsync(ApiRoutes.searchUsers, {
+                                const res = await Api.getAsync<SearchResult[]>(ApiRoutes.searchUsers, {
                                     search,
                                     filters: JSON.stringify(["users"])
                                 });

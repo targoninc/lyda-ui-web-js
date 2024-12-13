@@ -22,3 +22,7 @@
 .tab {
     background: var(--color-9);
 }
+
+.audio-player-scrubbar {
+    background: var(--color-3);
+}

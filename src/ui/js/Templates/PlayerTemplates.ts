@@ -17,7 +17,7 @@ import {User} from "../Models/DbModels/User.ts";
 import {navigate} from "../Routing/Router.ts";
 import {FJSC} from "../../fjsc";
 import {compute, signal} from "../../fjsc/src/signals.ts";
-import { currentTrackId, playingFrom } from "../state.ts";
+import {currentlyBuffered, currentTrackId, currentTrackPosition, playingFrom} from "../state.ts";
 
 export class PlayerTemplates {
     static audioPlayer(track: Track) {
@@ -25,11 +25,10 @@ export class PlayerTemplates {
         setInterval(async () => {
             await PlayManager.playCheck(track);
         }, 1000);
-        const buffered = PlayManager.getBufferedLength(track.id);
-        const duration = PlayManager.getDuration(track.id);
-        const percent = (buffered / duration) * 100;
-        const bufferWidth = Math.min(percent, 100) + "%";
         const isPlaying = PlayManager.isPlaying(track.id);
+        const isCurrentTrack = compute(id => id === track.id, currentTrackId);
+        const positionPercent = compute((p, isCurrent) => isCurrent ? `${p.relative * 100}%` : "0%", currentTrackPosition, isCurrentTrack);
+        const bufferPercent = compute((p, isCurrent) => isCurrent ? `${p * 100}%` : "0%", currentlyBuffered, isCurrentTrack);
 
         return create("div")
             .classes("audio-player", "flex-grow", "flex")
@@ -64,7 +63,7 @@ export class PlayerTemplates {
                                     .build()
                             ).build(),
                         create("div")
-                            .classes("audio-player-scrubber", "flex-grow", "clickable", "flex", "rounded", "padded-inline")
+                            .classes("audio-player-scrubber", "flex-grow", "flex", "rounded", "padded-inline")
                             .id(track.id)
                             .onmousedown(PlayManager.scrubFromElement)
                             .onmousemove(async e => {
@@ -75,18 +74,22 @@ export class PlayerTemplates {
                             .children(
                                 create("div")
                                     .id(track.id)
-                                    .classes("audio-player-scrubbar-buffered", "rounded", "nopointer")
-                                    .styles("width", bufferWidth)
+                                    .classes("audio-player-buffer-indicator", "rounded", "nopointer")
+                                    .styles("left", bufferPercent)
                                     .build(),
                                 create("div")
                                     .classes("audio-player-scrubbar", "rounded", "nopointer")
                                     .build(),
                                 create("div")
+                                    .classes("audio-player-scrubbar-time", "rounded", "nopointer")
+                                    .styles("width", positionPercent)
+                                    .build(),
+                                create("div")
                                     .id(track.id)
                                     .classes("audio-player-scrubhead", "rounded", "nopointer")
+                                    .styles("left", positionPercent)
                                     .build()
-                            )
-                            .build(),
+                            ).build(),
                         create("div")
                             .classes("audio-player-time", "flex", "rounded", "padded-inline")
                             .children(

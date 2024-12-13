@@ -22,3 +22,7 @@ export const contextQueue = signal<number[]>([]);
 export const autoQueue = signal<number[]>([]);
 
 export const playingFrom = signal<PlayingFrom|null>(null);
+
+export const currentTrackPosition = signal<{ relative: number, absolute: number }>({ relative: 0, absolute: 0 });
+
+export const currentlyBuffered = signal(0);

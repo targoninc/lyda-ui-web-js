@@ -7,7 +7,7 @@ import {QueueTemplates} from "../Templates/QueueTemplates.ts";
 import {QueueManager} from "./QueueManager.ts";
 import {PlayerTemplates} from "../Templates/PlayerTemplates.ts";
 import {Util} from "../Classes/Util.ts";
-import {currentTrackId, manualQueue, trackInfo} from "../state.ts";
+import {currentlyBuffered, currentTrackId, currentTrackPosition, manualQueue, trackInfo} from "../state.ts";
 import {signal} from "../../fjsc/src/signals.ts";
 
 const updatingPlayState = signal(false);
@@ -38,7 +38,7 @@ export class StreamingUpdater {
             return;
         }
         const streamClient = PlayManager.getStreamClient(currentTrackId.value);
-        StreamingUpdater.updateBuffers(currentTrackId.value, streamClient.getBufferedLength(), streamClient.duration);
+        StreamingUpdater.updateBuffers(streamClient.getBufferedLength(), streamClient.duration);
         StreamingUpdater.updateScrubber(currentTrackId.value);
 
         let trackInfoTmp = trackInfo.value[currentTrackId.value];
@@ -57,6 +57,9 @@ export class StreamingUpdater {
         footer.innerHTML = "";
         if (footer.querySelector(".bottom-track-info") === null) {
             const user = await Util.getUserAsync();
+            if (!trackInfoTmp.track.user) {
+                throw new Error(`Track ${trackInfoTmp.track.id} has no user`);
+            }
             const player = await PlayerTemplates.player(trackInfoTmp.track, trackInfoTmp.track.user, user);
             footer.appendChild(player);
         }
@@ -74,21 +77,14 @@ export class StreamingUpdater {
     }
 
     static updateScrubber(id: number) {
-        const valueRelative = PlayManager.getCurrentTime(id, true);
-        const value = PlayManager.getCurrentTime(id, false);
-        const scrubHeads = document.querySelectorAll(".audio-player-scrubhead") as NodeListOf<HTMLDivElement>;
-        for (const scrubHead of scrubHeads) {
-            if (scrubHead.id !== id.toString()) {
-                continue;
-            }
-            scrubHead.style.left = `${valueRelative * 100}%`;
-        }
+        const currentTime = PlayManager.getCurrentTime(id);
+        currentTrackPosition.value = currentTime;
         const scrubTimesCurrent = document.querySelectorAll(".audio-player-time-current") as NodeListOf<HTMLSpanElement>;
         for (const scrubTimeCurrent of scrubTimesCurrent) {
             if (scrubTimeCurrent.id !== id.toString()) {
                 continue;
             }
-            scrubTimeCurrent.innerText = Time.format(value);
+            scrubTimeCurrent.innerText = Time.format(currentTime.absolute);
         }
 
         const waveforms = document.querySelectorAll(".waveform");
@@ -98,7 +94,7 @@ export class StreamingUpdater {
                 continue;
             }
             const waveformBars = waveform.querySelectorAll(".waveform-bar");
-            const barsBefore = Math.floor(valueRelative * barCount);
+            const barsBefore = Math.floor(currentTime.relative * barCount);
             const barsAfter = barCount - barsBefore;
             for (let i = 0; i < barsBefore; i++) {
                 waveformBars[i]?.classList.add("active");
@@ -109,24 +105,8 @@ export class StreamingUpdater {
         }
     }
 
-    static updateBuffers(id: number, bufferedLength: number, duration: number) {
-        const buffers = document.querySelectorAll(".audio-player-scrubbar-buffered") as NodeListOf<HTMLDivElement>;
-        let cssWidth = (bufferedLength / duration) * 100;
-        if (cssWidth > 100) {
-            console.warn("Buffered length is greater than duration");
-            console.warn("Buffered length: " + bufferedLength);
-            console.warn("Duration: " + duration);
-            cssWidth = 100;
-        }
-        for (const buffer of buffers) {
-            if (buffer.id !== id.toString()) {
-                continue;
-            }
-            buffer.style.width = `${cssWidth}%`;
-        }
-        if (buffers.length === 0) {
-            console.warn("No buffers found");
-        }
+    static updateBuffers(bufferedLength: number, duration: number) {
+        currentlyBuffered.value = Math.min(Math.max(bufferedLength / duration, 0), 1);
     }
 
     static updateMuteState(id: number) {
@@ -201,7 +181,6 @@ export class StreamingUpdater {
             return;
         }
         updatingPlayState.value = true;
-        console.log("updatingPlayState");
         const targets = document.querySelectorAll(".audio-player-toggle");
         for (const target of targets) {
             const streamClient = PlayManager.getStreamClient(parseInt(target.id));

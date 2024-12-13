@@ -263,17 +263,29 @@ label {
     height: 30px;
     position: relative;
     max-width: 100%;
+    cursor: pointer;
 }
 
 .audio-player-scrubhead {
-    width: var(--font-size-medium);
-    height: var(--font-size-medium);
+    width: var(--border-radius);
+    height: var(--font-size-large);
     background: var(--color-5);
-    border-radius: 50%;
+    border-radius: var(--border-radius);
     z-index: 1;
     position: absolute;
     top: 50%;
     transform: translateY(-50%) translateX(-50%);
+}
+
+.audio-player-buffer-indicator {
+    background: var(--color-7);
+    border-radius: var(--border-radius);
+    position: absolute;
+    height: 6px;
+    width: 3px;
+    top: 50%;
+    transform: translateY(-50%) translateX(-50%);
+    transition: left 1s ease;
 }
 
 .interpolate-left {
@@ -292,15 +304,20 @@ label {
     bottom: 20%;
 }
 
-.audio-player-scrubbar-buffered {
-    background: var(--color-3);
+.audio-player-scrubbar {
+    background: var(--color-6);
+    position: absolute;
+    height: 6px;
+    width: 100%;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
 }
 
-.audio-player-scrubbar {
+.audio-player-scrubbar-time {
     background: var(--color-5);
     position: absolute;
-    height: 3px;
-    width: 100%;
+    height: 6px;
     top: 50%;
     left: 0;
     transform: translateY(-50%);
@@ -314,16 +331,6 @@ label {
     left: 50%;
     bottom: 0;
     transform: translateX(-50%);
-}
-
-.audio-player-scrubbar-buffered {
-    background: var(--green);
-    position: absolute;
-    height: 4px;
-    top: 50%;
-    left: 0;
-    transform: translateY(-100%);
-    transition: width 1s ease;
 }
 
 .play-adjust {
