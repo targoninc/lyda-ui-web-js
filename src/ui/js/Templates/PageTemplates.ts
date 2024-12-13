@@ -7,9 +7,10 @@ import {Util} from "../Classes/Util.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {Follow} from "../Models/DbModels/Follow.ts";
 import {signal} from "../../fjsc/src/signals.ts";
+import {User} from "../Models/DbModels/User.ts";
 
 export class PageTemplates {
-    static mapping = {
+    static mapping: {[key: string]: Function} = {
         explore: this.explorePage,
         following: this.followingPage,
         album: this.albumPage,
@@ -33,7 +34,7 @@ export class PageTemplates {
         "password-reset": LandingPageTemplates.newLandingPage,
         "activate-account": LandingPageTemplates.newLandingPage,
     };
-    static nonUserFallback = {
+    static nonUserFallback: {[key: string]: Function} = {
         library: this.loginPage,
         upload: this.loginPage,
         settings: this.loginPage,
@@ -202,9 +203,9 @@ export class PageTemplates {
                 randomUserWidget.value = create("span").text("Failed to load random user").build();
                 return;
             }
-            const user = data.data;
+            const user = data.data as User;
             const selfUser = await Util.getUserAsync();
-            const following = user.follows.some((f: Follow) => selfUser ? f.following_user_id === selfUser.id : false);
+            const following = user.follows?.some((f: Follow) => selfUser ? f.following_user_id === selfUser.id : false) ?? false;
             randomUserWidget.value = UserTemplates.userWidget(user.id, user.username, user.displayname, await Util.getAvatarFromUserIdAsync(user.id), following);
         });
 

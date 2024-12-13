@@ -85,7 +85,7 @@ export class PlayManager {
 
     static getPlayingFrom() {
         let playingFromTmp = playingFrom.value;
-        if (Object.keys(playingFromTmp as any).length === 0) {
+        if (!playingFromTmp || Object.keys(playingFromTmp as any).length === 0) {
             const cachedPlayingFrom = LydaCache.get<PlayingFrom>("playingFrom").content ?? null;
             if (cachedPlayingFrom) {
                 playingFromTmp = cachedPlayingFrom;

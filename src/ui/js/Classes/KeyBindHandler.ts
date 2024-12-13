@@ -1,9 +1,14 @@
 import {PlayManager} from "../Streaming/PlayManager.ts";
 import {UiActions} from "../Actions/UiActions.ts";
 import {AuthActions} from "../Actions/AuthActions.ts";
+import {currentTrackId} from "../state.ts";
+import {signal} from "../../fjsc/src/signals.ts";
+import {target} from "./Util.ts";
+
+const keybindsInitialized = signal(false);
 
 export class KeyBinds {
-    static bindings = {
+    static bindings: {[key: string]: string[]} = {
         TogglePlay: ["Space"],
         SkipForward: ["ArrowRight", "KeyD"],
         SkipBackward: ["ArrowLeft", "KeyA"],
@@ -14,7 +19,7 @@ export class KeyBinds {
         LoginLogout: ["KeyL"],
     };
 
-    static functionMap = {
+    static functionMap: {[key: string]: {function: Function, neededModifiers?: string[]}} = {
         TogglePlay: { function: PlayManager.togglePlayAsync },
         SkipForward: { function: PlayManager.skipForward, neededModifiers: ["shift"] },
         SkipBackward: { function: PlayManager.skipBackward, neededModifiers: ["shift"] },
@@ -25,8 +30,8 @@ export class KeyBinds {
         Close: { function: UiActions.closeModal },
     };
 
-    static handler(e) {
-        if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
+    static handler(e: KeyboardEvent) {
+        if (target(e).tagName === "INPUT" || target(e).tagName === "TEXTAREA") {
             return;
         }
         for (const action in KeyBinds.bindings) {
@@ -36,23 +41,24 @@ export class KeyBinds {
                     const funcItem = KeyBinds.functionMap[action];
                     if (funcItem.neededModifiers) {
                         for (const modifier of funcItem.neededModifiers) {
+                            // @ts-ignore
                             if (!e[modifier+"Key"]) {
                                 return;
                             }
                         }
                     }
                     e.preventDefault();
-                    funcItem.function(window.currentTrackId);
+                    funcItem.function(currentTrackId.value);
                 }
             }
         }
     }
 
     static initiate() {
-        if (window.keybindsInitialized) {
+        if (keybindsInitialized.value) {
             return;
         }
         document.addEventListener("keydown", KeyBinds.handler);
-        window.keybindsInitialized = true;
+        keybindsInitialized.value = true;
     }
 }

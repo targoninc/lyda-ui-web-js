@@ -34,6 +34,7 @@ export class StreamingUpdater {
 
     static async updatePermanentPlayer() {
         if (!currentTrackId.value) {
+            console.log("no currentTrackId");
             return;
         }
         const streamClient = PlayManager.getStreamClient(currentTrackId.value);
@@ -200,6 +201,7 @@ export class StreamingUpdater {
             return;
         }
         updatingPlayState.value = true;
+        console.log("updatingPlayState");
         const targets = document.querySelectorAll(".audio-player-toggle");
         for (const target of targets) {
             const streamClient = PlayManager.getStreamClient(parseInt(target.id));

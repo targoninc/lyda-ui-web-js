@@ -1,4 +1,4 @@
-import {navigate, Router} from "./js/Routing/Router.ts";
+import {navigate, Route, Router} from "./js/Routing/Router.ts";
 import {PageTemplates} from "./js/Templates/PageTemplates.ts";
 import {KeyBinds} from "./js/Classes/KeyBindHandler.ts";
 import {LydaCache} from "./js/Cache/LydaCache.ts";
@@ -9,12 +9,16 @@ import {Ui} from "./js/Classes/Ui.ts";
 import {Util} from "./js/Classes/Util.ts";
 import {routes} from "./js/Routing/routes.js";
 import {GenericTemplates} from "./js/Templates/GenericTemplates.ts";
+import {currentTrackId} from "./js/state.ts";
 
-LydaCache.clear();
+//LydaCache.clear();
 let pageContainer = document.querySelector(".page-container");
+if (!pageContainer) {
+    throw new Error("No page container found");
+}
 pageContainer.appendChild(GenericTemplates.loadingSpinner());
 
-window.router = new Router(routes, async (route, params) => {
+export const router = new Router(routes, async (route: Route, params: any) => {
     const page = route.path.replace("/", "");
     console.log(`Navigating to ${page} with params`, params);
 
@@ -34,18 +38,18 @@ window.router = new Router(routes, async (route, params) => {
     const userToShow = page === Ui.validUrlPaths.profile ? params.path_1 : null;
     const userFound = await Ui.initUser(userToShow);
     if (userToShow && !userFound && page !== "404") {
-        window.router.navigate("404");
+        router.navigate("404");
         return;
     }
     await Lyda.initPage(params);
-}, async (route, params) => {
+}, async (route: Route, params: any) => {
     const page = route.path;
     Ui.updateNavBar(page);
 
-    const currentTrackId = LydaCache.get("currentTrackId").content;
-    if (currentTrackId !== null) {
-        window.currentTrackId = currentTrackId;
-        await PlayManager.initializeTrackAsync(currentTrackId);
+    const currentTrackIdTmp = LydaCache.get<number>("currentTrackId").content;
+    if (currentTrackIdTmp !== null) {
+        currentTrackId.value = currentTrackIdTmp;
+        await PlayManager.initializeTrackAsync(currentTrackIdTmp);
     }
 }, () => {
     setTimeout(() => {

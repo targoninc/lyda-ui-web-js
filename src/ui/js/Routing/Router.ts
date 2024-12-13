@@ -1,3 +1,5 @@
+import {router} from "../../main.ts";
+
 export class Router {
     currentRoute = null;
     routes: any[];
@@ -69,13 +71,11 @@ export function navigate(path: string, params: string[] = []) {
     if (params.length > 0) {
         path += "?" + params.join("&");
     }
-    // @ts-ignore
-    (<Router>window.router).navigate(path).then();
+    router.navigate(path).then();
 }
 
 export function reload() {
-    // @ts-ignore
-    (<Router>window.router).reload();
+    router.reload();
 }
 
 export interface Route {

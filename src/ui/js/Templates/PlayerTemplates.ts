@@ -11,12 +11,13 @@ import {CommentTemplates} from "./CommentTemplates.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {Util} from "../Classes/Util.ts";
-import {create} from "../../fjsc/src/f2.ts";
+import {create, ifjs} from "../../fjsc/src/f2.ts";
 import {Track} from "../Models/DbModels/Track.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {navigate} from "../Routing/Router.ts";
 import {FJSC} from "../../fjsc";
-import {signal} from "../../fjsc/src/signals.ts";
+import {compute, signal} from "../../fjsc/src/signals.ts";
+import { currentTrackId, playingFrom } from "../state.ts";
 
 export class PlayerTemplates {
     static audioPlayer(track: Track) {
@@ -110,8 +111,8 @@ export class PlayerTemplates {
 
     static loudnessControl(track: Track) {
         setTimeout(() => {
-            StreamingUpdater.updateLoudness(window.currentTrackId, PlayManager.getLoudness(window.currentTrackId));
-            StreamingUpdater.updateMuteState(window.currentTrackId);
+            StreamingUpdater.updateLoudness(currentTrackId.value, PlayManager.getLoudness(currentTrackId.value));
+            StreamingUpdater.updateMuteState(currentTrackId.value);
         }, 100);
         const volumePercent = PlayManager.getLoudness(track.id) * 100;
 
@@ -161,10 +162,9 @@ export class PlayerTemplates {
             .build();
     }
 
-    static async player(track, trackUser, user) {
+    static async player(track: Track, trackUser: User, user: User) {
         const queue = QueueManager.getManualQueue();
         const tasks = queue.map(id => PlayManager.getTrackData(id));
-        const playingFrom = PlayManager.getPlayingFrom();
         const trackList = await Promise.all(tasks);
         const loopingSingle = PlayManager.isLoopingSingle();
         const loopingContext = PlayManager.isLoopingContext();
@@ -183,7 +183,7 @@ export class PlayerTemplates {
                         create("div")
                             .classes("flex")
                             .children(
-                                await PlayerTemplates.bottomTrackInfo(track, trackUser, user, playingFrom),
+                                await PlayerTemplates.bottomTrackInfo(track, trackUser, user),
                                 await QueueTemplates.queue(trackList),
                                 PlayerTemplates.audioControls(loopingSingle, loopingContext)
                             ).build(),
@@ -203,25 +203,20 @@ export class PlayerTemplates {
             ).build();
     }
 
-    static playingFrom(playingFrom: { id: string, type: string, name: string }) {
-        const functionMap: any = {
-            "album": () => {
-                navigate("album/" + playingFrom.id);
-            },
-            "playlist": () => {
-                navigate("playlist/" + playingFrom.id);
-            },
-        };
+    static playingFrom() {
+        const id = compute(pf => pf?.id, playingFrom);
+        const type = compute(pf => pf?.type, playingFrom);
+        const name = compute(pf => pf?.name, playingFrom);
 
-        return create("div")
-            .classes("playing-from", "flex", playingFrom.id ? "_" : "hidden")
+        return ifjs(playingFrom, create("div")
+            .classes("playing-from", "flex")
             .children(
                 create("span")
                     .classes("text-small", "padded-inline", "align-center", "clickable", "rounded")
-                    .onclick(functionMap[playingFrom.type])
-                    .text("Playing from " + playingFrom.name)
+                    .onclick(() => navigate(`${type.value}/${id.value}`))
+                    .text("Playing from " + name)
                     .build(),
-            ).build();
+            ).build());
     }
 
     static noSubscriptionInfo() {
@@ -234,7 +229,7 @@ export class PlayerTemplates {
             }).build();
     }
 
-    static async bottomTrackInfo(track: Track, trackUser: User, user: User, playingFrom: any) {
+    static async bottomTrackInfo(track: Track, trackUser: User, user: User) {
         const icons = [];
         const isPrivate = track.visibility !== "public";
         if (isPrivate) {
@@ -257,9 +252,9 @@ export class PlayerTemplates {
                     }).build(),
                 ...icons,
                 UserTemplates.userWidget(trackUser.id, trackUser.username, trackUser.displayname, await Util.getAvatarFromUserIdAsync(trackUser.id),
-                    Util.arrayPropertyMatchesUser(trackUser.follows, "followingUserId", user),
+                    Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "followingUserId", user),
                     [], ["align-center"]),
-                PlayerTemplates.playingFrom(playingFrom),
+                PlayerTemplates.playingFrom(),
                 create("div")
                     .classes("flex", "align-center")
                     .children(

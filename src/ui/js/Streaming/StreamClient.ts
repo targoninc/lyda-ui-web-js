@@ -4,6 +4,7 @@ import {PlayManager} from "./PlayManager.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {Util} from "../Classes/Util.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
+import { currentTrackId } from "../state.ts";
 
 export class StreamClient {
     id: number;
@@ -22,9 +23,9 @@ export class StreamClient {
         this.audio.src = src;
         this.playing = false;
 
-        const currentStreamClient = PlayManager.getStreamClient(window.currentTrackId);
+        const currentStreamClient = PlayManager.getStreamClient(currentTrackId.value);
         if (!currentStreamClient) {
-            const cachedVolume = LydaCache.get("volume").content;
+            const cachedVolume = LydaCache.get<number>("volume").content;
             this.audio.volume = cachedVolume !== null ? cachedVolume : 0.2;
         } else {
             this.audio.volume = currentStreamClient.getVolume();
@@ -33,7 +34,7 @@ export class StreamClient {
 
     async startAsync() {
         this.playing = true;
-        window.currentTrackId = this.id;
+        currentTrackId.value = this.id;
         LydaCache.set("currentTrackId", new CacheItem(this.id));
         await this.audio.play();
         this.duration = this.audio.duration;

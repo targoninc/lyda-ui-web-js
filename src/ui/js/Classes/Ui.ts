@@ -14,6 +14,7 @@ import {navInitialized} from "../state.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {CollaboratorType} from "../Models/DbModels/CollaboratorType.ts";
 import {TrackCollaborator} from "../Models/DbModels/TrackCollaborator.ts";
+import {Notification} from "../Models/DbModels/Notification.ts";
 
 export class Ui {
     static validUrlPaths = {
@@ -41,7 +42,7 @@ export class Ui {
         if (document.getElementById("navTop") === null) {
             let userTemplateRender;
             if (signedIn) {
-                const res = await Api.getAsync(ApiRoutes.getAllNotifications);
+                const res = await Api.getAsync<Notification[]>(ApiRoutes.getAllNotifications);
                 let notifications = [];
                 if (res.code !== 200) {
                     userTemplateRender = NavTemplates.notSignedInNote();
@@ -158,7 +159,7 @@ export class Ui {
         }
     }
 
-    static getImageModal(imageUrl: string) {
+    static getImageModal(imageUrl: StringOrSignal) {
         const modal = GenericTemplates.imageModal(imageUrl);
         Ui.addModal(modal);
     }
