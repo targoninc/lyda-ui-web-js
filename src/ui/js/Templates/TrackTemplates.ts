@@ -25,12 +25,12 @@ import {TrackLike} from "../Models/DbModels/TrackLike.ts";
 import {Repost} from "../Models/DbModels/Repost.ts";
 import {Album} from "../Models/DbModels/Album.ts";
 import {FJSC} from "../../fjsc";
-import {UploadableTrack} from "../Models/UploadableTrack.ts";
 import {PlaylistTrack} from "../Models/DbModels/PlaylistTrack.ts";
 import {AlbumTrack} from "../Models/DbModels/AlbumTrack.ts";
 import {Playlist} from "../Models/DbModels/Playlist.ts";
-import {Signal, signal} from "../../fjsc/src/signals.ts";
+import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {CollaboratorType} from "../Models/DbModels/CollaboratorType.ts";
+import {currentTrackId} from "../state.ts";
 
 export class TrackTemplates {
     static trackCard(track: Track, user: User, profileId: number) {
@@ -61,7 +61,7 @@ export class TrackTemplates {
         });
 
         return create("div")
-            .classes("track-card", "noflexwrap", "small-gap", "padded", "flex-v", window.currentTrackId === track.id ? "playing" : "_")
+            .classes("track-card", "noflexwrap", "small-gap", "padded", "flex-v", currentTrackId.value === track.id ? "playing" : "_")
             .attributes("track_id", track.id)
             .children(
                 create("div")
@@ -78,7 +78,7 @@ export class TrackTemplates {
                             .classes("flex-v", "small-gap")
                             .children(
                                 UserTemplates.userWidget(track.user_id, track.user.username, track.user.displayname, avatarState,
-                                    Util.arrayPropertyMatchesUser(track.user.follows, "followingUserId", user)),
+                                    Util.arrayPropertyMatchesUser(track.user.follows ?? [], "followingUserId", user)),
                                 create("span")
                                     .classes("date", "text-small", "nopointer", "color-dim")
                                     .text(Time.ago(track.release_date ?? track.created_at))
@@ -96,25 +96,20 @@ export class TrackTemplates {
             ).build();
     }
 
-    /**
-     *
-     * @param collab {TrackCollaborator}
-     * @returns {*}
-     */
-    static collabIndicator(collab) {
+    static collabIndicator(collab: TrackCollaborator): any {
         return create("div")
             .classes("pill", "padded-inline", "flex", "rounded-max", "bordered")
             .children(
                 create("div")
                     .classes("align-center", "text-small", "nopointer")
-                    .text(collab.collaboratorType.name)
+                    .text(collab.collab_type?.name)
                     .build(),
             ).build();
     }
 
-    static noTracksUploadedYet(isOwnProfile) {
+    static noTracksUploadedYet(isOwnProfile: boolean) {
         let children;
-        if (isOwnProfile === true) {
+        if (isOwnProfile) {
             children = [
                 create("p")
                     .text("We would love to hear what you make.")
@@ -187,7 +182,7 @@ export class TrackTemplates {
             .build();
     }
 
-    static async trackList(tracksState: Signal<Track[]>, pageState, type, filterState, loadingState, user) {
+    static async trackList(tracksState: Signal<Track[]>, pageState: Signal<number>, type: string, filterState: Signal<string>, loadingState: Signal<boolean>, user: User) {
         const trackList = tracksState.value.map(track => TrackTemplates.feedTrack(track, user));
         const trackListContainer = signal(TrackTemplates.#trackList(trackList));
         tracksState.onUpdate = async (newTracks) => {
@@ -206,8 +201,8 @@ export class TrackTemplates {
             .build();
     }
 
-    static feedFilters(filterState, loadingState) {
-        const filterMap = {
+    static feedFilters(filterState: Signal<string>, loadingState: Signal<boolean>) {
+        const filterMap: {[key: string]: string} = {
             all: "All",
             originals: "Originals",
             reposts: "Reposts",
@@ -225,14 +220,14 @@ export class TrackTemplates {
         return GenericTemplates.pills(options, filterState, [], loadingState);
     }
 
-    static #trackList(trackList) {
+    static #trackList(trackList: any[]) {
         return create("div")
             .classes("flex-v", "track-list")
             .children(...trackList)
             .build();
     }
 
-    static paginationControls(pageState) {
+    static paginationControls(pageState: Signal<number>) {
         const previousCallback = () => {
             pageState.value = pageState.value - 1;
         };
@@ -248,7 +243,7 @@ export class TrackTemplates {
         return controls;
     }
 
-    static #paginationControls(currentPage, previousCallback, nextCallback) {
+    static #paginationControls(currentPage: number, previousCallback: Function, nextCallback: Function) {
         return create("div")
             .classes("flex")
             .children(
@@ -257,8 +252,8 @@ export class TrackTemplates {
             ).build();
     }
 
-    static waveform(track_id, processed, track_length, loudnessData, small = false) {
-        if (!processed) {
+    static waveform(track: Track, loudnessData: number[], small = false) {
+        if (!track.processed) {
             return create("div")
                 .classes("waveform", small ? "waveform-small" : "_", "processing-box", "rounded-max", "relative", "flex", "nogap")
                 .title("This track is still processing, please check back later.")
@@ -266,10 +261,9 @@ export class TrackTemplates {
         }
         return create("div")
             .classes("waveform", small ? "waveform-small" : "_", "relative", "flex", "nogap", "pointer")
-            .id(track_id)
-            .attributes("duration", track_length)
+            .id(track.id)
             .onmousedown(async (e) => {
-                PlayManager.addStreamClientIfNotExists(e.target.id, e.target.getAttribute("duration"));
+                PlayManager.addStreamClientIfNotExists(track.id, track.length);
                 await PlayManager.scrubFromElement(e);
             })
             .onmousemove(async e => {
@@ -309,7 +303,7 @@ export class TrackTemplates {
             ).build();
     }
 
-    static feedTrack(track, user) {
+    static feedTrack(track: Track, user: User) {
         const icons = [];
         const isPrivate = track.visibility === "private";
         if (isPrivate) {
@@ -318,25 +312,26 @@ export class TrackTemplates {
 
         const graphics = [];
         if (track.processed) {
-            graphics.push(TrackTemplates.waveform(track.id, track.processed, track.length, JSON.parse(track.loudnessData)));
+            graphics.push(TrackTemplates.waveform(track, JSON.parse(track.loudness_data)));
         } else {
-            graphics.push(TrackTemplates.waveform(track.id, track.processed, track.length, []));
+            graphics.push(TrackTemplates.waveform(track, []));
         }
         const avatarState = signal(Images.DEFAULT_AVATAR);
         Util.getAvatarFromUserIdAsync(track.user_id).then((src) => {
             avatarState.value = src;
         });
         const inQueue = signal(QueueManager.isInManualQueue(track.id));
-        const queueSubState = inQueue.boolValues({
-            text: {onTrue: "Unqueue", onFalse: "Queue"},
-            icon: {onTrue: Icons.UNQUEUE, onFalse: Icons.QUEUE},
-        });
+        const text = compute((q: boolean): string => q ? "Unqueue" : "Queue", inQueue);
+        const icon = compute((q: boolean) => q ? Icons.UNQUEUE : Icons.QUEUE, inQueue);
+        if (!track.comments || !track.likes || !track.reposts) {
+            throw new Error(`Track ${track.id} has no comments, likes or reposts`);
+        }
 
         return create("div")
             .classes("flex")
             .children(
                 create("div")
-                    .classes("list-track", "flex", "padded", "rounded", "fullWidth", "card", window.currentTrackId === track.id ? "playing" : "_")
+                    .classes("list-track", "flex", "padded", "rounded", "fullWidth", "card", currentTrackId.value === track.id ? "playing" : "_")
                     .styles("max-width", "100%")
                     .children(
                         TrackTemplates.feedTrackCover(track),
@@ -353,17 +348,17 @@ export class TrackTemplates {
                                                     .classes("flex")
                                                     .children(
                                                         TrackTemplates.title(track.title, track.id, icons),
-                                                        track.repost ? TrackTemplates.repostIndicator(track.repost) : null,
+                                                        //track.repost ? TrackTemplates.repostIndicator(track.repost) : null,
                                                     ).build(),
                                                 create("div")
                                                     .classes("flex")
                                                     .children(
-                                                        UserTemplates.userWidget(track.user_id, track.user.username, track.user.displayname, avatarState,
-                                                            Util.arrayPropertyMatchesUser(track.user.follows, "followingUserId", user),
+                                                        UserTemplates.userWidget(track.user_id, track.user!.username, track.user!.displayname, avatarState,
+                                                            Util.arrayPropertyMatchesUser(track.user!.follows ?? [], "followingUserId", user),
                                                             [], ["align-center", "widget-secondary"]),
                                                         create("span")
                                                             .classes("date", "text-small", "nopointer", "color-dim", "align-center")
-                                                            .text(Time.ago(track.createdAt))
+                                                            .text(Time.ago(track.created_at))
                                                             .build(),
                                                     ).build()
                                             ).build(),
@@ -378,7 +373,7 @@ export class TrackTemplates {
                                         isPrivate ? null : StatisticsTemplates.repostListOpener(track.reposts, user),
                                         CommentTemplates.commentsIndicator(track.id, track.comments.length),
                                         CommentTemplates.commentListOpener(track.id, track.comments, user),
-                                        GenericTemplates.action(queueSubState.icon, queueSubState.text, track.id, () => {
+                                        GenericTemplates.action(icon, text, track.id, () => {
                                             QueueManager.toggleInManualQueue(track.id);
                                             inQueue.value = QueueManager.isInManualQueue(track.id);
                                         }, [], ["secondary"]),
@@ -413,9 +408,9 @@ export class TrackTemplates {
 
         const graphics = [];
         if (track.processed) {
-            graphics.push(TrackTemplates.waveform(track.id, track.processed, track.length, JSON.parse(track.loudness_data), true));
+            graphics.push(TrackTemplates.waveform(track, JSON.parse(track.loudness_data), true));
         } else {
-            graphics.push(TrackTemplates.waveform(track.id, track.processed, track.length, [], true));
+            graphics.push(TrackTemplates.waveform(track, [], true));
         }
 
         const trackActions = [];
@@ -452,10 +447,10 @@ export class TrackTemplates {
         if (canEdit) {
             item = item
                 .attributes("draggable", "true")
-                .ondragstart(async (e) => {
+                .ondragstart(async (e: DragEvent) => {
                     DragActions.showDragTargets();
-                    e.dataTransfer.setData("text/plain", JSON.stringify(dragData));
-                    e.dataTransfer.effectAllowed = "move";
+                    e.dataTransfer!.setData("text/plain", JSON.stringify(dragData));
+                    e.dataTransfer!.effectAllowed = "move";
                     e.stopPropagation();
                 })
                 .ondragend(async (e) => {
@@ -465,7 +460,7 @@ export class TrackTemplates {
                 });
         }
 
-        const playingClasses = window.currentTrackId === track.id ? ["playing"] : [];
+        const playingClasses = currentTrackId.value === track.id ? ["playing"] : [];
 
         itemNode = item.children(
             create("div")
@@ -604,7 +599,7 @@ export class TrackTemplates {
             icons.push(GenericTemplates.lock());
         }
 
-        const trackUser: User = track.user;
+        const trackUser = track.user;
         if (!trackUser) {
             throw new Error(`Track ${track.id} has no user`);
         }
@@ -647,7 +642,7 @@ export class TrackTemplates {
                                 ...icons,
                             ).build(),
                         UserTemplates.userWidget(trackUser.id, trackUser.username, trackUser.displayname, await Util.getAvatarFromUserIdAsync(trackUser.id),
-                            Util.arrayPropertyMatchesUser(trackUser.follows, "followingUserId", user),
+                            Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "followingUserId", user),
                             [], ["widget-secondary"]),
                     ).build(),
                 ...toAppend,
@@ -693,7 +688,7 @@ export class TrackTemplates {
                         create("div")
                             .classes("flex-v")
                             .children(
-                                TrackTemplates.waveform(track.id, track.processed, track.length, track.processed ? JSON.parse(track.loudness_data) : []),
+                                TrackTemplates.waveform(track, track.processed ? JSON.parse(track.loudness_data) : []),
                                 create("div")
                                     .classes("flex")
                                     .children(
@@ -722,7 +717,7 @@ export class TrackTemplates {
             ).build();
     }
 
-    static collaboratorSection(collaboratorChildren, linkedUserState: Signal<TrackCollaborator[]>) {
+    static collaboratorSection(collaboratorChildren: AnyNode, linkedUserState: Signal<TrackCollaborator[]>) {
         const collabText = signal("");
         linkedUserState.subscribe((newCollaborators: TrackCollaborator[]) => {
             collabText.value = newCollaborators.length > 0 ? "Collaborators" : "";
@@ -795,17 +790,15 @@ export class TrackTemplates {
 
     static audioActions(track: Track, user: User, editActions: AnyNode[]) {
         const inQueue = signal(QueueManager.isInManualQueue(track.id));
-        const queueSubState = inQueue.boolValues({
-            text: {onTrue: "Unqueue", onFalse: "Queue"},
-            icon: {onTrue: "remove", onFalse: "switch_access_shortcut_add"},
-        });
+        const text = compute((q: boolean): string => q ? "Unqueue" : "Queue", inQueue);
+        const icon = compute((q: boolean): string => q ? "remove" : "switch_access_shortcut_add", inQueue);
 
         let actions: AnyElement[] = [];
         if (user) {
             actions = [
                 FJSC.button({
-                    text: queueSubState.text,
-                    icon: { icon: queueSubState.icon },
+                    text,
+                    icon: { icon },
                     onclick: () => {
                         QueueManager.toggleInManualQueue(track.id);
                         inQueue.value = QueueManager.isInManualQueue(track.id);

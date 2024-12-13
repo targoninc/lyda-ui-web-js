@@ -196,7 +196,7 @@ export class GenericTemplates {
             ).build();
     }
 
-    static action(icon: StringOrSignal, text: HtmlPropertyValue, id: HtmlPropertyValue, onclick: (e: any) => void, attributes: HtmlPropertyValue[] = [], classes: StringOrSignal[] = [], link: StringOrSignal|null = null) {
+    static action(icon: StringOrSignal, text: HtmlPropertyValue, id: HtmlPropertyValue, onclick: Function, attributes: HtmlPropertyValue[] = [], classes: StringOrSignal[] = [], link: StringOrSignal|null = null) {
         return create(link ? "a" : "div")
             .classes("flex", "small-gap", "clickable", "fakeButton", "padded-inline", "rounded")
             .children(
