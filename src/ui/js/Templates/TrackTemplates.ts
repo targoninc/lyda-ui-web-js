@@ -77,8 +77,7 @@ export class TrackTemplates {
                         create("div")
                             .classes("flex-v", "small-gap")
                             .children(
-                                UserTemplates.userWidget(track.user_id, track.user.username, track.user.displayname, avatarState,
-                                    Util.arrayPropertyMatchesUser(track.user.follows ?? [], "followingUserId", user)),
+                                UserTemplates.userWidget(track.user, Util.arrayPropertyMatchesUser(track.user.follows ?? [], "followingUserId", user)),
                                 create("span")
                                     .classes("date", "text-small", "nopointer", "color-dim")
                                     .text(Time.ago(track.release_date ?? track.created_at))
@@ -353,9 +352,7 @@ export class TrackTemplates {
                                                 create("div")
                                                     .classes("flex")
                                                     .children(
-                                                        UserTemplates.userWidget(track.user_id, track.user!.username, track.user!.displayname, avatarState,
-                                                            Util.arrayPropertyMatchesUser(track.user!.follows ?? [], "followingUserId", user),
-                                                            [], ["align-center", "widget-secondary"]),
+                                                        UserTemplates.userWidget(track.user, Util.arrayPropertyMatchesUser(track.user!.follows ?? [], "followingUserId", user)),
                                                         create("span")
                                                             .classes("date", "text-small", "nopointer", "color-dim", "align-center")
                                                             .text(Time.ago(track.created_at))
@@ -645,9 +642,7 @@ export class TrackTemplates {
                                     .build(),
                                 ...icons,
                             ).build(),
-                        UserTemplates.userWidget(trackUser.id, trackUser.username, trackUser.displayname, await Util.getAvatarFromUserIdAsync(trackUser.id),
-                            Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "followingUserId", user),
-                            [], ["widget-secondary"]),
+                        UserTemplates.userWidget(trackUser, Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "followingUserId", user)),
                     ).build(),
                 ...toAppend,
                 create("div")
@@ -872,7 +867,7 @@ export class TrackTemplates {
                             .classes("text-small")
                             .text(Time.ago(track.created_at))
                             .build(),
-                        UserTemplates.userWidget(track.user_id, track.user.username, track.user.displayname, avatarState, track.user.follows.some(follow => follow.following_user_id === user.id)),
+                        UserTemplates.userWidget(track.user, track.user.follows.some(follow => follow.following_user_id === user.id)),
                         create("span")
                             .text("Requested you to be " + collabType.name)
                             .build(),

@@ -269,8 +269,7 @@ export class PlaylistTemplates {
                             .classes("flex-v", "small-gap")
                             .children(
                                 PlaylistTemplates.title(playlist.title, playlist.id, icons),
-                                UserTemplates.userWidget(playlist.user_id, playlist.user.username, playlist.user.displayname, coverState,
-                                    Util.arrayPropertyMatchesUser(playlist.user.follows, "followingUserId", user)),
+                                UserTemplates.userWidget(playlist.user, Util.arrayPropertyMatchesUser(playlist.user.follows, "followingUserId", user)),
                                 create("span")
                                     .classes("date", "text-small", "nopointer", "color-dim")
                                     .text(Time.ago(playlist.created_at))
@@ -419,8 +418,7 @@ export class PlaylistTemplates {
                             .classes("title", "wordwrap")
                             .text(playlist.title)
                             .build(),
-                        UserTemplates.userWidget(a_user.id, a_user.username, a_user.displayname, await Util.getAvatarFromUserIdAsync(a_user.id),
-                            Util.arrayPropertyMatchesUser(a_user.follows, "followingUserId", user), [], ["widget-secondary"])
+                        UserTemplates.userWidget(a_user, Util.arrayPropertyMatchesUser(a_user.follows, "followingUserId", user))
                     ).build(),
                 create("div")
                     .classes("playlist-info-container", "flex")
@@ -475,7 +473,7 @@ export class PlaylistTemplates {
         }
 
         const playingFrom = PlayManager.getPlayingFrom();
-        const isPlaying = playingFrom.type === "album" && playingFrom.id === playlist.id;
+        const isPlaying = playingFrom && playingFrom.type === "playlist" && playingFrom.id === playlist.id;
         const manualQueue = QueueManager.getManualQueue();
         const allTracksInQueue = playlist.tracks.every((t) => manualQueue.includes(t.track_id));
         const duration = playlist.tracks.reduce((acc, t) => acc + (t.track?.length ?? 0), 0);

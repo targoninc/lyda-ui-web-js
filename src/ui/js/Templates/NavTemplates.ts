@@ -147,7 +147,7 @@ export class NavTemplates {
                     }
                 }),
                 NavTemplates.notifications(notifications),
-                UserTemplates.userWidget(user.id, user.username, user.displayname, avatar, true, [], ["align-center"]),
+                UserTemplates.userWidget(user, true),
                 FJSC.button({
                     text: "Log out",
                     classes: ["hideOnSmallBreakpoint", "negative"],
@@ -255,28 +255,22 @@ export class NavTemplates {
             .children(...notificationList)
             .build();
 
-        const notificationButton = create("div")
-            .classes("fakeButton", "flex", "clickable", "rounded", "padded-inline")
-            .styles("height", "24px")
-            .children(
-                create("img")
-                    .classes("nopointer", "align-center", "inline-icon", "svg")
-                    .attributes("src", Icons.BELL, "alt", "Notifications")
-                    .build(),
+        const notificationButton = FJSC.button({
+            icon: { icon: "notifications" },
+            onclick: UserActions.markNotificationsAsRead,
+        });
+        /*
                 create("div")
                     .classes("nopointer", "notification-bubble", unreadNotifications.length === 0 ? "hidden" : "_")
                     .build()
-            )
-            .onclick(UserActions.markNotificationsAsRead)
-            .build();
+         */
 
         UserActions.getNotificationsPeriodically(notificationButton);
         return create("div")
-            .classes("align-center", "notification-container", "relative")
+            .classes("notification-container", "relative")
             .children(
                 notificationButton,
                 notificationContainer
-            )
-            .build();
+            ).build();
     }
 }

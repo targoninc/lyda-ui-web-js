@@ -97,7 +97,7 @@ export class StatisticsTemplates {
             Util.getAvatarFromUserIdAsync(item.user_id).then(avatarUrl => {
                 avatar.value = avatarUrl;
             });
-            return UserTemplates.userWidget(item.user_id, item.user.username, item.user.displayname, avatar, Util.arrayPropertyMatchesUser(item.user.follows, "followingUserId", user));
+            return UserTemplates.userWidget(item.user, Util.arrayPropertyMatchesUser(item.user.follows, "followingUserId", user));
         });
 
         return create("div")

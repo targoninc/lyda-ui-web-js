@@ -432,15 +432,6 @@ button.positive:hover {
     background: var(--green-dark);
 }
 
-button:hover, button.secondary:hover {
-    border-color: var(--color-1);
-}
-
-button.secondary {
-    background: transparent;
-    color: var(--color-7);
-}
-
 .fadeIn {
     animation: fadeIn .5s ease;
 }

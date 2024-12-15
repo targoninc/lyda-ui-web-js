@@ -443,18 +443,13 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .user-widget {
-    background: var(--color-9);
     padding-left: var(--base-padding);
     padding-right: var(--base-padding);
     height: max-content;
 }
 
-.user-widget.widget-secondary {
-    background: var(--color-4);
-}
-
-.user-widget:hover {
-    background: var(--color-1) !important;
+.user-widget .user-displayname, .user-widget .user-name {
+    transform: translateY(.1em);
 }
 
 .user-icon, .user-icon-big {

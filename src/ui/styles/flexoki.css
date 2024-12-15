@@ -40,10 +40,6 @@
     filter: var(--filter-5);
 }
 
-.user-widget {
-    background: var(--color-3);
-}
-
 .border-card {
     background: var(--color-9);
 }

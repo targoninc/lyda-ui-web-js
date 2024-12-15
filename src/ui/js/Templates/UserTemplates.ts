@@ -31,39 +31,44 @@ import {FJSC} from "../../fjsc";
 import {compute, signal} from "../../fjsc/src/signals.ts";
 
 export class UserTemplates {
-    static userWidget(user_id: number, username: string, displayname: string, avatar: StringOrSignal, following: boolean, extraAttributes: HtmlPropertyValue[] = [], extraClasses: HtmlPropertyValue[] = []) {
-        const base = create("a");
+    static userWidget(user: User, following: boolean, extraAttributes: HtmlPropertyValue[] = [], extraClasses: HtmlPropertyValue[] = []) {
+        const base = create("button");
         if (extraAttributes) {
             base.attributes(...extraAttributes);
         }
         if (extraClasses) {
             base.classes(...extraClasses);
         }
+
+        const avatarState = signal(Images.DEFAULT_AVATAR);
+        Util.getAvatarFromUserIdAsync(user.id).then((src) => {
+            avatarState.value = src;
+        });
         const cacheUser = LydaCache.get("user");
         return base
-            .classes("user-widget", "clickable", "rounded-max", "flex", "padded-inline")
-            .attributes("user_id", user_id, "username", username)
+            .classes("user-widget", "fjsc", "clickable", "rounded-max", "flex", "padded-inline")
+            .attributes("user_id", user.id, "username", user.username)
             .onclick((e: MouseEvent) => {
                 if (e.button === 0) {
                     e.preventDefault();
-                    navigate("profile/" + username);
+                    navigate("profile/" + user.username);
                 }
             })
-            .href(Links.PROFILE(username))
-            .title(displayname + " (@" + username + ")")
+            .href(Links.PROFILE(user.username))
+            .title(user.displayname + " (@" + user.username + ")")
             .children(
-                UserTemplates.userIcon(user_id, avatar),
+                UserTemplates.userIcon(user.id, avatarState),
                 create("span")
                     .classes("text", "align-center", "nopointer", "user-displayname")
-                    .text(CustomText.shorten(displayname, 10))
-                    .attributes("data-user-id", user_id)
+                    .text(CustomText.shorten(user.displayname, 10))
+                    .attributes("data-user-id", user.id)
                     .build(),
                 create("span")
                     .classes("text", "align-center", "text-small", "nopointer", "user-name", "hideOnSmallBreakpoint")
-                    .text("@" + username)
-                    .attributes("data-user-id", user_id)
+                    .text("@" + user.username)
+                    .attributes("data-user-id", user.id)
                     .build(),
-                cacheUser.content && user_id !== cacheUser.content.id ? UserTemplates.followButton(following, user_id, true) : null
+                cacheUser.content && user.id !== cacheUser.content.id ? UserTemplates.followButton(following, user.id, true) : null
             ).build();
     }
 
@@ -77,7 +82,7 @@ export class UserTemplates {
             base.classes(...extraClasses);
         }
         return base
-            .classes("user-widget", "widget-secondary", "collaborator", noredirect ? "_" : "clickable", "rounded", "flex-v", "padded-inline")
+            .classes("user-widget", "collaborator", noredirect ? "_" : "clickable", "rounded", "flex-v", "padded-inline")
             .attributes("user_id", user_id, "username", username)
             .onclick(async () => {
                 if (noredirect) {
@@ -550,17 +555,22 @@ export class UserTemplates {
 
     static editDescriptionButton(currentDescription: string) {
         const descState = signal(currentDescription);
-        return GenericTemplates.action(Icons.PEN, "Edit description", "edit-description", async e => {
-            e.preventDefault();
-            UserActions.editDescription(descState.value, (newDescription: string) => {
-                const description = document.querySelector("#user-description");
-                if (!description) {
-                    return;
-                }
-                description.innerHTML = CustomText.renderToHtml(newDescription);
-                descState.value = newDescription;
-            });
-        }, [], ["secondary"]);
+
+        return FJSC.button({
+            icon: { icon: "edit_note" },
+            text: "Edit description",
+            onclick: async (e: Event) => {
+                e.preventDefault();
+                UserActions.editDescription(descState.value, (newDescription: string) => {
+                    const description = document.querySelector("#user-description");
+                    if (!description) {
+                        return;
+                    }
+                    description.innerHTML = CustomText.renderToHtml(newDescription);
+                    descState.value = newDescription;
+                });
+            }
+        });
     }
 
     static notPublicLibrary(name: string) {

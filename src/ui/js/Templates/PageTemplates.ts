@@ -206,7 +206,7 @@ export class PageTemplates {
             const user = data.data as User;
             const selfUser = await Util.getUserAsync();
             const following = user.follows?.some((f: Follow) => selfUser ? f.following_user_id === selfUser.id : false) ?? false;
-            randomUserWidget.value = UserTemplates.userWidget(user.id, user.username, user.displayname, await Util.getAvatarFromUserIdAsync(user.id), following);
+            randomUserWidget.value = UserTemplates.userWidget(user, following);
         });
 
         return create("div")

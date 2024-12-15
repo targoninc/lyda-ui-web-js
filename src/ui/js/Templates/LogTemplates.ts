@@ -63,7 +63,7 @@ export class LogTemplates {
                                     create("td")
                                         .classes("log-user")
                                         .children(
-                                            UserTemplates.userWidget(l.user_id, users[l.user_id].username, users[l.user_id].displayname, users[l.user_id].avatarUrl, users[l.user_id].follows.some(f => f.followingUserId === selfUser.id)),
+                                            UserTemplates.userWidget(users[l.user_id], users[l.user_id].follows.some(f => f.following_user_id === selfUser.id)),
                                         ).build(),
                                     create("td")
                                         .classes("log-action-name")
@@ -72,9 +72,9 @@ export class LogTemplates {
                                     create("td")
                                         .classes("log-user")
                                         .children(
-                                            UserTemplates.userWidget(l.actionedUserId, users[l.actionedUserId].username, users[l.actionedUserId].displayname, users[l.actionedUserId].avatarUrl, users[l.actionedUserId].follows.some(f => f.followingUserId === selfUser.id)),
+                                            UserTemplates.userWidget(users[l.actioned_user_id], users[l.actionedUserId].follows.some(f => f.following_user_id === selfUser.id)),
                                         ).build(),
-                                    LogTemplates.properties(l.additionalInfo),
+                                    LogTemplates.properties(l.additional_info),
                                 ).build();
                         })
                     ).build(),

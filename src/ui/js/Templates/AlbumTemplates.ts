@@ -182,7 +182,7 @@ export class AlbumTemplates {
                             name: "release_date",
                             label: "Release Date",
                             placeholder: "YYYY-MM-DD",
-                            value: compute(d => new Date(d), releaseDate),
+                            value: releaseDate,
                             onchange: (v) => {
                                 album.value = { ...album.value, release_date: new Date(v) };
                             }
@@ -250,10 +250,6 @@ export class AlbumTemplates {
         if (album.visibility === "private") {
             icons.push(GenericTemplates.lock());
         }
-        const avatarState = signal(Images.DEFAULT_AVATAR);
-        Util.getAvatarFromUserIdAsync(album.user_id).then((src) => {
-            avatarState.value = src;
-        });
 
         return create("div")
             .classes("album-card", "padded", "flex-v", "small-gap", isSecondary ? "secondary" : "_")
@@ -266,8 +262,7 @@ export class AlbumTemplates {
                             .classes("flex-v", "small-gap")
                             .children(
                                 AlbumTemplates.title(album.title, album.id, icons),
-                                UserTemplates.userWidget(album.user_id, album.user.username, album.user.displayname, avatarState,
-                                    Util.arrayPropertyMatchesUser(album.user.follows, "followingUserId", user)),
+                                UserTemplates.userWidget(album.user, Util.arrayPropertyMatchesUser(album.user.follows, "followingUserId", user)),
                                 create("span")
                                     .classes("date", "text-small", "nopointer", "color-dim")
                                     .text(Time.ago(album.release_date))
@@ -417,11 +412,8 @@ export class AlbumTemplates {
                             .classes("title", "wordwrap")
                             .text(album.title)
                             .build(),
-                        UserTemplates.userWidget(a_user.id, a_user.username, a_user.displayname, await Util.getAvatarFromUserIdAsync(a_user.id),
-                            Util.arrayPropertyMatchesUser(a_user.follows, "followingUserId", user),
-                            [], ["widget-secondary"])
-                    )
-                    .build(),
+                        UserTemplates.userWidget(a_user, Util.arrayPropertyMatchesUser(a_user.follows, "followingUserId", user))
+                    ).build(),
                 create("div")
                     .classes("album-info-container", "flex")
                     .children(
@@ -472,8 +464,7 @@ export class AlbumTemplates {
 
     static audioActions(album: Album, user: User, editActions: AnyNode[] = []) {
         const playingFrom = PlayManager.getPlayingFrom();
-        const isPlaying =
-            playingFrom.type === "album" && playingFrom.id === album.id;
+        const isPlaying = playingFrom && playingFrom.type === "album" && playingFrom.id === album.id;
         const manualQueue = QueueManager.getManualQueue();
         if (!album.tracks) {
             throw new Error(`Album ${album.id} has no tracks`);

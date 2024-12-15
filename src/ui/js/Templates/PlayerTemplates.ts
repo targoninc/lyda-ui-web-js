@@ -260,8 +260,7 @@ export class PlayerTemplates {
                         navigate("track/" + track.id);
                     }).build(),
                 ...icons,
-                UserTemplates.userWidget(trackUser.id, trackUser.username, trackUser.displayname, await Util.getAvatarFromUserIdAsync(trackUser.id),
-                    Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "followingUserId", user),
+                UserTemplates.userWidget(trackUser, Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "followingUserId", user),
                     [], ["align-center"]),
                 PlayerTemplates.playingFrom(),
                 create("div")
