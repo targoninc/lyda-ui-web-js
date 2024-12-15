@@ -10,8 +10,11 @@ import {AuthActions} from "../Actions/AuthActions.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {Util} from "../Classes/Util.ts";
 import {navigate} from "../Routing/Router.ts";
-import {AnyNode, create} from "../../fjsc/src/f2.ts";
+import {AnyNode, create, StringOrSignal} from "../../fjsc/src/f2.ts";
 import {signal} from "../../fjsc/src/signals.ts";
+import {User} from "../Models/DbModels/User.ts";
+import {Notification} from "../Models/DbModels/Notification.ts";
+import {FJSC} from "../../fjsc";
 
 export class NavTemplates {
     static navTop(userTemplate: AnyNode) {
@@ -130,19 +133,29 @@ export class NavTemplates {
             ).build();
     }
 
-    static signedInNote(user, avatar, notifications) {
+    static accountSection(user: User, avatar: StringOrSignal, notifications: Notification[]) {
         return create("div")
             .classes("widest-fill-right", "relative")
             .children(
-                GenericTemplates.actionWithMidBreakpoint(Icons.UPLOAD, "Upload", "upload", async e => {
-                    e.preventDefault();
-                    navigate("upload");
-                }, [], ["positive"], Links.LINK("upload")),
+                FJSC.button({
+                    text: "Upload",
+                    classes: ["hideOnSmallBreakpoint", "positive"],
+                    icon: { icon: "upload" },
+                    onclick: async (e: MouseEvent) => {
+                        e.preventDefault();
+                        navigate("upload");
+                    }
+                }),
                 NavTemplates.notifications(notifications),
                 UserTemplates.userWidget(user.id, user.username, user.displayname, avatar, true, [], ["align-center"]),
-                GenericTemplates.actionWithMidBreakpoint(Icons.LOGOUT, "Log out", "logout", async () => {
-                    await AuthActions.logOut();
-                }, [], ["negative"]),
+                FJSC.button({
+                    text: "Log out",
+                    classes: ["hideOnSmallBreakpoint", "negative"],
+                    icon: { icon: "logout" },
+                    onclick: async () => {
+                        await AuthActions.logOut();
+                    }
+                }),
             )
             .build();
     }

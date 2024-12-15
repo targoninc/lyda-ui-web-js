@@ -137,7 +137,7 @@
 }
 
 .track-card:hover {
-    border-color: var(--color-2);
+    border-color: var(--red);
 }
 
 .svg {
@@ -204,11 +204,11 @@
 }
 
 .stats-indicator.likes {
-    border-color: var(--color-2);
+    border-color: var(--red);
 }
 
 .stats-indicator.likes.enabled {
-    background: var(--color-2);
+    background: var(--red);
 }
 
 .stats-indicator.reposts {
@@ -490,7 +490,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .upload-info-item.error {
-    color: var(--color-2);
+    color: var(--red);
 }
 
 .listNotification {
@@ -656,7 +656,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .waveform-bar.active {
-    background: var(--color-8-dark);
+    background: var(--green-dark);
 }
 
 .list-track {
@@ -744,7 +744,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .log.error > td:first-child {
-    --log-color: var(--color-2);
+    --log-color: var(--red);
 }
 
 .search-result-type.album {
@@ -752,7 +752,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .search-result-type.user {
-    background: color-mix(in oklab, var(--color-2), transparent 50%);
+    background: color-mix(in oklab, var(--red), transparent 50%);
 }
 
 .search-result-type.playlist {
@@ -932,12 +932,12 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .progress-section-part.error, .progress-section-part.cancelled {
-    border-color: var(--color-2);
-    color: var(--color-2);
+    border-color: var(--red);
+    color: var(--red);
 }
 
 .progress-section-retry {
-    color: var(--color-2);
+    color: var(--red);
 }
 
 .progress-section-part-container {
@@ -998,7 +998,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .check-list-item.active:hover {
-    border-right: 1em solid var(--color-2);
+    border-right: 1em solid var(--red);
 }
 
 .gif8831:hover img {

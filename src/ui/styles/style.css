@@ -1,9 +1,9 @@
 :root {
     --color-1: #ff8e3c;
     --color-1-rgb: 255, 142, 60;
-    --color-2: #d9376e;
+    --red: #d9376e;
     --color-2-rgb: 217, 55, 110;
-    --color-2-dark: #b32a5a;
+    --red-dark: #b32a5a;
     --color-2-dark-rgb: 179, 42, 90;
     --filter-2: invert(27%) sepia(93%) saturate(2198%) hue-rotate(322deg) brightness(92%) contrast(84%);
     --color-3: #eff0f3;
@@ -20,7 +20,7 @@
     --color-7-rgb: 74, 74, 74;
     --green: #70c926;
     --color-8-rgb: 142, 255, 60;
-    --color-8-dark: #5aa21a;
+    --green-dark: #5aa21a;
     --color-8-dark-rgb: 90, 162, 26;
     --color-9: #dcdce0;
     --filter-8: invert(74%) sepia(50%) saturate(854%) hue-rotate(40deg) brightness(94%) contrast(75%);
@@ -29,13 +29,13 @@
     --blue: #317eef;
     --verified: var(--blue);
     --stats-1: var(--color-1);
-    --stats-2: color-mix(in oklab, var(--color-1) 75%, var(--color-2) 25%);
-    --stats-3: color-mix(in oklab, var(--color-1) 50%, var(--color-2) 50%);
-    --stats-4: color-mix(in oklab, var(--color-1) 25%, var(--color-2) 75%);
-    --stats-5: var(--color-2);
-    --stats-6: color-mix(in oklab, var(--color-2) 75%, var(--green) 25%);
-    --stats-7: color-mix(in oklab, var(--color-2) 50%, var(--green) 50%);
-    --stats-8: color-mix(in oklab, var(--color-2) 25%, var(--green) 75%);
+    --stats-2: color-mix(in oklab, var(--color-1) 75%, var(--red) 25%);
+    --stats-3: color-mix(in oklab, var(--color-1) 50%, var(--red) 50%);
+    --stats-4: color-mix(in oklab, var(--color-1) 25%, var(--red) 75%);
+    --stats-5: var(--red);
+    --stats-6: color-mix(in oklab, var(--red) 75%, var(--green) 25%);
+    --stats-7: color-mix(in oklab, var(--red) 50%, var(--green) 50%);
+    --stats-8: color-mix(in oklab, var(--red) 25%, var(--green) 75%);
     --stats-9: var(--green);
     --stats-10: color-mix(in oklab, var(--green) 75%, var(--color-1) 25%);
     --stats-11: color-mix(in oklab, var(--green) 50%, var(--color-1) 50%);
@@ -63,7 +63,7 @@
     --button-bottom-border-size: 3px;
 
     --fjsc-text-color: var(--color-5);
-    --fjsc-error-color: var(--color-2);
+    --fjsc-error-color: var(--red);
 
     --fjsc-interactive-background: var(--color-6);
     --fjsc-interactive-background-hover: var(--color-3);
@@ -320,8 +320,8 @@ h3 {
 }
 
 .card-label.error {
-    border-color: var(--color-2);
-    color: var(--color-2);
+    border-color: var(--red);
+    color: var(--red);
 }
 
 .card-label i {
@@ -415,19 +415,21 @@ button {
 }
 
 button.negative {
-    border-color: var(--color-2);
+    border-left-color: var(--red);
 }
 
 button.negative:hover {
-    border-color: var(--color-2-dark);
+    border-color: var(--red);
+    background: var(--red-dark);
 }
 
 button.positive {
-    border-color: var(--green);
+    border-left-color: var(--green);
 }
 
 button.positive:hover {
-    border-color: var(--color-8-dark);
+    border-color: var(--green);
+    background: var(--green-dark);
 }
 
 button:hover, button.secondary:hover {
@@ -472,8 +474,8 @@ button.secondary {
 }
 
 .notification.error {
-    background: var(--color-2);
-    border: 1px solid var(--color-2);
+    background: var(--red);
+    border: 1px solid var(--red);
     color: var(--color-5);
 }
 
@@ -717,8 +719,8 @@ textarea.fullWidth {
 }
 
 .fakeButton.negative:hover {
-    border-color: var(--color-2);
-    color: var(--color-2);
+    border-color: var(--red);
+    color: var(--red);
 }
 
 .fakeButton.negative:hover .svg {
@@ -787,11 +789,11 @@ td:last-child, th:last-child {
 }
 
 .error {
-    color: var(--color-2);
+    color: var(--red);
 }
 
 .error input, .error button, .error select, .error textarea {
-    border-color: var(--color-2);
+    border-color: var(--red);
 }
 
 .inlineLink:hover {
