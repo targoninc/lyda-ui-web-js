@@ -64,7 +64,7 @@ export class UserTemplates {
                     .attributes("data-user-id", user.id)
                     .build(),
                 create("span")
-                    .classes("text", "align-center", "text-small", "nopointer", "user-name", "hideOnSmallBreakpoint")
+                    .classes("text", "align-center", "text-xsmall", "nopointer", "user-name", "hideOnSmallBreakpoint")
                     .text("@" + user.username)
                     .attributes("data-user-id", user.id)
                     .build(),
@@ -317,7 +317,7 @@ export class UserTemplates {
             .children(
                 UserTemplates.displayname(user, selfUser, isOwnProfile),
                 create("div")
-                    .classes("flex")
+                    .classes("flex", "align-children")
                     .children(
                         UserTemplates.username(user, selfUser, isOwnProfile),
                         ifjs(verified, UserTemplates.verificationbadge()),

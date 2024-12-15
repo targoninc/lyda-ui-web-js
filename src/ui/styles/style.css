@@ -235,10 +235,6 @@ footer:empty {
     width: 100%;
 }
 
-.nav:hover, .nav.active {
-    text-decoration: underline;
-}
-
 footer {
     position: absolute;
     z-index: 2;
@@ -357,16 +353,19 @@ form {
 }
 
 input, textarea, select {
-    background: var(--color-4);
-    border: 1px solid var(--color-7);
+    background: var(--fjsc-interactive-background);
+    border: 1px solid var(--fjsc-interactive-border);
     color: var(--color-5);
+    box-sizing: border-box;
     border-radius: var(--border-radius);
-    padding: 5px 10px;
-    font-size: var(--font-size-medium);
+    padding: var(--fjsc-input-padding-y) var(--fjsc-input-padding-x);
+    font-size: var(--fjsc-base-font-size);
+    height: max-content;
 }
 
 input:focus-visible, textarea:focus-visible, select:focus-visible {
-    border-color: var(--green);
+    border-color: var(--fjsc-interactive-border-focused);
+    background: var(--fjsc-interactive-background-hover);
     outline: none;
 }
 
@@ -697,7 +696,7 @@ textarea.fullWidth {
 }
 
 .fullHeight {
-    height: 100%;
+    height: 100% !important;
 }
 
 .clickable, .pointer {

@@ -157,8 +157,8 @@ export class QueueTemplates {
                             ).build(),
                         ...children
                     ).build(),
-                create("div")
-                    .classes("queue-opener", "flex", "align-center", "clickable", "fakeButton", "rounded", "padded-inline", "relative")
+                create("button")
+                    .classes("fjsc", "relative")
                     .onclick(() => {
                         queueListHidden.value = !queueListHidden.value;
                     })

@@ -448,10 +448,6 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     height: max-content;
 }
 
-.user-widget .user-displayname, .user-widget .user-name {
-    transform: translateY(.1em);
-}
-
 .user-icon, .user-icon-big {
     border-radius: 50%;
 }
@@ -674,8 +670,8 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .search-input {
-    border-radius: 50px;
     width: calc(100% - 20px);
+    padding-left: 30px !important;
 }
 
 .search-results {
@@ -694,6 +690,13 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     background: color-mix(in oklab, var(--color-3), transparent 50%);
     max-height: 300px;
     flex-wrap: nowrap;
+}
+
+.search-icon {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
 }
 
 .search-result {

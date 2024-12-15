@@ -4,6 +4,7 @@ import {notify} from "../Classes/Ui.ts";
 import {navigate} from "../Routing/Router.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {signal} from "../../fjsc/src/signals.ts";
+import {GenericTemplates} from "./GenericTemplates.ts";
 
 export class SearchTemplates {
     static search() {
@@ -22,10 +23,11 @@ export class SearchTemplates {
         let resultCount = 0;
 
         return create("div")
-            .classes("search-input-container")
+            .classes("search-input-container", "relative")
             .children(
+                GenericTemplates.icon("search", true, ["inline-icon", "svg", "search-icon"]),
                 create("input")
-                    .classes("search-input")
+                    .classes("fjsc", "search-input")
                     .placeholder("Search")
                     .onkeydown((e: KeyboardEvent) => {
                         const list = results.value;

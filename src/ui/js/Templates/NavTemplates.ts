@@ -27,13 +27,13 @@ export class NavTemplates {
                 create("div")
                     .classes("flex", "flex-grow")
                     .children(
-                        NavTemplates.navButton("following", "Feed", Icons.PEOPLE, async () => {
+                        NavTemplates.navButton("following", "Feed", "rss_feed", async () => {
                             navigate("following");
                         }),
-                        NavTemplates.navButton("explore", "Explore", Icons.STARS, async () => {
+                        NavTemplates.navButton("explore", "Explore", "explore", async () => {
                             navigate("explore");
                         }),
-                        NavTemplates.navButton("library", "Library", Icons.LIKE, async () => {
+                        NavTemplates.navButton("library", "Library", "category", async () => {
                             navigate("library");
                         }),
                         SearchTemplates.search(),
@@ -99,20 +99,14 @@ export class NavTemplates {
             ).build();
     }
 
-    static navButton(id, text, icon, clickFunc) {
-        return create("div")
-            .classes("nav", "flex", "small-gap", "clickable", "fakeButton", "padded-inline", "rounded", "hideOnMidBreakpoint")
-            .id(id)
-            .onclick(clickFunc)
-            .children(
-                create("img")
-                    .classes("inline-icon", "svg", "nopointer")
-                    .attributes("src", icon, "alt", text)
-                    .build(),
-                create("span")
-                    .text(text)
-                    .build()
-            ).build();
+    static navButton(id: string, text: string, icon: StringOrSignal, clickFunc: Function) {
+        return FJSC.button({
+            text,
+            icon: { icon, adaptive: true, classes: ["inline-icon", "svg", "nopointer"] },
+            onclick: clickFunc,
+            classes: ["hideOnMidBreakpoint"],
+            id,
+        });
     }
 
     static navButtonInBurger(id, text, icon, clickFunc) {
@@ -258,6 +252,8 @@ export class NavTemplates {
         const notificationButton = FJSC.button({
             icon: { icon: "notifications" },
             onclick: UserActions.markNotificationsAsRead,
+            text: "",
+            classes: ["fullHeight"]
         });
         /*
                 create("div")
