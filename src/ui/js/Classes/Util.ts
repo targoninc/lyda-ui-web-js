@@ -468,11 +468,11 @@ export function finalizeLogin(step: Signal<string>, user: User) {
     }
 }
 
-export function getUserSettingValue(user: User, key: string) {
+export function getUserSettingValue<T>(user: User, key: string) {
     const val = user.settings?.find(s => s.key === key)?.value;
-    if (val === "true") return true;
-    if (val === "false") return false;
-    return val;
+    if (val === "true") return true as T;
+    if (val === "false") return false as T;
+    return val as T;
 }
 
 export function userHasSettingValue(user: User, key: string, value: string) {

@@ -11,18 +11,6 @@ export class QueueManager {
         StreamingUpdater.updateQueue().then();
     }
 
-    static getAutoQueue() {
-        let autoQueueTmp = autoQueue.value;
-        if (autoQueueTmp.length === 0) {
-            let cache = LydaCache.get<number[]>("queue").content;
-            if (cache) {
-                autoQueueTmp = cache;
-                autoQueue.value = autoQueueTmp;
-            }
-        }
-        return autoQueueTmp;
-    }
-
     static setAutoQueue(queue: number[]) {
         autoQueue.value = queue;
 
@@ -48,18 +36,6 @@ export class QueueManager {
         contextQueue.value = queue;
 
         StreamingUpdater.updateQueue().then();
-    }
-
-    static getContextQueue() {
-        let contextQueueTmp = contextQueue.value;
-        if (contextQueueTmp.length === 0) {
-            let cache = LydaCache.get<number[]>("contextQueue").content;
-            if (cache) {
-                contextQueueTmp = cache;
-                contextQueue.value = contextQueueTmp;
-            }
-        }
-        return contextQueueTmp;
     }
 
     static clearContextQueue() {
@@ -124,12 +100,36 @@ export class QueueManager {
         }
     }
 
+    static getAutoQueue() {
+        let autoQueueTmp = autoQueue.value;
+        if (autoQueueTmp.length === 0) {
+            let cache = LydaCache.get<number[] | number>("queue").content;
+            if (cache) {
+                autoQueueTmp = (cache.length ? cache : [cache]) as number[];
+                autoQueue.value = autoQueueTmp;
+            }
+        }
+        return autoQueueTmp;
+    }
+
+    static getContextQueue() {
+        let contextQueueTmp = contextQueue.value;
+        if (contextQueueTmp.length === 0) {
+            let cache = LydaCache.get<number[] | number>("contextQueue").content;
+            if (cache) {
+                contextQueueTmp = (cache.length ? cache : [cache]) as number[];
+                contextQueue.value = contextQueueTmp;
+            }
+        }
+        return contextQueueTmp;
+    }
+
     static getManualQueue(): number[] {
         let manualQueueTmp = manualQueue.value;
         if (manualQueueTmp.length === 0) {
-            let cache = LydaCache.get<number[]>("manualQueue").content;
+            let cache = LydaCache.get<number[] | number>("manualQueue").content;
             if (cache) {
-                manualQueueTmp = cache;
+                manualQueueTmp = (cache.length ? cache : [cache]) as number[];
                 manualQueue.value = manualQueueTmp;
             }
         }

@@ -20,7 +20,7 @@ export class SettingsTemplates {
                     .text("Settings")
                     .build(),
                 SettingsTemplates.accountSection(user),
-                SettingsTemplates.themeSection(getUserSettingValue(user, UserSettings.theme)),
+                SettingsTemplates.themeSection(getUserSettingValue<Theme>(user, UserSettings.theme)),
                 SettingsTemplates.behaviourSection(user),
                 SettingsTemplates.notificationsSection(user),
                 SettingsTemplates.dangerSection(user),
@@ -135,10 +135,8 @@ export class SettingsTemplates {
     }
 
     static themeSelector(theme: Theme, currentTheme$: Signal<Theme>) {
-        const active$ = signal(currentTheme$.value === theme ? "active" : "_");
-        currentTheme$.subscribe((currentTheme: Theme) => {
-            active$.value = currentTheme === theme ? "active" : "_";
-        });
+        const active$ = compute(c => c === theme ? "active" : "_", currentTheme$);
+        console.log(currentTheme$.value, theme);
 
         return FJSC.button(<ButtonConfig>{
             classes: [active$],
