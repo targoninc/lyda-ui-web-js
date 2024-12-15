@@ -95,7 +95,7 @@ export class Util {
         if (id === null) {
             return Images.DEFAULT_AVATAR;
         }
-        const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.userAvatar}`;
+        const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.userAvatar}&t=${Date.now()}`;
         return await this.getFileOrBackupAsync(url, Images.DEFAULT_AVATAR);
     }
 
@@ -103,22 +103,22 @@ export class Util {
         if (id === null) {
             return Images.DEFAULT_BANNER;
         }
-        const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.userBanner}`;
+        const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.userBanner}&t=${Date.now()}`;
         return await this.getFileOrBackupAsync(url, Images.DEFAULT_BANNER);
     }
 
     static async getCoverFileFromTrackIdAsync(id: number, user_id: number|null = null) {
-        const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.trackCover}`;
+        const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.trackCover}&t=${Date.now()}`;
         return await this.getFileOrBackupAsync(url, await Util.getAvatarFromUserIdAsync(user_id));
     }
 
     static async getCoverFileFromAlbumIdAsync(id: number, user_id: number|null = null) {
-        const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.albumCover}`;
+        const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.albumCover}&t=${Date.now()}`;
         return await this.getFileOrBackupAsync(url, await Util.getAvatarFromUserIdAsync(user_id));
     }
 
     static async getCoverFileFromPlaylistIdAsync(id: number, user_id: number|null = null) {
-        const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.playlistCover}`;
+        const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.playlistCover}&t=${Date.now()}`;
         return await this.getFileOrBackupAsync(url, await Util.getAvatarFromUserIdAsync(user_id));
     }
 

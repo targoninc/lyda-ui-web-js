@@ -222,20 +222,21 @@ export class UserTemplates {
     static profileHeader(user: User, isOwnProfile: boolean) {
         const avatarLoading = signal(false);
         const bannerLoading = signal(false);
-        let bannerDeleteButton = GenericTemplates.centeredDeleteButton("banner-delete-button", () => UserActions.deleteBanner(user, bannerLoading), ["hidden", "showOnParentHover"]);
-        let avatarDeleteButton = GenericTemplates.centeredDeleteButton("avatar-delete-button", () => UserActions.deleteAvatar(user, avatarLoading), ["showOnParentHover"]);
         const userBanner = signal(Images.DEFAULT_BANNER);
         Util.getBannerFromUserIdAsync(user.id).then(banner => {
+            console.log(`new banner ${banner}`);
             userBanner.value = banner;
         });
         const userAvatar = signal(Images.DEFAULT_AVATAR);
         Util.getAvatarFromUserIdAsync(user.id).then(avatar => {
             userAvatar.value = avatar;
         });
+        let bannerDeleteButton = GenericTemplates.centeredDeleteButton("banner-delete-button", () => UserActions.deleteBanner(user, userBanner, bannerLoading), ["hidden", "showOnParentHover"]);
+        let avatarDeleteButton = GenericTemplates.centeredDeleteButton("avatar-delete-button", () => UserActions.deleteAvatar(user, userAvatar, avatarLoading), ["showOnParentHover"]);
         const bannerContainer = create("div")
                 .classes("banner-container", "relative", isOwnProfile ? "clickable" : "_", isOwnProfile ? "blurOnParentHover" : "_")
                 .attributes("isOwnProfile", isOwnProfile.toString())
-                .onclick(UserActions.replaceBanner)
+                .onclick(e => UserActions.replaceBanner(e, isOwnProfile, user, userBanner, bannerLoading))
                 .children(
                     create("img")
                         .classes("nopointer", "user-banner", "banner-image")
@@ -257,18 +258,13 @@ export class UserTemplates {
                 create("div")
                     .classes("header-info-container", "flex")
                     .attributes("isOwnProfile", isOwnProfile.toString())
-                    .onclick((e) => {
-                        if (isOwnProfile) {
-                            UserActions.replaceBanner(e, isOwnProfile, user, bannerLoading).then();
-                        }
-                    })
                     .children(
                         create("div")
                             .classes("avatar-container", "relative", isOwnProfile ? "pointer" : "_")
                             .attributes("isOwnProfile", isOwnProfile.toString())
                             .onclick((e) => {
                                 if (isOwnProfile) {
-                                    UserActions.replaceAvatar(e, isOwnProfile, user, avatarLoading).then();
+                                    UserActions.replaceAvatar(e, isOwnProfile, user, userAvatar, avatarLoading).then();
                                 }
                             })
                             .onmouseover(() => {

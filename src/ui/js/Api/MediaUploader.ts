@@ -23,7 +23,7 @@ export class MediaUploader {
                 if (xhr.status >= 200 && xhr.status < 300) {
                     resolve(xhr.responseText);
                 } else {
-                    reject(new Error(`Failed to upload media: ${xhr.statusText}`));
+                    reject(new Error(`Failed to upload media: ${xhr.responseText}`));
                 }
             };
 
