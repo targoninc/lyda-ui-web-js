@@ -19,10 +19,11 @@ import {Images} from "../Enums/Images.ts";
 export class UserActions {
     static updateImagesWithSource(newSrc: string, oldSrc: string) {
         oldSrc = oldSrc.replace(/&t=\d+/, "");
-        console.log(`Replacing ${oldSrc} with ${newSrc}`);
-        const imgs = document.querySelectorAll("img[src='" + oldSrc + "']") as NodeListOf<HTMLImageElement>;
+        const imgs = document.querySelectorAll("img") as NodeListOf<HTMLImageElement>;
         for (const img of imgs) {
-            img.src = newSrc;
+            if (img.src.includes(oldSrc)) {
+                img.src = newSrc;
+            }
         }
     }
 
