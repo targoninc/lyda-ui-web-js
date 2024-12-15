@@ -224,7 +224,6 @@ export class UserTemplates {
         const bannerLoading = signal(false);
         const userBanner = signal(Images.DEFAULT_BANNER);
         Util.getBannerFromUserIdAsync(user.id).then(banner => {
-            console.log(`new banner ${banner}`);
             userBanner.value = banner;
         });
         const userAvatar = signal(Images.DEFAULT_AVATAR);
