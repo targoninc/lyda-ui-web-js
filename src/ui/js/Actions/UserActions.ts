@@ -18,16 +18,11 @@ import {Images} from "../Enums/Images.ts";
 
 export class UserActions {
     static updateImagesWithSource(newSrc: string, oldSrc: string) {
-        oldSrc = oldSrc.replace(/\?t=\d+/, "");
+        oldSrc = oldSrc.replace(/&t=\d+/, "");
         const imgs = document.querySelectorAll("img[src='" + oldSrc + "']") as NodeListOf<HTMLImageElement>;
         for (const img of imgs) {
             img.src = newSrc;
         }
-    }
-
-    static async fileExists(url: string) {
-        let response = await fetch(url);
-        return response.status === 200;
     }
 
     static async replaceAvatar(e: Event, isOwnProfile: boolean, user: User, avatar: Signal<string>, loading: Signal<boolean>) {
