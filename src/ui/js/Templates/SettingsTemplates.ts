@@ -10,6 +10,7 @@ import {notify, Ui} from "../Classes/Ui.ts";
 import {LydaApi} from "../Api/LydaApi.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
+import {navigate} from "../Routing/Router.ts";
 
 export class SettingsTemplates {
     static settingsPage(user: User) {
@@ -198,7 +199,7 @@ export class SettingsTemplates {
                                     LydaApi.deleteUser().then(res => {
                                         if (res.code === 200) {
                                             notify("Account deleted", "success");
-                                            window.location.reload();
+                                            navigate("login");
                                         } else {
                                             notify("Account deletion failed", "error");
                                         }
