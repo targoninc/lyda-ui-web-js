@@ -200,6 +200,7 @@ export class SettingsTemplates {
                                         if (res.code === 200) {
                                             notify("Account deleted", "success");
                                             navigate("login");
+                                            window.location.reload();
                                         } else {
                                             notify("Account deletion failed", "error");
                                         }
