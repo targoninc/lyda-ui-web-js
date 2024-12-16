@@ -109,7 +109,7 @@ export class NavTemplates {
         });
     }
 
-    static navButtonInBurger(id, text, icon, clickFunc) {
+    static navButtonInBurger(id: string, text: string, icon: string, clickFunc: Function) {
         return create("div")
             .classes("nav", "flex", "small-gap", "clickable", "fakeButton", "padded-inline", "rounded")
             .id(id)
@@ -165,24 +165,22 @@ export class NavTemplates {
             .build();
     }
 
-    static notificationInList(type, read, created_at, message, data) {
-        const result = NotificationParser.parse(message, data);
+    static notificationInList(notification: Notification) {
+        const elements = NotificationParser.parse(notification);
 
         return create("div")
-            .classes("listNotification", "flex", type, "rounded", "padded-inline", "hoverable", "text-left", read === true ? "read" : "unread")
-            .attributes("data-created_at", created_at)
+            .classes("listNotification", "flex", notification.type, "rounded", "padded-inline", "hoverable", "text-left", notification.is_read ? "read" : "unread")
+            .id(notification.id)
             .children(
-                //ifjs(result, NavTemplates.notificationImage(result.image)),
                 create("div")
                     .classes("flex-v", "no-gap")
                     .children(
                         create("span")
-                            .children(
-                                ...result.elements
-                            ).build(),
+                            .children(...elements)
+                            .build(),
                         create("span")
                             .classes("notification-time", "text-small")
-                            .text(Time.ago(created_at))
+                            .text(Time.ago(notification.created_at))
                             .build()
                     ).build()
             ).build();
@@ -206,7 +204,7 @@ export class NavTemplates {
         return null;
     }
 
-    static notificationLink(link, text) {
+    static notificationLink(link: string, text: string) {
         return create("span")
             .classes("inlineLink")
             .onclick(async () => {
@@ -225,7 +223,7 @@ export class NavTemplates {
             .build();
     }
 
-    static notifications(notifications) {
+    static notifications(notifications: Notification[]) {
         let notificationList;
         if (!notifications || notifications.length === 0 || notifications.constructor !== Array) {
             notificationList = [
@@ -237,12 +235,10 @@ export class NavTemplates {
         } else {
             notificationList = [];
             for (let notification of notifications) {
-                notificationList.push(
-                    NavTemplates.notificationInList(notification.type, notification.isRead, notification.createdAt, notification.message, notification.data)
-                );
+                notificationList.push(NavTemplates.notificationInList(notification));
             }
         }
-        let unreadNotifications = notifications.filter(notification => notification.read === 0);
+        let unreadNotifications = notifications.filter(notification => !notification.is_read);
 
         const notificationContainer = create("div")
             .classes("hidden", "popout-below", "rounded", "absolute-align-right", "notification-list")

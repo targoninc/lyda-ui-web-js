@@ -1,4 +1,7 @@
+import {NotificationReference} from "../NotificationReference.ts";
+
 export interface Notification {
+    references?: NotificationReference[];
     id: number;
     user_id: number;
     track_id: number;

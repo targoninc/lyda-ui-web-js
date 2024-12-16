@@ -137,7 +137,6 @@ export class SettingsTemplates {
 
     static themeSelector(theme: Theme, currentTheme$: Signal<Theme>) {
         const active$ = compute(c => c === theme ? "active" : "_", currentTheme$);
-        console.log(currentTheme$.value, theme);
 
         return FJSC.button(<ButtonConfig>{
             classes: [active$],

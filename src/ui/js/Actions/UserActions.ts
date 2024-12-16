@@ -127,11 +127,11 @@ export class UserActions {
 
     static getNotificationsPeriodically(e: HTMLElement) {
         setInterval(async () => {
-            const timestamp = document.querySelector(".listNotification")?.getAttribute("data-created_at");
-            if (!timestamp) {
+            const id = document.querySelector(".listNotification")?.id;
+            if (!id) {
                 return;
             }
-            const res = await Api.getAsync(ApiRoutes.getAllNotifications, { after: timestamp });
+            const res = await Api.getAsync(ApiRoutes.getAllNotifications, { after: id });
             if (res.code !== 200) {
                 return;
             }
@@ -140,8 +140,7 @@ export class UserActions {
                 const notificationList = document.querySelector(".notification-list");
                 if (notificationList) {
                     for (const notification of notifications) {
-                        // TODO: Add data
-                        notificationList.prepend(NavTemplates.notificationInList(notification.type, notification.is_read, notification.created_at, notification.message, {}));
+                        notificationList.prepend(NavTemplates.notificationInList(notification));
                     }
                     const notificationBubble = document.querySelector(".notification-bubble");
                     if (notificationBubble) {
