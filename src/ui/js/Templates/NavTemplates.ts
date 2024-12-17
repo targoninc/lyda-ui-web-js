@@ -68,23 +68,21 @@ export class NavTemplates {
             .classes("burger-menu-content", "hidden", "padded-page", "flex-v")
             .children(
                 create("div")
-                    .classes("flex", "clickable")
+                    .classes("flex", "clickable", "burger-menu-topbar")
                     .onclick(NavActions.closeBurgerMenu)
                     .children(
-                        create("img")
-                            .classes("icon", "svg", "nopointer")
-                            .attributes("src", Icons.X, "alt", "X")
-                            .build(),
                         create("div")
                             .children(
                                 create("img")
                                     .classes("icon", "svg")
                                     .attributes("src", Icons.LYDA, "alt", "Lyda")
                                     .build()
-                            )
-                            .build()
-                    )
-                    .build(),
+                            ).build(),
+                        create("img")
+                            .classes("icon", "svg", "nopointer")
+                            .attributes("src", Icons.X, "alt", "X")
+                            .build(),
+                    ).build(),
                 NavTemplates.navButtonInBurger("following", "Feed", "rss_feed", async () => {
                     NavActions.closeBurgerMenu();
                     navigate("following");
@@ -125,7 +123,7 @@ export class NavTemplates {
             text,
             icon: { icon, adaptive: true, classes: ["inline-icon", "svg", "nopointer"] },
             onclick: clickFunc,
-            classes: ["text-xxlarge", activeClass],
+            classes: ["text-xxlarge", "burger-menu-button", activeClass],
             id,
         });
     }

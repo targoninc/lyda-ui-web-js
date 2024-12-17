@@ -559,6 +559,15 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     z-index: 3;
 }
 
+.burger-menu-button {
+    width: 100%;
+    justify-content: center;
+}
+
+.burger-menu-topbar {
+    margin-left: auto;
+}
+
 .themeSwitchInSettings {
     height: 48px;
 }
