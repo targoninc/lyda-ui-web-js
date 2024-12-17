@@ -670,7 +670,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .search {
     margin-right: var(--gap);
-    width: 100%;
+    flex-grow: 1;
 }
 
 .search-input {
