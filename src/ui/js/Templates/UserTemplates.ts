@@ -30,9 +30,10 @@ import {Badge} from "../Models/DbModels/Badge.ts";
 import {FJSC} from "../../fjsc";
 import {compute, signal} from "../../fjsc/src/signals.ts";
 import {UiActions} from "../Actions/UiActions.ts";
+import {router} from "../../main.ts";
 
 export class UserTemplates {
-    static userWidget(user: User, following: boolean, extraAttributes: HtmlPropertyValue[] = [], extraClasses: HtmlPropertyValue[] = []) {
+    static userWidget(user: User, following: boolean, extraAttributes: HtmlPropertyValue[] = [], extraClasses: StringOrSignal[] = []) {
         const base = create("button");
         if (extraAttributes) {
             base.attributes(...extraAttributes);
@@ -46,8 +47,12 @@ export class UserTemplates {
             avatarState.value = src;
         });
         const cacheUser = LydaCache.get("user");
+        const activeClass = compute((r, p): string => {
+            return r && r.path === "profile" && p.name === user.username ? "active" : "_";
+        }, router.currentRoute, router.currentParams);
+
         return base
-            .classes("user-widget", "fjsc", "clickable", "rounded-max", "flex", "padded-inline")
+            .classes("user-widget", "fjsc", activeClass)
             .attributes("user_id", user.id, "username", user.username)
             .onclick((e: MouseEvent) => {
                 if (e.button === 0) {

@@ -3,6 +3,9 @@ import {signal} from "../../fjsc/src/signals.ts";
 
 export class Router {
     public currentRoute = signal<Route|null>(null);
+    public currentParams = signal<{
+        [key: string]: string;
+    }>({});
     routes: any[];
     protected preRouteChange: Function = () => {};
     protected postRouteChange: Function = () => {};
@@ -27,11 +30,13 @@ export class Router {
         this.currentRoute.value = route;
         if (route) {
             const params = this.getParams(path, route);
+            this.currentParams.value = params;
             this.preRouteChange && await this.preRouteChange(route, params);
             route.handler && await route.handler(route, params);
             this.postRouteChange && await this.postRouteChange(route,params);
         } else {
             this.onNoRouteFound && await this.onNoRouteFound();
+            this.currentParams.value = {};
         }
     }
 
