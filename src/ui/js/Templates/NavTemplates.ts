@@ -85,15 +85,15 @@ export class NavTemplates {
                             .build()
                     )
                     .build(),
-                NavTemplates.navButtonInBurger("following", "Feed", Icons.PEOPLE, async () => {
+                NavTemplates.navButtonInBurger("following", "Feed", "rss_feed", async () => {
                     NavActions.closeBurgerMenu();
                     navigate("following");
                 }),
-                NavTemplates.navButtonInBurger("explore", "Explore", Icons.STARS, async () => {
+                NavTemplates.navButtonInBurger("explore", "Explore", "explore", async () => {
                     NavActions.closeBurgerMenu();
                     navigate("explore");
                 }),
-                NavTemplates.navButtonInBurger("library", "Library", Icons.LIKE, async () => {
+                NavTemplates.navButtonInBurger("library", "Library", "category", async () => {
                     NavActions.closeBurgerMenu();
                     navigate("library");
                 }),
@@ -106,7 +106,11 @@ export class NavTemplates {
 
         return FJSC.button({
             text,
-            icon: { icon, adaptive: true, classes: ["inline-icon", "svg", "nopointer"] },
+            icon: {
+                icon,
+                adaptive: true,
+                classes: ["inline-icon", "svg", "nopointer"]
+            },
             onclick: clickFunc,
             classes: ["hideOnMidBreakpoint", activeClass],
             id,
