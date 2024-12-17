@@ -23,6 +23,7 @@ import {compute, signal} from "../../fjsc/src/signals.ts";
 
 export class PlaylistTemplates {
     static async addTrackToPlaylistModal(track: Track, playlists: Playlist[]) {
+        // TODO: Copy funcitionality from AlbumTemplates
         let playlistList = [];
         if (playlists.length === 0) {
             playlistList.push(create("span")

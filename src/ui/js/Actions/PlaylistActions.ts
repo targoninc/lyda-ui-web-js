@@ -16,7 +16,7 @@ import {MediaFileType} from "../Enums/MediaFileType.ts";
 
 export class PlaylistActions {
     static async openAddToPlaylistModal(objectToBeAdded: Album|Track, type: "track"|"album") {
-        const res = await Api.getAsync(ApiRoutes.getPlaylistsByUserId, {user_id: objectToBeAdded.user_id});
+        const res = await Api.getAsync<Playlist[]>(ApiRoutes.getPlaylistsByUserId, {id: objectToBeAdded.user_id});
         if (res.code !== 200) {
             console.error("Failed to get playlists: ", res.data);
             return;
