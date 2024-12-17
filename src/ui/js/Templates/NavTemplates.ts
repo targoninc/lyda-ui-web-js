@@ -128,7 +128,7 @@ export class NavTemplates {
         });
     }
 
-    static accountSection(user: User, avatar: StringOrSignal, notifications: Notification[]) {
+    static accountSection(user: User, notifications: Notification[]) {
         return create("div")
             .classes("widest-fill-right", "relative")
             .children(
@@ -151,8 +151,7 @@ export class NavTemplates {
                         await AuthActions.logOut();
                     }
                 }),
-            )
-            .build();
+            ).build();
     }
 
     static notSignedInNote() {

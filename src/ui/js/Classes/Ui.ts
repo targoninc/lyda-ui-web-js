@@ -48,7 +48,7 @@ export class Ui {
                     userTemplateRender = NavTemplates.notSignedInNote();
                 } else {
                     notifications = res.data;
-                    userTemplateRender = NavTemplates.accountSection(user, await Util.getAvatarFromUserIdAsync(user.id), notifications);
+                    userTemplateRender = NavTemplates.accountSection(user, notifications);
                 }
             } else {
                 userTemplateRender = NavTemplates.notSignedInNote();

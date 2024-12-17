@@ -11,6 +11,7 @@ import {LydaApi} from "../Api/LydaApi.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {navigate} from "../Routing/Router.ts";
+import {AuthActions} from "../Actions/AuthActions.ts";
 
 export class SettingsTemplates {
     static settingsPage(user: User) {
@@ -48,6 +49,14 @@ export class SettingsTemplates {
                 create("div")
                     .classes("flex-v", "small-card")
                     .children(
+                        FJSC.button({
+                            text: "Log out",
+                            classes: ["negative", "showOnSmallBreakpoint"],
+                            icon: { icon: "logout" },
+                            onclick: async () => {
+                                await AuthActions.logOut();
+                            }
+                        }),
                         FJSC.input(<InputConfig<string>>{
                             type: InputType.text,
                             label: "Username",
