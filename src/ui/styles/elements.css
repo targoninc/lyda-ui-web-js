@@ -58,7 +58,6 @@
 
 .cover-container .cover {
     width: 100%;
-    min-width: 100px;
     height: auto;
     border-radius: var(--border-radius);
     background: var(--color-5);
@@ -379,8 +378,11 @@ label {
 
 .loudness-button, .loop-button {
     height: 27px;
-    z-index: 1;
     position: relative;
+}
+
+.loudness-button {
+    z-index: 1;
 }
 
 #permanent-player {
@@ -523,6 +525,22 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .cover-container {
     height: max-content;
+}
+
+.cover-container, .cover-container .cover {
+    width: var(--cover-size);
+}
+
+.cover-container.card-cover {
+    --cover-size: 120px;
+}
+
+.cover-container.inline-cover {
+    --cover-size: var(--inline-track-height);
+}
+
+.cover-container.small-cover {
+    --cover-size: var(--small-track-height);
 }
 
 #banner-loader, #avatar-loader {
@@ -1064,6 +1082,10 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
     .waveform-bar.odd {
         display: none;
+    }
+
+    .cover-container.card-cover {
+        --cover-size: 90px;
     }
 
     :root {

@@ -73,7 +73,7 @@ export class TrackTemplates {
                 create("div")
                     .classes("flex", "noflexwrap")
                     .children(
-                        TrackTemplates.trackCover(track, "120px"),
+                        TrackTemplates.trackCover(track, "card-cover"),
                         create("div")
                             .classes("flex-v", "small-gap")
                             .children(
@@ -132,16 +132,15 @@ export class TrackTemplates {
             .build();
     }
 
-    static trackCover(track: Track, overwriteWidth: string | null = null, startCallback: Function|null = null) {
+    static trackCover(track: Track, coverType: string, startCallback: Function|null = null) {
         const imageState = signal(Images.DEFAULT_AVATAR);
         Util.getCoverFileFromTrackIdAsync(track.id, track.user_id).then((src) => {
             imageState.value = src;
         });
 
         return create("div")
-            .classes("cover-container", "relative", "pointer")
+            .classes("cover-container", "relative", "pointer", coverType)
             .attributes("track_id", track.id)
-            .styles("width", overwriteWidth ?? "min(200px, 100%)")
             .id(track.id)
             .onclick(async () => {
                 if (!startCallback) {
@@ -154,7 +153,6 @@ export class TrackTemplates {
             .children(
                 create("img")
                     .classes("cover", "nopointer", "blurOnParentHover")
-                    .styles("min-width", overwriteWidth ?? "100px")
                     .src(imageState)
                     .alt(track.title)
                     .build(),
@@ -167,11 +165,11 @@ export class TrackTemplates {
     }
 
     static feedTrackCover(track: Track) {
-        return TrackTemplates.trackCover(track, "var(--inline-track-height)");
+        return TrackTemplates.trackCover(track, "inline-cover");
     }
 
     static smallListTrackCover(track: Track, startCallback: Function|null = null) {
-        return TrackTemplates.trackCover(track, "var(--small-track-height)", startCallback);
+        return TrackTemplates.trackCover(track, "small-cover", startCallback);
     }
 
     static trackCardsContainer(children: AnyNode[]) {
