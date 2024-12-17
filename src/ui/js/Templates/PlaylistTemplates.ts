@@ -264,12 +264,12 @@ export class PlaylistTemplates {
                 create("div")
                     .classes("flex")
                     .children(
-                        PlaylistTemplates.playlistCover(playlist, "120px"),
+                        PlaylistTemplates.playlistCover(playlist, "card-cover"),
                         create("div")
                             .classes("flex-v", "small-gap")
                             .children(
                                 PlaylistTemplates.title(playlist.title, playlist.id, icons),
-                                UserTemplates.userWidget(playlist.user, Util.arrayPropertyMatchesUser(playlist.user.follows, "followingUserId", user)),
+                                UserTemplates.userWidget(playlist.user, Util.arrayPropertyMatchesUser(playlist.user.follows ?? [], "followingUserId", user)),
                                 create("span")
                                     .classes("date", "text-small", "nopointer", "color-dim")
                                     .text(Time.ago(playlist.created_at))
@@ -300,7 +300,7 @@ export class PlaylistTemplates {
             ).build();
     }
 
-    static playlistCover(playlist: Playlist, overwriteWidth: string | null = null) {
+    static playlistCover(playlist: Playlist, coverType: string) {
         const coverState = signal(Images.DEFAULT_AVATAR);
         Util.getCoverFileFromPlaylistIdAsync(playlist.id, playlist.user_id).then(cover => {
             coverState.value = cover;
@@ -310,9 +310,8 @@ export class PlaylistTemplates {
         }
 
         return create("div")
-            .classes("cover-container", "relative", "pointer")
+            .classes("cover-container", "relative", "pointer", coverType)
             .attributes("playlist_id", playlist.id)
-            .styles("width", overwriteWidth ?? "min(200px, 100%)")
             .id(playlist.id)
             .onclick(async () => {
                 notify("Starting playlist " + playlist.id, "info");

@@ -29,6 +29,7 @@ import {AnyElement, create} from "../fjsc/src/f2.ts";
 import {User} from "./Models/DbModels/User.ts";
 import {ApiRoutes} from "./Api/ApiRoutes.ts";
 import {signal} from "../fjsc/src/signals.ts";
+import {Track} from "./Models/DbModels/Track.ts";
 
 export class Lyda {
     static async getEndpointData(endpoint: string, params = "") {
@@ -83,8 +84,8 @@ export class Lyda {
             data = await Lyda.getEndpointData(endpoint, paramsString);
         }
         let user: User;
-        const permissionData  = await Api.getAsync(ApiRoutes.userPermissions);
-        const permissions = permissionData.data;
+        const permissionData  = await Api.getAsync<Permission[]>(ApiRoutes.userPermissions);
+        const permissions = permissionData.data as Permission[];
         switch (element.getAttribute("datatype")) {
         case "uploadForm":
             // @ts-ignore
@@ -97,7 +98,7 @@ export class Lyda {
                 throw new Error("Missing feed type");
             }
             this.loadFeed(feedType, element, user).then();
-            if (data.error) {
+            if (data && data.error) {
                 element.innerHTML = data.error;
                 return;
             }
@@ -124,7 +125,11 @@ export class Lyda {
         case "track":
             await PlayManager.cacheTrackData(data);
             user = await Util.getUserAsync();
-            element.appendChild(await TrackTemplates.trackPage(data, user));
+            const trackPage = await TrackTemplates.trackPage(data, user);
+            if (!trackPage) {
+                return;
+            }
+            element.appendChild(trackPage);
             if (data.error) {
                 element.innerHTML = data.error;
                 return;
@@ -247,7 +252,7 @@ export class Lyda {
         };
         const endpoint = feedMap[type as keyof typeof feedMap];
         const pageState = signal(1);
-        const tracksState = signal([]);
+        const tracksState = signal<Track[]>([]);
         const filterState = signal("all");
         const loadingState = signal(false);
         const pageSize = 10;
@@ -257,14 +262,14 @@ export class Lyda {
             const offset = (pageNumber - 1) * pageSize;
             const params = type === "following" ? { offset, filter } : { offset };
             loadingState.value = true;
-            const res = await Api.getAsync(endpoint, params);
+            const res = await Api.getAsync<Track[]>(endpoint, params);
             if (res.code !== 200) {
-                notify("Failed to get tracks", "error");
+                notify(`Failed to get tracks: ${res.data.error}`, "error");
                 loadingState.value = false;
                 return;
             }
-            const newTracks = res.data;
-            if (newTracks.length === 0 && pageNumber > 1) {
+            const newTracks = res.data as Track[];
+            if (newTracks && newTracks.length === 0 && pageNumber > 1) {
                 pageState.value -= 1;
                 loadingState.value = false;
                 return;

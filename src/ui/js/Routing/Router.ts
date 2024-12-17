@@ -1,11 +1,12 @@
 import {router} from "../../main.ts";
+import {signal} from "../../fjsc/src/signals.ts";
 
 export class Router {
-    currentRoute = null;
+    public currentRoute = signal<Route|null>(null);
     routes: any[];
-    preRouteChange: Function = () => {};
-    postRouteChange: Function = () => {};
-    onNoRouteFound: Function = () => {};
+    protected preRouteChange: Function = () => {};
+    protected postRouteChange: Function = () => {};
+    protected onNoRouteFound: Function = () => {};
 
     constructor(routes: Route[], preRouteChange: Function = () => {}, postRouteChange: Function = () => {}, onNoRouteFound: Function = () => {}) {
         this.routes = routes;
@@ -23,7 +24,7 @@ export class Router {
     async handleRouteChange() {
         const path = window.location.pathname.substring(1);
         const route = this.routes.find(r => path.startsWith(r.path) || (r.aliases && r.aliases.some((a: string) => path.startsWith(a))));
-        this.currentRoute = route;
+        this.currentRoute.value = route;
         if (route) {
             const params = this.getParams(path, route);
             this.preRouteChange && await this.preRouteChange(route, params);

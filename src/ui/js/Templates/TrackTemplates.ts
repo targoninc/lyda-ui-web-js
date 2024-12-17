@@ -554,7 +554,7 @@ export class TrackTemplates {
         if (!trackData.track) {
             console.log(trackData);
             console.error("Invalid track data");
-            return;
+            return null;
         }
         const track = trackData.track as Track;
         const trackState = signal(TrackProcessor.forDownload(track));

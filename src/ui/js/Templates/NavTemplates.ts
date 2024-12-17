@@ -11,10 +11,11 @@ import {Time} from "../Classes/Helpers/Time.ts";
 import {Util} from "../Classes/Util.ts";
 import {navigate} from "../Routing/Router.ts";
 import {AnyNode, create, StringOrSignal} from "../../fjsc/src/f2.ts";
-import {signal} from "../../fjsc/src/signals.ts";
+import {compute, signal} from "../../fjsc/src/signals.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {Notification} from "../Models/DbModels/Notification.ts";
 import {FJSC} from "../../fjsc";
+import {router} from "../../main.ts";
 
 export class NavTemplates {
     static navTop(userTemplate: AnyNode) {
@@ -100,31 +101,29 @@ export class NavTemplates {
     }
 
     static navButton(id: string, text: string, icon: StringOrSignal, clickFunc: Function) {
+        const active = compute(r => r && r.path === id, router.currentRoute);
+        const activeClass = compute((a): string => a ? "active" : "_", active);
+
         return FJSC.button({
             text,
             icon: { icon, adaptive: true, classes: ["inline-icon", "svg", "nopointer"] },
             onclick: clickFunc,
-            classes: ["hideOnMidBreakpoint"],
+            classes: ["hideOnMidBreakpoint", activeClass],
             id,
         });
     }
 
     static navButtonInBurger(id: string, text: string, icon: string, clickFunc: Function) {
-        return create("div")
-            .classes("nav", "flex", "small-gap", "clickable", "fakeButton", "padded-inline", "rounded")
-            .id(id)
-            .onclick(clickFunc)
-            .children(
-                create("img")
-                    .classes("inline-icon", "svg", "nopointer")
-                    .attributes("src", icon, "alt", text)
-                    .build(),
-                create("span")
-                    .classes("text-xxlarge", "nopointer")
-                    .id(id)
-                    .text(text)
-                    .build()
-            ).build();
+        const active = compute(r => r && r.path === id, router.currentRoute);
+        const activeClass = compute((a): string => a ? "active" : "_", active);
+
+        return FJSC.button({
+            text,
+            icon: { icon, adaptive: true, classes: ["inline-icon", "svg", "nopointer"] },
+            onclick: clickFunc,
+            classes: ["text-xxlarge", activeClass],
+            id,
+        });
     }
 
     static accountSection(user: User, avatar: StringOrSignal, notifications: Notification[]) {

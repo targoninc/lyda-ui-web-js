@@ -257,7 +257,7 @@ export class AlbumTemplates {
                 create("div")
                     .classes("flex")
                     .children(
-                        AlbumTemplates.albumCover(album, "120px"),
+                        AlbumTemplates.albumCover(album, "card-cover"),
                         create("div")
                             .classes("flex-v", "small-gap")
                             .children(
@@ -294,7 +294,7 @@ export class AlbumTemplates {
             ).build();
     }
 
-    static albumCover(album: Album, overwriteWidth: string|null = null) {
+    static albumCover(album: Album, coverType: string) {
         if (!album.tracks) {
             throw new Error(`Album ${album.id} has no tracks`);
         }
@@ -305,9 +305,8 @@ export class AlbumTemplates {
         });
 
         return create("div")
-            .classes("cover-container", "relative", "pointer")
+            .classes("cover-container", "relative", "pointer", coverType)
             .attributes("album_id", album.id)
-            .styles("width", overwriteWidth ?? "min(200px, 100%)")
             .id(album.id)
             .onclick(async () => {
                 PlayManager.playFrom("album", album.title, album.id);
