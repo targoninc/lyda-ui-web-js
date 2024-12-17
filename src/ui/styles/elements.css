@@ -50,7 +50,6 @@
 }
 
 .single-page .cover-container {
-    width: min(150px, 100%);
     border-radius: var(--border-radius);
     display: flex;
     flex-direction: column;
@@ -525,6 +524,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .cover-container {
     height: max-content;
+    --cover-size: 200px;
 }
 
 .cover-container, .cover-container .cover {
