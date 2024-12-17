@@ -44,9 +44,6 @@ export const router = new Router(routes, async (route: Route, params: any) => {
     }
     await Lyda.initPage(params);
 }, async (route: Route, params: any) => {
-    const page = route.path;
-    Ui.updateNavBar(page);
-
     const currentTrackIdTmp = LydaCache.get<number>("currentTrackId").content;
     if (currentTrackIdTmp) {
         currentTrackId.value = currentTrackIdTmp;

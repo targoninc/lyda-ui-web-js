@@ -83,16 +83,6 @@ export class Ui {
         }
     }
 
-    static updateNavBar(currentPage: string) {
-        let navs = document.querySelectorAll(".nav");
-        for (let nav of navs) {
-            nav.classList.remove("active");
-            if (nav.id === currentPage) {
-                nav.classList.add("active");
-            }
-        }
-    }
-
     static async windowResize() {
         let pageBackground = document.querySelector(".page-background") as HTMLElement;
         let nav = document.querySelector("nav");
