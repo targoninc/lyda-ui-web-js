@@ -171,12 +171,6 @@ export class PlayerTemplates {
         const trackList = await Promise.all(tasks);
         const loopingSingle = PlayManager.isLoopingSingle();
         const loopingContext = PlayManager.isLoopingContext();
-        const cover = signal(Images.DEFAULT_AVATAR);
-        Util.getCoverFileFromTrackIdAsync(track.id, track.user_id).then((src) => {
-            cover.value = src;
-        });
-
-
 
         return create("div")
             .classes("flex-v")
@@ -192,20 +186,13 @@ export class PlayerTemplates {
                         create("div")
                             .classes("flex")
                             .children(
-                                await PlayerTemplates.bottomTrackInfo(track, trackUser, user),
-                                await QueueTemplates.queue(trackList),
-                                PlayerTemplates.audioControls(loopingSingle, loopingContext)
+                                ...await PlayerTemplates.bottomTrackInfo(track, trackUser, user),
+                                ...await QueueTemplates.queue(trackList),
+                                ...PlayerTemplates.audioControls(loopingSingle, loopingContext)
                             ).build(),
                         create("div")
                             .classes("flex")
                             .children(
-                                create("img")
-                                    .classes("cover-image", "inline-cover", "align-center", "rounded", "clickable", "hover-image")
-                                    .src(cover)
-                                    .onclick(async () => {
-                                        Ui.getImageModal(cover);
-                                    })
-                                    .build(),
                                 PlayerTemplates.audioPlayer(track),
                             ).build(),
                     ).build(), true)
@@ -249,29 +236,37 @@ export class PlayerTemplates {
         track.comments = track.comments ?? [];
         track.reposts = track.reposts ?? [];
 
-        return create("div")
-            .classes("bottom-track-info", "flex")
-            .children(
-                //TODO: !user.isSubscribed ? PlayerTemplates.noSubscriptionInfo() : null,
-                create("span")
-                    .classes("title", "clickable", "padded-inline", "align-center")
-                    .text(track.title)
-                    .onclick(() => {
-                        navigate("track/" + track.id);
-                    }).build(),
-                ...icons,
-                UserTemplates.userWidget(trackUser, Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "followingUserId", user),
-                    [], ["align-center"]),
-                PlayerTemplates.playingFrom(),
-                create("div")
-                    .classes("flex", "align-center")
-                    .children(
-                        StatisticsTemplates.likesIndicator("track", track.id, track.likes.length,
-                            Util.arrayPropertyMatchesUser(track.likes, "userId", user)),
-                        isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, Util.arrayPropertyMatchesUser(track.reposts, "userId", user)),
-                        CommentTemplates.commentsIndicator(track.id, track.comments.length),
-                    ).build()
-            ).build();
+        const cover = signal(Images.DEFAULT_AVATAR);
+        Util.getCoverFileFromTrackIdAsync(track.id, track.user_id).then((src) => {
+            cover.value = src;
+        });
+
+        return [
+            create("img")
+                .classes("cover-image", "inline-cover", "align-center", "rounded", "clickable", "hover-image")
+                .src(cover)
+                .onclick(async () => {
+                    Ui.getImageModal(cover);
+                }).build(),
+            create("span")
+                .classes("title", "clickable", "padded-inline", "align-center")
+                .text(track.title)
+                .onclick(() => {
+                    navigate("track/" + track.id);
+                }).build(),
+            ...icons,
+            UserTemplates.userWidget(trackUser, Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "followingUserId", user),
+                [], ["align-center"]),
+            PlayerTemplates.playingFrom(),
+            create("div")
+                .classes("flex", "align-center")
+                .children(
+                    StatisticsTemplates.likesIndicator("track", track.id, track.likes.length,
+                        Util.arrayPropertyMatchesUser(track.likes, "userId", user)),
+                    isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, Util.arrayPropertyMatchesUser(track.reposts, "userId", user)),
+                    CommentTemplates.commentsIndicator(track.id, track.comments.length),
+                ).build()
+        ];
     }
 
     static audioControls(loopingSingle: boolean, loopingContext: boolean) {
@@ -282,21 +277,19 @@ export class PlayerTemplates {
             src = Icons.LOOP_SINGLE;
         }
 
-        return create("div")
-            .classes("audio-controls", "flex")
-            .children(
-                create("div")
-                    .classes("loop-button", "fakeButton", "clickable", "flex", "rounded-50", "padded-inline", "align-center")
-                    .onclick(async () => {
-                        await PlayManager.toggleLoop();
-                    })
-                    .title("Change loop mode")
-                    .children(
-                        create("img")
-                            .classes("loop-button-img", "align-center", "inline-icon", "svg", "nopointer")
-                            .src(src)
-                            .build(),
-                    ).build(),
-            ).build();
+        return [
+            create("div")
+                .classes("loop-button", "fakeButton", "clickable", "flex", "rounded-50", "padded-inline", "align-center")
+                .onclick(async () => {
+                    await PlayManager.toggleLoop();
+                })
+                .title("Change loop mode")
+                .children(
+                    create("img")
+                        .classes("loop-button-img", "align-center", "inline-icon", "svg", "nopointer")
+                        .src(src)
+                        .build(),
+                ).build()
+        ];
     }
 }

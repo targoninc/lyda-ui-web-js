@@ -420,7 +420,7 @@ export class TrackActions {
     }
 
     static async getUnapprovedTracks() {
-        const res = await Api.getAsync(ApiRoutes.getUnapprovedCollabs);
+        const res = await Api.getAsync<any[]>(ApiRoutes.getUnapprovedCollabs);
         if (res.code !== 200) {
             notify("Error while trying to get unapproved tracks: " + res.data, "error");
             return [];

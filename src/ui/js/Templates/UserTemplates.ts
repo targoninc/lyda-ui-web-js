@@ -124,7 +124,7 @@ export class UserTemplates {
             .build();
     }
 
-    static followButton(initialFollowing: boolean, user_id: HtmlPropertyValue, noText = false) {
+    static followButton(initialFollowing: boolean, user_id: number, noText = false) {
         const following = signal(initialFollowing);
 
         return create("div")
@@ -163,7 +163,7 @@ export class UserTemplates {
     }
 
     static unapprovedTracksLink() {
-        const unapprovedTracks = signal([]);
+        const unapprovedTracks = signal<any[]>([]);
         TrackActions.getUnapprovedTracks().then(tracks => {
             unapprovedTracks.value = tracks;
         });

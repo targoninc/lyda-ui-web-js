@@ -271,9 +271,9 @@ export class TrackTemplates {
                 }
             })
             .children(
-                ...loudnessData.map((loudness) => {
+                ...loudnessData.map((loudness, index) => {
                     return create("div")
-                        .classes("waveform-bar", "nopointer")
+                        .classes("waveform-bar", "nopointer", index % 2 === 0 ? "even" : "odd")
                         .styles("height", (loudness * 100) + "%")
                         .build();
                 })

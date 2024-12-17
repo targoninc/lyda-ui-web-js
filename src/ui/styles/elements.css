@@ -166,7 +166,7 @@
 }
 
 .inline-cover {
-    --cover-size: 54px;
+    --cover-size: 2em;
     height: var(--cover-size);
     width: var(--cover-size);
 }
@@ -259,7 +259,6 @@ label {
 }
 
 .audio-player-scrubber {
-    width: 200px;
     height: 30px;
     position: relative;
     max-width: 100%;
@@ -348,6 +347,7 @@ label {
 .audio-player-controls {
     background: var(--color-3);
     border-radius: 27px;
+    flex-wrap: nowrap;
 }
 
 .loudness-control:hover .loudness-bar {
@@ -361,6 +361,10 @@ label {
     bottom: 100%;
     left: 50%;
     transform: translateX(-50%);
+}
+
+.audio-player-time {
+    flex-wrap: nowrap;
 }
 
 .audio-player-loudnessbackground {
@@ -1055,6 +1059,10 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 @media screen and (max-width: 600px) {
     .waveform-bar {
         width: 1px;
+    }
+
+    .waveform-bar.odd {
+        display: none;
     }
 
     :root {
