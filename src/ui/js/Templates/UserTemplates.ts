@@ -29,6 +29,7 @@ import {Album} from "../Models/DbModels/Album.ts";
 import {Badge} from "../Models/DbModels/Badge.ts";
 import {FJSC} from "../../fjsc";
 import {compute, signal} from "../../fjsc/src/signals.ts";
+import {UiActions} from "../Actions/UiActions.ts";
 
 export class UserTemplates {
     static userWidget(user: User, following: boolean, extraAttributes: HtmlPropertyValue[] = [], extraClasses: HtmlPropertyValue[] = []) {
@@ -183,11 +184,17 @@ export class UserTemplates {
         }
 
         return create("div")
-            .classes("actions-container", "flex")
+            .classes("flex", "fullWidth")
             .children(
-                GenericTemplates.newTrackButton(),
-                GenericTemplates.newAlbumButton(),
-                GenericTemplates.newPlaylistButton(),
+                GenericTemplates.newTrackButton(["hideOnSmallBreakpoint"]),
+                GenericTemplates.newAlbumButton(["hideOnSmallBreakpoint"]),
+                GenericTemplates.newPlaylistButton(["hideOnSmallBreakpoint"]),
+                FJSC.button({
+                    classes: ["showOnSmallBreakpoint", "positive"],
+                    text: "New",
+                    icon: { icon: "add" },
+                    onclick: UiActions.openCreateMenu
+                }),
                 FJSC.button({
                     text: "Settings",
                     icon: { icon: "settings" },

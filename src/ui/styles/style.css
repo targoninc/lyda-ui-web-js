@@ -224,7 +224,6 @@ button * {
 
 nav, footer {
     display: flex;
-    flex-wrap: wrap;
     gap: 30px;
     padding: var(--page-padding);
     border-bottom: 1px solid var(--color-5);
@@ -905,6 +904,10 @@ img.loading:before {
     transform: scale(1.1);
 }
 
+.showOnSmallBreakpoint, .showOnMidBreakpoint {
+    display: none !important;
+}
+
 @keyframes loadingAnimation {
     0% {
         background-position: 200% 0;
@@ -923,12 +926,6 @@ img.loading:before {
     }
 }
 
-@media only screen and (max-width: 1301px) {
-    .search {
-        max-width: 120px;
-    }
-}
-
 @media only screen and (max-width: 1110px) {
     .flexOnMidBreakpoint {
         display: flex;
@@ -936,6 +933,10 @@ img.loading:before {
 
     .hideOnMidBreakpoint {
         display: none !important;
+    }
+
+    .showOnMidBreakpoint {
+        display: block !important;
     }
 }
 
@@ -946,5 +947,9 @@ img.loading:before {
 
     .hideOnSmallBreakpoint {
         display: none !important;
+    }
+
+    .showOnSmallBreakpoint {
+        display: block !important;
     }
 }

@@ -124,7 +124,7 @@
     border-radius: var(--border-radius);
     gap: 15px;
     border: 1px solid transparent;
-    width: var(--card-width);
+    width: max(var(--card-width), 100%);
     max-width: var(--card-width);
 }
 
@@ -666,11 +666,11 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .search {
     margin-right: var(--gap);
-    width: min(100%, 300px);
+    width: 100%;
 }
 
 .search-input {
-    width: calc(100% - 20px);
+    width: 100%;
     padding-left: 30px !important;
 }
 
