@@ -10,6 +10,7 @@ import {create} from "../../fjsc/src/f2.ts";
 import {FJSC} from "../../fjsc";
 import {User} from "../Models/DbModels/User.ts";
 import {compute, signal} from "../../fjsc/src/signals.ts";
+import {Images} from "../Enums/Images.ts";
 
 export class QueueTemplates {
     static async queueItem(track: Track, index: number, totalCount: number, user: User, attributes = [], classes = []) {
@@ -55,6 +56,12 @@ export class QueueTemplates {
         if (!track.user) {
             throw new Error(`Track ${track.id} has no user`);
         }
+        const coverState = signal(Images.DEFAULT_AVATAR);
+        if (track.has_cover) {
+            Util.getCoverFileFromTrackIdAsync(track.id, track.user.id).then((src) => {
+                coverState.value = src;
+            });
+        }
 
         return create("div")
             .styles("height", "34px")
@@ -76,7 +83,7 @@ export class QueueTemplates {
                     .children(
                         create("img")
                             .classes("align-center", "inline-icon", "nopointer")
-                            .src(await Util.getCoverFileFromTrackIdAsync(track.id, track.user.id))
+                            .src(coverState)
                             .alt(track.title)
                             .build(),
                         create("span")

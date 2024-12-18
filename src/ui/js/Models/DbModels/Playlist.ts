@@ -14,4 +14,5 @@ export interface Playlist {
     updated_at: Date;
     visibility: string;
     secretcode: string;
+    has_cover: boolean;
 }

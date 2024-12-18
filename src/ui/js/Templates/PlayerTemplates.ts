@@ -237,9 +237,11 @@ export class PlayerTemplates {
         track.reposts = track.reposts ?? [];
 
         const cover = signal(Images.DEFAULT_AVATAR);
-        Util.getCoverFileFromTrackIdAsync(track.id, track.user_id).then((src) => {
-            cover.value = src;
-        });
+        if (track.has_cover) {
+            Util.getCoverFileFromTrackIdAsync(track.id, track.user_id).then((src) => {
+                cover.value = src;
+            });
+        }
 
         return [
             create("img")
@@ -255,7 +257,7 @@ export class PlayerTemplates {
                     navigate("track/" + track.id);
                 }).build(),
             ...icons,
-            UserTemplates.userWidget(trackUser, Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "followingUserId", user),
+            UserTemplates.userWidget(trackUser, Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "following_user_id", user),
                 [], ["align-center"]),
             PlayerTemplates.playingFrom(),
             create("div")

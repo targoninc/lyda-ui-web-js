@@ -259,9 +259,11 @@ export class PlaylistTemplates {
             icons.push(GenericTemplates.lock());
         }
         const coverState = signal(Images.DEFAULT_AVATAR);
-        Util.getCoverFileFromPlaylistIdAsync(playlist.id, playlist.user_id).then(cover => {
-            coverState.value = cover;
-        });
+        if (playlist.has_cover) {
+            Util.getCoverFileFromPlaylistIdAsync(playlist.id, playlist.user_id).then(cover => {
+                coverState.value = cover;
+            });
+        }
         if (!playlist.user) {
             throw new Error(`Playlist ${playlist.id} has no user`);
         }
@@ -280,7 +282,7 @@ export class PlaylistTemplates {
                             .classes("flex-v", "small-gap")
                             .children(
                                 PlaylistTemplates.title(playlist.title, playlist.id, icons),
-                                UserTemplates.userWidget(playlist.user, Util.arrayPropertyMatchesUser(playlist.user.follows ?? [], "followingUserId", user)),
+                                UserTemplates.userWidget(playlist.user, Util.arrayPropertyMatchesUser(playlist.user.follows ?? [], "following_user_id", user)),
                                 create("span")
                                     .classes("date", "text-small", "nopointer", "color-dim")
                                     .text(Time.ago(playlist.created_at))
@@ -313,9 +315,11 @@ export class PlaylistTemplates {
 
     static playlistCover(playlist: Playlist, coverType: string) {
         const coverState = signal(Images.DEFAULT_AVATAR);
-        Util.getCoverFileFromPlaylistIdAsync(playlist.id, playlist.user_id).then(cover => {
-            coverState.value = cover;
-        });
+        if (playlist.has_cover) {
+            Util.getCoverFileFromPlaylistIdAsync(playlist.id, playlist.user_id).then(cover => {
+                coverState.value = cover;
+            });
+        }
         if (!playlist.tracks) {
             throw new Error(`Playlist ${playlist.id} has no tracks`);
         }
@@ -350,10 +354,17 @@ export class PlaylistTemplates {
     }
 
     static async smallPlaylistCover(playlist: Playlist) {
+        const coverState = signal(Images.DEFAULT_AVATAR);
+        if (playlist.has_cover) {
+            Util.getCoverFileFromPlaylistIdAsync(playlist.id, playlist.user_id).then(cover => {
+                coverState.value = cover;
+            });
+        }
+
         return create("img")
             .classes("cover", "rounded", "nopointer", "blurOnParentHover")
             .styles("height", "var(--font-size-large)")
-            .src(await Util.getCoverFileFromPlaylistIdAsync(playlist.id, playlist.user_id))
+            .src(coverState)
             .alt(playlist.title)
             .build();
     }
@@ -417,6 +428,12 @@ export class PlaylistTemplates {
             }));
         }
         const coverLoading = signal(false);
+        const coverState = signal(Images.DEFAULT_AVATAR);
+        if (playlist.has_cover) {
+            Util.getCoverFileFromPlaylistIdAsync(playlist.id, playlist.user_id).then(cover => {
+                coverState.value = cover;
+            });
+        }
 
         return create("div")
             .classes("single-page", "noflexwrap", "padded-large", "rounded-large", "flex-v")
@@ -428,7 +445,7 @@ export class PlaylistTemplates {
                             .classes("title", "wordwrap")
                             .text(playlist.title)
                             .build(),
-                        UserTemplates.userWidget(a_user, Util.arrayPropertyMatchesUser(a_user.follows, "followingUserId", user))
+                        UserTemplates.userWidget(a_user, Util.arrayPropertyMatchesUser(a_user.follows ?? [], "following_user_id", user))
                     ).build(),
                 create("div")
                     .classes("playlist-info-container", "flex")
@@ -444,7 +461,7 @@ export class PlaylistTemplates {
                                     .build()),
                                 create("img")
                                     .classes("cover", "blurOnParentHover", "nopointer")
-                                    .src(await Util.getCoverFileFromPlaylistIdAsync(playlist.id, playlist.user_id))
+                                    .src(coverState)
                                     .alt(playlist.title)
                                     .build()
                             ).build(),

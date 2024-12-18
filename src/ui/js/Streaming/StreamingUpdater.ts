@@ -167,12 +167,10 @@ export class StreamingUpdater {
             const queue = QueueManager.getManualQueue();
             const tasks = queue.map((id: number) => PlayManager.getTrackData(id));
             const trackList = await Promise.all(tasks);
-            const queueList = queueContainer.querySelector(".queue-list");
+            // TODO: Fix queue updates :D
+            /*const queueList = queueContainer.querySelector(".queue-list");
             const newQueueContainer = await QueueTemplates.queue(trackList);
-            if (!queueList?.classList.contains("hidden")) {
-                newQueueContainer.classList.remove("hidden");
-            }
-            queueContainer.replaceWith(newQueueContainer);
+            queueContainer.replaceWith(newQueueContainer);*/
         }
     }
 

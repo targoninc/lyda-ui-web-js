@@ -77,7 +77,7 @@ export class TrackTemplates {
                         create("div")
                             .classes("flex-v", "small-gap")
                             .children(
-                                UserTemplates.userWidget(track.user, Util.arrayPropertyMatchesUser(track.user.follows ?? [], "followingUserId", user)),
+                                UserTemplates.userWidget(track.user, Util.arrayPropertyMatchesUser(track.user.follows ?? [], "following_user_id", user)),
                                 create("span")
                                     .classes("date", "text-small", "nopointer", "color-dim")
                                     .text(Time.ago(track.release_date ?? track.created_at))
@@ -134,9 +134,11 @@ export class TrackTemplates {
 
     static trackCover(track: Track, coverType: string, startCallback: Function|null = null) {
         const imageState = signal(Images.DEFAULT_AVATAR);
-        Util.getCoverFileFromTrackIdAsync(track.id, track.user_id).then((src) => {
-            imageState.value = src;
-        });
+        if (track.has_cover) {
+            Util.getCoverFileFromTrackIdAsync(track.id, track.user_id).then((src) => {
+                imageState.value = src;
+            });
+        }
 
         return create("div")
             .classes("cover-container", "relative", "pointer", coverType)
@@ -194,8 +196,7 @@ export class TrackTemplates {
                 TrackTemplates.paginationControls(pageState),
                 trackListContainer,
                 TrackTemplates.paginationControls(pageState)
-            )
-            .build();
+            ).build();
     }
 
     static feedFilters(filterState: Signal<string>, loadingState: Signal<boolean>) {
@@ -350,7 +351,7 @@ export class TrackTemplates {
                                                 create("div")
                                                     .classes("flex")
                                                     .children(
-                                                        UserTemplates.userWidget(track.user, Util.arrayPropertyMatchesUser(track.user!.follows ?? [], "followingUserId", user)),
+                                                        UserTemplates.userWidget(track.user, Util.arrayPropertyMatchesUser(track.user!.follows ?? [], "following_user_id", user)),
                                                         create("span")
                                                             .classes("date", "text-small", "nopointer", "color-dim", "align-center")
                                                             .text(Time.ago(track.created_at))
@@ -620,9 +621,11 @@ export class TrackTemplates {
         }, 200);
         const coverLoading = signal(false);
         const coverFile = signal(Images.DEFAULT_AVATAR);
-        Util.getCoverFileFromTrackIdAsync(track.id, track.user_id).then((src) => {
-            coverFile.value = src;
-        });
+        if (track.has_cover) {
+            Util.getCoverFileFromTrackIdAsync(track.id, track.user_id).then((src) => {
+                coverFile.value = src;
+            });
+        }
 
         return create("div")
             .classes("single-page", "noflexwrap", "padded-large", "rounded-large", "flex-v")
@@ -640,7 +643,7 @@ export class TrackTemplates {
                                     .build(),
                                 ...icons,
                             ).build(),
-                        UserTemplates.userWidget(trackUser, Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "followingUserId", user)),
+                        UserTemplates.userWidget(trackUser, Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "following_user_id", user)),
                     ).build(),
                 ...toAppend,
                 create("div")

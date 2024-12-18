@@ -121,7 +121,7 @@ export class AlbumTemplates {
         const name = compute((s) => s.title ?? "", album);
         const upc = compute((s) => s.upc ?? "", album);
         const description = compute((s) => s.description ?? "", album);
-        const releaseDate = compute((s) => s.release_date?.toISOString().split("T")[0] ?? "", album);
+        const releaseDate = compute((s) => s.release_date ?? new Date(), album);
         const visibility = compute((s) => s.visibility === "private", album);
         const disabled = compute((s) => {
             return !s.title || s.title === "";
@@ -262,7 +262,7 @@ export class AlbumTemplates {
                             .classes("flex-v", "small-gap")
                             .children(
                                 AlbumTemplates.title(album.title, album.id, icons),
-                                UserTemplates.userWidget(album.user, Util.arrayPropertyMatchesUser(album.user.follows, "followingUserId", user)),
+                                UserTemplates.userWidget(album.user, Util.arrayPropertyMatchesUser(album.user.follows ?? [], "following_user_id", user)),
                                 create("span")
                                     .classes("date", "text-small", "nopointer", "color-dim")
                                     .text(Time.ago(album.release_date))
@@ -300,9 +300,11 @@ export class AlbumTemplates {
         }
 
         const srcState = signal(Images.DEFAULT_AVATAR);
-        Util.getCoverFileFromAlbumIdAsync(album.id, album.user_id).then((src) => {
-            srcState.value = src;
-        });
+        if (album.has_cover) {
+            Util.getCoverFileFromAlbumIdAsync(album.id, album.user_id).then((src) => {
+                srcState.value = src;
+            });
+        }
 
         return create("div")
             .classes("cover-container", "relative", "pointer", coverType)
@@ -411,7 +413,7 @@ export class AlbumTemplates {
                             .classes("title", "wordwrap")
                             .text(album.title)
                             .build(),
-                        UserTemplates.userWidget(a_user, Util.arrayPropertyMatchesUser(a_user.follows, "followingUserId", user))
+                        UserTemplates.userWidget(a_user, Util.arrayPropertyMatchesUser(a_user.follows ?? [], "following_user_id", user))
                     ).build(),
                 create("div")
                     .classes("album-info-container", "flex")

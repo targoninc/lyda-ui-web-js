@@ -43,9 +43,11 @@ export class UserTemplates {
         }
 
         const avatarState = signal(Images.DEFAULT_AVATAR);
-        Util.getAvatarFromUserIdAsync(user.id).then((src) => {
-            avatarState.value = src;
-        });
+        if (user.has_avatar) {
+            Util.getAvatarFromUserIdAsync(user.id).then((src) => {
+                avatarState.value = src;
+            });
+        }
         const cacheUser = LydaCache.get("user");
         const activeClass = compute((r, p): string => {
             return r && r.path === "profile" && p.name === user.username ? "active" : "_";

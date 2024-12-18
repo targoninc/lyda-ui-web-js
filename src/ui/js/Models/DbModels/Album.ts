@@ -17,4 +17,5 @@ export interface Album {
     visibility: string;
     secretcode: string;
     price: number;
+    has_cover: boolean;
 }

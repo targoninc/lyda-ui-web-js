@@ -28,4 +28,6 @@ export interface User extends Express.User {
     password_updated_at: Date;
     tos_agreed_at: Date;
     ip: string;
+    has_avatar: boolean;
+    has_banner: boolean;
 }

@@ -188,7 +188,7 @@ export class CommentTemplates {
                 create("div")
                     .classes("flex")
                     .children(
-                        UserTemplates.userWidget(comment.user, Util.arrayPropertyMatchesUser(comment.user.follows, "followingUserId", user), ["comment_id", comment.id]),
+                        UserTemplates.userWidget(comment.user, Util.arrayPropertyMatchesUser(comment.user.follows, "following_user_id", user), ["comment_id", comment.id]),
                         create("span")
                             .classes("text", "text-small", "color-dim", "align-center")
                             .text(Time.ago(comment.created_at))
