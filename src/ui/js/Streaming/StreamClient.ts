@@ -41,10 +41,10 @@ export class StreamClient {
         await this.audio.pause();
     }
 
-    async scrubTo(time: number, relative = true) {
-        //await this.stopAsync();
+    async scrubTo(time: number, relative = true, togglePlay = false) {
+        if (togglePlay) await this.stopAsync();
         this.audio.currentTime = time * (relative ? this.audio.duration : 1);
-        //await this.startAsync();
+        if (togglePlay) await this.startAsync();
     }
 
     getCurrentTime(relative = false) {

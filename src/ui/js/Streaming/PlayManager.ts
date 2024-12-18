@@ -205,7 +205,7 @@ export class PlayManager {
         await StreamingUpdater.updatePlayState();
         console.log(currentTrackPosition.value, track.track.length);
         if (currentTrackPosition.value.relative !== 0) {
-            await streamClient.scrubTo(currentTrackPosition.value.relative * track.track.length, false);
+            await streamClient.scrubTo(currentTrackPosition.value.relative * track.track.length, false, false);
         }
     }
 
@@ -273,7 +273,7 @@ export class PlayManager {
 
         //await PlayManager.stopAllAsync(id);
         const streamClient = PlayManager.getStreamClient(id);
-        await streamClient.scrubTo(value);
+        await streamClient.scrubTo(value, true, true);
 
         StreamingUpdater.updateScrubber(id);
         await StreamingUpdater.updatePlayState();
