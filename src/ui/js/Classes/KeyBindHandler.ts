@@ -31,7 +31,8 @@ export class KeyBinds {
     };
 
     static handler(e: KeyboardEvent) {
-        if (target(e).tagName === "INPUT" || target(e).tagName === "TEXTAREA") {
+        const ignoredTargets = ["input", "textarea", "select", "button"];
+        if (ignoredTargets.includes(target(e).tagName.toLowerCase())) {
             return;
         }
         for (const action in KeyBinds.bindings) {
