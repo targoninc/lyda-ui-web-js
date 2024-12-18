@@ -202,11 +202,10 @@ export class PlayManager {
         if (streamClient === undefined) {
             streamClient = PlayManager.addStreamClientIfNotExists(id, track.track.length);
         }
-        await StreamingUpdater.updatePlayState();
-        console.log(currentTrackPosition.value, track.track.length);
         if (currentTrackPosition.value.relative !== 0) {
             await streamClient.scrubTo(currentTrackPosition.value.relative * track.track.length, false, false);
         }
+        await StreamingUpdater.updatePlayState();
     }
 
     static async stopAsync(id: number) {

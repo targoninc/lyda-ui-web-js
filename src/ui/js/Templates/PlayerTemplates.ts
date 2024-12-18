@@ -35,7 +35,7 @@ export class PlayerTemplates {
             .id("player_" + track.id)
             .children(
                 create("div")
-                    .classes("audio-player-controls", "fullWidth", "flex", "rounded", "padded")
+                    .classes("audio-player-controls", "fullWidth", "flex", "rounded")
                     .id(track.id)
                     .attributes("duration", track.length)
                     .children(
@@ -44,7 +44,7 @@ export class PlayerTemplates {
                             .styles("display", "none")
                             .build(),
                         create("div")
-                            .classes("audio-player-toggle", "clickable", "fakeButton", "flex", "rounded-50", "padded-inline", "relative")
+                            .classes("audio-player-toggle", "audio-player-control", "clickable", "fakeButton", "flex", "rounded-50", "relative")
                             .id(track.id)
                             .onclick(() => {
                                 PlayManager.togglePlayAsync(track.id).then();
@@ -55,7 +55,7 @@ export class PlayerTemplates {
                                     adaptive: true,
                                     id: track.id,
                                     isUrl: true,
-                                    classes: ["audio-player-control-icon", "align-center", "inline-icon", "svg", "nopointer", isPlaying ? "pause-adjust" : "play-adjust"]
+                                    classes: ["audio-player-control-icon", "align-center", "inline-icon", "svg", "nopointer"]
                                 }),
                                 create("span")
                                     .classes("nopointer", "hidden")
@@ -125,14 +125,14 @@ export class PlayerTemplates {
             .onwheel(PlayManager.setLoudnessFromWheel)
             .children(
                 create("div")
-                    .classes("loudness-button", "fakeButton", "clickable", "flex", "rounded-50", "padded-inline")
+                    .classes("loudness-button", "audio-player-control", "fakeButton", "clickable", "flex", "rounded-50")
                     .id(track.id)
                     .onclick(() => {
                         PlayManager.toggleMute(track.id);
                     })
                     .children(
                         create("img")
-                            .classes("loudness-control-icon", "align-center", "inline-icon", "svg", "nopointer")
+                            .classes("loudness-control-icon", "audio-player-control-icon", "align-center", "inline-icon", "svg", "nopointer")
                             .id(track.id)
                             .src(Icons.LOUD)
                             .build()

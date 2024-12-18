@@ -512,7 +512,7 @@ export class PlaylistTemplates {
                     text: isPlaying ? "Pause" : "Play",
                     icon: {
                         icon: isPlaying ? Icons.PAUSE : Icons.PLAY,
-                        classes: ["inline-icon", "svg", "nopointer", isPlaying ? "pause-adjust" : "play-adjust"],
+                        classes: ["inline-icon", "svg", "nopointer"],
                         adaptive: true,
                         isUrl: true
                     },

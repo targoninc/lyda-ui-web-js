@@ -835,7 +835,7 @@ export class TrackTemplates {
             text: isPlaying ? "Pause": "Play",
             icon: {
                 icon: isPlaying ? Icons.PAUSE : Icons.PLAY,
-                classes: ["inline-icon", "svg", "nopointer", isPlaying ? "pause-adjust" : "play-adjust"],
+                classes: ["inline-icon", "svg", "nopointer"],
                 isUrl: true
             },
             classes: ["audio-player-toggle"],

@@ -206,14 +206,10 @@ export class StreamingUpdater {
             if (streamClient.playing) {
                 img.src = Icons.PAUSE;
                 img.alt = "Pause";
-                img.classList.remove("play-adjust");
-                img.classList.add("pause-adjust");
                 text.innerText = "Pause";
             } else {
                 img.src = Icons.PLAY;
                 img.alt = "Play";
-                img.classList.add("play-adjust");
-                img.classList.remove("pause-adjust");
                 text.innerText = "Play";
             }
             img.classList.remove("spinner-animation");
@@ -239,7 +235,6 @@ export class StreamingUpdater {
             img.src = Icons.SPINNER;
             img.alt = "Buffering";
             img.classList.add("spinner-animation");
-            img.classList.remove("pause-adjust");
             text.innerText = "Buffering";
         }
     }

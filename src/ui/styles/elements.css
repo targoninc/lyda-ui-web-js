@@ -166,7 +166,7 @@
 }
 
 .inline-cover {
-    --cover-size: 2em;
+    --cover-size: 36px;
     height: var(--cover-size);
     width: var(--cover-size);
 }
@@ -254,8 +254,15 @@ label {
 }
 
 .audio-player-control-icon {
-    width: var(--font-size-medium);
-    height: var(--font-size-medium);
+    margin: auto;
+}
+
+.audio-player-control {
+    --control-size: 36px;
+    min-width: var(--control-size);
+    min-height: var(--control-size);
+    max-width: var(--control-size);
+    max-height: var(--control-size);
 }
 
 .audio-player-scrubber {
@@ -332,20 +339,11 @@ label {
     transform: translateX(-50%);
 }
 
-.play-adjust {
-    margin-left: 2px;
-}
-
-.pause-adjust {
-    margin: 0 1px;
-}
-
 .spinner-animation {
     animation: spin 1s linear infinite;
 }
 
 .audio-player-controls {
-    background: var(--color-3);
     border-radius: 27px;
     flex-wrap: nowrap;
 }

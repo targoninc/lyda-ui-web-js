@@ -55,7 +55,7 @@
     --base-padding: 10px;
     --large-padding: calc(var(--base-padding) * 2);
     --page-padding: 20px 30px;
-    --inline-padding: 2px 8px;
+    --inline-padding: 2px 7px;
     --gap: 5px;
     --layout-gap: 10px;
     --anti-gap-margin: -7px;
