@@ -176,9 +176,11 @@ export class CommentTemplates {
             }));
         }
         const avatarState = signal(Images.DEFAULT_AVATAR);
-        Util.getAvatarFromUserIdAsync(comment.user_id).then(avatar => {
-            avatarState.value = avatar;
-        });
+        if (user.has_avatar) {
+            Util.getAvatarFromUserIdAsync(comment.user_id).then(avatar => {
+                avatarState.value = avatar;
+            });
+        }
 
         return create("div")
             .classes("comment-in-list", "flex-v")

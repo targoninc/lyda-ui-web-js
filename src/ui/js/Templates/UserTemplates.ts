@@ -237,13 +237,17 @@ export class UserTemplates {
         const avatarLoading = signal(false);
         const bannerLoading = signal(false);
         const userBanner = signal(Images.DEFAULT_BANNER);
-        Util.getBannerFromUserIdAsync(user.id).then(banner => {
-            userBanner.value = banner;
-        });
+        if (user.has_banner) {
+            Util.getBannerFromUserIdAsync(user.id).then(banner => {
+                userBanner.value = banner;
+            });
+        }
         const userAvatar = signal(Images.DEFAULT_AVATAR);
-        Util.getAvatarFromUserIdAsync(user.id).then(avatar => {
-            userAvatar.value = avatar;
-        });
+        if (user.has_avatar) {
+            Util.getAvatarFromUserIdAsync(user.id).then(avatar => {
+                userAvatar.value = avatar;
+            });
+        }
         let bannerDeleteButton = GenericTemplates.centeredDeleteButton("banner-delete-button", () => UserActions.deleteBanner(user, userBanner, bannerLoading), ["hidden", "showOnParentHover"]);
         let avatarDeleteButton = GenericTemplates.centeredDeleteButton("avatar-delete-button", () => UserActions.deleteAvatar(user, userAvatar, avatarLoading), ["showOnParentHover"]);
         const bannerContainer = create("div")

@@ -543,9 +543,11 @@ export class TrackEditTemplates {
             for (const id of newValue) {
                 const user = userMap.get(id);
                 const avatarState = signal(Images.DEFAULT_AVATAR);
-                Util.getAvatarFromUserIdAsync(user.id).then((avatar) => {
-                    avatarState.value = avatar;
-                });
+                if (user.has_avatar) {
+                    Util.getAvatarFromUserIdAsync(user.id).then((avatar) => {
+                        avatarState.value = avatar;
+                    });
+                }
                 container.appendChild(UserTemplates.linkedUser(user.id, user.username, user.displayname, avatarState, user.collab_type.name, TrackEditTemplates.removeLinkedUser(user.id, linkedUserState), [], ["no-redirect"]));
             }
             const sendValue = newValue.map((id: number) => userMap.get(id));

@@ -56,9 +56,11 @@ export class TrackTemplates {
         }
         const collab = track.collaborators!.find((collab: TrackCollaborator) => collab.user_id === profileId);
         const avatarState = signal(Images.DEFAULT_AVATAR);
-        Util.getAvatarFromUserIdAsync(track.user_id).then((src) => {
-            avatarState.value = src;
-        });
+        if (track.user.has_avatar) {
+            Util.getAvatarFromUserIdAsync(track.user_id).then((src) => {
+                avatarState.value = src;
+            });
+        }
 
         return create("div")
             .classes("track-card", "noflexwrap", "small-gap", "padded", "flex-v", currentTrackId.value === track.id ? "playing" : "_")
@@ -315,9 +317,11 @@ export class TrackTemplates {
             graphics.push(TrackTemplates.waveform(track, []));
         }
         const avatarState = signal(Images.DEFAULT_AVATAR);
-        Util.getAvatarFromUserIdAsync(track.user_id).then((src) => {
-            avatarState.value = src;
-        });
+        if (track.user?.has_avatar) {
+            Util.getAvatarFromUserIdAsync(track.user_id).then((src) => {
+                avatarState.value = src;
+            });
+        }
         const inQueue = signal(QueueManager.isInManualQueue(track.id));
         const text = compute((q: boolean): string => q ? "Unqueue" : "Queue", inQueue);
         const icon = compute((q: boolean) => q ? Icons.UNQUEUE : Icons.QUEUE, inQueue);
@@ -531,9 +535,11 @@ export class TrackTemplates {
 
     static collaborator(track: Track, user: User, collaborator: TrackCollaborator): any {
         const avatarState = signal(Images.DEFAULT_AVATAR);
-        Util.getAvatarFromUserIdAsync(collaborator.user_id).then((src) => {
-            avatarState.value = src;
-        });
+        if (collaborator.user?.has_avatar) {
+            Util.getAvatarFromUserIdAsync(collaborator.user_id).then((src) => {
+                avatarState.value = src;
+            });
+        }
         let actionButton = null, classes = [];
         if (user && user.id === track.user_id) {
             actionButton = GenericTemplates.action(Icons.X, "Remove", track.id, async () => {
@@ -840,9 +846,11 @@ export class TrackTemplates {
 
     static toBeApprovedTrack(collabType: CollaboratorType, track: TrackCollaborator, user: User) {
         const avatarState = signal(Images.DEFAULT_AVATAR);
-        Util.getAvatarFromUserIdAsync(track.user_id).then((src) => {
-            avatarState.value = src;
-        });
+        if (track.user?.has_avatar) {
+            Util.getAvatarFromUserIdAsync(track.user_id).then((src) => {
+                avatarState.value = src;
+            });
+        }
         if (!track.user) {
             throw new Error("User not set on to be approved track with ID ${track.track_id}");
         }

@@ -98,9 +98,11 @@ export class StatisticsTemplates {
 
         const itemsList = items.map(item => {
             const avatar = signal(Images.DEFAULT_AVATAR);
-            Util.getAvatarFromUserIdAsync(item.user_id).then(avatarUrl => {
-                avatar.value = avatarUrl;
-            });
+            if (user.has_avatar) {
+                Util.getAvatarFromUserIdAsync(item.user_id).then(avatarUrl => {
+                    avatar.value = avatarUrl;
+                });
+            }
             return UserTemplates.userWidget(item.user, Util.arrayPropertyMatchesUser(item.user.follows, "following_user_id", user));
         });
 
