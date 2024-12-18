@@ -39,7 +39,7 @@ export const router = new Router(routes, async (route: Route, params: any) => {
     const userToShow = page === Ui.validUrlPaths.profile ? params.path_1 : null;
     const userFound = await Ui.initUser(userToShow);
     if (userToShow && !userFound && page !== "404") {
-        router.navigate("404");
+        navigate("404");
         return;
     }
     await Lyda.initPage(params);

@@ -120,19 +120,7 @@ export class Ui {
         if (!userToShow) {
             return false;
         }
-        const user = await Util.getUserByNameAsync(userToShow);
-        if (!user) {
-            return false;
-        }
-
-        Ui.fillClassWithValue(user.id, "user-displayname", user.displayname, "user", [`user=${user.username}`]);
-        Ui.fillClassWithValue(user.id, "user-name", "@" + user.username, "user", [`user=${user.username}`]);
-        Ui.fillClassWithValue(user.id, "user-theme", user.theme);
-        Ui.fillClassWithValue(user.id, "user-trackview", user.trackview);
-        Ui.setImagesSource(user.id, "user-avatar", await Util.getAvatarFromUserIdAsync(user.id));
-        Ui.setImagesSource(user.id, "user-banner", await Util.getAvatarFromUserIdAsync(user.id));
-
-        return true;
+        return await Util.getUserByNameAsync(userToShow);
     }
 
     static setImagesSource(userId: number, className: string, source: string) {

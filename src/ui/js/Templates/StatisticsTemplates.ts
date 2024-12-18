@@ -64,7 +64,7 @@ export class StatisticsTemplates {
             .onclick(async () => {
                 const targetValue = !toggleObservable.value;
                 toggleObservable.value = targetValue;
-                clickFunc(reference_id, toggleObservable.value).then((success: boolean) => {
+                clickFunc(reference_id, !targetValue).then((success: boolean) => {
                     if (!success) {
                         toggleObservable.value = !targetValue;
                     }

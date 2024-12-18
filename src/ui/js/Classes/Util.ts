@@ -109,25 +109,28 @@ export class Util {
 
     static async getCoverFileFromTrackIdAsync(id: number, user_id: number|null = null) {
         const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.trackCover}&t=${Date.now()}`;
-        return await this.getFileOrBackupAsync(url, await Util.getAvatarFromUserIdAsync(user_id));
+        return await this.getFileOrBackupAsync(url, Util.getAvatarFromUserIdAsync, user_id);
     }
 
     static async getCoverFileFromAlbumIdAsync(id: number, user_id: number|null = null) {
         const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.albumCover}&t=${Date.now()}`;
-        return await this.getFileOrBackupAsync(url, await Util.getAvatarFromUserIdAsync(user_id));
+        return await this.getFileOrBackupAsync(url, Util.getAvatarFromUserIdAsync, user_id);
     }
 
     static async getCoverFileFromPlaylistIdAsync(id: number, user_id: number|null = null) {
         const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.playlistCover}&t=${Date.now()}`;
-        return await this.getFileOrBackupAsync(url, await Util.getAvatarFromUserIdAsync(user_id));
+        return await this.getFileOrBackupAsync(url, Util.getAvatarFromUserIdAsync, user_id);
     }
 
-    static async getFileOrBackupAsync(url: string, backupUrl: string) {
+    static async getFileOrBackupAsync(url: string, backupUrl: string|Function, user_id: number|null = null) {
         const res = await fetch(url);
         if (res.status === 200) {
             return url;
         }
-        return backupUrl;
+        if (backupUrl.constructor !== String) {
+            backupUrl = await (backupUrl as Function)(user_id);
+        }
+        return backupUrl as string;
     }
 
     static async copyToClipboard(text: string) {
