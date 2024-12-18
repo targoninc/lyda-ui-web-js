@@ -9,8 +9,9 @@ import {Ui} from "./js/Classes/Ui.ts";
 import {Util} from "./js/Classes/Util.ts";
 import {routes} from "./js/Routing/routes.js";
 import {GenericTemplates} from "./js/Templates/GenericTemplates.ts";
-import {currentTrackId} from "./js/state.ts";
+import {currentTrackId, currentTrackPosition} from "./js/state.ts";
 import {StreamingBroadcaster} from "./js/Streaming/StreamingBroadcaster.ts";
+import {TrackPosition} from "./js/Models/TrackPosition.ts";
 
 //LydaCache.clear();
 let pageContainer = document.querySelector(".page-container");
@@ -44,6 +45,10 @@ export const router = new Router(routes, async (route: Route, params: any) => {
     }
     await Lyda.initPage(params);
 }, async (route: Route, params: any) => {
+    const currentTrackPositionTmp = LydaCache.get<TrackPosition>("currentTrackPosition").content;
+    if (currentTrackPositionTmp) {
+        currentTrackPosition.value = currentTrackPositionTmp;
+    }
     const currentTrackIdTmp = LydaCache.get<number>("currentTrackId").content;
     if (currentTrackIdTmp) {
         currentTrackId.value = currentTrackIdTmp;

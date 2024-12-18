@@ -9,9 +9,18 @@ import {userHasSettingValue, Util} from "../Classes/Util.ts";
 import {notify} from "../Classes/Ui.ts";
 import {Track} from "../Models/DbModels/Track.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {trackInfo, currentTrackId, playingFrom, streamClients, volume, playingHere} from "../state.ts";
+import {
+    trackInfo,
+    currentTrackId,
+    playingFrom,
+    streamClients,
+    volume,
+    playingHere,
+    currentTrackPosition
+} from "../state.ts";
 import {PlayingFrom} from "../Models/PlayingFrom.ts";
 import {StreamingBroadcaster, StreamingEvent} from "./StreamingBroadcaster.ts";
+import {TrackPosition} from "../Models/TrackPosition.ts";
 
 export class PlayManager {
     static async playCheck(track: any) {
@@ -188,12 +197,16 @@ export class PlayManager {
     }
 
     static async initializeTrackAsync(id: number) {
-        const streamClient = PlayManager.getStreamClient(id);
+        let streamClient = PlayManager.getStreamClient(id);
         const track = await PlayManager.getTrackData(id);
         if (streamClient === undefined) {
-            PlayManager.addStreamClientIfNotExists(id, track.track.length);
+            streamClient = PlayManager.addStreamClientIfNotExists(id, track.track.length);
         }
         await StreamingUpdater.updatePlayState();
+        console.log(currentTrackPosition.value, track.track.length);
+        if (currentTrackPosition.value.relative !== 0) {
+            await streamClient.scrubTo(currentTrackPosition.value.relative * track.track.length, false);
+        }
     }
 
     static async stopAsync(id: number) {
@@ -266,12 +279,16 @@ export class PlayManager {
         await StreamingUpdater.updatePlayState();
     }
 
-    static getCurrentTime(id: number) {
+    static getCurrentTime(id: number): TrackPosition {
         const streamClient = PlayManager.getStreamClient(id);
-        return {
+        const trackPosition = {
             relative: streamClient.getCurrentTime(true),
             absolute: streamClient.getCurrentTime(false)
         };
+        if (isNaN(trackPosition.relative)) {
+            trackPosition.relative = 0;
+        }
+        return trackPosition;
     }
 
     static getDuration(id: number) {

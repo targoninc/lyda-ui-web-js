@@ -78,7 +78,10 @@ export class StreamingUpdater {
 
     static updateScrubber(id: number) {
         const currentTime = PlayManager.getCurrentTime(id);
-        currentTrackPosition.value = currentTime;
+        const streamClient = PlayManager.getStreamClient(id);
+        if (streamClient && streamClient.playing) {
+            currentTrackPosition.value = currentTime;
+        }
         const scrubTimesCurrent = document.querySelectorAll(".audio-player-time-current") as NodeListOf<HTMLSpanElement>;
         for (const scrubTimeCurrent of scrubTimesCurrent) {
             if (scrubTimeCurrent.id !== id.toString()) {

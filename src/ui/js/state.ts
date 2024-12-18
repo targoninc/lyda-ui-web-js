@@ -5,6 +5,8 @@ import {Track} from "./Models/DbModels/Track.ts";
 import {LydaCache} from "./Cache/LydaCache.ts";
 import {CacheItem} from "./Cache/CacheItem.ts";
 import {User} from "./Models/DbModels/User.ts";
+import {TrackPosition} from "./Models/TrackPosition.ts";
+import {stack} from "../fjsc/src/f2.ts";
 
 export const dragging = signal(false);
 
@@ -32,7 +34,13 @@ export const autoQueue = signal<number[]>([]);
 
 export const playingFrom = signal<PlayingFrom|null>(null);
 
-export const currentTrackPosition = signal<{ relative: number, absolute: number }>({ relative: 0, absolute: 0 });
+export const currentTrackPosition = signal<TrackPosition>({ relative: 0, absolute: 0 });
+currentTrackPosition.subscribe((p, changed) => {
+    if (!changed) {
+        return;
+    }
+    LydaCache.set("currentTrackPosition", new CacheItem(p));
+});
 
 export const currentlyBuffered = signal(0);
 
