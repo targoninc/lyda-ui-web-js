@@ -89,23 +89,23 @@ export class AlbumTemplates {
             ).build();
     }
 	
-    static async albumInAddList(album: Album, checkedAlbums: Signal<number[]>) {
-        const checked = compute((ch) => ch.includes(album.id), checkedAlbums);
+    static async albumInAddList(item: Album, checkedItems: Signal<number[]>) {
+        const checked = compute((ch) => ch.includes(item.id), checkedItems);
         const checkedClass = compute((c): string => c ? "active" : "_", checked);
 
         return create("div")
             .classes("flex", "padded", "check-list-item", checkedClass)
             .onclick(() => {
                 if (checked.value) {
-                    checkedAlbums.value = checkedAlbums.value.filter(id => id !== album.id);
+                    checkedItems.value = checkedItems.value.filter(id => id !== item.id);
                 } else {
-                    checkedAlbums.value = [...checkedAlbums.value, album.id];
+                    checkedItems.value = [...checkedItems.value, item.id];
                 }
             })
             .children(
-                await AlbumTemplates.smallAlbumCover(album),
+                await AlbumTemplates.smallAlbumCover(item),
                 create("span")
-                    .text(album.title)
+                    .text(item.title)
                     .build(),
             ).build();
     }

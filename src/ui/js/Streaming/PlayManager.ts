@@ -370,6 +370,9 @@ export class PlayManager {
             return trackInfo.value[id];
         }
         const res = await Api.getAsync<{ track: Track }>(ApiRoutes.getTrackById, { id });
+        if (res.code !== 200) {
+            throw new Error(`Failed to get track data: ${res.data.error}`);
+        }
         await PlayManager.cacheTrackData(res.data);
         return res.data;
     }

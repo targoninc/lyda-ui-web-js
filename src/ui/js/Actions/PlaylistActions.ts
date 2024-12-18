@@ -56,15 +56,11 @@ export class PlaylistActions {
         }
     }
 
-    static async addTrackToPlaylists(id: number) {
-        const playlists = document.querySelectorAll("input[id^=playlist_]") as NodeListOf<HTMLInputElement>;
-        let playlistIds = [];
-        for (let playlist of playlists) {
-            if (playlist.checked) {
-                playlistIds.push(playlist.id.split("_")[1]);
-            }
-        }
-        const res = await Api.postAsync(ApiRoutes.addTrackToPlaylists, {playlist_ids: playlistIds, track_id: id});
+    static async addTrackToPlaylists(track_id: number, playlist_ids: number[]) {
+        const res = await Api.postAsync(ApiRoutes.addTrackToPlaylists, {
+            playlist_ids,
+            track_id
+        });
         Util.removeModal();
         if (res.code !== 200) {
             notify("Failed to add track to playlists: " + res.data, "error");
@@ -143,34 +139,29 @@ export class PlaylistActions {
         return true;
     }
 
-    static async startTrackInPlaylist(playlist, trackId, stopIfPlaying = false) {
+    static async startTrackInPlaylist(playlist: Playlist, trackId: number, stopIfPlaying = false) {
         const playingFrom = PlayManager.getPlayingFrom();
-        const isPlaying =
-            playingFrom.type === "playlist" && playingFrom.id === playlist.id;
+        const isPlaying = playingFrom && playingFrom.type === "playlist" && playingFrom.id === playlist.id;
         if (isPlaying && stopIfPlaying) {
             await PlayManager.stopAllAsync();
         } else {
             PlayManager.playFrom("playlist", playlist.title, playlist.id);
-            QueueManager.setContextQueue(playlist.playlisttracks.map(t => t.id));
-            const track = playlist.playlisttracks.find(t => t.id === trackId);
+            QueueManager.setContextQueue(playlist.tracks!.map(t => t.track_id));
+            const track = playlist.tracks!.find(t => t.track_id === trackId);
             if (!track) {
                 notify("This track could not be found in this playlist", "error");
                 return;
             }
-            PlayManager.addStreamClientIfNotExists(track.id, track.length);
-            await PlayManager.startAsync(track.id);
+            PlayManager.addStreamClientIfNotExists(track.track_id, track.track?.length ?? 0);
+            await PlayManager.startAsync(track.track_id);
         }
     }
 
-    static async addAlbumToPlaylists(id) {
-        const playlists = document.querySelectorAll("input[id^=playlist_]") as NodeListOf<HTMLInputElement>;
-        let playlistIds = [];
-        for (let playlist of playlists) {
-            if (playlist.checked) {
-                playlistIds.push(playlist.id.split("_")[1]);
-            }
-        }
-        const res = await Api.postAsync(ApiRoutes.addAlbumToPlaylists, {playlist_ids: playlistIds, album_id: id});
+    static async addAlbumToPlaylists(album_id: number, playlist_ids: number[]) {
+        const res = await Api.postAsync(ApiRoutes.addAlbumToPlaylists, {
+            playlist_ids,
+            album_id
+        });
         Util.removeModal();
         if (res.code !== 200) {
             notify(res.data, "error");

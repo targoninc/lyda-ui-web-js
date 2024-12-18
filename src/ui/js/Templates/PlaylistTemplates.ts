@@ -19,11 +19,15 @@ import {Track} from "../Models/DbModels/Track.ts";
 import {Album} from "../Models/DbModels/Album.ts";
 import {navigate} from "../Routing/Router.ts";
 import {InputType} from "../../fjsc/src/Types.ts";
-import {compute, signal} from "../../fjsc/src/signals.ts";
+import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 
 export class PlaylistTemplates {
     static async addTrackToPlaylistModal(track: Track, playlists: Playlist[]) {
-        // TODO: Copy funcitionality from AlbumTemplates
+        if (playlists.some(p => !p.tracks)) {
+            return create("div").text("No playlists found").build();
+        }
+
+        const checkedPlaylists = signal(playlists.filter(p => p.tracks!.some(t => t.track_id === track.id)).map(p => p.id));
         let playlistList = [];
         if (playlists.length === 0) {
             playlistList.push(create("span")
@@ -31,9 +35,14 @@ export class PlaylistTemplates {
                 .text("No playlists found")
                 .build());
         } else {
-            playlistList = await Promise.all(playlists.map(async (playlist: Playlist) => {
-                return await PlaylistTemplates.playlistInAddList(playlist, playlist.tracks?.some((pt) => pt.track_id === track.id) || false);
-            }));
+            playlistList = await Promise.all(playlists.map(async (playlist) => {
+                if (!playlist.tracks) {
+                    console.warn("Playlist has no tracks: ", playlist);
+                    return;
+                }
+
+                return await PlaylistTemplates.playlistInAddList(playlist, checkedPlaylists);
+            })) as AnyNode[];
         }
 
         return create("div")
@@ -53,17 +62,15 @@ export class PlaylistTemplates {
                     )
                     .build(),
                 create("div")
-                    .classes("flex-v")
-                    .children(
-                        ...playlistList,
-                    )
+                    .classes("check-list")
+                    .children(...playlistList)
                     .build(),
                 create("div")
                     .classes("flex")
                     .children(
                         FJSC.button({
                             text: "Ok",
-                            onclick: async () => PlaylistActions.addTrackToPlaylists(track.id),
+                            onclick: async () => PlaylistActions.addTrackToPlaylists(track.id, checkedPlaylists.value),
                             icon: {icon: "playlist_add"},
                             classes: ["positive"],
                         }),
@@ -73,6 +80,7 @@ export class PlaylistTemplates {
     }
 
     static async addAlbumToPlaylistModal(album: Album, playlists: Playlist[]) {
+        const checkedPlaylists = signal(playlists.filter(p => p.tracks?.some(t => album.tracks?.some(ata => ata.track_id === t.track_id))).map(p => p.id));
         let playlistList = [];
         if (playlists.length === 0) {
             playlistList.push(create("span")
@@ -81,7 +89,7 @@ export class PlaylistTemplates {
                 .build());
         } else {
             playlistList = await Promise.all(playlists.map(async (playlist: Playlist) => {
-                return await PlaylistTemplates.playlistInAddList(playlist, playlist.tracks?.some((pt) => album.tracks?.some(ata => ata.track_id === pt.track_id) || false) || false);
+                return await PlaylistTemplates.playlistInAddList(playlist, checkedPlaylists);
             }));
         }
 
@@ -101,7 +109,7 @@ export class PlaylistTemplates {
                             .build()
                     ).build(),
                 create("div")
-                    .classes("flex-v")
+                    .classes("check-list")
                     .children(...playlistList)
                     .build(),
                 create("div")
@@ -109,7 +117,7 @@ export class PlaylistTemplates {
                     .children(
                         FJSC.button({
                             text: "Ok",
-                            onclick: async () => PlaylistActions.addAlbumToPlaylists(album.id),
+                            onclick: async () => PlaylistActions.addAlbumToPlaylists(album.id, checkedPlaylists.value),
                             icon: {icon: "playlist_add"},
                             classes: ["positive"],
                         }),
@@ -118,23 +126,25 @@ export class PlaylistTemplates {
             ).build();
     }
 
-    static async playlistInAddList(playlist: Playlist, isChecked: boolean) {
-        const checked = signal(isChecked);
+    static async playlistInAddList(item: Playlist, checkedItems: Signal<number[]>) {
+        const checked = compute((ch) => ch.includes(item.id), checkedItems);
+        const checkedClass = compute((c): string => c ? "active" : "_", checked);
 
         return create("div")
-            .classes("flex", "rounded", "padded", "card")
+            .classes("flex", "padded", "check-list-item", checkedClass)
             .onclick(() => {
-                checked.value = !checked.value
+                if (checked.value) {
+                    checkedItems.value = checkedItems.value.filter(id => id !== item.id);
+                } else {
+                    checkedItems.value = [...checkedItems.value, item.id];
+                }
             })
             .children(
-                GenericTemplates.checkbox("playlist_" + playlist.id, checked, "", false),
-                await PlaylistTemplates.smallPlaylistCover(playlist),
+                await PlaylistTemplates.smallPlaylistCover(item),
                 create("span")
-                    .classes("nopointer")
-                    .text(playlist.title)
+                    .text(item.title)
                     .build(),
-            )
-            .build();
+            ).build();
     }
 
     static newPlaylistModal() {

@@ -141,8 +141,7 @@ export class AlbumActions {
 
     static async startTrackInAlbum(album: Album, trackId: number, stopIfPlaying = false) {
         const playingFrom = PlayManager.getPlayingFrom();
-        const isPlaying =
-            playingFrom.type === "album" && playingFrom.id === album.id;
+        const isPlaying = playingFrom && playingFrom.type === "album" && playingFrom.id === album.id;
         if (isPlaying && stopIfPlaying) {
             await PlayManager.stopAllAsync();
         } else {

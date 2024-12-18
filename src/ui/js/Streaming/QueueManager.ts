@@ -129,7 +129,7 @@ export class QueueManager {
         if (manualQueueTmp.length === 0) {
             let cache = LydaCache.get<number[] | number>("manualQueue").content;
             if (cache) {
-                manualQueueTmp = (cache.length ? cache : [cache]) as number[];
+                manualQueueTmp = (cache.constructor === Number ? [cache] : cache) as number[];
                 manualQueue.value = manualQueueTmp;
             }
         }

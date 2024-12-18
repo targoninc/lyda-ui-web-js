@@ -134,7 +134,7 @@ export class NavTemplates {
             .children(
                 FJSC.button({
                     text: "Upload",
-                    classes: ["hideOnSmallBreakpoint", "positive"],
+                    classes: ["hideOnMidBreakpoint", "positive"],
                     icon: { icon: "upload" },
                     onclick: async (e: MouseEvent) => {
                         e.preventDefault();
