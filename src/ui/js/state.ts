@@ -38,3 +38,5 @@ export const currentlyBuffered = signal(0);
 export const playingElsewhere = signal(false);
 
 export const playingHere = signal(false);
+
+export const openMenus = signal<string[]>([]);

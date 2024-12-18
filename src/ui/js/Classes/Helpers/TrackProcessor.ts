@@ -11,7 +11,7 @@ export class TrackProcessor {
         delete track.plays;
         delete track.playlists;
         delete track.albums;
-        delete track.has_audio;
+        delete track.has_cover;
         delete track.collaborators;
         return track;
     }

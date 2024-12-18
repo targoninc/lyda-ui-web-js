@@ -28,7 +28,10 @@ export class Ui {
         profile: "profile",
     };
 
-    static addModal(modal: AnyElement) {
+    static addModal(modal: AnyElement|null) {
+        if (!modal) {
+            return;
+        }
         document.body.appendChild(modal);
         Util.initializeModalRemove(modal);
     }

@@ -156,8 +156,7 @@ export class TrackEditTemplates {
                             }),
                         ).build()
                 ).build(),
-        ], ["confirmationModal"]
-        );
+        ], "edit-track");
     }
 
     static upDownButtons(state: Signal<UploadableTrack>, uploadEnabled = false) {

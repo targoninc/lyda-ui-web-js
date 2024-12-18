@@ -36,6 +36,6 @@ export interface Track {
     secretcode: string;
     monetization: boolean;
     price: number;
-    has_audio: boolean;
+    has_cover: boolean;
     processed: boolean;
 }

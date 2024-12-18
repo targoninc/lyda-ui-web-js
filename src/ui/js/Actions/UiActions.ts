@@ -3,6 +3,7 @@ import {MenuTemplates} from "../Templates/MenuTemplates.ts";
 import {Util} from "../Classes/Util.ts";
 import {FeatureDetector} from "../Classes/Helpers/FeatureDetector.ts";
 import {Ui} from "../Classes/Ui.ts";
+import {openMenus} from "../state.ts";
 
 export class UiActions {
     static closeModal() {
@@ -17,7 +18,7 @@ export class UiActions {
         if (!user) {
             return;
         }
-        let modal = GenericTemplates.modal([MenuTemplates.createMenu()]);
+        let modal = GenericTemplates.modal([MenuTemplates.createMenu()], "create-menu");
         Ui.addModal(modal);
     }
 

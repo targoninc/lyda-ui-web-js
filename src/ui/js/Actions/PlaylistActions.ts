@@ -23,15 +23,15 @@ export class PlaylistActions {
         }
         let modal;
         if (type === "track") {
-            modal = GenericTemplates.modal([await PlaylistTemplates.addTrackToPlaylistModal(objectToBeAdded as Track, res.data)]);
+            modal = GenericTemplates.modal([await PlaylistTemplates.addTrackToPlaylistModal(objectToBeAdded as Track, res.data)], "add-to-playlist");
         } else {
-            modal = GenericTemplates.modal([await PlaylistTemplates.addAlbumToPlaylistModal(objectToBeAdded as Album, res.data)]);
+            modal = GenericTemplates.modal([await PlaylistTemplates.addAlbumToPlaylistModal(objectToBeAdded as Album, res.data)], "add-to-playlist");
         }
         Ui.addModal(modal);
     }
 
     static async openNewPlaylistModal() {
-        let modal = GenericTemplates.modal([PlaylistTemplates.newPlaylistModal()]);
+        let modal = GenericTemplates.modal([PlaylistTemplates.newPlaylistModal()], "new-playlist");
         Ui.addModal(modal);
     }
 

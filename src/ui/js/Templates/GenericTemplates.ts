@@ -23,6 +23,7 @@ import {ProgressState} from "../Enums/ProgressState.ts";
 import {ProgressPart} from "../Models/ProgressPart.ts";
 import {compute, signal, Signal} from "../../fjsc/src/signals.ts";
 import {SearchResult} from "../Models/SearchResult.ts";
+import {openMenus} from "../state.ts";
 
 export class GenericTemplates {
     static icon(icon: StringOrSignal, adaptive = false, classes: StringOrSignal[] = [], title = "") {
@@ -450,18 +451,29 @@ export class GenericTemplates {
             ).build();
     }
 
-    static modal = (children: AnyNode[], extraClasses: string[] = []) => {
+    static modal(children: AnyNode[], modalId: string) {
+        if (openMenus.value.includes(modalId)) {
+            return null;
+        }
+        openMenus.value.push(modalId);
+        const interval = setInterval(() => {
+            if (!document.getElementById("modal-" + modalId)) {
+                clearInterval(interval);
+                openMenus.value = openMenus.value.filter(id => id !== modalId);
+            }
+        }, 500);
+
         return create("div")
             .classes("modal-container")
+            .id("modal-" + modalId)
             .children(
                 create("div")
                     .classes("modal-overlay")
                     .build(),
                 create("div")
-                    .classes("modal", "padded-large", ...extraClasses)
-                    .children(
-                        ...children
-                    ).build()
+                    .classes("modal", "flex-v", "padded-large")
+                    .children(...children)
+                    .build()
             ).build();
     }
 
@@ -500,8 +512,7 @@ export class GenericTemplates {
                             icon: {icon: "close"}
                         }),
                     ).build()
-            ], ["confirmationModal"]
-        );
+            ], "confirmation");
     }
 
     static imageModal(imageUrl: StringOrSignal) {
@@ -571,8 +582,7 @@ export class GenericTemplates {
                                 }),
                             ).build()
                     ).build(),
-            ], ["confirmationModal"]
-        );
+            ], "text-input");
     }
 
     static textAreaInputModal(title: HtmlPropertyValue, text: HtmlPropertyValue, currentValue: HtmlPropertyValue,
@@ -623,8 +633,7 @@ export class GenericTemplates {
                                 }),
                             ).build()
                     ).build(),
-            ], ["confirmationModal"]
-        );
+            ], "text-area-input");
     }
 
     static tabSelector(tabs: any[], callback: Function, selectedTab = 0) {
@@ -789,8 +798,7 @@ export class GenericTemplates {
                                 }),
                             ).build()
                     ).build(),
-            ], ["confirmationModal"]
-        );
+            ], "add-linked-user");
     }
 
     static breadcrumbs(pageMap: any, history: Signal<any>, stepState: Signal<any>) {

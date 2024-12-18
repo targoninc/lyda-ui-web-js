@@ -846,6 +846,8 @@ td:last-child, th:last-child {
     border-radius: calc(var(--border-radius) * 2);
     max-height: calc(100% - 100px);
     overflow: auto;
+    max-width: 80dvw;
+    width: max-content;
 }
 
 .modal-overlay {

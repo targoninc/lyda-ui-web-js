@@ -22,17 +22,17 @@ export class AlbumActions {
     }
 
     static async openAddToAlbumModal(track: Track) {
-        const res = await Api.getAsync(ApiRoutes.getAlbumsByUserId, {id: track.user_id});
+        const res = await Api.getAsync<Album[]>(ApiRoutes.getAlbumsByUserId, {id: track.user_id});
         if (res.code !== 200) {
             console.error("Failed to get albums: ", res.data);
             return;
         }
-        let modal = GenericTemplates.modal([await AlbumTemplates.addToAlbumModal(track, res.data)]);
+        let modal = GenericTemplates.modal([await AlbumTemplates.addToAlbumModal(track, res.data)], "add-to-album");
         Ui.addModal(modal);
     }
 
     static async openNewAlbumModal() {
-        let modal = GenericTemplates.modal([AlbumTemplates.newAlbumModal()]);
+        let modal = GenericTemplates.modal([AlbumTemplates.newAlbumModal()], "new-album");
         Ui.addModal(modal);
     }
 
