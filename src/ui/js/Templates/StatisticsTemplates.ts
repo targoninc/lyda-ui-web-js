@@ -42,15 +42,15 @@ export class StatisticsTemplates {
     }
 
     static statsIndicator(stats_type: string, toggleObservable: Signal<boolean>, count: number, icon: StringOrSignal, reference_id = -1, clickFunc: Function = () => {}, extraClasses: StringOrSignal[] = []) {
-        const countState = signal(count);
+        const count$ = signal(count);
         toggleObservable.onUpdate = (value: boolean) => {
             if (!Util.isLoggedIn()) {
                 return;
             }
             if (value) {
-                countState.value = countState.value + 1;
+                count$.value = count$.value + 1;
             } else {
-                countState.value = countState.value - 1;
+                count$.value = count$.value - 1;
             }
         };
 
@@ -61,15 +61,15 @@ export class StatisticsTemplates {
         return create("div")
             .classes("stats-indicator", stats_type, "flex", ...extraClasses)
             .attributes("reference_id", reference_id)
-            .onclick(() => {
-                if (clickFunc(reference_id, toggleObservable.value)) {
+            .onclick(async () => {
+                if (await clickFunc(reference_id, toggleObservable.value)) {
                     toggleObservable.value = !toggleObservable.value;
                 }
             })
             .children(
                 create("span")
                     .classes("stats-count", "nopointer", stats_type)
-                    .text(countState)
+                    .text(count$)
                     .build(),
                 FJSC.icon({
                     icon: icon,
