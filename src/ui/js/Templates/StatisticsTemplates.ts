@@ -62,9 +62,13 @@ export class StatisticsTemplates {
             .classes("stats-indicator", stats_type, "flex", ...extraClasses)
             .attributes("reference_id", reference_id)
             .onclick(async () => {
-                if (await clickFunc(reference_id, toggleObservable.value)) {
-                    toggleObservable.value = !toggleObservable.value;
-                }
+                const targetValue = !toggleObservable.value;
+                toggleObservable.value = targetValue;
+                clickFunc(reference_id, toggleObservable.value).then((success: boolean) => {
+                    if (!success) {
+                        toggleObservable.value = !targetValue;
+                    }
+                });
             })
             .children(
                 create("span")
