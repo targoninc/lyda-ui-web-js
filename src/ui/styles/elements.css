@@ -125,6 +125,7 @@
     border: 1px solid transparent;
     width: max(var(--card-width), 100%);
     max-width: var(--card-width);
+    height: max-content;
 }
 
 .small-card {

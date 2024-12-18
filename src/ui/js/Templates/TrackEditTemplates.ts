@@ -9,6 +9,7 @@ import {Util} from "../Classes/Util.ts";
 import {AudioUpload} from "../Classes/AudioUpload.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {
+    AnyElement,
     AnyNode,
     create,
     DomNode,
@@ -397,7 +398,7 @@ export class TrackEditTemplates {
             ).build();
     }
 
-    static sectionCard(title: HtmlPropertyValue, errorSections: Signal<string[]>, id: string, children: TypeOrSignal<(AnyNode|null)>[], icon: string|null = null, classes: StringOrSignal[] = []) {
+    static sectionCard(title: HtmlPropertyValue, errorSections: Signal<string[]>, id: string, children: TypeOrSignal<(AnyNode|AnyElement|null)>[], icon: string|null = null, classes: StringOrSignal[] = []) {
         const hasError = compute((e: string[]) => e.includes(id), errorSections);
 
         return create("div")
@@ -464,41 +465,6 @@ export class TrackEditTemplates {
         return create("span")
             .text("This track will be monetized through streaming subscriptions and available for buying.")
             .build();
-    }
-
-    static upc(value = "", parentState = null) {
-        const state = this.getStateWithParentUpdate("upc", value, parentState);
-        return FormTemplates.textField("UPC", "upc", "00888072469600", "text", state, false, v => {
-            state.value = v;
-        });
-    }
-
-    static isrc(value = "", parentState = null) {
-        const state = this.getStateWithParentUpdate("isrc", value, parentState);
-        return FormTemplates.textField("ISRC", "isrc", "QZNWX2227540", "text", state, false, v => {
-            state.value = v;
-        });
-    }
-
-    static releaseDate(value = Util.getDateForPicker(new Date()), parentState = null) {
-        const state = this.getStateWithParentUpdate("releaseDate", value, parentState);
-        return FormTemplates.textField("Release Date", "release_date", "YYYY-MM-DD", "date", state, false, v => {
-            state.value = v;
-        });
-    }
-
-    static collaborators(value = "", parentState = null) {
-        const state = this.getStateWithParentUpdate("collaborators", value, parentState);
-        return FormTemplates.textField("Collaborators", "collaborators", "Collaborators", "text", state, false, v => {
-            state.value = v;
-        });
-    }
-
-    static price(value = "1", parentState: Signal<Track>) {
-        const state = this.getStateWithParentUpdate("price", value, parentState);
-        return FormTemplates.textField("Minimum track price in USD", "price", "1", "number", state, false, v => {
-            state.value = v;
-        });
     }
 
     static removeLinkedUser(removeUserId: number, linkedUserState) {
