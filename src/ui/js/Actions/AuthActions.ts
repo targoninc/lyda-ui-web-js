@@ -5,7 +5,7 @@ import {Icons} from "../Enums/Icons.js";
 import {PlayManager} from "../Streaming/PlayManager.ts";
 import {navigate, reload} from "../Routing/Router.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {navInitialized} from "../state.ts";
+import {currentUser, navInitialized} from "../state.ts";
 
 export class AuthActions {
     static resetUiState() {
@@ -26,6 +26,7 @@ export class AuthActions {
         AuthActions.resetUiState();
         const res = await Api.postAsync(ApiRoutes.logout);
         if (res.code === 200) {
+            currentUser.value = null;
             reload();
             notify("Logged out!", "success");
         }

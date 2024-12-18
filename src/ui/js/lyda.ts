@@ -1,6 +1,4 @@
-import {LydaCache} from "./Cache/LydaCache.ts";
 import {PlayManager} from "./Streaming/PlayManager.ts";
-import {CacheItem} from "./Cache/CacheItem.ts";
 import {UserTemplates} from "./Templates/UserTemplates.ts";
 import {SettingsTemplates} from "./Templates/SettingsTemplates.ts";
 import {TrackEditTemplates} from "./Templates/TrackEditTemplates.ts";
@@ -33,32 +31,15 @@ import {Track} from "./Models/DbModels/Track.ts";
 
 export class Lyda {
     static async getEndpointData(endpoint: string, params = "") {
-        const cacheItem = LydaCache.get("api/" + endpoint + params).content;
-        if (cacheItem) {
-            const cacheExpiration = cacheItem.createTime + cacheItem.reFetchTtlInSeconds * 1000;
-            if (cacheExpiration > new Date().getTime()) {
-                return cacheItem.content;
-            }
-        }
-
-        let r = await fetch(endpoint + params, {
-            method: "GET",
-            mode: "cors",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            credentials: "include"
-        });
-        if (r.status !== 200) {
-            console.error("Failed to fetch from endpoint " + endpoint + ", status: " + r.status);
+        let r = await Api.getAsync<any>(endpoint + params);
+        if (r.code !== 200) {
+            console.error("Failed to fetch from endpoint " + endpoint + ", status: " + r.code);
             return {
-                error: "Failed to fetch from endpoint " + endpoint + ", status: " + r.status,
-                status: r.status
+                error: "Failed to fetch from endpoint " + endpoint + ", status: " + r.code,
+                status: r.code
             };
         }
-        let text = await r.text();
-        LydaCache.set("api/" + endpoint + params, new CacheItem(text));
-        return JSON.parse(text);
+        return r.data;
     }
 
     static async initPage(params: any) {

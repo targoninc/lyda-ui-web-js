@@ -7,7 +7,7 @@ import {AnyElement} from "../../fjsc/src/f2.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {MediaFileType} from "../Enums/MediaFileType.ts";
 import {User} from "../Models/DbModels/User.ts";
-import {dragging} from "../state.ts";
+import {currentUser, dragging} from "../state.ts";
 import {Signal} from "../../fjsc/src/signals.ts";
 
 export class Util {
@@ -229,31 +229,20 @@ export class Util {
         }
     }
 
-    /**
-     *
-     * @param id
-     * @param noCache
-     * @returns {Promise<null|User>}
-     */
-    static async getUserAsync(id = null, noCache = false) {
+    static async getUserAsync(id: number|null = null, allowCache = true) {
         if (!id) {
-            if (!noCache) {
-                const rawCachedUser = LydaCache.get<string|User>("user").content;
-                const userData = Util.parseCachedUser(rawCachedUser);
+            if (allowCache) {
+                const userData = currentUser.value;
                 if (userData !== null) {
-                    return Util.mapNullToEmptyString(userData);
+                    return userData;
                 }
             }
             return await Util.getUser();
         } else {
-            if (!noCache) {
-                const cachedUser = LydaCache.get<string|User>("user:" + id).content;
-                const userData = Util.parseCachedUser(cachedUser);
-                if (userData !== null) {
-                    return Util.mapNullToEmptyString(userData);
-                }
+            if (allowCache) {
+                // TODO: Implement caching for user by id
             }
-            const res = await Api.getAsync(ApiRoutes.getUser, { id: nullIfEmpty(id) });
+            const res = await Api.getAsync<User>(ApiRoutes.getUser, { id: nullIfEmpty(id) });
             if (res.code === 401) {
                 return null;
             }
@@ -324,18 +313,17 @@ export class Util {
     }
 
     static async getUser() {
-        const cacheKey = "user";
         let userData;
-        const res = await Api.getAsync(ApiRoutes.getUser);
+        const res = await Api.getAsync<User>(ApiRoutes.getUser);
         if (res.code === 401) {
             return null;
         }
         userData = res.data;
-        LydaCache.set(cacheKey, new CacheItem(JSON.stringify(userData)));
         if (userData === null) {
             return null;
         }
-        return Util.mapNullToEmptyString(userData);
+        currentUser.value = Util.mapNullToEmptyString(userData);
+        return currentUser.value;
     }
 
     static mergeObjects(obj1: any, obj2: any) {
@@ -436,8 +424,7 @@ export class Util {
     }
 
     static isLoggedIn() {
-        const cacheUser = LydaCache.get("user");
-        return cacheUser !== null && cacheUser.content !== null;
+        return currentUser.value !== null;
     }
 
     static downloadFile(fileName: string, content: string) {

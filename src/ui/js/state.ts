@@ -4,6 +4,7 @@ import {PlayingFrom} from "./Models/PlayingFrom.ts";
 import {Track} from "./Models/DbModels/Track.ts";
 import {LydaCache} from "./Cache/LydaCache.ts";
 import {CacheItem} from "./Cache/CacheItem.ts";
+import {User} from "./Models/DbModels/User.ts";
 
 export const dragging = signal(false);
 
@@ -40,3 +41,5 @@ export const playingElsewhere = signal(false);
 export const playingHere = signal(false);
 
 export const openMenus = signal<string[]>([]);
+
+export const currentUser = signal<User|null>(null);
