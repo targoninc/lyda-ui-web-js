@@ -12,6 +12,7 @@ import {HtmlPropertyValue, create, ifjs, AnyNode} from "../../fjsc/src/f2.ts";
 import {Api, ApiResponse} from "../Api/Api.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
+import {navigate} from "../Routing/Router.ts";
 
 export interface AuthData {
     termsOfService: boolean;
@@ -165,6 +166,14 @@ export class LandingPageTemplates {
                         ifjs(done, create("p")
                             .text(`Your account is now activated!`)
                             .build()),
+                        ifjs(done, FJSC.button({
+                            text: "Go to profile",
+                            icon: { icon: "person" },
+                            classes: ["positive"],
+                            onclick: () => {
+                                navigate("profile");
+                            }
+                        })),
                         ifjs(compute(e => e.length > 0, error), FJSC.error(error))
                     ).build()
             ).build();
