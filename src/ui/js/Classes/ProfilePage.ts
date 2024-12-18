@@ -5,6 +5,10 @@ import {GenericTemplates} from "../Templates/GenericTemplates.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {AnyElement} from "../../fjsc/src/f2.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
+import {getErrorMessage} from "./Util.ts";
+import {Track} from "../Models/DbModels/Track.ts";
+import {Album} from "../Models/DbModels/Album.ts";
+import {Playlist} from "../Models/DbModels/Playlist.ts";
 
 export class ProfilePage {
     static async addTabSectionAsync(element: AnyElement, user: User, selfUser: User, isOwnProfile: boolean) {
@@ -31,54 +35,54 @@ export class ProfilePage {
     }
 
     static async addTracksAsync(element: AnyElement, user: User, selfUser: User, isOwnProfile: boolean) {
-        const tracksRes = await Api.getAsync(ApiRoutes.getTrackByUserId, { id: user.id, name: user.username });
-        if (tracksRes.code !== 200) {
-            notify(tracksRes.data, "error");
+        const res = await Api.getAsync<Track[]>(ApiRoutes.getTrackByUserId, { id: user.id, name: user.username });
+        if (res.code !== 200) {
+            notify("Error while getting tracks: " + getErrorMessage(res), "error");
             return;
         }
-        const tracks = tracksRes.data;
+        const tracks = res.data;
         const trackCards = UserTemplates.trackCards(tracks, user.id, selfUser, isOwnProfile);
         element.innerHTML = "";
         element.appendChild(trackCards);
     }
 
     static async addAlbumsAsync(element: AnyElement, user: User, selfUser: User, isOwnProfile: boolean) {
-        const albumsRes = await Api.getAsync(ApiRoutes.getAlbumsByUserId, {
+        const res = await Api.getAsync<Album[]>(ApiRoutes.getAlbumsByUserId, {
             id: user.id, name: user.username
         });
-        if (albumsRes.code !== 200) {
-            notify(albumsRes.data, "error");
+        if (res.code !== 200) {
+            notify("Error while getting albums: " + getErrorMessage(res), "error");
             return;
         }
-        const albums = albumsRes.data;
+        const albums = res.data;
         const albumCards = UserTemplates.albumCards(albums, selfUser, isOwnProfile);
         element.innerHTML = "";
         element.appendChild(albumCards);
     }
 
     static async addPlaylistsAsync(element: AnyElement, user: User, selfUser: User, isOwnProfile: boolean) {
-        const playlistsRes = await Api.getAsync(ApiRoutes.getPlaylistsByUserId, {
+        const res = await Api.getAsync<Playlist[]>(ApiRoutes.getPlaylistsByUserId, {
             id: user.id, name: user.username
         });
-        if (playlistsRes.code !== 200) {
-            notify(playlistsRes.data, "error");
+        if (res.code !== 200) {
+            notify("Error while getting playlists: " + getErrorMessage(res), "error");
             return;
         }
-        const playlists = playlistsRes.data;
+        const playlists = res.data;
         const playlistCards = UserTemplates.playlistCards(playlists, selfUser, isOwnProfile);
         element.innerHTML = "";
         element.appendChild(playlistCards);
     }
 
     static async addRepostsAsync(element: AnyElement, user: User, selfUser: User, isOwnProfile: boolean) {
-        const repostsRes = await Api.getAsync(ApiRoutes.getRepostsByUserId, {
+        const res = await Api.getAsync<Track[]>(ApiRoutes.getRepostsByUserId, {
             id: user.id, name: user.username
         });
-        if (repostsRes.code !== 200) {
-            notify(repostsRes.data, "error");
+        if (res.code !== 200) {
+            notify("Error while getting reposts: " + getErrorMessage(res), "error");
             return;
         }
-        const reposts = repostsRes.data;
+        const reposts = res.data;
         const repostCards = UserTemplates.trackCards(reposts, user.id, selfUser, isOwnProfile);
         element.innerHTML = "";
         element.appendChild(repostCards);

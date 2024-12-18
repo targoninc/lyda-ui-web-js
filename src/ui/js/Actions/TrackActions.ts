@@ -1,13 +1,9 @@
 import {Api} from "../Api/Api.ts";
-import {Util} from "../Classes/Util.ts";
+import {getErrorMessage, Util} from "../Classes/Util.ts";
 import {Icons} from "../Enums/Icons.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
-import {QueueManager} from "../Streaming/QueueManager.ts";
 import {AlbumActions} from "./AlbumActions.ts";
 import {PlaylistActions} from "./PlaylistActions.ts";
-import {LydaCache} from "../Cache/LydaCache.ts";
-import {CacheItem} from "../Cache/CacheItem.ts";
-import {CommentTemplates} from "../Templates/CommentTemplates.ts";
 import {TrackEditTemplates} from "../Templates/TrackEditTemplates.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {navigate, reload} from "../Routing/Router.ts";
@@ -40,7 +36,7 @@ export class TrackActions {
         });
 
         if (res.code !== 200) {
-            notify("Error while trying to unfollow user: " + res.data, "error");
+            notify("Error while trying to unfollow user: " + getErrorMessage(res), "error");
         }
 
         return res;
@@ -56,7 +52,7 @@ export class TrackActions {
             notify(res.data, "success");
             navigate("profile");
         } else {
-            notify("Error trying to delete track: " + res.data, "error");
+            notify("Error trying to delete track: " + getErrorMessage(res), "error");
         }
     }
 
@@ -67,7 +63,7 @@ export class TrackActions {
             });
 
             if (res.code !== 200) {
-                notify(res.data, "error");
+                notify(getErrorMessage(res), "error");
                 return;
             }
 
@@ -105,7 +101,7 @@ export class TrackActions {
         });
 
         if (res.code !== 200) {
-            notify(res.data, "error");
+            notify(getErrorMessage(res), "error");
             return;
         }
 
@@ -140,11 +136,21 @@ export class TrackActions {
     }
 
     static async repostTrack(id: number) {
-        return await Api.postAsync(ApiRoutes.repostTrack, { id });
+        const res = await Api.postAsync(ApiRoutes.repostTrack, { id });
+        if (res.code !== 200) {
+            notify("Failed to repost track: " + getErrorMessage(res), "error");
+            return false;
+        }
+        return true;
     }
 
     static async unrepostTrack(id: number) {
-        return await Api.postAsync(ApiRoutes.unrepostTrack, { id });
+        const res = await Api.postAsync(ApiRoutes.unrepostTrack, { id });
+        if (res.code !== 200) {
+            notify("Failed to unrepost track: " + getErrorMessage(res), "error");
+            return false;
+        }
+        return true;
     }
 
     static async runFollowFunctionFromElement(e: any, userId: number, following: Signal<boolean>) {
@@ -175,7 +181,7 @@ export class TrackActions {
         });
 
         if (res.code !== 200) {
-            notify("Error while trying to follow user: " + res.data, "error");
+            notify("Error while trying to follow user: " + getErrorMessage(res), "error");
         }
 
         return res;
@@ -184,7 +190,7 @@ export class TrackActions {
     static async getCollabTypes() {
         const res = await Api.getAsync(ApiRoutes.getTrackCollabTypes);
         if (res.code !== 200) {
-            notify("Error while trying to get collab types: " + res.data, "error");
+            notify("Error while trying to get collab types: " + getErrorMessage(res), "error");
             return [];
         }
         return res.data;
@@ -215,17 +221,10 @@ export class TrackActions {
             return false;
         }
         if (isEnabled) {
-            const res = await TrackActions.unrepostTrack(id);
-            if (res.code !== 200) {
-                return false;
-            }
+            return await TrackActions.unrepostTrack(id);
         } else {
-            const res = await TrackActions.repostTrack(id);
-            if (res.code !== 200) {
-                return false;
-            }
+            return await TrackActions.repostTrack(id);
         }
-        return true;
     }
 
     static async openTrackFromElement(e: any) {
@@ -377,7 +376,7 @@ export class TrackActions {
         });
 
         if (res.code !== 200) {
-            notify("Error while trying to remove collaborator: " + res.data, "error");
+            notify("Error while trying to remove collaborator: " + getErrorMessage(res), "error");
             return;
         }
 
@@ -393,7 +392,7 @@ export class TrackActions {
         });
 
         if (res.code !== 200) {
-            notify("Error while trying to add collaborator: " + res.data, "error");
+            notify("Error while trying to add collaborator: " + getErrorMessage(res), "error");
             return;
         }
 
@@ -422,7 +421,7 @@ export class TrackActions {
     static async getUnapprovedTracks() {
         const res = await Api.getAsync<any[]>(ApiRoutes.getUnapprovedCollabs);
         if (res.code !== 200) {
-            notify("Error while trying to get unapproved tracks: " + res.data, "error");
+            notify("Error while trying to get unapproved tracks: " + getErrorMessage(res), "error");
             return [];
         }
         return res.data;
@@ -433,7 +432,7 @@ export class TrackActions {
             id: id,
         });
         if (res.code !== 200) {
-            notify("Error while trying to approve collab: " + res.data, "error");
+            notify("Error while trying to approve collab: " + getErrorMessage(res), "error");
             return;
         }
 
@@ -449,7 +448,7 @@ export class TrackActions {
             id: id,
         });
         if (res.code !== 200) {
-            notify("Error while trying to deny collab: " + res.data, "error");
+            notify("Error while trying to deny collab: " + getErrorMessage(res), "error");
             return;
         }
 
@@ -474,7 +473,7 @@ export class TrackActions {
             price: track.price,
         });
         if (res.code !== 200) {
-            notify("Error while trying to update track: " + res.data, "error");
+            notify("Error while trying to update track: " + getErrorMessage(res), "error");
             return;
         }
 

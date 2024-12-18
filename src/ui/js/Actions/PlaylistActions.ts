@@ -1,7 +1,7 @@
 import {GenericTemplates} from "../Templates/GenericTemplates.ts";
 import {PlaylistTemplates} from "../Templates/PlaylistTemplates.ts";
 import {Api} from "../Api/Api.ts";
-import {Util} from "../Classes/Util.ts";
+import {getErrorMessage, Util} from "../Classes/Util.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
 import {QueueManager} from "../Streaming/QueueManager.ts";
@@ -38,7 +38,7 @@ export class PlaylistActions {
     static async createNewPlaylist(playlist: Partial<Playlist>) {
         const res = await Api.postAsync(ApiRoutes.newPlaylist, playlist);
         if (res.code !== 200) {
-            notify("Failed to create playlist: " + res.data, "error");
+            notify("Failed to create playlist: " + getErrorMessage(res), "error");
             return;
         }
         notify("Created playlist", "success");
@@ -52,7 +52,7 @@ export class PlaylistActions {
             notify("Successfully deleted playlist", "success");
             navigate("profile");
         } else {
-            notify("Error trying to delete playlist: " + res.data, "error");
+            notify("Error trying to delete playlist: " + getErrorMessage(res), "error");
         }
     }
 
@@ -63,7 +63,7 @@ export class PlaylistActions {
         });
         Util.removeModal();
         if (res.code !== 200) {
-            notify("Failed to add track to playlists: " + res.data, "error");
+            notify("Failed to add track to playlists: " + getErrorMessage(res), "error");
             return;
         }
         notify("Added track to playlist(s)", "success");
@@ -72,7 +72,7 @@ export class PlaylistActions {
     static async removeTrackFromPlaylist(track_id: number, playlist_ids: number[]) {
         const res = await Api.postAsync(ApiRoutes.removeTrackFromPlaylists, {playlist_ids, track_id});
         if (res.code !== 200) {
-            notify("Failed to remove track from playlist: " + res.data, "error");
+            notify("Failed to remove track from playlist: " + getErrorMessage(res), "error");
             return false;
         }
         notify("Removed track from playlist", "success");
@@ -106,7 +106,7 @@ export class PlaylistActions {
     static async moveTrackInPlaylist(playlistId, trackId, newPosition) {
         const res = await Api.postAsync(ApiRoutes.reorderPlaylistTracks, {id: playlistId, track_id: trackId, new_position: newPosition});
         if (res.code !== 200) {
-            notify("Failed to move track in playlist: " + res.data, "error");
+            notify("Failed to move track in playlist: " + getErrorMessage(res), "error");
             return false;
         }
         return true;
@@ -164,7 +164,7 @@ export class PlaylistActions {
         });
         Util.removeModal();
         if (res.code !== 200) {
-            notify(res.data, "error");
+            notify(getErrorMessage(res), "error");
             return;
         }
         notify("Added album to playlist(s)", "success");

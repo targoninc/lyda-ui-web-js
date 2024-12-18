@@ -2,14 +2,16 @@ import {Api} from "../Api/Api.ts";
 import {SubscriptionTemplates} from "../Templates/SubscriptionTemplates.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
+import {getErrorMessage} from "../Classes/Util.ts";
+import {Signal} from "../../fjsc/src/signals.ts";
 
 export class SubscriptionActions {
     static clientId = "AUw6bB-HQTIfqy5fhk-s5wZOaEQdaCIjRnCyIC3WDCRxVKc9Qvz1c6xLw7etCit1CD1qSHY5Pv-3xgQN";
 
-    static async startSubscription(id, planId, previousId, optionMessage) {
+    static async startSubscription(id: string, planId: string, previousId: string, optionMessage: Signal<string>) {
         const client_id = SubscriptionActions.clientId;
         SubscriptionActions.initializeDomForSubStart(id, previousId, optionMessage);
-        SubscriptionActions.initializePaypalButton(client_id, planId, "paypal-button-" + id, optionMessage, async (data) => {
+        SubscriptionActions.initializePaypalButton(client_id, planId, "paypal-button-" + id, optionMessage, async (data: any) => {
             await SubscriptionActions.subscriptionSuccess(data, {
                 id,
                 planId,
@@ -63,12 +65,12 @@ export class SubscriptionActions {
         buttons.render("#" + button_id);
     }
 
-    static async subscriptionSuccess(data, parameters) {
-        const response = await Api.postAsync(ApiRoutes.subscribe, {...parameters});
-        if (response.code === 200) {
+    static async subscriptionSuccess(data: any, parameters: any) {
+        const res = await Api.postAsync(ApiRoutes.subscribe, {...parameters});
+        if (res.code === 200) {
             notify("Subscription started", "success");
         } else {
-            notify(response.data, "error");
+            notify("Error when starting subscription: " + getErrorMessage(res), "error");
         }
     }
 
@@ -82,10 +84,10 @@ export class SubscriptionActions {
         );
     }
 
-    static async cancelSubscriptionAsync(id) {
-        const response = await Api.postAsync(ApiRoutes.unsubscribe, {id});
-        if (response.code !== 200) {
-            notify(response.data, "error");
+    static async cancelSubscriptionAsync(id: string) {
+        const res = await Api.postAsync(ApiRoutes.unsubscribe, {id});
+        if (res.code !== 200) {
+            notify("Error while cancelling subscription: " + getErrorMessage(res), "error");
             return false;
         }
 

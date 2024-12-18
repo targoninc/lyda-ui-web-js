@@ -1,7 +1,7 @@
 import {notify} from "./Ui.ts";
 import {Images} from "../Enums/Images.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
-import {Api} from "../Api/Api.ts";
+import {Api, ApiResponse} from "../Api/Api.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {AnyElement} from "../../fjsc/src/f2.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
@@ -477,4 +477,25 @@ export function updateUserSetting(user: User, key: string, value: string) {
 
 export function target(e: Event) {
     return e.target as HTMLInputElement;
+}
+
+export function getErrorMessage(res: ApiResponse<any>) {
+    if (res.data?.error) {
+        return res.data.error;
+    }
+
+    switch (res.code) {
+        case 400:
+            return "Invalid request";
+        case 401:
+            return "Not logged in";
+        case 403:
+            return "Missing permissions";
+        case 404:
+            return "Not found";
+        case 500:
+            return "Server error";
+        default:
+            return "Unknown error";
+    }
 }

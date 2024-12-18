@@ -1,7 +1,7 @@
 import {GenericTemplates} from "../Templates/GenericTemplates.ts";
 import {AlbumTemplates} from "../Templates/AlbumTemplates.ts";
 import {Api} from "../Api/Api.ts";
-import {Util} from "../Classes/Util.ts";
+import {getErrorMessage, Util} from "../Classes/Util.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
 import {QueueManager} from "../Streaming/QueueManager.ts";
@@ -39,7 +39,7 @@ export class AlbumActions {
     static async createNewAlbum(album: Partial<Album>) {
         const res = await Api.postAsync(ApiRoutes.newAlbum, album);
         if (res.code !== 200) {
-            notify("Failed to create album: " + res.data, "error");
+            notify("Failed to create album: " + getErrorMessage(res), "error");
             return;
         }
         notify("Created album", "success");
@@ -53,7 +53,7 @@ export class AlbumActions {
             notify("Successfully deleted album", "success");
             navigate("profile");
         } else {
-            notify("Error trying to delete album: " + res.data, "error");
+            notify("Error trying to delete album: " + getErrorMessage(res), "error");
         }
     }
 
@@ -61,7 +61,7 @@ export class AlbumActions {
         const res = await Api.postAsync(ApiRoutes.addTrackToAlbums, {album_ids, track_id});
         Util.removeModal();
         if (res.code !== 200) {
-            notify("Failed to add track to albums: " + res.data, "error");
+            notify("Failed to add track to albums: " + getErrorMessage(res), "error");
             return;
         }
         notify("Added track to albums", "success");
@@ -70,7 +70,7 @@ export class AlbumActions {
     static async removeTrackFromAlbum(track_id: number, album_ids: number[]) {
         const res = await Api.postAsync(ApiRoutes.removeTrackFromAlbums, {album_ids, track_id});
         if (res.code !== 200) {
-            notify("Failed to remove track from album: " + res.data, "error");
+            notify("Failed to remove track from album: " + getErrorMessage(res), "error");
             return false;
         }
         notify("Removed track from album", "success");
@@ -95,9 +95,9 @@ export class AlbumActions {
                 loading.value = false;
                 notify("Cover updated", "success");
                 await Util.updateImage(URL.createObjectURL(file), oldSrc);
-            } catch (e) {
+            } catch (e: any) {
                 loading.value = false;
-                notify(e, "error");
+                notify(e.toString(), "error");
             }
         };
         fileInput.click();
@@ -106,7 +106,7 @@ export class AlbumActions {
     static async moveTrackInAlbum(albumId: number, trackId: number, newPosition: number) {
         const res = await Api.postAsync(ApiRoutes.reorderAlbumTracks, {id: albumId, track_id: trackId, new_position: newPosition});
         if (res.code !== 200) {
-            notify("Failed to move track in album: " + res.data, "error");
+            notify("Failed to move track in album: " + getErrorMessage(res), "error");
             return false;
         }
         return true;
