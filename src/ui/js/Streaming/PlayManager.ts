@@ -371,7 +371,8 @@ export class PlayManager {
         }
         const res = await Api.getAsync<{ track: Track }>(ApiRoutes.getTrackById, { id });
         if (res.code !== 200) {
-            throw new Error(`Failed to get track data: ${res.data.error}`);
+            await PlayManager.removeTrackFromAllStates(id);
+            throw new Error(`Failed to get track data for ${id}: ${res.data.error}`);
         }
         await PlayManager.cacheTrackData(res.data);
         return res.data;
