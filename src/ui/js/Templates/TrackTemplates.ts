@@ -31,6 +31,7 @@ import {Playlist} from "../Models/DbModels/Playlist.ts";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {CollaboratorType} from "../Models/DbModels/CollaboratorType.ts";
 import {currentTrackId} from "../state.ts";
+import {PillOption} from "../Models/PillOption.ts";
 
 export class TrackTemplates {
     static trackCard(track: Track, user: User, profileId: number) {
@@ -202,20 +203,29 @@ export class TrackTemplates {
     }
 
     static feedFilters(filterState: Signal<string>, loadingState: Signal<boolean>) {
-        const filterMap: {[key: string]: string} = {
-            all: "All",
-            originals: "Originals",
-            reposts: "Reposts",
+        const filterMap: Record<string, Partial<PillOption>> = {
+            all: {
+                text: "All",
+                icon: "filter_list_off"
+            },
+            originals: {
+                text: "Originals",
+                icon: "draw"
+            },
+            reposts: {
+                text: "Reposts",
+                icon: "share"
+            },
         };
         const options = Object.keys(filterMap).map(k => {
             return {
-                text: filterMap[k],
+                ...filterMap[k],
                 value: k,
                 onclick: () => {
                     filterState.value = k;
                 }
             };
-        });
+        }) as PillOption[];
 
         return GenericTemplates.pills(options, filterState, [], loadingState);
     }

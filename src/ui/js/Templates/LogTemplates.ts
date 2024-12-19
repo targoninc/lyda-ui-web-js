@@ -4,6 +4,8 @@ import {GenericTemplates} from "./GenericTemplates.ts";
 import {Util} from "../Classes/Util.ts";
 import {create} from "../../fjsc/src/f2.ts";
 import {User} from "../Models/DbModels/User.ts";
+import {Signal} from "../../fjsc/src/signals.ts";
+import {PillOption} from "../Models/PillOption.ts";
 
 export class LogTemplates {
     static async actionLogs(selfUser: User, data: any[]) {
@@ -218,22 +220,34 @@ export class LogTemplates {
             ).build();
     }
 
-    static logFilters(pillState) {
-        const filterMap = {
-            all: "All",
-            info: "Info",
-            warnings: "Warnings",
-            errors: "Errors",
+    static logFilters(pillState: Signal<string>) {
+        const filterMap: Record<string, Partial<PillOption>> = {
+            all: {
+                text: "All",
+                icon: "filter_list_off"
+            },
+            info: {
+                text: "Info",
+                icon: "info"
+            },
+            warnings: {
+                text: "Warnings",
+                icon: "warning"
+            },
+            errors: {
+                text: "Errors",
+                icon: "error"
+            },
         };
         const options = Object.keys(filterMap).map(k => {
             return {
-                text: filterMap[k],
+                ...filterMap[k],
                 value: k,
                 onclick: () => {
                     pillState.value = k;
                 }
             };
-        });
+        }) as PillOption[];
 
         return GenericTemplates.pills(options, pillState);
     }

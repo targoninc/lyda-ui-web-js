@@ -24,6 +24,7 @@ import {ProgressPart} from "../Models/ProgressPart.ts";
 import {compute, signal, Signal} from "../../fjsc/src/signals.ts";
 import {SearchResult} from "../Models/SearchResult.ts";
 import {openMenus} from "../state.ts";
+import {PillOption} from "../Models/PillOption.ts";
 
 export class GenericTemplates {
     static icon(icon: StringOrSignal, adaptive = false, classes: StringOrSignal[] = [], title = "") {
@@ -298,26 +299,30 @@ export class GenericTemplates {
             .build();
     }
 
-    static pill(value: any, text: HtmlPropertyValue, onclick = () => {
-    }, pillState: Signal<any>, extraClasses: string[] = []) {
-        const selectedState = signal(pillState.value === value ? "active" : "_");
+    static pill(p: PillOption, pillState: Signal<any>, extraClasses: string[] = []) {
+        const selectedState = signal(pillState.value === p.value ? "active" : "_");
         pillState.onUpdate = (newSelected: any) => {
-            selectedState.value = newSelected === value ? "active" : "_";
+            selectedState.value = newSelected === p.value ? "active" : "_";
         };
 
-        return create("div")
-            .classes("pill", "padded-inline", "clickable", "fakeButton", "rounded-max", selectedState, ...extraClasses)
-            .onclick(onclick)
-            .text(text)
-            .build();
+        return FJSC.button({
+            text: p.text,
+            icon: p.icon ? {
+                icon: p.icon,
+                adaptive: true,
+                isUrl: false,
+            } : undefined,
+            classes: ["rounded-max", selectedState, ...extraClasses],
+            onclick: p.onclick,
+        });
     }
 
-    static pills(options: any[], pillState: Signal<any>, extraClasses: string[] = [], loadingState: Signal<boolean> | null = null) {
+    static pills(options: PillOption[], pillState: Signal<any>, extraClasses: string[] = [], loadingState: Signal<boolean> | null = null) {
         return create("div")
             .classes("flex", "pill-container", ...extraClasses)
             .children(
                 ...options.map(p => {
-                    return GenericTemplates.pill(p.value, p.text, p.onclick, pillState);
+                    return GenericTemplates.pill(p, pillState);
                 }),
                 ifjs(loadingState, create("img")
                     .src(Icons.SPINNER)
