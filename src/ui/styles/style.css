@@ -737,6 +737,12 @@ textarea.fullWidth {
 th, td {
     text-align: left;
     padding: var(--inline-padding);
+    vertical-align: top;
+    border-bottom: 1px solid var(--color-4);
+}
+
+tr.log {
+    background: var(--color-3);
 }
 
 tr:hover {

@@ -836,6 +836,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 .log-properties {
     resize: both;
     overflow: auto;
+    right: 0;
 }
 
 .property-value {

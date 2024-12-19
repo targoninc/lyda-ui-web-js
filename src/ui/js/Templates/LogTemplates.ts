@@ -2,11 +2,14 @@ import {Time} from "../Classes/Helpers/Time.ts";
 import {UserTemplates} from "./UserTemplates.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {Util} from "../Classes/Util.ts";
-import {create} from "../../fjsc/src/f2.ts";
+import {create, ifjs} from "../../fjsc/src/f2.ts";
 import {User} from "../Models/DbModels/User.ts";
-import {Signal} from "../../fjsc/src/signals.ts";
+import {signal, Signal} from "../../fjsc/src/signals.ts";
 import {PillOption} from "../Models/PillOption.ts";
 import {LogLevel} from "../Enums/LogLevel.ts";
+import {Log} from "../Models/DbModels/Log.ts";
+import {FJSC} from "../../fjsc";
+import {notify} from "../Classes/Ui.ts";
 
 export class LogTemplates {
     static async actionLogs(selfUser: User, data: any[]) {
@@ -84,7 +87,22 @@ export class LogTemplates {
             ).build();
     }
 
-    static logs(data) {
+    static logs(data: Log[]) {
+        const headers = ["Timestamp", "Host", "Log Level", "Message", "Stack", "Properties"];
+        const headerDefinitions = headers.map(h => ({
+            title: h,
+            className: h.toLowerCase().replaceAll(" ", "-"),
+        }));
+        const logLevelMap: Record<number, string> = {
+            [LogLevel.debug]: "Debug",
+            [LogLevel.success]: "Success",
+            [LogLevel.info]: "Info",
+            [LogLevel.warning]: "Warning",
+            [LogLevel.error]: "Error",
+            [LogLevel.critical]: "Critical",
+            [LogLevel.unknown]: "Unknown",
+        };
+
         return create("table")
             .classes("logs")
             .attributes("cellspacing", "0", "cellpadding", "0")
@@ -94,50 +112,48 @@ export class LogTemplates {
                         create("tr")
                             .classes("log")
                             .children(
-                                create("th")
-                                    .classes("log-timestamp")
-                                    .text("Timestamp")
-                                    .build(),
-                                create("th")
-                                    .classes("log-type")
-                                    .text("Type")
-                                    .build(),
-                                create("th")
-                                    .classes("log-scope")
-                                    .text("Scope")
-                                    .build(),
-                                create("th")
-                                    .classes("log-message")
-                                    .text("Message")
-                                    .build(),
-                                create("th")
-                                    .classes("log-properties")
-                                    .text("Properties")
-                                    .build(),
+                                ...headerDefinitions.map(h => create("th")
+                                    .classes(h.className)
+                                    .text(h.title)
+                                    .build()),
                             ).build(),
                     ).build(),
                 create("tbody")
                     .children(
                         ...data.map(l => {
+                            const type = logLevelMap[l.logLevel].toLowerCase();
+
                             return create("tr")
-                                .classes("log", l.type)
+                                .classes("log", type)
                                 .children(
                                     create("td")
                                         .classes("log-timestamp")
                                         .text(Time.ago(l.time))
                                         .build(),
                                     create("td")
-                                        .classes("log-type")
-                                        .text(l.type)
+                                        .classes("log-host")
+                                        .text(l.host)
                                         .build(),
                                     create("td")
-                                        .classes("log-scope")
-                                        .text(l.scope)
+                                        .classes("log-level")
+                                        .text(logLevelMap[l.logLevel])
                                         .build(),
                                     create("td")
-                                        .classes("log-message", l.type)
+                                        .classes("log-message", type)
                                         .text(l.message)
                                         .build(),
+                                    create("td")
+                                        .classes("log-stack")
+                                        .children(
+                                            FJSC.button({
+                                                text: "Copy stack",
+                                                icon: { icon: "content_copy" },
+                                                onclick: () => {
+                                                    navigator.clipboard.writeText(l.stack);
+                                                    notify("Copied stack to clipboard", "success");
+                                                }
+                                            }),
+                                        ).build(),
                                     LogTemplates.properties(l.properties),
                                 ).build();
                         })
@@ -145,40 +161,32 @@ export class LogTemplates {
             ).build();
     }
 
-    static properties(data) {
-        try {
-            data = JSON.parse(data);
-        } catch (e) {
-            // empty
-        }
-
-        if (!data) {
+    static properties(data: any) {
+        if (Object.keys(data).length === 0) {
             return create("td")
                 .classes("log-properties")
                 .build();
         }
-
-        const id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        const shown = signal(false);
 
         return create("td")
-            .classes("flex-v", "clickable", "fakeButton", "rounded", "padded-inline")
+            .classes("flex-v")
             .styles("position", "relative")
-            .text("Info")
-            .onclick(e => {
-                if (!e.target?.classList.contains("clickable")) {
-                    return;
-                }
-                document.getElementById("properties-container" + id).classList.toggle("hidden");
-            })
             .children(
-                create("div")
-                    .classes("flex-v", "hidden", "card", "popout-below", "log-properties")
-                    .id("properties-container" + id)
+                FJSC.button({
+                    text: "Info",
+                    icon: { icon: "info" },
+                    onclick: () => {
+                        shown.value = !shown.value;
+                    }
+                }),
+                ifjs(shown, create("div")
+                    .classes("flex-v", "card", "popout-below", "log-properties")
                     .children(
                         ...Object.keys(data).map(k => {
                             return LogTemplates.property(k, data[k]);
                         })
-                    ).build(),
+                    ).build()),
             ).build();
     }
 
