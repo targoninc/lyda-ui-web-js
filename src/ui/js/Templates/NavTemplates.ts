@@ -78,10 +78,14 @@ export class NavTemplates {
                                     .attributes("src", Icons.LYDA, "alt", "Lyda")
                                     .build()
                             ).build(),
-                        create("img")
-                            .classes("icon", "svg", "nopointer")
-                            .attributes("src", Icons.X, "alt", "X")
-                            .build(),
+                        create("div")
+                            .classes("mobile-menu-close")
+                            .children(
+                                create("img")
+                                    .classes("icon", "svg", "nopointer")
+                                    .attributes("src", Icons.X, "alt", "X")
+                                    .build(),
+                            ).build(),
                     ).build(),
                 NavTemplates.navButtonInBurger("following", "Feed", "rss_feed", async () => {
                     NavActions.closeBurgerMenu();

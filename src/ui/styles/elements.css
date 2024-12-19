@@ -1035,6 +1035,17 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     border-bottom: 2px solid var(--blue);
 }
 
+.mobile-menu-close {
+    padding: var(--base-padding);
+    background: var(--color-6);
+    border-radius: 999px;
+    height: 3em;
+    width: 3em;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
 @keyframes pulse-glow {
     0% {
         box-shadow: 0 0 0 0 var(--green);
