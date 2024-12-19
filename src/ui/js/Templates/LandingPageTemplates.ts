@@ -634,7 +634,7 @@ export class LandingPageTemplates {
                         FJSC.button({
                             text: "Register",
                             id: "registerTrigger",
-                            disabled: compute(e => e.length > 0, errors),
+                            disabled: compute((e, allTouched) => e.length > 0 || !allTouched, errors, allFieldsTouched),
                             onclick: continueRegistration,
                             icon: {
                                 icon: "person_add",
@@ -700,7 +700,7 @@ export class LandingPageTemplates {
                         FJSC.button({
                             text: "Next",
                             id: "checkEmailTrigger",
-                            disabled: compute(u => !u.email || u.email.trim().length === 0, user),
+                            disabled: compute((u, e) => !u.email || u.email.trim().length === 0 || e.length > 0, user, errors),
                             onclick: triggerLogin,
                             icon: {
                                 icon: "arrow_forward",
