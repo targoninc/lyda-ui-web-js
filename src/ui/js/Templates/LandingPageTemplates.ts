@@ -269,6 +269,7 @@ export class LandingPageTemplates {
                             placeholder: "E-Mail",
                             value: email,
                             required: true,
+                            attributes: ["autocomplete", "email"],
                             onchange: (value) => {
                                 AuthApi.userExists(value, () => {
                                     user.value = {
@@ -441,6 +442,7 @@ export class LandingPageTemplates {
             placeholder: "Password",
             value: password,
             required: true,
+            attributes: ["autocomplete", "password"],
             onchange: (value) => {
                 user.value = {
                     ...user.value,
