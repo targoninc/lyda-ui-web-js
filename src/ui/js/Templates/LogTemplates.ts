@@ -6,6 +6,7 @@ import {create} from "../../fjsc/src/f2.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {Signal} from "../../fjsc/src/signals.ts";
 import {PillOption} from "../Models/PillOption.ts";
+import {LogLevel} from "../Enums/LogLevel.ts";
 
 export class LogTemplates {
     static async actionLogs(selfUser: User, data: any[]) {
@@ -220,31 +221,39 @@ export class LogTemplates {
             ).build();
     }
 
-    static logFilters(pillState: Signal<string>) {
+    static logFilters(pillState: Signal<LogLevel>) {
         const filterMap: Record<string, Partial<PillOption>> = {
-            all: {
-                text: "All",
-                icon: "filter_list_off"
+            debug: {
+                text: "Debug",
+                icon: "bug_report",
+                value: LogLevel.debug
+            },
+            success: {
+                text: "Success",
+                icon: "check",
+                value: LogLevel.success
             },
             info: {
                 text: "Info",
-                icon: "info"
+                icon: "info",
+                value: LogLevel.info
             },
             warnings: {
                 text: "Warnings",
-                icon: "warning"
+                icon: "warning",
+                value: LogLevel.warning
             },
             errors: {
                 text: "Errors",
-                icon: "error"
+                icon: "report",
+                value: LogLevel.error
             },
         };
         const options = Object.keys(filterMap).map(k => {
             return {
                 ...filterMap[k],
-                value: k,
                 onclick: () => {
-                    pillState.value = k;
+                    pillState.value = filterMap[k].value;
                 }
             };
         }) as PillOption[];

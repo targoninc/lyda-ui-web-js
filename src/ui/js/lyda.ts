@@ -28,6 +28,8 @@ import {User} from "./Models/DbModels/User.ts";
 import {ApiRoutes} from "./Api/ApiRoutes.ts";
 import {signal} from "../fjsc/src/signals.ts";
 import {Track} from "./Models/DbModels/Track.ts";
+import {LogLevel} from "./Enums/LogLevel.ts";
+import {Log} from "./Models/DbModels/Log.ts";
 
 export class Lyda {
     static async getEndpointData(endpoint: string, params = "") {
@@ -171,11 +173,11 @@ export class Lyda {
                 notify("You do not have permission to view logs", "error");
                 return;
             }
-            const filterState = signal("all");
+            const filterState = signal(LogLevel.debug);
             element.appendChild(LogTemplates.logFilters(filterState));
             let logsList = create("div").build();
             element.appendChild(logsList);
-            LydaApi.getLogs(filterState, async (logs) => {
+            LydaApi.getLogs(filterState, async (logs: Log[]) => {
                 const newLogs = LogTemplates.logs(logs);
                 element.replaceChild(newLogs, logsList);
                 logsList = newLogs;
