@@ -122,14 +122,17 @@ export class QueueTemplates {
             ).build();
     }
 
-    static async queue(queue: any[]) {
+    static async queue(queue: { track: Track }[]) {
         let children = [];
         let i = 0;
-        for (let track of queue) {
+        for (let item of queue) {
             children.push(GenericTemplates.dragTargetInList((data: any) => {
                 QueueManager.moveInManualQueue(data.from, data.to);
             }, i.toString()));
-            children.push(await QueueTemplates.queueItem(track.track, i, queue.length, track.user));
+            if (!item.track.user) {
+                throw new Error(`Track ${item.track.id} has no user`);
+            }
+            children.push(await QueueTemplates.queueItem(item.track, i, queue.length, item.track.user));
             i++;
         }
         let queueText;

@@ -187,8 +187,7 @@ export class PlayerTemplates {
                         create("div")
                             .classes("flex")
                             .children(
-                                ...await PlayerTemplates.bottomTrackInfo(track, trackUser, user),
-                                ...await QueueTemplates.queue(trackList),
+                                ...await PlayerTemplates.bottomTrackInfo(track, trackUser, user, trackList),
                                 ...PlayerTemplates.audioControls(loopingSingle, loopingContext)
                             ).build(),
                         create("div")
@@ -226,7 +225,7 @@ export class PlayerTemplates {
             }).build();
     }
 
-    static async bottomTrackInfo(track: Track, trackUser: User, user: User) {
+    static async bottomTrackInfo(track: Track, trackUser: User, user: User, trackList: { track: Track }[]) {
         const icons = [];
         const isPrivate = track.visibility !== "public";
         if (isPrivate) {
@@ -261,13 +260,22 @@ export class PlayerTemplates {
             UserTemplates.userWidget(trackUser, Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "following_user_id", user),
                 [], ["align-center"], UserWidgetContext.player),
             PlayerTemplates.playingFrom(),
+            FJSC.button({
+                text: "",
+                icon: { icon: "more_horiz" },
+                classes: ["showOnMidBreakpoint", "align-center"],
+                onclick: async () => {
+                    console.log("Opening menu");
+                }
+            }),
             create("div")
-                .classes("flex", "align-center")
+                .classes("flex", "align-center", "hideOnMidBreakpoint")
                 .children(
                     StatisticsTemplates.likesIndicator("track", track.id, track.likes.length,
                         Util.arrayPropertyMatchesUser(track.likes, "userId", user)),
                     isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, Util.arrayPropertyMatchesUser(track.reposts, "userId", user)),
                     CommentTemplates.commentsIndicator(track.id, track.comments.length),
+                    ...await QueueTemplates.queue(trackList)
                 ).build()
         ];
     }
