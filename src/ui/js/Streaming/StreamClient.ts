@@ -23,9 +23,9 @@ export class StreamClient {
         const currentStreamClient = PlayManager.getStreamClient(currentTrackId.value);
         if (!currentStreamClient) {
             const cachedVolume = LydaCache.get<number>("volume").content;
-            this.audio.volume = cachedVolume !== null ? cachedVolume : 0.2;
+            this.setVolume(cachedVolume !== null ? cachedVolume : 0.2);
         } else {
-            this.audio.volume = currentStreamClient.getVolume();
+            this.setVolume(currentStreamClient.getVolume());
         }
     }
 
@@ -52,11 +52,11 @@ export class StreamClient {
     }
 
     getVolume() {
-        return this.audio.volume;
+        return Math.sqrt(this.audio.volume);
     }
 
     setVolume(volume: number) {
-        this.audio.volume = volume;
+        this.audio.volume = volume * volume;
     }
 
     getBufferedLength() {
