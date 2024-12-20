@@ -61,6 +61,7 @@
     --anti-gap-margin: -7px;
     --default-shadow: 0 0 15px -7px var(--color-5);
     --button-bottom-border-size: 3px;
+    --default-font-family: "Inter Tight", serif;
 
     --fjsc-text-color: var(--color-5);
     --fjsc-error-color: var(--red);
@@ -73,9 +74,10 @@
     --fjsc-interactive-border: var(--color-7);
     --fjsc-interactive-border-focused: var(--blue);
     --fjsc-interactive-border-active: var(--color-1);
+
+    --fjsc-font: var(--default-font-family);
 }
 
-/* fallback */
 @font-face {
     font-family: 'Material Symbols Outlined';
     font-style: normal;
@@ -175,7 +177,7 @@ a {
 body {
     background: var(--color-4);
     color: var(--color-5);
-    font-family: 'Roboto', sans-serif;
+    font-family: var(--default-font-family);
     font-size: 16px;
     line-height: 1.5;
     margin: 0;

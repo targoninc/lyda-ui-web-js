@@ -79,27 +79,29 @@ export class PlaylistActions {
         return true;
     }
 
-    static async replaceCover(e: MouseEvent, loading: Signal<boolean>) {
+    static async replaceCover(e: MouseEvent, id: number, canEdit: boolean, loading: Signal<boolean>) {
         const target = e.target as HTMLImageElement;
-        if (!target || target.getAttribute("canEdit") !== "true") {
+        if (!target || !canEdit) {
             return;
         }
         const oldSrc = target.src;
-        loading.value = true;
         let fileInput = document.createElement("input");
-        const id = parseInt(Util.getPlaylistIdFromEvent(e));
         fileInput.type = "file";
         fileInput.accept = "image/*";
         fileInput.onchange = async (e) => {
+            loading.value = true;
             const fileTarget = e.target as HTMLInputElement;
             const file = fileTarget.files![0];
-            const response = await MediaUploader.upload(MediaFileType.playlistCover, id, file);
-            if (response.code === 200) {
-                loading.value = false;
+            try {
+                await MediaUploader.upload(MediaFileType.playlistCover, id, file);
                 notify("Cover updated", "success");
                 await Util.updateImage(URL.createObjectURL(file), oldSrc);
+            } catch (e: any) {
+                notify(e.toString(), "error");
             }
+            loading.value = false;
         };
+        fileInput.onabort = () => loading.value = false;
         fileInput.click();
     }
 

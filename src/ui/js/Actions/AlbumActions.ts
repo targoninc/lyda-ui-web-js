@@ -77,9 +77,9 @@ export class AlbumActions {
         return true;
     }
 
-    static async replaceCover(e: MouseEvent, id: number, loading: Signal<boolean>) {
+    static async replaceCover(e: MouseEvent, id: number, canEdit: boolean, loading: Signal<boolean>) {
         const target = e.target as HTMLImageElement;
-        if (target.getAttribute("canEdit") !== "true") {
+        if (!target || !canEdit) {
             return;
         }
         const oldSrc = target.src;
@@ -92,14 +92,14 @@ export class AlbumActions {
             const file = fileTarget.files![0];
             try {
                 await MediaUploader.upload(MediaFileType.albumCover, id, file)
-                loading.value = false;
                 notify("Cover updated", "success");
                 await Util.updateImage(URL.createObjectURL(file), oldSrc);
             } catch (e: any) {
-                loading.value = false;
                 notify(e.toString(), "error");
             }
+            loading.value = false;
         };
+        fileInput.onabort = () => loading.value = false;
         fileInput.click();
     }
 

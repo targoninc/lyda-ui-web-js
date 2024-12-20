@@ -96,7 +96,7 @@ export class Util {
             return Images.DEFAULT_AVATAR;
         }
         const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.userAvatar}&t=${Date.now()}`;
-        return await this.getFileOrBackupAsync(url, Images.DEFAULT_AVATAR);
+        return await Util.getFileOrBackupAsync(url, Images.DEFAULT_AVATAR);
     }
 
     static async getBannerFromUserIdAsync(id: number|null) {
@@ -104,22 +104,22 @@ export class Util {
             return Images.DEFAULT_BANNER;
         }
         const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.userBanner}&t=${Date.now()}`;
-        return await this.getFileOrBackupAsync(url, Images.DEFAULT_BANNER);
+        return await Util.getFileOrBackupAsync(url, Images.DEFAULT_BANNER);
     }
 
     static async getCoverFileFromTrackIdAsync(id: number, user_id: number|null = null) {
         const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.trackCover}&t=${Date.now()}`;
-        return await this.getFileOrBackupAsync(url, Util.getAvatarFromUserIdAsync, user_id);
+        return await Util.getFileOrBackupAsync(url, Util.getAvatarFromUserIdAsync, user_id);
     }
 
     static async getCoverFileFromAlbumIdAsync(id: number, user_id: number|null = null) {
         const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.albumCover}&t=${Date.now()}`;
-        return await this.getFileOrBackupAsync(url, Util.getAvatarFromUserIdAsync, user_id);
+        return await Util.getFileOrBackupAsync(url, Util.getAvatarFromUserIdAsync, user_id);
     }
 
     static async getCoverFileFromPlaylistIdAsync(id: number, user_id: number|null = null) {
         const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.playlistCover}&t=${Date.now()}`;
-        return await this.getFileOrBackupAsync(url, Util.getAvatarFromUserIdAsync, user_id);
+        return await Util.getFileOrBackupAsync(url, Util.getAvatarFromUserIdAsync, user_id);
     }
 
     static async getFileOrBackupAsync(url: string, backupUrl: string|Function, user_id: number|null = null) {

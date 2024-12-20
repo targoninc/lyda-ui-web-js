@@ -50,6 +50,13 @@ export async function baseHtml(req: Request) {
     <meta name="description" content="${description}">
     <meta name="theme-color" content="#202025">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" type="text/css" href="/fjsc/src/fjs-components.css"/>
     <link rel="stylesheet" type="text/css" href="/styles/style.css"/>
     <link rel="stylesheet" type="text/css" href="/styles/elements.css"/>

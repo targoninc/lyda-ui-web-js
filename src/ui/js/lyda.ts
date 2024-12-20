@@ -169,8 +169,14 @@ export class Lyda {
             break;
         case "logs":
             user = await Util.getUserAsync();
+            if (permissions.error) {
+                notify("You do not have permission to view logs", "error");
+                navigate("login");
+                return;
+            }
             if (!permissions.some((p: Permission) => p.name === Permissions.canViewLogs)) {
                 notify("You do not have permission to view logs", "error");
+                navigate("profile");
                 return;
             }
             const filterState = signal(LogLevel.debug);

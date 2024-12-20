@@ -452,8 +452,7 @@ export class PlaylistTemplates {
                     .children(
                         create("div")
                             .classes("cover-container", "relative", data.canEdit ? "pointer" : "_")
-                            .attributes("playlist_id", playlist.id, "canEdit", data.canEdit)
-                            .onclick(e => PlaylistActions.replaceCover(e, coverLoading))
+                            .onclick(e => PlaylistActions.replaceCover(e, playlist.id, data.canEdit, coverLoading))
                             .children(
                                 ifjs(coverLoading, create("div")
                                     .classes("loader", "loader-small", "centeredInParent")

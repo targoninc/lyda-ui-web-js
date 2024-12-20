@@ -263,6 +263,7 @@ export class TrackActions {
             }
             loading.value = false;
         };
+        fileInput.onabort = () => loading.value = false;
         fileInput.click();
     }
 
