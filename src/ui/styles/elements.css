@@ -252,16 +252,16 @@ label {
     height: max-content;
 }
 
-.audio-player-control-icon {
-    margin: auto;
-}
-
-.audio-player-control {
+.player-button {
     --control-size: 36px;
     min-width: var(--control-size);
     min-height: var(--control-size);
     max-width: var(--control-size);
     max-height: var(--control-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50% !important;
 }
 
 .audio-player-scrubber {
@@ -347,17 +347,29 @@ label {
     flex-wrap: nowrap;
 }
 
-.loudness-control:hover .loudness-bar {
+.loudness-control {
+    width: 36px;
+}
+
+.loudness-control:hover .loudness-bar, .loudness-bar:hover {
     display: initial;
 }
 
 .loudness-bar {
     position: absolute;
-    width: var(--font-size-medium);
+    width: 36px;
     height: 100px;
     bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0;
+    box-sizing: border-box;
+}
+
+.audio-player-loudnesstracker {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
 }
 
 .audio-player-time {
@@ -366,20 +378,17 @@ label {
 
 .audio-player-loudnessbackground {
     position: absolute;
-    height: calc(100% + 54px);
-    border-radius: 27px;
+    height: calc(100% + 36px);
+    border-radius: 27px 27px 0 0;
     left: 0;
     width: calc(100% - 2px);
-    bottom: -35px;
-}
-
-.loudness-button, .loop-button {
-    height: 27px;
-    position: relative;
+    bottom: -17px;
+    border: 1px solid var(--fjsc-interactive-border);
 }
 
 .loudness-button {
     z-index: 1;
+    position: relative;
 }
 
 #permanent-player {

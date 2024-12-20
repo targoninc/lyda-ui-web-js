@@ -16,11 +16,12 @@ import {
     streamClients,
     volume,
     playingHere,
-    currentTrackPosition
+    currentTrackPosition, loopMode, muted
 } from "../state.ts";
 import {PlayingFrom} from "../Models/PlayingFrom.ts";
 import {StreamingBroadcaster, StreamingEvent} from "./StreamingBroadcaster.ts";
 import {TrackPosition} from "../Models/TrackPosition.ts";
+import {LoopMode} from "../Enums/LoopMode.ts";
 
 export class PlayManager {
     static async playCheck(track: any) {
@@ -240,31 +241,28 @@ export class PlayManager {
     }
 
     static isLoopingSingle() {
-        return LydaCache.get<boolean>("loopSingle").content ?? false;
+        return loopMode.value === LoopMode.single;
     }
 
     static isLoopingContext() {
-        return LydaCache.get<boolean>("loopContext").content ?? false;
+        return loopMode.value === LoopMode.context;
     }
 
-    static async toggleLoop() {
-        let loopingSingle = PlayManager.isLoopingSingle();
-        let loopingContext = PlayManager.isLoopingContext();
-
-        if (loopingSingle) {
-            loopingSingle = false;
-            loopingContext = true;
-        } else if (loopingContext) {
-            loopingSingle = false;
-            loopingContext = false;
-        } else {
-            loopingSingle = true;
-            loopingContext = false;
+    static async nextLoopMode() {
+        switch (loopMode.value) {
+            case LoopMode.off:
+                loopMode.value = LoopMode.single;
+                break;
+            case LoopMode.single:
+                loopMode.value = LoopMode.context;
+                break;
+            case LoopMode.context:
+                loopMode.value = LoopMode.off;
+                break;
         }
 
-        LydaCache.set("loopSingle", new CacheItem(loopingSingle));
-        LydaCache.set("loopContext", new CacheItem(loopingContext));
-        StreamingUpdater.updateLoopStates(loopingSingle, loopingContext);
+        const streamClient = PlayManager.getStreamClient(currentTrackId.value);
+        streamClient.audio.loop = loopMode.value === LoopMode.single;
     }
 
     static async scrubTo(id: number, value: number) {
@@ -310,45 +308,41 @@ export class PlayManager {
         const streamClient = PlayManager.getStreamClient(id);
         if (streamClient.getVolume() > 0) {
             volume.value = streamClient.getVolume();
+            muted.value = true;
             streamClient.setVolume(0);
-            StreamingUpdater.updateLoudness(id, 0);
         } else {
+            muted.value = false;
             streamClient.setVolume(volume.value);
-            StreamingUpdater.updateLoudness(id, volume.value);
         }
-        StreamingUpdater.updateMuteState(id);
     }
 
     static async setLoudnessFromElement(e: any) {
         let value = 1 - (e.offsetY / e.target.offsetHeight);
-        await PlayManager.setLoudness(e.target.id, value);
+        await PlayManager.setLoudness(value);
     }
 
     static async setLoudnessFromWheel(e: any) {
-        const id = e.target.id;
-        let value = PlayManager.getLoudness(id);
+        let value = PlayManager.getLoudness();
         if (e.deltaY < 0) {
             value += 0.05;
         } else {
             value -= 0.05;
         }
-        await PlayManager.setLoudness(id, value);
+        await PlayManager.setLoudness(value);
     }
 
-    static getLoudness(id: number) {
-        const streamClient = PlayManager.getStreamClient(id);
+    static getLoudness() {
+        const streamClient = PlayManager.getStreamClient(currentTrackId.value);
         return streamClient.getVolume();
     }
 
-    static async setLoudness(id: number, value: number) {
+    static async setLoudness(value: number) {
         value = Math.min(Math.max(value, 0), 1);
-        const streamClient = PlayManager.getStreamClient(id);
+        const streamClient = PlayManager.getStreamClient(currentTrackId.value);
         await streamClient.setVolume(value);
 
-        StreamingUpdater.updateLoudness(id, value);
-        StreamingUpdater.updateMuteState(id);
-
-        LydaCache.set("volume", new CacheItem(value));
+        volume.value = value;
+        muted.value = value === 0;
     }
 
     static async skipForward(id: number) {
@@ -367,14 +361,14 @@ export class PlayManager {
         }
     };
 
-    static async volumeUp(id: number) {
-        const streamClient = PlayManager.getStreamClient(id);
-        await PlayManager.setLoudness(id, streamClient.getVolume() * PlayManager.config.controls.volumeChangeRelative);
+    static async volumeUp() {
+        const streamClient = PlayManager.getStreamClient(currentTrackId.value);
+        await PlayManager.setLoudness(streamClient.getVolume() * PlayManager.config.controls.volumeChangeRelative);
     }
 
-    static async volumeDown(id: number) {
-        const streamClient = PlayManager.getStreamClient(id);
-        await PlayManager.setLoudness(id, streamClient.getVolume() / PlayManager.config.controls.volumeChangeRelative);
+    static async volumeDown() {
+        const streamClient = PlayManager.getStreamClient(currentTrackId.value);
+        await PlayManager.setLoudness(streamClient.getVolume() / PlayManager.config.controls.volumeChangeRelative);
     }
 
     static async cacheTrackData(trackData: { track: Track }) {

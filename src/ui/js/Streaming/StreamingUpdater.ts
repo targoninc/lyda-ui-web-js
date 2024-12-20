@@ -7,7 +7,14 @@ import {QueueTemplates} from "../Templates/QueueTemplates.ts";
 import {QueueManager} from "./QueueManager.ts";
 import {PlayerTemplates} from "../Templates/PlayerTemplates.ts";
 import {Util} from "../Classes/Util.ts";
-import {currentlyBuffered, currentTrackId, currentTrackPosition, manualQueue, trackInfo} from "../state.ts";
+import {
+    currentlyBuffered,
+    currentTrackId,
+    currentTrackPosition,
+    manualQueue,
+    playingHere,
+    trackInfo
+} from "../state.ts";
 import {signal} from "../../fjsc/src/signals.ts";
 
 const updatingPlayState = signal(false);
@@ -65,17 +72,6 @@ export class StreamingUpdater {
         }
     }
 
-    static updateLoopStates(loopingSingle: boolean, loopingContext: boolean) {
-        const loopSingleButtons = document.querySelectorAll(".loop-button-img") as NodeListOf<HTMLImageElement>;
-        for (const loopButton of loopSingleButtons) {
-            loopButton.src = loopingSingle ? Icons.LOOP_SINGLE : Icons.LOOP_OFF;
-            loopButton.src = loopingContext ? Icons.LOOP_CONTEXT : loopButton.src;
-        }
-
-        const streamClient = PlayManager.getStreamClient(currentTrackId.value);
-        streamClient.audio.loop = loopingSingle;
-    }
-
     static updateScrubber(id: number) {
         const currentTime = PlayManager.getCurrentTime(id);
         const streamClient = PlayManager.getStreamClient(id);
@@ -110,32 +106,6 @@ export class StreamingUpdater {
 
     static updateBuffers(bufferedLength: number, duration: number) {
         currentlyBuffered.value = Math.min(Math.max(bufferedLength / duration, 0), 1);
-    }
-
-    static updateMuteState(id: number) {
-        const streamClient = PlayManager.getStreamClient(id);
-        const targets = document.querySelectorAll(".loudness-control-icon") as NodeListOf<HTMLImageElement>;
-        for (const target of targets) {
-            if (target.id !== id.toString()) {
-                continue;
-            }
-            if (streamClient.getVolume() > 0) {
-                target.src = Icons.LOUD;
-            } else {
-                target.src = Icons.MUTE;
-            }
-        }
-    }
-
-    static updateLoudness(id: number, value: number) {
-        const loudnessBars = document.querySelectorAll(".audio-player-loudnesshead") as NodeListOf<HTMLDivElement>;
-        const cssWidth = value * 100;
-        for (const loudnessBar of loudnessBars) {
-            if (loudnessBar.id !== id.toString()) {
-                continue;
-            }
-            loudnessBar.style.bottom = `${cssWidth}%`;
-        }
     }
 
     static async updateQueue() {
@@ -183,6 +153,10 @@ export class StreamingUpdater {
         }
         updatingPlayState.value = true;
         const targets = document.querySelectorAll(".audio-player-toggle");
+
+        const currentStreamClient = PlayManager.getStreamClient(currentTrackId.value);
+        playingHere.value = currentStreamClient.playing;
+
         for (const target of targets) {
             const streamClient = PlayManager.getStreamClient(parseInt(target.id));
             if (streamClient === undefined) {

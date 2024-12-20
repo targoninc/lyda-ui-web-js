@@ -6,7 +6,7 @@ import {LydaCache} from "./Cache/LydaCache.ts";
 import {CacheItem} from "./Cache/CacheItem.ts";
 import {User} from "./Models/DbModels/User.ts";
 import {TrackPosition} from "./Models/TrackPosition.ts";
-import {stack} from "../fjsc/src/f2.ts";
+import {LoopMode} from "./Enums/LoopMode.ts";
 
 export const dragging = signal(false);
 
@@ -25,6 +25,14 @@ currentTrackId.subscribe((id, changed) => {
 export const trackInfo = signal<Record<number, { track: Track }>>({});
 
 export const volume = signal(0.5);
+volume.subscribe((newValue, changed) => {
+    if (!changed) {
+        return;
+    }
+    LydaCache.set("volume", new CacheItem(newValue));
+});
+
+export const muted = signal<boolean>(false);
 
 export const manualQueue = signal<number[]>([]);
 
@@ -51,3 +59,12 @@ export const playingHere = signal(false);
 export const openMenus = signal<string[]>([]);
 
 export const currentUser = signal<User|null>(null);
+
+export const loopMode = signal<LoopMode>(LoopMode.off);
+loopMode.value = LydaCache.get<LoopMode>("loopMode").content ?? LoopMode.off;
+loopMode.subscribe((newMode, changed) => {
+    if (!changed) {
+        return;
+    }
+    LydaCache.set("loopMode", new CacheItem(newMode));
+});

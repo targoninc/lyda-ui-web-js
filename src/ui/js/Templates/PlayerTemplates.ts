@@ -11,14 +11,23 @@ import {CommentTemplates} from "./CommentTemplates.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {Util} from "../Classes/Util.ts";
-import {create, ifjs} from "../../fjsc/src/f2.ts";
+import {create, ifjs, StringOrSignal} from "../../fjsc/src/f2.ts";
 import {Track} from "../Models/DbModels/Track.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {navigate} from "../Routing/Router.ts";
 import {FJSC} from "../../fjsc";
-import {compute, signal} from "../../fjsc/src/signals.ts";
-import {currentlyBuffered, currentTrackId, currentTrackPosition, playingElsewhere, playingFrom} from "../state.ts";
+import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
+import {
+    currentlyBuffered,
+    currentTrackId,
+    currentTrackPosition, loopMode, muted,
+    playingElsewhere,
+    playingFrom,
+    playingHere, volume
+} from "../state.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
+import {IconConfig} from "../../fjsc/src/Types.ts";
+import {LoopMode} from "../Enums/LoopMode.ts";
 
 export class PlayerTemplates {
     static audioPlayer(track: Track) {
@@ -26,7 +35,6 @@ export class PlayerTemplates {
         setInterval(async () => {
             await PlayManager.playCheck(track);
         }, 1000);
-        const isPlaying = PlayManager.isPlaying(track.id);
         const isCurrentTrack = compute(id => id === track.id, currentTrackId);
         const positionPercent = compute((p, isCurrent) => isCurrent ? `${p.relative * 100}%` : "0%", currentTrackPosition, isCurrentTrack);
         const bufferPercent = compute((p, isCurrent) => isCurrent ? `${p * 100}%` : "0%", currentlyBuffered, isCurrentTrack);
@@ -44,134 +52,118 @@ export class PlayerTemplates {
                             .id("audio_" + track.id)
                             .styles("display", "none")
                             .build(),
-                        create("div")
-                            .classes("audio-player-toggle", "audio-player-control", "clickable", "fakeButton", "flex", "rounded-50", "relative")
-                            .id(track.id)
-                            .onclick(() => {
-                                PlayManager.togglePlayAsync(track.id).then();
-                            })
-                            .children(
-                                FJSC.icon({
-                                    icon: isPlaying ? Icons.PAUSE : Icons.PLAY,
-                                    adaptive: true,
-                                    id: track.id,
-                                    isUrl: true,
-                                    classes: ["audio-player-control-icon", "align-center", "inline-icon", "svg", "nopointer"]
-                                }),
-                                create("span")
-                                    .classes("nopointer", "hidden")
-                                    .text(isPlaying ? "Pause" : "Play")
-                                    .build()
-                            ).build(),
-                        create("div")
-                            .classes("audio-player-scrubber", "flex-grow", "flex", "rounded", "padded-inline")
-                            .id(track.id)
-                            .onmousedown(PlayManager.scrubFromElement)
-                            .onmousemove(async e => {
-                                if (e.buttons === 1) {
-                                    await PlayManager.scrubFromElement(e);
-                                }
-                            })
-                            .children(
-                                create("div")
-                                    .id(track.id)
-                                    .classes("audio-player-buffer-indicator", "rounded", "nopointer")
-                                    .styles("left", bufferPercent)
-                                    .build(),
-                                create("div")
-                                    .classes("audio-player-scrubbar", "rounded", "nopointer")
-                                    .build(),
-                                create("div")
-                                    .classes("audio-player-scrubbar-time", "rounded", "nopointer")
-                                    .styles("width", positionPercent)
-                                    .build(),
-                                create("div")
-                                    .id(track.id)
-                                    .classes("audio-player-scrubhead", "rounded", "nopointer")
-                                    .styles("left", positionPercent)
-                                    .build()
-                            ).build(),
-                        create("div")
-                            .classes("audio-player-time", "flex", "rounded", "padded-inline")
-                            .children(
-                                create("span")
-                                    .id(track.id)
-                                    .classes("audio-player-time-current", "nopointer", "align-center")
-                                    .text("0:00")
-                                    .build(),
-                                create("span")
-                                    .classes("audio-player-time-separator", "nopointer", "align-center")
-                                    .text("/")
-                                    .build(),
-                                create("span")
-                                    .classes("audio-player-time-total", "nopointer", "align-center")
-                                    .text(Time.format(track.length))
-                                    .build()
-                            ).build(),
+                        PlayerTemplates.playerIconButton({
+                            icon: compute(p => p ? Icons.PAUSE : Icons.PLAY, playingHere),
+                            adaptive: true,
+                            isUrl: true,
+                        }, async () => {
+                            PlayManager.togglePlayAsync(track.id).then();
+                        }, "Play/Pause"),
+                        PlayerTemplates.trackScrubbar(track, bufferPercent, positionPercent),
+                        PlayerTemplates.trackTime(track),
                         PlayerTemplates.loudnessControl(track)
                     ).build()
             ).build();
     }
 
+    private static trackScrubbar(track: Track, bufferPercent: Signal<string>, positionPercent: Signal<string>) {
+        return create("div")
+            .classes("audio-player-scrubber", "flex-grow", "flex", "rounded", "padded-inline")
+            .id(track.id)
+            .onmousedown(PlayManager.scrubFromElement)
+            .onmousemove(async e => {
+                if (e.buttons === 1) {
+                    await PlayManager.scrubFromElement(e);
+                }
+            })
+            .children(
+                create("div")
+                    .id(track.id)
+                    .classes("audio-player-buffer-indicator", "rounded", "nopointer")
+                    .styles("left", bufferPercent)
+                    .build(),
+                create("div")
+                    .classes("audio-player-scrubbar", "rounded", "nopointer")
+                    .build(),
+                create("div")
+                    .classes("audio-player-scrubbar-time", "rounded", "nopointer")
+                    .styles("width", positionPercent)
+                    .build(),
+                create("div")
+                    .id(track.id)
+                    .classes("audio-player-scrubhead", "rounded", "nopointer")
+                    .styles("left", positionPercent)
+                    .build()
+            ).build();
+    }
+
+    private static trackTime(track: Track) {
+        return create("div")
+            .classes("audio-player-time", "flex", "rounded", "padded-inline")
+            .children(
+                create("span")
+                    .id(track.id)
+                    .classes("audio-player-time-current", "nopointer", "align-center")
+                    .text("0:00")
+                    .build(),
+                create("span")
+                    .classes("audio-player-time-separator", "nopointer", "align-center")
+                    .text("/")
+                    .build(),
+                create("span")
+                    .classes("audio-player-time-total", "nopointer", "align-center")
+                    .text(Time.format(track.length))
+                    .build()
+            ).build();
+    }
+
     static loudnessControl(track: Track) {
-        setTimeout(() => {
-            StreamingUpdater.updateLoudness(currentTrackId.value, PlayManager.getLoudness(currentTrackId.value));
-            StreamingUpdater.updateMuteState(currentTrackId.value);
-        }, 100);
-        const volumePercent = PlayManager.getLoudness(track.id) * 100;
+        const volumePercent = compute(vol => `${vol * 100}%`, volume);
 
         return create("div")
             .classes("loudness-control", "clickable", "relative")
             .id(track.id)
             .onwheel(PlayManager.setLoudnessFromWheel)
             .children(
-                create("div")
-                    .classes("loudness-button", "audio-player-control", "fakeButton", "clickable", "flex", "rounded-50")
-                    .id(track.id)
-                    .onclick(() => {
-                        PlayManager.toggleMute(track.id);
-                    })
-                    .children(
-                        create("img")
-                            .classes("loudness-control-icon", "audio-player-control-icon", "align-center", "inline-icon", "svg", "nopointer")
-                            .id(track.id)
-                            .src(Icons.LOUD)
-                            .build()
-                    )
-                    .build(),
+                PlayerTemplates.playerIconButton({
+                    icon: compute(p => p ? Icons.MUTE : Icons.LOUD, muted),
+                    adaptive: true,
+                    isUrl: true,
+                }, async () => {
+                    PlayManager.toggleMute(track.id);
+                }, "Mute/Unmute", ["loudness-button"]),
                 create("div")
                     .classes("loudness-bar", "rounded", "padded", "relative", "hidden")
                     .id(track.id)
-                    .onmousemove(async e => {
-                        if (e.buttons === 1) {
-                            await PlayManager.setLoudnessFromElement(e);
-                        }
-                    })
-                    .onclick(PlayManager.setLoudnessFromElement)
                     .children(
                         create("div")
                             .classes("audio-player-loudnessbackground", "fakeButton", "nopointer")
+                            .build(),
+                        create("div")
+                            .classes("audio-player-loudnesstracker")
+                            .onmousemove(async e => {
+                                if (e.buttons === 1) {
+                                    await PlayManager.setLoudnessFromElement(e);
+                                }
+                            })
+                            .onclick(e => PlayManager.setLoudnessFromElement(e))
                             .build(),
                         create("div")
                             .classes("audio-player-loudnessbar", "rounded", "nopointer")
                             .build(),
                         create("div")
                             .classes("audio-player-loudnesshead", "rounded", "nopointer")
-                            .styles("bottom", volumePercent.toString() + "%")
+                            .styles("bottom", volumePercent)
                             .id(track.id)
                             .build(),
-                    )
-                    .build()
-            )
-            .build();
+                    ).build()
+            ).build();
     }
 
     static async player(track: Track, trackUser: User, user: User) {
         const queue = QueueManager.getManualQueue();
         const tasks = queue.map(id => PlayManager.getTrackData(id));
         const trackList = await Promise.all(tasks);
-        const loopingSingle = PlayManager.isLoopingSingle();
-        const loopingContext = PlayManager.isLoopingContext();
 
         return create("div")
             .classes("flex-v")
@@ -188,7 +180,7 @@ export class PlayerTemplates {
                             .classes("flex")
                             .children(
                                 ...await PlayerTemplates.bottomTrackInfo(track, trackUser, user, trackList),
-                                ...PlayerTemplates.audioControls(loopingSingle, loopingContext)
+                                ...PlayerTemplates.audioControls()
                             ).build(),
                         create("div")
                             .classes("flex")
@@ -280,27 +272,34 @@ export class PlayerTemplates {
         ];
     }
 
-    static audioControls(loopingSingle: boolean, loopingContext: boolean) {
-        let src = Icons.LOOP_OFF;
-        if (loopingContext) {
-            src = Icons.LOOP_CONTEXT;
-        } else if (loopingSingle) {
-            src = Icons.LOOP_SINGLE;
-        }
+    static audioControls() {
+        const map: Record<LoopMode, string> = {
+            [LoopMode.off]: Icons.LOOP_OFF,
+            [LoopMode.single]: Icons.LOOP_SINGLE,
+            [LoopMode.context]: Icons.LOOP_CONTEXT,
+        };
 
         return [
-            create("div")
-                .classes("loop-button", "fakeButton", "clickable", "flex", "rounded-50", "padded-inline", "align-center")
-                .onclick(async () => {
-                    await PlayManager.toggleLoop();
-                })
-                .title("Change loop mode")
-                .children(
-                    create("img")
-                        .classes("loop-button-img", "align-center", "inline-icon", "svg", "nopointer")
-                        .src(src)
-                        .build(),
-                ).build()
+            PlayerTemplates.playerIconButton({
+                icon: compute(mode => map[mode], loopMode),
+                adaptive: true,
+                isUrl: true,
+            }, async () => {
+                await PlayManager.nextLoopMode();
+            }, "Change loop mode"),
         ];
+    }
+
+    static playerIconButton(icon: IconConfig, onclick: Function, title: StringOrSignal = "", classes: StringOrSignal[] = []) {
+        return create("button")
+            .classes("player-button", "fjsc", ...classes)
+            .onclick(onclick)
+            .title(title)
+            .children(
+                FJSC.icon({
+                    ...icon,
+                    classes: ["player-button-icon", "align-center", "inline-icon", "svg", "nopointer"]
+                }),
+            ).build()
     }
 }
