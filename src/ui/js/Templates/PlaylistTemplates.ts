@@ -260,7 +260,7 @@ export class PlaylistTemplates {
         }
         const coverState = signal(Images.DEFAULT_AVATAR);
         if (playlist.has_cover) {
-            Util.getCoverFileFromPlaylistIdAsync(playlist.id, playlist.user_id).then(cover => {
+            Util.getPlaylistCover(playlist.id, playlist.user_id).then(cover => {
                 coverState.value = cover;
             });
         }
@@ -316,7 +316,7 @@ export class PlaylistTemplates {
     static playlistCover(playlist: Playlist, coverType: string) {
         const coverState = signal(Images.DEFAULT_AVATAR);
         if (playlist.has_cover) {
-            Util.getCoverFileFromPlaylistIdAsync(playlist.id, playlist.user_id).then(cover => {
+            Util.getPlaylistCover(playlist.id, playlist.user_id).then(cover => {
                 coverState.value = cover;
             });
         }
@@ -356,7 +356,7 @@ export class PlaylistTemplates {
     static async smallPlaylistCover(playlist: Playlist) {
         const coverState = signal(Images.DEFAULT_AVATAR);
         if (playlist.has_cover) {
-            Util.getCoverFileFromPlaylistIdAsync(playlist.id, playlist.user_id).then(cover => {
+            Util.getPlaylistCover(playlist.id, playlist.user_id).then(cover => {
                 coverState.value = cover;
             });
         }
@@ -430,7 +430,7 @@ export class PlaylistTemplates {
         const coverLoading = signal(false);
         const coverState = signal(Images.DEFAULT_AVATAR);
         if (playlist.has_cover) {
-            Util.getCoverFileFromPlaylistIdAsync(playlist.id, playlist.user_id).then(cover => {
+            Util.getPlaylistCover(playlist.id, playlist.user_id).then(cover => {
                 coverState.value = cover;
             });
         }

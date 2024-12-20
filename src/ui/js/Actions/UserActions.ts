@@ -44,7 +44,7 @@ export class UserActions {
             try {
                 await MediaUploader.upload(MediaFileType.userAvatar, user.id, file)
                 notify("Avatar updated", "success");
-                const newSrc = await Util.getAvatarFromUserIdAsync(user.id);
+                const newSrc = await Util.getUserAvatar(user.id);
                 UserActions.updateImagesWithSource(newSrc, avatar.value);
                 avatar.value = newSrc;
             } catch (e: any) {
@@ -91,7 +91,7 @@ export class UserActions {
             try {
                 await MediaUploader.upload(MediaFileType.userBanner, user.id, file);
                 notify("Banner updated", "success");
-                const newSrc = await Util.getBannerFromUserIdAsync(user.id);
+                const newSrc = await Util.getUserBanner(user.id);
                 UserActions.updateImagesWithSource(newSrc, banner.value);
                 banner.value = newSrc;
             } catch (e: any) {

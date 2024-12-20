@@ -510,7 +510,7 @@ export class TrackEditTemplates {
                 const user = userMap.get(id);
                 const avatarState = signal(Images.DEFAULT_AVATAR);
                 if (user.has_avatar) {
-                    Util.getAvatarFromUserIdAsync(user.id).then((avatar) => {
+                    Util.getUserAvatar(user.id).then((avatar) => {
                         avatarState.value = avatar;
                     });
                 }

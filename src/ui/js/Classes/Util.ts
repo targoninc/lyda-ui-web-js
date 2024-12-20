@@ -91,7 +91,7 @@ export class Util {
         }, true);
     }
 
-    static async getAvatarFromUserIdAsync(id: number|null) {
+    static async getUserAvatar(id: number|null) {
         if (id === null) {
             return Images.DEFAULT_AVATAR;
         }
@@ -99,7 +99,7 @@ export class Util {
         return await Util.getFileOrBackupAsync(url, Images.DEFAULT_AVATAR);
     }
 
-    static async getBannerFromUserIdAsync(id: number|null) {
+    static async getUserBanner(id: number|null) {
         if (id === null) {
             return Images.DEFAULT_BANNER;
         }
@@ -107,19 +107,19 @@ export class Util {
         return await Util.getFileOrBackupAsync(url, Images.DEFAULT_BANNER);
     }
 
-    static async getCoverFileFromTrackIdAsync(id: number, user_id: number|null = null) {
+    static async getTrackCover(id: number, user_id: number|null = null) {
         const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.trackCover}&t=${Date.now()}`;
-        return await Util.getFileOrBackupAsync(url, Util.getAvatarFromUserIdAsync, user_id);
+        return await Util.getFileOrBackupAsync(url, Util.getUserAvatar, user_id);
     }
 
-    static async getCoverFileFromAlbumIdAsync(id: number, user_id: number|null = null) {
+    static async getAlbumCover(id: number, user_id: number|null = null) {
         const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.albumCover}&t=${Date.now()}`;
-        return await Util.getFileOrBackupAsync(url, Util.getAvatarFromUserIdAsync, user_id);
+        return await Util.getFileOrBackupAsync(url, Util.getUserAvatar, user_id);
     }
 
-    static async getCoverFileFromPlaylistIdAsync(id: number, user_id: number|null = null) {
+    static async getPlaylistCover(id: number, user_id: number|null = null) {
         const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.playlistCover}&t=${Date.now()}`;
-        return await Util.getFileOrBackupAsync(url, Util.getAvatarFromUserIdAsync, user_id);
+        return await Util.getFileOrBackupAsync(url, Util.getUserAvatar, user_id);
     }
 
     static async getFileOrBackupAsync(url: string, backupUrl: string|Function, user_id: number|null = null) {

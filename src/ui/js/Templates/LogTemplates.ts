@@ -17,11 +17,11 @@ export class LogTemplates {
         for (const log of data) {
             if (!users[log.user_id]) {
                 users[log.user_id] = await Util.getUserAsync(log.user_id);
-                users[log.user_id].avatarUrl = await Util.getAvatarFromUserIdAsync(log.user_id);
+                users[log.user_id].avatarUrl = await Util.getUserAvatar(log.user_id);
             }
             if (!users[log.actionedUserId]) {
                 users[log.actionedUserId] = await Util.getUserAsync(log.actionedUserId);
-                users[log.actionedUserId].avatarUrl = await Util.getAvatarFromUserIdAsync(log.actionedUserId);
+                users[log.actionedUserId].avatarUrl = await Util.getUserAvatar(log.actionedUserId);
             }
         }
 

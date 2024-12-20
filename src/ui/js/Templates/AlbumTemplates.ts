@@ -301,7 +301,7 @@ export class AlbumTemplates {
 
         const srcState = signal(Images.DEFAULT_AVATAR);
         if (album.has_cover) {
-            Util.getCoverFileFromAlbumIdAsync(album.id, album.user_id).then((src) => {
+            Util.getAlbumCover(album.id, album.user_id).then((src) => {
                 srcState.value = src;
             });
         }
@@ -336,10 +336,17 @@ export class AlbumTemplates {
     }
 
     static async smallAlbumCover(album: Album) {
+        const coverState = signal(Images.DEFAULT_AVATAR);
+        if (album.has_cover) {
+            Util.getAlbumCover(album.id, album.user_id).then((src) => {
+                coverState.value = src;
+            });
+        }
+
         return create("img")
             .classes("cover", "rounded", "nopointer", "blurOnParentHover")
             .styles("height", "var(--font-size-large)")
-            .src(await Util.getCoverFileFromAlbumIdAsync(album.id, album.user_id))
+            .src(coverState)
             .alt(album.title)
             .build();
     }
@@ -402,6 +409,12 @@ export class AlbumTemplates {
             }));
         }
         const coverLoading = signal(false);
+        const coverState = signal(Images.DEFAULT_AVATAR);
+        if (album.has_cover) {
+            Util.getAlbumCover(album.id, album.user_id).then((src) => {
+                coverState.value = src;
+            });
+        }
 
         return create("div")
             .classes("single-page", "noflexwrap", "padded-large", "rounded-large", "flex-v")
@@ -429,7 +442,7 @@ export class AlbumTemplates {
                                     .build()),
                                 create("img")
                                     .classes("cover", "blurOnParentHover", "nopointer")
-                                    .src(await Util.getCoverFileFromAlbumIdAsync(album.id, album.user_id))
+                                    .src(coverState)
                                     .alt(album.title)
                                     .build()
                             )

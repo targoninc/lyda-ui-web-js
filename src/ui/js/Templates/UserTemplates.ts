@@ -44,7 +44,7 @@ export class UserTemplates {
 
         const avatarState = signal(Images.DEFAULT_AVATAR);
         if (user.has_avatar) {
-            Util.getAvatarFromUserIdAsync(user.id).then((src) => {
+            Util.getUserAvatar(user.id).then((src) => {
                 avatarState.value = src;
             });
         }
@@ -238,13 +238,13 @@ export class UserTemplates {
         const bannerLoading = signal(false);
         const userBanner = signal(Images.DEFAULT_BANNER);
         if (user.has_banner) {
-            Util.getBannerFromUserIdAsync(user.id).then(banner => {
+            Util.getUserBanner(user.id).then(banner => {
                 userBanner.value = banner;
             });
         }
         const userAvatar = signal(Images.DEFAULT_AVATAR);
         if (user.has_avatar) {
-            Util.getAvatarFromUserIdAsync(user.id).then(avatar => {
+            Util.getUserAvatar(user.id).then(avatar => {
                 userAvatar.value = avatar;
             });
         }

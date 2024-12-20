@@ -194,7 +194,7 @@ export class NavTemplates {
         const type = image.type;
         const id = image.id;
         const srcState = signal("");
-        Util.getAvatarFromUserIdAsync(id).then((src) => {
+        Util.getUserAvatar(id).then((src) => {
             srcState.value = src;
         });
 

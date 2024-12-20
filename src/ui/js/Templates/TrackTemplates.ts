@@ -58,7 +58,7 @@ export class TrackTemplates {
         const collab = track.collaborators!.find((collab: TrackCollaborator) => collab.user_id === profileId);
         const avatarState = signal(Images.DEFAULT_AVATAR);
         if (track.user.has_avatar) {
-            Util.getAvatarFromUserIdAsync(track.user_id).then((src) => {
+            Util.getUserAvatar(track.user_id).then((src) => {
                 avatarState.value = src;
             });
         }
@@ -328,7 +328,7 @@ export class TrackTemplates {
         }
         const avatarState = signal(Images.DEFAULT_AVATAR);
         if (track.user?.has_avatar) {
-            Util.getAvatarFromUserIdAsync(track.user_id).then((src) => {
+            Util.getUserAvatar(track.user_id).then((src) => {
                 avatarState.value = src;
             });
         }
@@ -546,7 +546,7 @@ export class TrackTemplates {
     static collaborator(track: Track, user: User, collaborator: TrackCollaborator): any {
         const avatarState = signal(Images.DEFAULT_AVATAR);
         if (collaborator.user?.has_avatar) {
-            Util.getAvatarFromUserIdAsync(collaborator.user_id).then((src) => {
+            Util.getUserAvatar(collaborator.user_id).then((src) => {
                 avatarState.value = src;
             });
         }
@@ -857,7 +857,7 @@ export class TrackTemplates {
     static toBeApprovedTrack(collabType: CollaboratorType, track: TrackCollaborator, user: User) {
         const avatarState = signal(Images.DEFAULT_AVATAR);
         if (track.user?.has_avatar) {
-            Util.getAvatarFromUserIdAsync(track.user_id).then((src) => {
+            Util.getUserAvatar(track.user_id).then((src) => {
                 avatarState.value = src;
             });
         }

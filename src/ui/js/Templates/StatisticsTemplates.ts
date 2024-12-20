@@ -99,7 +99,7 @@ export class StatisticsTemplates {
         const itemsList = items.map(item => {
             const avatar = signal(Images.DEFAULT_AVATAR);
             if (user.has_avatar) {
-                Util.getAvatarFromUserIdAsync(item.user_id).then(avatarUrl => {
+                Util.getUserAvatar(item.user_id).then(avatarUrl => {
                     avatar.value = avatarUrl;
                 });
             }

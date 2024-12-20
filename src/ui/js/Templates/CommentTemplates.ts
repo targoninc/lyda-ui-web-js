@@ -177,7 +177,7 @@ export class CommentTemplates {
         }
         const avatarState = signal(Images.DEFAULT_AVATAR);
         if (user.has_avatar) {
-            Util.getAvatarFromUserIdAsync(comment.user_id).then(avatar => {
+            Util.getUserAvatar(comment.user_id).then(avatar => {
                 avatarState.value = avatar;
             });
         }
