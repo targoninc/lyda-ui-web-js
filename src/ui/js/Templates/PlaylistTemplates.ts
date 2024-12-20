@@ -20,6 +20,7 @@ import {Album} from "../Models/DbModels/Album.ts";
 import {navigate} from "../Routing/Router.ts";
 import {InputType} from "../../fjsc/src/Types.ts";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
+import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 
 export class PlaylistTemplates {
     static async addTrackToPlaylistModal(track: Track, playlists: Playlist[]) {
@@ -282,7 +283,7 @@ export class PlaylistTemplates {
                             .classes("flex-v", "small-gap")
                             .children(
                                 PlaylistTemplates.title(playlist.title, playlist.id, icons),
-                                UserTemplates.userWidget(playlist.user, Util.arrayPropertyMatchesUser(playlist.user.follows ?? [], "following_user_id", user)),
+                                UserTemplates.userWidget(playlist.user, Util.arrayPropertyMatchesUser(playlist.user.follows ?? [], "following_user_id", user), [], [], UserWidgetContext.card),
                                 create("span")
                                     .classes("date", "text-small", "nopointer", "color-dim")
                                     .text(Time.ago(playlist.created_at))
@@ -445,7 +446,7 @@ export class PlaylistTemplates {
                             .classes("title", "wordwrap")
                             .text(playlist.title)
                             .build(),
-                        UserTemplates.userWidget(a_user, Util.arrayPropertyMatchesUser(a_user.follows ?? [], "following_user_id", user))
+                        UserTemplates.userWidget(a_user, Util.arrayPropertyMatchesUser(a_user.follows ?? [], "following_user_id", user), [], [], UserWidgetContext.singlePage)
                     ).build(),
                 create("div")
                     .classes("playlist-info-container", "flex")

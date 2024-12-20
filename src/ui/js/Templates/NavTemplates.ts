@@ -16,6 +16,8 @@ import {User} from "../Models/DbModels/User.ts";
 import {Notification} from "../Models/DbModels/Notification.ts";
 import {FJSC} from "../../fjsc";
 import {router} from "../../main.ts";
+import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
+import {currentUser} from "../state.ts";
 
 export class NavTemplates {
     static navTop(userTemplate: AnyNode) {
@@ -130,7 +132,7 @@ export class NavTemplates {
         });
     }
 
-    static accountSection(user: User, notifications: Notification[]) {
+    static accountSection(notifications: Notification[]) {
         return create("div")
             .classes("widest-fill-right", "relative")
             .children(
@@ -144,7 +146,7 @@ export class NavTemplates {
                     }
                 }),
                 NavTemplates.notifications(notifications),
-                UserTemplates.userWidget(user, true),
+                UserTemplates.userWidget(currentUser, true, [], [], UserWidgetContext.nav),
                 FJSC.button({
                     text: "Log out",
                     classes: ["hideOnSmallBreakpoint", "negative"],
@@ -163,8 +165,7 @@ export class NavTemplates {
                 GenericTemplates.action(Icons.LOGIN, "Log in", "login", async () => {
                     navigate("login");
                 })
-            )
-            .build();
+            ).build();
     }
 
     static notificationInList(notification: Notification) {

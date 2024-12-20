@@ -8,6 +8,9 @@ export class CustomText {
     }
 
     static shorten(text: string, length: number): string {
+        if (!text) {
+            return "";
+        }
         return text.length > length ? text.substring(0, length - 3) + "..." : text;
     }
 }

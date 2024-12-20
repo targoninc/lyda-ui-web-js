@@ -6,6 +6,7 @@ import {User} from "../Models/DbModels/User.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {Log} from "../Models/DbModels/Log.ts";
+import {currentUser} from "../state.ts";
 
 export class LydaApi {
     static getLogs(filterState: Signal<any>, successCallback: Function) {
@@ -39,9 +40,10 @@ export class LydaApi {
             notify("Failed to update account", "error");
             return false;
         }
-        let newUser = LydaCache.get("user").content;
-        newUser = {...newUser, ...user};
-        LydaCache.set("user", new CacheItem(newUser));
+        currentUser.value = <User>{
+            ...currentUser.value,
+            ...user
+        };
         notify("Account updated", "success");
         return true;
     }

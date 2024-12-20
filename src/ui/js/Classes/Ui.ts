@@ -10,7 +10,7 @@ import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {Theme} from "../Enums/Theme.ts";
 import {navigate} from "../Routing/Router.ts";
 import {signal} from "../../fjsc/src/signals.ts";
-import {navInitialized} from "../state.ts";
+import {currentUser, navInitialized} from "../state.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {CollaboratorType} from "../Models/DbModels/CollaboratorType.ts";
 import {TrackCollaborator} from "../Models/DbModels/TrackCollaborator.ts";
@@ -38,8 +38,8 @@ export class Ui {
 
     static async initializeNavBar() {
         let signedIn = true;
-        let user = await Util.getUserAsync();
-        if (!user) {
+        await Util.getUser();
+        if (!currentUser.value) {
             signedIn = false;
         }
         if (document.getElementById("navTop") === null) {
@@ -51,7 +51,7 @@ export class Ui {
                     userTemplateRender = NavTemplates.notSignedInNote();
                 } else {
                     notifications = res.data;
-                    userTemplateRender = NavTemplates.accountSection(user, notifications);
+                    userTemplateRender = NavTemplates.accountSection(notifications);
                 }
             } else {
                 userTemplateRender = NavTemplates.notSignedInNote();

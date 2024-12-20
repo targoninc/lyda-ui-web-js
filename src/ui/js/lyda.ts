@@ -66,170 +66,184 @@ export class Lyda {
         if (endpoint !== null) {
             data = await Lyda.getEndpointData(endpoint, paramsString);
         }
-        let user: User;
-        const permissionData  = await Api.getAsync<Permission[]>(ApiRoutes.userPermissions);
+        let user: null | User = await Util.getUser();
+        const permissionData = await Api.getAsync<Permission[]>(ApiRoutes.userPermissions);
         const permissions = permissionData.data as Permission[];
+
         switch (element.getAttribute("datatype")) {
-        case "uploadForm":
-            // @ts-ignore
-            element.appendChild(TrackEditTemplates.uploadForm());
-            break;
-        case "tracks":
-            user = await Util.getUserAsync();
-            const feedType = element.getAttribute("feedType");
-            if (!feedType) {
-                throw new Error("Missing feed type");
-            }
-            this.loadFeed(feedType, element, user).then();
-            if (data && data.error) {
-                element.innerHTML = data.error;
-                return;
-            }
-            break;
-        case "profile":
-            user = data;
-            if (!user || user.error) {
-                navigate("login");
-                return;
-            }
-            const selfUser = await Util.getUserAsync();
-            const isOwnProfile = selfUser ? user.id === selfUser.id : false;
-            element.appendChild(UserTemplates.userActionsContainer(isOwnProfile));
-            element.appendChild(UserTemplates.profileHeader(user, isOwnProfile));
-            const following = user.follows?.some((f: Follow) => {
-                return selfUser ? f.following_user_id === selfUser.id : false;
-            }) ?? false;
-            const followsBack = user.following?.some(f => {
-                return selfUser ? f.user_id === selfUser.id : false;
-            }) ?? false;
-            element.appendChild(UserTemplates.profileInfo(user, selfUser, isOwnProfile, permissions, following, followsBack));
-            ProfilePage.addTabSectionAsync(element, user, selfUser, isOwnProfile).then();
-            break;
-        case "track":
-            await PlayManager.cacheTrackData(data);
-            user = await Util.getUserAsync();
-            const trackPage = await TrackTemplates.trackPage(data, user);
-            if (!trackPage) {
-                return;
-            }
-            element.appendChild(trackPage);
-            if (data.error) {
-                element.innerHTML = data.error;
-                return;
-            }
-            break;
-        case "album":
-            user = await Util.getUserAsync();
-            element.appendChild(await AlbumTemplates.albumPage(data, user));
-            if (data.error) {
-                element.innerHTML = data.error;
-                return;
-            }
-            break;
-        case "playlist":
-            user = await Util.getUserAsync();
-            element.appendChild(await PlaylistTemplates.playlistPage(data, user));
-            if (data.error) {
-                element.innerHTML = data.error;
-                return;
-            }
-            break;
-        case "settings":
-            user = await Util.getUserAsync();
-            if (!user || user.error) {
-                navigate("login");
-                return;
-            }
-            element.appendChild(SettingsTemplates.settingsPage(user));
-            break;
-        case "statistics":
-            user = await Util.getUserAsync();
-            if (!user || user.error) {
-                navigate("login");
-                return;
-            }
-            const royaltyInfo = await Api.getAsync(ApiRoutes.getRoyaltyInfo);
-            element.append(await StatisticTemplates.statisticActions(user, royaltyInfo.data, permissions));
-            element.append(create("div").classes("flex").children(...(await StatisticsWrapper.getStatistics())).build());
-            break;
-        case "library":
-            user = await Util.getUserAsync();
-            if (!user || user.error) {
-                navigate("login");
-                return;
-            }
-            const name = params.name ?? "";
-            const library = await LibraryActions.getLibrary(name);
-            if (!library) {
-                element.appendChild(UserTemplates.notPublicLibrary(name));
-                return;
-            }
-            const page = UserTemplates.libraryPage(library.albums, library.playlists, library.tracks, user);
-            element.appendChild(page);
-            break;
-        case "logs":
-            user = await Util.getUserAsync();
-            if (permissions.error) {
-                notify("You do not have permission to view logs", "error");
-                navigate("login");
-                return;
-            }
-            if (!permissions.some((p: Permission) => p.name === Permissions.canViewLogs)) {
-                notify("You do not have permission to view logs", "error");
-                navigate("profile");
-                return;
-            }
-            const filterState = signal(LogLevel.debug);
-            element.appendChild(LogTemplates.logFilters(filterState));
-            let logsList = create("div").build();
-            element.appendChild(logsList);
-            LydaApi.getLogs(filterState, async (logs: Log[]) => {
-                const newLogs = LogTemplates.logs(logs);
-                element.replaceChild(newLogs, logsList);
-                logsList = newLogs;
-            });
-            break;
-        case "actionLogs":
-            user = await Util.getUserAsync();
-            if (!permissions.some(p => p.name === Permissions.canViewActionLogs)) {
-                notify("You do not have permission to view action logs", "error");
-                return;
-            }
-            const actionLogs = await Api.getAsync(ApiRoutes.getActionLogs);
-            element.appendChild(await LogTemplates.actionLogs(user, actionLogs.data));
-            break;
-        case "unapprovedTracks":
-            user = await Util.getUserAsync();
-            TrackActions.getUnapprovedTracks().then(tracks => {
-                element.appendChild(TrackTemplates.unapprovedTracks(tracks, user));
-            });
-            break;
-        case "moderation":
-            user = await Util.getUserAsync();
-            if (!permissions.some(p => p.name === Permissions.canDeleteComments)) {
-                notify("You do not have permission to moderate", "error");
-                return;
-            }
-            const comments = await CommentActions.getPotentiallyHarmful();
-            element.appendChild(await CommentTemplates.moderatableCommentsList(comments, user));
-            break;
-        case "subscribe":
-            user = await Util.getUserAsync();
-            if (!user) {
-                navigate("login");
-                return;
-            }
-            SubscriptionActions.addPaypalSdkIfNotExists(SubscriptionActions.clientId);
-            const options = signal([]);
-            SubscriptionActions.loadSubscriptionOptions().then(optionsRes => {
-                options.value = optionsRes;
-            });
-            const currency = "USD";
-            element.appendChild(SubscriptionTemplates.page(user, currency, options));
-            break;
-        default:
-            element.innerHTML = JSON.stringify(data, null, 2);
-            break;
+            case "uploadForm":
+                // @ts-ignore
+                element.appendChild(TrackEditTemplates.uploadForm());
+                break;
+            case "tracks":
+                if (!user) {
+                    navigate("explore");
+                    return;
+                }
+                const feedType = element.getAttribute("feedType");
+                if (!feedType) {
+                    throw new Error("Missing feed type");
+                }
+                this.loadFeed(feedType, element, user).then();
+                if (data && data.error) {
+                    element.innerHTML = data.error;
+                    return;
+                }
+                break;
+            case "profile":
+                if (!user || !data || data.error) {
+                    notify("Failed to load profile", "error");
+                    navigate("explore");
+                    return;
+                }
+                const isOwnProfile = user ? data.id === user.id : false;
+                element.appendChild(UserTemplates.userActionsContainer(isOwnProfile));
+                element.appendChild(UserTemplates.profileHeader(data, isOwnProfile));
+                const following = data.follows?.some((f: Follow) => {
+                    return user ? f.following_user_id === user.id : false;
+                }) ?? false;
+                const followsBack = data.following?.some((f: Follow) => {
+                    return user ? f.user_id === user.id : false;
+                }) ?? false;
+                element.appendChild(UserTemplates.profileInfo(data, user, isOwnProfile, permissions, following, followsBack));
+                ProfilePage.addTabSectionAsync(element, data, user, isOwnProfile).then();
+                break;
+            case "track":
+                if (!user) {
+                    navigate("explore");
+                    return;
+                }
+                await PlayManager.cacheTrackData(data);
+                const trackPage = await TrackTemplates.trackPage(data, user);
+                if (!trackPage) {
+                    return;
+                }
+                element.appendChild(trackPage);
+                if (data.error) {
+                    element.innerHTML = data.error;
+                    return;
+                }
+                break;
+            case "album":
+                if (!user) {
+                    navigate("explore");
+                    return;
+                }
+                element.appendChild(await AlbumTemplates.albumPage(data, user));
+                if (data.error) {
+                    element.innerHTML = data.error;
+                    return;
+                }
+                break;
+            case "playlist":
+                if (!user) {
+                    navigate("explore");
+                    return;
+                }
+                element.appendChild(await PlaylistTemplates.playlistPage(data, user));
+                if (data.error) {
+                    element.innerHTML = data.error;
+                    return;
+                }
+                break;
+            case "settings":
+                if (!user) {
+                    navigate("explore");
+                    return;
+                }
+                element.appendChild(SettingsTemplates.settingsPage(user));
+                break;
+            case "statistics":
+                if (!user) {
+                    navigate("explore");
+                    return;
+                }
+                const royaltyInfo = await Api.getAsync(ApiRoutes.getRoyaltyInfo);
+                element.append(await StatisticTemplates.statisticActions(user, royaltyInfo.data, permissions));
+                element.append(create("div").classes("flex").children(...(await StatisticsWrapper.getStatistics())).build());
+                break;
+            case "library":
+                if (!user) {
+                    navigate("explore");
+                    return;
+                }
+                const name = params.name ?? "";
+                const library = await LibraryActions.getLibrary(name);
+                if (!library) {
+                    element.appendChild(UserTemplates.notPublicLibrary(name));
+                    return;
+                }
+                const page = UserTemplates.libraryPage(library.albums, library.playlists, library.tracks, user);
+                element.appendChild(page);
+                break;
+            case "logs":
+                if (permissions.error) {
+                    notify("You do not have permission to view logs", "error");
+                    navigate("explore");
+                    return;
+                }
+                if (!permissions.some((p: Permission) => p.name === Permissions.canViewLogs)) {
+                    notify("You do not have permission to view logs", "error");
+                    navigate("profile");
+                    return;
+                }
+                const filterState = signal(LogLevel.debug);
+                element.appendChild(LogTemplates.logFilters(filterState));
+                let logsList = create("div").build();
+                element.appendChild(logsList);
+                LydaApi.getLogs(filterState, async (logs: Log[]) => {
+                    const newLogs = LogTemplates.logs(logs);
+                    element.replaceChild(newLogs, logsList);
+                    logsList = newLogs;
+                });
+                break;
+            case "actionLogs":
+                user = await Util.getUserAsync();
+                if (!permissions.some(p => p.name === Permissions.canViewActionLogs)) {
+                    notify("You do not have permission to view action logs", "error");
+                    return;
+                }
+                const actionLogs = await Api.getAsync(ApiRoutes.getActionLogs);
+                element.appendChild(await LogTemplates.actionLogs(user, actionLogs.data));
+                break;
+            case "unapprovedTracks":
+                user = await Util.getUserAsync();
+                TrackActions.getUnapprovedTracks().then(tracks => {
+                    element.appendChild(TrackTemplates.unapprovedTracks(tracks, user));
+                });
+                break;
+            case "moderation":
+                if (!user) {
+                    navigate("explore");
+                    return;
+                }
+                if (!permissions.some(p => p.name === Permissions.canDeleteComments)) {
+                    notify("You do not have permission to moderate", "error");
+                    return;
+                }
+                const comments = await CommentActions.getPotentiallyHarmful();
+                element.appendChild(await CommentTemplates.moderatableCommentsList(comments, user));
+                break;
+            case "subscribe":
+                if (!user) {
+                    navigate("login");
+                    return;
+                }
+                SubscriptionActions.addPaypalSdkIfNotExists(SubscriptionActions.clientId);
+                const options = signal<any[]>([]);
+                SubscriptionActions.loadSubscriptionOptions().then(res => {
+                    if (!res || res.error) {
+                        notify("Failed to load subscription options", "error");
+                        return;
+                    }
+                    options.value = res;
+                });
+                const currency = "USD";
+                element.appendChild(SubscriptionTemplates.page(user, currency, options));
+                break;
+            default:
+                element.innerHTML = JSON.stringify(data, null, 2);
+                break;
         }
     }
 
@@ -249,7 +263,7 @@ export class Lyda {
             const pageNumber = pageState.value;
             const filter = filterState.value;
             const offset = (pageNumber - 1) * pageSize;
-            const params = type === "following" ? { offset, filter } : { offset };
+            const params = type === "following" ? {offset, filter} : {offset};
             loadingState.value = true;
             const res = await Api.getAsync<Track[]>(endpoint, params);
             if (res.code !== 200) {

@@ -9,6 +9,7 @@ import {create, StringOrSignal} from "../../fjsc/src/f2.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {FJSC} from "../../fjsc";
 import {Signal, signal} from "../../fjsc/src/signals.ts";
+import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 
 export class StatisticsTemplates {
     static likesIndicator(type: string, reference_id: number, like_count: number, liked: boolean) {
@@ -103,7 +104,7 @@ export class StatisticsTemplates {
                     avatar.value = avatarUrl;
                 });
             }
-            return UserTemplates.userWidget(item.user, Util.arrayPropertyMatchesUser(item.user.follows, "following_user_id", user));
+            return UserTemplates.userWidget(item.user, Util.arrayPropertyMatchesUser(item.user.follows, "following_user_id", user), [], [], UserWidgetContext.list);
         });
 
         return create("div")

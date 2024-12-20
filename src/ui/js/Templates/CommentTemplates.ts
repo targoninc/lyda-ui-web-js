@@ -12,6 +12,7 @@ import {User} from "../Models/DbModels/User.ts";
 import {Comment} from "../Models/DbModels/Comment.ts";
 import {FJSC} from "../../fjsc";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
+import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 
 ;
 
@@ -190,7 +191,7 @@ export class CommentTemplates {
                 create("div")
                     .classes("flex")
                     .children(
-                        UserTemplates.userWidget(comment.user, Util.arrayPropertyMatchesUser(comment.user.follows, "following_user_id", user), ["comment_id", comment.id]),
+                        UserTemplates.userWidget(comment.user, Util.arrayPropertyMatchesUser(comment.user.follows ?? [], "following_user_id", user), ["comment_id", comment.id], [], UserWidgetContext.comment),
                         create("span")
                             .classes("text", "text-small", "color-dim", "align-center")
                             .text(Time.ago(comment.created_at))

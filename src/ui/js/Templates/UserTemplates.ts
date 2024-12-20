@@ -14,8 +14,10 @@ import {Permissions} from "../Enums/Permissions.ts";
 import {Images} from "../Enums/Images.ts";
 import {navigate} from "../Routing/Router.ts";
 import {
+    AnyElement,
     AnyNode,
     create,
+    DomNode,
     HtmlPropertyValue,
     ifjs,
     nullElement,
@@ -28,20 +30,41 @@ import {Playlist} from "../Models/DbModels/Playlist.ts";
 import {Album} from "../Models/DbModels/Album.ts";
 import {Badge} from "../Models/DbModels/Badge.ts";
 import {FJSC} from "../../fjsc";
-import {compute, signal} from "../../fjsc/src/signals.ts";
+import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {UiActions} from "../Actions/UiActions.ts";
 import {router} from "../../main.ts";
+import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 
 export class UserTemplates {
-    static userWidget(user: User, following: boolean, extraAttributes: HtmlPropertyValue[] = [], extraClasses: StringOrSignal[] = []) {
-        const base = create("button");
-        if (extraAttributes) {
-            base.attributes(...extraAttributes);
-        }
-        if (extraClasses) {
-            base.classes(...extraClasses);
+    static userWidget(user: User|Signal<User|null>, following: boolean, extraAttributes: HtmlPropertyValue[] = [], extraClasses: StringOrSignal[] = [], context: UserWidgetContext = UserWidgetContext.unknown) {
+        const out = signal<AnyElement>(nullElement());
+
+        const getWidget = (newUser: User|null) => {
+            if (!newUser) {
+                return nullElement();
+            }
+
+            const base = create("button");
+            if (extraAttributes) {
+                base.attributes(...extraAttributes);
+            }
+            if (extraClasses) {
+                base.classes(...extraClasses);
+            }
+            out.value = this.userWidgetInternal(context, newUser, base, following);
         }
 
+        if (user.constructor === Signal) {
+            (user as Signal<User|null>).subscribe(getWidget);
+            getWidget((user as Signal<User|null>).value);
+        } else {
+            getWidget(user as User);
+        }
+        return out;
+    }
+
+    private static userWidgetInternal(context: UserWidgetContext, user: User, base: DomNode, following: boolean) {
+        const maxDisplaynameLength = [UserWidgetContext.singlePage, UserWidgetContext.list].includes(context) ? 100 : 15;
         const avatarState = signal(Images.DEFAULT_AVATAR);
         if (user.has_avatar) {
             Util.getUserAvatar(user.id).then((src) => {
@@ -68,7 +91,7 @@ export class UserTemplates {
                 UserTemplates.userIcon(user.id, avatarState),
                 create("span")
                     .classes("text", "align-center", "nopointer", "user-displayname")
-                    .text(CustomText.shorten(user.displayname, 10))
+                    .text(CustomText.shorten(user.displayname, maxDisplaynameLength))
                     .attributes("data-user-id", user.id)
                     .build(),
                 create("span")
@@ -499,11 +522,12 @@ export class UserTemplates {
 
     static username(user: User, selfUser: User, isOwnProfile: boolean) {
         const nameState = signal(user.username);
+        const displayedName = compute(name => `@${name}`, nameState);
 
         const base = create("span")
             .classes("username", "user-name")
             .attributes("data-user-id", user.id)
-            .text(`@${user.username}`);
+            .text(displayedName);
 
         if (isOwnProfile) {
             base.onclick(async () => {

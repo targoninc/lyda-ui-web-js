@@ -102,7 +102,7 @@ export class SubscriptionActions {
     }
 
     static async loadSubscriptionOptions() {
-        const res = await Api.getAsync(ApiRoutes.getSubscriptionOptions);
+        const res = await Api.getAsync<any[]>(ApiRoutes.getSubscriptionOptions);
         if (res.code !== 200) {
             notify("Failed to load subscription options", "error");
             return;

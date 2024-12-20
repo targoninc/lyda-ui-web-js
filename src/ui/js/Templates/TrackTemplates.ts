@@ -32,6 +32,7 @@ import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {CollaboratorType} from "../Models/DbModels/CollaboratorType.ts";
 import {currentTrackId} from "../state.ts";
 import {PillOption} from "../Models/PillOption.ts";
+import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 
 export class TrackTemplates {
     static trackCard(track: Track, user: User, profileId: number) {
@@ -80,7 +81,7 @@ export class TrackTemplates {
                         create("div")
                             .classes("flex-v", "small-gap")
                             .children(
-                                UserTemplates.userWidget(track.user, Util.arrayPropertyMatchesUser(track.user.follows ?? [], "following_user_id", user)),
+                                UserTemplates.userWidget(track.user, Util.arrayPropertyMatchesUser(track.user.follows ?? [], "following_user_id", user), [], [], UserWidgetContext.card),
                                 create("span")
                                     .classes("date", "text-small", "nopointer", "color-dim")
                                     .text(Time.ago(track.release_date ?? track.created_at))
@@ -376,7 +377,7 @@ export class TrackTemplates {
                                                 create("div")
                                                     .classes("flex")
                                                     .children(
-                                                        UserTemplates.userWidget(track.user, Util.arrayPropertyMatchesUser(track.user!.follows ?? [], "following_user_id", user)),
+                                                        UserTemplates.userWidget(track.user!, Util.arrayPropertyMatchesUser(track.user!.follows ?? [], "following_user_id", user), [], [], UserWidgetContext.card),
                                                         create("span")
                                                             .classes("date", "text-small", "nopointer", "color-dim", "align-center")
                                                             .text(Time.ago(track.created_at))
@@ -670,7 +671,7 @@ export class TrackTemplates {
                                     .build(),
                                 ...icons,
                             ).build(),
-                        UserTemplates.userWidget(trackUser, Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "following_user_id", user)),
+                        UserTemplates.userWidget(trackUser, Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "following_user_id", user), [], [], UserWidgetContext.singlePage),
                     ).build(),
                 ...toAppend,
                 create("div")
@@ -897,7 +898,7 @@ export class TrackTemplates {
                             .classes("text-small")
                             .text(Time.ago(track.created_at))
                             .build(),
-                        UserTemplates.userWidget(track.user, track.user.follows.some(follow => follow.following_user_id === user.id)),
+                        UserTemplates.userWidget(track.user, track.user.follows.some(follow => follow.following_user_id === user.id), [], [], UserWidgetContext.card),
                         create("span")
                             .text("Requested you to be " + collabType.name)
                             .build(),

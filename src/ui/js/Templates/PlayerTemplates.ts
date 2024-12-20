@@ -18,6 +18,7 @@ import {navigate} from "../Routing/Router.ts";
 import {FJSC} from "../../fjsc";
 import {compute, signal} from "../../fjsc/src/signals.ts";
 import {currentlyBuffered, currentTrackId, currentTrackPosition, playingElsewhere, playingFrom} from "../state.ts";
+import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 
 export class PlayerTemplates {
     static audioPlayer(track: Track) {
@@ -258,7 +259,7 @@ export class PlayerTemplates {
                 }).build(),
             ...icons,
             UserTemplates.userWidget(trackUser, Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "following_user_id", user),
-                [], ["align-center"]),
+                [], ["align-center"], UserWidgetContext.player),
             PlayerTemplates.playingFrom(),
             create("div")
                 .classes("flex", "align-center")
