@@ -56,9 +56,9 @@ export class QueueTemplates {
         if (!track.user) {
             throw new Error(`Track ${track.id} has no user`);
         }
-        const coverState = signal(Images.DEFAULT_AVATAR);
+        const coverState = signal(Images.DEFAULT_COVER_TRACK);
         if (track.has_cover) {
-            Util.getCoverFileFromTrackIdAsync(track.id, track.user.id).then((src) => {
+            Util.getTrackCover(track.id).then((src) => {
                 coverState.value = src;
             });
         }

@@ -3,8 +3,8 @@
     --color-1-rgb: 218, 112, 44;
     --red: #D14D41;
     --color-2-rgb: 209, 77, 65;
-    --red-dark: #AF3029;
-    --color-2-dark-rgb: 175, 48, 41;
+    --red-dark: #ce3a32;
+    --color-2-dark-rgb: 206, 58, 50;
     --color-3: #FFFCF0;
     --color-3-rgb: 255, 252, 240;
     --color-4: #E6E4D9;
@@ -25,6 +25,7 @@
     --blue: #4385BE;
 
     --fjsc-interactive-background: var(--color-3);
+    --fjsc-interactive-color-active: var(--color-5);
 }
 
 .fakeButton {

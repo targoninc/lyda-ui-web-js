@@ -1,5 +1,6 @@
 :root {
     --fjsc-interactive-background: var(--color-9);
+    --fjsc-interactive-color-active: var(--color-5);
 }
 
 .fakeButton {

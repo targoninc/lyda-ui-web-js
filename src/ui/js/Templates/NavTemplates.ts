@@ -9,7 +9,7 @@ import {NotificationParser} from "../Classes/Helpers/NotificationParser.ts";
 import {AuthActions} from "../Actions/AuthActions.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {Util} from "../Classes/Util.ts";
-import {navigate} from "../Routing/Router.ts";
+import {navigate, reload} from "../Routing/Router.ts";
 import {AnyNode, create, StringOrSignal} from "../../fjsc/src/f2.ts";
 import {compute, signal} from "../../fjsc/src/signals.ts";
 import {User} from "../Models/DbModels/User.ts";
@@ -46,9 +46,7 @@ export class NavTemplates {
     static navLogo() {
         return create("div")
             .classes("nav-logo", "hideOnMidBreakpoint", "pointer")
-            .onclick(async () => {
-                navigate("explore");
-            })
+            .onclick(reload)
             .children(
                 GenericTemplates.icon(Icons.LYDA, true, ["icon", "svg"]),
             ).build();

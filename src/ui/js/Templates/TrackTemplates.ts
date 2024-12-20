@@ -136,9 +136,9 @@ export class TrackTemplates {
     }
 
     static trackCover(track: Track, coverType: string, startCallback: Function|null = null) {
-        const imageState = signal(Images.DEFAULT_AVATAR);
+        const imageState = signal(Images.DEFAULT_COVER_TRACK);
         if (track.has_cover) {
-            Util.getCoverFileFromTrackIdAsync(track.id, track.user_id).then((src) => {
+            Util.getTrackCover(track.id).then((src) => {
                 imageState.value = src;
             });
         }
@@ -257,8 +257,19 @@ export class TrackTemplates {
         return create("div")
             .classes("flex")
             .children(
-                GenericTemplates.action(Icons.ARROW_LEFT, "Previous page", "previousPage", previousCallback, [], [currentPage === 1 ? "nonclickable" : "_"]),
-                GenericTemplates.action(Icons.ARROW_RIGHT, "Next page", "nextPage", nextCallback),
+                FJSC.button({
+                    text: "Previous page",
+                    icon: { icon: "arrow_left" },
+                    onclick: previousCallback,
+                    disabled: currentPage === 1,
+                    classes: ["previousPage"],
+                }),
+                FJSC.button({
+                    text: "Next page",
+                    icon: { icon: "arrow_right" },
+                    onclick: nextCallback,
+                    disabled: currentPage === Infinity,
+                }),
             ).build();
     }
 
@@ -636,9 +647,9 @@ export class TrackTemplates {
             }
         }, 200);
         const coverLoading = signal(false);
-        const coverFile = signal(Images.DEFAULT_AVATAR);
+        const coverFile = signal(Images.DEFAULT_COVER_TRACK);
         if (track.has_cover) {
-            Util.getCoverFileFromTrackIdAsync(track.id, track.user_id).then((src) => {
+            Util.getTrackCover(track.id).then((src) => {
                 coverFile.value = src;
             });
         }

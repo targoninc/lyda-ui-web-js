@@ -236,9 +236,9 @@ export class PlayerTemplates {
         track.comments = track.comments ?? [];
         track.reposts = track.reposts ?? [];
 
-        const cover = signal(Images.DEFAULT_AVATAR);
+        const cover = signal(Images.DEFAULT_COVER_TRACK);
         if (track.has_cover) {
-            Util.getCoverFileFromTrackIdAsync(track.id, track.user_id).then((src) => {
+            Util.getTrackCover(track.id).then((src) => {
                 cover.value = src;
             });
         }

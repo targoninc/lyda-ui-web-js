@@ -299,9 +299,9 @@ export class AlbumTemplates {
             throw new Error(`Album ${album.id} has no tracks`);
         }
 
-        const srcState = signal(Images.DEFAULT_AVATAR);
+        const srcState = signal(Images.DEFAULT_COVER_ALBUM);
         if (album.has_cover) {
-            Util.getAlbumCover(album.id, album.user_id).then((src) => {
+            Util.getAlbumCover(album.id).then((src) => {
                 srcState.value = src;
             });
         }
@@ -336,9 +336,9 @@ export class AlbumTemplates {
     }
 
     static async smallAlbumCover(album: Album) {
-        const coverState = signal(Images.DEFAULT_AVATAR);
+        const coverState = signal(Images.DEFAULT_COVER_ALBUM);
         if (album.has_cover) {
-            Util.getAlbumCover(album.id, album.user_id).then((src) => {
+            Util.getAlbumCover(album.id).then((src) => {
                 coverState.value = src;
             });
         }
@@ -409,9 +409,9 @@ export class AlbumTemplates {
             }));
         }
         const coverLoading = signal(false);
-        const coverState = signal(Images.DEFAULT_AVATAR);
+        const coverState = signal(Images.DEFAULT_COVER_ALBUM);
         if (album.has_cover) {
-            Util.getAlbumCover(album.id, album.user_id).then((src) => {
+            Util.getAlbumCover(album.id).then((src) => {
                 coverState.value = src;
             });
         }

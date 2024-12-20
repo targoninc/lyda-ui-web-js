@@ -258,9 +258,9 @@ export class PlaylistTemplates {
         if (playlist.visibility === "private") {
             icons.push(GenericTemplates.lock());
         }
-        const coverState = signal(Images.DEFAULT_AVATAR);
+        const coverState = signal(Images.DEFAULT_COVER_PLAYLIST);
         if (playlist.has_cover) {
-            Util.getPlaylistCover(playlist.id, playlist.user_id).then(cover => {
+            Util.getPlaylistCover(playlist.id).then(cover => {
                 coverState.value = cover;
             });
         }
@@ -314,9 +314,9 @@ export class PlaylistTemplates {
     }
 
     static playlistCover(playlist: Playlist, coverType: string) {
-        const coverState = signal(Images.DEFAULT_AVATAR);
+        const coverState = signal(Images.DEFAULT_COVER_PLAYLIST);
         if (playlist.has_cover) {
-            Util.getPlaylistCover(playlist.id, playlist.user_id).then(cover => {
+            Util.getPlaylistCover(playlist.id).then(cover => {
                 coverState.value = cover;
             });
         }
@@ -354,9 +354,9 @@ export class PlaylistTemplates {
     }
 
     static async smallPlaylistCover(playlist: Playlist) {
-        const coverState = signal(Images.DEFAULT_AVATAR);
+        const coverState = signal(Images.DEFAULT_COVER_PLAYLIST);
         if (playlist.has_cover) {
-            Util.getPlaylistCover(playlist.id, playlist.user_id).then(cover => {
+            Util.getPlaylistCover(playlist.id).then(cover => {
                 coverState.value = cover;
             });
         }
@@ -428,9 +428,9 @@ export class PlaylistTemplates {
             }));
         }
         const coverLoading = signal(false);
-        const coverState = signal(Images.DEFAULT_AVATAR);
+        const coverState = signal(Images.DEFAULT_COVER_PLAYLIST);
         if (playlist.has_cover) {
-            Util.getPlaylistCover(playlist.id, playlist.user_id).then(cover => {
+            Util.getPlaylistCover(playlist.id).then(cover => {
                 coverState.value = cover;
             });
         }

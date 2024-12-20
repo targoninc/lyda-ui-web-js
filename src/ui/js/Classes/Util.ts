@@ -107,19 +107,19 @@ export class Util {
         return await Util.getFileOrBackupAsync(url, Images.DEFAULT_BANNER);
     }
 
-    static async getTrackCover(id: number, user_id: number|null = null) {
+    static async getTrackCover(id: number) {
         const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.trackCover}&t=${Date.now()}`;
-        return await Util.getFileOrBackupAsync(url, Util.getUserAvatar, user_id);
+        return await Util.getFileOrBackupAsync(url, Images.DEFAULT_COVER_TRACK);
     }
 
-    static async getAlbumCover(id: number, user_id: number|null = null) {
+    static async getAlbumCover(id: number) {
         const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.albumCover}&t=${Date.now()}`;
-        return await Util.getFileOrBackupAsync(url, Util.getUserAvatar, user_id);
+        return await Util.getFileOrBackupAsync(url, Images.DEFAULT_COVER_ALBUM);
     }
 
-    static async getPlaylistCover(id: number, user_id: number|null = null) {
+    static async getPlaylistCover(id: number) {
         const url = ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.playlistCover}&t=${Date.now()}`;
-        return await Util.getFileOrBackupAsync(url, Util.getUserAvatar, user_id);
+        return await Util.getFileOrBackupAsync(url, Images.DEFAULT_COVER_PLAYLIST);
     }
 
     static async getFileOrBackupAsync(url: string, backupUrl: string|Function, user_id: number|null = null) {
