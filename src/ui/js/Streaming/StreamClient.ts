@@ -1,7 +1,7 @@
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {PlayManager} from "./PlayManager.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {currentTrackId} from "../state.ts";
+import {currentTrackId, volume} from "../state.ts";
 
 export class StreamClient {
     id: number;
@@ -22,8 +22,7 @@ export class StreamClient {
 
         const currentStreamClient = PlayManager.getStreamClient(currentTrackId.value);
         if (!currentStreamClient) {
-            const cachedVolume = LydaCache.get<number>("volume").content;
-            this.setVolume(cachedVolume !== null ? cachedVolume : 0.2);
+            this.setVolume(volume.value ?? 0.2);
         } else {
             this.setVolume(currentStreamClient.getVolume());
         }
