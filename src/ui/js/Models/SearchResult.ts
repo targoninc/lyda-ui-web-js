@@ -4,4 +4,6 @@ export interface SearchResult {
     exactMatch: boolean;
     type: string;
     display: string;
+    subtitle?: string;
+    hasImage?: boolean;
 }

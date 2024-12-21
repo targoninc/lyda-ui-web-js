@@ -8,6 +8,7 @@ import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {Follow} from "../Models/DbModels/Follow.ts";
 import {signal} from "../../fjsc/src/signals.ts";
 import {User} from "../Models/DbModels/User.ts";
+import {SearchTemplates} from "./SearchTemplates.ts";
 
 export class PageTemplates {
     static mapping: {[key: string]: Function} = {
@@ -33,6 +34,7 @@ export class PageTemplates {
         subscribe: this.subscribePage,
         "password-reset": LandingPageTemplates.newLandingPage,
         "activate-account": LandingPageTemplates.newLandingPage,
+        search: SearchTemplates.searchPage,
     };
     static nonUserFallback: {[key: string]: Function} = {
         library: this.loginPage,

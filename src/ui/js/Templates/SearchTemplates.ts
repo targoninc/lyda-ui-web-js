@@ -9,9 +9,10 @@ import {NotificationType} from "../Enums/NotificationType.ts";
 import {SearchResult} from "../Models/SearchResult.ts";
 import {Util} from "../Classes/Util.ts";
 import {Images} from "../Enums/Images.ts";
+import {SearchContext} from "../Enums/SearchContext.ts";
 
 export class SearchTemplates {
-    static search() {
+    static search(context: SearchContext) {
         const results = signal<SearchResult[]>([]);
         const selectedResult = signal<number|null>(null);
         const resultsShown = compute(r => r.length > 0, results);
@@ -20,7 +21,7 @@ export class SearchTemplates {
             .classes("search", "relative", "align-center")
             .children(
                 SearchTemplates.searchInput(results, selectedResult),
-                SearchTemplates.searchResults(results, selectedResult, resultsShown)
+                SearchTemplates.searchResults(results, selectedResult, resultsShown, context)
             ).build();
     }
 
@@ -120,17 +121,17 @@ export class SearchTemplates {
         selectedResult.value = list[index - 1].id;
     }
 
-    static searchResults(results: Signal<SearchResult[]>, selectedResult: Signal<number|null>, resultsShown: Signal<boolean>) {
+    static searchResults(results: Signal<SearchResult[]>, selectedResult: Signal<number|null>, resultsShown: Signal<boolean>, context: SearchContext) {
         let searchResults = results.value;
-        const sResults = signal(SearchTemplates.searchResultsList(searchResults, selectedResult, resultsShown));
+        const sResults = signal(SearchTemplates.searchResultsList(searchResults, selectedResult, resultsShown, context));
         results.onUpdate = () => {
             searchResults = results.value;
-            sResults.value = SearchTemplates.searchResultsList(searchResults, selectedResult, resultsShown);
+            sResults.value = SearchTemplates.searchResultsList(searchResults, selectedResult, resultsShown, context);
         };
         return sResults;
     }
 
-    static searchResultsList(searchResults: SearchResult[], selectedResult: Signal<number|null>, resultsShown: Signal<boolean>) {
+    static searchResultsList(searchResults: SearchResult[], selectedResult: Signal<number|null>, resultsShown: Signal<boolean>, context: SearchContext) {
         const exactMatches = searchResults.filter(r => r.exactMatch);
         const partialMatches = searchResults.filter(r => !r.exactMatch);
         const preExact = exactMatches.length === 0 ? [] : [
@@ -146,9 +147,10 @@ export class SearchTemplates {
                 .build()
         ];
         const showClass = compute((s: boolean): string => s ? "_" : "hidden", resultsShown);
+        const contextClass = context === SearchContext.navBar ? "search-results-popout" : "search-results-page";
 
         return create("div")
-            .classes("search-results", "rounded", showClass)
+            .classes(contextClass, showClass)
             .children(
                 create("div")
                     .classes("flex-v", "nogap")
@@ -177,6 +179,11 @@ export class SearchTemplates {
         if (searchResult.display.length > 50) {
             display = searchResult.display.substring(0, 50) + "...";
         }
+        let subtitle = searchResult.subtitle;
+        if (subtitle && subtitle.length > 50) {
+            subtitle = subtitle.substring(0, 50) + "...";
+        }
+
         const imageMap: Record<string, Function> = {
             "user": Util.getUserAvatar,
             "track": Util.getTrackCover,
@@ -184,9 +191,11 @@ export class SearchTemplates {
             "playlist": Util.getPlaylistCover,
         };
         const image = signal(Images.DEFAULT_COVER_TRACK);
-        imageMap[searchResult.type](searchResult.id).then((url: string) => {
-            image.value = url;
-        });
+        if (searchResult.hasImage) {
+            imageMap[searchResult.type](searchResult.id).then((url: string) => {
+                image.value = url;
+            });
+        }
 
         elementReference = create("div")
             .classes("search-result", "padded", "flex", addClass)
@@ -202,15 +211,27 @@ export class SearchTemplates {
                             .src(image)
                             .build()
                     ).build(),
-                create("span")
-                    .classes("search-result-text", "flex-grow")
-                    .text(display)
-                    .build(),
+                create("div")
+                    .classes("flex-v", "nogap", "search-result-text", "flex-grow")
+                    .children(
+                        create("span")
+                            .classes("search-result-display")
+                            .text(display)
+                            .build(),
+                        create("span")
+                            .classes("search-result-subtitle", "text-xsmall")
+                            .text(subtitle)
+                            .build(),
+                    ).build(),
                 create("span")
                     .classes("search-result-type", "padded-inline", searchResult.type)
                     .text(searchResult.type)
                     .build()
             ).build();
         return elementReference;
+    }
+
+    static searchPage() {
+
     }
 }

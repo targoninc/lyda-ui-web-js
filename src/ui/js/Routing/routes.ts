@@ -36,6 +36,9 @@ export const routes: Route[] = [
         path: "statistics"
     },
     {
+        path: "search"
+    },
+    {
         path: "upload"
     },
     {

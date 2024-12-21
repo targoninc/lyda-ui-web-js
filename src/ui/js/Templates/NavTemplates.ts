@@ -3,7 +3,6 @@ import {UserTemplates} from "./UserTemplates.ts";
 import {UserActions} from "../Actions/UserActions.ts";
 import {NavActions} from "../Actions/NavActions.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
-import {Links} from "../Enums/Links.ts";
 import {SearchTemplates} from "./SearchTemplates.ts";
 import {NotificationParser} from "../Classes/Helpers/NotificationParser.ts";
 import {AuthActions} from "../Actions/AuthActions.ts";
@@ -12,12 +11,12 @@ import {Util} from "../Classes/Util.ts";
 import {navigate, reload} from "../Routing/Router.ts";
 import {AnyNode, create, StringOrSignal} from "../../fjsc/src/f2.ts";
 import {compute, signal} from "../../fjsc/src/signals.ts";
-import {User} from "../Models/DbModels/User.ts";
 import {Notification} from "../Models/DbModels/Notification.ts";
 import {FJSC} from "../../fjsc";
 import {router} from "../../main.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 import {currentUser} from "../state.ts";
+import {SearchContext} from "../Enums/SearchContext.ts";
 
 export class NavTemplates {
     static navTop(userTemplate: AnyNode) {
@@ -39,7 +38,7 @@ export class NavTemplates {
                         NavTemplates.navButton("library", "Library", "category", async () => {
                             navigate("library");
                         }),
-                        SearchTemplates.search(),
+                        SearchTemplates.search(SearchContext.navBar),
                     ).build(),
                 userTemplate
             ).build();
