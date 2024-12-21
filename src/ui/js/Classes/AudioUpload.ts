@@ -9,6 +9,7 @@ import {MediaFileType} from "../Enums/MediaFileType.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {ProgressPart} from "../Models/ProgressPart.ts";
 import {ProgressState} from "../Enums/ProgressState.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class AudioUpload {
     triggerEvent: Event;
@@ -68,11 +69,11 @@ export class AudioUpload {
     async uploadTrack() {
         const error = await this.createTrackThenNext();
         if (error) {
-            notify(`Failed to create track: ${error}`, "error");
+            notify(`Failed to create track: ${error}`, NotificationType.error);
             return;
         }
 
-        notify("Track upload completed", "success");
+        notify("Track upload completed", NotificationType.success);
         navigate(`track/${this.id}`);
     }
 

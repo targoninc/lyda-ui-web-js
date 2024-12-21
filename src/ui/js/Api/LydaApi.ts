@@ -3,10 +3,9 @@ import {notify} from "../Classes/Ui.ts";
 import {Signal} from "../../fjsc/src/signals.ts";
 import {ApiRoutes} from "./ApiRoutes.ts";
 import {User} from "../Models/DbModels/User.ts";
-import {LydaCache} from "../Cache/LydaCache.ts";
-import {CacheItem} from "../Cache/CacheItem.ts";
 import {Log} from "../Models/DbModels/Log.ts";
 import {currentUser} from "../state.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class LydaApi {
     static getLogs(filterState: Signal<any>, successCallback: Function) {
@@ -24,7 +23,7 @@ export class LydaApi {
 
     static handleResponse(response: any, errorText: string, successCallback: Function) {
         if (response.code !== 200) {
-            notify(errorText, "error");
+            notify(errorText, NotificationType.error);
             return;
         }
         successCallback(response.data);
@@ -37,14 +36,14 @@ export class LydaApi {
     static async updateUser(user: Partial<User>) {
         const res = await Api.postAsync(ApiRoutes.updateUser, { user });
         if (res.code !== 200) {
-            notify("Failed to update account", "error");
+            notify("Failed to update account", NotificationType.error);
             return false;
         }
         currentUser.value = <User>{
             ...currentUser.value,
             ...user
         };
-        notify("Account updated", "success");
+        notify("Account updated", NotificationType.success);
         return true;
     }
 

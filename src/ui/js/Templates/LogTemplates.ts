@@ -10,6 +10,7 @@ import {LogLevel} from "../Enums/LogLevel.ts";
 import {Log} from "../Models/DbModels/Log.ts";
 import {FJSC} from "../../fjsc";
 import {notify} from "../Classes/Ui.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class LogTemplates {
     static async actionLogs(selfUser: User, data: any[]) {
@@ -150,7 +151,7 @@ export class LogTemplates {
                                                 icon: { icon: "content_copy" },
                                                 onclick: () => {
                                                     navigator.clipboard.writeText(l.stack);
-                                                    notify("Copied stack to clipboard", "success");
+                                                    notify("Copied stack to clipboard", NotificationType.success);
                                                 }
                                             }),
                                         ).build(),

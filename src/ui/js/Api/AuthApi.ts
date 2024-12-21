@@ -1,6 +1,7 @@
 import {Api, ApiResponse} from "./Api.ts";
-import {notify, Ui} from "../Classes/Ui.ts";
+import {notify} from "../Classes/Ui.ts";
 import {ApiRoutes} from "./ApiRoutes.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class AuthApi {
     static userExists(email: string, successCallback: Function = () => {
@@ -24,7 +25,7 @@ export class AuthApi {
             if (response.code === 200) {
                 successCallback(response.data);
             } else {
-                notify(response.data.error, "error");
+                notify(response.data.error ?? "Unknown error while logging in", NotificationType.error);
                 errorCallback(response.code, response.data);
             }
         });
@@ -48,7 +49,7 @@ export class AuthApi {
             if (response.code === 200) {
                 successCallback(response);
             } else {
-                notify(response.data.error, "error");
+                notify(response.data.error ?? "Unknown error while registering", NotificationType.error);
                 errorCallback(response);
             }
         });
@@ -62,7 +63,7 @@ export class AuthApi {
             if (response.code === 200 || response.code === 204) {
                 successCallback && successCallback(response);
             } else {
-                notify(response.data.error, "error");
+                notify(response.data.error ?? "Unknown error while requesting MFA", NotificationType.error);
                 errorCallback && errorCallback(response);
             }
         });

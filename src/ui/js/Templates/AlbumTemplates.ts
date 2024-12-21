@@ -21,6 +21,7 @@ import {User} from "../Models/DbModels/User.ts";
 import {navigate} from "../Routing/Router.ts";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
@@ -316,7 +317,7 @@ export class AlbumTemplates {
                 QueueManager.setContextQueue(album.tracks!.map(t => t.track_id));
                 const firstTrack = album.tracks![0];
                 if (!firstTrack) {
-                    notify("This album has no tracks", "error");
+                    notify("This album has no tracks", NotificationType.error);
                     return;
                 }
                 PlayManager.addStreamClientIfNotExists(firstTrack.track_id, firstTrack.track?.length ?? 0);

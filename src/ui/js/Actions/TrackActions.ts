@@ -18,6 +18,7 @@ import {AlbumTrack} from "../Models/DbModels/AlbumTrack.ts";
 import {Album} from "../Models/DbModels/Album.ts";
 import {Playlist} from "../Models/DbModels/Playlist.ts";
 import {AnyElement} from "../../fjsc/src/f2.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class TrackActions {
     static async savePlay(id: number) {
@@ -36,7 +37,7 @@ export class TrackActions {
         });
 
         if (res.code !== 200) {
-            notify("Error while trying to unfollow user: " + getErrorMessage(res), "error");
+            notify("Error while trying to unfollow user: " + getErrorMessage(res), NotificationType.error);
         }
 
         return res;
@@ -49,10 +50,10 @@ export class TrackActions {
         const res = await Api.postAsync(ApiRoutes.deleteTrack, { id });
         if (res.code === 200) {
             await PlayManager.removeTrackFromAllStates(id);
-            notify(res.data, "success");
+            notify(res.data, NotificationType.success);
             navigate("profile");
         } else {
-            notify("Error trying to delete track: " + getErrorMessage(res), "error");
+            notify("Error trying to delete track: " + getErrorMessage(res), NotificationType.error);
         }
     }
 
@@ -63,7 +64,7 @@ export class TrackActions {
             });
 
             if (res.code !== 200) {
-                notify(getErrorMessage(res), "error");
+                notify(getErrorMessage(res), NotificationType.error);
                 return;
             }
 
@@ -90,7 +91,7 @@ export class TrackActions {
             return;
         }
         if (content.value.length > 1000) {
-            notify("Comment is too long", "error");
+            notify("Comment is too long", NotificationType.error);
             return;
         }
 
@@ -101,7 +102,7 @@ export class TrackActions {
         });
 
         if (res.code !== 200) {
-            notify(getErrorMessage(res), "error");
+            notify(getErrorMessage(res), NotificationType.error);
             return;
         }
 
@@ -138,7 +139,7 @@ export class TrackActions {
     static async repostTrack(id: number) {
         const res = await Api.postAsync(ApiRoutes.repostTrack, { id });
         if (res.code !== 200) {
-            notify("Failed to repost track: " + getErrorMessage(res), "error");
+            notify("Failed to repost track: " + getErrorMessage(res), NotificationType.error);
             return false;
         }
         return true;
@@ -147,7 +148,7 @@ export class TrackActions {
     static async unrepostTrack(id: number) {
         const res = await Api.postAsync(ApiRoutes.unrepostTrack, { id });
         if (res.code !== 200) {
-            notify("Failed to unrepost track: " + getErrorMessage(res), "error");
+            notify("Failed to unrepost track: " + getErrorMessage(res), NotificationType.error);
             return false;
         }
         return true;
@@ -181,7 +182,7 @@ export class TrackActions {
         });
 
         if (res.code !== 200) {
-            notify("Error while trying to follow user: " + getErrorMessage(res), "error");
+            notify("Error while trying to follow user: " + getErrorMessage(res), NotificationType.error);
         }
 
         return res;
@@ -190,7 +191,7 @@ export class TrackActions {
     static async getCollabTypes() {
         const res = await Api.getAsync(ApiRoutes.getTrackCollabTypes);
         if (res.code !== 200) {
-            notify("Error while trying to get collab types: " + getErrorMessage(res), "error");
+            notify("Error while trying to get collab types: " + getErrorMessage(res), NotificationType.error);
             return [];
         }
         return res.data;
@@ -198,7 +199,7 @@ export class TrackActions {
 
     static async toggleLike(id: number, isEnabled: boolean) {
         if (!Util.isLoggedIn()) {
-            notify("You must be logged in to like tracks", "error");
+            notify("You must be logged in to like tracks", NotificationType.error);
             return false;
         }
         if (isEnabled) {
@@ -217,7 +218,7 @@ export class TrackActions {
 
     static async toggleRepost(id: number, isEnabled: boolean) {
         if (!Util.isLoggedIn()) {
-            notify("You must be logged in to repost tracks", "error");
+            notify("You must be logged in to repost tracks", NotificationType.error);
             return false;
         }
         if (isEnabled) {
@@ -256,10 +257,10 @@ export class TrackActions {
 
             try {
                 await MediaUploader.upload(MediaFileType.trackCover, id, file);
-                notify("Cover updated", "success");
+                notify("Cover updated", NotificationType.success);
                 await Util.updateImage(URL.createObjectURL(file), oldSrc.value);
             } catch (e) {
-                notify("Failed to upload cover", "error");
+                notify("Failed to upload cover", NotificationType.error);
             }
             loading.value = false;
         };

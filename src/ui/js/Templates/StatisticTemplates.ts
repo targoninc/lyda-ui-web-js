@@ -14,6 +14,7 @@ import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {signal} from "../../fjsc/src/signals.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {getErrorMessage} from "../Classes/Util.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 Chart.register(...registerables);
 
@@ -185,7 +186,7 @@ export class StatisticTemplates {
                     month: selectedState.value
                 });
                 if (res.code !== 200) {
-                    notify(getErrorMessage(res), "error");
+                    notify(getErrorMessage(res), NotificationType.error);
                     return;
                 }
                 notify("Royalties calculated");
@@ -213,10 +214,10 @@ export class StatisticTemplates {
                 await Ui.getTextInputModal("Set PayPal mail", "The account you will receive payments with", "", "Save", "Cancel", async (address) => {
                     const res = await Api.postAsync(ApiRoutes.updateUser, {address});
                     if (res.code !== 200) {
-                        notify(getErrorMessage(res), "error");
+                        notify(getErrorMessage(res), NotificationType.error);
                         return;
                     }
-                    notify("PayPal mail set", "success");
+                    notify("PayPal mail set", NotificationType.success);
                     paypalMailExistsState.value = true;
                 }, () => {
                 }, Icons.PAYPAL);
@@ -228,10 +229,10 @@ export class StatisticTemplates {
                         value: ""
                     });
                     if (res.code !== 200) {
-                        notify(getErrorMessage(res), "error");
+                        notify(getErrorMessage(res), NotificationType.error);
                         return;
                     }
-                    notify("PayPal mail removed");
+                    notify("PayPal mail removed", NotificationType.success);
                     paypalMailExistsState.value = false;
                 }, () => {
                 }, Icons.WARNING);
@@ -239,10 +240,10 @@ export class StatisticTemplates {
             actions.push(GenericTemplates.action(Icons.PAY, "Request payment", "requestPayment", async () => {
                 const res = await Api.postAsync(ApiRoutes.requestPayment);
                 if (res.code !== 200) {
-                    notify(getErrorMessage(res), "error");
+                    notify(getErrorMessage(res), NotificationType.error);
                     return;
                 }
-                notify("Payment requested", "success");
+                notify("Payment requested", NotificationType.success);
             }, [], [visibilityClass, "secondary"]));
         }
 

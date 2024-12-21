@@ -155,7 +155,11 @@ export class StreamingUpdater {
         const targets = document.querySelectorAll(".audio-player-toggle");
 
         const currentStreamClient = PlayManager.getStreamClient(currentTrackId.value);
-        playingHere.value = currentStreamClient.playing;
+        if (currentStreamClient) {
+            playingHere.value = currentStreamClient.playing;
+        } else {
+            playingHere.value = false;
+        }
 
         for (const target of targets) {
             const streamClient = PlayManager.getStreamClient(parseInt(target.id));

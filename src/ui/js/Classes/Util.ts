@@ -9,6 +9,7 @@ import {MediaFileType} from "../Enums/MediaFileType.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {currentUser, dragging} from "../state.ts";
 import {Signal} from "../../fjsc/src/signals.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class Util {
     static capitalizeFirstLetter(string: string) {
@@ -135,7 +136,7 @@ export class Util {
 
     static async copyToClipboard(text: string) {
         await navigator.clipboard.writeText(text);
-        notify("Copied to clipboard", "success");
+        notify("Copied to clipboard", NotificationType.success);
     }
 
     static async fileExists(url: string) {
@@ -250,7 +251,7 @@ export class Util {
                 return null;
             }
             if (res.code === 500) {
-                notify("An error occurred while fetching the user", "error");
+                notify("An error occurred while fetching the user", NotificationType.error);
                 return null;
             }
             return Util.mapNullToEmptyString(res.data);
@@ -270,7 +271,7 @@ export class Util {
             return null;
         }
         if (res.code === 500) {
-            notify("An error occurred while fetching the user", "error");
+            notify("An error occurred while fetching the user", NotificationType.error);
             return null;
         }
         return Util.mapNullToEmptyString(res.data);

@@ -9,6 +9,7 @@ import {getErrorMessage} from "./Util.ts";
 import {Track} from "../Models/DbModels/Track.ts";
 import {Album} from "../Models/DbModels/Album.ts";
 import {Playlist} from "../Models/DbModels/Playlist.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class ProfilePage {
     static async addTabSectionAsync(element: AnyElement, user: User, selfUser: User, isOwnProfile: boolean) {
@@ -37,7 +38,7 @@ export class ProfilePage {
     static async addTracksAsync(element: AnyElement, user: User, selfUser: User, isOwnProfile: boolean) {
         const res = await Api.getAsync<Track[]>(ApiRoutes.getTrackByUserId, { id: user.id, name: user.username });
         if (res.code !== 200) {
-            notify("Error while getting tracks: " + getErrorMessage(res), "error");
+            notify("Error while getting tracks: " + getErrorMessage(res), NotificationType.error);
             return;
         }
         const tracks = res.data;
@@ -51,7 +52,7 @@ export class ProfilePage {
             id: user.id, name: user.username
         });
         if (res.code !== 200) {
-            notify("Error while getting albums: " + getErrorMessage(res), "error");
+            notify("Error while getting albums: " + getErrorMessage(res), NotificationType.error);
             return;
         }
         const albums = res.data;
@@ -65,7 +66,7 @@ export class ProfilePage {
             id: user.id, name: user.username
         });
         if (res.code !== 200) {
-            notify("Error while getting playlists: " + getErrorMessage(res), "error");
+            notify("Error while getting playlists: " + getErrorMessage(res), NotificationType.error);
             return;
         }
         const playlists = res.data;
@@ -79,7 +80,7 @@ export class ProfilePage {
             id: user.id, name: user.username
         });
         if (res.code !== 200) {
-            notify("Error while getting reposts: " + getErrorMessage(res), "error");
+            notify("Error while getting reposts: " + getErrorMessage(res), NotificationType.error);
             return;
         }
         const reposts = res.data;

@@ -30,6 +30,7 @@ import {signal} from "../fjsc/src/signals.ts";
 import {Track} from "./Models/DbModels/Track.ts";
 import {LogLevel} from "./Enums/LogLevel.ts";
 import {Log} from "./Models/DbModels/Log.ts";
+import {NotificationType} from "./Enums/NotificationType.ts";
 
 export class Lyda {
     static async getEndpointData(endpoint: string, params = "") {
@@ -77,7 +78,7 @@ export class Lyda {
                 break;
             case "tracks":
                 if (!user) {
-                    navigate("explore");
+                    notify("You need to be logged in to see your feed", NotificationType.error);
                     return;
                 }
                 const feedType = element.getAttribute("feedType");
@@ -92,8 +93,7 @@ export class Lyda {
                 break;
             case "profile":
                 if (!user || !data || data.error) {
-                    notify("Failed to load profile", "error");
-                    navigate("explore");
+                    notify("You need to be logged in to see your profile", NotificationType.error);
                     return;
                 }
                 const isOwnProfile = user ? data.id === user.id : false;
@@ -178,12 +178,12 @@ export class Lyda {
                 break;
             case "logs":
                 if (permissions.error) {
-                    notify("You do not have permission to view logs", "error");
+                    notify("You do not have permission to view logs", NotificationType.error);
                     navigate("explore");
                     return;
                 }
                 if (!permissions.some((p: Permission) => p.name === Permissions.canViewLogs)) {
-                    notify("You do not have permission to view logs", "error");
+                    notify("You do not have permission to view logs", NotificationType.error);
                     navigate("profile");
                     return;
                 }
@@ -198,27 +198,33 @@ export class Lyda {
                 });
                 break;
             case "actionLogs":
-                user = await Util.getUserAsync();
-                if (!permissions.some(p => p.name === Permissions.canViewActionLogs)) {
-                    notify("You do not have permission to view action logs", "error");
+                if (!user) {
+                    notify("You need to be logged in to see action logs", NotificationType.error);
                     return;
                 }
-                const actionLogs = await Api.getAsync(ApiRoutes.getActionLogs);
+                if (!permissions.some(p => p.name === Permissions.canViewActionLogs)) {
+                    notify("You do not have permission to view action logs", NotificationType.error);
+                    return;
+                }
+                const actionLogs = await Api.getAsync<any[]>(ApiRoutes.getActionLogs);
                 element.appendChild(await LogTemplates.actionLogs(user, actionLogs.data));
                 break;
             case "unapprovedTracks":
-                user = await Util.getUserAsync();
+                if (!user) {
+                    notify("You need to be logged in to see unapproved tracks", NotificationType.error);
+                    return;
+                }
                 TrackActions.getUnapprovedTracks().then(tracks => {
                     element.appendChild(TrackTemplates.unapprovedTracks(tracks, user));
                 });
                 break;
             case "moderation":
                 if (!user) {
-                    navigate("explore");
+                    notify("You need to be logged in to moderate", NotificationType.error);
                     return;
                 }
                 if (!permissions.some(p => p.name === Permissions.canDeleteComments)) {
-                    notify("You do not have permission to moderate", "error");
+                    notify("You do not have permission to moderate", NotificationType.error);
                     return;
                 }
                 const comments = await CommentActions.getPotentiallyHarmful();
@@ -233,7 +239,7 @@ export class Lyda {
                 const options = signal<any[]>([]);
                 SubscriptionActions.loadSubscriptionOptions().then(res => {
                     if (!res || res.error) {
-                        notify("Failed to load subscription options", "error");
+                        notify("Failed to load subscription options", NotificationType.error);
                         return;
                     }
                     options.value = res;
@@ -267,7 +273,7 @@ export class Lyda {
             loadingState.value = true;
             const res = await Api.getAsync<Track[]>(endpoint, params);
             if (res.code !== 200) {
-                notify(`Failed to get tracks: ${res.data.error}`, "error");
+                notify(`Failed to get tracks: ${res.data.error}`, NotificationType.error);
                 loadingState.value = false;
                 return;
             }

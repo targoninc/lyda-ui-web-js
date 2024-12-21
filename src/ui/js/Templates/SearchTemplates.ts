@@ -5,6 +5,7 @@ import {navigate} from "../Routing/Router.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {signal} from "../../fjsc/src/signals.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class SearchTemplates {
     static search() {
@@ -83,7 +84,7 @@ export class SearchTemplates {
                         // TODO: Change search so it searches all 4 endpoints
                         const res = await Api.getAsync(ApiRoutes.searchTracks, { search, filters });
                         if (res.code !== 200) {
-                            notify("Failed to search, status code " + res.code, "error");
+                            notify("Failed to search, status code " + res.code, NotificationType.error);
                             return;
                         }
                         if (tempCount === resultCount + 1) {

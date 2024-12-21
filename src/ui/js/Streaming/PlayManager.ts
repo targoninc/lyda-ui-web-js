@@ -22,6 +22,7 @@ import {PlayingFrom} from "../Models/PlayingFrom.ts";
 import {StreamingBroadcaster, StreamingEvent} from "./StreamingBroadcaster.ts";
 import {TrackPosition} from "../Models/TrackPosition.ts";
 import {LoopMode} from "../Enums/LoopMode.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class PlayManager {
     static async playCheck(track: any) {
@@ -169,7 +170,7 @@ export class PlayManager {
         await PlayManager.stopAllAsync();
 
         if (!Util.isLoggedIn()) {
-            notify("You need to be logged in to play music", "error");
+            notify("You need to be logged in to play music", NotificationType.error);
             return;
         }
 

@@ -4,6 +4,7 @@ import {notify, Ui} from "../Classes/Ui.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {getErrorMessage} from "../Classes/Util.ts";
 import {Signal} from "../../fjsc/src/signals.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class SubscriptionActions {
     static clientId = "AUw6bB-HQTIfqy5fhk-s5wZOaEQdaCIjRnCyIC3WDCRxVKc9Qvz1c6xLw7etCit1CD1qSHY5Pv-3xgQN";
@@ -48,11 +49,11 @@ export class SubscriptionActions {
                 onApprove(data, actions);
             },
             onError: function (err) {
-                notify("Failed to start subscription: " + err, "error");
+                notify("Failed to start subscription: " + err, NotificationType.error);
                 message.value = "Failed to start subscription";
             },
             onCancel: function () {
-                notify("Subscription cancelled", "info");
+                notify("Subscription cancelled", NotificationType.info);
                 message.value = "Subscription cancelled";
             },
             style: {
@@ -68,9 +69,9 @@ export class SubscriptionActions {
     static async subscriptionSuccess(data: any, parameters: any) {
         const res = await Api.postAsync(ApiRoutes.subscribe, {...parameters});
         if (res.code === 200) {
-            notify("Subscription started", "success");
+            notify("Subscription started", NotificationType.success);
         } else {
-            notify("Error when starting subscription: " + getErrorMessage(res), "error");
+            notify("Error when starting subscription: " + getErrorMessage(res), NotificationType.error);
         }
     }
 
@@ -87,11 +88,11 @@ export class SubscriptionActions {
     static async cancelSubscriptionAsync(id: string) {
         const res = await Api.postAsync(ApiRoutes.unsubscribe, {id});
         if (res.code !== 200) {
-            notify("Error while cancelling subscription: " + getErrorMessage(res), "error");
+            notify("Error while cancelling subscription: " + getErrorMessage(res), NotificationType.error);
             return false;
         }
 
-        notify("Subscription cancelled", "success");
+        notify("Subscription cancelled", NotificationType.success);
         return true;
     }
 
@@ -104,7 +105,7 @@ export class SubscriptionActions {
     static async loadSubscriptionOptions() {
         const res = await Api.getAsync<any[]>(ApiRoutes.getSubscriptionOptions);
         if (res.code !== 200) {
-            notify("Failed to load subscription options", "error");
+            notify("Failed to load subscription options", NotificationType.error);
             return;
         }
 

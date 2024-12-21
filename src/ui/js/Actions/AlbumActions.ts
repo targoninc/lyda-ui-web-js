@@ -12,6 +12,7 @@ import {Track} from "../Models/DbModels/Track.ts";
 import {MediaUploader} from "../Api/MediaUploader.ts";
 import {MediaFileType} from "../Enums/MediaFileType.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class AlbumActions {
     static async deleteAlbumFromElement(e: any) {
@@ -39,10 +40,10 @@ export class AlbumActions {
     static async createNewAlbum(album: Partial<Album>) {
         const res = await Api.postAsync(ApiRoutes.newAlbum, album);
         if (res.code !== 200) {
-            notify("Failed to create album: " + getErrorMessage(res), "error");
+            notify("Failed to create album: " + getErrorMessage(res), NotificationType.error);
             return;
         }
-        notify("Created album", "success");
+        notify("Created album", NotificationType.success);
     }
 
     static async deleteAlbum(id: number) {
@@ -50,10 +51,10 @@ export class AlbumActions {
         if (res.code === 200) {
             PlayManager.removeStreamClient(id);
             QueueManager.removeFromManualQueue(id);
-            notify("Successfully deleted album", "success");
+            notify("Successfully deleted album", NotificationType.success);
             navigate("profile");
         } else {
-            notify("Error trying to delete album: " + getErrorMessage(res), "error");
+            notify("Error trying to delete album: " + getErrorMessage(res), NotificationType.error);
         }
     }
 
@@ -61,19 +62,19 @@ export class AlbumActions {
         const res = await Api.postAsync(ApiRoutes.addTrackToAlbums, {album_ids, track_id});
         Util.removeModal();
         if (res.code !== 200) {
-            notify("Failed to add track to albums: " + getErrorMessage(res), "error");
+            notify("Failed to add track to albums: " + getErrorMessage(res), NotificationType.error);
             return;
         }
-        notify("Added track to albums", "success");
+        notify("Added track to albums", NotificationType.success);
     }
 
     static async removeTrackFromAlbum(track_id: number, album_ids: number[]) {
         const res = await Api.postAsync(ApiRoutes.removeTrackFromAlbums, {album_ids, track_id});
         if (res.code !== 200) {
-            notify("Failed to remove track from album: " + getErrorMessage(res), "error");
+            notify("Failed to remove track from album: " + getErrorMessage(res), NotificationType.error);
             return false;
         }
-        notify("Removed track from album", "success");
+        notify("Removed track from album", NotificationType.success);
         return true;
     }
 
@@ -92,10 +93,10 @@ export class AlbumActions {
             const file = fileTarget.files![0];
             try {
                 await MediaUploader.upload(MediaFileType.albumCover, id, file)
-                notify("Cover updated", "success");
+                notify("Cover updated", NotificationType.success);
                 await Util.updateImage(URL.createObjectURL(file), oldSrc);
             } catch (e: any) {
-                notify(e.toString(), "error");
+                notify(e.toString(), NotificationType.error);
             }
             loading.value = false;
         };
@@ -106,7 +107,7 @@ export class AlbumActions {
     static async moveTrackInAlbum(albumId: number, trackId: number, newPosition: number) {
         const res = await Api.postAsync(ApiRoutes.reorderAlbumTracks, {id: albumId, track_id: trackId, new_position: newPosition});
         if (res.code !== 200) {
-            notify("Failed to move track in album: " + getErrorMessage(res), "error");
+            notify("Failed to move track in album: " + getErrorMessage(res), NotificationType.error);
             return false;
         }
         return true;
@@ -122,7 +123,7 @@ export class AlbumActions {
 
     static async toggleLike(id: number, isEnabled: boolean) {
         if (!Util.isLoggedIn()) {
-            notify("You must be logged in to like albums", "error");
+            notify("You must be logged in to like albums", NotificationType.error);
             return false;
         }
         if (isEnabled) {
@@ -152,7 +153,7 @@ export class AlbumActions {
             QueueManager.setContextQueue(album.tracks.map(t => t.track_id));
             const track = album.tracks.find(t => t.track_id === trackId);
             if (!track) {
-                notify("This track could not be found in this album", "error");
+                notify("This track could not be found in this album", NotificationType.error);
                 return;
             }
             PlayManager.addStreamClientIfNotExists(track.track_id, track.track?.length ?? 0);

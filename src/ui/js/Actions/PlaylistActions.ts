@@ -13,6 +13,7 @@ import {Album} from "../Models/DbModels/Album.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {MediaUploader} from "../Api/MediaUploader.ts";
 import {MediaFileType} from "../Enums/MediaFileType.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class PlaylistActions {
     static async openAddToPlaylistModal(objectToBeAdded: Album|Track, type: "track"|"album") {
@@ -38,10 +39,10 @@ export class PlaylistActions {
     static async createNewPlaylist(playlist: Partial<Playlist>) {
         const res = await Api.postAsync(ApiRoutes.newPlaylist, playlist);
         if (res.code !== 200) {
-            notify("Failed to create playlist: " + getErrorMessage(res), "error");
+            notify("Failed to create playlist: " + getErrorMessage(res), NotificationType.error);
             return;
         }
-        notify("Created playlist", "success");
+        notify("Created playlist", NotificationType.success);
     }
 
     static async deletePlaylist(id: number) {
@@ -49,10 +50,10 @@ export class PlaylistActions {
         if (res.code === 200) {
             PlayManager.removeStreamClient(id);
             QueueManager.removeFromManualQueue(id);
-            notify("Successfully deleted playlist", "success");
+            notify("Successfully deleted playlist", NotificationType.success);
             navigate("profile");
         } else {
-            notify("Error trying to delete playlist: " + getErrorMessage(res), "error");
+            notify("Error trying to delete playlist: " + getErrorMessage(res), NotificationType.error);
         }
     }
 
@@ -63,19 +64,19 @@ export class PlaylistActions {
         });
         Util.removeModal();
         if (res.code !== 200) {
-            notify("Failed to add track to playlists: " + getErrorMessage(res), "error");
+            notify("Failed to add track to playlists: " + getErrorMessage(res), NotificationType.error);
             return;
         }
-        notify("Added track to playlist(s)", "success");
+        notify("Added track to playlist(s)", NotificationType.success);
     }
 
     static async removeTrackFromPlaylist(track_id: number, playlist_ids: number[]) {
         const res = await Api.postAsync(ApiRoutes.removeTrackFromPlaylists, {playlist_ids, track_id});
         if (res.code !== 200) {
-            notify("Failed to remove track from playlist: " + getErrorMessage(res), "error");
+            notify("Failed to remove track from playlist: " + getErrorMessage(res), NotificationType.error);
             return false;
         }
-        notify("Removed track from playlist", "success");
+        notify("Removed track from playlist", NotificationType.success);
         return true;
     }
 
@@ -94,10 +95,10 @@ export class PlaylistActions {
             const file = fileTarget.files![0];
             try {
                 await MediaUploader.upload(MediaFileType.playlistCover, id, file);
-                notify("Cover updated", "success");
+                notify("Cover updated", NotificationType.success);
                 await Util.updateImage(URL.createObjectURL(file), oldSrc);
             } catch (e: any) {
-                notify(e.toString(), "error");
+                notify(e.toString(), NotificationType.error);
             }
             loading.value = false;
         };
@@ -108,23 +109,23 @@ export class PlaylistActions {
     static async moveTrackInPlaylist(playlistId, trackId, newPosition) {
         const res = await Api.postAsync(ApiRoutes.reorderPlaylistTracks, {id: playlistId, track_id: trackId, new_position: newPosition});
         if (res.code !== 200) {
-            notify("Failed to move track in playlist: " + getErrorMessage(res), "error");
+            notify("Failed to move track in playlist: " + getErrorMessage(res), NotificationType.error);
             return false;
         }
         return true;
     }
 
-    static async likePlaylist(id) {
+    static async likePlaylist(id: number) {
         return await Api.postAsync(ApiRoutes.likePlaylist, { id });
     }
 
-    static async unlikePlaylist(id) {
+    static async unlikePlaylist(id: number) {
         return await Api.postAsync(ApiRoutes.unlikePlaylist, { id });
     }
 
-    static async toggleLike(id, isEnabled) {
+    static async toggleLike(id: number, isEnabled: boolean) {
         if (!Util.isLoggedIn()) {
-            notify("You must be logged in to like playlists", "error");
+            notify("You must be logged in to like playlists", NotificationType.error);
             return false;
         }
         if (isEnabled) {
@@ -151,7 +152,7 @@ export class PlaylistActions {
             QueueManager.setContextQueue(playlist.tracks!.map(t => t.track_id));
             const track = playlist.tracks!.find(t => t.track_id === trackId);
             if (!track) {
-                notify("This track could not be found in this playlist", "error");
+                notify("This track could not be found in this playlist", NotificationType.error);
                 return;
             }
             PlayManager.addStreamClientIfNotExists(track.track_id, track.track?.length ?? 0);
@@ -166,9 +167,9 @@ export class PlaylistActions {
         });
         Util.removeModal();
         if (res.code !== 200) {
-            notify(getErrorMessage(res), "error");
+            notify(getErrorMessage(res), NotificationType.error);
             return;
         }
-        notify("Added album to playlist(s)", "success");
+        notify("Added album to playlist(s)", NotificationType.success);
     }
 }

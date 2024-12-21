@@ -15,6 +15,7 @@ import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {Notification} from "../Models/DbModels/Notification.ts";
 import {LydaApi} from "../Api/LydaApi.ts";
 import {Images} from "../Enums/Images.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class UserActions {
     static updateImagesWithSource(newSrc: string, oldSrc: string) {
@@ -43,12 +44,12 @@ export class UserActions {
             const file = fileInput.files![0];
             try {
                 await MediaUploader.upload(MediaFileType.userAvatar, user.id, file)
-                notify("Avatar updated", "success");
+                notify("Avatar updated", NotificationType.success);
                 const newSrc = await Util.getUserAvatar(user.id);
                 UserActions.updateImagesWithSource(newSrc, avatar.value);
                 avatar.value = newSrc;
             } catch (e: any) {
-                notify(`Failed to upload avatar: ${e}`, "error");
+                notify(`Failed to upload avatar: ${e}`, NotificationType.error);
                 return;
             } finally {
                 loading.value = false;
@@ -66,7 +67,7 @@ export class UserActions {
             });
             loading.value = false;
             if (response.code === 200) {
-                notify("Avatar removed", "success");
+                notify("Avatar removed", NotificationType.success);
                 UserActions.updateImagesWithSource(Images.DEFAULT_AVATAR, avatar.value);
                 avatar.value = Images.DEFAULT_BANNER;
             }
@@ -90,12 +91,12 @@ export class UserActions {
 
             try {
                 await MediaUploader.upload(MediaFileType.userBanner, user.id, file);
-                notify("Banner updated", "success");
+                notify("Banner updated", NotificationType.success);
                 const newSrc = await Util.getUserBanner(user.id);
                 UserActions.updateImagesWithSource(newSrc, banner.value);
                 banner.value = newSrc;
             } catch (e: any) {
-                notify(`Failed to upload banner: ${e}`, "error");
+                notify(`Failed to upload banner: ${e}`, NotificationType.error);
                 return;
             } finally {
                 loading.value = false;
@@ -114,11 +115,11 @@ export class UserActions {
                 });
                 loading.value = false;
                 if (response.code === 200) {
-                    notify("Banner removed", "success");
+                    notify("Banner removed", NotificationType.success);
                     UserActions.updateImagesWithSource(Images.DEFAULT_BANNER, banner.value);
                     banner.value = Images.DEFAULT_BANNER;
                 } else {
-                    notify(`Failed to remove banner: ${response.data.error}`, "error");
+                    notify(`Failed to remove banner: ${response.data.error}`, NotificationType.error);
                 }
             },
             () => {}, Icons.WARNING
@@ -200,7 +201,7 @@ export class UserActions {
 
         const res = await Api.postAsync(ApiRoutes.updateUserSetting, { setting: UserSettings.theme, value: themeName });
         if (res.code !== 200) {
-            notify("Failed to update theme", "error");
+            notify("Failed to update theme", NotificationType.error);
         }
     }
 
@@ -210,7 +211,7 @@ export class UserActions {
             value
         });
         if (res.code !== 200) {
-            notify("Failed to update user setting", "error");
+            notify("Failed to update user setting", NotificationType.error);
             return false;
         }
         return true;
@@ -243,7 +244,7 @@ export class UserActions {
     static async unverifyUser(id: number) {
         const res = await Api.postAsync(ApiRoutes.unverifyUser, { id });
         if (res.code !== 200) {
-            notify("Failed to unverify user", "error");
+            notify("Failed to unverify user", NotificationType.error);
             return false;
         }
         return true;
@@ -252,7 +253,7 @@ export class UserActions {
     static async verifyUser(id: number) {
         const res = await Api.postAsync(ApiRoutes.verifyUser, { id });
         if (res.code !== 200) {
-            notify("Failed to verify user", "error");
+            notify("Failed to verify user", NotificationType.error);
             return false;
         }
         return true;

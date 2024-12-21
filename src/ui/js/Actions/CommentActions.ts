@@ -2,12 +2,13 @@ import {Api} from "../Api/Api.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {getErrorMessage} from "../Classes/Util.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class CommentActions {
     static async getPotentiallyHarmful() {
         const res = await Api.getAsync<Comment[]>(ApiRoutes.getPotentiallyHarmful);
         if (res.code !== 200) {
-            notify("Error while trying to get comments: " + getErrorMessage(res), "error");
+            notify("Error while trying to get comments: " + getErrorMessage(res), NotificationType.error);
             return [];
         }
         return res.data;
@@ -16,7 +17,7 @@ export class CommentActions {
     static async hideComment(id: number) {
         const res = await Api.postAsync(ApiRoutes.hideComment, {id});
         if (res.code !== 200) {
-            notify("Error while trying to hide comment: " + getErrorMessage(res), "error");
+            notify("Error while trying to hide comment: " + getErrorMessage(res), NotificationType.error);
             return false;
         }
         return true;
@@ -25,7 +26,7 @@ export class CommentActions {
     static async unhideComment(id: number) {
         const res = await Api.postAsync(ApiRoutes.unhideComment, {id});
         if (res.code !== 200) {
-            notify("Error while trying to unhide comment: " + getErrorMessage(res), "error");
+            notify("Error while trying to unhide comment: " + getErrorMessage(res), NotificationType.error);
             return false;
         }
         return true;
@@ -34,7 +35,7 @@ export class CommentActions {
     static async markSafe(id: number) {
         const res = await Api.postAsync(ApiRoutes.markCommentSafe, {id});
         if (res.code !== 200) {
-            notify("Error while trying to mark comment as safe: " + getErrorMessage(res), "error");
+            notify("Error while trying to mark comment as safe: " + getErrorMessage(res), NotificationType.error);
             return false;
         }
         return true;
@@ -43,7 +44,7 @@ export class CommentActions {
     static async markUnsafe(id: number) {
         const res = await Api.postAsync(ApiRoutes.markCommentUnsafe, {id});
         if (res.code !== 200) {
-            notify("Error while trying to mark comment as unsafe: " + getErrorMessage(res), "error");
+            notify("Error while trying to mark comment as unsafe: " + getErrorMessage(res), NotificationType.error);
             return false;
         }
         return true;

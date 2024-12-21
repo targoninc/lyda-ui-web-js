@@ -6,6 +6,7 @@ import {PlayManager} from "../Streaming/PlayManager.ts";
 import {navigate, reload} from "../Routing/Router.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {currentUser, navInitialized} from "../state.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class AuthActions {
     static resetUiState() {
@@ -26,9 +27,8 @@ export class AuthActions {
         AuthActions.resetUiState();
         const res = await Api.postAsync(ApiRoutes.logout);
         if (res.code === 200) {
-            currentUser.value = null;
-            reload();
-            notify("Logged out!", "success");
+            window.location.reload();
+            notify("Logged out!", NotificationType.success);
         }
         return res;
     }
@@ -36,9 +36,10 @@ export class AuthActions {
     static async logOutWithRedirect() {
         let r = await AuthActions.logOut();
         if (r.code === 200) {
+            window.location.reload();
             navigate("login");
         } else {
-            notify("Failed to log out. Please try again later.", "error");
+            notify("Failed to log out. Please try again later.", NotificationType.error);
         }
     }
 

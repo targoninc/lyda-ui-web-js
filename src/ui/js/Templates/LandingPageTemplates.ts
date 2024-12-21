@@ -13,6 +13,7 @@ import {Api, ApiResponse} from "../Api/Api.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {navigate} from "../Routing/Router.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export interface AuthData {
     termsOfService: boolean;
@@ -184,7 +185,7 @@ export class LandingPageTemplates {
             if (res.code === 200) {
                 step.value = "complete";
             } else {
-                notify(`Failed to register: ${res.data.error}`, "error");
+                notify(`Failed to register: ${res.data.error}`, NotificationType.error);
                 step.value = "email";
             }
         });
@@ -210,7 +211,7 @@ export class LandingPageTemplates {
 
     static loggingInBox(step: Signal<string>, user: Signal<AuthData>) {
         AuthApi.login(user.value.email, user.value.password, user.value.mfaCode, (data: { user: User }) => {
-            notify("Logged in as " + data.user.username, "success");
+            notify("Logged in as " + data.user.username, NotificationType.success);
             AuthApi.user(data.user.id, (user: User) => {
                 finalizeLogin(step, user);
             });
@@ -356,10 +357,10 @@ export class LandingPageTemplates {
                             onclick: async () => {
                                 const res = await AuthApi.requestPasswordReset(email.value);
                                 if (res.code === 200) {
-                                    notify("Password reset requested, check your email", "success");
+                                    notify("Password reset requested, check your email", NotificationType.success);
                                     step.value = "password-reset-requested";
                                 } else {
-                                    notify(`Failed to reset password: ${res.data.error}`, "error");
+                                    notify(`Failed to reset password: ${res.data.error}`, NotificationType.error);
                                     errors.value = [res.data.error];
                                 }
                             },

@@ -5,6 +5,7 @@ import {Num} from "./Helpers/Num.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {signal} from "../../fjsc/src/signals.ts";
 import {getErrorMessage} from "./Util.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class StatisticsWrapper {
     static async getStatistics() {
@@ -21,7 +22,7 @@ export class StatisticsWrapper {
         const chart = signal(template([], []));
         Api.getAsync<any[]>(endpoint).then((res) => {
             if (res.code !== 200) {
-                notify(getErrorMessage(res), "error");
+                notify(getErrorMessage(res), NotificationType.error);
                 return;
             }
             if (reverse) {

@@ -21,6 +21,7 @@ import {navigate} from "../Routing/Router.ts";
 import {InputType} from "../../fjsc/src/Types.ts";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class PlaylistTemplates {
     static async addTrackToPlaylistModal(track: Track, playlists: Playlist[]) {
@@ -330,7 +331,7 @@ export class PlaylistTemplates {
             .attributes("playlist_id", playlist.id)
             .id(playlist.id)
             .onclick(async () => {
-                notify("Starting playlist " + playlist.id, "info");
+                notify("Starting playlist " + playlist.id, NotificationType.info);
                 PlayManager.playFrom("playlist", playlist.title, playlist.id);
                 QueueManager.setContextQueue(playlist.tracks!.map(t => t.track_id));
                 const firstTrack = playlist.tracks![0];

@@ -15,6 +15,7 @@ import {User} from "../Models/DbModels/User.ts";
 import {CollaboratorType} from "../Models/DbModels/CollaboratorType.ts";
 import {TrackCollaborator} from "../Models/DbModels/TrackCollaborator.ts";
 import {Notification} from "../Models/DbModels/Notification.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class Ui {
     static validUrlPaths = {
@@ -81,7 +82,7 @@ export class Ui {
             LydaCache.set("page/" + page, new CacheItem(pageContent));
             return pageContent;
         } else {
-            notify("Could not load page.", "error");
+            notify("Could not load page.", NotificationType.error);
             throw new Error(`No content for page ${page}.`);
         }
     }
@@ -209,7 +210,7 @@ export class Ui {
     }
 }
 
-export function notify(text: string, type = "info", time = 7000) {
+export function notify(text: string, type = NotificationType.info, time = 7000) {
     const notifications = document.querySelector(".notifications");
     const notification = GenericTemplates.notification(type, text);
     const previousNotifications = document.querySelectorAll(".notification") as NodeListOf<HTMLElement>;
