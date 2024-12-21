@@ -258,11 +258,11 @@ export class Util {
         }
     }
 
-    static arrayPropertyMatchesUser(array: any[], property: any, user: User|null) {
-        if (!array || !property || !user) {
+    static arrayPropertyMatchesUser(array: any[], property: any) {
+        if (!array || !property || !currentUser.value) {
             return false;
         }
-        return array.some((e) => e[property] === user.id);
+        return array.some((e) => e[property] === currentUser.value!.id);
     }
 
     static async getUserByNameAsync(name: string) {

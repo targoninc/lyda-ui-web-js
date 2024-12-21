@@ -264,7 +264,7 @@ export class AlbumTemplates {
                             .classes("flex-v", "small-gap")
                             .children(
                                 AlbumTemplates.title(album.title, album.id, icons),
-                                UserTemplates.userWidget(album.user, Util.arrayPropertyMatchesUser(album.user.follows ?? [], "following_user_id", user), [], [], UserWidgetContext.card),
+                                UserTemplates.userWidget(album.user, Util.arrayPropertyMatchesUser(album.user.follows ?? [], "following_user_id"), [], [], UserWidgetContext.card),
                                 create("span")
                                     .classes("date", "text-small", "nopointer", "color-dim")
                                     .text(Time.ago(album.release_date))
@@ -275,7 +275,7 @@ export class AlbumTemplates {
                     .classes("stats-container", "flex", "rounded")
                     .children(
                         StatisticsTemplates.likesIndicator("album", album.id, album.likes.length,
-                            Util.arrayPropertyMatchesUser(album.likes, "user_id", user)),
+                            Util.arrayPropertyMatchesUser(album.likes, "user_id")),
                         StatisticsTemplates.likeListOpener(album.likes, album.user),
                     ).build()
             ).build();
@@ -428,7 +428,7 @@ export class AlbumTemplates {
                             .classes("title", "wordwrap")
                             .text(album.title)
                             .build(),
-                        UserTemplates.userWidget(a_user, Util.arrayPropertyMatchesUser(a_user.follows ?? [], "following_user_id", user), [], [], UserWidgetContext.singlePage)
+                        UserTemplates.userWidget(a_user, Util.arrayPropertyMatchesUser(a_user.follows ?? [], "following_user_id"), [], [], UserWidgetContext.singlePage)
                     ).build(),
                 create("div")
                     .classes("album-info-container", "flex")
@@ -465,7 +465,7 @@ export class AlbumTemplates {
                                     .classes("stats-container", "flex", "rounded")
                                     .children(
                                         StatisticsTemplates.likesIndicator("album", album.id, album.likes.length,
-                                            Util.arrayPropertyMatchesUser(album.likes, "user_id", user)),
+                                            Util.arrayPropertyMatchesUser(album.likes, "user_id")),
                                         StatisticsTemplates.likeListOpener(album.likes, user),
                                     ).build(),
                             ).build()

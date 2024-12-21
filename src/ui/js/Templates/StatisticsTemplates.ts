@@ -104,7 +104,7 @@ export class StatisticsTemplates {
                     avatar.value = avatarUrl;
                 });
             }
-            return UserTemplates.userWidget(item.user, Util.arrayPropertyMatchesUser(item.user.follows, "following_user_id", user), [], [], UserWidgetContext.list);
+            return UserTemplates.userWidget(item.user, Util.arrayPropertyMatchesUser(item.user.follows, "following_user_id"), [], [], UserWidgetContext.list);
         });
 
         return create("div")

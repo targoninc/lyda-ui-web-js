@@ -249,7 +249,7 @@ export class PlayerTemplates {
                     navigate("track/" + track.id);
                 }).build(),
             ...icons,
-            UserTemplates.userWidget(trackUser, Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "following_user_id", user),
+            UserTemplates.userWidget(trackUser, Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "following_user_id"),
                 [], ["align-center"], UserWidgetContext.player),
             PlayerTemplates.playingFrom(),
             await PlayerTemplates.moreMenu(track, isPrivate, user, trackList),
@@ -257,8 +257,8 @@ export class PlayerTemplates {
                 .classes("flex", "align-center", "hideOnMidBreakpoint")
                 .children(
                     StatisticsTemplates.likesIndicator("track", track.id, track.likes.length,
-                        Util.arrayPropertyMatchesUser(track.likes, "userId", user)),
-                    isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, Util.arrayPropertyMatchesUser(track.reposts, "userId", user)),
+                        Util.arrayPropertyMatchesUser(track.likes, "user_id")),
+                    isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, Util.arrayPropertyMatchesUser(track.reposts, "user_id")),
                     CommentTemplates.commentsIndicator(track.id, track.comments.length),
                     ...await QueueTemplates.queue(trackList)
                 ).build()
@@ -282,8 +282,8 @@ export class PlayerTemplates {
                     .classes("popout-above", "card", "flex-v")
                     .children(
                         StatisticsTemplates.likesIndicator("track", track.id, track.likes!.length,
-                            Util.arrayPropertyMatchesUser(track.likes!, "userId", user)),
-                        isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts!.length, Util.arrayPropertyMatchesUser(track.reposts!, "userId", user)),
+                            Util.arrayPropertyMatchesUser(track.likes!, "user_id")),
+                        isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts!.length, Util.arrayPropertyMatchesUser(track.reposts!, "user_id")),
                         CommentTemplates.commentsIndicator(track.id, track.comments!.length),
                         ...await QueueTemplates.queue(trackList)
                     ).build())
