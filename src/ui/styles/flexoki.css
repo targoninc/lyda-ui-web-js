@@ -22,9 +22,11 @@
     --color-8-dark-rgb: 102, 128, 11;
     --filter-8: brightness(0) saturate(100%) invert(29%) sepia(96%) saturate(1386%) hue-rotate(53deg) brightness(107%) contrast(91%);
     --color-9: #DAD8CE;
-    --blue: #4385BE;
+    --blue: #1a91f8;
+    --blue-dark: #316fd1;
 
     --fjsc-interactive-background: var(--color-3);
+    --fjsc-interactive-color: var(--color-5);
     --fjsc-interactive-color-active: var(--color-5);
 }
 

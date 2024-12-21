@@ -63,11 +63,10 @@ export class StreamingUpdater {
         }
         footer.innerHTML = "";
         if (footer.querySelector("#permanent-player") === null) {
-            const user = await Util.getUserAsync();
             if (!trackInfoTmp.track.user) {
                 throw new Error(`Track ${trackInfoTmp.track.id} has no user`);
             }
-            const player = await PlayerTemplates.player(trackInfoTmp.track, trackInfoTmp.track.user, user);
+            const player = await PlayerTemplates.player(trackInfoTmp.track, trackInfoTmp.track.user);
             footer.appendChild(player);
         }
     }
@@ -134,17 +133,6 @@ export class StreamingUpdater {
                 text && (text.innerText = "Queue");
             }
         }
-
-        const queueContainer = document.querySelector(".queue");
-        if (queueContainer) {
-            const queue = QueueManager.getManualQueue();
-            const tasks = queue.map((id: number) => PlayManager.getTrackData(id));
-            const trackList = await Promise.all(tasks);
-            // TODO: Fix queue updates :D
-            /*const queueList = queueContainer.querySelector(".queue-list");
-            const newQueueContainer = await QueueTemplates.queue(trackList);
-            queueContainer.replaceWith(newQueueContainer);*/
-        }
     }
 
     static async updatePlayState() {
@@ -196,28 +184,5 @@ export class StreamingUpdater {
         StreamingUpdater.updatePlayingIndicators();
         await StreamingUpdater.updatePermanentPlayer();
         updatingPlayState.value = false;
-    }
-
-    static enableBuffering() {
-        const targets = document.querySelectorAll(".audio-player-toggle");
-        for (const target of targets) {
-            const streamClient = PlayManager.getStreamClient(parseInt(target.id));
-            if (streamClient === undefined) {
-                continue;
-            }
-            const img = target.querySelector("img");
-            const text = target.querySelector("span");
-            if (!img || !text) {
-                continue;
-            }
-            img.src = Icons.SPINNER;
-            img.alt = "Buffering";
-            img.classList.add("spinner-animation");
-            text.innerText = "Buffering";
-        }
-    }
-
-    static disableBuffering() {
-        StreamingUpdater.updatePlayState().then();
     }
 }

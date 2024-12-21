@@ -160,7 +160,7 @@ export class PlayerTemplates {
             ).build();
     }
 
-    static async player(track: Track, trackUser: User, user: User) {
+    static async player(track: Track, trackUser: User) {
         return create("div")
             .classes("flex-v")
             .id("permanent-player")
@@ -175,7 +175,7 @@ export class PlayerTemplates {
                         create("div")
                             .classes("flex")
                             .children(
-                                ...await PlayerTemplates.bottomTrackInfo(track, trackUser, user),
+                                ...await PlayerTemplates.bottomTrackInfo(track, trackUser),
                                 ...PlayerTemplates.audioControls()
                             ).build(),
                         create("div")
@@ -213,7 +213,7 @@ export class PlayerTemplates {
             }).build();
     }
 
-    static async bottomTrackInfo(track: Track, trackUser: User, user: User) {
+    static async bottomTrackInfo(track: Track, trackUser: User) {
         const icons = [];
         const isPrivate = track.visibility !== "public";
         if (isPrivate) {

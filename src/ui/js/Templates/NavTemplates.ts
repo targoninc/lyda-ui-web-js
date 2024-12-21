@@ -161,8 +161,14 @@ export class NavTemplates {
         return create("div")
             .classes("widest-fill-right")
             .children(
-                GenericTemplates.action(Icons.LOGIN, "Log in", "login", async () => {
-                    navigate("login");
+                FJSC.button({
+                    text: "Log in",
+                    icon: { icon: "login" },
+                    classes: ["special"],
+                    disabled: compute((r) => (r && r.path === "login") as boolean, router.currentRoute),
+                    onclick: async () => {
+                        navigate("login");
+                    }
                 })
             ).build();
     }

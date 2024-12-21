@@ -128,9 +128,14 @@ export class LandingPageTemplates {
                             };
                         }, true, () => {
                         }),
-                        GenericTemplates.action(Icons.RIGHT, "Submit", "loginTrigger", () => {
-                            step.value = "logging-in";
-                        }, [], ["secondary", "positive"])
+                        FJSC.button({
+                            text: "Submit",
+                            icon: { icon: "login" },
+                            classes: ["positive"],
+                            onclick: () => {
+                                step.value = "logging-in";
+                            }
+                        }),
                     ).build(),
             ).build();
     }

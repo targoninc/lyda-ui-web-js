@@ -27,6 +27,9 @@
     --color-attention: var(--color-1);
     --color-state: var(--green);
     --blue: #317eef;
+    --blue-dark: #2a6ed9;
+    --purple: #a855f7;
+    --purple-dark: #8a4dd9;
     --verified: var(--blue);
     --stats-1: var(--color-1);
     --stats-2: color-mix(in oklab, var(--color-1) 75%, var(--red) 25%);
@@ -430,6 +433,26 @@ button.positive {
 button.positive:hover {
     border-color: var(--green);
     background: var(--green-dark);
+}
+
+button.special {
+    border-color: var(--blue);
+    background: var(--blue-dark);
+}
+
+@keyframes special-glow {
+    0% {
+        box-shadow: 0 0 10px -5px var(--blue);
+    }
+    100% {
+        box-shadow: 0 0 30px -7px var(--blue);
+    }
+}
+
+button.special:hover {
+    border-color: var(--blue-dark);
+    background: var(--blue);
+    animation: special-glow 2s ease infinite alternate;
 }
 
 .fadeIn {

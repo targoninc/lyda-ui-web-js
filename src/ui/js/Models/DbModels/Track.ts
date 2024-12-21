@@ -8,6 +8,8 @@ import {User} from "./User.js";
 import {Repost} from "./Repost.js";
 
 export interface Track {
+    repost_user_id?: number;
+    repost?: Repost;
     user?: User;
     comments?: Comment[];
     likes?: TrackLike[];

@@ -308,21 +308,18 @@ export class TrackTemplates {
             throw new Error(`Repost has no user`);
         }
 
-        return create("div")
-            .classes("pill", "padded-inline", "flex", "rounded-max", "repost-indicator", "clickable", "fakeButton")
-            .onclick(() => {
+        return FJSC.button({
+            text: "@" + repost.user.username,
+            icon: {
+                icon: Icons.REPOST,
+                classes: ["inline-icon", "svg"],
+                isUrl: true,
+                adaptive: true },
+            classes: ["special", "rounded-max", "align-center", "text-small"],
+            onclick: () => {
                 navigate("profile/" + repost.user!.username);
-            })
-            .children(
-                create("div")
-                    .classes("align-center", "text-small", "nopointer")
-                    .text("@" + repost.user.username)
-                    .build(),
-                create("img")
-                    .classes("inline-icon", "svg", "align-center", "nopointer")
-                    .src(Icons.REPOST)
-                    .build(),
-            ).build();
+            }
+        });
     }
 
     static feedTrack(track: Track, user: User) {
@@ -370,7 +367,7 @@ export class TrackTemplates {
                                                     .classes("flex")
                                                     .children(
                                                         TrackTemplates.title(track.title, track.id, icons),
-                                                        //track.repost ? TrackTemplates.repostIndicator(track.repost) : null,
+                                                        track.repost ? TrackTemplates.repostIndicator(track.repost) : null,
                                                     ).build(),
                                                 create("div")
                                                     .classes("flex")
