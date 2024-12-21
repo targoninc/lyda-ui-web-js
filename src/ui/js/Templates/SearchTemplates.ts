@@ -36,12 +36,12 @@ export class SearchTemplates {
         return create("div")
             .classes("search", "relative", "flex-v", "align-center")
             .children(
-                SearchTemplates.searchInput(results, selectedResult, currentSearch),
+                SearchTemplates.searchInput(results, selectedResult, currentSearch, resultsShown),
                 SearchTemplates.searchResults(results, selectedResult, resultsShown, currentSearch, context)
             ).build();
     }
 
-    static searchInput(results: Signal<SearchResult[]>, selectedResult: Signal<number | null>, currentSearch: Signal<string>) {
+    static searchInput(results: Signal<SearchResult[]>, selectedResult: Signal<number | null>, currentSearch: Signal<string>, resultsShown: Signal<boolean>) {
         const debounce = 200;
         let timeout: Timer | undefined;
 
@@ -75,6 +75,9 @@ export class SearchTemplates {
                     .classes("fjsc", "search-input")
                     .placeholder("Search")
                     .value(currentSearch)
+                    .onclick(() => {
+                        resultsShown.value = true;
+                    })
                     .onkeydown((e: KeyboardEvent) => {
                         const list = results.value;
                         const pressedKey = e.key;
@@ -90,6 +93,8 @@ export class SearchTemplates {
                         const pressedKey = e.key;
                         if (pressedKey === "Enter") {
                             if (selectedResult.value === null) {
+                                resultsShown.value = false;
+                                navigate("search?q=" + currentSearch.value);
                                 return;
                             }
                             const result = results.value.find(r => r.id === selectedResult.value);
@@ -226,8 +231,7 @@ export class SearchTemplates {
                             return create("div")
                                 .classes("flex-v", "small-gap", "card", "search-results-card")
                                 .children(
-                                    create("span")
-                                        .classes("search-result-header")
+                                    create("h2")
                                         .text(group)
                                         .build(),
                                     ...groups[group].sort((a, b) => a.exactMatch && !b.exactMatch ? 1 : b.exactMatch && !a.exactMatch ? -1 : 0).map(result => {
