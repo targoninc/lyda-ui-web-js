@@ -37,7 +37,7 @@ export class SearchTemplates {
             .classes("search", "relative", "flex-v", "align-center")
             .children(
                 SearchTemplates.searchInput(results, selectedResult, currentSearch),
-                SearchTemplates.searchResults(results, selectedResult, resultsShown, context)
+                SearchTemplates.searchResults(results, selectedResult, resultsShown, currentSearch, context)
             ).build();
     }
 
@@ -150,15 +150,15 @@ export class SearchTemplates {
         selectedResult.value = list[index - 1].id;
     }
 
-    static searchResults(results: Signal<SearchResult[]>, selectedResult: Signal<number | null>, resultsShown: Signal<boolean>, context: SearchContext): Signal<AnyElement> {
+    static searchResults(results: Signal<SearchResult[]>, selectedResult: Signal<number | null>, resultsShown: Signal<boolean>, currentSearch: Signal<string>, context: SearchContext): Signal<AnyElement> {
         if (context === SearchContext.navBar) {
-            return compute((r) => SearchTemplates.searchResultsList(r, selectedResult, resultsShown), results);
+            return compute((r) => SearchTemplates.searchResultsList(r, selectedResult, resultsShown, currentSearch), results);
         } else {
             return compute((r) => SearchTemplates.searchResultsCards(r, selectedResult, resultsShown), results);
         }
     }
 
-    static searchResultsList(searchResults: SearchResult[], selectedResult: Signal<number | null>, resultsShown: Signal<boolean>) {
+    static searchResultsList(searchResults: SearchResult[], selectedResult: Signal<number | null>, resultsShown: Signal<boolean>, currentSearch: Signal<string>) {
         const exactMatches = searchResults.filter(r => r.exactMatch);
         const partialMatches = searchResults.filter(r => !r.exactMatch);
         const showClass = compute((s: boolean): string => s ? "_" : "hidden", resultsShown);
@@ -169,6 +169,19 @@ export class SearchTemplates {
                 create("div")
                     .classes("flex-v", "nogap")
                     .children(
+                        create("div")
+                            .classes("padded")
+                            .children(
+                                FJSC.button({
+                                    icon: { icon: "search" },
+                                    text: "Open search",
+                                    classes: ["positive"],
+                                    onclick: () => {
+                                        resultsShown.value = false;
+                                        navigate("search?q=" + currentSearch.value);
+                                    }
+                                }),
+                            ).build(),
                         ifjs(exactMatches.length > 0,
                             create("span")
                                 .classes("search-result-header")
