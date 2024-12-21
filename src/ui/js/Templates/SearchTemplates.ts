@@ -104,7 +104,7 @@ export class SearchTemplates {
                                 return;
                             }
                             resultsShown.value = false;
-                            navigate(result.type + "/" + result.id);
+                            navigate(result.url);
                             return;
                         }
 
