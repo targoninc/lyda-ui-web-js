@@ -252,12 +252,7 @@ export class PlayerTemplates {
             UserTemplates.userWidget(trackUser, Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "following_user_id", user),
                 [], ["align-center"], UserWidgetContext.player),
             PlayerTemplates.playingFrom(),
-            PlayerTemplates.playerIconButton({
-                icon: "more_horiz",
-                adaptive: true,
-            }, async () => {
-                console.log("Opening menu");
-            }, "Open menu", ["showOnMidBreakpoint"]),
+            await PlayerTemplates.moreMenu(track, isPrivate, user, trackList),
             create("div")
                 .classes("flex", "align-center", "hideOnMidBreakpoint")
                 .children(
@@ -268,6 +263,31 @@ export class PlayerTemplates {
                     ...await QueueTemplates.queue(trackList)
                 ).build()
         ];
+    }
+
+    private static async moreMenu(track: Track, isPrivate: boolean, user: User, trackList: { track: Track }[]) {
+        const menuShown = signal(false);
+        const activeClass = compute((m: boolean): string => m ? "active" : "_", menuShown);
+
+        return create("div")
+            .classes("relative", "player-button")
+            .children(
+                PlayerTemplates.playerIconButton({
+                    icon: "more_horiz",
+                    adaptive: true,
+                }, async () => {
+                    menuShown.value = !menuShown.value;
+                }, "Open menu", ["showOnMidBreakpoint", activeClass]),
+                ifjs(menuShown, create("div")
+                    .classes("popout-above", "card", "flex-v")
+                    .children(
+                        StatisticsTemplates.likesIndicator("track", track.id, track.likes!.length,
+                            Util.arrayPropertyMatchesUser(track.likes!, "userId", user)),
+                        isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts!.length, Util.arrayPropertyMatchesUser(track.reposts!, "userId", user)),
+                        CommentTemplates.commentsIndicator(track.id, track.comments!.length),
+                        ...await QueueTemplates.queue(trackList)
+                    ).build())
+            ).build();
     }
 
     static audioControls() {
