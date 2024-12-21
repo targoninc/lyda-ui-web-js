@@ -1,4 +1,4 @@
-import {create} from "../../fjsc/src/f2.ts";
+import {create, ifjs} from "../../fjsc/src/f2.ts";
 import {AuthActions} from "../Actions/AuthActions.ts";
 import {LandingPageTemplates} from "./LandingPageTemplates.ts";
 import {UserTemplates} from "./UserTemplates.ts";
@@ -6,7 +6,7 @@ import {Api} from "../Api/Api.ts";
 import {Util} from "../Classes/Util.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {Follow} from "../Models/DbModels/Follow.ts";
-import {signal} from "../../fjsc/src/signals.ts";
+import {compute, signal} from "../../fjsc/src/signals.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {SearchTemplates} from "./SearchTemplates.ts";
 
@@ -200,15 +200,15 @@ export class PageTemplates {
 
     static notFoundPage() {
         const randomUserWidget = signal(create("span").text("loading...").build());
+        const user = signal<User|null>(null);
+        const following = compute(u => !!(u && Util.arrayPropertyMatchesUser(u.follows ?? [], "following_user_id")), user);
+
         Api.getAsync(ApiRoutes.randomUser).then(async data => {
             if (data.code !== 200) {
                 randomUserWidget.value = create("span").text("Failed to load random user").build();
                 return;
             }
-            const user = data.data as User;
-            const selfUser = await Util.getUserAsync();
-            const following = user.follows?.some((f: Follow) => selfUser ? f.following_user_id === selfUser.id : false) ?? false;
-            randomUserWidget.value = UserTemplates.userWidget(user, following);
+            user.value = data.data as User;
         });
 
         return create("div")
@@ -224,9 +224,12 @@ export class PageTemplates {
                 create("span")
                     .text("If you were trying to find a user, here's a random one:")
                     .build(),
-                randomUserWidget,
-            )
-            .build();
+                ifjs(user, create("div")
+                    .classes("flex")
+                    .children(
+                        UserTemplates.userWidget(user, following)
+                    ).build()),
+            ).build();
     }
 
     static unapprovedTracksPage() {

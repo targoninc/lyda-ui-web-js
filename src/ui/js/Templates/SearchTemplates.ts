@@ -36,12 +36,12 @@ export class SearchTemplates {
         return create("div")
             .classes("search", "relative", "flex-v", "align-center")
             .children(
-                SearchTemplates.searchInput(results, selectedResult, currentSearch, resultsShown),
+                SearchTemplates.searchInput(results, selectedResult, currentSearch, resultsShown, context),
                 SearchTemplates.searchResults(results, selectedResult, resultsShown, currentSearch, context)
             ).build();
     }
 
-    static searchInput(results: Signal<SearchResult[]>, selectedResult: Signal<number | null>, currentSearch: Signal<string>, resultsShown: Signal<boolean>) {
+    static searchInput(results: Signal<SearchResult[]>, selectedResult: Signal<number | null>, currentSearch: Signal<string>, resultsShown: Signal<boolean>, context: SearchContext) {
         const debounce = 200;
         let timeout: Timer | undefined;
 
@@ -65,10 +65,11 @@ export class SearchTemplates {
             });
             await Promise.all(promises);
         }
+        const contextClasses = context === SearchContext.searchPage ? ["fullWidth"] : []
         getResults().then();
 
         return create("div")
-            .classes("search-input-container", "relative")
+            .classes("search-input-container", "relative", ...contextClasses)
             .children(
                 GenericTemplates.icon("search", true, ["inline-icon", "svg", "search-icon"]),
                 create("input")
@@ -181,7 +182,7 @@ export class SearchTemplates {
                             .classes("padded")
                             .children(
                                 FJSC.button({
-                                    icon: { icon: "search" },
+                                    icon: { icon: "manage_search" },
                                     text: "Open search",
                                     classes: ["positive"],
                                     onclick: () => {
@@ -228,6 +229,14 @@ export class SearchTemplates {
                 create("div")
                     .classes("flex")
                     .children(
+                        ifjs(searchResults.length === 0, create("div")
+                            .classes("flex-v")
+                            .children(
+                                create("span")
+                                    .classes("color-dim")
+                                    .text("Nothing here. Try a different search?")
+                                    .build()
+                            ).build()),
                         ...Object.keys(groups).map(group => {
                             return create("div")
                                 .classes("flex-v", "small-gap", "card", "search-results-card")

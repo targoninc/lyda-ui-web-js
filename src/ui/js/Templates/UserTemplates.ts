@@ -36,7 +36,7 @@ import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 import {currentUser} from "../state.ts";
 
 export class UserTemplates {
-    static userWidget(user: User|Signal<User|null>, following: boolean, extraAttributes: HtmlPropertyValue[] = [], extraClasses: StringOrSignal[] = [], context: UserWidgetContext = UserWidgetContext.unknown) {
+    static userWidget(user: User|Signal<User|null>, following: boolean|Signal<boolean>, extraAttributes: HtmlPropertyValue[] = [], extraClasses: StringOrSignal[] = [], context: UserWidgetContext = UserWidgetContext.unknown) {
         const out = signal<AnyElement>(nullElement());
 
         const getWidget = (newUser: User|null) => {
@@ -63,7 +63,7 @@ export class UserTemplates {
         return out;
     }
 
-    private static userWidgetInternal(context: UserWidgetContext, user: User, base: DomNode, following: boolean) {
+    private static userWidgetInternal(context: UserWidgetContext, user: User, base: DomNode, following: boolean|Signal<boolean>) {
         const maxDisplaynameLength = [UserWidgetContext.singlePage, UserWidgetContext.list].includes(context) ? 100 : 15;
         const avatarState = signal(Images.DEFAULT_AVATAR);
         if (user.has_avatar) {
@@ -74,7 +74,10 @@ export class UserTemplates {
         const activeClass = compute((r, p): string => {
             return r && r.path === "profile" && p.name === user.username ? "active" : "_";
         }, router.currentRoute, router.currentParams);
-        const showFollowButton = compute(u => u && u.id && u.id !== user.id && !following, currentUser);
+        if (following.constructor !== Signal) {
+            following = signal(following as boolean);
+        }
+        const showFollowButton = compute(u => u && u.id && u.id !== user.id && !following.value, currentUser);
 
         return base
             .classes("user-widget", "fjsc", activeClass, "round-on-tiny-breakpoint")
@@ -154,8 +157,10 @@ export class UserTemplates {
             .build();
     }
 
-    static followButton(initialFollowing: boolean, user_id: number, noText = false) {
-        const following = signal(initialFollowing);
+    static followButton(following: boolean|Signal<boolean>, user_id: number, noText = false) {
+        if (following.constructor !== Signal) {
+            following = signal(following as boolean);
+        }
 
         return create("div")
             .classes("follow-button", "fakeButton", "clickable", "rounded-max", "flex", "padded-inline")
