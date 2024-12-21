@@ -725,11 +725,10 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     border-radius: var(--fjsc-border-radius-medium);
     overflow: auto;
     backdrop-filter: blur(50px);
-    gap: 0;
     background: color-mix(in oklab, var(--color-3), transparent 30%);
     max-height: 300px;
-    flex-wrap: nowrap;
     box-sizing: border-box;
+    box-shadow: 0 10px 20px 7px var(--color-4);
 }
 
 .search-results-card {
