@@ -102,6 +102,8 @@ export class StreamingUpdater {
                 waveformBars[i]?.classList.remove("active");
             }
         }
+
+        StreamingUpdater.updateBuffers(streamClient.getBufferedLength(), streamClient.duration);
     }
 
     static updateBuffers(bufferedLength: number, duration: number) {

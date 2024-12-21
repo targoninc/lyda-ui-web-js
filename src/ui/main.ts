@@ -37,23 +37,24 @@ export const router = new Router(routes, async (route: Route, params: any) => {
 
     Ui.loadTheme(user).then();
     await Lyda.initPage(params);
-}, async (route: Route, params: any) => {
-    const currentTrackPositionTmp = LydaCache.get<TrackPosition>("currentTrackPosition").content;
-    if (currentTrackPositionTmp) {
-        currentTrackPosition.value = currentTrackPositionTmp;
-    }
-    const currentTrackIdTmp = LydaCache.get<number>("currentTrackId").content;
-    if (currentTrackIdTmp) {
-        currentTrackId.value = currentTrackIdTmp;
-        await PlayManager.initializeTrackAsync(currentTrackIdTmp);
-    }
-}, () => {
+}, () => {}, () => {
     setTimeout(() => {
         console.log("No route found, attempting to redirect to profile");
         const path = window.location.pathname;
         navigate("profile" + path);
     }, 100);
 });
+
+const currentTrackPositionTmp = LydaCache.get<TrackPosition>("currentTrackPosition").content;
+if (currentTrackPositionTmp) {
+    currentTrackPosition.value = currentTrackPositionTmp;
+}
+
+const currentTrackIdTmp = LydaCache.get<number>("currentTrackId").content;
+if (currentTrackIdTmp) {
+    currentTrackId.value = currentTrackIdTmp;
+    await PlayManager.initializeTrackAsync(currentTrackIdTmp);
+}
 
 KeyBinds.initiate();
 UiActions.runMobileCheck();
