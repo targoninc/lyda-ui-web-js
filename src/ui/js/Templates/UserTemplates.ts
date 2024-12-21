@@ -271,8 +271,8 @@ export class UserTemplates {
                 userAvatar.value = avatar;
             });
         }
-        let bannerDeleteButton = GenericTemplates.centeredDeleteButton("banner-delete-button", () => UserActions.deleteBanner(user, userBanner, bannerLoading), ["hidden", "showOnParentHover"]);
-        let avatarDeleteButton = GenericTemplates.centeredDeleteButton("avatar-delete-button", () => UserActions.deleteAvatar(user, userAvatar, avatarLoading), ["showOnParentHover"]);
+        let bannerDeleteButton = GenericTemplates.deleteIconButton("banner-delete-button", () => UserActions.deleteBanner(user, userBanner, bannerLoading));
+        let avatarDeleteButton = GenericTemplates.deleteIconButton("avatar-delete-button", () => UserActions.deleteAvatar(user, userAvatar, avatarLoading));
         const bannerContainer = create("div")
                 .classes("banner-container", "relative", isOwnProfile ? "clickable" : "_", isOwnProfile ? "blurOnParentHover" : "_")
                 .attributes("isOwnProfile", isOwnProfile.toString())
@@ -290,7 +290,18 @@ export class UserTemplates {
             .classes("profile-header")
             .children(
                 bannerContainer,
-                ifjs(isOwnProfile, bannerDeleteButton),
+                ifjs(isOwnProfile, create("div")
+                    .classes("hidden", "showOnParentHover", "centeredInParent", "flex")
+                    .children(
+                        bannerDeleteButton,
+                        FJSC.button({
+                            icon: { icon: "upload" },
+                            classes: ["positive"],
+                            title: "Upload new banner",
+                            text: "",
+                            onclick: e => UserActions.replaceBanner(e, isOwnProfile, user, userBanner, bannerLoading)
+                        })
+                    ).build()),
                 ifjs(bannerLoading, create("div")
                     .classes("loader", "loader-small", "centeredInParent", "hidden")
                     .attributes("id", "banner-loader")
@@ -302,11 +313,7 @@ export class UserTemplates {
                         create("div")
                             .classes("avatar-container", "relative", isOwnProfile ? "pointer" : "_")
                             .attributes("isOwnProfile", isOwnProfile.toString())
-                            .onclick((e) => {
-                                if (isOwnProfile) {
-                                    UserActions.replaceAvatar(e, isOwnProfile, user, userAvatar, avatarLoading).then();
-                                }
-                            })
+                            .onclick(() => UserActions.replaceAvatar(isOwnProfile, user, userAvatar, avatarLoading).then())
                             .onmouseover(() => {
                                 if (!isOwnProfile) {
                                     return;
@@ -328,7 +335,18 @@ export class UserTemplates {
                                     .attributes("src", userAvatar)
                                     .attributes("alt", user.username)
                                     .build(),
-                                ifjs(isOwnProfile, avatarDeleteButton),
+                                ifjs(isOwnProfile, create("div")
+                                    .classes("hidden", "showOnParentHover", "centeredInParent", "flex")
+                                    .children(
+                                        avatarDeleteButton,
+                                        FJSC.button({
+                                            icon: { icon: "upload" },
+                                            classes: ["positive"],
+                                            title: "Upload new avatar",
+                                            text: "",
+                                            onclick: () => UserActions.replaceAvatar(isOwnProfile, user, userAvatar, avatarLoading)
+                                        })
+                                    ).build()),
                                 ifjs(avatarLoading, create("div")
                                     .classes("loader", "loader-small", "centeredInParent", "hidden")
                                     .attributes("id", "avatar-loader")

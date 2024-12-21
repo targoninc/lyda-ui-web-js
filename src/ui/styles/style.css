@@ -842,11 +842,11 @@ td:last-child, th:last-child {
 }
 
 *:hover > .showOnParentHover {
-    display: initial;
+    display: flex;
 }
 
 *:hover > .blurOnParentHover {
-    filter: brightness(0.8);
+    filter: brightness(0.3);
 }
 
 .nogap {

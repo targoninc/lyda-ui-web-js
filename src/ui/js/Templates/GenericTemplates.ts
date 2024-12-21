@@ -353,17 +353,15 @@ export class GenericTemplates {
             ).build();
     }
 
-    static centeredDeleteButton(id: HtmlPropertyValue, callback: Function, extraClasses: string[] = []) {
-        return create("div")
-            .id(id)
-            .classes("delete-button", "fakeButton", "centeredInParent", "clickable", "flex", "padded-inline", "rounded", ...extraClasses)
-            .onclick(callback)
-            .children(
-                create("img")
-                    .classes("inline-icon", "svg", "nopointer")
-                    .attributes("src", Icons.DELETE, "alt", "Delete")
-                    .build()
-            ).build();
+    static deleteIconButton(id: HtmlPropertyValue, callback: Function, extraClasses: string[] = []) {
+        return FJSC.button({
+            id,
+            classes: ["negative", ...extraClasses],
+            onclick: callback,
+            icon: { icon: "delete" },
+            title: "Delete",
+            text: ""
+        });
     }
 
     static card() {

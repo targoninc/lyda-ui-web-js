@@ -29,7 +29,7 @@ export class UserActions {
         }
     }
 
-    static async replaceAvatar(e: Event, isOwnProfile: boolean, user: User, avatar: Signal<string>, loading: Signal<boolean>) {
+    static async replaceAvatar(isOwnProfile: boolean, user: User, avatar: Signal<string>, loading: Signal<boolean>) {
         if (!isOwnProfile) {
             return;
         }
