@@ -87,6 +87,8 @@ export class SearchTemplates {
                         } else if (pressedKey === "ArrowUp") {
                             e.preventDefault();
                             SearchTemplates.selectPreviousResult(selectedResult, list);
+                        } else if (pressedKey === "Escape") {
+                            resultsShown.value = false;
                         }
                     })
                     .onkeyup(async (e: KeyboardEvent) => {
@@ -219,10 +221,8 @@ export class SearchTemplates {
                 delete groups[group];
             }
         });
-        const showClass = compute((s: boolean): string => s ? "_" : "hidden", resultsShown);
 
         return create("div")
-            .classes(showClass)
             .children(
                 create("div")
                     .classes("flex")
