@@ -219,7 +219,7 @@ body {
     pointer-events: none;
 }
 
-button * {
+button > * {
     align-self: center;
 }
 

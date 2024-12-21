@@ -732,6 +732,15 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     box-sizing: border-box;
 }
 
+.search-results-card {
+    width: 500px;
+    max-width: 100%;
+}
+
+.search-result-text {
+    align-items: start;
+}
+
 .search-icon {
     position: absolute;
     top: 50%;
