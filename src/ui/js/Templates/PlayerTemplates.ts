@@ -252,14 +252,12 @@ export class PlayerTemplates {
             UserTemplates.userWidget(trackUser, Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "following_user_id", user),
                 [], ["align-center"], UserWidgetContext.player),
             PlayerTemplates.playingFrom(),
-            FJSC.button({
-                text: "",
-                icon: { icon: "more_horiz" },
-                classes: ["showOnMidBreakpoint", "align-center"],
-                onclick: async () => {
-                    console.log("Opening menu");
-                }
-            }),
+            PlayerTemplates.playerIconButton({
+                icon: "more_horiz",
+                adaptive: true,
+            }, async () => {
+                console.log("Opening menu");
+            }, "Open menu", ["showOnMidBreakpoint"]),
             create("div")
                 .classes("flex", "align-center", "hideOnMidBreakpoint")
                 .children(

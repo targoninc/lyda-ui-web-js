@@ -16,6 +16,7 @@ import {Notification} from "../Models/DbModels/Notification.ts";
 import {LydaApi} from "../Api/LydaApi.ts";
 import {Images} from "../Enums/Images.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
+import {AnyElement} from "../../fjsc/src/f2.ts";
 
 export class UserActions {
     static updateImagesWithSource(newSrc: string, oldSrc: string) {
@@ -126,7 +127,7 @@ export class UserActions {
         );
     }
 
-    static getNotificationsPeriodically(e: HTMLElement) {
+    static getNotificationsPeriodically(e: AnyElement) {
         setInterval(async () => {
             const id = document.querySelector(".listNotification")?.id;
             if (!id) {

@@ -154,24 +154,19 @@ export class TrackActions {
         return true;
     }
 
-    static async runFollowFunctionFromElement(e: any, userId: number, following: Signal<boolean>) {
-        const button = e.target;
-        const span = button.querySelector("span");
-        const img = button.querySelector("img");
+    static async runFollowFunctionFromElement(userId: number, following: Signal<boolean>) {
         if (following.value) {
             const res = await TrackActions.unfollowUser(userId);
             if (res.code !== 200) {
-                return;
+                return false;
             }
-            span.innerText = "Follow";
-            img.src = Icons.FOLLOW;
+            notify(`Successfully unfollowed user`, NotificationType.success);
         } else {
             const res = await TrackActions.followUser(userId);
             if (res.code !== 200) {
                 return;
             }
-            span.innerText = "Unfollow";
-            img.src = Icons.UNFOLLOW;
+            notify(`Successfully followed user`, NotificationType.success);
         }
         following.value = !following.value;
     }

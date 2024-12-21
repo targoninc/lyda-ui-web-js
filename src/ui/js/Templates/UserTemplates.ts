@@ -1,4 +1,4 @@
-import {Util} from "../Classes/Util.ts";
+import {target, Util} from "../Classes/Util.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {TrackTemplates} from "./TrackTemplates.ts";
@@ -34,6 +34,7 @@ import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {UiActions} from "../Actions/UiActions.ts";
 import {router} from "../../main.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
+import {currentUser} from "../state.ts";
 
 export class UserTemplates {
     static userWidget(user: User|Signal<User|null>, following: boolean, extraAttributes: HtmlPropertyValue[] = [], extraClasses: StringOrSignal[] = [], context: UserWidgetContext = UserWidgetContext.unknown) {
@@ -71,16 +72,16 @@ export class UserTemplates {
                 avatarState.value = src;
             });
         }
-        const cacheUser = LydaCache.get("user");
         const activeClass = compute((r, p): string => {
             return r && r.path === "profile" && p.name === user.username ? "active" : "_";
         }, router.currentRoute, router.currentParams);
+        const showFollowButton = compute(u => u && u.id && !following, currentUser);
 
         return base
-            .classes("user-widget", "fjsc", activeClass)
+            .classes("user-widget", "fjsc", activeClass, "round-on-tiny-breakpoint")
             .attributes("user_id", user.id, "username", user.username)
             .onclick((e: MouseEvent) => {
-                if (e.button === 0) {
+                if (e.button === 0 && target(e).tagName.toLowerCase() === "button") {
                     e.preventDefault();
                     navigate("profile/" + user.username);
                 }
@@ -90,7 +91,7 @@ export class UserTemplates {
             .children(
                 UserTemplates.userIcon(user.id, avatarState),
                 create("span")
-                    .classes("text", "align-center", "nopointer", "user-displayname")
+                    .classes("text", "align-center", "nopointer", "user-displayname", "hideOnTinyBreakpoint")
                     .text(CustomText.shorten(user.displayname, maxDisplaynameLength))
                     .attributes("data-user-id", user.id)
                     .build(),
@@ -99,7 +100,7 @@ export class UserTemplates {
                     .text("@" + user.username)
                     .attributes("data-user-id", user.id)
                     .build(),
-                cacheUser.content && user.id !== cacheUser.content.id ? UserTemplates.followButton(following, user.id, true) : null
+                ifjs(showFollowButton, UserTemplates.followButton(following, user.id, true))
             ).build();
     }
 
@@ -162,15 +163,15 @@ export class UserTemplates {
             .attributes("user_id", user_id)
             .children(
                 create("img")
-                    .src(initialFollowing ? Icons.UNFOLLOW : Icons.FOLLOW)
+                    .src(compute((f) => f ? Icons.UNFOLLOW : Icons.FOLLOW, following))
                     .classes("inline-icon", "svg", "nopointer")
                     .build(),
                 noText ? null : create("span")
                     .classes("text-small", "nopointer")
-                    .text(initialFollowing ? "Unfollow" : "Follow")
+                    .text(compute((f): string => f ? "Unfollow" : "Follow", following))
                     .build()
-            ).onclick(async (e) => {
-                await TrackActions.runFollowFunctionFromElement(e, user_id, following);
+            ).onclick(async () => {
+                await TrackActions.runFollowFunctionFromElement(user_id, following);
             }).build();
     }
 

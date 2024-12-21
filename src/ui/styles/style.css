@@ -220,7 +220,6 @@ body {
 }
 
 button * {
-    pointer-events: none;
     align-self: center;
 }
 
@@ -947,7 +946,7 @@ img.loading:before {
     }
 
     .showOnMidBreakpoint {
-        display: block !important;
+        display: flex !important;
     }
 }
 
@@ -961,6 +960,21 @@ img.loading:before {
     }
 
     .showOnSmallBreakpoint {
-        display: block !important;
+        display: flex !important;
+    }
+}
+
+@media only screen and (max-width: 400px) {
+    .hideOnTinyBreakpoint {
+        display: none !important;
+    }
+
+    .showOnTinyBreakpoint {
+        display: flex !important;
+    }
+
+    .round-on-tiny-breakpoint {
+        border-radius: 999px !important;
+        height: 34px !important;
     }
 }

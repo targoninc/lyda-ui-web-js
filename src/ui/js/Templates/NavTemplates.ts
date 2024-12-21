@@ -193,7 +193,7 @@ export class NavTemplates {
         const type = image.type;
         const id = image.id;
         const srcState = signal("");
-        Util.getUserAvatar(id).then((src) => {
+        Util.getUserAvatar(parseInt(id)).then((src) => {
             srcState.value = src;
         });
 
@@ -252,13 +252,8 @@ export class NavTemplates {
             icon: { icon: "notifications" },
             onclick: UserActions.markNotificationsAsRead,
             text: "",
-            classes: ["fullHeight"]
+            classes: ["fullHeight", "round-on-tiny-breakpoint", unreadNotifications.length === 0 ? "unread" : "_"]
         });
-        /*
-                create("div")
-                    .classes("nopointer", "notification-bubble", unreadNotifications.length === 0 ? "hidden" : "_")
-                    .build()
-         */
 
         UserActions.getNotificationsPeriodically(notificationButton);
         return create("div")
