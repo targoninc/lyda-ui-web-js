@@ -283,7 +283,7 @@ export class SearchTemplates {
             })
             .children(
                 create("div")
-                    .classes("flex")
+                    .classes("flex", "noflexwrap")
                     .children(
                         create("span")
                             .classes("search-result-image")
@@ -314,7 +314,7 @@ export class SearchTemplates {
                             ).build(),
                     ).build(),
                 create("span")
-                    .classes("search-result-type", "padded-inline", searchResult.type)
+                    .classes("search-result-type", "hideOnSmallBreakpoint", "padded-inline", searchResult.type)
                     .text(searchResult.type)
                     .build()
             ).build();
