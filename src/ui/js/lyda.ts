@@ -92,8 +92,12 @@ export class Lyda {
                 }
                 break;
             case "profile":
-                if (!user || !data || data.error) {
+                if (!user) {
                     notify("You need to be logged in to see your profile", NotificationType.error);
+                    return;
+                }
+                if (!data || data.error) {
+                    navigate("404");
                     return;
                 }
                 const isOwnProfile = user ? data.id === user.id : false;
