@@ -1,4 +1,3 @@
-import {Request} from "express";
 import {MediaFileType} from "../ui/js/Enums/MediaFileType.ts";
 
 export async function baseHtml(req: Request) {
