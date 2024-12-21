@@ -733,7 +733,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .search-results-card {
-    width: 500px;
+    width: min(500px, 100%);
     max-width: 100%;
 }
 
