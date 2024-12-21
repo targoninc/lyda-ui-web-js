@@ -270,7 +270,7 @@ export class PlayerTemplates {
         const activeClass = compute((m: boolean): string => m ? "active" : "_", menuShown);
 
         return create("div")
-            .classes("relative", "player-button")
+            .classes("relative", "player-button", "showOnMidBreakpoint")
             .children(
                 PlayerTemplates.playerIconButton({
                     icon: "more_horiz",
