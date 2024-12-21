@@ -797,6 +797,10 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     --log-color: var(--red);
 }
 
+.log-message {
+    word-wrap: anywhere;
+}
+
 .search-result-type.album {
     background: color-mix(in oklab, var(--color-1), transparent 50%);
 }
