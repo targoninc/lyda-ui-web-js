@@ -25,8 +25,8 @@ export class SearchTemplates {
     }
 
     static searchInput(results: Signal<SearchResult[]>, selectedResult: Signal<number|null>) {
-        let lastKeypress = 0;
-        const debounce = 500;
+        const debounce = 200;
+        let timeout: Timer | undefined;
 
         return create("div")
             .classes("search-input-container", "relative")
@@ -71,22 +71,25 @@ export class SearchTemplates {
                             results.value = [];
                             return;
                         }
-                        if (Date.now() - lastKeypress < debounce) {
-                            return;
-                        }
-                        lastKeypress = Date.now();
 
-                        results.value = [];
-                        const endpoints = [ApiRoutes.searchTracks, ApiRoutes.searchAlbums, ApiRoutes.searchPlaylists, ApiRoutes.searchUsers];
-                        const promises = endpoints.map(async (endpoint) => {
-                            const res = await Api.getAsync<SearchResult[]>(endpoint, { search });
-                            if (res.code !== 200) {
-                                notify("Failed to search, status code " + res.code, NotificationType.error);
-                                return [];
-                            }
-                            results.value = results.value.concat(res.data);
-                        });
-                        await Promise.all(promises);
+                        if (timeout) {
+                            clearTimeout(timeout);
+                            timeout = undefined;
+                        }
+
+                        timeout = setTimeout(async () => {
+                            results.value = [];
+                            const endpoints = [ApiRoutes.searchTracks, ApiRoutes.searchAlbums, ApiRoutes.searchPlaylists, ApiRoutes.searchUsers];
+                            const promises = endpoints.map(async (endpoint) => {
+                                const res = await Api.getAsync<SearchResult[]>(endpoint, { search });
+                                if (res.code !== 200) {
+                                    notify("Failed to search, status code " + res.code, NotificationType.error);
+                                    return [];
+                                }
+                                results.value = results.value.concat(res.data);
+                            });
+                            await Promise.all(promises);
+                        }, debounce);
                     }).build()
             ).build();
     }
