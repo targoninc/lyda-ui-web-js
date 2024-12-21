@@ -376,8 +376,8 @@ export class PlayManager {
         trackInfo.value[trackData.track.id] = trackData;
     }
 
-    static async getTrackData(id: number, noCache = false) {
-        if (trackInfo.value[id] && !noCache) {
+    static async getTrackData(id: number, allowCache = true) {
+        if (trackInfo.value[id] && allowCache) {
             return trackInfo.value[id];
         }
         const res = await Api.getAsync<{ track: Track }>(ApiRoutes.getTrackById, { id });

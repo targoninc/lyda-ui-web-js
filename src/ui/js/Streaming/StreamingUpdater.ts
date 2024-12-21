@@ -111,8 +111,6 @@ export class StreamingUpdater {
     }
 
     static async updateQueue() {
-        LydaCache.set("manualQueue", new CacheItem(manualQueue.value));
-
         const queue = QueueManager.getManualQueue();
         const queueDom = document.querySelectorAll(".audio-queueadd") as NodeListOf<HTMLDivElement>;
         for (const queueItem of queueDom) {

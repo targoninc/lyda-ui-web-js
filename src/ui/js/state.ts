@@ -1,4 +1,4 @@
-import {signal} from "../fjsc/src/signals.ts";
+import {compute, signal} from "../fjsc/src/signals.ts";
 import {StreamClient} from "./Streaming/StreamClient.ts";
 import {PlayingFrom} from "./Models/PlayingFrom.ts";
 import {Track} from "./Models/DbModels/Track.ts";
@@ -35,9 +35,19 @@ volume.subscribe((newValue, changed) => {
 export const muted = signal<boolean>(false);
 
 export const manualQueue = signal<number[]>([]);
+let cachedQueue = LydaCache.get<number[]>("manualQueue").content ?? [];
+if (cachedQueue.constructor === Number) {
+    cachedQueue = [cachedQueue];
+}
+manualQueue.value = cachedQueue.filter(id => id !== undefined && id !== null);
+manualQueue.subscribe((newQueue, changed) => {
+    if (!changed) {
+        return;
+    }
+    LydaCache.set("manualQueue", new CacheItem(newQueue));
+});
 
 export const contextQueue = signal<number[]>([]);
-
 export const autoQueue = signal<number[]>([]);
 
 export const playingFrom = signal<PlayingFrom|null>(null);

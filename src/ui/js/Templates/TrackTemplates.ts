@@ -345,8 +345,6 @@ export class TrackTemplates {
             });
         }
         const inQueue = signal(QueueManager.isInManualQueue(track.id));
-        const text = compute((q: boolean): string => q ? "Unqueue" : "Queue", inQueue);
-        const icon = compute((q: boolean) => q ? Icons.UNQUEUE : Icons.QUEUE, inQueue);
         if (!track.comments || !track.likes || !track.reposts) {
             throw new Error(`Track ${track.id} has no comments, likes or reposts`);
         }
@@ -395,10 +393,17 @@ export class TrackTemplates {
                                         isPrivate ? null : StatisticsTemplates.repostListOpener(track.reposts, user),
                                         CommentTemplates.commentsIndicator(track.id, track.comments.length),
                                         CommentTemplates.commentListOpener(track.id, track.comments, user),
-                                        GenericTemplates.action(icon, text, track.id, () => {
-                                            QueueManager.toggleInManualQueue(track.id);
-                                            inQueue.value = QueueManager.isInManualQueue(track.id);
-                                        }, [], ["secondary"]),
+                                        FJSC.button({
+                                            text: compute((q: boolean): string => q ? "Unqueue" : "Queue", inQueue),
+                                            icon: {
+                                                icon: compute((q: boolean): string => q ? "remove" : "switch_access_shortcut_add", inQueue),
+                                                adaptive: true },
+                                            classes: [compute((q: boolean): string => q ? "negative" : "positive", inQueue)],
+                                            onclick: () => {
+                                                QueueManager.toggleInManualQueue(track.id);
+                                                inQueue.value = QueueManager.isInManualQueue(track.id);
+                                            }
+                                        }),
                                     ).build(),
                                 create("div")
                                     .classes("flex")
@@ -819,6 +824,7 @@ export class TrackTemplates {
         const inQueue = signal(QueueManager.isInManualQueue(track.id));
         const text = compute((q: boolean): string => q ? "Unqueue" : "Queue", inQueue);
         const icon = compute((q: boolean): string => q ? "remove" : "switch_access_shortcut_add", inQueue);
+        const queueClass = compute((q: boolean): string => q ? "negative" : "positive", inQueue);
 
         let actions: AnyElement[] = [];
         if (user) {
@@ -826,6 +832,7 @@ export class TrackTemplates {
                 FJSC.button({
                     text,
                     icon: { icon },
+                    classes: [queueClass],
                     onclick: () => {
                         QueueManager.toggleInManualQueue(track.id);
                         inQueue.value = QueueManager.isInManualQueue(track.id);

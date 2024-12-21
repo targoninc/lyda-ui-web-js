@@ -21,7 +21,7 @@ export class QueueManager {
         if (!id) {
             return;
         }
-        manualQueue.value.push(id);
+        manualQueue.value = [...new Set([...manualQueue.value, id])];
 
         StreamingUpdater.updateQueue().then();
     }
@@ -125,16 +125,7 @@ export class QueueManager {
     }
 
     static getManualQueue(): number[] {
-        let manualQueueTmp = manualQueue.value;
-        if (manualQueueTmp.length === 0) {
-            let cache = LydaCache.get<number[] | number>("manualQueue").content;
-            if (cache) {
-                manualQueueTmp = (cache.constructor === Number ? [cache] : cache) as number[];
-                manualQueue.value = manualQueueTmp;
-            }
-        }
-        manualQueueTmp = manualQueueTmp.filter(id => id !== undefined && id !== null);
-        return manualQueueTmp;
+        return manualQueue.value;
     }
 
     static isInManualQueue(id: number) {

@@ -13,7 +13,7 @@ import {compute, signal} from "../../fjsc/src/signals.ts";
 import {Images} from "../Enums/Images.ts";
 
 export class QueueTemplates {
-    static async queueItem(track: Track, index: number, totalCount: number, user: User, attributes = [], classes = []) {
+    static queueItem(track: Track, index: number, totalCount: number, attributes = [], classes = []) {
         const upButton = create("div")
             .classes("align-center", "fakeButton", "rounded", "padded-inline", "clickablePreserveWidth")
             .alt("Move up in queue")
@@ -122,7 +122,7 @@ export class QueueTemplates {
             ).build();
     }
 
-    static async queue(queue: { track: Track }[]) {
+    static queue(queue: { track: Track }[]) {
         let children = [];
         let i = 0;
         for (let item of queue) {
@@ -132,9 +132,10 @@ export class QueueTemplates {
             if (!item.track.user) {
                 throw new Error(`Track ${item.track.id} has no user`);
             }
-            children.push(await QueueTemplates.queueItem(item.track, i, queue.length, item.track.user));
+            children.push(QueueTemplates.queueItem(item.track, i, queue.length));
             i++;
         }
+
         let queueText;
         if (queue.length > 0) {
             let queueTrackLength = 0;
@@ -150,40 +151,42 @@ export class QueueTemplates {
         const queueListHidden = signal(true);
         const queueListVisClass = compute((h): string => h ? "hidden" : "_", queueListHidden);
 
-        return [
-            create("div")
-                .classes(queueListVisClass, "queue-list", "flex-v", "no-gap", "padded", "rounded")
-                .styles("width", "max-content")
-                .children(
-                    create("div")
-                        .classes("flex", "align-center", "justify-center", "text-small")
-                        .children(
-                            create("span")
-                                .classes("flex-grow")
-                                .text(queueText)
-                                .build(),
-                        ).build(),
-                    ...children
-                ).build(),
-            create("button")
-                .classes("fjsc", "relative", "align-center")
-                .onclick(() => {
-                    queueListHidden.value = !queueListHidden.value;
-                })
-                .children(
-                    FJSC.icon({
-                        icon: "queue_music",
-                        adaptive: true,
-                    }),
-                    create("span")
-                        .classes("align-center", "nopointer")
-                        .text("Queue")
-                        .build(),
-                    create("div")
-                        .classes("queue-bubble", "nopointer")
-                        .text(queue.length)
-                        .build()
-                ).build()
-        ];
+        return create("div")
+            .classes("relative")
+            .children(
+                create("div")
+                    .classes(queueListVisClass, "queue-list", "flex-v", "no-gap", "padded", "rounded")
+                    .styles("width", "max-content")
+                    .children(
+                        create("div")
+                            .classes("flex", "align-center", "justify-center", "text-small")
+                            .children(
+                                create("span")
+                                    .classes("flex-grow")
+                                    .text(queueText)
+                                    .build(),
+                            ).build(),
+                        ...children
+                    ).build(),
+                create("button")
+                    .classes("fjsc", "relative", "align-center")
+                    .onclick(() => {
+                        queueListHidden.value = !queueListHidden.value;
+                    })
+                    .children(
+                        FJSC.icon({
+                            icon: "queue_music",
+                            adaptive: true,
+                        }),
+                        create("span")
+                            .classes("align-center", "nopointer")
+                            .text("Queue")
+                            .build(),
+                        create("div")
+                            .classes("queue-bubble", "nopointer")
+                            .text(queue.length)
+                            .build()
+                    ).build()
+            ).build();
     }
 }

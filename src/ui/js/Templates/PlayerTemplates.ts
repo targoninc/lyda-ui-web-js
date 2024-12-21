@@ -11,7 +11,7 @@ import {CommentTemplates} from "./CommentTemplates.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {Util} from "../Classes/Util.ts";
-import {create, ifjs, StringOrSignal} from "../../fjsc/src/f2.ts";
+import {AnyElement, AnyNode, create, ifjs, StringOrSignal} from "../../fjsc/src/f2.ts";
 import {Track} from "../Models/DbModels/Track.ts";
 import {User} from "../Models/DbModels/User.ts";
 import {navigate} from "../Routing/Router.ts";
@@ -20,7 +20,7 @@ import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {
     currentlyBuffered,
     currentTrackId,
-    currentTrackPosition, loopMode, muted,
+    currentTrackPosition, loopMode, manualQueue, muted,
     playingElsewhere,
     playingFrom,
     playingHere, volume
@@ -161,10 +161,6 @@ export class PlayerTemplates {
     }
 
     static async player(track: Track, trackUser: User, user: User) {
-        const queue = QueueManager.getManualQueue();
-        const tasks = queue.map(id => PlayManager.getTrackData(id));
-        const trackList = await Promise.all(tasks);
-
         return create("div")
             .classes("flex-v")
             .id("permanent-player")
@@ -179,7 +175,7 @@ export class PlayerTemplates {
                         create("div")
                             .classes("flex")
                             .children(
-                                ...await PlayerTemplates.bottomTrackInfo(track, trackUser, user, trackList),
+                                ...await PlayerTemplates.bottomTrackInfo(track, trackUser, user),
                                 ...PlayerTemplates.audioControls()
                             ).build(),
                         create("div")
@@ -217,7 +213,7 @@ export class PlayerTemplates {
             }).build();
     }
 
-    static async bottomTrackInfo(track: Track, trackUser: User, user: User, trackList: { track: Track }[]) {
+    static async bottomTrackInfo(track: Track, trackUser: User, user: User) {
         const icons = [];
         const isPrivate = track.visibility !== "public";
         if (isPrivate) {
@@ -234,6 +230,14 @@ export class PlayerTemplates {
                 cover.value = src;
             });
         }
+
+        const trackList = signal<{ track: Track }[]>([]);
+        manualQueue.subscribe(async (queue) => {
+            const tasks = queue.map(id => PlayManager.getTrackData(id));
+            trackList.value = await Promise.all(tasks);
+        });
+        const queueComponentMore = compute((q: any[]) => QueueTemplates.queue(q), trackList);
+        const queueComponent = compute((q: any[]) => QueueTemplates.queue(q), trackList);
 
         return [
             create("img")
@@ -252,7 +256,7 @@ export class PlayerTemplates {
             UserTemplates.userWidget(trackUser, Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "following_user_id"),
                 [], ["align-center"], UserWidgetContext.player),
             PlayerTemplates.playingFrom(),
-            await PlayerTemplates.moreMenu(track, isPrivate, user, trackList),
+            await PlayerTemplates.moreMenu(track, isPrivate, queueComponentMore),
             create("div")
                 .classes("flex", "align-center", "hideOnMidBreakpoint")
                 .children(
@@ -260,12 +264,12 @@ export class PlayerTemplates {
                         Util.arrayPropertyMatchesUser(track.likes, "user_id")),
                     isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, Util.arrayPropertyMatchesUser(track.reposts, "user_id")),
                     CommentTemplates.commentsIndicator(track.id, track.comments.length),
-                    ...await QueueTemplates.queue(trackList)
+                    queueComponent
                 ).build()
         ];
     }
 
-    private static async moreMenu(track: Track, isPrivate: boolean, user: User, trackList: { track: Track }[]) {
+    private static async moreMenu(track: Track, isPrivate: boolean, queueComponent: Signal<AnyElement>) {
         const menuShown = signal(false);
         const activeClass = compute((m: boolean): string => m ? "active" : "_", menuShown);
 
@@ -285,7 +289,7 @@ export class PlayerTemplates {
                             Util.arrayPropertyMatchesUser(track.likes!, "user_id")),
                         isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts!.length, Util.arrayPropertyMatchesUser(track.reposts!, "user_id")),
                         CommentTemplates.commentsIndicator(track.id, track.comments!.length),
-                        ...await QueueTemplates.queue(trackList)
+                        queueComponent
                     ).build())
             ).build();
     }
