@@ -103,6 +103,7 @@ export class SearchTemplates {
                             if (!result) {
                                 return;
                             }
+                            resultsShown.value = false;
                             navigate(result.type + "/" + result.id);
                             return;
                         }
