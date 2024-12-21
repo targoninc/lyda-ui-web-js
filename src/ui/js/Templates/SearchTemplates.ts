@@ -1,27 +1,32 @@
-import {create} from "../../fjsc/src/f2.ts";
+import {AnyElement, create, ifjs} from "../../fjsc/src/f2.ts";
 import {Api} from "../Api/Api.ts";
 import {notify} from "../Classes/Ui.ts";
 import {navigate} from "../Routing/Router.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {signal} from "../../fjsc/src/signals.ts";
+import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
+import {SearchResult} from "../Models/SearchResult.ts";
+import {Util} from "../Classes/Util.ts";
+import {Images} from "../Enums/Images.ts";
 
 export class SearchTemplates {
     static search() {
-        const results = signal([]);
-        const selectedResult = signal({ id: null });
+        const results = signal<SearchResult[]>([]);
+        const selectedResult = signal<number|null>(null);
+        const resultsShown = compute(r => r.length > 0, results);
 
         return create("div")
             .classes("search", "relative", "align-center")
             .children(
                 SearchTemplates.searchInput(results, selectedResult),
-                SearchTemplates.searchResults(results, selectedResult)
+                SearchTemplates.searchResults(results, selectedResult, resultsShown)
             ).build();
     }
 
-    static searchInput(results, selectedResult, filters = []) {
-        let resultCount = 0;
+    static searchInput(results: Signal<SearchResult[]>, selectedResult: Signal<number|null>) {
+        let lastKeypress = 0;
+        const debounce = 500;
 
         return create("div")
             .classes("search-input-container", "relative")
@@ -35,28 +40,10 @@ export class SearchTemplates {
                         const pressedKey = e.key;
                         if (pressedKey === "ArrowDown") {
                             e.preventDefault();
-                            if (selectedResult.value === null) {
-                                selectedResult.value = list[0];
-                                return;
-                            }
-                            const index = list.findIndex(l => l.id === selectedResult.value.id);
-                            if (index === list.length - 1) {
-                                selectedResult.value = list[0];
-                                return;
-                            }
-                            selectedResult.value = list[index + 1];
+                            SearchTemplates.selectNextResult(selectedResult, list);
                         } else if (pressedKey === "ArrowUp") {
                             e.preventDefault();
-                            if (selectedResult.value === null) {
-                                selectedResult.value = list[list.length - 1];
-                                return;
-                            }
-                            const index = list.findIndex(l => l.id === selectedResult.value.id);
-                            if (index === 0) {
-                                selectedResult.value = list[list.length - 1];
-                                return;
-                            }
-                            selectedResult.value = list[index - 1];
+                            SearchTemplates.selectPreviousResult(selectedResult, list);
                         }
                     })
                     .onkeyup(async (e: KeyboardEvent) => {
@@ -65,7 +52,11 @@ export class SearchTemplates {
                             if (selectedResult.value === null) {
                                 return;
                             }
-                            navigate(selectedResult.value.type + "/" + selectedResult.value.id);
+                            const result = results.value.find(r => r.id === selectedResult.value);
+                            if (!result) {
+                                return;
+                            }
+                            navigate(result.type + "/" + result.id);
                             return;
                         }
 
@@ -80,34 +71,63 @@ export class SearchTemplates {
                             results.value = [];
                             return;
                         }
-                        const tempCount = resultCount + 1;
-                        // TODO: Change search so it searches all 4 endpoints
-                        const res = await Api.getAsync(ApiRoutes.searchTracks, { search, filters });
-                        if (res.code !== 200) {
-                            notify("Failed to search, status code " + res.code, NotificationType.error);
+                        if (Date.now() - lastKeypress < debounce) {
                             return;
                         }
-                        if (tempCount === resultCount + 1) {
-                            selectedResult.unsubscribeAll();
-                            selectedResult.value = null;
-                            results.value = res.data;
-                        }
-                    })
-                    .build()
+                        lastKeypress = Date.now();
+
+                        results.value = [];
+                        const endpoints = [ApiRoutes.searchTracks, ApiRoutes.searchAlbums, ApiRoutes.searchPlaylists, ApiRoutes.searchUsers];
+                        const promises = endpoints.map(async (endpoint) => {
+                            const res = await Api.getAsync<SearchResult[]>(endpoint, { search });
+                            if (res.code !== 200) {
+                                notify("Failed to search, status code " + res.code, NotificationType.error);
+                                return [];
+                            }
+                            results.value = results.value.concat(res.data);
+                        });
+                        await Promise.all(promises);
+                    }).build()
             ).build();
     }
 
-    static searchResults(results, selectedResult) {
+    private static selectNextResult(selectedResult: Signal<number | null>, list: SearchResult[]) {
+        if (selectedResult.value === null) {
+            selectedResult.value = list[0].id;
+            return;
+        }
+        const index = list.findIndex(l => l.id === selectedResult.value);
+        if (index === list.length - 1) {
+            selectedResult.value = list[0].id;
+            return;
+        }
+        selectedResult.value = list[index + 1].id;
+    }
+
+    private static selectPreviousResult(selectedResult: Signal<number | null>, list: SearchResult[]) {
+        if (selectedResult.value === null) {
+            selectedResult.value = list[list.length - 1].id;
+            return;
+        }
+        const index = list.findIndex(l => l.id === selectedResult.value);
+        if (index === 0) {
+            selectedResult.value = list[list.length - 1].id;
+            return;
+        }
+        selectedResult.value = list[index - 1].id;
+    }
+
+    static searchResults(results: Signal<SearchResult[]>, selectedResult: Signal<number|null>, resultsShown: Signal<boolean>) {
         let searchResults = results.value;
-        const sResults = signal(SearchTemplates.searchResultsList(searchResults, selectedResult));
+        const sResults = signal(SearchTemplates.searchResultsList(searchResults, selectedResult, resultsShown));
         results.onUpdate = () => {
             searchResults = results.value;
-            sResults.value = SearchTemplates.searchResultsList(searchResults, selectedResult);
+            sResults.value = SearchTemplates.searchResultsList(searchResults, selectedResult, resultsShown);
         };
         return sResults;
     }
 
-    static searchResultsList(searchResults, selectedResult) {
+    static searchResultsList(searchResults: SearchResult[], selectedResult: Signal<number|null>, resultsShown: Signal<boolean>) {
         const exactMatches = searchResults.filter(r => r.exactMatch);
         const partialMatches = searchResults.filter(r => !r.exactMatch);
         const preExact = exactMatches.length === 0 ? [] : [
@@ -123,37 +143,51 @@ export class SearchTemplates {
                 .build()
         ];
         return create("div")
-            .classes("search-results", "flex-v", "rounded", searchResults.length === 0 ? "hidden" : "_")
+            .classes("search-results", "rounded", searchResults.length === 0 ? "hidden" : "_")
             .children(
-                ...preExact,
-                ...exactMatches.map(result => {
-                    return this.searchResult(result.display, result.id, result.type, result.image, selectedResult);
-                }),
-                ...prePartial,
-                ...partialMatches.map(result => {
-                    return this.searchResult(result.display, result.id, result.type, result.image, selectedResult);
-                })
+                ifjs(resultsShown, create("div")
+                    .classes("flex-v", "nogap")
+                    .children(
+                        ...preExact,
+                        ...exactMatches.map(result => {
+                            return this.searchResult(result, selectedResult, resultsShown);
+                        }),
+                        ...prePartial,
+                        ...partialMatches.map(result => {
+                            return this.searchResult(result, selectedResult, resultsShown);
+                        })
+                    ).build())
             ).build();
     }
 
-    static searchResult(display, id, type, image = "", selectedResult = null) {
-        const addClass = signal(selectedResult.id === id ? "selected" : "_");
-        let elementReference;
-        selectedResult.onUpdate = (newValue) => {
-            addClass.value = newValue.id === id ? "selected" : "_";
-            if (newValue.id === id) {
+    static searchResult(searchResult: SearchResult, selectedResult: Signal<number|null>, resultsShown: Signal<boolean>) {
+        const addClass = compute((sr): string => sr === searchResult.id ? "selected" : "_", selectedResult);
+        let elementReference: AnyElement;
+        selectedResult.subscribe((newId) => {
+            if (newId === searchResult.id) {
                 elementReference.scrollIntoView({ behavior: "smooth", block: "nearest" });
             }
-        };
-        if (display.length > 50) {
-            display = display.substring(0, 50) + "...";
+        });
+        let display = searchResult.display;
+        if (searchResult.display.length > 50) {
+            display = searchResult.display.substring(0, 50) + "...";
         }
+        const imageMap: Record<string, Function> = {
+            "user": Util.getUserAvatar,
+            "track": Util.getTrackCover,
+            "album": Util.getAlbumCover,
+            "playlist": Util.getPlaylistCover,
+        };
+        const image = signal(Images.DEFAULT_COVER_TRACK);
+        imageMap[searchResult.type](searchResult.id).then((url: string) => {
+            image.value = url;
+        });
+
         elementReference = create("div")
             .classes("search-result", "padded", "flex", addClass)
             .onclick(async () => {
-                navigate(type + "/" + id);
-                const resultList = document.querySelector(".search-results");
-                resultList.classList.add("hidden");
+                navigate(searchResult.url);
+                resultsShown.value = false;
             })
             .children(
                 create("span")
@@ -168,11 +202,10 @@ export class SearchTemplates {
                     .text(display)
                     .build(),
                 create("span")
-                    .classes("search-result-type", "padded-inline", type)
-                    .text(type)
+                    .classes("search-result-type", "padded-inline", searchResult.type)
+                    .text(searchResult.type)
                     .build()
-            )
-            .build();
+            ).build();
         return elementReference;
     }
 }
