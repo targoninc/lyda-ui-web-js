@@ -27,7 +27,7 @@ import {openMenus} from "../state.ts";
 import {PillOption} from "../Models/PillOption.ts";
 
 export class GenericTemplates {
-    static icon(icon: StringOrSignal, adaptive = false, classes: StringOrSignal[] = [], title = "") {
+    static icon(icon: StringOrSignal, adaptive = false, classes: StringOrSignal[] = [], title = "", onclick: Function | undefined = undefined) {
         const urlIndicators = [window.location.origin, "http", "data:", "blob:"];
         // @ts-ignore
         const isMaterial = icon && (icon as string) && icon.includes && !urlIndicators.some(i => icon.includes(i));
@@ -39,6 +39,7 @@ export class GenericTemplates {
             adaptive,
             title,
             isUrl: !isMaterial,
+            onclick,
             classes: [iconClass, svgClass, ...classes],
         });
     }

@@ -748,6 +748,13 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     transform: translateY(-50%);
 }
 
+.clear-icon {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+}
+
 .search-result {
     align-items: center;
     cursor: pointer;

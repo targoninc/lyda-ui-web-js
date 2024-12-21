@@ -44,12 +44,15 @@ export class SearchTemplates {
     static searchInput(results: Signal<SearchResult[]>, selectedResult: Signal<number | null>, currentSearch: Signal<string>, resultsShown: Signal<boolean>, context: SearchContext) {
         const debounce = 200;
         let timeout: Timer | undefined;
+        let searchCount = 0;
 
         async function getResults() {
             if (currentSearch.value.length === 0) {
                 return;
             }
+            searchCount++;
             results.value = [];
+            const currentSearchCount = searchCount;
             const endpoints = [ApiRoutes.searchTracks, ApiRoutes.searchAlbums, ApiRoutes.searchPlaylists, ApiRoutes.searchUsers];
             const promises = endpoints.map(async (endpoint) => {
                 const res = await Api.getAsync<SearchResult[]>(endpoint, {
@@ -58,9 +61,12 @@ export class SearchTemplates {
 
                 if (res.code !== 200) {
                     notify("Failed to search, status code " + res.code, NotificationType.error);
-                    return [];
+                    return;
                 }
 
+                if (currentSearchCount !== searchCount) {
+                    return;
+                }
                 results.value = results.value.concat(res.data);
             });
             await Promise.all(promises);
@@ -72,6 +78,10 @@ export class SearchTemplates {
             .classes("search-input-container", "relative", ...contextClasses)
             .children(
                 GenericTemplates.icon("search", true, ["inline-icon", "svg", "search-icon"]),
+                GenericTemplates.icon("close", true, ["inline-icon", "svg", "clear-icon", "clickable"], "Clear search", () => {
+                    currentSearch.value = "";
+                    resultsShown.value = false;
+                }),
                 create("input")
                     .classes("fjsc", "search-input")
                     .placeholder("Search")
