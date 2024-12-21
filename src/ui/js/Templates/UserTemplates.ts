@@ -1,6 +1,5 @@
 import {target, Util} from "../Classes/Util.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
-import {LydaCache} from "../Cache/LydaCache.ts";
 import {TrackTemplates} from "./TrackTemplates.ts";
 import {UserActions} from "../Actions/UserActions.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
@@ -75,7 +74,7 @@ export class UserTemplates {
         const activeClass = compute((r, p): string => {
             return r && r.path === "profile" && p.name === user.username ? "active" : "_";
         }, router.currentRoute, router.currentParams);
-        const showFollowButton = compute(u => u && u.id && !following, currentUser);
+        const showFollowButton = compute(u => u && u.id && u.id !== user.id && !following, currentUser);
 
         return base
             .classes("user-widget", "fjsc", activeClass, "round-on-tiny-breakpoint")
