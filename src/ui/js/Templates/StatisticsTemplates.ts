@@ -85,7 +85,7 @@ export class StatisticsTemplates {
             ).build();
     }
 
-    static genericUserListOpener(type: string, items: any[], user: User) {
+    static genericUserListOpener(type: string, items: any[], user: User|null) {
         const openState = signal(false);
         const listClass = signal("hidden");
 
@@ -99,7 +99,7 @@ export class StatisticsTemplates {
 
         const itemsList = items.map(item => {
             const avatar = signal(Images.DEFAULT_AVATAR);
-            if (user.has_avatar) {
+            if (item.user.has_avatar) {
                 Util.getUserAvatar(item.user_id).then(avatarUrl => {
                     avatar.value = avatarUrl;
                 });
@@ -136,11 +136,11 @@ export class StatisticsTemplates {
             ).build();
     }
 
-    static likeListOpener(likes: any[], user: User) {
+    static likeListOpener(likes: any[], user: User|null) {
         return this.genericUserListOpener("likes", likes, user);
     }
 
-    static repostListOpener(reposts: any[], user: User) {
+    static repostListOpener(reposts: any[], user: User|null) {
         return this.genericUserListOpener("reposts", reposts, user);
     }
 }

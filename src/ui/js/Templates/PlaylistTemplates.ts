@@ -255,7 +255,7 @@ export class PlaylistTemplates {
             .build();
     }
 
-    static playlistCard(playlist: Playlist, user: User, isSecondary: boolean = false) {
+    static playlistCard(playlist: Playlist, user: User|null, isSecondary: boolean = false) {
         const icons = [];
         if (playlist.visibility === "private") {
             icons.push(GenericTemplates.lock());

@@ -243,7 +243,7 @@ export class AlbumTemplates {
             .build();
     }
 
-    static albumCard(album: Album, user: User, isSecondary = false) {
+    static albumCard(album: Album, user: User|null, isSecondary = false) {
         if (!album.user) {
             throw new Error(`Album has no user: ${album.id}`);
         }

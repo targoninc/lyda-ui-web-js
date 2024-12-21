@@ -12,7 +12,7 @@ import {Playlist} from "../Models/DbModels/Playlist.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class ProfilePage {
-    static async addTabSectionAsync(element: AnyElement, user: User, selfUser: User, isOwnProfile: boolean) {
+    static async addTabSectionAsync(element: AnyElement, user: User, selfUser: User|null, isOwnProfile: boolean) {
         const container = document.createElement("div");
         container.classList.add("flex-v");
         element.appendChild(container);
@@ -35,7 +35,7 @@ export class ProfilePage {
         ProfilePage.addRepostsAsync(repostsContainer, user, selfUser, isOwnProfile).then();
     }
 
-    static async addTracksAsync(element: AnyElement, user: User, selfUser: User, isOwnProfile: boolean) {
+    static async addTracksAsync(element: AnyElement, user: User, selfUser: User|null, isOwnProfile: boolean) {
         const res = await Api.getAsync<Track[]>(ApiRoutes.getTrackByUserId, { id: user.id, name: user.username });
         if (res.code !== 200) {
             notify("Error while getting tracks: " + getErrorMessage(res), NotificationType.error);
@@ -47,7 +47,7 @@ export class ProfilePage {
         element.appendChild(trackCards);
     }
 
-    static async addAlbumsAsync(element: AnyElement, user: User, selfUser: User, isOwnProfile: boolean) {
+    static async addAlbumsAsync(element: AnyElement, user: User, selfUser: User|null, isOwnProfile: boolean) {
         const res = await Api.getAsync<Album[]>(ApiRoutes.getAlbumsByUserId, {
             id: user.id, name: user.username
         });
@@ -61,7 +61,7 @@ export class ProfilePage {
         element.appendChild(albumCards);
     }
 
-    static async addPlaylistsAsync(element: AnyElement, user: User, selfUser: User, isOwnProfile: boolean) {
+    static async addPlaylistsAsync(element: AnyElement, user: User, selfUser: User|null, isOwnProfile: boolean) {
         const res = await Api.getAsync<Playlist[]>(ApiRoutes.getPlaylistsByUserId, {
             id: user.id, name: user.username
         });
@@ -75,7 +75,7 @@ export class ProfilePage {
         element.appendChild(playlistCards);
     }
 
-    static async addRepostsAsync(element: AnyElement, user: User, selfUser: User, isOwnProfile: boolean) {
+    static async addRepostsAsync(element: AnyElement, user: User, selfUser: User|null, isOwnProfile: boolean) {
         const res = await Api.getAsync<Track[]>(ApiRoutes.getRepostsByUserId, {
             id: user.id, name: user.username
         });

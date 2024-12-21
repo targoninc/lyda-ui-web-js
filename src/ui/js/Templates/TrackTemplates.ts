@@ -35,7 +35,7 @@ import {PillOption} from "../Models/PillOption.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 
 export class TrackTemplates {
-    static trackCard(track: Track, user: User, profileId: number) {
+    static trackCard(track: Track, user: User|null, profileId: number) {
         const icons = [];
         const isPrivate = track.visibility === "private";
         if (isPrivate) {

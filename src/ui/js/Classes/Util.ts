@@ -258,7 +258,7 @@ export class Util {
         }
     }
 
-    static arrayPropertyMatchesUser(array: any[], property: any, user: User) {
+    static arrayPropertyMatchesUser(array: any[], property: any, user: User|null) {
         if (!array || !property || !user) {
             return false;
         }

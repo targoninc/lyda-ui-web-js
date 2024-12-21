@@ -181,7 +181,7 @@ export class UserTemplates {
             .build();
     }
 
-    static trackCards(tracks: Track[], profileId: number, user: User, isOwnProfile: boolean) {
+    static trackCards(tracks: Track[], profileId: number, user: User|null, isOwnProfile: boolean) {
         let children = [];
         if (tracks.length === 0) {
             return TrackTemplates.noTracksUploadedYet(isOwnProfile);
@@ -338,7 +338,7 @@ export class UserTemplates {
             ).build();
     }
 
-    static profileInfo(user: User, selfUser: User, isOwnProfile: boolean, permissions: Permission[], following: boolean, followsBack: boolean) {
+    static profileInfo(user: User, selfUser: User|null, isOwnProfile: boolean, permissions: Permission[], following: boolean, followsBack: boolean) {
         let specialInfo: AnyNode[] = [];
         const verified = signal(user.verified);
         const canVerify = compute(v => !v && permissions.some(p => p.name === Permissions.canVerifyUsers), verified);
@@ -351,11 +351,11 @@ export class UserTemplates {
         return create("div")
             .classes("name-container", "flex-v")
             .children(
-                UserTemplates.displayname(user, selfUser, isOwnProfile),
+                UserTemplates.displayname(user, isOwnProfile),
                 create("div")
                     .classes("flex", "align-children")
                     .children(
-                        UserTemplates.username(user, selfUser, isOwnProfile),
+                        UserTemplates.username(user, isOwnProfile),
                         ifjs(verified, UserTemplates.verificationbadge()),
                         ifjs(canVerify, FJSC.button({
                             text: "Verify",
@@ -378,7 +378,7 @@ export class UserTemplates {
                         !isOwnProfile && selfUser ? UserTemplates.followButton(following, user.id) : null,
                         !isOwnProfile && followsBack ? UserTemplates.followsBackIndicator() : null,
                     ).build(),
-                UserTemplates.userDescription(user, selfUser, isOwnProfile, specialInfo)
+                UserTemplates.userDescription(user, isOwnProfile, specialInfo)
             ).build();
     }
 
@@ -408,7 +408,7 @@ export class UserTemplates {
             .build();
     }
 
-    static albumCards(albums: Album[], user: User, isOwnProfile: boolean) {
+    static albumCards(albums: Album[], user: User|null, isOwnProfile: boolean) {
         let children = [];
         if (albums.length === 0) {
             return AlbumTemplates.noAlbumsYet(isOwnProfile);
@@ -419,7 +419,7 @@ export class UserTemplates {
         return AlbumTemplates.albumCardsContainer(children);
     }
 
-    static playlistCards(playlists: Playlist[], user: User, isOwnProfile: boolean) {
+    static playlistCards(playlists: Playlist[], user: User|null, isOwnProfile: boolean) {
         let children = [];
         if (playlists.length === 0) {
             return PlaylistTemplates.noPlaylistsYet(isOwnProfile);
@@ -520,7 +520,7 @@ export class UserTemplates {
         return template;
     }
 
-    static username(user: User, selfUser: User, isOwnProfile: boolean) {
+    static username(user: User, isOwnProfile: boolean) {
         const nameState = signal(user.username);
         const displayedName = compute(name => `@${name}`, nameState);
 
@@ -541,7 +541,7 @@ export class UserTemplates {
         return base.build();
     }
 
-    static displayname(user: User, selfUser: User, isOwnProfile: boolean) {
+    static displayname(user: User, isOwnProfile: boolean) {
         const nameState = signal(user.displayname);
 
         const base = create("h1")
@@ -561,7 +561,7 @@ export class UserTemplates {
         return base.build();
     }
 
-    static userDescription(user: User, selfUser: User, isOwnProfile: boolean, specialInfo: AnyNode[]) {
+    static userDescription(user: User, isOwnProfile: boolean, specialInfo: AnyNode[]) {
         if (specialInfo.length === 0 && (user.description === null || user.description === "")) {
             return create("div").build();
         }
