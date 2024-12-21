@@ -751,6 +751,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 .search-result {
     align-items: center;
     cursor: pointer;
+    text-align: left;
 }
 
 .search-result.selected {
