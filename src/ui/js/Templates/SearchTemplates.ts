@@ -142,10 +142,12 @@ export class SearchTemplates {
                 .text("Partial Matches")
                 .build()
         ];
+        const showClass = compute((s: boolean): string => s ? "_" : "hidden", resultsShown);
+
         return create("div")
-            .classes("search-results", "rounded", searchResults.length === 0 ? "hidden" : "_")
+            .classes("search-results", "rounded", showClass)
             .children(
-                ifjs(resultsShown, create("div")
+                create("div")
                     .classes("flex-v", "nogap")
                     .children(
                         ...preExact,
@@ -156,7 +158,7 @@ export class SearchTemplates {
                         ...partialMatches.map(result => {
                             return this.searchResult(result, selectedResult, resultsShown);
                         })
-                    ).build())
+                    ).build()
             ).build();
     }
 
