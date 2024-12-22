@@ -1,6 +1,8 @@
 import {PlayManager} from "./PlayManager.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {currentQuality, currentTrackId, volume} from "../state.ts";
+import {currentQuality, currentTrackId, currentTrackPosition, volume} from "../state.ts";
+import {create} from "../../fjsc/src/f2.ts";
+import {compute} from "../../fjsc/src/signals.ts";
 
 export class StreamClient {
     id: number;
@@ -10,14 +12,29 @@ export class StreamClient {
 
     constructor(id: number) {
         this.id = id;
-        const src = `${ApiRoutes.getTrackAudio}?id=${this.id}&quality=${currentQuality.value}`;
-        this.audio = new Audio();
+        const src = compute(q => `${ApiRoutes.getTrackAudio}?id=${this.id}&quality=${q}`, currentQuality);
+        this.audio = create("audio")
+            .attributes("crossOrigin", "anonymous")
+            .attributes("preload", "auto")
+            .attributes("autoplay", "false")
+            .src(src)
+            .build() as HTMLAudioElement;
         this.duration = this.audio.duration;
-        this.audio.crossOrigin = "anonymous";
-        this.audio.preload = "auto";
-        this.audio.autoplay = false;
-        this.audio.src = src;
         this.playing = false;
+        currentQuality.subscribe(async q => {
+            if (this.playing) {
+                await this.stopAsync();
+                const interval = setInterval(async () => {
+                    if (this.getBufferedLength() >= this.duration) {
+                        await this.scrubTo(currentTrackPosition.value.absolute, false, false);
+                        await this.startAsync();
+                        clearInterval(interval);
+                    }
+                }, 100);
+            } else {
+                await this.stopAsync();
+            }
+        });
 
         const currentStreamClient = PlayManager.getStreamClient(currentTrackId.value);
         if (!currentStreamClient) {
