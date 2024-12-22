@@ -13,6 +13,7 @@ import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {navigate} from "../Routing/Router.ts";
 import {AuthActions} from "../Actions/AuthActions.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
+import {StreamingQuality} from "../Enums/StreamingQuality.ts";
 
 export class SettingsTemplates {
     static settingsPage(user: User) {
@@ -24,6 +25,7 @@ export class SettingsTemplates {
                     .build(),
                 SettingsTemplates.accountSection(user),
                 SettingsTemplates.themeSection(getUserSettingValue<Theme>(user, UserSettings.theme)),
+                SettingsTemplates.qualitySection(getUserSettingValue<StreamingQuality>(user, UserSettings.streamingQuality) ?? "m"),
                 SettingsTemplates.behaviourSection(user),
                 SettingsTemplates.notificationsSection(user),
                 SettingsTemplates.dangerSection(user),
@@ -150,11 +152,23 @@ export class SettingsTemplates {
 
         return FJSC.button(<ButtonConfig>{
             classes: [active$],
-            name: `theme-selector-${theme}`,
             text: theme.toUpperCase(),
             onclick: async () => {
                 currentTheme$.value = theme;
                 await UserActions.setTheme(theme);
+            }
+        });
+    }
+
+    static qualitySelector(value: StreamingQuality, currentValue$: Signal<StreamingQuality>) {
+        const active$ = compute(c => c === value ? "active" : "_", currentValue$);
+
+        return FJSC.button(<ButtonConfig>{
+            classes: [active$, `quality-selector-${value}`, value === StreamingQuality.high ? "special" : "_"],
+            text: value.toUpperCase(),
+            onclick: async () => {
+                currentValue$.value = value;
+                await UserActions.setStreamingQuality(value);
             }
         });
     }
@@ -172,6 +186,23 @@ export class SettingsTemplates {
                     .classes("flex")
                     .children(
                         ...themes.map(theme => SettingsTemplates.themeSelector(theme, currentTheme$))
+                    ).build(),
+            ).build();
+    }
+
+    static qualitySection(currentValue: StreamingQuality) {
+        const values = Object.values(StreamingQuality);
+        const currentValue$ = signal(currentValue);
+        return create("div")
+            .classes("card", "flex-v")
+            .children(
+                create("h2")
+                    .text("Streaming quality")
+                    .build(),
+                create("div")
+                    .classes("flex")
+                    .children(
+                        ...values.map(value => SettingsTemplates.qualitySelector(value, currentValue$))
                     ).build(),
             ).build();
     }

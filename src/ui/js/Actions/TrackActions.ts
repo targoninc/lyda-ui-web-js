@@ -19,15 +19,21 @@ import {Album} from "../Models/DbModels/Album.ts";
 import {Playlist} from "../Models/DbModels/Playlist.ts";
 import {AnyElement} from "../../fjsc/src/f2.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
+import {currentQuality, playingHere} from "../state.ts";
 
 export class TrackActions {
     static async savePlay(id: number) {
-        return await Api.postAsync(ApiRoutes.saveTrackPlay, { id });
+        if (!playingHere.value) {
+            return;
+        }
+        return await Api.postAsync(ApiRoutes.saveTrackPlay, { id, quality: currentQuality.value });
     }
 
-    static savePlayAfterTime(id: number, seconds: number) {
+    static savePlayAfterTimeIf(id: number, seconds: number, condition: () => boolean) {
         setTimeout(async () => {
-            await TrackActions.savePlay(id);
+            if (condition()) {
+                await TrackActions.savePlay(id);
+            }
         }, seconds * 1000);
     }
 

@@ -22,6 +22,8 @@ currentTrackId.subscribe((id, changed) => {
     LydaCache.set("currentTrackId", new CacheItem(id));
 });
 
+export const currentQuality = signal("h");
+
 export const trackInfo = signal<Record<number, { track: Track }>>({});
 
 export const volume = signal(0.5);

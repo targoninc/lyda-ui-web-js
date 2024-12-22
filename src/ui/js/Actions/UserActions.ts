@@ -17,6 +17,8 @@ import {LydaApi} from "../Api/LydaApi.ts";
 import {Images} from "../Enums/Images.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {AnyElement} from "../../fjsc/src/f2.ts";
+import {currentQuality} from "../state.ts";
+import {StreamingQuality} from "../Enums/StreamingQuality.ts";
 
 export class UserActions {
     static updateImagesWithSource(newSrc: string, oldSrc: string) {
@@ -183,6 +185,11 @@ export class UserActions {
         await UserActions.setUiTheme(theme);
     }
 
+    static async setStreamingQuality(quality: StreamingQuality) {
+        currentQuality.value = quality;
+        await UserActions.setStringSetting(UserSettings.streamingQuality, quality);
+    }
+
     static async setUiTheme(themeName: Theme, onlyLocal = false) {
         const themes = Object.values(Theme);
         if (!themes.includes(themeName)) {
@@ -284,5 +291,9 @@ export class UserActions {
             }
         }, () => {
         }, Icons.PEN).then();
+    }
+
+    private static setStringSetting(settingKey: string, value: string) {
+        return Api.postAsync(ApiRoutes.updateUserSetting, { setting: settingKey, value });
     }
 }

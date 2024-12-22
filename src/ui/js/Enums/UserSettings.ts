@@ -7,5 +7,6 @@ export const UserSettings = {
     paypalMail: "paypalMail",
     publicLikes: "publicLikes",
     theme: "theme",
+    streamingQuality: "streamingQuality",
     playFromAutoQueue: "playFromAutoQueue",
 };

@@ -807,6 +807,10 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     word-wrap: anywhere;
 }
 
+.log-timestamp {
+    text-wrap: nowrap;
+}
+
 .search-result-type.album {
     background: color-mix(in oklab, var(--color-1), transparent 50%);
 }

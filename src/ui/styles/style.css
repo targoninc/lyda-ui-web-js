@@ -438,6 +438,13 @@ button.positive:hover {
 button.special {
     border-color: var(--blue);
     background: var(--blue-dark);
+    box-sizing: border-box;
+}
+
+button.special.active {
+    border-color: var(--color-1);
+    border-width: 2px;
+    background: var(--blue);
 }
 
 @keyframes special-glow {

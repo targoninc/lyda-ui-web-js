@@ -16,7 +16,9 @@ import {
     streamClients,
     volume,
     playingHere,
-    currentTrackPosition, loopMode, muted
+    currentTrackPosition,
+    loopMode,
+    muted
 } from "../state.ts";
 import {PlayingFrom} from "../Models/PlayingFrom.ts";
 import {StreamingBroadcaster, StreamingEvent} from "./StreamingBroadcaster.ts";
@@ -30,15 +32,14 @@ export class PlayManager {
             const currentTime = PlayManager.getCurrentTime(track.id);
 
             if (currentTime.absolute >= PlayManager.getDuration(track.id)) {
-                const secondsBeforePlaySave = 5;
                 const loopingSingle = PlayManager.isLoopingSingle();
                 if (loopingSingle) {
                     await PlayManager.togglePlayAsync(track.id);
                     await PlayManager.scrubTo(track.id, 0);
-                    TrackActions.savePlayAfterTime(track.id, secondsBeforePlaySave);
                 } else {
                     await this.playNextFromQueues(track);
                 }
+                TrackActions.savePlayAfterTimeIf(track.id, 5, () => track.id === currentTrackId.value && PlayManager.isPlaying(track.id));
             }
 
             StreamingUpdater.updateScrubber(track.id);
@@ -91,7 +92,7 @@ export class PlayManager {
     }
 
     static playFrom(type: string, name: string, id: number) {
-        playingFrom.value = { type, name, id };
+        playingFrom.value = {type, name, id};
         LydaCache.set("playingFrom", new CacheItem(playingFrom.value));
     }
 
@@ -380,7 +381,7 @@ export class PlayManager {
         if (trackInfo.value[id] && allowCache) {
             return trackInfo.value[id];
         }
-        const res = await Api.getAsync<{ track: Track }>(ApiRoutes.getTrackById, { id });
+        const res = await Api.getAsync<{ track: Track }>(ApiRoutes.getTrackById, {id});
         if (res.code !== 200) {
             await PlayManager.removeTrackFromAllStates(id);
             throw new Error(`Failed to get track data for ${id}: ${res.data.error}`);
