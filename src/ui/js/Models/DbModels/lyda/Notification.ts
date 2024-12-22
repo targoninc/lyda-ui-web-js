@@ -1,4 +1,4 @@
-import {NotificationReference} from "../NotificationReference.ts";
+import {NotificationReference} from "../../NotificationReference.ts";
 
 export interface Notification {
     references?: NotificationReference[];

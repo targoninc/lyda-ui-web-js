@@ -1,7 +1,7 @@
 import {NavTemplates} from "../../Templates/NavTemplates.ts";
 import {GenericTemplates} from "../../Templates/GenericTemplates.ts";
 import {NotificationReference} from "../../Models/NotificationReference.ts";
-import {Notification} from "../../Models/DbModels/Notification.ts";
+import {Notification} from "../../Models/DbModels/lyda/Notification.ts";
 
 export class NotificationParser {
     static parse(notification: Notification) {

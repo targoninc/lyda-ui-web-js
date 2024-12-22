@@ -1,4 +1,4 @@
-import {User} from "./User.js";
+import {User} from "./User.ts";
 
 export interface AlbumLike {
     user?: User;

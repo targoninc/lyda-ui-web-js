@@ -396,10 +396,6 @@ label {
     align-items: center;
 }
 
-.subStarter.selected {
-    background: radial-gradient(var(--blue) 0%, var(--green) 100%);
-}
-
 .toggle-container {
     width: 40px;
     height: 20px;
@@ -1080,6 +1076,54 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     align-items: center;
     display: flex;
     justify-content: center;
+}
+
+.subscription-benefit {
+    display: flex;
+    align-items: center;
+    gap: var(--gap);
+    border: 1px solid var(--green);
+    background: var(--green-dark);
+    border-radius: var(--border-radius);
+    padding: var(--inline-padding);
+    height: max-content;
+}
+
+.subscription-benefit * {
+    color: var(--fjsc-interactive-background);
+}
+
+.marquee {
+    overflow: hidden;
+    position: relative;
+    height: 30px;
+    width: 100%;
+    white-space: nowrap;
+    border-left: 1px solid var(--green);
+    border-right: 1px solid var(--green);
+}
+
+.marquee .scrolling {
+    position: absolute;
+    width: max-content;
+    height: 100%;
+    margin: 0;
+    text-align: center;
+    /* Start off the right edge */
+    transform: translateX(0%);
+    /* Animate to the left */
+    animation: scroll-left 20s linear infinite;
+    flex-wrap: nowrap;
+}
+
+@keyframes scroll-left {
+    0% {
+        transform: translateX(0%);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
 }
 
 @keyframes pulse-glow {

@@ -11,7 +11,7 @@ import {Util} from "../Classes/Util.ts";
 import {navigate, reload} from "../Routing/Router.ts";
 import {AnyNode, create, StringOrSignal} from "../../fjsc/src/f2.ts";
 import {compute, signal} from "../../fjsc/src/signals.ts";
-import {Notification} from "../Models/DbModels/Notification.ts";
+import {Notification} from "../Models/DbModels/lyda/Notification.ts";
 import {FJSC} from "../../fjsc";
 import {router} from "../../main.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";

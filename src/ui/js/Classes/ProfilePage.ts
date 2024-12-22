@@ -2,13 +2,13 @@ import {Api} from "../Api/Api.ts";
 import {notify} from "./Ui.ts";
 import {UserTemplates} from "../Templates/UserTemplates.ts";
 import {GenericTemplates} from "../Templates/GenericTemplates.ts";
-import {User} from "../Models/DbModels/User.ts";
+import {User} from "../Models/DbModels/lyda/User.ts";
 import {AnyElement} from "../../fjsc/src/f2.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {getErrorMessage} from "./Util.ts";
-import {Track} from "../Models/DbModels/Track.ts";
-import {Album} from "../Models/DbModels/Album.ts";
-import {Playlist} from "../Models/DbModels/Playlist.ts";
+import {Track} from "../Models/DbModels/lyda/Track.ts";
+import {Album} from "../Models/DbModels/lyda/Album.ts";
+import {Playlist} from "../Models/DbModels/lyda/Playlist.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class ProfilePage {

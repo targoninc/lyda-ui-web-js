@@ -462,6 +462,14 @@ button.special:hover {
     animation: special-glow 2s ease infinite alternate;
 }
 
+.subscription-option {
+    box-sizing: border-box;
+}
+
+.subscription-option.selected {
+    border: 1px solid var(--blue);
+}
+
 .fadeIn {
     animation: fadeIn .5s ease;
 }
@@ -921,7 +929,7 @@ td:last-child, th:last-child {
 .spinner {
     border: 1px solid var(--color-5);
     border-radius: 50%;
-    border-top: 1px solid var(--color-1);
+    border-top: 1px solid var(--blue);
     width: 20px;
     height: 20px;
     animation: spin 1.2s linear infinite;

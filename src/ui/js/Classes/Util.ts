@@ -6,7 +6,7 @@ import {CacheItem} from "../Cache/CacheItem.ts";
 import {AnyElement} from "../../fjsc/src/f2.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {MediaFileType} from "../Enums/MediaFileType.ts";
-import {User} from "../Models/DbModels/User.ts";
+import {User} from "../Models/DbModels/lyda/User.ts";
 import {currentUser, dragging} from "../state.ts";
 import {Signal} from "../../fjsc/src/signals.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";

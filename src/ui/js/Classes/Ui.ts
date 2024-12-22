@@ -11,10 +11,10 @@ import {Theme} from "../Enums/Theme.ts";
 import {navigate} from "../Routing/Router.ts";
 import {signal} from "../../fjsc/src/signals.ts";
 import {currentUser, navInitialized} from "../state.ts";
-import {User} from "../Models/DbModels/User.ts";
-import {CollaboratorType} from "../Models/DbModels/CollaboratorType.ts";
-import {TrackCollaborator} from "../Models/DbModels/TrackCollaborator.ts";
-import {Notification} from "../Models/DbModels/Notification.ts";
+import {User} from "../Models/DbModels/lyda/User.ts";
+import {CollaboratorType} from "../Models/DbModels/lyda/CollaboratorType.ts";
+import {TrackCollaborator} from "../Models/DbModels/lyda/TrackCollaborator.ts";
+import {Notification} from "../Models/DbModels/lyda/Notification.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class Ui {

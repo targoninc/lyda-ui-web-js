@@ -22,12 +22,12 @@ import {
     nullElement,
     StringOrSignal
 } from "../../fjsc/src/f2.ts";
-import {Track} from "../Models/DbModels/Track.ts";
-import {User} from "../Models/DbModels/User.ts";
-import {Permission} from "../Models/DbModels/Permission.ts";
-import {Playlist} from "../Models/DbModels/Playlist.ts";
-import {Album} from "../Models/DbModels/Album.ts";
-import {Badge} from "../Models/DbModels/Badge.ts";
+import {Track} from "../Models/DbModels/lyda/Track.ts";
+import {User} from "../Models/DbModels/lyda/User.ts";
+import {Permission} from "../Models/DbModels/lyda/Permission.ts";
+import {Playlist} from "../Models/DbModels/lyda/Playlist.ts";
+import {Album} from "../Models/DbModels/lyda/Album.ts";
+import {Badge} from "../Models/DbModels/lyda/Badge.ts";
 import {FJSC} from "../../fjsc";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {UiActions} from "../Actions/UiActions.ts";

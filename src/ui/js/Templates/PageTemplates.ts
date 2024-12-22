@@ -5,9 +5,9 @@ import {UserTemplates} from "./UserTemplates.ts";
 import {Api} from "../Api/Api.ts";
 import {Util} from "../Classes/Util.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {Follow} from "../Models/DbModels/Follow.ts";
+import {Follow} from "../Models/DbModels/lyda/Follow.ts";
 import {compute, signal} from "../../fjsc/src/signals.ts";
-import {User} from "../Models/DbModels/User.ts";
+import {User} from "../Models/DbModels/lyda/User.ts";
 import {SearchTemplates} from "./SearchTemplates.ts";
 
 export class PageTemplates {

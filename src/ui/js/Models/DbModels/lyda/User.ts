@@ -1,7 +1,7 @@
-import {Follow} from "./Follow.js";
-import {UserBadge} from "./UserBadge.js";
-import {Usersetting} from "./Usersetting.js";
-import {Badge} from "./Badge.js";
+import {Follow} from "./Follow.ts";
+import {UserBadge} from "./UserBadge.ts";
+import {Usersetting} from "./Usersetting.ts";
+import {Badge} from "./Badge.ts";
 
 export interface User extends Express.User {
     settings?: Usersetting[];

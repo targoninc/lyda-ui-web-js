@@ -7,7 +7,7 @@ import {finalizeLogin, Util} from "../Classes/Util.ts";
 import {notify} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
 import {InputType} from "../../fjsc/src/Types.ts";
-import {User} from "../Models/DbModels/User.ts";
+import {User} from "../Models/DbModels/lyda/User.ts";
 import {HtmlPropertyValue, create, ifjs, AnyNode} from "../../fjsc/src/f2.ts";
 import {Api, ApiResponse} from "../Api/Api.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";

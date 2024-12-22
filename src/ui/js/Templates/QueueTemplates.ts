@@ -5,10 +5,10 @@ import {GenericTemplates} from "./GenericTemplates.ts";
 import {DragActions} from "../Actions/DragActions.ts";
 import {Util} from "../Classes/Util.ts";
 import {navigate} from "../Routing/Router.ts";
-import {Track} from "../Models/DbModels/Track.ts";
+import {Track} from "../Models/DbModels/lyda/Track.ts";
 import {create} from "../../fjsc/src/f2.ts";
 import {FJSC} from "../../fjsc";
-import {User} from "../Models/DbModels/User.ts";
+import {User} from "../Models/DbModels/lyda/User.ts";
 import {compute, signal} from "../../fjsc/src/signals.ts";
 import {Images} from "../Enums/Images.ts";
 

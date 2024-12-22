@@ -1,4 +1,4 @@
-import {Track} from "./Track.js";
+import {Track} from "./Track.ts";
 
 export interface PlaylistTrack {
     playlist_id: number;

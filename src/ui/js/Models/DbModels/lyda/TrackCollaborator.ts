@@ -1,5 +1,5 @@
-import {User} from "./User.js";
-import {CollaboratorType} from "./CollaboratorType.js";
+import {User} from "./User.ts";
+import {CollaboratorType} from "./CollaboratorType.ts";
 import {Track} from "./Track.ts";
 
 export interface TrackCollaborator {

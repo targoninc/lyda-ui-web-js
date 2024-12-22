@@ -7,7 +7,7 @@ import {TrackActions} from "../Actions/TrackActions.ts";
 import {StreamClient} from "./StreamClient.ts";
 import {userHasSettingValue, Util} from "../Classes/Util.ts";
 import {notify} from "../Classes/Ui.ts";
-import {Track} from "../Models/DbModels/Track.ts";
+import {Track} from "../Models/DbModels/lyda/Track.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {
     trackInfo,

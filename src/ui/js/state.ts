@@ -1,10 +1,10 @@
 import {compute, signal} from "../fjsc/src/signals.ts";
 import {StreamClient} from "./Streaming/StreamClient.ts";
 import {PlayingFrom} from "./Models/PlayingFrom.ts";
-import {Track} from "./Models/DbModels/Track.ts";
+import {Track} from "./Models/DbModels/lyda/Track.ts";
 import {LydaCache} from "./Cache/LydaCache.ts";
 import {CacheItem} from "./Cache/CacheItem.ts";
-import {User} from "./Models/DbModels/User.ts";
+import {User} from "./Models/DbModels/lyda/User.ts";
 import {TrackPosition} from "./Models/TrackPosition.ts";
 import {LoopMode} from "./Enums/LoopMode.ts";
 

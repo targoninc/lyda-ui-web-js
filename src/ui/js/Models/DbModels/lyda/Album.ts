@@ -1,5 +1,5 @@
-import {User} from "./User.js";
-import {AlbumLike} from "./AlbumLike.js";
+import {User} from "./User.ts";
+import {AlbumLike} from "./AlbumLike.ts";
 import {AlbumTrack} from "./AlbumTrack.ts";
 
 export interface Album {

@@ -18,11 +18,11 @@ import {
     signalMap, StringOrSignal,
     TypeOrSignal
 } from "../../fjsc/src/f2.ts";
-import {Track} from "../Models/DbModels/Track.ts";
+import {Track} from "../Models/DbModels/lyda/Track.ts";
 import {FJSC} from "../../fjsc";
-import {User} from "../Models/DbModels/User.ts";
+import {User} from "../Models/DbModels/lyda/User.ts";
 import {InputType} from "../../fjsc/src/Types.ts";
-import {TrackCollaborator} from "../Models/DbModels/TrackCollaborator.ts";
+import {TrackCollaborator} from "../Models/DbModels/lyda/TrackCollaborator.ts";
 import {UploadableTrack} from "../Models/UploadableTrack.ts";
 import {UploadInfo} from "../Models/UploadInfo.ts";
 import {ProgressPart} from "../Models/ProgressPart.ts";

@@ -12,7 +12,7 @@ import {FormTemplates} from "./FormTemplates.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {signal} from "../../fjsc/src/signals.ts";
-import {User} from "../Models/DbModels/User.ts";
+import {User} from "../Models/DbModels/lyda/User.ts";
 import {getErrorMessage} from "../Classes/Util.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 

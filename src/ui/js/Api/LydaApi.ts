@@ -2,8 +2,8 @@ import {Api} from "./Api.ts";
 import {notify} from "../Classes/Ui.ts";
 import {Signal} from "../../fjsc/src/signals.ts";
 import {ApiRoutes} from "./ApiRoutes.ts";
-import {User} from "../Models/DbModels/User.ts";
-import {Log} from "../Models/DbModels/Log.ts";
+import {User} from "../Models/DbModels/lyda/User.ts";
+import {Log} from "../Models/DbModels/lyda/Log.ts";
 import {currentUser} from "../state.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 

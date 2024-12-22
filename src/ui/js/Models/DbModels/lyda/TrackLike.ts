@@ -1,6 +1,6 @@
-import {User} from "./User.js";
+import {User} from "./User.ts";
 
-export interface Repost {
+export interface TrackLike {
     user?: User;
     user_id: number;
     track_id: number;

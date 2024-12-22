@@ -5,13 +5,15 @@ import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {getErrorMessage} from "../Classes/Util.ts";
 import {Signal} from "../../fjsc/src/signals.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
+import {AvailableSubscription} from "../Models/DbModels/finance/AvailableSubscription.ts";
+import {Subscription} from "../Models/DbModels/finance/Subscription.ts";
 
 export class SubscriptionActions {
     static clientId = "AUw6bB-HQTIfqy5fhk-s5wZOaEQdaCIjRnCyIC3WDCRxVKc9Qvz1c6xLw7etCit1CD1qSHY5Pv-3xgQN";
 
-    static async startSubscription(id: string, planId: string, previousId: string, optionMessage: Signal<string>) {
+    static async startSubscription(id: number, planId: string, optionMessage: Signal<string>) {
         const client_id = SubscriptionActions.clientId;
-        SubscriptionActions.initializeDomForSubStart(id, previousId, optionMessage);
+        SubscriptionActions.initializeDomForSubStart(id, optionMessage);
         SubscriptionActions.initializePaypalButton(client_id, planId, "paypal-button-" + id, optionMessage, async (data: any) => {
             await SubscriptionActions.subscriptionSuccess(data, {
                 id,
@@ -22,33 +24,34 @@ export class SubscriptionActions {
         });
     }
 
-    static initializeDomForSubStart(id, previousId, optionMessage) {
-        const subStarters = document.querySelectorAll(".subStarter");
-        for (const subStarter of subStarters) {
-            subStarter.classList.remove("selected");
+    static initializeDomForSubStart(id: number, optionMessage: Signal<string>) {
+        const subStarter = document.querySelector(".subStarter[id=\"" + id + "\"]");
+        if (!subStarter) {
+            console.warn("Could not find subStarter with id " + id);
+            return;
         }
-        document.querySelector(".subStarter[id=\"" + id + "\"]").classList.add("selected");
+        subStarter.classList.add("selected");
         optionMessage.value = "Click the button below to start your subscription";
     }
 
-    static addPaypalSdkIfNotExists(client_id) {
+    static addPaypalSdkIfNotExists(client_id: string) {
         if (document.getElementById("paypalSdk") === null) {
             const paypalSdk = SubscriptionTemplates.paypalSdk(client_id);
             document.body.appendChild(paypalSdk);
         }
     }
 
-    static initializePaypalButton(client_id, plan_id, button_id, message, onApprove) {
+    static initializePaypalButton(client_id: string, plan_id: string, button_id: string, message: Signal<string>, onApprove: Function) {
         const buttons = window.paypal.Buttons({
-            createSubscription: function (data, actions) {
+            createSubscription: function (data: any, actions: any) {
                 return actions.subscription.create({
                     "plan_id": plan_id
                 });
             },
-            onApprove: function (data, actions) {
+            onApprove: function (data: any, actions: any) {
                 onApprove(data, actions);
             },
-            onError: function (err) {
+            onError: function (err: any) {
                 notify("Failed to start subscription: " + err, NotificationType.error);
                 message.value = "Failed to start subscription";
             },
@@ -75,7 +78,7 @@ export class SubscriptionActions {
         }
     }
 
-    static async cancelSubscriptionWithConfirmationAsync(id) {
+    static async cancelSubscriptionWithConfirmationAsync(id: number) {
         await Ui.getConfirmationModal(
             "Cancel subscription",
             "Are you sure you want to cancel this subscription?",
@@ -96,14 +99,11 @@ export class SubscriptionActions {
         return true;
     }
 
-    static togglePayments(e) {
-        const id = e.currentTarget.id.split("_")[1];
-        const payments = document.querySelector("#payments_" + id);
-        payments.classList.toggle("hidden");
-    }
-
     static async loadSubscriptionOptions() {
-        const res = await Api.getAsync<any[]>(ApiRoutes.getSubscriptionOptions);
+        const res = await Api.getAsync<{
+            options: AvailableSubscription[],
+            currentSubscription: Subscription|null
+        }>(ApiRoutes.getSubscriptionOptions);
         if (res.code !== 200) {
             notify("Failed to load subscription options", NotificationType.error);
             return;

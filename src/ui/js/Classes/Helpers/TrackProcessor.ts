@@ -1,4 +1,4 @@
-import {Track} from "../../Models/DbModels/Track.ts";
+import {Track} from "../../Models/DbModels/lyda/Track.ts";
 
 export class TrackProcessor {
     static forDownload(input: Track) {

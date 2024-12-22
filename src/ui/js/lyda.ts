@@ -21,16 +21,18 @@ import {Util} from "./Classes/Util.ts";
 import {StatisticsWrapper} from "./Classes/StatisticsWrapper.ts";
 import {notify} from "./Classes/Ui.ts";
 import {navigate} from "./Routing/Router.ts";
-import {Permission} from "./Models/DbModels/Permission.ts";
-import {Follow} from "./Models/DbModels/Follow.ts";
+import {Permission} from "./Models/DbModels/lyda/Permission.ts";
+import {Follow} from "./Models/DbModels/lyda/Follow.ts";
 import {AnyElement, create} from "../fjsc/src/f2.ts";
-import {User} from "./Models/DbModels/User.ts";
+import {User} from "./Models/DbModels/lyda/User.ts";
 import {ApiRoutes} from "./Api/ApiRoutes.ts";
 import {signal} from "../fjsc/src/signals.ts";
-import {Track} from "./Models/DbModels/Track.ts";
+import {Track} from "./Models/DbModels/lyda/Track.ts";
 import {LogLevel} from "./Enums/LogLevel.ts";
-import {Log} from "./Models/DbModels/Log.ts";
+import {Log} from "./Models/DbModels/lyda/Log.ts";
 import {NotificationType} from "./Enums/NotificationType.ts";
+import {AvailableSubscription} from "./Models/DbModels/finance/AvailableSubscription.ts";
+import {Subscription} from "./Models/DbModels/finance/Subscription.ts";
 
 export class Lyda {
     static async getEndpointData(endpoint: string, params = "") {
@@ -240,16 +242,18 @@ export class Lyda {
                     return;
                 }
                 SubscriptionActions.addPaypalSdkIfNotExists(SubscriptionActions.clientId);
-                const options = signal<any[]>([]);
+                const options = signal<AvailableSubscription[]>([]);
+                const currentSubscription = signal<Subscription|null>(null);
                 SubscriptionActions.loadSubscriptionOptions().then(res => {
                     if (!res || res.error) {
                         notify("Failed to load subscription options", NotificationType.error);
                         return;
                     }
-                    options.value = res;
+                    options.value = res.options;
+                    currentSubscription.value = res.currentSubscription;
                 });
                 const currency = "USD";
-                element.appendChild(SubscriptionTemplates.page(user, currency, options));
+                element.appendChild(SubscriptionTemplates.page(currency, options, currentSubscription));
                 break;
             default:
                 element.innerHTML = JSON.stringify(data, null, 2);

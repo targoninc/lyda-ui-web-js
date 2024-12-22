@@ -1,5 +1,5 @@
-import {User} from "./User.js";
-import {PlaylistLike} from "./PlaylistLike.js";
+import {User} from "./User.ts";
+import {PlaylistLike} from "./PlaylistLike.ts";
 import {PlaylistTrack} from "./PlaylistTrack.ts";
 
 export interface Playlist {
