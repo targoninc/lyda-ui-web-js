@@ -29,8 +29,8 @@ export const router = new Router(routes, async (route: Route, params: any) => {
     const user = await Util.getUserAsync();
     pageContainer.innerHTML = "";
     let template = PageTemplates.mapping[page]();
-    if (!user && PageTemplates.nonUserFallback[page]) {
-        template = PageTemplates.nonUserFallback[page]();
+    if (!user && PageTemplates.needLoginPages.includes(page)) {
+        navigate("login");
     }
     pageContainer.appendChild(template);
     pageContainer.scrollIntoView();

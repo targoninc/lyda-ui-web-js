@@ -3,7 +3,6 @@ export interface Subscription {
     user_id: number;
     subscription_id: number;
     active: boolean;
-    scope: string;
     billed: number;
     paid: number;
     created_at: Date;

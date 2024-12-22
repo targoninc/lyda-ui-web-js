@@ -1099,8 +1099,6 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     height: 30px;
     width: 100%;
     white-space: nowrap;
-    border-left: 1px solid var(--green);
-    border-right: 1px solid var(--green);
 }
 
 .marquee .scrolling {

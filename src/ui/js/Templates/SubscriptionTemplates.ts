@@ -4,7 +4,6 @@ import {SubscriptionActions} from "../Actions/SubscriptionActions.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {compute, signal, Signal} from "../../fjsc/src/signals.ts";
-import {User} from "../Models/DbModels/lyda/User.ts";
 import {AvailableSubscription} from "../Models/DbModels/finance/AvailableSubscription.ts";
 import {Subscription} from "../Models/DbModels/finance/Subscription.ts";
 
@@ -23,7 +22,7 @@ export class SubscriptionTemplates {
                 ifjs(currentSubscription, create("h1")
                     .text("Your benefits")
                     .build(), true),
-                ifjs(currentSubscription, SubscriptionTemplates.subscriptionBenefits(currentSubscription), true),
+                ifjs(currentSubscription, SubscriptionTemplates.subscriptionBenefits(), true),
                 ifjs(optionsLoading, GenericTemplates.loadingSpinner()),
                 signalMap(options, create("div")
                         .classes("flex"),
@@ -31,7 +30,7 @@ export class SubscriptionTemplates {
             ).build();
     }
 
-    static subscriptionBenefits(currentSubscription: Signal<Subscription | null>) {
+    static subscriptionBenefits() {
         return create("div")
             .classes("marquee")
             .styles("max-width", "min(500px, 100%)")
@@ -60,20 +59,6 @@ export class SubscriptionTemplates {
                     .text(benefit)
                     .build()
             ).build();
-    }
-
-    static paypalContainer(availableSub: AvailableSubscription) {
-        return create("div")
-            .id("startSubscription_" + availableSub.id)
-            .classes("flex")
-            .build();
-    }
-
-    static paypalSdk(client_id: string) {
-        return create("script")
-            .id("paypalSdk")
-            .src("https://www.paypal.com/sdk/js?client-id=" + client_id + "&vault=true&intent=subscription")
-            .build();
     }
 
     static paypalButton(button_id: string) {

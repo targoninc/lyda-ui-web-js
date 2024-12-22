@@ -1,5 +1,4 @@
 import {Api} from "../Api/Api.ts";
-import {SubscriptionTemplates} from "../Templates/SubscriptionTemplates.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {getErrorMessage} from "../Classes/Util.ts";
@@ -7,19 +6,29 @@ import {Signal} from "../../fjsc/src/signals.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {AvailableSubscription} from "../Models/DbModels/finance/AvailableSubscription.ts";
 import {Subscription} from "../Models/DbModels/finance/Subscription.ts";
+import {CreateSubscriptionActions, loadScript,
+    OnApproveActions, OnApproveData, PayPalButtonsComponentOptions, PayPalNamespace} from "@paypal/paypal-js";
+
+const clientId = "AUw6bB-HQTIfqy5fhk-s5wZOaEQdaCIjRnCyIC3WDCRxVKc9Qvz1c6xLw7etCit1CD1qSHY5Pv-3xgQN";
+// @ts-ignore
+const paypal: PayPalNamespace = await loadScript({
+    clientId,
+    vault: true,
+    intent: "subscription",
+});
+if (!paypal) {
+    console.warn("PayPal SDK could not initialized");
+}
 
 export class SubscriptionActions {
-    static clientId = "AUw6bB-HQTIfqy5fhk-s5wZOaEQdaCIjRnCyIC3WDCRxVKc9Qvz1c6xLw7etCit1CD1qSHY5Pv-3xgQN";
-
     static async startSubscription(id: number, planId: string, optionMessage: Signal<string>) {
-        const client_id = SubscriptionActions.clientId;
         SubscriptionActions.initializeDomForSubStart(id, optionMessage);
-        SubscriptionActions.initializePaypalButton(client_id, planId, "paypal-button-" + id, optionMessage, async (data: any) => {
-            await SubscriptionActions.subscriptionSuccess(data, {
+        SubscriptionActions.initializePaypalButton(planId, "paypal-button-" + id, optionMessage, async (paypalData: any) => {
+            await SubscriptionActions.subscriptionSuccess(paypalData, {
                 id,
                 planId,
-                orderId: data.orderID,
-                subscriptionId: data.subscriptionID
+                orderId: paypalData.orderID,
+                subscriptionId: paypalData.subscriptionID
             });
         });
     }
@@ -34,30 +43,26 @@ export class SubscriptionActions {
         optionMessage.value = "Click the button below to start your subscription";
     }
 
-    static addPaypalSdkIfNotExists(client_id: string) {
-        if (document.getElementById("paypalSdk") === null) {
-            const paypalSdk = SubscriptionTemplates.paypalSdk(client_id);
-            document.body.appendChild(paypalSdk);
-        }
-    }
-
-    static initializePaypalButton(client_id: string, plan_id: string, button_id: string, message: Signal<string>, onApprove: Function) {
-        const buttons = window.paypal.Buttons({
-            createSubscription: function (data: any, actions: any) {
+    static initializePaypalButton(plan_id: string, button_id: string, message: Signal<string>, onApprove: Function) {
+        const buttons = paypal.Buttons!(<PayPalButtonsComponentOptions>{
+            createSubscription(data: Record<string, unknown>, actions: CreateSubscriptionActions) {
                 return actions.subscription.create({
                     "plan_id": plan_id
                 });
             },
-            onApprove: function (data: any, actions: any) {
-                onApprove(data, actions);
+            onClick(data: any, actions: any) {
+                message.value = "Opened PayPal popup";
             },
-            onError: function (err: any) {
+            async onApprove(data: OnApproveData, actions: OnApproveActions) {
+                await onApprove(data, actions);
+            },
+            onError(err: Record<string, unknown>) {
                 notify("Failed to start subscription: " + err, NotificationType.error);
                 message.value = "Failed to start subscription";
             },
-            onCancel: function () {
-                notify("Subscription cancelled", NotificationType.info);
-                message.value = "Subscription cancelled";
+            onCancel() {
+                notify("Subscription creation cancelled", NotificationType.info);
+                message.value = "Subscription creation cancelled";
             },
             style: {
                 color: "silver",

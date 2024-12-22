@@ -36,16 +36,16 @@ export class PageTemplates {
         "activate-account": LandingPageTemplates.newLandingPage,
         search: SearchTemplates.searchPage,
     };
-    static nonUserFallback: {[key: string]: Function} = {
-        library: this.loginPage,
-        upload: this.loginPage,
-        settings: this.loginPage,
-        statistics: this.loginPage,
-        following: this.loginPage,
-        "unapproved-tracks": this.loginPage,
-        moderation: this.loginPage,
-        subscribe: this.loginPage
-    };
+    static needLoginPages: string[] = [
+        "library",
+        "upload",
+        "settings",
+        "statistics",
+        "following",
+        "unapproved-tracks",
+        "moderation",
+        "subscribe"
+    ];
 
     static albumPage() {
         return create("div")

@@ -241,7 +241,6 @@ export class Lyda {
                     navigate("login");
                     return;
                 }
-                SubscriptionActions.addPaypalSdkIfNotExists(SubscriptionActions.clientId);
                 const options = signal<AvailableSubscription[]>([]);
                 const currentSubscription = signal<Subscription|null>(null);
                 SubscriptionActions.loadSubscriptionOptions().then(res => {
