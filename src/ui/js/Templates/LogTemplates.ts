@@ -2,7 +2,7 @@ import {Time} from "../Classes/Helpers/Time.ts";
 import {UserTemplates} from "./UserTemplates.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {Util} from "../Classes/Util.ts";
-import {create, ifjs} from "../../fjsc/src/f2.ts";
+import {AnyElement, create, ifjs} from "../../fjsc/src/f2.ts";
 import {User} from "../Models/DbModels/lyda/User.ts";
 import {signal, Signal} from "../../fjsc/src/signals.ts";
 import {PillOption} from "../Models/PillOption.ts";
@@ -11,6 +11,8 @@ import {Log} from "../Models/DbModels/lyda/Log.ts";
 import {FJSC} from "../../fjsc";
 import {notify} from "../Classes/Ui.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
+import {LydaApi} from "../Api/LydaApi.ts";
+import {truncateText} from "../Classes/Helpers/CustomText.ts";
 
 export class LogTemplates {
     static async actionLogs(selfUser: User, data: any[]) {
@@ -18,11 +20,9 @@ export class LogTemplates {
         for (const log of data) {
             if (!users[log.user_id]) {
                 users[log.user_id] = await Util.getUserAsync(log.user_id);
-                users[log.user_id].avatarUrl = await Util.getUserAvatar(log.user_id);
             }
             if (!users[log.actionedUserId]) {
                 users[log.actionedUserId] = await Util.getUserAsync(log.actionedUserId);
-                users[log.actionedUserId].avatarUrl = await Util.getUserAvatar(log.actionedUserId);
             }
         }
 
@@ -35,26 +35,11 @@ export class LogTemplates {
                         create("tr")
                             .classes("log")
                             .children(
-                                create("th")
-                                    .classes("log-timestamp")
-                                    .text("Timestamp")
-                                    .build(),
-                                create("th")
-                                    .classes("log-user")
-                                    .text("User")
-                                    .build(),
-                                create("th")
-                                    .classes("log-action-name")
-                                    .text("Action Name")
-                                    .build(),
-                                create("th")
-                                    .classes("log-user")
-                                    .text("Actioned User")
-                                    .build(),
-                                create("th")
-                                    .classes("log-properties")
-                                    .text("Properties")
-                                    .build(),
+                                LogTemplates.header("Timestamp", "log-timestamp"),
+                                LogTemplates.header("User", "log-user"),
+                                LogTemplates.header("Action Name", "log-action-name"),
+                                LogTemplates.header("Actioned User", "log-user"),
+                                LogTemplates.header("Properties", "log-properties"),
                             ).build(),
                     ).build(),
                 create("tbody")
@@ -88,6 +73,17 @@ export class LogTemplates {
             ).build();
     }
 
+    static header(title: string, type: string) {
+        return create("th")
+            .classes(type)
+            .children(
+                create("span")
+                    .classes("table-header")
+                    .text(title)
+                    .build(),
+            ).build();
+    }
+
     static logs(data: Log[]) {
         const headers = ["Timestamp", "Host", "Log Level", "Message", "Stack", "Properties"];
         const headerDefinitions = headers.map(h => ({
@@ -113,52 +109,56 @@ export class LogTemplates {
                         create("tr")
                             .classes("log")
                             .children(
-                                ...headerDefinitions.map(h => create("th")
-                                    .classes(h.className)
-                                    .text(h.title)
-                                    .build()),
+                                ...headerDefinitions.map(h => LogTemplates.header(h.title, h.className)),
                             ).build(),
                     ).build(),
                 create("tbody")
                     .children(
-                        ...data.map(l => {
-                            const type = logLevelMap[l.logLevel].toLowerCase();
-
-                            return create("tr")
-                                .classes("log", type)
-                                .children(
-                                    create("td")
-                                        .classes("log-timestamp")
-                                        .text(Time.ago(l.time))
-                                        .build(),
-                                    create("td")
-                                        .classes("log-host")
-                                        .text(l.host)
-                                        .build(),
-                                    create("td")
-                                        .classes("log-level")
-                                        .text(logLevelMap[l.logLevel])
-                                        .build(),
-                                    create("td")
-                                        .classes("log-message", type)
-                                        .text(l.message)
-                                        .build(),
-                                    create("td")
-                                        .classes("log-stack")
-                                        .children(
-                                            FJSC.button({
-                                                text: "Copy stack",
-                                                icon: { icon: "content_copy" },
-                                                onclick: () => {
-                                                    navigator.clipboard.writeText(l.stack);
-                                                    notify("Copied stack to clipboard", NotificationType.success);
-                                                }
-                                            }),
-                                        ).build(),
-                                    LogTemplates.properties(l.properties),
-                                ).build();
-                        })
+                        ...data.map(l => LogTemplates.logEntry(logLevelMap, l))
                     ).build(),
+            ).build();
+    }
+
+    private static logEntry(logLevelMap: Record<number, string>, l: Log) {
+        const type = logLevelMap[l.logLevel].toLowerCase();
+
+        return create("tr")
+            .classes("log", type)
+            .children(
+                create("td")
+                    .classes("log-timestamp")
+                    .text(Time.ago(l.time))
+                    .build(),
+                create("td")
+                    .classes("log-host", "color-dim")
+                    .text(l.host)
+                    .build(),
+                create("td")
+                    .classes("log-level")
+                    .text(logLevelMap[l.logLevel])
+                    .build(),
+                create("td")
+                    .classes("log-message", type, "color-dim", "text-small")
+                    .title(l.message)
+                    .text(truncateText(l.message, 200))
+                    .onclick(async () => {
+                        await navigator.clipboard.writeText(l.message);
+                        notify("Copied message to clipboard", NotificationType.success);
+                    })
+                    .build(),
+                create("td")
+                    .classes("log-stack")
+                    .children(
+                        FJSC.button({
+                            text: "Copy stack",
+                            icon: {icon: "content_copy"},
+                            onclick: () => {
+                                navigator.clipboard.writeText(l.stack);
+                                notify("Copied stack to clipboard", NotificationType.success);
+                            }
+                        }),
+                    ).build(),
+                LogTemplates.properties(l.properties),
             ).build();
     }
 
@@ -191,7 +191,7 @@ export class LogTemplates {
             ).build();
     }
 
-    static property(key, value) {
+    static property(key: string, value: any): AnyElement {
         if (value === null) {
             value = "null";
         }
@@ -213,7 +213,7 @@ export class LogTemplates {
                         .classes("property-value", "flex-v")
                         .children(
                             ...Object.keys(value).map((k: string) => {
-                                return LogTemplates.property(k, value[k]);
+                                return LogTemplates.property(k, value[k]) as any;
                             })
                         ).build()
                 ).build();
@@ -227,6 +227,21 @@ export class LogTemplates {
                     .text(key)
                     .build(),
                 valueChild
+            ).build();
+    }
+
+    static logsPage() {
+        const filterState = signal(LogLevel.debug);
+        const logsList = signal<AnyElement>(create("div").build());
+        LydaApi.getLogs(filterState, async (logs: Log[]) => {
+            logsList.value = LogTemplates.logs(logs);
+        });
+
+        return create("div")
+            .classes("flex-v")
+            .children(
+                LogTemplates.logFilters(filterState),
+                logsList
             ).build();
     }
 

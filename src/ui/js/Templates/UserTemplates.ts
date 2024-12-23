@@ -8,7 +8,7 @@ import {Icons as Icons} from "../Enums/Icons.js";
 import {Badges} from "../Enums/Badges.ts";
 import {Links} from "../Enums/Links.ts";
 import {PlaylistTemplates} from "./PlaylistTemplates.ts";
-import {CustomText} from "../Classes/Helpers/CustomText.ts";
+import {CustomText, truncateText} from "../Classes/Helpers/CustomText.ts";
 import {Permissions} from "../Enums/Permissions.ts";
 import {Images} from "../Enums/Images.ts";
 import {navigate} from "../Routing/Router.ts";
@@ -94,7 +94,7 @@ export class UserTemplates {
                 UserTemplates.userIcon(user.id, avatarState),
                 create("span")
                     .classes("text", "align-center", "nopointer", "user-displayname", "hideOnTinyBreakpoint")
-                    .text(CustomText.shorten(user.displayname, maxDisplaynameLength))
+                    .text(truncateText(user.displayname, maxDisplaynameLength))
                     .attributes("data-user-id", user.id)
                     .build(),
                 create("span")

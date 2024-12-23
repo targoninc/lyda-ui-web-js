@@ -6,11 +6,11 @@ export class CustomText {
         replacedText = replacedText.replace(atMentionPattern, "<a href=\"/profile/$1\" target='_blank' class='inlineLink'>@$1</a>");
         return replacedText;
     }
+}
 
-    static shorten(text: string, length: number): string {
-        if (!text) {
-            return "";
-        }
-        return text.length > length ? text.substring(0, length - 3) + "..." : text;
+export function truncateText(text: string, length: number): string {
+    if (!text) {
+        return "";
     }
+    return text.length > length ? text.substring(0, length - 3) + "..." : text;
 }

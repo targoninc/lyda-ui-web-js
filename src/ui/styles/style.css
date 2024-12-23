@@ -773,6 +773,20 @@ textarea.fullWidth {
     filter: none !important;
 }
 
+.table-header {
+    font-weight: bold;
+    padding: var(--inline-padding);
+    border-radius: var(--border-radius);
+    background: var(--blue-dark);
+    border: 1px solid var(--blue);
+}
+
+th {
+    text-wrap: nowrap;
+    padding: var(--base-padding) !important;
+    background: var(--color-6);
+}
+
 th, td {
     text-align: left;
     padding: var(--inline-padding);

@@ -187,15 +187,7 @@ export class Lyda {
                     navigate("profile");
                     return;
                 }
-                const filterState = signal(LogLevel.debug);
-                element.appendChild(LogTemplates.logFilters(filterState));
-                let logsList = create("div").build();
-                element.appendChild(logsList);
-                LydaApi.getLogs(filterState, async (logs: Log[]) => {
-                    const newLogs = LogTemplates.logs(logs);
-                    element.replaceChild(newLogs, logsList);
-                    logsList = newLogs;
-                });
+                element.appendChild(LogTemplates.logsPage());
                 break;
             case "actionLogs":
                 if (!user) {

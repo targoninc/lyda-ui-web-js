@@ -11,12 +11,20 @@ import {getErrorMessage} from "../Classes/Util.ts";
 export class LydaApi {
     static getLogs(filterState: Signal<any>, successCallback: Function) {
         const errorText = "Failed to get logs";
-        Api.getAsync<Log[]>(ApiRoutes.getLogs, {logLevel: filterState.value}).then(logs => {
+        Api.getAsync<Log[]>(ApiRoutes.getLogs, {
+            logLevel: filterState.value,
+            offset: 0,
+            limit: 100
+        }).then(logs => {
             LydaApi.handleResponse(logs, errorText, successCallback);
         });
 
         filterState.subscribe(async (newValue) => {
-            Api.getAsync<Log[]>(ApiRoutes.getLogs, {logLevel: newValue}).then(logs => {
+            Api.getAsync<Log[]>(ApiRoutes.getLogs, {
+                logLevel: newValue,
+                offset: 0,
+                limit: 100
+            }).then(logs => {
                 LydaApi.handleResponse(logs, errorText, successCallback);
             });
         });
