@@ -75,13 +75,13 @@ export class SubscriptionTemplates {
         const active = compute(sub => sub && sub.subscription_id === option.id, currentSubscription);
         const enabled = compute(a => !a, active);
         const activeClass = compute((a): string => a ? "active" : "_", active);
-        const paypalButtonShown = compute(selected => selected === option.id, selectedOption);
+        const isSelectedOption = compute(selected => selected === option.id, selectedOption);
+        const selectedClass = compute((s): string => s === option.id ? "selected" : "_", selectedOption);
         const gifted = compute(s => !!(s && s.gifted), currentSubscription);
         const createdAt = compute(s => s && s.created_at, currentSubscription);
         const previousId = compute(s => s && s.previous_subscription, currentSubscription);
         const startSubClass = compute(p => "startSubscription_" + option.id + "_" + p, previousId);
-        const selectedClass = compute((s): string => s === option.id ? "selected" : "_", selectedOption);
-        const optionMessage = signal("");
+        const optionMessage = signal("Available payment providers:");
 
         return create("div")
             .classes("flex-v", "card", "relative", "subscription-option", selectedClass, activeClass)
@@ -135,11 +135,11 @@ export class SubscriptionTemplates {
                                         selectedOption.value = option.id;
                                         await SubscriptionActions.startSubscription(option.id, option.plan_id, optionMessage);
                                     }).build()),
-                                ifjs(optionMessage, create("span")
+                                ifjs(isSelectedOption, create("span")
                                     .classes("color-dim")
                                     .text(optionMessage)
                                     .build()),
-                                ifjs(paypalButtonShown, SubscriptionTemplates.paypalButton("paypal-button-" + option.id))
+                                ifjs(isSelectedOption, SubscriptionTemplates.paypalButton("paypal-button-" + option.id))
                             ).build()
                     ).build()
             ).build();

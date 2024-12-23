@@ -21,14 +21,14 @@ if (!paypal) {
 }
 
 export class SubscriptionActions {
-    static async startSubscription(id: number, planId: string, optionMessage: Signal<string>) {
+    static async startSubscription(id: number, subPlanId: string, optionMessage: Signal<string>) {
         SubscriptionActions.initializeDomForSubStart(id, optionMessage);
-        SubscriptionActions.initializePaypalButton(planId, "paypal-button-" + id, optionMessage, async (paypalData: any) => {
+        SubscriptionActions.initializePaypalButton(subPlanId, "paypal-button-" + id, optionMessage, async (paypalData: any) => {
             await SubscriptionActions.subscriptionSuccess(paypalData, {
                 id,
-                planId,
+                subscriptionId: subPlanId,
                 orderId: paypalData.orderID,
-                subscriptionId: paypalData.subscriptionID
+                externalSubscriptionId: paypalData.subscriptionID
             });
         });
     }
@@ -93,7 +93,7 @@ export class SubscriptionActions {
         );
     }
 
-    static async cancelSubscriptionAsync(id: string) {
+    static async cancelSubscriptionAsync(id: number) {
         const res = await Api.postAsync(ApiRoutes.unsubscribe, {id});
         if (res.code !== 200) {
             notify("Error while cancelling subscription: " + getErrorMessage(res), NotificationType.error);
