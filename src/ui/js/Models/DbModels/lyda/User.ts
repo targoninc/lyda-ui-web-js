@@ -2,8 +2,10 @@ import {Follow} from "./Follow.ts";
 import {UserBadge} from "./UserBadge.ts";
 import {Usersetting} from "./Usersetting.ts";
 import {Badge} from "./Badge.ts";
+import {Subscription} from "../finance/Subscription.ts";
 
 export interface User extends Record<string, any> {
+    subscription?: Subscription;
     settings?: Usersetting[];
     badges?: Badge[];
     userBadges?: UserBadge[];

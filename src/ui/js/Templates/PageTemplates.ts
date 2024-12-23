@@ -9,6 +9,7 @@ import {Follow} from "../Models/DbModels/lyda/Follow.ts";
 import {compute, signal} from "../../fjsc/src/signals.ts";
 import {User} from "../Models/DbModels/lyda/User.ts";
 import {SearchTemplates} from "./SearchTemplates.ts";
+import {SettingsTemplates} from "./SettingsTemplates.ts";
 
 export class PageTemplates {
     static mapping: {[key: string]: Function} = {
@@ -17,7 +18,7 @@ export class PageTemplates {
         album: this.albumPage,
         playlist: this.playlistPage,
         profile: this.profilePage,
-        settings: this.settingsPage,
+        settings: SettingsTemplates.settingsPage,
         statistics: this.statisticsPage,
         track: this.trackPage,
         upload: this.uploadPage,

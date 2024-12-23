@@ -1,4 +1,4 @@
-import {create} from "../../fjsc/src/f2.ts";
+import {create, ifjs} from "../../fjsc/src/f2.ts";
 import {UserActions} from "../Actions/UserActions.ts";
 import {Theme} from "../Enums/Theme.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
@@ -15,9 +15,16 @@ import {AuthActions} from "../Actions/AuthActions.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {StreamingQuality} from "../Enums/StreamingQuality.ts";
 import {UserTemplates} from "./UserTemplates.ts";
+import {currentUser} from "../state.ts";
 
 export class SettingsTemplates {
-    static settingsPage(user: User) {
+    static settingsPage() {
+        const user = currentUser.value;
+        if (!user) {
+            navigate("login");
+            return;
+        }
+
         return create("div")
             .classes("flex-v")
             .children(
@@ -47,6 +54,22 @@ export class SettingsTemplates {
                 create("h2")
                     .text("Account")
                     .build(),
+                ifjs(user.subscription, FJSC.button({
+                    icon: { icon: "payments" },
+                    text: "Manage subscription",
+                    classes: ["positive"],
+                    onclick: () => {
+                        navigate("subscribe");
+                    }
+                })),
+                ifjs(user.subscription, FJSC.button({
+                    icon: { icon: "payments" },
+                    text: "Subscribe for more features",
+                    classes: ["special"],
+                    onclick: () => {
+                        navigate("subscribe");
+                    }
+                }), true),
                 FJSC.button({
                     text: "Log out",
                     classes: ["negative", "showOnSmallBreakpoint"],

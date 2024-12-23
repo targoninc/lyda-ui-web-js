@@ -153,13 +153,6 @@ export class Lyda {
                     return;
                 }
                 break;
-            case "settings":
-                if (!user) {
-                    navigate("explore");
-                    return;
-                }
-                element.appendChild(SettingsTemplates.settingsPage(user));
-                break;
             case "statistics":
                 if (!user) {
                     navigate("explore");
