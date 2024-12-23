@@ -223,7 +223,7 @@
 }
 
 .text-positive {
-    color: var(--green);
+    color: var(--green) !important;
 }
 
 .stats-indicator-opener {

@@ -118,6 +118,19 @@ export class SettingsTemplates {
                                 updatedUser.value = { ...updatedUser.value, email: v };
                             }
                         }),
+                        ifjs(notActivated, create("div")
+                            .classes("flex", "noflexwrap", "color-dim")
+                            .children(
+                                FJSC.icon({
+                                    icon: "new_releases",
+                                    adaptive: true,
+                                    classes: ["text-positive"],
+                                }),
+                                create("span")
+                                    .classes("text-positive")
+                                    .text("Your E-mail address is verified.")
+                                    .build()
+                            ).build(), true),
                         ifjs(notActivated, FJSC.button({
                             icon: { icon: "verified_user" },
                             text: "Verify E-mail",
