@@ -19,7 +19,7 @@ if (!pageContainer) {
     throw new Error("No page container found");
 }
 pageContainer.appendChild(GenericTemplates.loadingSpinner());
-currentUser.value = await Util.getUserAsync();
+currentUser.value = await Util.getUserAsync(null, false);
 
 export const router = new Router(routes, async (route: Route, params: any) => {
     const page = route.path.replace("/", "");
@@ -27,7 +27,7 @@ export const router = new Router(routes, async (route: Route, params: any) => {
 
     await Ui.windowResize();
 
-    currentUser.value = await Util.getUserAsync();
+    currentUser.value = await Util.getUserAsync(null, false);
     pageContainer.innerHTML = "";
     let template = PageTemplates.mapping[page]();
     if (!currentUser.value && PageTemplates.needLoginPages.includes(page)) {
