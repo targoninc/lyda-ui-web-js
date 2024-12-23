@@ -8,6 +8,7 @@ import {AvailableSubscription} from "../Models/DbModels/finance/AvailableSubscri
 import {Subscription} from "../Models/DbModels/finance/Subscription.ts";
 import {CreateSubscriptionActions, loadScript,
     OnApproveActions, OnApproveData, PayPalButtonsComponentOptions, PayPalNamespace} from "@paypal/paypal-js";
+import {reload} from "../Routing/Router.ts";
 
 const clientId = "AUw6bB-HQTIfqy5fhk-s5wZOaEQdaCIjRnCyIC3WDCRxVKc9Qvz1c6xLw7etCit1CD1qSHY5Pv-3xgQN";
 // @ts-ignore
@@ -26,7 +27,7 @@ export class SubscriptionActions {
         SubscriptionActions.initializePaypalButton(subPlanId, "paypal-button-" + id, optionMessage, async (paypalData: any) => {
             await SubscriptionActions.subscriptionSuccess(paypalData, {
                 id,
-                subscriptionId: subPlanId,
+                planId: subPlanId,
                 orderId: paypalData.orderID,
                 externalSubscriptionId: paypalData.subscriptionID
             });
@@ -78,18 +79,20 @@ export class SubscriptionActions {
         const res = await Api.postAsync(ApiRoutes.subscribe, {...parameters});
         if (res.code === 200) {
             notify("Subscription started", NotificationType.success);
+            reload();
         } else {
             notify("Error when starting subscription: " + getErrorMessage(res), NotificationType.error);
         }
     }
 
-    static async cancelSubscriptionWithConfirmationAsync(id: number) {
+    static async cancelSubscriptionWithConfirmationAsync(subscriptionId: number) {
         await Ui.getConfirmationModal(
             "Cancel subscription",
             "Are you sure you want to cancel this subscription?",
             "Yes", "No",
-            () => SubscriptionActions.cancelSubscriptionAsync(id),
-            () => {}
+            () => SubscriptionActions.cancelSubscriptionAsync(subscriptionId),
+            () => {},
+            "contract_delete"
         );
     }
 
@@ -101,6 +104,7 @@ export class SubscriptionActions {
         }
 
         notify("Subscription cancelled", NotificationType.success);
+        reload();
         return true;
     }
 

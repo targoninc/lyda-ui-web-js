@@ -3,7 +3,7 @@ import {AuthApi} from "../Api/AuthApi.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {FormTemplates} from "./FormTemplates.ts";
 import {UserValidator} from "../Classes/Validators/UserValidator.ts";
-import {finalizeLogin, Util} from "../Classes/Util.ts";
+import {finalizeLogin, target, Util} from "../Classes/Util.ts";
 import {notify} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
 import {InputType} from "../../fjsc/src/Types.ts";
@@ -698,7 +698,7 @@ export class LandingPageTemplates {
                                         if (e.key === "Enter") {
                                             user.value = {
                                                 ...user.value,
-                                                email: e.target?.value
+                                                email: target(e).value
                                             };
                                             triggerLogin();
                                         }
@@ -717,6 +717,41 @@ export class LandingPageTemplates {
                             classes: ["secondary", "positive"]
                         }),
                     ).build(),
+                create("div")
+                    .classes("flex-v")
+                    .children(
+                        create("h2")
+                            .text("Why use Lyda?")
+                            .build(),
+                        LandingPageTemplates.lydaBenefits(),
+                        create("p")
+                            .styles("max-width", "300px")
+                            .text("We are focused on building a platform that is both good for artists as well as listeners.")
+                            .build(),
+                        create("p")
+                            .classes("color-dim")
+                            .styles("max-width", "300px")
+                            .text("We want to make sure that artists can earn money from their work, and listeners can enjoy their music without ads.")
+                            .build()
+                    ).build(),
+            ).build();
+    }
+
+    static lydaBenefits() {
+        return create("div")
+            .classes("marquee")
+            .styles("max-width", "min(500px, 100%)")
+            .children(
+                create("div")
+                    .classes("scrolling", "flex")
+                    .children(
+                        GenericTemplates.benefit("Transparent royalties", "visibility"),
+                        GenericTemplates.benefit("No ads", "ad_group_off"),
+                        GenericTemplates.benefit("Social features", "people"),
+                        GenericTemplates.benefit("Transparent royalties", "visibility"),
+                        GenericTemplates.benefit("No ads", "ad_group_off"),
+                        GenericTemplates.benefit("Social features", "people"),
+                    ).build()
             ).build();
     }
 

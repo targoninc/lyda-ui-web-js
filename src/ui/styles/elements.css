@@ -427,6 +427,7 @@ label {
     right: 0;
     transform: translateX(50%) translateY(-50%);
     padding: calc(var(--base-padding) * .5);
+    z-index: 2;
 }
 
 .gift-icon {
@@ -1078,7 +1079,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     justify-content: center;
 }
 
-.subscription-benefit {
+.benefit-item {
     display: flex;
     align-items: center;
     gap: var(--gap);
@@ -1089,14 +1090,14 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     height: max-content;
 }
 
-.subscription-benefit * {
+.benefit-item * {
     color: var(--fjsc-interactive-background);
 }
 
 .marquee {
     overflow: hidden;
     position: relative;
-    height: 30px;
+    height: 40px;
     width: 100%;
     white-space: nowrap;
 }
@@ -1120,7 +1121,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     }
 
     100% {
-        transform: translateX(-50%);
+        transform: translateX(calc(-50% - var(--gap)));
     }
 }
 

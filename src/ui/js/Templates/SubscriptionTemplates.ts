@@ -19,10 +19,10 @@ export class SubscriptionTemplates {
                     .classes("color-dim")
                     .text("You do not have an active subscription. Choose any of the options below to start. All prices are in USD.")
                     .build(), true),
-                ifjs(currentSubscription, create("h1")
+                create("h1")
                     .text("Your benefits")
-                    .build(), true),
-                ifjs(currentSubscription, SubscriptionTemplates.subscriptionBenefits(), true),
+                    .build(),
+                SubscriptionTemplates.subscriptionBenefits(),
                 ifjs(optionsLoading, GenericTemplates.loadingSpinner()),
                 signalMap(options, create("div")
                         .classes("flex"),
@@ -38,26 +38,15 @@ export class SubscriptionTemplates {
                 create("div")
                     .classes("scrolling", "flex")
                     .children(
-                        SubscriptionTemplates.subscriptionBenefit("Listen in higher quality", "hearing"),
-                        SubscriptionTemplates.subscriptionBenefit("Artists earn money through you", "attach_money"),
-                        SubscriptionTemplates.subscriptionBenefit("No ads", "ad_group_off"),
-                        SubscriptionTemplates.subscriptionBenefit("Comment on tracks", "comment"),
-                        SubscriptionTemplates.subscriptionBenefit("Listen in higher quality", "hearing"),
-                        SubscriptionTemplates.subscriptionBenefit("Artists earn money through you", "attach_money"),
-                        SubscriptionTemplates.subscriptionBenefit("No ads", "ad_group_off"),
-                        SubscriptionTemplates.subscriptionBenefit("Comment on tracks", "comment"),
+                        GenericTemplates.benefit("Listen in higher quality", "hearing"),
+                        GenericTemplates.benefit("Artists earn money through you", "attach_money"),
+                        GenericTemplates.benefit("No ads", "ad_group_off"),
+                        GenericTemplates.benefit("Comment on tracks", "comment"),
+                        GenericTemplates.benefit("Listen in higher quality", "hearing"),
+                        GenericTemplates.benefit("Artists earn money through you", "attach_money"),
+                        GenericTemplates.benefit("No ads", "ad_group_off"),
+                        GenericTemplates.benefit("Comment on tracks", "comment"),
                     ).build()
-            ).build();
-    }
-
-    static subscriptionBenefit(benefit: string, icon: string) {
-        return create("div")
-            .classes("subscription-benefit")
-            .children(
-                GenericTemplates.icon(icon, true),
-                create("span")
-                    .text(benefit)
-                    .build()
             ).build();
     }
 
@@ -78,10 +67,11 @@ export class SubscriptionTemplates {
         const isSelectedOption = compute(selected => selected === option.id, selectedOption);
         const selectedClass = compute((s): string => s === option.id ? "selected" : "_", selectedOption);
         const gifted = compute(s => !!(s && s.gifted), currentSubscription);
-        const createdAt = compute(s => s && s.created_at, currentSubscription);
+        const createdAt = compute(s => s && new Date(s.created_at), currentSubscription);
         const previousId = compute(s => s && s.previous_subscription, currentSubscription);
         const startSubClass = compute(p => "startSubscription_" + option.id + "_" + p, previousId);
         const optionMessage = signal("Available payment providers:");
+        const buttonText = compute((a): string => a ? "Switch plan" : "Subscribe", currentSubscription);
 
         return create("div")
             .classes("flex-v", "card", "relative", "subscription-option", selectedClass, activeClass)
@@ -122,19 +112,41 @@ export class SubscriptionTemplates {
                                             .text("/" + option.term_type)
                                             .build(),
                                     ).build(),
-                                ifjs(currentSubscription, SubscriptionTemplates.subscribedFor(createdAt))
+                                ifjs(active, SubscriptionTemplates.subscribedFor(createdAt))
                             ).build(),
                         create("div")
                             .classes("flex-v", startSubClass)
                             .children(
-                                ifjs(enabled, create("button")
-                                    .classes("fjsc", "special", selectedClass)
-                                    .id(option.id)
-                                    .text("Subscribe")
-                                    .onclick(async () => {
-                                        selectedOption.value = option.id;
-                                        await SubscriptionActions.startSubscription(option.id, option.plan_id, optionMessage);
-                                    }).build()),
+                                create("div")
+                                    .classes("flex", "small-gap")
+                                    .children(
+                                        ifjs(active, create("button")
+                                            .classes("fjsc", "negative")
+                                            .id(option.id)
+                                            .text("Cancel")
+                                            .onclick(async () => {
+                                                const currentSub = currentSubscription.value;
+                                                if (!currentSub) {
+                                                    console.warn("Can't cancel subscription, no current subscription. How did you get here?");
+                                                    return;
+                                                }
+                                                await SubscriptionActions.cancelSubscriptionWithConfirmationAsync(currentSub.id);
+                                            }).build()),
+                                        ifjs(enabled, create("button")
+                                            .classes("fjsc", "special", selectedClass)
+                                            .id(option.id)
+                                            .text(buttonText)
+                                            .onclick(async () => {
+                                                selectedOption.value = option.id;
+                                                await SubscriptionActions.startSubscription(option.id, option.plan_id, optionMessage);
+                                            }).build()),
+                                        ifjs(isSelectedOption, create("button")
+                                            .classes("fjsc", selectedClass)
+                                            .text("Cancel")
+                                            .onclick(async () => {
+                                                selectedOption.value = null;
+                                            }).build()),
+                                    ).build(),
                                 ifjs(isSelectedOption, create("span")
                                     .classes("color-dim")
                                     .text(optionMessage)
@@ -146,14 +158,14 @@ export class SubscriptionTemplates {
     }
 
     static subscribedFor(created_at: Signal<Date | null>) {
-        const subscribedAgo = compute(c => Time.ago(c ?? new Date()), created_at);
+        const subscribedAgo = compute(c => "Subscribed " + Time.ago(c ?? new Date()), created_at);
 
         return create("div")
             .classes("flex-v")
             .children(
                 create("span")
                     .classes("text-positive")
-                    .text("Subscribed " + subscribedAgo)
+                    .text(subscribedAgo)
                     .build()
             ).build();
     }

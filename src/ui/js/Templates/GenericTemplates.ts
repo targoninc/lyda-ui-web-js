@@ -682,6 +682,17 @@ export class GenericTemplates {
             .build();
     }
 
+    static benefit(benefit: string, icon: string) {
+        return create("div")
+            .classes("benefit-item")
+            .children(
+                GenericTemplates.icon(icon, true),
+                create("span")
+                    .text(benefit)
+                    .build()
+            ).build();
+    }
+
     static modalCancelButton(modal: AnyElement|null = null) {
         return FJSC.button({
             text: "Cancel",
