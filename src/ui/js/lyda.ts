@@ -172,6 +172,7 @@ export class Lyda {
                     return;
                 }
                 const name = params.name ?? "";
+                document.title = "Library - " + name;
                 const library = await LibraryActions.getLibrary(name);
                 if (!library) {
                     element.appendChild(UserTemplates.notPublicLibrary(name));
