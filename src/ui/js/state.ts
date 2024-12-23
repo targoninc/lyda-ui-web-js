@@ -26,7 +26,7 @@ export const currentQuality = signal("h");
 
 export const trackInfo = signal<Record<number, { track: Track }>>({});
 
-export const volume = signal(0.5);
+export const volume = signal(0.25);
 volume.subscribe((newValue, changed) => {
     if (!changed) {
         return;
