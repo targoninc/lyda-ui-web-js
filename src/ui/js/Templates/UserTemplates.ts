@@ -316,15 +316,11 @@ export class UserTemplates {
                                 if (!isOwnProfile) {
                                     return;
                                 }
-                                bannerContainer.classList.remove("blurOnParentHover");
-                                bannerDeleteButton.classList.remove("showOnParentHover");
                             })
                             .onmouseleave(() => {
                                 if (!isOwnProfile) {
                                     return;
                                 }
-                                bannerContainer.classList.add("blurOnParentHover");
-                                bannerDeleteButton.classList.add("showOnParentHover");
                             })
                             .children(
                                 create("img")
