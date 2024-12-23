@@ -855,7 +855,6 @@ export class TrackTemplates {
 
     static playButton(track: Track) {
         const isPlaying = PlayManager.isPlaying(track.id);
-        PlayManager.addStreamClientIfNotExists(track.id, track.length);
 
         return FJSC.button({
             text: isPlaying ? "Pause": "Play",
@@ -866,7 +865,10 @@ export class TrackTemplates {
             },
             classes: ["audio-player-toggle"],
             id: track.id,
-            onclick: () => PlayManager.togglePlayAsync(track.id),
+            onclick: async () => {
+                PlayManager.addStreamClientIfNotExists(track.id, track.length);
+                await PlayManager.togglePlayAsync(track.id);
+            },
         });
     }
 

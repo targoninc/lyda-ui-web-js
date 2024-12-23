@@ -26,6 +26,7 @@ export class StreamClient {
                 await this.stopAsync();
                 const interval = setInterval(async () => {
                     if (this.getBufferedLength() >= this.duration) {
+                        console.log("Starting because buffer loaded");
                         await this.scrubTo(currentTrackPosition.value.absolute, false, false);
                         await this.startAsync();
                         clearInterval(interval);
