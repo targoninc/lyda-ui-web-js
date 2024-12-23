@@ -3,7 +3,7 @@ import {UserBadge} from "./UserBadge.ts";
 import {Usersetting} from "./Usersetting.ts";
 import {Badge} from "./Badge.ts";
 
-export interface User extends Express.User {
+export interface User extends Record<string, any> {
     settings?: Usersetting[];
     badges?: Badge[];
     userBadges?: UserBadge[];

@@ -276,8 +276,7 @@ export class UserTemplates {
                 userAvatar.value = avatar;
             });
         }
-        let bannerDeleteButton = GenericTemplates.deleteIconButton("banner-delete-button", () => UserActions.deleteBanner(user, userBanner, bannerLoading));
-        let avatarDeleteButton = GenericTemplates.deleteIconButton("avatar-delete-button", () => UserActions.deleteAvatar(user, userAvatar, avatarLoading));
+        let bannerDeleteButton = UserTemplates.bannerDeleteButton(user, userBanner, bannerLoading);
         const bannerContainer = create("div")
                 .classes("banner-container", "relative", isOwnProfile ? "clickable" : "_", isOwnProfile ? "blurOnParentHover" : "_")
                 .attributes("isOwnProfile", isOwnProfile.toString())
@@ -299,13 +298,7 @@ export class UserTemplates {
                     .classes("hidden", "showOnParentHover", "centeredInParent", "flex")
                     .children(
                         bannerDeleteButton,
-                        FJSC.button({
-                            icon: { icon: "upload" },
-                            classes: ["positive"],
-                            title: "Upload new banner",
-                            text: "",
-                            onclick: e => UserActions.replaceBanner(e, isOwnProfile, user, userBanner, bannerLoading)
-                        })
+                        UserTemplates.bannerReplaceButton(user, userBanner, bannerLoading)
                     ).build()),
                 ifjs(bannerLoading, create("div")
                     .classes("loader", "loader-small", "centeredInParent", "hidden")
@@ -318,7 +311,7 @@ export class UserTemplates {
                         create("div")
                             .classes("avatar-container", "relative", isOwnProfile ? "pointer" : "_")
                             .attributes("isOwnProfile", isOwnProfile.toString())
-                            .onclick(() => UserActions.replaceAvatar(isOwnProfile, user, userAvatar, avatarLoading).then())
+                            .onclick(() => UserActions.replaceAvatar(user, userAvatar, avatarLoading).then())
                             .onmouseover(() => {
                                 if (!isOwnProfile) {
                                     return;
@@ -343,14 +336,8 @@ export class UserTemplates {
                                 ifjs(isOwnProfile, create("div")
                                     .classes("hidden", "showOnParentHover", "centeredInParent", "flex")
                                     .children(
-                                        avatarDeleteButton,
-                                        FJSC.button({
-                                            icon: { icon: "upload" },
-                                            classes: ["positive"],
-                                            title: "Upload new avatar",
-                                            text: "",
-                                            onclick: () => UserActions.replaceAvatar(isOwnProfile, user, userAvatar, avatarLoading)
-                                        })
+                                        UserTemplates.avatarDeleteButton(user, userAvatar, avatarLoading),
+                                        UserTemplates.avatarReplaceButton(user, userAvatar, avatarLoading)
                                     ).build()),
                                 ifjs(avatarLoading, create("div")
                                     .classes("loader", "loader-small", "centeredInParent", "hidden")
@@ -359,6 +346,34 @@ export class UserTemplates {
                             ).build(),
                     ).build()
             ).build();
+    }
+
+    static bannerReplaceButton(user: User, userBanner: Signal<string> = signal(""), bannerLoading: Signal<boolean> = signal(false)) {
+        return FJSC.button({
+            icon: {icon: "upload"},
+            classes: ["positive"],
+            title: "Upload new banner",
+            text: "",
+            onclick: e => UserActions.replaceBanner(e, user, userBanner, bannerLoading)
+        });
+    }
+
+    static avatarDeleteButton(user: User, userAvatar: Signal<string> = signal(""), avatarLoading: Signal<boolean> = signal(false)) {
+        return GenericTemplates.deleteIconButton("avatar-delete-button", () => UserActions.deleteAvatar(user, userAvatar, avatarLoading));
+    }
+
+    static avatarReplaceButton(user: User, userAvatar: Signal<string> = signal(""), avatarLoading: Signal<boolean> = signal(false)) {
+        return FJSC.button({
+            icon: {icon: "upload"},
+            classes: ["positive"],
+            title: "Upload new avatar",
+            text: "",
+            onclick: () => UserActions.replaceAvatar(user, userAvatar, avatarLoading)
+        });
+    }
+
+    static bannerDeleteButton(user: User, userBanner: Signal<string> = signal(""), bannerLoading: Signal<boolean> = signal(false)) {
+        return GenericTemplates.deleteIconButton("banner-delete-button", () => UserActions.deleteBanner(user, userBanner, bannerLoading));
     }
 
     static profileInfo(user: User, selfUser: User|null, isOwnProfile: boolean, permissions: Permission[], following: boolean, followsBack: boolean) {

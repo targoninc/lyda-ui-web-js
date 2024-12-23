@@ -31,10 +31,7 @@ export class UserActions {
         }
     }
 
-    static async replaceAvatar(isOwnProfile: boolean, user: User, avatar: Signal<string>, loading: Signal<boolean>) {
-        if (!isOwnProfile) {
-            return;
-        }
+    static async replaceAvatar(user: User, avatar: Signal<string>, loading: Signal<boolean>) {
         let fileInput = document.createElement("input");
         fileInput.type = "file";
         fileInput.accept = "image/*";
@@ -77,8 +74,8 @@ export class UserActions {
         }, () => {}, Icons.WARNING);
     }
 
-    static async replaceBanner(e: Event, isOwnProfile: boolean, user: User, banner: Signal<string>, loading: Signal<boolean>) {
-        if (!isOwnProfile || target(e).classList.contains("avatar-container")) {
+    static async replaceBanner(e: Event, user: User, banner: Signal<string>, loading: Signal<boolean>) {
+        if (target(e).classList.contains("avatar-container")) {
             return;
         }
 

@@ -14,6 +14,7 @@ import {navigate} from "../Routing/Router.ts";
 import {AuthActions} from "../Actions/AuthActions.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {StreamingQuality} from "../Enums/StreamingQuality.ts";
+import {UserTemplates} from "./UserTemplates.ts";
 
 export class SettingsTemplates {
     static settingsPage(user: User) {
@@ -29,13 +30,13 @@ export class SettingsTemplates {
                 SettingsTemplates.behaviourSection(user),
                 SettingsTemplates.notificationsSection(user),
                 SettingsTemplates.dangerSection(user),
-                SettingsTemplates.linksSection(user),
+                SettingsTemplates.linksSection(),
             ).build();
     }
 
     static accountSection(user: User) {
         const updatedUser = signal<Partial<User>>({});
-        const saveDisabled = compute(u => {
+        const saveDisabled = compute((u: Record<string, any>) => {
             const keys = Object.keys(u);
             return !keys.some(k => u[k] !== user[k]);
         }, updatedUser);
@@ -46,20 +47,21 @@ export class SettingsTemplates {
                 create("h2")
                     .text("Account")
                     .build(),
+                FJSC.button({
+                    text: "Log out",
+                    classes: ["negative", "showOnSmallBreakpoint"],
+                    icon: { icon: "logout" },
+                    onclick: async () => {
+                        await AuthActions.logOut();
+                    }
+                }),
                 create("p")
                     .text("Change your account settings here.")
                     .build(),
+                SettingsTemplates.userImageSettings(user),
                 create("div")
                     .classes("flex-v", "small-card")
                     .children(
-                        FJSC.button({
-                            text: "Log out",
-                            classes: ["negative", "showOnSmallBreakpoint"],
-                            icon: { icon: "logout" },
-                            onclick: async () => {
-                                await AuthActions.logOut();
-                            }
-                        }),
                         FJSC.input(<InputConfig<string>>{
                             type: InputType.text,
                             label: "Username",
@@ -271,7 +273,7 @@ export class SettingsTemplates {
             ).build();
     }
 
-    private static linksSection(user: User) {
+    private static linksSection() {
         return create("div")
             .classes("card", "flex-v")
             .children(
@@ -286,6 +288,31 @@ export class SettingsTemplates {
                         GenericTemplates.gif8831("/img/88x31/discord.gif", "https://discord.gg/QeNU8b7Hbb"),
                         GenericTemplates.gif8831("/img/88x31/ubuntu.gif", "https://ubuntu.com/"),
                         GenericTemplates.gif8831("/img/88x31/hetzner.gif", "https://www.hetzner.com/"),
+                    ).build()
+            ).build();
+    }
+
+    private static userImageSettings(user: User) {
+        return create("div")
+            .classes("flex-v")
+            .children(
+                create("div")
+                    .classes("flex", "card", "small-card", "secondary")
+                    .children(
+                        create("span")
+                            .text("Avatar")
+                            .build(),
+                        UserTemplates.avatarDeleteButton(user),
+                        UserTemplates.avatarReplaceButton(user)
+                    ).build(),
+                create("div")
+                    .classes("flex", "card", "small-card", "secondary")
+                    .children(
+                        create("span")
+                            .text("Banner")
+                            .build(),
+                        UserTemplates.bannerDeleteButton(user),
+                        UserTemplates.bannerReplaceButton(user)
                     ).build()
             ).build();
     }
