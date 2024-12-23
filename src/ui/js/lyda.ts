@@ -33,6 +33,7 @@ import {Log} from "./Models/DbModels/lyda/Log.ts";
 import {NotificationType} from "./Enums/NotificationType.ts";
 import {AvailableSubscription} from "./Models/DbModels/finance/AvailableSubscription.ts";
 import {Subscription} from "./Models/DbModels/finance/Subscription.ts";
+import {currentUser} from "./state.ts";
 
 export class Lyda {
     static async getEndpointData(endpoint: string, params = "") {
@@ -69,7 +70,7 @@ export class Lyda {
         if (endpoint !== null) {
             data = await Lyda.getEndpointData(endpoint, paramsString);
         }
-        let user: null | User = await Util.getUser();
+        const user = currentUser.value;
         const permissionData = await Api.getAsync<Permission[]>(ApiRoutes.userPermissions);
         const permissions = permissionData.data as Permission[];
 

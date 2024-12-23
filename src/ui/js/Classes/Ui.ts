@@ -101,8 +101,9 @@ export class Ui {
         }
     }
 
-    static async loadTheme(user: User|null) {
+    static async loadTheme() {
         const darkPreferred = window.matchMedia("(prefers-color-scheme: dark)");
+        const user = currentUser.value;
         if (!user) {
             await UserActions.setUiTheme(Theme.dark, true);
             return;

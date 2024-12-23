@@ -9,7 +9,7 @@ import {Ui} from "./js/Classes/Ui.ts";
 import {Util} from "./js/Classes/Util.ts";
 import {routes} from "./js/Routing/routes.js";
 import {GenericTemplates} from "./js/Templates/GenericTemplates.ts";
-import {currentTrackId, currentTrackPosition} from "./js/state.ts";
+import {currentTrackId, currentTrackPosition, currentUser} from "./js/state.ts";
 import {StreamingBroadcaster} from "./js/Streaming/StreamingBroadcaster.ts";
 import {TrackPosition} from "./js/Models/TrackPosition.ts";
 
@@ -19,6 +19,7 @@ if (!pageContainer) {
     throw new Error("No page container found");
 }
 pageContainer.appendChild(GenericTemplates.loadingSpinner());
+currentUser.value = await Util.getUserAsync();
 
 export const router = new Router(routes, async (route: Route, params: any) => {
     const page = route.path.replace("/", "");
@@ -26,16 +27,16 @@ export const router = new Router(routes, async (route: Route, params: any) => {
 
     await Ui.windowResize();
 
-    const user = await Util.getUserAsync();
+    currentUser.value = await Util.getUserAsync();
     pageContainer.innerHTML = "";
     let template = PageTemplates.mapping[page]();
-    if (!user && PageTemplates.needLoginPages.includes(page)) {
+    if (!currentUser.value && PageTemplates.needLoginPages.includes(page)) {
         navigate("login");
     }
     pageContainer.appendChild(template);
     pageContainer.scrollIntoView();
 
-    Ui.loadTheme(user).then();
+    Ui.loadTheme().then();
     await Lyda.initPage(params);
 }, () => {}, () => {
     setTimeout(() => {
@@ -45,15 +46,17 @@ export const router = new Router(routes, async (route: Route, params: any) => {
     }, 100);
 });
 
-const currentTrackPositionTmp = LydaCache.get<TrackPosition>("currentTrackPosition").content;
-if (currentTrackPositionTmp) {
-    currentTrackPosition.value = currentTrackPositionTmp;
-}
+if (currentUser.value) {
+    const currentTrackPositionTmp = LydaCache.get<TrackPosition>("currentTrackPosition").content;
+    if (currentTrackPositionTmp) {
+        currentTrackPosition.value = currentTrackPositionTmp;
+    }
 
-const currentTrackIdTmp = LydaCache.get<number>("currentTrackId").content;
-if (currentTrackIdTmp) {
-    currentTrackId.value = currentTrackIdTmp;
-    await PlayManager.initializeTrackAsync(currentTrackIdTmp);
+    const currentTrackIdTmp = LydaCache.get<number>("currentTrackId").content;
+    if (currentTrackIdTmp) {
+        currentTrackId.value = currentTrackIdTmp;
+        await PlayManager.initializeTrackAsync(currentTrackIdTmp);
+    }
 }
 
 KeyBinds.initiate();
