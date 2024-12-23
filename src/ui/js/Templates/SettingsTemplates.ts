@@ -10,7 +10,7 @@ import {notify, Ui} from "../Classes/Ui.ts";
 import {LydaApi} from "../Api/LydaApi.ts";
 import {User} from "../Models/DbModels/lyda/User.ts";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
-import {navigate} from "../Routing/Router.ts";
+import {navigate, reload} from "../Routing/Router.ts";
 import {AuthActions} from "../Actions/AuthActions.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {StreamingQuality} from "../Enums/StreamingQuality.ts";
@@ -125,7 +125,8 @@ export class SettingsTemplates {
                     onclick: async () => {
                         if (await LydaApi.updateUser(updatedUser.value)) {
                             user = { ...user, ...updatedUser.value };
-                            window.location.reload();
+                            currentUser.value = await Util.getUserAsync(null, false);
+                            reload();
                         }
                     }
                 })
@@ -433,6 +434,18 @@ export class SettingsTemplates {
                             onclick: async () => {
                                 await AuthApi.sendActivationEmail();
                                 activationTimedOut.value = true;
+                                const interval = setInterval(async () => {
+                                    const user = await Util.getUserAsync(null, false);
+                                    if (user) {
+                                        if (user.emails.some((e: UserEmail) => e.email === email.email && e.verified)) {
+                                            clearInterval(interval);
+                                            activationTimedOut.value = false;
+                                            currentUser.value = user;
+                                            reload();
+                                        }
+                                    }
+                                }, 10 * 1000);
+
                                 setTimeout(() => {
                                     activationTimedOut.value = false;
                                 }, 60 * 1000);
