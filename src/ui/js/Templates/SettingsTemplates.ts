@@ -50,6 +50,7 @@ export class SettingsTemplates {
         }, updatedUser);
         const notActivated = !(user.activation?.includes("@") ?? false);
         const activationTimedOut = signal(false);
+        const emailIsDifferent = compute(u => u.email && u.email !== user.email, updatedUser);
 
         return create("div")
             .classes("card", "flex-v")
@@ -135,7 +136,7 @@ export class SettingsTemplates {
                             icon: { icon: "verified_user" },
                             text: "Verify E-mail",
                             classes: ["positive"],
-                            disabled: activationTimedOut,
+                            disabled: compute((a, d) => a || d, activationTimedOut, emailIsDifferent),
                             onclick: async () => {
                                 await AuthApi.sendActivationEmail();
                                 activationTimedOut.value = true;
