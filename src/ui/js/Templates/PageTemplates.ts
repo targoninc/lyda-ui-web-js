@@ -34,7 +34,7 @@ export class PageTemplates {
         test: LandingPageTemplates.newLandingPage,
         subscribe: this.subscribePage,
         "password-reset": LandingPageTemplates.newLandingPage,
-        "activate-account": LandingPageTemplates.newLandingPage,
+        "verify-email": LandingPageTemplates.newLandingPage,
         search: SearchTemplates.searchPage,
     };
     static needLoginPages: string[] = [

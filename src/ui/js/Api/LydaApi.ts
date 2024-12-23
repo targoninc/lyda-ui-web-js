@@ -6,6 +6,7 @@ import {User} from "../Models/DbModels/lyda/User.ts";
 import {Log} from "../Models/DbModels/lyda/Log.ts";
 import {currentUser} from "../state.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
+import {getErrorMessage} from "../Classes/Util.ts";
 
 export class LydaApi {
     static getLogs(filterState: Signal<any>, successCallback: Function) {
@@ -36,7 +37,7 @@ export class LydaApi {
     static async updateUser(user: Partial<User>) {
         const res = await Api.postAsync(ApiRoutes.updateUser, { user });
         if (res.code !== 200) {
-            notify("Failed to update account", NotificationType.error);
+            notify("Failed to update account: " + getErrorMessage(res), NotificationType.error);
             return false;
         }
         currentUser.value = <User>{

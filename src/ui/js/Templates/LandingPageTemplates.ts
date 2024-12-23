@@ -52,9 +52,9 @@ export class LandingPageTemplates {
             "reset-password": LandingPageTemplates.resetPasswordBox,
             "password-reset": LandingPageTemplates.enterNewPasswordBox,
             "password-reset-requested": LandingPageTemplates.passwordResetRequestedBox,
-            "activate-account": LandingPageTemplates.activateAccountBox,
+            "verify-email": LandingPageTemplates.verifyEmailBox,
         };
-        const altEntryPoints = ["password-reset", "activate-account"];
+        const altEntryPoints = ["password-reset", "verify-email"];
         let firstStep: keyof typeof templateMap | undefined = "email";
         if (altEntryPoints.some(entryPoint => window.location.pathname.includes(entryPoint))) {
             firstStep = altEntryPoints.find(entryPoint => window.location.pathname.includes(entryPoint)) as keyof typeof templateMap;
@@ -140,13 +140,13 @@ export class LandingPageTemplates {
             ).build();
     }
 
-    static activateAccountBox(step: Signal<string>, user: Signal<AuthData>) {
+    static verifyEmailBox(step: Signal<string>, user: Signal<AuthData>) {
         const code = Util.getUrlParameter("code");
         const error = signal<string>("");
         const done = signal(false);
         const activating = signal(true);
 
-        Api.postAsync(ApiRoutes.activateAccount, {
+        Api.postAsync(ApiRoutes.verifyEmail, {
             activationCode: code
         }).then(res => {
             activating.value = false;
@@ -161,16 +161,16 @@ export class LandingPageTemplates {
             .classes("flex-v", "align-center")
             .children(
                 create("h1")
-                    .text("Activating your account")
+                    .text("Email verification")
                     .build(),
                 create("div")
                     .classes("flex-v")
                     .children(
                         ifjs(activating, create("p")
-                            .text(`We're activating your account with code ${code}...`)
+                            .text(`We're verifying your email with code ${code}...`)
                             .build()),
                         ifjs(done, create("p")
-                            .text(`Your account is now activated!`)
+                            .text(`This email is now verified!`)
                             .build()),
                         ifjs(done, FJSC.button({
                             text: "Go to profile",
@@ -348,7 +348,7 @@ export class LandingPageTemplates {
                                         if (e.key === "Enter") {
                                             user.value = {
                                                 ...user.value,
-                                                email: e.target?.value
+                                                email: target(e).value
                                             };
                                         }
                                     },

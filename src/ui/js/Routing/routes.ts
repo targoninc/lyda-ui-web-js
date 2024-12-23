@@ -74,6 +74,6 @@ export const routes: Route[] = [
         path: "password-reset"
     },
     {
-        path: "activate-account"
+        path: "verify-email"
     }
 ];

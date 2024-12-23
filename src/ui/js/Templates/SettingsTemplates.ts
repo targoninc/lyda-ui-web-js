@@ -1,8 +1,8 @@
-import {create, ifjs} from "../../fjsc/src/f2.ts";
+import {create, ifjs, signalMap} from "../../fjsc/src/f2.ts";
 import {UserActions} from "../Actions/UserActions.ts";
 import {Theme} from "../Enums/Theme.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
-import {getUserSettingValue} from "../Classes/Util.ts";
+import {getUserSettingValue, Util} from "../Classes/Util.ts";
 import {UserSettings} from "../Enums/UserSettings.ts";
 import {FJSC} from "../../fjsc";
 import {ButtonConfig, InputConfig, InputType, TextareaConfig} from "../../fjsc/src/Types.ts";
@@ -17,6 +17,7 @@ import {StreamingQuality} from "../Enums/StreamingQuality.ts";
 import {UserTemplates} from "./UserTemplates.ts";
 import {currentUser} from "../state.ts";
 import {AuthApi} from "../Api/AuthApi.ts";
+import {UserEmail} from "../Models/DbModels/lyda/UserEmail.ts";
 
 export class SettingsTemplates {
     static settingsPage() {
@@ -48,9 +49,6 @@ export class SettingsTemplates {
             const keys = Object.keys(u);
             return !keys.some(k => u[k] !== user[k]);
         }, updatedUser);
-        const notActivated = !(user.activation?.includes("@") ?? false);
-        const activationTimedOut = signal(false);
-        const emailIsDifferent = compute(u => u.email && u.email !== user.email, updatedUser);
 
         return create("div")
             .classes("card", "flex-v")
@@ -109,46 +107,7 @@ export class SettingsTemplates {
                                 updatedUser.value = { ...updatedUser.value, displayname: v };
                             }
                         }),
-                        FJSC.input(<InputConfig<string>>{
-                            type: InputType.email,
-                            label: "E-Mail address",
-                            name: "email",
-                            required: true,
-                            value: user.email,
-                            onchange: v => {
-                                updatedUser.value = { ...updatedUser.value, email: v };
-                            }
-                        }),
-                        ifjs(notActivated, create("div")
-                            .classes("flex", "noflexwrap", "color-dim")
-                            .children(
-                                FJSC.icon({
-                                    icon: "new_releases",
-                                    adaptive: true,
-                                    classes: ["text-positive"],
-                                }),
-                                create("span")
-                                    .classes("text-positive")
-                                    .text("Your E-mail address is verified.")
-                                    .build()
-                            ).build(), true),
-                        ifjs(notActivated, FJSC.button({
-                            icon: { icon: "verified_user" },
-                            text: "Verify E-mail",
-                            classes: ["positive"],
-                            disabled: compute((a, d) => a || d, activationTimedOut, emailIsDifferent),
-                            onclick: async () => {
-                                await AuthApi.sendActivationEmail();
-                                activationTimedOut.value = true;
-                                setTimeout(() => {
-                                    activationTimedOut.value = false;
-                                }, 60 * 1000);
-                            }
-                        })),
-                        ifjs(activationTimedOut, create("span")
-                            .classes("text-positive")
-                            .text("E-Mail sent, check your inbox and click the link to activate your account.")
-                            .build()),
+                        SettingsTemplates.emailSettings(user.emails, updatedUser),
                         FJSC.textarea(<TextareaConfig>{
                             label: "Description",
                             name: "description",
@@ -371,6 +330,129 @@ export class SettingsTemplates {
                         UserTemplates.bannerDeleteButton(user),
                         UserTemplates.bannerReplaceButton(user)
                     ).build()
+            ).build();
+    }
+
+    private static emailSettings(emails: UserEmail[], updatedUser: Signal<Partial<User>>) {
+        const emails$ = signal<UserEmail[]>(emails);
+        emails$.subscribe(emails => {
+            updatedUser.value = { ...updatedUser.value, emails };
+        });
+        const primaryEmailIndex = signal(emails.findIndex(e => e.primary));
+        primaryEmailIndex.subscribe(index => {
+            emails$.value = emails$.value.map((e, i) => {
+                e.primary = i === index;
+                return e;
+            });
+        });
+
+        return create("div")
+            .classes("flex-v")
+            .children(
+                create("h2")
+                    .text("E-Mail addresses")
+                    .build(),
+                signalMap(emails$, create("div").classes("flex-v", "card", "secondary"), (email, index) => SettingsTemplates.emailSetting(email, signal(index), primaryEmailIndex, emails$)),
+                FJSC.button({
+                    text: "Add E-Mail",
+                    icon: { icon: "add" },
+                    classes: ["positive"],
+                    onclick: async () => {
+                        emails$.value = [
+                            ...emails$.value,
+                            <UserEmail>{
+                                email: "",
+                                primary: false,
+                                verified: false,
+                                verified_at: null
+                            }
+                        ];
+                    },
+                })
+            ).build();
+    }
+
+    private static emailSetting(email: UserEmail, index: Signal<number>, primaryEmailIndex: Signal<number>, emails$: Signal<UserEmail[]>) {
+        const activationTimedOut = signal(false);
+        const isPrimary = compute((i, i2) => i === i2, primaryEmailIndex, index);
+
+        return create("div")
+            .classes("flex-v")
+            .children(
+                FJSC.input(<InputConfig<string>>{
+                    type: InputType.email,
+                    name: "email",
+                    required: true,
+                    value: email.email,
+                    onchange: v => {
+                        emails$.value = emails$.value.map((e, i) => {
+                            if (i === index.value) {
+                                e.email = v;
+                            }
+                            return e;
+                        });
+                    }
+                }),
+                create("div")
+                    .classes("flex", "align-children")
+                    .children(
+                        FJSC.toggle({
+                            text: "Primary",
+                            checked: isPrimary,
+                            disabled: emails$.value.length === 1,
+                            onchange: v => {
+                                if (emails$.value.length === 1) {
+                                    primaryEmailIndex.value = 0;
+                                    return;
+                                }
+                                if (v) {
+                                    primaryEmailIndex.value = index.value;
+                                } else {
+                                    primaryEmailIndex.value = 0;
+                                }
+                            }
+                        }),
+                        ifjs(email.verified, create("div")
+                            .classes("flex", "noflexwrap", "small-gap")
+                            .children(
+                                FJSC.icon({
+                                    icon: "new_releases",
+                                    adaptive: true,
+                                    classes: ["text-positive"],
+                                }),
+                                create("span")
+                                    .classes("text-positive")
+                                    .text("Verified on " + Util.formatDate(email.verified_at ?? new Date()))
+                                    .build()
+                            ).build()),
+                        ifjs(email.verified || email.email === "", FJSC.button({
+                            icon: { icon: "verified_user" },
+                            text: "Verify",
+                            classes: ["positive"],
+                            disabled: activationTimedOut,
+                            onclick: async () => {
+                                await AuthApi.sendActivationEmail();
+                                activationTimedOut.value = true;
+                                setTimeout(() => {
+                                    activationTimedOut.value = false;
+                                }, 60 * 1000);
+                            }
+                        }), true),
+                        ifjs(activationTimedOut, create("span")
+                            .classes("text-positive")
+                            .text("E-Mail sent, check your inbox and click the link to activate your account.")
+                            .build()),
+                        ifjs(email.primary, FJSC.button({
+                            text: "Delete",
+                            icon: { icon: "delete" },
+                            classes: ["negative"],
+                            onclick: async () => {
+                                await Ui.getConfirmationModal("Delete email", "Are you sure you want to delete this email? This can't be undone.", "Yes", "No", async () => {
+                                    emails$.value = emails$.value.filter((e, i) => i !== index.value);
+                                }, () => {}, "delete");
+                            }
+                        }), true),
+                    ).build(),
             ).build();
     }
 }

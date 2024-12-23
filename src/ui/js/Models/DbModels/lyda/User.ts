@@ -3,6 +3,7 @@ import {UserBadge} from "./UserBadge.ts";
 import {Usersetting} from "./Usersetting.ts";
 import {Badge} from "./Badge.ts";
 import {Subscription} from "../finance/Subscription.ts";
+import {UserEmail} from "./UserEmail.ts";
 
 export interface User extends Record<string, any> {
     subscription?: Subscription;
@@ -14,7 +15,7 @@ export interface User extends Record<string, any> {
     id: number;
     username: string;
     mfa_enabled: boolean;
-    email: string;
+    emails: UserEmail[];
     password_hash: string;
     displayname: string;
     description: string;
