@@ -1,4 +1,3 @@
-import {Icons} from "../Enums/Icons.js";
 import {AuthApi} from "../Api/AuthApi.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {FormTemplates} from "./FormTemplates.ts";
@@ -8,7 +7,7 @@ import {notify} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
 import {InputType} from "../../fjsc/src/Types.ts";
 import {User} from "../Models/DbModels/lyda/User.ts";
-import {HtmlPropertyValue, create, ifjs, AnyNode} from "../../fjsc/src/f2.ts";
+import {AnyNode, create, HtmlPropertyValue, ifjs} from "../../fjsc/src/f2.ts";
 import {Api, ApiResponse} from "../Api/Api.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
@@ -399,6 +398,7 @@ export class LandingPageTemplates {
                             name: "password-confirm",
                             label: "Confirm password",
                             placeholder: "Confirm password",
+                            attributes: ["autocomplete", "password"],
                             value: passwordConfirm,
                             required: true,
                             onchange: (value) => {
@@ -411,7 +411,7 @@ export class LandingPageTemplates {
                                 if (e.key === "Enter") {
                                     user.value = {
                                         ...user.value,
-                                        password2: e.target?.value
+                                        password2: target(e).value
                                     };
                                 }
                             },
@@ -422,15 +422,15 @@ export class LandingPageTemplates {
                             disabled: compute(u => !u.password || u.password.trim().length === 0 || u.password !== u.password2 || u.password2.trim().length === 0 || !token, user),
                             onclick: async () => {
                                 if (!token) {
-                                    notify("Token is missing", "error");
+                                    notify("Token is missing", NotificationType.error);
                                     return;
                                 }
                                 const res = await AuthApi.resetPassword(token, user.value.password, user.value.password2);
                                 if (res.code === 200) {
-                                    notify("Password updated, you can now log in", "success");
+                                    notify("Password updated, you can now log in", NotificationType.success);
                                     step.value = "login";
                                 } else {
-                                    notify(`Failed to reset password: ${res.data.error}`, "error");
+                                    notify(`Failed to reset password: ${res.data.error}`, NotificationType.error);
                                     errors.value = [res.data.error];
                                 }
                             },
@@ -459,7 +459,7 @@ export class LandingPageTemplates {
                 if (e.key === "Enter") {
                     user.value = {
                         ...user.value,
-                        password: e.target?.value
+                        password: target(e).value
                     };
                     onEnter();
                 }
