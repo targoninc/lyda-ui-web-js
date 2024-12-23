@@ -82,4 +82,8 @@ export class AuthApi {
             newPasswordConfirm
         });
     }
+
+    static async sendActivationEmail() {
+        return Api.postAsync(ApiRoutes.sendActivationEmail);
+    }
 }

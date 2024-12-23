@@ -16,6 +16,7 @@ import {NotificationType} from "../Enums/NotificationType.ts";
 import {StreamingQuality} from "../Enums/StreamingQuality.ts";
 import {UserTemplates} from "./UserTemplates.ts";
 import {currentUser} from "../state.ts";
+import {AuthApi} from "../Api/AuthApi.ts";
 
 export class SettingsTemplates {
     static settingsPage() {
@@ -47,6 +48,8 @@ export class SettingsTemplates {
             const keys = Object.keys(u);
             return !keys.some(k => u[k] !== user[k]);
         }, updatedUser);
+        const notActivated = !(user.activation?.includes("@") ?? false);
+        const activationTimedOut = signal(false);
 
         return create("div")
             .classes("card", "flex-v")
@@ -54,6 +57,14 @@ export class SettingsTemplates {
                 create("h2")
                     .text("Account")
                     .build(),
+                FJSC.button({
+                    text: "Log out",
+                    classes: ["negative", "showOnSmallBreakpoint"],
+                    icon: { icon: "logout" },
+                    onclick: async () => {
+                        await AuthActions.logOut();
+                    }
+                }),
                 ifjs(user.subscription, FJSC.button({
                     icon: { icon: "payments" },
                     text: "Manage subscription",
@@ -70,14 +81,6 @@ export class SettingsTemplates {
                         navigate("subscribe");
                     }
                 }), true),
-                FJSC.button({
-                    text: "Log out",
-                    classes: ["negative", "showOnSmallBreakpoint"],
-                    icon: { icon: "logout" },
-                    onclick: async () => {
-                        await AuthActions.logOut();
-                    }
-                }),
                 create("p")
                     .text("Change your account settings here.")
                     .build(),
@@ -115,6 +118,23 @@ export class SettingsTemplates {
                                 updatedUser.value = { ...updatedUser.value, email: v };
                             }
                         }),
+                        ifjs(notActivated, FJSC.button({
+                            icon: { icon: "verified_user" },
+                            text: "Verify E-mail",
+                            classes: ["positive"],
+                            disabled: activationTimedOut,
+                            onclick: async () => {
+                                await AuthApi.sendActivationEmail();
+                                activationTimedOut.value = true;
+                                setTimeout(() => {
+                                    activationTimedOut.value = false;
+                                }, 60 * 1000);
+                            }
+                        })),
+                        ifjs(activationTimedOut, create("span")
+                            .classes("text-positive")
+                            .text("E-Mail sent, check your inbox and click the link to activate your account.")
+                            .build()),
                         FJSC.textarea(<TextareaConfig>{
                             label: "Description",
                             name: "description",
