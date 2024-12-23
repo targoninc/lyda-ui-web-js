@@ -3,77 +3,99 @@ import {Route} from "./Router.ts";
 export const routes: Route[] = [
     {
         path: "404",
+        title: "404",
         aliases: ["error", "not-found"]
     },
     {
         path: "profile",
+        title: "Profile",
         params: ["name"],
         aliases: ["user"]
     },
     {
         path: "explore",
+        title: "Explore",
         aliases: ["discover", "home", "app"]
     },
     {
-        path: "following"
+        path: "following",
+        title: "Following",
     },
     {
         path: "album",
+        title: "Album",
         params: ["id"]
     },
     {
         path: "playlist",
+        title: "Playlist",
         params: ["id"]
     },
     {
         path: "track",
+        title: "Track",
         params: ["id", "code"]
     },
     {
-        path: "settings"
+        path: "settings",
+        title: "Settings",
     },
     {
-        path: "statistics"
+        path: "statistics",
+        title: "Statistics",
     },
     {
         path: "search",
+        title: "Search",
         params: ["q"]
     },
     {
-        path: "upload"
+        path: "upload",
+        title: "Upload",
     },
     {
         path: "library",
+        title: "Library",
         params: ["name"]
     },
     {
-        path: "logout"
+        path: "logout",
+        title: "Logout",
     },
     {
-        path: "login"
+        path: "login",
+        title: "Login",
     },
     {
-        path: "logs"
+        path: "logs",
+        title: "Logs",
     },
     {
-        path: "action-logs"
+        path: "action-logs",
+        title: "Action Logs",
     },
     {
-        path: "unapproved-tracks"
+        path: "unapproved-tracks",
+        title: "Unapproved Tracks",
     },
     {
-        path: "moderation"
+        path: "moderation",
+        title: "Moderation",
     },
     {
-        path: "test"
+        path: "test",
+        title: "Test",
     },
     {
-        path: "subscribe"
+        path: "subscribe",
+        title: "Subscribe",
     },
     {
-        path: "password-reset"
+        path: "password-reset",
+        title: "Password Reset",
     },
     {
-        path: "verify-email"
+        path: "verify-email",
+        title: "Verify Email",
     }
 ];
