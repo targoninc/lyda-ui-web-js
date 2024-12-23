@@ -15,11 +15,14 @@ export class SubscriptionTemplates {
         return create("div")
             .classes("flex-v")
             .children(
+                create("h1")
+                    .text("Lyda subscription")
+                    .build(),
                 ifjs(currentSubscription, create("span")
                     .classes("color-dim")
                     .text("You do not have an active subscription. Choose any of the options below to start. All prices are in USD.")
                     .build(), true),
-                create("h1")
+                create("h2")
                     .text("Your benefits")
                     .build(),
                 SubscriptionTemplates.subscriptionBenefits(),
