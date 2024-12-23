@@ -479,8 +479,8 @@ export function updateUserSetting(user: User, key: string, value: string) {
     })
 }
 
-export function target(e: Event) {
-    return e.target as HTMLInputElement;
+export function target<T = HTMLInputElement>(e: Event) {
+    return e.target as T;
 }
 
 export function getErrorMessage(res: ApiResponse<any>) {

@@ -5,7 +5,7 @@ import {UserTemplates} from "./UserTemplates.ts";
 import {Images} from "../Enums/Images.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
 import {Genre} from "../Enums/Genre.ts";
-import {Util} from "../Classes/Util.ts";
+import {target, Util} from "../Classes/Util.ts";
 import {AudioUpload} from "../Classes/AudioUpload.ts";
 import {Ui} from "../Classes/Ui.ts";
 import {
@@ -86,7 +86,7 @@ export class TrackEditTemplates {
                             .build(),
                         TrackEditTemplates.upDownButtons(state, true),
                         TrackEditTemplates.infoSection(state, errorSections, errorFields),
-                        TrackEditTemplates.uploadButton(state, errorSections, errorFields, uploadInfo),
+                        TrackEditTemplates.uploadButton(state, errorSections, errorFields),
                         TrackEditTemplates.uploadInfo(uploadInfo),
                     ).build(),
             ).build();
@@ -181,10 +181,10 @@ export class TrackEditTemplates {
                     const fileInput = document.createElement("input");
                     fileInput.type = "file";
                     fileInput.onchange = async (e) => {
-                        const file = e.target!.files[0];
+                        const file = target(e).files![0];
                         const reader = new FileReader();
                         reader.onload = async (e) => {
-                            const jsonString = e.target!.result as string;
+                            const jsonString = target<FileReader>(e).result as string;
                             state.value = JSON.parse(jsonString);
                         };
                         reader.readAsText(file);
@@ -220,7 +220,7 @@ export class TrackEditTemplates {
             ).build();
     }
 
-    static uploadButton(state: Signal<UploadableTrack>, errorSections: Signal<string[]>, errorFields: Signal<string[]>, uploadInfo: Signal<UploadInfo[]>) {
+    static uploadButton(state: Signal<UploadableTrack>, errorSections: Signal<string[]>, errorFields: Signal<string[]>) {
         const errors = signal<string[]>([]);
         const disabled = compute((s: UploadableTrack) => {
             const newErrors = [];
@@ -409,19 +409,6 @@ export class TrackEditTemplates {
             ).build();
     }
 
-    static detailsSection(title: HtmlPropertyValue, cssClass: HtmlPropertyValue, children: DomNode[], open = true) {
-        return create("details")
-            .classes(cssClass, "flex-v")
-            .children(
-                create("summary")
-                    .text(title)
-                    .build(),
-                ...children
-            )
-            .attributes("open", open)
-            .build();
-    }
-
     static audioFile(canOverwriteTitle = false, parentState: Signal<UploadableTrack>) {
         return FormTemplates.fileField("Audio File*", "Choose file", "audio-file", "audio/*", true, async (fileName: string, files) => {
             if (canOverwriteTitle) {
@@ -467,9 +454,9 @@ export class TrackEditTemplates {
             .build();
     }
 
-    static removeLinkedUser(removeUserId: number, linkedUserState) {
+    static removeLinkedUser(removeUserId: number, linkedUserState: Signal<Partial<TrackCollaborator>[]>) {
         return GenericTemplates.inlineAction("Remove", "remove", "remove_linked_user_" + removeUserId, () => {
-            linkedUserState.value = linkedUserState.value.filter((id: number) => id !== removeUserId);
+            linkedUserState.value = linkedUserState.value.filter((tc) => tc.user_id !== removeUserId);
         }, [], ["negative"]);
     }
 

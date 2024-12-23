@@ -14,7 +14,7 @@ import {notify, Ui} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
 import {User} from "../Models/DbModels/lyda/User.ts";
 import {Playlist} from "../Models/DbModels/lyda/Playlist.ts";
-import {create, ifjs, AnyNode, HtmlPropertyValue} from "../../fjsc/src/f2.ts";
+import {AnyNode, create, HtmlPropertyValue, ifjs} from "../../fjsc/src/f2.ts";
 import {Track} from "../Models/DbModels/lyda/Track.ts";
 import {Album} from "../Models/DbModels/lyda/Album.ts";
 import {navigate} from "../Routing/Router.ts";
@@ -255,7 +255,7 @@ export class PlaylistTemplates {
             .build();
     }
 
-    static playlistCard(playlist: Playlist, user: User|null, isSecondary: boolean = false) {
+    static playlistCard(playlist: Playlist, isSecondary: boolean = false) {
         const icons = [];
         if (playlist.visibility === "private") {
             icons.push(GenericTemplates.lock());
@@ -296,7 +296,7 @@ export class PlaylistTemplates {
                     .children(
                         StatisticsTemplates.likesIndicator("playlist", playlist.id, playlist.likes.length,
                             Util.arrayPropertyMatchesUser(playlist.likes, "user_id")),
-                        StatisticsTemplates.likeListOpener(playlist.likes, user),
+                        StatisticsTemplates.likeListOpener(playlist.likes),
                     ).build()
             ).build();
     }
@@ -336,7 +336,7 @@ export class PlaylistTemplates {
                 QueueManager.setContextQueue(playlist.tracks!.map(t => t.track_id));
                 const firstTrack = playlist.tracks![0];
                 if (!firstTrack) {
-                    notify("This playlist has no tracks", "error");
+                    notify("This playlist has no tracks", NotificationType.error);
                     return;
                 }
                 PlayManager.addStreamClientIfNotExists(firstTrack.track_id, firstTrack.track?.length ?? 0);
@@ -483,7 +483,7 @@ export class PlaylistTemplates {
                                     .children(
                                         StatisticsTemplates.likesIndicator("playlist", playlist.id, playlist.likes.length,
                                             Util.arrayPropertyMatchesUser(playlist.likes, "user_id")),
-                                        StatisticsTemplates.likeListOpener(playlist.likes, user),
+                                        StatisticsTemplates.likeListOpener(playlist.likes),
                                     ).build(),
                             ).build()
                     ).build(),

@@ -12,7 +12,7 @@ import {Playlist} from "../Models/DbModels/lyda/Playlist.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class ProfilePage {
-    static async addTabSectionAsync(element: AnyElement, user: User, selfUser: User|null, isOwnProfile: boolean) {
+    static async addTabSectionAsync(element: AnyElement, user: User, isOwnProfile: boolean) {
         const container = document.createElement("div");
         container.classList.add("flex-v");
         element.appendChild(container);
@@ -29,25 +29,25 @@ export class ProfilePage {
             });
         }, 0);
         container.append(tabSelector, tracksContainer, albumsContainer, playlistsContainer, repostsContainer);
-        ProfilePage.addAlbumsAsync(albumsContainer, user, selfUser, isOwnProfile).then();
-        ProfilePage.addTracksAsync(tracksContainer, user, selfUser, isOwnProfile).then();
-        ProfilePage.addPlaylistsAsync(playlistsContainer, user, selfUser, isOwnProfile).then();
-        ProfilePage.addRepostsAsync(repostsContainer, user, selfUser, isOwnProfile).then();
+        ProfilePage.addAlbumsAsync(albumsContainer, user, isOwnProfile).then();
+        ProfilePage.addTracksAsync(tracksContainer, user, isOwnProfile).then();
+        ProfilePage.addPlaylistsAsync(playlistsContainer, user, isOwnProfile).then();
+        ProfilePage.addRepostsAsync(repostsContainer, user, isOwnProfile).then();
     }
 
-    static async addTracksAsync(element: AnyElement, user: User, selfUser: User|null, isOwnProfile: boolean) {
+    static async addTracksAsync(element: AnyElement, user: User, isOwnProfile: boolean) {
         const res = await Api.getAsync<Track[]>(ApiRoutes.getTrackByUserId, { id: user.id, name: user.username });
         if (res.code !== 200) {
             notify("Error while getting tracks: " + getErrorMessage(res), NotificationType.error);
             return;
         }
         const tracks = res.data;
-        const trackCards = UserTemplates.trackCards(tracks, user.id, selfUser, isOwnProfile);
+        const trackCards = UserTemplates.trackCards(tracks, user.id, isOwnProfile);
         element.innerHTML = "";
         element.appendChild(trackCards);
     }
 
-    static async addAlbumsAsync(element: AnyElement, user: User, selfUser: User|null, isOwnProfile: boolean) {
+    static async addAlbumsAsync(element: AnyElement, user: User, isOwnProfile: boolean) {
         const res = await Api.getAsync<Album[]>(ApiRoutes.getAlbumsByUserId, {
             id: user.id, name: user.username
         });
@@ -56,12 +56,12 @@ export class ProfilePage {
             return;
         }
         const albums = res.data;
-        const albumCards = UserTemplates.albumCards(albums, selfUser, isOwnProfile);
+        const albumCards = UserTemplates.albumCards(albums, isOwnProfile);
         element.innerHTML = "";
         element.appendChild(albumCards);
     }
 
-    static async addPlaylistsAsync(element: AnyElement, user: User, selfUser: User|null, isOwnProfile: boolean) {
+    static async addPlaylistsAsync(element: AnyElement, user: User, isOwnProfile: boolean) {
         const res = await Api.getAsync<Playlist[]>(ApiRoutes.getPlaylistsByUserId, {
             id: user.id, name: user.username
         });
@@ -70,12 +70,12 @@ export class ProfilePage {
             return;
         }
         const playlists = res.data;
-        const playlistCards = UserTemplates.playlistCards(playlists, selfUser, isOwnProfile);
+        const playlistCards = UserTemplates.playlistCards(playlists, isOwnProfile);
         element.innerHTML = "";
         element.appendChild(playlistCards);
     }
 
-    static async addRepostsAsync(element: AnyElement, user: User, selfUser: User|null, isOwnProfile: boolean) {
+    static async addRepostsAsync(element: AnyElement, user: User, isOwnProfile: boolean) {
         const res = await Api.getAsync<Track[]>(ApiRoutes.getRepostsByUserId, {
             id: user.id, name: user.username
         });
@@ -84,7 +84,7 @@ export class ProfilePage {
             return;
         }
         const reposts = res.data;
-        const repostCards = UserTemplates.trackCards(reposts, user.id, selfUser, isOwnProfile);
+        const repostCards = UserTemplates.trackCards(reposts, user.id, isOwnProfile);
         element.innerHTML = "";
         element.appendChild(repostCards);
     }

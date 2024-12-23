@@ -243,7 +243,7 @@ export class AlbumTemplates {
             .build();
     }
 
-    static albumCard(album: Album, user: User|null, isSecondary = false) {
+    static albumCard(album: Album, isSecondary = false) {
         if (!album.user) {
             throw new Error(`Album has no user: ${album.id}`);
         }
@@ -276,7 +276,7 @@ export class AlbumTemplates {
                     .children(
                         StatisticsTemplates.likesIndicator("album", album.id, album.likes.length,
                             Util.arrayPropertyMatchesUser(album.likes, "user_id")),
-                        StatisticsTemplates.likeListOpener(album.likes, album.user),
+                        StatisticsTemplates.likeListOpener(album.likes),
                     ).build()
             ).build();
     }
@@ -466,7 +466,7 @@ export class AlbumTemplates {
                                     .children(
                                         StatisticsTemplates.likesIndicator("album", album.id, album.likes.length,
                                             Util.arrayPropertyMatchesUser(album.likes, "user_id")),
-                                        StatisticsTemplates.likeListOpener(album.likes, user),
+                                        StatisticsTemplates.likeListOpener(album.likes),
                                     ).build(),
                             ).build()
                     ).build(),

@@ -5,7 +5,7 @@ import {AlbumActions} from "../Actions/AlbumActions.ts";
 import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
-import {create, StringOrSignal} from "../../fjsc/src/f2.ts";
+import {create, HtmlPropertyValue, StringOrSignal} from "../../fjsc/src/f2.ts";
 import {User} from "../Models/DbModels/lyda/User.ts";
 import {FJSC} from "../../fjsc";
 import {Signal, signal} from "../../fjsc/src/signals.ts";
@@ -85,7 +85,7 @@ export class StatisticsTemplates {
             ).build();
     }
 
-    static genericUserListOpener(type: string, items: any[], user: User|null) {
+    static genericUserListOpener(type: string, items: any[]) {
         const openState = signal(false);
         const listClass = signal("hidden");
 
@@ -136,11 +136,11 @@ export class StatisticsTemplates {
             ).build();
     }
 
-    static likeListOpener(likes: any[], user: User|null) {
-        return this.genericUserListOpener("likes", likes, user);
+    static likeListOpener(likes: any[]) {
+        return this.genericUserListOpener("likes", likes);
     }
 
-    static repostListOpener(reposts: any[], user: User|null) {
-        return this.genericUserListOpener("reposts", reposts, user);
+    static repostListOpener(reposts: any[]) {
+        return this.genericUserListOpener("reposts", reposts);
     }
 }

@@ -7,7 +7,7 @@ import {TrackCollaborator} from "./TrackCollaborator.ts";
 import {User} from "./User.ts";
 import {Repost} from "./Repost.ts";
 
-export interface Track {
+export interface Track extends Record<string, any> {
     repost_user_id?: number;
     repost?: Repost;
     user?: User;

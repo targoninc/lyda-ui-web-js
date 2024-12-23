@@ -20,6 +20,7 @@ import {Playlist} from "../Models/DbModels/lyda/Playlist.ts";
 import {AnyElement} from "../../fjsc/src/f2.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {currentQuality, playingHere} from "../state.ts";
+import {TrackCollaborator} from "../Models/DbModels/lyda/TrackCollaborator.ts";
 
 export class TrackActions {
     static async savePlay(id: number) {
@@ -379,23 +380,23 @@ export class TrackActions {
         });
 
         if (res.code !== 200) {
-            notify("Error while trying to remove collaborator: " + getErrorMessage(res), "error");
+            notify("Error while trying to remove collaborator: " + getErrorMessage(res), NotificationType.error);
             return;
         }
 
         const collaborator = document.querySelector(".collaborator[user_id='" + userId + "']");
-        collaborator.remove();
+        if (collaborator) collaborator.remove();
     }
 
     static async addCollaboratorToTrack(trackId: number, userId: number, collabType: number) {
-        const res = await Api.postAsync(ApiRoutes.addCollaborator, {
+        const res = await Api.postAsync<TrackCollaborator>(ApiRoutes.addCollaborator, {
             id: trackId,
             userId: userId,
             collabType: collabType,
         });
 
         if (res.code !== 200) {
-            notify("Error while trying to add collaborator: " + getErrorMessage(res), "error");
+            notify("Error while trying to add collaborator: " + getErrorMessage(res), NotificationType.error);
             return;
         }
 
@@ -410,10 +411,10 @@ export class TrackActions {
                 value
             });
             if (res.code !== 200) {
-                notify("Failed to update " + property, "error");
+                notify("Failed to update " + property, NotificationType.error);
                 return;
             }
-            notify(property + " updated", "success");
+            notify(property + " updated", NotificationType.success);
             if (callback) {
                 callback(value);
             }
@@ -424,7 +425,7 @@ export class TrackActions {
     static async getUnapprovedTracks() {
         const res = await Api.getAsync<any[]>(ApiRoutes.getUnapprovedCollabs);
         if (res.code !== 200) {
-            notify("Error while trying to get unapproved tracks: " + getErrorMessage(res), "error");
+            notify("Error while trying to get unapproved tracks: " + getErrorMessage(res), NotificationType.error);
             return [];
         }
         return res.data;
@@ -435,11 +436,11 @@ export class TrackActions {
             id: id,
         });
         if (res.code !== 200) {
-            notify("Error while trying to approve collab: " + getErrorMessage(res), "error");
+            notify("Error while trying to approve collab: " + getErrorMessage(res), NotificationType.error);
             return;
         }
 
-        notify(`Collab on ${name} approved`, "success");
+        notify(`Collab on ${name} approved`, NotificationType.success);
         const collab = document.querySelector(".collab[id='" + id + "']");
         if (collab) {
             collab.remove();
@@ -451,11 +452,11 @@ export class TrackActions {
             id: id,
         });
         if (res.code !== 200) {
-            notify("Error while trying to deny collab: " + getErrorMessage(res), "error");
+            notify("Error while trying to deny collab: " + getErrorMessage(res), NotificationType.error);
             return;
         }
 
-        notify(`Collab on ${name} denied`, "success");
+        notify(`Collab on ${name} denied`, NotificationType.success);
         const collab = document.querySelector(".collab[id='" + id + "']");
         if (collab) {
             collab.remove();
@@ -476,7 +477,7 @@ export class TrackActions {
             price: track.price,
         });
         if (res.code !== 200) {
-            notify("Error while trying to update track: " + getErrorMessage(res), "error");
+            notify("Error while trying to update track: " + getErrorMessage(res), NotificationType.error);
             return;
         }
 
@@ -487,7 +488,7 @@ export class TrackActions {
         const confirmCallback2 = async (newTrack: Track) => {
             Util.removeModal();
             await TrackActions.updateTrackFull(newTrack);
-            notify("Track updated", "success");
+            notify("Track updated", NotificationType.success);
             reload();
         };
         const cancelCallback2 = () => {

@@ -112,8 +112,8 @@ export class Lyda {
                 const followsBack = data.following?.some((f: Follow) => {
                     return user ? f.user_id === user.id : false;
                 }) ?? false;
-                element.appendChild(UserTemplates.profileInfo(data, user, isOwnProfile, permissions, following, followsBack));
-                ProfilePage.addTabSectionAsync(element, data, user, isOwnProfile).then();
+                element.appendChild(UserTemplates.profileInfo(data, isOwnProfile, permissions, following, followsBack));
+                ProfilePage.addTabSectionAsync(element, data, isOwnProfile).then();
                 break;
             case "track":
                 if (!user) {

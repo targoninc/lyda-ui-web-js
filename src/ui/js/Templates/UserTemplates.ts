@@ -106,7 +106,7 @@ export class UserTemplates {
             ).build();
     }
 
-    static linkedUser(user_id: number, username: string, displayname: string, avatar: StringOrSignal, collab_type: HtmlPropertyValue, actionButton: AnyNode|null = null, extraAttributes: HtmlPropertyValue[] | undefined = undefined, extraClasses: HtmlPropertyValue[] = []) {
+    static linkedUser(user_id: number, username: string, displayname: string, avatar: StringOrSignal, collab_type: HtmlPropertyValue, actionButton: AnyNode|null = null, extraAttributes: HtmlPropertyValue[] | undefined = undefined, extraClasses: StringOrSignal[] = []) {
         const noredirect = extraClasses.includes("no-redirect");
         const base = noredirect ? create("div") : create("a");
         if (extraAttributes) {
@@ -186,12 +186,12 @@ export class UserTemplates {
             .build();
     }
 
-    static trackCards(tracks: Track[], profileId: number, user: User|null, isOwnProfile: boolean) {
+    static trackCards(tracks: Track[], profileId: number, isOwnProfile: boolean) {
         let children = [];
         if (tracks.length === 0) {
             return TrackTemplates.noTracksUploadedYet(isOwnProfile);
         } else {
-            children = tracks.map(track => TrackTemplates.trackCard(track, user, profileId));
+            children = tracks.map(track => TrackTemplates.trackCard(track, profileId));
         }
 
         return TrackTemplates.trackCardsContainer(children);
@@ -204,7 +204,7 @@ export class UserTemplates {
         });
         const link = signal(create("div").build());
         unapprovedTracks.onUpdate = (tracks: Track[]) => {
-            link.value = tracks.length === 0 ? nullElement() : GenericTemplates.action(Icons.APPROVAL, "Unapproved tracks", "unapproved-tracks", async e => {
+            link.value = tracks.length === 0 ? nullElement() : GenericTemplates.action(Icons.APPROVAL, "Unapproved tracks", "unapproved-tracks", async (e: Event) => {
                 e.preventDefault();
                 navigate("unapproved-tracks");
             }, [], [], Links.LINK("unapproved-tracks"));
@@ -280,7 +280,7 @@ export class UserTemplates {
         const bannerContainer = create("div")
                 .classes("banner-container", "relative", isOwnProfile ? "clickable" : "_", isOwnProfile ? "blurOnParentHover" : "_")
                 .attributes("isOwnProfile", isOwnProfile.toString())
-                .onclick(e => UserActions.replaceBanner(e, isOwnProfile, user, userBanner, bannerLoading))
+                .onclick(e => UserActions.replaceBanner(e, user, userBanner, bannerLoading))
                 .children(
                     create("img")
                         .classes("nopointer", "user-banner", "banner-image")
@@ -372,7 +372,7 @@ export class UserTemplates {
         return GenericTemplates.deleteIconButton("banner-delete-button", () => UserActions.deleteBanner(user, userBanner, bannerLoading));
     }
 
-    static profileInfo(user: User, selfUser: User|null, isOwnProfile: boolean, permissions: Permission[], following: boolean, followsBack: boolean) {
+    static profileInfo(user: User, isOwnProfile: boolean, permissions: Permission[], following: boolean, followsBack: boolean) {
         let specialInfo: AnyNode[] = [];
         const verified = signal(user.verified);
         const canVerify = compute(v => !v && permissions.some(p => p.name === Permissions.canVerifyUsers), verified);
@@ -409,7 +409,7 @@ export class UserTemplates {
                                 verified.value = false;
                             }
                         })),
-                        !isOwnProfile && selfUser ? UserTemplates.followButton(following, user.id) : null,
+                        !isOwnProfile && currentUser.value ? UserTemplates.followButton(following, user.id) : null,
                         !isOwnProfile && followsBack ? UserTemplates.followsBackIndicator() : null,
                     ).build(),
                 UserTemplates.userDescription(user, isOwnProfile, specialInfo)
@@ -442,23 +442,23 @@ export class UserTemplates {
             .build();
     }
 
-    static albumCards(albums: Album[], user: User|null, isOwnProfile: boolean) {
+    static albumCards(albums: Album[], isOwnProfile: boolean) {
         let children = [];
         if (albums.length === 0) {
             return AlbumTemplates.noAlbumsYet(isOwnProfile);
         } else {
-            children = albums.map((album: Album) => AlbumTemplates.albumCard(album, user));
+            children = albums.map((album: Album) => AlbumTemplates.albumCard(album));
         }
 
         return AlbumTemplates.albumCardsContainer(children);
     }
 
-    static playlistCards(playlists: Playlist[], user: User|null, isOwnProfile: boolean) {
+    static playlistCards(playlists: Playlist[], isOwnProfile: boolean) {
         let children = [];
         if (playlists.length === 0) {
             return PlaylistTemplates.noPlaylistsYet(isOwnProfile);
         } else {
-            children = playlists.map((playlist: Playlist) => PlaylistTemplates.playlistCard(playlist, user));
+            children = playlists.map((playlist: Playlist) => PlaylistTemplates.playlistCard(playlist));
         }
 
         return PlaylistTemplates.playlistCardsContainer(children);
@@ -468,7 +468,7 @@ export class UserTemplates {
         const container = create("div").build();
 
         const tracksContainer = UserTemplates.libraryTracks(tracks, user);
-        const albumsContainer = UserTemplates.libraryAlbums(albums, user);
+        const albumsContainer = UserTemplates.libraryAlbums(albums);
         const playlistsContainer = UserTemplates.libraryPlaylists(playlists, user);
 
         const tabs = ["Tracks", "Albums", "Playlists"];
@@ -490,7 +490,7 @@ export class UserTemplates {
             ).build();
     }
 
-    static libraryAlbums(albums: Album[], user: User) {
+    static libraryAlbums(albums: Album[]) {
         const template = signal(create("div").build());
         const update = (albums: Album[]) => {
             let children;
@@ -501,7 +501,7 @@ export class UserTemplates {
                         .build()
                 ];
             } else {
-                children = albums.map((album: Album) => AlbumTemplates.albumCard(album, user));
+                children = albums.map((album: Album) => AlbumTemplates.albumCard(album));
             }
 
             template.value = AlbumTemplates.albumCardsContainer(children);
@@ -522,7 +522,7 @@ export class UserTemplates {
                         .build()
                 ];
             } else {
-                children = tracks.map((track: Track) => TrackTemplates.trackCard(track, user, user.id));
+                children = tracks.map((track: Track) => TrackTemplates.trackCard(track, user.id));
             }
 
             template.value = TrackTemplates.trackCardsContainer(children);
@@ -544,7 +544,7 @@ export class UserTemplates {
                         .build()
                 ];
             } else {
-                children = playlists.map((playlist: Playlist) => PlaylistTemplates.playlistCard(playlist, user));
+                children = playlists.map((playlist: Playlist) => PlaylistTemplates.playlistCard(playlist));
             }
 
             template.value = PlaylistTemplates.playlistCardsContainer(children);

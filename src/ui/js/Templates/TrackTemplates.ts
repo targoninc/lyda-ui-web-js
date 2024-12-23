@@ -33,6 +33,7 @@ import {CollaboratorType} from "../Models/DbModels/lyda/CollaboratorType.ts";
 import {currentTrackId} from "../state.ts";
 import {PillOption} from "../Models/PillOption.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
+import {UploadableTrack} from "../Models/UploadableTrack.ts";
 
 export class TrackTemplates {
     static trackCard(track: Track, profileId: number) {
@@ -385,9 +386,9 @@ export class TrackTemplates {
                                     .children(
                                         StatisticsTemplates.likesIndicator("track", track.id, track.likes.length,
                                             Util.arrayPropertyMatchesUser(track.likes, "user_id")),
-                                        StatisticsTemplates.likeListOpener(track.likes, user),
+                                        StatisticsTemplates.likeListOpener(track.likes),
                                         isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, Util.arrayPropertyMatchesUser(track.reposts, "user_id")),
-                                        isPrivate ? null : StatisticsTemplates.repostListOpener(track.reposts, user),
+                                        isPrivate ? null : StatisticsTemplates.repostListOpener(track.reposts),
                                         CommentTemplates.commentsIndicator(track.id, track.comments.length),
                                         CommentTemplates.commentListOpener(track.id, track.comments, user),
                                         FJSC.button({
@@ -726,9 +727,9 @@ export class TrackTemplates {
                                             .classes("stats-container", "flex", "rounded")
                                             .children(
                                                 StatisticsTemplates.likesIndicator("track", track.id, track.likes.length, liked),
-                                                StatisticsTemplates.likeListOpener(track.likes, user),
+                                                StatisticsTemplates.likeListOpener(track.likes),
                                                 isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, reposted),
-                                                isPrivate ? null : StatisticsTemplates.repostListOpener(track.reposts, user),
+                                                isPrivate ? null : StatisticsTemplates.repostListOpener(track.reposts),
                                                 CommentTemplates.commentsIndicator(track.id, track.comments.length),
                                                 CommentTemplates.commentListSingleOpener()
                                             ).build(),
@@ -741,8 +742,8 @@ export class TrackTemplates {
                     .children(
                         CommentTemplates.commentListFullWidth(track.id, track.comments, user)
                     ).build(),
-                TrackTemplates.inAlbumsList(track, user),
-                await TrackTemplates.inPlaylistsList(track, user)
+                TrackTemplates.inAlbumsList(track),
+                await TrackTemplates.inPlaylistsList(track)
             ).build();
     }
 
@@ -767,7 +768,7 @@ export class TrackTemplates {
             ).build();
     }
 
-    static inAlbumsList(track: Track, user: User) {
+    static inAlbumsList(track: Track) {
         if (!track.albums || track.albums.length === 0) {
             return create("div")
                 .classes("flex-v", "track-contained-list")
@@ -775,7 +776,7 @@ export class TrackTemplates {
         }
 
         const albumCards = track.albums.map((album: Album) => {
-            return AlbumTemplates.albumCard(album, user, true);
+            return AlbumTemplates.albumCard(album, true);
         });
 
         return create("div")
@@ -792,7 +793,7 @@ export class TrackTemplates {
             ).build();
     }
 
-    static async inPlaylistsList(track: Track, user: User) {
+    static async inPlaylistsList(track: Track) {
         if (!track.playlists || track.playlists.length === 0) {
             return create("div")
                 .classes("flex-v", "track-contained-list")
@@ -800,7 +801,7 @@ export class TrackTemplates {
         }
 
         const playlistCards = track.playlists.map(playlist => {
-            return PlaylistTemplates.playlistCard(playlist, user, true);
+            return PlaylistTemplates.playlistCard(playlist, true);
         });
 
         return create("div")
