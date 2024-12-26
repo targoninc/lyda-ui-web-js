@@ -5,3 +5,4 @@
 /dist
 .env
 /out/
+*.DS_STORE
