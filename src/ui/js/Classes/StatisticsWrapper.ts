@@ -6,6 +6,7 @@ import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {signal} from "../../fjsc/src/signals.ts";
 import {getErrorMessage} from "./Util.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
+import { Statistic } from "../Models/Statistic.ts";
 
 export class StatisticsWrapper {
     static async getStatistics() {
@@ -18,9 +19,9 @@ export class StatisticsWrapper {
         ];
     }
 
-    static async getSingleStat(template: Function, endpoint: string, keyProperty: string, valueProperty: string, reverse: boolean = false) {
+    static async getSingleStat(template: Function, endpoint: string, reverse: boolean = false) {
         const chart = signal(template([], []));
-        Api.getAsync<any[]>(endpoint).then((res) => {
+        Api.getAsync<Statistic[]>(endpoint).then((res) => {
             if (res.code !== 200) {
                 notify(getErrorMessage(res), NotificationType.error);
                 return;
@@ -28,30 +29,30 @@ export class StatisticsWrapper {
             if (reverse) {
                 res.data.reverse();
             }
-            const labels = res.data.map((item: any) => item[keyProperty]);
-            const values = Num.shortenInArray(res.data.map((item: any) => item[valueProperty]));
+            const labels = res.data.map((item: any) => item.label);
+            const values = Num.shortenInArray(res.data.map((item: any) => item.value));
             chart.value = template(labels, values);
         });
         return chart;
     }
 
     static async getRoyaltiesByMonth() {
-        return StatisticsWrapper.getSingleStat(StatisticTemplates.royaltiesByMonthChart, ApiRoutes.getRoyaltiesByMonth, "month", "amount", true);
+        return StatisticsWrapper.getSingleStat(StatisticTemplates.royaltiesByMonthChart, ApiRoutes.getRoyaltiesByMonth, true);
     }
 
     static async getRoyaltiesByTrack() {
-        return StatisticsWrapper.getSingleStat(StatisticTemplates.royaltiesByTrackChart, ApiRoutes.getRoyaltiesByTrack, "title", "amount");
+        return StatisticsWrapper.getSingleStat(StatisticTemplates.royaltiesByTrackChart, ApiRoutes.getRoyaltiesByTrack);
     }
 
     static async getPlayCountByTracks() {
-        return StatisticsWrapper.getSingleStat(StatisticTemplates.playCountByTrackChart, ApiRoutes.getPlayCountByTrack, "title", "plays");
+        return StatisticsWrapper.getSingleStat(StatisticTemplates.playCountByTrackChart, ApiRoutes.getPlayCountByTrack);
     }
 
     static async getPlayCountByMonth() {
-        return StatisticsWrapper.getSingleStat(StatisticTemplates.playCountByMonthChart, ApiRoutes.getPlayCountByMonth, "month", "plays", true);
+        return StatisticsWrapper.getSingleStat(StatisticTemplates.playCountByMonthChart, ApiRoutes.getPlayCountByMonth, true);
     }
 
     static async getLikesByTrack() {
-        return StatisticsWrapper.getSingleStat(StatisticTemplates.likesByTrackChart, ApiRoutes.getLikesByTrack, "title", "likes", true);
+        return StatisticsWrapper.getSingleStat(StatisticTemplates.likesByTrackChart, ApiRoutes.getLikesByTrack, true);
     }
 }
