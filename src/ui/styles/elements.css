@@ -872,7 +872,6 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .property-value {
-    background: rgba(100, 100, 100, 0.1);
     border-radius: var(--border-radius);
 }
 

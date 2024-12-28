@@ -581,8 +581,7 @@ button.special:hover {
 
 summary {
     cursor: pointer;
-    margin-bottom: 10px;
-    background: var(--color-1);
+    background: var(--color-7);
     padding: 0 8px;
     border-radius: var(--border-radius);
 }
