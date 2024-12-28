@@ -101,7 +101,7 @@ export class LogTemplates {
         };
 
         return create("table")
-            .classes("logs")
+            .classes("logs", "fixed-bar-content")
             .attributes("cellspacing", "0", "cellpadding", "0")
             .children(
                 create("thead")
@@ -242,7 +242,7 @@ export class LogTemplates {
             .classes("flex-v")
             .children(
                 create("div")
-                    .classes("flex", "align-children")
+                    .classes("flex", "align-children", "fixed-bar")
                     .children(
                         LogTemplates.logFilters(filterState),
                         FJSC.button({
