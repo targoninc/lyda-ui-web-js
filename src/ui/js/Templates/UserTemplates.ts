@@ -396,6 +396,7 @@ export class UserTemplates {
         const verified = signal(user.verified);
         const canVerify = compute(v => !v && permissions.some(p => p.name === Permissions.canVerifyUsers), verified);
         const canUnverify = compute(v => v && permissions.some(p => p.name === Permissions.canVerifyUsers), verified);
+        const hasUnverifiedPrimaryEmail = isOwnProfile && user.emails && user.emails.some(e => e.primary && !e.verified);
 
         if (user.badges && user.badges.length > 0) {
             specialInfo = [UserTemplates.badges(user.badges)];
@@ -431,7 +432,23 @@ export class UserTemplates {
                         !isOwnProfile && currentUser.value ? UserTemplates.followButton(following, user.id) : null,
                         !isOwnProfile && followsBack ? UserTemplates.followsBackIndicator() : null,
                     ).build(),
-                UserTemplates.userDescription(user, isOwnProfile, specialInfo)
+                UserTemplates.userDescription(user, isOwnProfile, specialInfo),
+                ifjs(hasUnverifiedPrimaryEmail, create("div")
+                    .classes("card", "padded", "flex", "warning", "align-children")
+                    .children(
+                        GenericTemplates.icon("warning", true, ["warning"]),
+                        create("span")
+                            .text("Your primary email is not verified. Please verify it to ensure you can recover your account.")
+                            .build(),
+                        FJSC.button({
+                            text: "Go to settings",
+                            icon: { icon: "settings" },
+                            classes: ["positive"],
+                            onclick: async () => {
+                                navigate("seetings");
+                            }
+                        })
+                    ).build())
             ).build();
     }
 
