@@ -64,6 +64,9 @@ export class SettingsTemplates {
                         await AuthActions.logOut();
                     }
                 }),
+                create("p")
+                    .text("Change your account settings here.")
+                    .build(),
                 ifjs(user.subscription, FJSC.button({
                     icon: { icon: "payments" },
                     text: "Manage subscription",
@@ -80,9 +83,6 @@ export class SettingsTemplates {
                         navigate("subscribe");
                     }
                 }), true),
-                create("p")
-                    .text("Change your account settings here.")
-                    .build(),
                 SettingsTemplates.userImageSettings(user),
                 create("div")
                     .classes("flex-v", "small-card")
@@ -107,7 +107,6 @@ export class SettingsTemplates {
                                 updatedUser.value = { ...updatedUser.value, displayname: v };
                             }
                         }),
-                        SettingsTemplates.emailSettings(user.emails, updatedUser),
                         FJSC.textarea(<TextareaConfig>{
                             label: "Description",
                             name: "description",
@@ -116,6 +115,7 @@ export class SettingsTemplates {
                                 updatedUser.value = { ...updatedUser.value, description: v };
                             }
                         }),
+                        SettingsTemplates.emailSettings(user.emails, updatedUser),
                     ).build(),
                 FJSC.button(<ButtonConfig>{
                     disabled: saveDisabled,
