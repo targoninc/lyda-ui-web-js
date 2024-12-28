@@ -225,13 +225,11 @@ export class UserTemplates {
             return user ? f.user_id === selfUser.id : false;
         }) ?? false;
 
-        return create("div")
-            .classes("flex-v")
-            .children(
-                UserTemplates.userActionsContainer(isOwnProfile),
-                UserTemplates.profileHeader(user, isOwnProfile),
-                UserTemplates.profileInfo(user, isOwnProfile, permissions, following, followsBack)
-            ).build();
+        return [
+            UserTemplates.userActionsContainer(isOwnProfile),
+            UserTemplates.profileHeader(user, isOwnProfile),
+            UserTemplates.profileInfo(user, isOwnProfile, permissions, following, followsBack)
+        ];
     }
 
     static userActionsContainer(isOwnProfile: boolean) {

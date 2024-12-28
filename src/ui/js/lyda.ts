@@ -105,7 +105,7 @@ export class Lyda {
                     notify("You need to be logged in to see your profile", NotificationType.error);
                     return;
                 }
-                element.appendChild(UserTemplates.profile(isOwnProfile, data, permissions));
+                element.append(...UserTemplates.profile(isOwnProfile, data, permissions));
                 ProfilePage.addTabSectionAsync(element, data, isOwnProfile).then();
                 break;
             case "track":
