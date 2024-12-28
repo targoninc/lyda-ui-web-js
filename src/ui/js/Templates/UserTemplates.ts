@@ -445,7 +445,7 @@ export class UserTemplates {
                             icon: { icon: "settings" },
                             classes: ["positive"],
                             onclick: async () => {
-                                navigate("seetings");
+                                navigate("settings");
                             }
                         })
                     ).build())
