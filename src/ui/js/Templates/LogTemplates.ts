@@ -240,7 +240,22 @@ export class LogTemplates {
         return create("div")
             .classes("flex-v")
             .children(
-                LogTemplates.logFilters(filterState),
+                create("div")
+                    .classes("flex", "align-children")
+                    .children(
+                        LogTemplates.logFilters(filterState),
+                        FJSC.button({
+                            text: "Refresh",
+                            icon: { icon: "refresh" },
+                            classes: ["positive"],
+                            onclick: async () => {
+                                logsList.value = create("div").build();
+                                LydaApi.getLogs(filterState, async (logs: Log[]) => {
+                                    logsList.value = LogTemplates.logs(logs);
+                                });
+                            }
+                        })
+                    ).build(),
                 logsList
             ).build();
     }
