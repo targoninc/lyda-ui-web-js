@@ -24,13 +24,14 @@
     --color-8-dark-rgb: 90, 162, 26;
     --color-9: #dcdce0;
     --filter-8: invert(74%) sepia(50%) saturate(854%) hue-rotate(40deg) brightness(94%) contrast(75%);
-    --color-attention: var(--color-1);
+    --orange: var(--color-1);
     --color-state: var(--green);
     --blue: #317eef;
     --blue-dark: #2a6ed9;
     --purple: #a855f7;
     --purple-dark: #8a4dd9;
     --verified: var(--blue);
+
     --stats-1: var(--color-1);
     --stats-2: color-mix(in oklab, var(--color-1) 75%, var(--red) 25%);
     --stats-3: color-mix(in oklab, var(--color-1) 50%, var(--red) 50%);
@@ -43,6 +44,7 @@
     --stats-10: color-mix(in oklab, var(--green) 75%, var(--color-1) 25%);
     --stats-11: color-mix(in oklab, var(--green) 50%, var(--color-1) 50%);
     --stats-12: color-mix(in oklab, var(--green) 25%, var(--color-1) 75%);
+
     --breakpoint-big: 1301px;
     --breakpoint-mid: 1110px;
     --breakpoint-small: 300px;
@@ -494,8 +496,8 @@ button.special:hover {
 }
 
 .notification {
-    background: var(--color-attention);
-    border: 1px solid var(--color-attention);
+    background: var(--orange);
+    border: 1px solid var(--orange);
     border-radius: var(--border-radius);
     color: var(--color-4);
     padding: 5px 10px;
@@ -529,7 +531,7 @@ button.special:hover {
 }
 
 .warning {
-    color: var(--color-attention);
+    color: var(--orange);
 }
 
 .card, .border-card {

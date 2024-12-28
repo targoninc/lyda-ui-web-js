@@ -105,15 +105,7 @@ export class Lyda {
                     notify("You need to be logged in to see your profile", NotificationType.error);
                     return;
                 }
-                element.appendChild(UserTemplates.userActionsContainer(isOwnProfile));
-                element.appendChild(UserTemplates.profileHeader(data, isOwnProfile));
-                const following = data.follows?.some((f: Follow) => {
-                    return user ? f.following_user_id === user.id : false;
-                }) ?? false;
-                const followsBack = data.following?.some((f: Follow) => {
-                    return user ? f.user_id === user.id : false;
-                }) ?? false;
-                element.appendChild(UserTemplates.profileInfo(data, isOwnProfile, permissions, following, followsBack));
+                element.appendChild(UserTemplates.profile(isOwnProfile, data, permissions));
                 ProfilePage.addTabSectionAsync(element, data, isOwnProfile).then();
                 break;
             case "track":

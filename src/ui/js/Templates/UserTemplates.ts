@@ -34,6 +34,7 @@ import {UiActions} from "../Actions/UiActions.ts";
 import {router} from "../../main.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 import {currentUser} from "../state.ts";
+import {Follow} from "../Models/DbModels/lyda/Follow.ts";
 
 export class UserTemplates {
     static userWidget(user: User|Signal<User|null>, following: boolean|Signal<boolean>, extraAttributes: HtmlPropertyValue[] = [], extraClasses: StringOrSignal[] = [], context: UserWidgetContext = UserWidgetContext.unknown) {
@@ -211,6 +212,26 @@ export class UserTemplates {
         };
 
         return link;
+    }
+
+    static profile(isOwnProfile: boolean, user: User, permissions: Permission[]) {
+        const selfUser = currentUser.value ?? {
+            id: 0,
+        };
+        const following = user.follows?.some((f: Follow) => {
+            return user ? f.following_user_id === selfUser.id : false;
+        }) ?? false;
+        const followsBack = user.following?.some((f: Follow) => {
+            return user ? f.user_id === selfUser.id : false;
+        }) ?? false;
+
+        return create("div")
+            .classes("flex-v")
+            .children(
+                UserTemplates.userActionsContainer(isOwnProfile),
+                UserTemplates.profileHeader(user, isOwnProfile),
+                UserTemplates.profileInfo(user, isOwnProfile, permissions, following, followsBack)
+            ).build();
     }
 
     static userActionsContainer(isOwnProfile: boolean) {

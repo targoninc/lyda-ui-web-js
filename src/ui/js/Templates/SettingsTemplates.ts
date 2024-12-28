@@ -351,8 +351,13 @@ export class SettingsTemplates {
             .classes("flex-v")
             .children(
                 create("h2")
-                    .text("E-Mail addresses")
-                    .build(),
+                    .classes("flex")
+                    .children(
+                        GenericTemplates.icon("email", true),
+                        create("h2")
+                            .text("E-Mail settings")
+                            .build(),
+                    ).build(),
                 signalMap(emails$, create("div").classes("flex-v", "card", "secondary"), (email, index) => SettingsTemplates.emailSetting(email, signal(index), primaryEmailIndex, emails$)),
                 FJSC.button({
                     text: "Add E-Mail",
@@ -401,6 +406,7 @@ export class SettingsTemplates {
                             text: "Primary",
                             checked: isPrimary,
                             disabled: emails$.value.length === 1,
+                            title: emails$.value.length === 1 ? "At least one email is required to be primary" : "",
                             onchange: v => {
                                 if (emails$.value.length === 1) {
                                     primaryEmailIndex.value = 0;
@@ -451,6 +457,19 @@ export class SettingsTemplates {
                                 }, 60 * 1000);
                             }
                         }), true),
+                        ifjs(email.verified, create("div")
+                            .classes("flex", "noflexwrap", "small-gap")
+                            .children(
+                                FJSC.icon({
+                                    icon: "warning",
+                                    adaptive: true,
+                                    classes: ["warning"],
+                                }),
+                                create("span")
+                                    .classes("warning")
+                                    .text("Not verified")
+                                    .build()
+                            ).build(), true),
                         ifjs(activationTimedOut, create("span")
                             .classes("text-positive")
                             .text("E-Mail sent, check your inbox and click the link to activate your account.")
