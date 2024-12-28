@@ -884,6 +884,9 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     resize: both;
     overflow: auto;
     right: 0;
+    max-width: 50dvw;
+    max-height: 50dvh;
+    flex-wrap: nowrap;
 }
 
 .property-value {
