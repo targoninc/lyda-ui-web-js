@@ -196,18 +196,19 @@ export class LogTemplates {
             value = "null";
         }
 
-        let valueChild;
+        let valueChild, showKey = true;
         if (typeof value !== "object") {
             valueChild = create("span")
                 .classes("property-value")
                 .text(value)
                 .build();
         } else {
+            showKey = false;
             valueChild = create("details")
                 .children(
                     create("summary")
                         .classes("property-value")
-                        .text("Object")
+                        .text(key)
                         .build(),
                     create("div")
                         .classes("property-value", "flex-v")
@@ -222,10 +223,10 @@ export class LogTemplates {
         return create("div")
             .classes("property", "flex")
             .children(
-                create("span")
+                showKey ? create("span")
                     .classes("property-key")
                     .text(key)
-                    .build(),
+                    .build() : null,
                 valueChild
             ).build();
     }

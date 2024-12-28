@@ -586,6 +586,10 @@ summary {
     border-radius: var(--border-radius);
 }
 
+details > *:not(summary) {
+    margin-left: 2em;
+}
+
 .space-outwards {
     justify-content: space-between;
 }
