@@ -472,7 +472,7 @@ export class SettingsTemplates {
                             ).build(), true),
                         ifjs(activationTimedOut, create("span")
                             .classes("text-positive")
-                            .text("E-Mail sent, check your inbox and click the link to activate your account.")
+                            .text("E-Mail sent, check your inbox and click the link to verify this address.")
                             .build()),
                         ifjs(email.primary, FJSC.button({
                             text: "Delete",
