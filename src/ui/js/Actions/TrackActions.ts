@@ -64,7 +64,7 @@ export class TrackActions {
         }
     }
 
-    static async deleteComment(commentId: number) {
+    static async deleteComment(commentId: number, comments: Signal<Comment[]>) {
         await Ui.getConfirmationModal("Delete comment", "Are you sure you want to delete this comment?", "Yes", "No", async () => {
             const res = await Api.postAsync(ApiRoutes.deleteComment, {
                 id: commentId,
@@ -83,6 +83,7 @@ export class TrackActions {
             if (comment) {
                 comment.remove();
             }
+            comments.value = comments.value.filter(c => c.id !== commentId && c.parent_id !== commentId);
             if (document.querySelectorAll(".comment-in-list").length === 0) {
                 const noComments = document.querySelector(".no-comments");
                 if (noComments !== null) {

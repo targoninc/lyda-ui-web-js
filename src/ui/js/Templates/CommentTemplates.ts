@@ -113,7 +113,7 @@ export class CommentTemplates {
                 text: "Delete",
                 icon: { icon: "delete" },
                 classes: ["negative"],
-                onclick: () => TrackActions.deleteComment(comment.id)
+                onclick: () => TrackActions.deleteComment(comment.id, comments)
             }));
         }
         const avatarState = signal(Images.DEFAULT_AVATAR);
