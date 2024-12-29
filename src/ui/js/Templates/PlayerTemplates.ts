@@ -244,7 +244,12 @@ export class PlayerTemplates {
                 .classes("cover-image", "inline-cover", "align-center", "rounded", "clickable", "hover-image")
                 .src(cover)
                 .onclick(async () => {
-                    Ui.getImageModal(cover);
+                    const windowWidth = window.innerWidth;
+                    if (windowWidth < 600) {
+                        navigate("track/" + track.id);
+                    } else {
+                        Ui.showImageModal(cover);
+                    }
                 }).build(),
             create("span")
                 .classes("title", "clickable", "padded-inline", "align-center")
@@ -254,7 +259,7 @@ export class PlayerTemplates {
                 }).build(),
             ...icons,
             UserTemplates.userWidget(trackUser, Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "following_user_id"),
-                [], ["align-center"], UserWidgetContext.player),
+                [], ["hideOnSmallBreakpoint", "align-center"], UserWidgetContext.player),
             PlayerTemplates.playingFrom(),
             await PlayerTemplates.moreMenu(track, isPrivate, queueComponentMore),
             create("div")

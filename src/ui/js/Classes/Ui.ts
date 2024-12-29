@@ -142,7 +142,7 @@ export class Ui {
         }
     }
 
-    static getImageModal(imageUrl: StringOrSignal) {
+    static showImageModal(imageUrl: StringOrSignal) {
         const modal = GenericTemplates.imageModal(imageUrl);
         Ui.addModal(modal);
     }
