@@ -56,6 +56,7 @@ if (currentUser.value) {
     if (currentTrackIdTmp) {
         currentTrackId.value = currentTrackIdTmp;
         await PlayManager.initializeTrackAsync(currentTrackIdTmp);
+        await PlayManager.stopAllAsync();
     }
 }
 

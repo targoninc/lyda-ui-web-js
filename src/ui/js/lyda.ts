@@ -88,7 +88,7 @@ export class Lyda {
                 if (!feedType) {
                     throw new Error("Missing feed type");
                 }
-                this.loadFeed(feedType, element, user).then();
+                this.loadFeed(feedType, element).then();
                 if (data && data.error) {
                     element.innerHTML = data.error;
                     return;
@@ -243,7 +243,7 @@ export class Lyda {
         }
     }
 
-    static async loadFeed(type: string, element: AnyElement, user: User) {
+    static async loadFeed(type: string, element: AnyElement) {
         const feedMap = {
             following: ApiRoutes.followingFeed,
             explore: ApiRoutes.exploreFeed,
@@ -278,7 +278,7 @@ export class Lyda {
         };
         pageState.onUpdate = update;
         filterState.onUpdate = update;
-        element.appendChild(await TrackTemplates.trackList(tracksState, pageState, type, filterState, loadingState, user));
+        element.appendChild(await TrackTemplates.trackList(tracksState, pageState, type, filterState, loadingState));
         pageState.value = 1;
     }
 }

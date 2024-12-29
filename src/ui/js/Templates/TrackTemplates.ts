@@ -93,7 +93,6 @@ export class TrackTemplates {
                                         StatisticsTemplates.likesIndicator("track", track.id, track.likes.length,
                                             Util.arrayPropertyMatchesUser(track.likes, "user_id")),
                                         isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, Util.arrayPropertyMatchesUser(track.reposts, "user_id")),
-                                        CommentTemplates.commentsIndicator(track.id, track.comments.length),
                                     ).build()
                             ).build(),
                     ).build(),
@@ -186,11 +185,11 @@ export class TrackTemplates {
             .build();
     }
 
-    static async trackList(tracksState: Signal<Track[]>, pageState: Signal<number>, type: string, filterState: Signal<string>, loadingState: Signal<boolean>, user: User) {
-        const trackList = tracksState.value.map(track => TrackTemplates.feedTrack(track, user));
+    static async trackList(tracksState: Signal<Track[]>, pageState: Signal<number>, type: string, filterState: Signal<string>, loadingState: Signal<boolean>) {
+        const trackList = tracksState.value.map(track => TrackTemplates.feedTrack(track));
         const trackListContainer = signal(TrackTemplates.#trackList(trackList));
         tracksState.onUpdate = async (newTracks) => {
-            const trackList = newTracks.map(track => TrackTemplates.feedTrack(track, user));
+            const trackList = newTracks.map(track => TrackTemplates.feedTrack(track));
             trackListContainer.value = TrackTemplates.#trackList(trackList);
         };
 
@@ -323,7 +322,7 @@ export class TrackTemplates {
         });
     }
 
-    static feedTrack(track: Track, user: User) {
+    static feedTrack(track: Track) {
         const icons = [];
         const isPrivate = track.visibility === "private";
         if (isPrivate) {
@@ -389,8 +388,6 @@ export class TrackTemplates {
                                         StatisticsTemplates.likeListOpener(track.likes),
                                         isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, Util.arrayPropertyMatchesUser(track.reposts, "user_id")),
                                         isPrivate ? null : StatisticsTemplates.repostListOpener(track.reposts),
-                                        CommentTemplates.commentsIndicator(track.id, track.comments.length),
-                                        CommentTemplates.commentListOpener(track.id, track.comments, user),
                                         FJSC.button({
                                             text: compute((q: boolean): string => q ? "Unqueue" : "Queue", inQueue),
                                             icon: {
@@ -657,6 +654,8 @@ export class TrackTemplates {
                 coverFile.value = src;
             });
         }
+        const showComments = signal(false);
+        const comments = signal(track.comments);
 
         return create("div")
             .classes("single-page", "noflexwrap", "padded-large", "rounded-large", "flex-v")
@@ -730,8 +729,7 @@ export class TrackTemplates {
                                                 StatisticsTemplates.likeListOpener(track.likes),
                                                 isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, reposted),
                                                 isPrivate ? null : StatisticsTemplates.repostListOpener(track.reposts),
-                                                CommentTemplates.commentsIndicator(track.id, track.comments.length),
-                                                CommentTemplates.commentListSingleOpener()
+                                                CommentTemplates.commentButton(true, comments, showComments)
                                             ).build(),
                                     ).build()
                             ).build(),
@@ -740,7 +738,7 @@ export class TrackTemplates {
                 create("div")
                     .classes("flex")
                     .children(
-                        CommentTemplates.commentListFullWidth(track.id, track.comments, user)
+                        CommentTemplates.commentListFullWidth(track.id, comments, user, showComments)
                     ).build(),
                 TrackTemplates.inAlbumsList(track),
                 await TrackTemplates.inPlaylistsList(track)

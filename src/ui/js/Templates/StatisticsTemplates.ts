@@ -5,11 +5,11 @@ import {AlbumActions} from "../Actions/AlbumActions.ts";
 import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
-import {create, HtmlPropertyValue, StringOrSignal} from "../../fjsc/src/f2.ts";
-import {User} from "../Models/DbModels/lyda/User.ts";
+import {create, StringOrSignal} from "../../fjsc/src/f2.ts";
 import {FJSC} from "../../fjsc";
-import {Signal, signal} from "../../fjsc/src/signals.ts";
+import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
+import {GenericTemplates} from "./GenericTemplates.ts";
 
 export class StatisticsTemplates {
     static likesIndicator(type: string, reference_id: number, like_count: number, liked: boolean) {
@@ -28,7 +28,7 @@ export class StatisticsTemplates {
             }
         };
         // @ts-ignore
-        return StatisticsTemplates.statsIndicator("likes", toggleState, like_count, imageState, reference_id, functionMap[type], [toggleClass]);
+        return StatisticsTemplates.toggleIndicator("likes", toggleState, like_count, imageState, reference_id, functionMap[type], [toggleClass]);
     }
 
     static repostIndicator(reference_id: number, repost_count: number, reposted: boolean) {
@@ -39,10 +39,10 @@ export class StatisticsTemplates {
                 toggleClass.value = value ? "enabled" : "_";
             }
         };
-        return StatisticsTemplates.statsIndicator("reposts", toggleState, repost_count, Icons.REPOST, reference_id, TrackActions.toggleRepost, [toggleClass]);
+        return StatisticsTemplates.toggleIndicator("reposts", toggleState, repost_count, Icons.REPOST, reference_id, TrackActions.toggleRepost, [toggleClass]);
     }
 
-    static statsIndicator(stats_type: string, toggleObservable: Signal<boolean>, count: number, icon: StringOrSignal, reference_id = -1, clickFunc: Function = () => {}, extraClasses: StringOrSignal[] = []) {
+    static toggleIndicator(stats_type: string, toggleObservable: Signal<boolean>, count: number, icon: StringOrSignal, reference_id = -1, clickFunc: Function = () => {}, extraClasses: StringOrSignal[] = []) {
         const count$ = signal(count);
         toggleObservable.onUpdate = (value: boolean) => {
             if (!Util.isLoggedIn()) {
@@ -55,33 +55,30 @@ export class StatisticsTemplates {
             }
         };
 
-        if (stats_type === "likes" || stats_type === "reposts") {
-            extraClasses.push("clickable");
-        }
+        const iconIsUrl = (icon.subscribe && icon.value.startsWith("http")) || icon.startsWith("http");
+        const stateClass = compute((s: boolean): string => s ? "active" : "_", toggleObservable);
+        const stateClass2 = compute((s: boolean): string => s ? "positive" : "_", toggleObservable);
 
         return create("div")
-            .classes("stats-indicator", stats_type, "flex", ...extraClasses)
-            .attributes("reference_id", reference_id)
-            .onclick(async () => {
-                const targetValue = !toggleObservable.value;
-                toggleObservable.value = targetValue;
-                clickFunc(reference_id, !targetValue).then((success: boolean) => {
-                    if (!success) {
-                        toggleObservable.value = !targetValue;
-                    }
-                });
-            })
+            .classes("flex", "stats-indicator")
             .children(
                 create("span")
                     .classes("stats-count", "nopointer", stats_type)
                     .text(count$)
                     .build(),
-                FJSC.icon({
+                GenericTemplates.roundIconButton({
                     icon: icon,
                     adaptive: true,
-                    classes: ["inline-icon", "svg", "nopointer"],
-                    isUrl: (icon.subscribe && icon.value.startsWith("http")) || icon.startsWith("http"),
-                }),
+                    isUrl: iconIsUrl,
+                }, async () => {
+                    const targetValue = !toggleObservable.value;
+                    toggleObservable.value = targetValue;
+                    clickFunc(reference_id, !targetValue).then((success: boolean) => {
+                        if (!success) {
+                            toggleObservable.value = !targetValue;
+                        }
+                    });
+                }, "", ["stats-indicator-action", stateClass2, stateClass, ...extraClasses]),
             ).build();
     }
 
@@ -111,7 +108,7 @@ export class StatisticsTemplates {
             .classes("listFromStatsOpener", type, "flex", "relative")
             .children(
                 create("span")
-                    .classes("stats-indicator-opener", "clickable", "rounded", "padded-inline")
+                    .classes("stats-indicator-opener", type, "clickable", "rounded", "padded-inline")
                     .children(
                         FJSC.icon({
                             icon: "arrow_drop_down",

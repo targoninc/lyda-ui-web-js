@@ -1,4 +1,3 @@
-import {StatisticsTemplates} from "./StatisticsTemplates.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {Icons} from "../Enums/Icons.js";
 import {CommentActions} from "../Actions/CommentActions.ts";
@@ -13,8 +12,6 @@ import {Comment} from "../Models/DbModels/lyda/Comment.ts";
 import {FJSC} from "../../fjsc";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
-
-;
 
 export class CommentTemplates {
     static moderatableComment(comment: any, user: User) {
@@ -59,8 +56,7 @@ export class CommentTemplates {
             .build();
     }
 
-    static commentListFullWidth(track_id: number, initial_comments: Comment[], user: User) {
-        const comments = signal(initial_comments);
+    static commentListFullWidth(track_id: number, comments: Signal<Comment[]>, user: User, showComments: Signal<boolean>) {
         const hasComments = compute(c => c.length > 0, comments);
         hasComments.subscribe(() => {
             Util.nestCommentElementsByParents();
@@ -71,15 +67,19 @@ export class CommentTemplates {
         const parentCommentId = signal(0);
 
         return create("div")
-            .classes("listFromStatsIndicator", "move-to-new-row", "comments", "flex-v", "hidden")
+            .classes("listFromStatsIndicator", "move-to-new-row", "comments", "flex-v")
             .children(
-                GenericTemplates.cardLabel("Comments", "comment"),
-                CommentTemplates.commentBox(track_id, parentCommentId, comments),
-                ifjs(hasComments, create("span")
-                    .classes("text", "no-comments")
-                    .text("No comments yet")
-                    .build(), true),
-                ifjs(hasComments, signalMap(comments, create("div").classes("flex-v", "comment-list"), (comment: Comment) => CommentTemplates.commentInList(comment, parentCommentId, user)))
+                ifjs(showComments, create("div")
+                    .classes("flex-v")
+                    .children(
+                        GenericTemplates.cardLabel("Comments", "comment"),
+                        CommentTemplates.commentBox(track_id, parentCommentId, comments),
+                        ifjs(hasComments, create("span")
+                            .classes("text", "no-comments")
+                            .text("No comments yet")
+                            .build(), true),
+                        ifjs(hasComments, signalMap(comments, create("div").classes("flex-v", "comment-list"), (comment: Comment) => CommentTemplates.commentInList(comment, parentCommentId, user)))
+                    ).build()),
             ).build();
     }
 
@@ -106,59 +106,6 @@ export class CommentTemplates {
                             classes: ["positive"],
                             onclick: () => TrackActions.newComment(newComment, comments, track_id, parentCommentId)
                         }),
-                    ).build())
-            ).build();
-    }
-
-    static commentsIndicator(track_id: number, comment_count: number) {
-        const toggleState = signal(false);
-        return StatisticsTemplates.statsIndicator("comments", toggleState, comment_count, "comment", track_id);
-    }
-
-    static commentListOpener(track_id: number, initial_comments: Comment[], user: User) {
-        const parentCommentId = signal(0);
-        const comments = signal(initial_comments);
-        const hasComments = compute((c: Comment[]) => c.length > 0, comments);
-        hasComments.subscribe(() => {
-            Util.nestCommentElementsByParents();
-        });
-        setTimeout(() => {
-            Util.nestCommentElementsByParents();
-        });
-        const listShown = signal(false);
-
-        return create("div")
-            .classes("listFromStatsOpener", "comments", "flex", "relative")
-            .children(
-                create("span")
-                    .classes("stats-indicator-opener", "clickable", "rounded", "padded-inline")
-                    .onclick(() => {
-                        listShown.value = !listShown.value;
-                    })
-                    .children(
-                        FJSC.icon({
-                            icon: "arrow_drop_down",
-                            adaptive: true,
-                            classes: ["inline-icon", "svg", "nopointer"],
-                        }),
-                    ).build(),
-                ifjs(listShown, create("div")
-                    .classes("listFromStatsIndicator", "popout-below", "comments", "flex-v", "padded", "rounded")
-                    .children(
-                        create("span")
-                            .classes("comments-label", "text", "label", "padded-inline", "rounded", "text-small")
-                            .text("Comments")
-                            .build(),
-                        CommentTemplates.commentBox(track_id, parentCommentId, comments),
-                        create("div")
-                            .classes("flex-v", "comment-list")
-                            .children(
-                                ifjs(hasComments, create("span")
-                                    .classes("text", "no-comments")
-                                    .text("No comments yet")
-                                    .build(), true),
-                                ifjs(hasComments, signalMap(comments, create("div").classes("flex-v", "comment-list"), (comment: Comment) => CommentTemplates.commentInList(comment, parentCommentId, user)))
-                            ).build(),
                     ).build())
             ).build();
     }
@@ -235,21 +182,21 @@ export class CommentTemplates {
         }
     }
 
-    static commentListSingleOpener() {
+    static commentButton(showButton: boolean, comments: Signal<Comment[]>, showComments: Signal<boolean> = signal(false)) {
+        const count = compute(c => c.length.toString(), comments);
+
         return create("div")
-            .classes("listFromStatsOpener", "comments", "flex", "relative")
             .children(
-                create("span")
-                    .classes("stats-indicator-opener", "clickable", "rounded", "padded-inline")
-                    .children(
-                        FJSC.icon({
-                            icon: "arrow_drop_down",
-                            adaptive: true,
-                            classes: ["inline-icon", "svg", "nopointer"],
-                        }),
-                    ).onclick(() => {
-                    Util.toggleClass(document.querySelector(".listFromStatsIndicator.comments"), "hidden", "listFromStatsIndicator");
-                }).build()
+                ifjs(showButton, FJSC.button({
+                    text: count,
+                    classes: ["wide-round-button"],
+                    icon: {
+                        icon: "comment",
+                        adaptive: true,
+                        classes: ["inline-icon", "svg", "nopointer"],
+                    },
+                    onclick: () => showComments.value = !showComments.value
+                }))
             ).build();
     }
 }

@@ -52,7 +52,7 @@ export class PlayerTemplates {
                             .id("audio_" + track.id)
                             .styles("display", "none")
                             .build(),
-                        PlayerTemplates.playerIconButton({
+                        GenericTemplates.roundIconButton({
                             icon: compute(p => p ? Icons.PAUSE : Icons.PLAY, playingHere),
                             adaptive: true,
                             isUrl: true,
@@ -125,7 +125,7 @@ export class PlayerTemplates {
             .id(track.id)
             .onwheel(PlayManager.setLoudnessFromWheel)
             .children(
-                PlayerTemplates.playerIconButton({
+                GenericTemplates.roundIconButton({
                     icon: compute(p => p ? Icons.MUTE : Icons.LOUD, muted),
                     adaptive: true,
                     isUrl: true,
@@ -263,7 +263,6 @@ export class PlayerTemplates {
                     StatisticsTemplates.likesIndicator("track", track.id, track.likes.length,
                         Util.arrayPropertyMatchesUser(track.likes, "user_id")),
                     isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, Util.arrayPropertyMatchesUser(track.reposts, "user_id")),
-                    CommentTemplates.commentsIndicator(track.id, track.comments.length),
                     queueComponent
                 ).build()
         ];
@@ -274,9 +273,9 @@ export class PlayerTemplates {
         const activeClass = compute((m: boolean): string => m ? "active" : "_", menuShown);
 
         return create("div")
-            .classes("relative", "player-button", "showOnMidBreakpoint")
+            .classes("relative", "round-button", "showOnMidBreakpoint")
             .children(
-                PlayerTemplates.playerIconButton({
+                GenericTemplates.roundIconButton({
                     icon: "more_horiz",
                     adaptive: true,
                 }, async () => {
@@ -288,7 +287,7 @@ export class PlayerTemplates {
                         StatisticsTemplates.likesIndicator("track", track.id, track.likes!.length,
                             Util.arrayPropertyMatchesUser(track.likes!, "user_id")),
                         isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts!.length, Util.arrayPropertyMatchesUser(track.reposts!, "user_id")),
-                        CommentTemplates.commentsIndicator(track.id, track.comments!.length),
+                        CommentTemplates.commentButton(false, signal(track.comments!)),
                         queueComponent
                     ).build())
             ).build();
@@ -302,7 +301,7 @@ export class PlayerTemplates {
         };
 
         return [
-            PlayerTemplates.playerIconButton({
+            GenericTemplates.roundIconButton({
                 icon: compute(mode => map[mode], loopMode),
                 adaptive: true,
                 isUrl: true,
@@ -310,18 +309,5 @@ export class PlayerTemplates {
                 await PlayManager.nextLoopMode();
             }, "Change loop mode"),
         ];
-    }
-
-    static playerIconButton(icon: IconConfig, onclick: Function, title: StringOrSignal = "", classes: StringOrSignal[] = []) {
-        return create("button")
-            .classes("player-button", "fjsc", ...classes)
-            .onclick(onclick)
-            .title(title)
-            .children(
-                FJSC.icon({
-                    ...icon,
-                    classes: ["player-button-icon", "align-center", "inline-icon", "svg", "nopointer"]
-                }),
-            ).build()
     }
 }

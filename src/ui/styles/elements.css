@@ -2,6 +2,7 @@
     --inline-track-height: 150px;
     --small-track-height: 75px;
     --card-width: 405px;
+    --round-button-size: 36px;
 }
 
 .material-symbols-outlined {
@@ -193,13 +194,9 @@
 }
 
 .stats-indicator {
-    padding: var(--inline-padding);
-    width: max-content;
-    height: max-content;
-    border-radius: 50px;
     z-index: 2;
-    background: var(--color-9);
-    border: 1px solid var(--color-9);
+    align-items: center;
+    border-radius: 999px;
 }
 
 .stats-indicator.likes {
@@ -227,11 +224,18 @@
 }
 
 .stats-indicator-opener {
-    padding-left: 20px;
-    margin-left: -20px;
+    padding-left: 32px;
+    margin-left: -35px;
     border: 1px solid var(--color-9);
-    border-radius: 0 50px 50px 0;
-    height: max-content;
+    border-radius: 50px;
+    align-items: center;
+    display: flex;
+    box-sizing: border-box;
+}
+
+.stats-indicator-opener.comments {
+    padding-left: 32px;
+    margin-left: -35px;
 }
 
 .listFromStatsOpener {
@@ -252,16 +256,22 @@ label {
     height: max-content;
 }
 
-.player-button {
-    --control-size: 36px;
-    min-width: var(--control-size);
-    min-height: var(--control-size);
-    max-width: var(--control-size);
-    max-height: var(--control-size);
+.round-button {
+    min-width: var(--round-button-size);
+    min-height: var(--round-button-size);
+    max-width: var(--round-button-size);
+    max-height: var(--round-button-size);
+    width: var(--round-button-size);
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50% !important;
+}
+
+.wide-round-button {
+    min-height: var(--round-button-size);
+    max-height: var(--round-button-size);
+    border-radius: 100vw !important;
 }
 
 .audio-player-scrubber {

@@ -437,6 +437,10 @@ button.positive:hover {
     background: var(--green-dark);
 }
 
+button.positive.active {
+    border-color: var(--green);
+}
+
 button.special {
     border-color: var(--blue);
     background: var(--blue-dark);

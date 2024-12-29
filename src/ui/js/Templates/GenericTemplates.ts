@@ -15,7 +15,7 @@ import {
     TypeOrSignal
 } from "../../fjsc/src/f2.ts";
 import {FJSC} from "../../fjsc";
-import {InputType, SearchableSelectConfig} from "../../fjsc/src/Types.ts";
+import {IconConfig, InputType, SearchableSelectConfig} from "../../fjsc/src/Types.ts";
 import {Util} from "../Classes/Util.ts";
 import {navigate} from "../Routing/Router.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
@@ -680,6 +680,19 @@ export class GenericTemplates {
             .classes("spinner")
             .children()
             .build();
+    }
+
+    static roundIconButton(icon: IconConfig, onclick: Function, title: StringOrSignal = "", classes: StringOrSignal[] = []) {
+        return create("button")
+            .classes("round-button", "fjsc", ...classes)
+            .onclick(onclick)
+            .title(title)
+            .children(
+                FJSC.icon({
+                    ...icon,
+                    classes: ["round-button-icon", "align-center", "inline-icon", "svg", "nopointer"]
+                }),
+            ).build()
     }
 
     static benefit(benefit: string, icon: string) {

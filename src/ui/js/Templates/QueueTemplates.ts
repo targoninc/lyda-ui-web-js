@@ -152,7 +152,7 @@ export class QueueTemplates {
         const queueListVisClass = compute((h): string => h ? "hidden" : "_", queueListHidden);
 
         return create("div")
-            .classes("relative")
+            .classes("relative", "align-center")
             .children(
                 create("div")
                     .classes(queueListVisClass, "queue-list", "flex-v", "no-gap", "padded", "rounded")
