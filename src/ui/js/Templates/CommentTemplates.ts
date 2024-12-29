@@ -12,11 +12,11 @@ import {Comment} from "../Models/DbModels/lyda/Comment.ts";
 import {FJSC} from "../../fjsc";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
+import {InputType} from "../../fjsc/src/Types.ts";
 
 export class CommentTemplates {
-    static moderatableComment(comment: any, user: User) {
+    static moderatableComment(comment: any, comments: Signal<Comment[]>, user: User) {
         const id = comment.comment.id;
-        const parentCommentId = signal(0);
 
         const el = create("div")
             .classes("flex")
@@ -24,7 +24,7 @@ export class CommentTemplates {
                 create("div")
                     .classes("card")
                     .children(
-                        CommentTemplates.commentInList(comment, parentCommentId, user),
+                        CommentTemplates.commentInList(comment, comments, user),
                     ).build(),
                 create("div")
                     .classes("flex-v")
@@ -48,7 +48,7 @@ export class CommentTemplates {
     }
 
     static async moderatableCommentsList(comments: any[], user: User) {
-        const commentList = comments.map(c => CommentTemplates.moderatableComment(c, user));
+        const commentList = comments.map(c => CommentTemplates.moderatableComment(c, signal(comments), user));
 
         return create("div")
             .classes("flex-v")
@@ -64,7 +64,6 @@ export class CommentTemplates {
         setTimeout(() => {
             Util.nestCommentElementsByParents();
         });
-        const parentCommentId = signal(0);
 
         return create("div")
             .classes("listFromStatsIndicator", "move-to-new-row", "comments", "flex-v")
@@ -72,18 +71,17 @@ export class CommentTemplates {
                 ifjs(showComments, create("div")
                     .classes("flex-v")
                     .children(
-                        GenericTemplates.cardLabel("Comments", "comment"),
-                        CommentTemplates.commentBox(track_id, parentCommentId, comments),
+                        CommentTemplates.commentBox(track_id, comments),
                         ifjs(hasComments, create("span")
                             .classes("text", "no-comments")
                             .text("No comments yet")
                             .build(), true),
-                        ifjs(hasComments, signalMap(comments, create("div").classes("flex-v", "comment-list"), (comment: Comment) => CommentTemplates.commentInList(comment, parentCommentId, user)))
+                        ifjs(hasComments, signalMap(comments, create("div").classes("flex-v", "comment-list"), (comment: Comment) => CommentTemplates.commentInList(comment, comments, user)))
                     ).build()),
             ).build();
     }
 
-    static commentBox(track_id: number, parentCommentId: Signal<number>, comments: Signal<Comment[]>) {
+    static commentBox(track_id: number, comments: Signal<Comment[]>) {
         const newComment = signal("");
 
         return create("div")
@@ -104,13 +102,13 @@ export class CommentTemplates {
                             text: "Post",
                             icon: { icon: "send" },
                             classes: ["positive"],
-                            onclick: () => TrackActions.newComment(newComment, comments, track_id, parentCommentId)
+                            onclick: () => TrackActions.newComment(newComment, comments, track_id)
                         }),
                     ).build())
             ).build();
     }
 
-    static commentInList(comment: Comment, parentCommentId: Signal<number>, user: User) {
+    static commentInList(comment: Comment, comments: Signal<Comment[]>, user: User) {
         let actions = [];
         if (!comment.user) {
             throw new Error(`Comment ${comment.id} has no user`);
@@ -129,6 +127,8 @@ export class CommentTemplates {
                 avatarState.value = avatar;
             });
         }
+        const replyInputShown = signal(false);
+        const newComment = signal("");
 
         return create("div")
             .classes("comment-in-list", "flex-v")
@@ -141,7 +141,7 @@ export class CommentTemplates {
                         UserTemplates.userWidget(comment.user, Util.arrayPropertyMatchesUser(comment.user.follows ?? [], "following_user_id"), ["comment_id", comment.id], [], UserWidgetContext.comment),
                         create("span")
                             .classes("text", "text-small", "color-dim", "align-center")
-                            .text(Time.ago(comment.created_at))
+                            .text(Time.agoUpdating(new Date(comment.created_at)))
                             .build(),
                         create("div")
                             .classes("flex")
@@ -152,7 +152,33 @@ export class CommentTemplates {
                     .classes("flex", "comment_body")
                     .children(
                         CommentTemplates.commentContent(comment, true),
-                        Util.isLoggedIn() ? GenericTemplates.inlineAction("Reply", "prompt_suggestion", comment.id, (e: Event) => TrackActions.replyToComment(e, comment.track_id, comment.id, comment.user!.username, parentCommentId), ["track_id", comment.track_id], ["secondary"]) : null,
+                        ifjs(Util.isLoggedIn(), create("div")
+                            .classes("flex")
+                            .children(
+                                FJSC.button({
+                                    text: "Reply",
+                                    icon: { icon: "reply" },
+                                    classes: ["positive"],
+                                    onclick: () => replyInputShown.value = !replyInputShown.value
+                                }),
+                                ifjs(replyInputShown, FJSC.input<string>({
+                                    type: InputType.text,
+                                    name: "reply-input",
+                                    label: "",
+                                    placeholder: "Reply to " + comment.user!.username + "...",
+                                    value: newComment,
+                                    attributes: ["track_id", comment.track_id.toString()],
+                                    onchange: v => {
+                                        newComment.value = v;
+                                    }
+                                })),
+                                ifjs(replyInputShown, FJSC.button({
+                                    text: "Post",
+                                    icon: { icon: "send" },
+                                    classes: ["positive"],
+                                    onclick: () => TrackActions.newComment(newComment, comments, comment.track_id, comment.id)
+                                }))
+                            ).build()),
                     ).build(),
                 create("div")
                     .classes("comment-children")

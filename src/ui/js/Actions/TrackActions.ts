@@ -93,7 +93,7 @@ export class TrackActions {
         }, Icons.WARNING);
     }
 
-    static async newComment(content: Signal<string>, comments: Signal<Comment[]>, track_id: number, parentCommentId: Signal<number>) {
+    static async newComment(content: Signal<string>, comments: Signal<Comment[]>, track_id: number, parentCommentId: number|null = null) {
         if (!content.value || content.value === "") {
             return;
         }
@@ -105,7 +105,7 @@ export class TrackActions {
         const res = await Api.postAsync(ApiRoutes.newComment, {
             id: track_id,
             content: content.value,
-            parentId: parentCommentId.value,
+            parentId: parentCommentId ? parentCommentId : null,
         });
 
         if (res.code !== 200) {
@@ -118,14 +118,15 @@ export class TrackActions {
         let nowUtc = new Date();
         const offset = nowUtc.getTimezoneOffset() * 60000;
         nowUtc = new Date(nowUtc.getTime() + offset);
+        const createdId = parseInt(res.data);
 
         const comment = <Comment>{
-            id: parseInt(res.data),
+            id: createdId,
             content: content.value,
             user: user,
             user_id: user.id,
             track_id: track_id,
-            parent_id: parentCommentId.value,
+            parent_id: parentCommentId ? parentCommentId : createdId,
             created_at: nowUtc,
             potentially_harmful: false,
             hidden: false,

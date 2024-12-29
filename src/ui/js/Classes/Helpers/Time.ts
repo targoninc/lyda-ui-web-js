@@ -72,15 +72,15 @@ export class Time {
 
     static agoUpdating(time: number|string|Date) {
         const state = signal(Time.ago(time));
-        const updateIn = (time: string|number|Date) => {
+        const update = () => {
             state.value = Time.ago(time);
             const updateInterval = Time.#shouldUpdateInSeconds(state.value) ? 1000 : 60000;
             if (state.value.includes("hours")) {
                 return;
             }
-            setTimeout(() => updateIn(time), updateInterval);
+            setTimeout(update, updateInterval);
         };
-        updateIn(1000);
+        update();
 
         return state;
     }
