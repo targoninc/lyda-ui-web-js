@@ -1,5 +1,5 @@
 import {Api} from "../Api/Api.ts";
-import {getUserSettingValue, target, updateUserSetting, Util} from "../Classes/Util.ts";
+import {getErrorMessage, getUserSettingValue, target, updateUserSetting, Util} from "../Classes/Util.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
@@ -206,7 +206,7 @@ export class UserActions {
 
         const res = await Api.postAsync(ApiRoutes.updateUserSetting, { setting: UserSettings.theme, value: themeName });
         if (res.code !== 200) {
-            notify("Failed to update theme", NotificationType.error);
+            notify(`Failed to update theme: ${getErrorMessage(res)}`, NotificationType.error);
         }
     }
 

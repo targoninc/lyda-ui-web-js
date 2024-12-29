@@ -1,3 +1,6 @@
+import {NotificationType} from "../Enums/NotificationType.ts";
+import {notify} from "../Classes/Ui.ts";
+
 export interface ApiResponse<T> {
     code: number;
     data: T & { error?: string };
@@ -37,6 +40,17 @@ export class Api {
             },
             credentials: "include",
         });
+
+        if (res.status === 429) {
+            notify("Too many requests, please try again in 15 minutes.", NotificationType.error);
+            return {
+                code: 429,
+                data: {
+                    error: "Too many requests, please try again in 15 minutes."
+                }
+            };
+        }
+
         return {
             code: res.status,
             data: await Api.getDataFromHttpResponse(res)
@@ -65,6 +79,17 @@ export class Api {
             credentials: "include",
             body
         });
+
+        if (res.status === 429) {
+            notify("Too many requests, please try again in 15 minutes.", NotificationType.error);
+            return {
+                code: 429,
+                data: {
+                    error: "Too many requests, please try again in 15 minutes."
+                }
+            };
+        }
+
         return {
             code: res.status,
             data: await Api.getDataFromHttpResponse(res)
