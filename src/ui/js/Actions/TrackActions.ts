@@ -104,7 +104,7 @@ export class TrackActions {
 
         const res = await Api.postAsync(ApiRoutes.newComment, {
             id: track_id,
-            content: content,
+            content: content.value,
             parentId: parentCommentId.value,
         });
 
