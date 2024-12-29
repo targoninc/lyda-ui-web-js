@@ -127,7 +127,7 @@ export class ApiRoutes {
 
     // region Comments
     private static comments = ApiRoutes.base + "/comments";
-    static getPotentiallyHarmful = ApiRoutes.comments + "/potentiallyHarmful";
+    static getModerationComments = ApiRoutes.comments + "/get";
 
     private static commentActions = ApiRoutes.comments + "/actions";
     static newComment = ApiRoutes.commentActions + "/new";

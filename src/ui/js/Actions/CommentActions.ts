@@ -5,13 +5,16 @@ import {getErrorMessage} from "../Classes/Util.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class CommentActions {
-    static async getPotentiallyHarmful() {
-        const res = await Api.getAsync<Comment[]>(ApiRoutes.getPotentiallyHarmful);
-        if (res.code !== 200) {
-            notify("Error while trying to get comments: " + getErrorMessage(res), NotificationType.error);
-            return [];
-        }
-        return res.data;
+    static getModerationComments(filter: { potentiallyHarmful: boolean, user_id: number | null, offset: number, limit: number }, loading: Signal<boolean>, callback: Function) {
+        loading.value = true;
+        Api.getAsync<Comment[]>(ApiRoutes.getModerationComments, filter).then(res => {
+            loading.value = false;
+            if (res.code !== 200) {
+                notify("Error while trying to get comments: " + getErrorMessage(res), NotificationType.error);
+                return [];
+            }
+            callback(res.data);
+        });
     }
 
     static async hideComment(id: number) {

@@ -216,8 +216,7 @@ export class Lyda {
                     notify("You do not have permission to moderate", NotificationType.error);
                     return;
                 }
-                const comments = await CommentActions.getPotentiallyHarmful();
-                element.appendChild(await CommentTemplates.moderatableCommentsList(comments, user));
+                element.appendChild(await CommentTemplates.moderatableCommentsPage());
                 break;
             case "subscribe":
                 if (!user) {

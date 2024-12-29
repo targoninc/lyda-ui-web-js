@@ -7,7 +7,6 @@ import {Time} from "../Classes/Helpers/Time.ts";
 import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
 import {AnyElement, create, ifjs, signalMap} from "../../fjsc/src/f2.ts";
-import {User} from "../Models/DbModels/lyda/User.ts";
 import {Comment} from "../Models/DbModels/lyda/Comment.ts";
 import {FJSC} from "../../fjsc";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
@@ -15,9 +14,7 @@ import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 import {InputType} from "../../fjsc/src/Types.ts";
 
 export class CommentTemplates {
-    static moderatableComment(comment: any, comments: Signal<Comment[]>, user: User) {
-        const id = comment.comment.id;
-
+    static moderatableComment(comment: Comment, comments: Signal<Comment[]>) {
         const el = create("div")
             .classes("flex")
             .children(
@@ -29,30 +26,126 @@ export class CommentTemplates {
                 create("div")
                     .classes("flex-v")
                     .children(
-                        GenericTemplates.action(Icons.CHECK, "Approve", "approveComment", async () => {
-                            const success = await CommentActions.markSafe(id);
-                            if (success) {
-                                el.remove();
+                        FJSC.button({
+                            text: "Approve",
+                            icon: {icon: "check"},
+                            classes: ["positive"],
+                            onclick: async () => {
+                                const success = await CommentActions.markSafe(comment.id);
+                                if (success) {
+                                    el.remove();
+                                }
                             }
-                        }, [], ["positive"]),
-                        GenericTemplates.action(Icons.X, "Hide", "hideComment", async () => {
-                            const success = await CommentActions.hideComment(id);
-                            if (success) {
-                                el.remove();
+                        }),
+                        FJSC.button({
+                            text: "Hide",
+                            icon: {icon: "close"},
+                            classes: ["negative"],
+                            onclick: async () => {
+                                const success = await CommentActions.hideComment(comment.id);
+                                if (success) {
+                                    el.remove();
+                                }
                             }
-                        }, [], ["negative"]),
+                        }),
                     ).build()
             ).build();
 
         return el;
     }
 
-    static async moderatableCommentsList(comments: any[], user: User) {
-        const commentList = comments.map(c => CommentTemplates.moderatableComment(c, signal(comments), user));
+    static async moderatableCommentsPage() {
+        const commentsList = signal<AnyElement>(create("div").build());
+        const filterState = signal({
+            potentiallyHarmful: true,
+            user_id: null,
+            offset: 0,
+            limit: 100
+        });
+        const loading = signal(false);
+        filterState.subscribe(async (newFilter) => {
+            commentsList.value = create("div").build();
+            CommentActions.getModerationComments(newFilter, loading, async (comments: Comment[]) => {
+                commentsList.value = CommentTemplates.moderatableCommentsList(comments);
+            });
+        });
+        CommentActions.getModerationComments(filterState.value, loading, async (comments: Comment[]) => {
+            commentsList.value = CommentTemplates.moderatableCommentsList(comments);
+        });
 
         return create("div")
             .classes("flex-v")
-            .children(...commentList)
+            .children(
+                create("div")
+                    .classes("flex", "align-children", "fixed-bar")
+                    .children(
+                        CommentTemplates.commentFilters(filterState),
+                        FJSC.button({
+                            text: "Refresh",
+                            icon: { icon: "refresh" },
+                            classes: ["positive"],
+                            onclick: async () => {
+                                commentsList.value = create("div").build();
+                                CommentActions.getModerationComments(filterState.value, loading, async (comments: Comment[]) => {
+                                    commentsList.value = CommentTemplates.moderatableCommentsList(comments);
+                                });
+                            }
+                        })
+                    ).build(),
+                ifjs(loading, GenericTemplates.loadingSpinner()),
+                commentsList
+            ).build();
+    }
+
+    static commentFilters(filter: Signal<{ potentiallyHarmful: boolean, user_id: number | null, offset: number, limit: number }>) {
+        const potentiallyHarmful = compute(f => f.potentiallyHarmful, filter);
+        const userId = compute(f => f.user_id, filter);
+        const offset = compute(f => f.offset, filter);
+        const limit = compute(f => f.limit, filter);
+
+        return create("div")
+            .classes("flex", "align-children")
+            .children(
+                FJSC.toggle({
+                    text: "Potentially harmful",
+                    checked: potentiallyHarmful,
+                    onchange: (v) => {
+                        filter.value = { ...filter.value, potentiallyHarmful: v };
+                    }
+                }),
+                create("div")
+                    .classes("flex")
+                    .children(
+                        FJSC.input<number>({
+                            type: InputType.number,
+                            name: "user_id",
+                            placeholder: "Filter by user ID",
+                            value: userId,
+                            onchange: (v) => {
+                                if (v === 0) {
+                                    v = null;
+                                }
+                                filter.value = { ...filter.value, user_id: v };
+                            }
+                        }),
+                    ).build(),
+            ).build();
+    }
+
+    static moderatableCommentsList(comments: Comment[]) {
+        if (comments.length === 0) {
+            return create("div")
+                .classes("card", "flex-v")
+                .children(
+                    create("span")
+                        .text("No comments")
+                        .build()
+                ).build();
+        }
+
+        return create("div")
+            .classes("flex-v", "fixed-bar-content")
+            .children(...comments.map(c => CommentTemplates.moderatableComment(c, signal(comments))))
             .build();
     }
 
