@@ -12,34 +12,24 @@ import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 
 export class StatisticsTemplates {
-    static likesIndicator(type: string, reference_id: number, like_count: number, liked: boolean) {
-        const functionMap = {
+    static likesIndicator(type: string, reference_id: number, like_count: number, liked: boolean|Signal<boolean>) {
+        const functionMap: Record<string, Function> = {
             "track": TrackActions.toggleLike,
             "album": AlbumActions.toggleLike,
             "playlist": PlaylistActions.toggleLike,
         };
-        const toggleState = signal(liked);
-        const toggleClass = signal(liked ? "enabled" : "_");
-        const imageState = signal(liked ? Icons.LIKE : Icons.LIKE_OUTLINE);
-        toggleState.onUpdate = (value: boolean) => {
-            if (Util.isLoggedIn()) {
-                toggleClass.value = value ? "enabled" : "_";
-                imageState.value = value ? Icons.LIKE : Icons.LIKE_OUTLINE;
-            }
-        };
-        // @ts-ignore
-        return StatisticsTemplates.toggleIndicator("likes", toggleState, like_count, imageState, reference_id, functionMap[type], [toggleClass]);
+        liked = liked.constructor === Signal ? liked : signal(liked as boolean);
+        const toggleClass = compute((l): string => l ? "enabled" : "_", liked);
+        const imageState = compute(l => l ? Icons.LIKE : Icons.LIKE_OUTLINE, liked);
+
+        return StatisticsTemplates.toggleIndicator("likes", liked, like_count, imageState, reference_id, functionMap[type], [toggleClass]);
     }
 
-    static repostIndicator(reference_id: number, repost_count: number, reposted: boolean) {
-        const toggleState = signal(reposted);
-        const toggleClass = signal(reposted ? "enabled" : "_");
-        toggleState.onUpdate = (value: boolean) => {
-            if (Util.isLoggedIn()) {
-                toggleClass.value = value ? "enabled" : "_";
-            }
-        };
-        return StatisticsTemplates.toggleIndicator("reposts", toggleState, repost_count, Icons.REPOST, reference_id, TrackActions.toggleRepost, [toggleClass]);
+    static repostIndicator(reference_id: number, repost_count: number, reposted: boolean|Signal<boolean>) {
+        reposted = reposted.constructor === Signal ? reposted : signal(reposted as boolean);
+        const toggleClass = compute((r): string => r ? "enabled" : "_", reposted);
+
+        return StatisticsTemplates.toggleIndicator("reposts", reposted, repost_count, Icons.REPOST, reference_id, TrackActions.toggleRepost, [toggleClass]);
     }
 
     static toggleIndicator(stats_type: string, toggleObservable: Signal<boolean>, count: number, icon: StringOrSignal, reference_id = -1, clickFunc: Function = () => {}, extraClasses: StringOrSignal[] = []) {

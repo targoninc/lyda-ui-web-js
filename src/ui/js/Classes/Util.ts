@@ -8,9 +8,11 @@ import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {MediaFileType} from "../Enums/MediaFileType.ts";
 import {User} from "../Models/DbModels/lyda/User.ts";
 import {currentUser, dragging} from "../state.ts";
-import {Signal} from "../../fjsc/src/signals.ts";
+import {compute, Signal} from "../../fjsc/src/signals.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {Comment} from "../Models/DbModels/lyda/Comment.ts";
+import {Likable} from "../Models/Likable.ts";
+import {Track} from "../Models/DbModels/lyda/Track.ts";
 
 export class Util {
     static capitalizeFirstLetter(string: string) {
@@ -264,6 +266,22 @@ export class Util {
             return false;
         }
         return array.some((e) => e[property] === currentUser.value!.id);
+    }
+
+    static userHasLiked(entity: Likable) {
+        return compute(u => !!(u && entity.likes?.some(l => l.user_id === u.id)), currentUser);
+    }
+
+    static userHasReposted(entity: Track) {
+        return compute(u => !!(u && entity.reposts?.some(r => r.user_id === u.id)), currentUser);
+    }
+
+    static userIsFollowing(user: User) {
+        return compute(u => !!(u && user.follows?.some(f => f.following_user_id === u.id)), currentUser);
+    }
+
+    static userIsFollowedBy(user: User) {
+        return compute(u => !!(u && user.follows?.some(f => f.user_id === u.id)), currentUser);
     }
 
     static async getUserByNameAsync(name: string) {

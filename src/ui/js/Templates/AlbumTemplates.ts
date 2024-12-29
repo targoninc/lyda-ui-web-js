@@ -264,7 +264,7 @@ export class AlbumTemplates {
                             .classes("flex-v", "small-gap")
                             .children(
                                 AlbumTemplates.title(album.title, album.id, icons),
-                                UserTemplates.userWidget(album.user, Util.arrayPropertyMatchesUser(album.user.follows ?? [], "following_user_id"), [], [], UserWidgetContext.card),
+                                UserTemplates.userWidget(album.user, Util.userIsFollowing(album.user), [], [], UserWidgetContext.card),
                                 create("span")
                                     .classes("date", "text-small", "nopointer", "color-dim")
                                     .text(Time.ago(album.release_date))
@@ -274,8 +274,7 @@ export class AlbumTemplates {
                 create("div")
                     .classes("stats-container", "flex", "rounded")
                     .children(
-                        StatisticsTemplates.likesIndicator("album", album.id, album.likes.length,
-                            Util.arrayPropertyMatchesUser(album.likes, "user_id")),
+                        StatisticsTemplates.likesIndicator("album", album.id, album.likes.length, Util.userHasLiked(album)),
                         StatisticsTemplates.likeListOpener(album.likes),
                     ).build()
             ).build();
