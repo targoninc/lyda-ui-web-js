@@ -16,7 +16,8 @@ import {InputType} from "../../fjsc/src/Types.ts";
 export class CommentTemplates {
     static moderatableComment(comment: Comment, comments: Signal<Comment[]>) {
         return create("div")
-            .classes("flex-v")
+            .classes("flex-v", "comment-in-list")
+            .id(comment.id)
             .children(
                 create("div")
                     .classes("flex", "align-children")
@@ -27,6 +28,14 @@ export class CommentTemplates {
                             classes: ["positive"],
                             onclick: async () => {
                                 window.open(window.location.origin + "/track/" + comment.track_id);
+                            }
+                        }),
+                        FJSC.button({
+                            text: "Delete comment",
+                            icon: { icon: "delete" },
+                            classes: ["negative"],
+                            onclick: async () => {
+                                await TrackActions.deleteComment(comment.id, comments);
                             }
                         }),
                         FJSC.toggle({

@@ -90,6 +90,7 @@ export class TrackActions {
                     noComments.classList.remove("hidden");
                 }
             }
+            notify("Comment deleted", NotificationType.success);
         }, () => {
         }, Icons.WARNING);
     }
