@@ -132,10 +132,8 @@ export class ApiRoutes {
     private static commentActions = ApiRoutes.comments + "/actions";
     static newComment = ApiRoutes.commentActions + "/new";
     static deleteComment = ApiRoutes.commentActions + "/delete";
-    static hideComment = ApiRoutes.commentActions + "/hide";
-    static unhideComment = ApiRoutes.commentActions + "/unhide";
-    static markCommentSafe = ApiRoutes.commentActions + "/markSafe";
-    static markCommentUnsafe = ApiRoutes.commentActions + "/markUnsafe";
+    static setCommentPotentiallyHarmful = ApiRoutes.commentActions + "/setPotentiallyHarmful";
+    static setCommentHidden = ApiRoutes.commentActions + "/setHidden";
     // endregion
 
     // region Statistics

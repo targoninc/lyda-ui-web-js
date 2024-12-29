@@ -15,7 +15,7 @@ import {InputType} from "../../fjsc/src/Types.ts";
 
 export class CommentTemplates {
     static moderatableComment(comment: Comment, comments: Signal<Comment[]>) {
-        const el = create("div")
+        return create("div")
             .classes("flex")
             .children(
                 create("div")
@@ -26,32 +26,34 @@ export class CommentTemplates {
                 create("div")
                     .classes("flex-v")
                     .children(
-                        FJSC.button({
-                            text: "Approve",
-                            icon: {icon: "check"},
-                            classes: ["positive"],
-                            onclick: async () => {
-                                const success = await CommentActions.markSafe(comment.id);
-                                if (success) {
-                                    el.remove();
-                                }
+                        FJSC.toggle({
+                            text: "Potentially harmful",
+                            checked: comment.potentially_harmful,
+                            onchange: async (v) => {
+                                await CommentActions.setPotentiallyHarmful(comment.id, v);
+                                comments.value = comments.value.map(c => {
+                                    if (c.id === comment.id) {
+                                        c.potentially_harmful = v;
+                                    }
+                                    return c;
+                                });
                             }
                         }),
-                        FJSC.button({
-                            text: "Hide",
-                            icon: {icon: "close"},
-                            classes: ["negative"],
-                            onclick: async () => {
-                                const success = await CommentActions.hideComment(comment.id);
-                                if (success) {
-                                    el.remove();
-                                }
+                        FJSC.toggle({
+                            text: "Hidden",
+                            checked: comment.hidden,
+                            onchange: async (v) => {
+                                await CommentActions.setHidden(comment.id, v);
+                                comments.value = comments.value.map(c => {
+                                    if (c.id === comment.id) {
+                                        c.hidden = v;
+                                    }
+                                    return c;
+                                });
                             }
                         }),
                     ).build()
             ).build();
-
-        return el;
     }
 
     static async moderatableCommentsPage() {
@@ -239,7 +241,7 @@ export class CommentTemplates {
                 create("div")
                     .classes("flex", "comment_body")
                     .children(
-                        CommentTemplates.commentContent(comment, true),
+                        CommentTemplates.commentContent(comment),
                         ifjs(Util.isLoggedIn(), create("div")
                             .classes("flex")
                             .children(
@@ -275,23 +277,33 @@ export class CommentTemplates {
             ).build();
     }
 
-    static commentContent(comment: Comment, fullWidth = false) {
+    static commentContent(comment: Comment) {
         if (comment.hidden) {
+            const contentShown = signal(false);
+
             return create("div")
-                .classes("flex", "hoverable", "hidden-comment", "rounded", "padded")
+                .classes("text", "comment_content", "text-small", "flex", "noflexwrap", "fullWidth")
                 .children(
-                    create("img")
-                        .classes("inline-icon")
-                        .src(Icons.WARNING)
-                        .build(),
-                    create("i")
-                        .classes("text", "comment_content", "text-small")
-                        .text(comment.content)
-                        .build()
+                    ifjs(contentShown, create("div")
+                        .classes("color-dim", "flex", "noflexwrap", "fullWidth")
+                        .onclick(() => {
+                            contentShown.value = !contentShown.value;
+                        }).children(
+                            GenericTemplates.icon(Icons.WARNING, true),
+                            create("i")
+                                .classes("text", "comment_content", "text-small", "fullWidth")
+                                .text("This comment has been hidden. Click to show anyway.")
+                                .build()
+                        ).build(), true),
+                    ifjs(contentShown, create("span")
+                        .onclick(() => {
+                            contentShown.value = !contentShown.value;
+                        }).text(comment.content)
+                        .build())
                 ).build();
         } else {
             return create("span")
-                .classes("text", "comment_content", "text-small", fullWidth ? "fullWidth" : "")
+                .classes("text", "comment_content", "text-small", "fullWidth")
                 .text(comment.content)
                 .build();
         }
