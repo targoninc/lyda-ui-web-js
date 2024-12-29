@@ -16,16 +16,19 @@ import {InputType} from "../../fjsc/src/Types.ts";
 export class CommentTemplates {
     static moderatableComment(comment: Comment, comments: Signal<Comment[]>) {
         return create("div")
-            .classes("flex")
+            .classes("flex-v")
             .children(
                 create("div")
-                    .classes("card")
+                    .classes("flex", "align-children")
                     .children(
-                        CommentTemplates.commentInList(comment, comments),
-                    ).build(),
-                create("div")
-                    .classes("flex-v")
-                    .children(
+                        FJSC.button({
+                            text: "Open track",
+                            icon: { icon: "open_in_new" },
+                            classes: ["positive"],
+                            onclick: async () => {
+                                window.open(window.location.origin + "/track/" + comment.track_id);
+                            }
+                        }),
                         FJSC.toggle({
                             text: "Potentially harmful",
                             checked: comment.potentially_harmful,
@@ -52,7 +55,12 @@ export class CommentTemplates {
                                 });
                             }
                         }),
-                    ).build()
+                    ).build(),
+                create("div")
+                    .classes("card")
+                    .children(
+                        CommentTemplates.commentInList(comment, comments),
+                    ).build(),
             ).build();
     }
 
