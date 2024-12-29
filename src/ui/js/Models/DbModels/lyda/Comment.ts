@@ -1,6 +1,7 @@
 import {User} from "./User.ts";
 
 export interface Comment {
+    comments?: Comment[];
     user?: User;
     canEdit?: boolean;
     id: number;

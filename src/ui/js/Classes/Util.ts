@@ -10,6 +10,7 @@ import {User} from "../Models/DbModels/lyda/User.ts";
 import {currentUser, dragging} from "../state.ts";
 import {Signal} from "../../fjsc/src/signals.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
+import {Comment} from "../Models/DbModels/lyda/Comment.ts";
 
 export class Util {
     static capitalizeFirstLetter(string: string) {
@@ -345,60 +346,6 @@ export class Util {
         return obj;
     }
 
-    /**
-     * Uses a timeout to wait for the DOM to be ready before nesting the comments
-     * If a comment has a parent_id, it will be nested under the parent comment if that exists
-     */
-    static nestCommentElementsByParents() {
-        setTimeout(() => {
-            const commentList = document.querySelectorAll(".comment-list");
-            commentList.forEach((c) => {
-                Util.nestCommentElementsByCommentList(c);
-            });
-        }, 100);
-    }
-
-    /**
-     * Nest comments by their parent_id recursively
-     */
-    static nestCommentElementsByCommentList(commentList: HTMLElement) {
-        const comments = commentList.querySelectorAll(".comment-in-list");
-        const commentMap = {};
-        comments.forEach((c) => {
-            const id = c.getAttribute("id");
-            let parentId = c.getAttribute("parent_id");
-            if (parentId === "null") {
-                parentId = 0;
-            }
-            if (commentMap[parentId] === undefined) {
-                commentMap[parentId] = [];
-            }
-            commentMap[parentId].push(id);
-        });
-        const nestComments = (parentId) => {
-            if (commentMap[parentId] === undefined) {
-                return;
-            }
-            commentMap[parentId].forEach((id) => {
-                const comment = document.querySelector(".comment-in-list[id='" + id + "']");
-                let parentComment = document.querySelector(".comment-in-list[id='" + parentId + "']");
-                let removeOriginal = false;
-                if (parentComment === null) {
-                    parentComment = commentList;
-                    removeOriginal = true;
-                } else {
-                    parentComment = parentComment.querySelector(".comment-children");
-                }
-                if (removeOriginal) {
-                    comment.remove();
-                }
-                parentComment.appendChild(comment);
-                nestComments(id);
-            });
-        };
-        nestComments(0);
-    }
-
     static getUserIdFromEvent(e: Event) {
         const userId = target(e).getAttribute("user_id");
         if (userId === null) {
@@ -436,6 +383,37 @@ export class Util {
         link.href = "data:text/plain;charset=utf-8," + encodeURIComponent(content);
         link.download = fileName;
         link.click();
+    }
+
+    static nestComments(comments: Comment[]): Comment[] {
+        const commentMap: Record<number, Comment[]> = {};
+
+        // Step 1: Create a map with parent as key and child comments as the value
+        comments.forEach((comment) => {
+            const parentId = comment.parent_id ?? 0;
+
+            // If the comment has a parent, group it under the parent's id
+            if (!commentMap[parentId]) {
+                commentMap[parentId] = [];
+            }
+            commentMap[parentId].push({ ...comment, comments: [] }); // Ensure comments array exists
+        });
+
+        // Step 2: Recursively nest comments
+        const buildNestedComments = (parentId: number): Comment[] => {
+            if (!commentMap[parentId]) {
+                return [];
+            }
+
+            return commentMap[parentId].map((comment) => {
+                // Assign nested comments recursively
+                comment.comments = buildNestedComments(comment.id);
+                return comment;
+            });
+        };
+
+        // Step 3: Start nesting from root-level comments (parent_id === 0)
+        return buildNestedComments(0);
     }
 }
 

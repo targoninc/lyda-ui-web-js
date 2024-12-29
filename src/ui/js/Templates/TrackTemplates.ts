@@ -738,7 +738,7 @@ export class TrackTemplates {
                 create("div")
                     .classes("flex")
                     .children(
-                        CommentTemplates.commentListFullWidth(track.id, comments, user, showComments)
+                        CommentTemplates.commentListFullWidth(track.id, comments, showComments)
                     ).build(),
                 TrackTemplates.inAlbumsList(track),
                 await TrackTemplates.inPlaylistsList(track)

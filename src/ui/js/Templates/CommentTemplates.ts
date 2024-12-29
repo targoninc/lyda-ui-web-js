@@ -6,7 +6,7 @@ import {UserTemplates} from "./UserTemplates.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
-import {create, ifjs, signalMap} from "../../fjsc/src/f2.ts";
+import {AnyElement, create, ifjs, signalMap} from "../../fjsc/src/f2.ts";
 import {User} from "../Models/DbModels/lyda/User.ts";
 import {Comment} from "../Models/DbModels/lyda/Comment.ts";
 import {FJSC} from "../../fjsc";
@@ -24,7 +24,7 @@ export class CommentTemplates {
                 create("div")
                     .classes("card")
                     .children(
-                        CommentTemplates.commentInList(comment, comments, user),
+                        CommentTemplates.commentInList(comment, comments),
                     ).build(),
                 create("div")
                     .classes("flex-v")
@@ -56,14 +56,9 @@ export class CommentTemplates {
             .build();
     }
 
-    static commentListFullWidth(track_id: number, comments: Signal<Comment[]>, user: User, showComments: Signal<boolean>) {
+    static commentListFullWidth(track_id: number, comments: Signal<Comment[]>, showComments: Signal<boolean>) {
         const hasComments = compute(c => c.length > 0, comments);
-        hasComments.subscribe(() => {
-            Util.nestCommentElementsByParents();
-        });
-        setTimeout(() => {
-            Util.nestCommentElementsByParents();
-        });
+        const nestedComments = compute(c => Util.nestComments(c), comments);
 
         return create("div")
             .classes("listFromStatsIndicator", "move-to-new-row", "comments", "flex-v")
@@ -76,7 +71,7 @@ export class CommentTemplates {
                             .classes("text", "no-comments")
                             .text("No comments yet")
                             .build(), true),
-                        ifjs(hasComments, signalMap(comments, create("div").classes("flex-v", "comment-list"), (comment: Comment) => CommentTemplates.commentInList(comment, comments, user)))
+                        ifjs(hasComments, signalMap(nestedComments, create("div").classes("flex-v", "comment-list"), (comment: Comment) => CommentTemplates.commentInList(comment, comments)))
                     ).build()),
             ).build();
     }
@@ -108,7 +103,7 @@ export class CommentTemplates {
             ).build();
     }
 
-    static commentInList(comment: Comment, comments: Signal<Comment[]>, user: User) {
+    static commentInList(comment: Comment, comments: Signal<Comment[]>): AnyElement {
         let actions = [];
         if (!comment.user) {
             throw new Error(`Comment ${comment.id} has no user`);
@@ -122,7 +117,7 @@ export class CommentTemplates {
             }));
         }
         const avatarState = signal(Images.DEFAULT_AVATAR);
-        if (user.has_avatar) {
+        if (comment.user.has_avatar) {
             Util.getUserAvatar(comment.user_id).then(avatar => {
                 avatarState.value = avatar;
             });
@@ -182,6 +177,7 @@ export class CommentTemplates {
                     ).build(),
                 create("div")
                     .classes("comment-children")
+                    .children(...(comment.comments?.map(c => CommentTemplates.commentInList(c, comments)) ?? []))
                     .build()
             ).build();
     }
