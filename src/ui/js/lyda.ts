@@ -113,7 +113,7 @@ export class Lyda {
                     navigate("explore");
                     return;
                 }
-                document.title = data.title;
+                document.title = data.track.title;
                 await PlayManager.cacheTrackData(data);
                 const trackPage = await TrackTemplates.trackPage(data, user);
                 if (!trackPage) {
@@ -130,7 +130,7 @@ export class Lyda {
                     navigate("explore");
                     return;
                 }
-                document.title = data.title;
+                document.title = data.album.title;
                 element.appendChild(await AlbumTemplates.albumPage(data, user));
                 if (data.error) {
                     element.innerHTML = data.error;
@@ -142,7 +142,7 @@ export class Lyda {
                     navigate("explore");
                     return;
                 }
-                document.title = data.title;
+                document.title = data.playlist.title;
                 element.appendChild(await PlaylistTemplates.playlistPage(data, user));
                 if (data.error) {
                     element.innerHTML = data.error;
