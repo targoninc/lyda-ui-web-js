@@ -127,7 +127,7 @@ export class TrackActions {
             user: user,
             user_id: user.id,
             track_id: track_id,
-            parent_id: parentCommentId ? parentCommentId : createdId,
+            parent_id: parentCommentId ? parentCommentId : null,
             created_at: nowUtc,
             potentially_harmful: false,
             hidden: false,
