@@ -179,12 +179,14 @@ export class SettingsTemplates {
         });
     }
 
-    static qualitySelector(value: StreamingQuality, currentValue$: Signal<StreamingQuality>) {
-        const active$ = compute(c => c === value ? "active" : "_", currentValue$);
+    static qualitySelector(value: StreamingQuality, currentValue$: Signal<StreamingQuality>, actualValue$: Signal<StreamingQuality>) {
+        const active$ = compute(c => c === value ? "active" : "_", actualValue$);
+        const disabled$ = compute(u => value === StreamingQuality.high && (!u || !u.subscription), currentUser);
 
         return FJSC.button(<ButtonConfig>{
             classes: [active$, `quality-selector-${value}`, value === StreamingQuality.high ? "special" : "_"],
             text: value.toUpperCase(),
+            disabled: disabled$,
             onclick: async () => {
                 currentValue$.value = value;
                 await UserActions.setStreamingQuality(value);
@@ -212,17 +214,31 @@ export class SettingsTemplates {
     static qualitySection(currentValue: StreamingQuality) {
         const values = Object.values(StreamingQuality);
         const currentValue$ = signal(currentValue);
+        const actualValue = compute((u, v) => {
+            if (!u || !u.subscription) {
+                if (v === StreamingQuality.high) {
+                    return StreamingQuality.medium;
+                }
+            }
+            return v;
+        }, currentUser, currentValue$);
+        const noSubscription = compute(u => !u || !u.subscription, currentUser);
+
         return create("div")
             .classes("card", "flex-v")
             .children(
                 create("h2")
                     .text("Streaming quality")
                     .build(),
+                ifjs(noSubscription, create("div")
+                    .classes("text", "text-small", "color-dim")
+                    .text("High quality is only available with a subscription.")
+                    .build()),
                 create("div")
                     .classes("flex")
                     .children(
-                        ...values.map(value => SettingsTemplates.qualitySelector(value, currentValue$))
-                    ).build(),
+                        ...values.map(value => SettingsTemplates.qualitySelector(value, currentValue$, actualValue))
+                    ).build()
             ).build();
     }
 
