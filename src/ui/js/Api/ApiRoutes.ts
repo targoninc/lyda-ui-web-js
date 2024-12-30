@@ -143,6 +143,7 @@ export class ApiRoutes {
     static getLikesByTrack = ApiRoutes.statistics + "/likesByTrack";
     static getRoyaltiesByMonth = ApiRoutes.statistics + "/royaltiesByMonth";
     static getRoyaltiesByTrack = ApiRoutes.statistics + "/royaltiesByTrack";
+    static getActivityByTime = ApiRoutes.statistics + "/activityByTime";
     static getRoyaltyInfo = ApiRoutes.statistics + "/royaltyInfo";
     // endregion
 

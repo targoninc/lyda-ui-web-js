@@ -166,6 +166,11 @@ export class StatisticTemplates {
         return StatisticTemplates.donutChart(trackNames, likeCounts, "Likes", "Likes by track", "likesByTrackChart", trackColors);
     }
 
+    static activityByTimeChart(labels: string[], values: number[], title: string) {
+        const id = Math.floor(Math.random() * 1000);
+        return StatisticTemplates.barChart(labels, values, title, `${title} by time`, `activityByTimeChart-${id}`, usedColors);
+    }
+
     static royaltyCalculator(royaltyInfo) {
         if (!royaltyInfo.calculatableMonths) {
             return [];
