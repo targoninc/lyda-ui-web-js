@@ -750,6 +750,15 @@ export class LandingPageTemplates {
 
     static lydaBenefits() {
         return create("div")
+            .classes("flex")
+            .children(
+                GenericTemplates.benefit("Transparent royalties", "visibility"),
+                GenericTemplates.benefit("No ads", "ad_group_off"),
+                GenericTemplates.benefit("Social features", "people"),
+            ).build();
+
+        /* Add back marquee when we have more benefits
+        return create("div")
             .classes("marquee")
             .styles("max-width", "min(500px, 100%)")
             .children(
@@ -759,11 +768,8 @@ export class LandingPageTemplates {
                         GenericTemplates.benefit("Transparent royalties", "visibility"),
                         GenericTemplates.benefit("No ads", "ad_group_off"),
                         GenericTemplates.benefit("Social features", "people"),
-                        GenericTemplates.benefit("Transparent royalties", "visibility"),
-                        GenericTemplates.benefit("No ads", "ad_group_off"),
-                        GenericTemplates.benefit("Social features", "people"),
                     ).build()
-            ).build();
+            ).build();*/
     }
 
     static footer() {
