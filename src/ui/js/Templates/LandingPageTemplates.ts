@@ -289,12 +289,6 @@ export class LandingPageTemplates {
                             },
                         }),
                         LandingPageTemplates.passwordInput(password, user, () => step.value = "checking-mfa"),
-                        GenericTemplates.inlineLink(() => {
-                            step.value = "reset-password";
-                        }, "Change/forgot password?", false),
-                        GenericTemplates.inlineLink(() => {
-                            step.value = "register";
-                        }, "Register instead"),
                         FJSC.button({
                             text: "Login",
                             id: "mfaCheckTrigger",
@@ -307,6 +301,12 @@ export class LandingPageTemplates {
                             classes: ["secondary", "positive"]
                         }),
                         FJSC.errorList(errors),
+                        GenericTemplates.inlineLink(() => {
+                            step.value = "reset-password";
+                        }, "Change/forgot password?", false),
+                        GenericTemplates.inlineLink(() => {
+                            step.value = "register";
+                        }, "Register instead"),
                     ).build(),
             ).build();
     }
@@ -704,6 +704,17 @@ export class LandingPageTemplates {
                                         }
                                     }
                                 }),
+                                create("input")
+                                    .classes("hidden")
+                                    .name("password")
+                                    .type(InputType.password)
+                                    .onchange((e) => {
+                                        user.value = {
+                                            ...user.value,
+                                            password: target(e).value
+                                        };
+                                    })
+                                    .build(),
                             ).build(),
                         FJSC.button({
                             text: "Next",
