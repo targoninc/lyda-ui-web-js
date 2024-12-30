@@ -85,7 +85,7 @@ export class TrackEditTemplates {
                             .text("Upload a track")
                             .build(),
                         TrackEditTemplates.upDownButtons(state, true),
-                        TrackEditTemplates.infoSection(state, errorSections, errorFields),
+                        TrackEditTemplates.trackUpload(state, errorSections, errorFields),
                         TrackEditTemplates.uploadButton(state, errorSections, errorFields),
                         TrackEditTemplates.uploadInfo(uploadInfo),
                     ).build(),
@@ -137,7 +137,7 @@ export class TrackEditTemplates {
                     create("p")
                         .text("Edit the track details below")
                         .build(),
-                    TrackEditTemplates.infoSection(state, signal<string[]>([]), signal<string[]>([]), false, false),
+                    TrackEditTemplates.trackEdit(state, signal<string[]>([]), false),
                     create("div")
                         .classes("flex")
                         .children(
@@ -275,7 +275,117 @@ export class TrackEditTemplates {
             ).build();
     }
 
-    static infoSection(state: Signal<UploadableTrack>, errorSections: Signal<string[]>, errorFields: Signal<string[]>, enableTos = true, enableLinkedUsers = true) {
+    static trackEdit(state: Signal<UploadableTrack>, errorSections: Signal<string[]>, enableLinkedUsers = true) {
+        const isPrivate = compute((s) => s.visibility === "private", state);
+
+        return create("div")
+            .classes("flex-v")
+            .children(
+                TrackEditTemplates.sectionCard("Track Details", errorSections, "info", [
+                    create("div")
+                        .classes("flex")
+                        .children(
+                            FJSC.toggle({
+                                name: "visibility",
+                                label: "Private",
+                                text: "Private",
+                                checked: isPrivate,
+                                onchange: (v) => {
+                                    state.value = { ...state.value, visibility: v ? "private" : "public" };
+                                }
+                            }),
+                        ).build(),
+                    FJSC.input<string>({
+                        type: InputType.text,
+                        required: true,
+                        name: "title",
+                        label: "Title*",
+                        placeholder: "Track title",
+                        value: compute(s => s.title, state),
+                        onchange: (v) => {
+                            state.value = { ...state.value, title: v };
+                        }
+                    }),
+                    FJSC.input<string>({
+                        type: InputType.text,
+                        name: "credits",
+                        label: "Collaborators",
+                        placeholder: "John Music, Alice Frequency",
+                        value: compute(s => s.credits, state),
+                        onchange: (v) => {
+                            state.value = { ...state.value, credits: v };
+                        }
+                    }),
+                    ifjs(enableLinkedUsers, TrackEditTemplates.linkedUsers(state.value.collaborators, state)),
+                    FJSC.input<string>({
+                        type: InputType.date,
+                        name: "release_date",
+                        label: "Release Date",
+                        placeholder: "YYYY-MM-DD",
+                        value: compute(s => s.release_date.toISOString().split("T")[0], state),
+                        onchange: (v) => {
+                            state.value = { ...state.value, release_date: new Date(v) };
+                        }
+                    }),
+                    FormTemplates.genre(state),
+                    FJSC.input<string>({
+                        type: InputType.text,
+                        name: "isrc",
+                        label: "ISRC",
+                        placeholder: "QZNWX2227540",
+                        value: compute(s => s.isrc, state),
+                        onchange: (v) => {
+                            state.value = { ...state.value, isrc: v };
+                        }
+                    }),
+                    FJSC.input<string>({
+                        type: InputType.text,
+                        name: "upc",
+                        label: "UPC",
+                        placeholder: "00888072469600",
+                        value: compute(s => s.upc, state),
+                        onchange: (v) => {
+                            state.value = { ...state.value, upc: v };
+                        }
+                    }),
+                    FJSC.textarea({
+                        name: "description",
+                        label: "Description",
+                        placeholder: "My cool track",
+                        value: compute(s => s.description, state),
+                        onchange: (v) => {
+                            state.value = { ...state.value, description: v };
+                        }
+                    }),
+                ], "info", ["flex-grow"]),
+                create("div")
+                    .classes("flex-v")
+                    .children(
+                        TrackEditTemplates.sectionCard("Monetization", errorSections, "monetization", [
+                            TrackEditTemplates.monetization(),
+                            FJSC.input<number>({
+                                type: InputType.number,
+                                name: "price",
+                                label: "Minimum track price in USD",
+                                placeholder: "1$",
+                                value: compute(s => s.price, state),
+                                validators: [
+                                    (v) => {
+                                        if (v < 0) {
+                                            return ["Minimum track price must be a positive number"];
+                                        }
+                                    }
+                                ],
+                                onchange: (v) => {
+                                    state.value = { ...state.value, price: v };
+                                }
+                            }),
+                        ], "attach_money"),
+                    ).build()
+            ).build();
+    }
+
+    static trackUpload(state: Signal<UploadableTrack>, errorSections: Signal<string[]>, errorFields: Signal<string[]>, enableTos = true, enableLinkedUsers = true) {
         const isPrivate = compute((s) => s.visibility === "private", state);
 
         return create("div")

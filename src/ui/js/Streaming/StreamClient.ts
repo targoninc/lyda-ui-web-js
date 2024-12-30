@@ -10,9 +10,9 @@ export class StreamClient {
     duration: number;
     playing: boolean;
 
-    constructor(id: number) {
+    constructor(id: number, code: string) {
         this.id = id;
-        const src = compute(q => `${ApiRoutes.getTrackAudio}?id=${this.id}&quality=${q}`, currentQuality);
+        const src = compute(q => `${ApiRoutes.getTrackAudio}?id=${this.id}&quality=${q}&code=${code}`, currentQuality);
         this.audio = create("audio")
             .attributes("crossOrigin", "anonymous")
             .attributes("preload", "auto")

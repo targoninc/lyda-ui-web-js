@@ -80,3 +80,5 @@ loopMode.subscribe((newMode, changed) => {
     }
     LydaCache.set("loopMode", new CacheItem(newMode));
 });
+
+export const currentSecretCode = signal<string>("");

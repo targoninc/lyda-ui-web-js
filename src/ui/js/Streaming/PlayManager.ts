@@ -5,7 +5,7 @@ import {StreamingUpdater} from "./StreamingUpdater.ts";
 import {QueueManager} from "./QueueManager.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
 import {StreamClient} from "./StreamClient.ts";
-import {userHasSettingValue, Util} from "../Classes/Util.ts";
+import {getErrorMessage, userHasSettingValue, Util} from "../Classes/Util.ts";
 import {notify} from "../Classes/Ui.ts";
 import {Track} from "../Models/DbModels/lyda/Track.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
@@ -18,7 +18,7 @@ import {
     playingHere,
     currentTrackPosition,
     loopMode,
-    muted
+    muted, currentSecretCode
 } from "../state.ts";
 import {PlayingFrom} from "../Models/PlayingFrom.ts";
 import {StreamingBroadcaster, StreamingEvent} from "./StreamingBroadcaster.ts";
@@ -120,7 +120,7 @@ export class PlayManager {
     static addStreamClientIfNotExists(id: number, duration: number) {
         let streamClient;
         if (PlayManager.getStreamClient(id) === undefined) {
-            streamClient = new StreamClient(id);
+            streamClient = new StreamClient(id, currentSecretCode.value);
             PlayManager.addStreamClient(id, streamClient);
         } else {
             streamClient = PlayManager.getStreamClient(id);
@@ -384,6 +384,7 @@ export class PlayManager {
         const res = await Api.getAsync<{ track: Track }>(ApiRoutes.getTrackById, {id});
         if (res.code !== 200) {
             await PlayManager.removeTrackFromAllStates(id);
+            notify(`Failed to get track data for ${id}: ${getErrorMessage(res)}`, NotificationType.error);
             throw new Error(`Failed to get track data for ${id}: ${res.data.error}`);
         }
         await PlayManager.cacheTrackData(res.data);

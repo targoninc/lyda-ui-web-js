@@ -33,7 +33,7 @@ import {Log} from "./Models/DbModels/lyda/Log.ts";
 import {NotificationType} from "./Enums/NotificationType.ts";
 import {AvailableSubscription} from "./Models/DbModels/finance/AvailableSubscription.ts";
 import {Subscription} from "./Models/DbModels/finance/Subscription.ts";
-import {currentUser} from "./state.ts";
+import {currentSecretCode, currentUser} from "./state.ts";
 
 export class Lyda {
     static async getEndpointData(endpoint: string, params = "") {
@@ -113,7 +113,12 @@ export class Lyda {
                     navigate("explore");
                     return;
                 }
+                if (data.error) {
+                    notify(data.error, NotificationType.error);
+                    return;
+                }
                 document.title = data.track.title;
+                currentSecretCode.value = params.code;
                 await PlayManager.cacheTrackData(data);
                 const trackPage = await TrackTemplates.trackPage(data, user);
                 if (!trackPage) {
