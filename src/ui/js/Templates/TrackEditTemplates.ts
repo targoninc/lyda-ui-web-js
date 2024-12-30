@@ -28,6 +28,8 @@ import {UploadInfo} from "../Models/UploadInfo.ts";
 import {ProgressPart} from "../Models/ProgressPart.ts";
 import {AlbumActions} from "../Actions/AlbumActions.ts";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
+import {reload} from "../Routing/Router.ts";
+import {PlayManager} from "../Streaming/PlayManager.ts";
 
 export class TrackEditTemplates {
     static getStateWithParentUpdate(key: any, value: any, parentState: Signal<any>) {
@@ -655,5 +657,22 @@ export class TrackEditTemplates {
                         }, ["align-center"])
                     ).build(),
             ).build();
+    }
+
+    static replaceAudioButton(track: Track) {
+        const loading = signal(false);
+
+        return FJSC.button({
+            text: "Replace Audio",
+            icon: { icon: "upload" },
+            classes: ["positive"],
+            disabled: loading,
+            onclick: async () => {
+                await TrackActions.replaceAudio(track.id, true, loading, () => {
+                    PlayManager.removeTrackFromAllStates(track.id);
+                    reload();
+                });
+            },
+        });
     }
 }

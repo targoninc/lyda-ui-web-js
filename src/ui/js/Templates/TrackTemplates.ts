@@ -630,7 +630,10 @@ export class TrackTemplates {
         const editActions = [];
         if (trackData.canEdit) {
             editActions.push(TrackEditTemplates.addToAlbumsButton(track));
-            editActions.push(TrackTemplates.copyPrivateLinkButton(track.id, track.secretcode));
+            if (isPrivate) {
+                editActions.push(TrackTemplates.copyPrivateLinkButton(track.id, track.secretcode));
+            }
+            editActions.push(TrackEditTemplates.replaceAudioButton(track));
             editActions.push(TrackEditTemplates.openEditPageButton(track));
             editActions.push(TrackEditTemplates.upDownButtons(trackState));
             editActions.push(TrackEditTemplates.deleteTrackButton(track.id));
@@ -727,8 +730,8 @@ export class TrackTemplates {
                                             .children(
                                                 StatisticsTemplates.likesIndicator("track", track.id, track.likes.length, liked),
                                                 StatisticsTemplates.likeListOpener(track.likes),
-                                                isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, reposted),
-                                                isPrivate ? null : StatisticsTemplates.repostListOpener(track.reposts),
+                                                ifjs(isPrivate, StatisticsTemplates.repostIndicator(track.id, track.reposts.length, reposted), true),
+                                                ifjs(isPrivate, StatisticsTemplates.repostListOpener(track.reposts), true),
                                                 CommentTemplates.commentButton(true, comments, showComments)
                                             ).build(),
                                     ).build()
@@ -942,6 +945,7 @@ export class TrackTemplates {
         return FJSC.button({
             text: "Copy private link",
             icon: { icon: "link" },
+            classes: ["special"],
             onclick: async () => {
                 await Util.copyToClipboard(window.location.origin + "/track/" + id + "/" + code);
             }

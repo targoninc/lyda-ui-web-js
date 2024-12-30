@@ -273,6 +273,36 @@ export class TrackActions {
         fileInput.click();
     }
 
+    static async replaceAudio(id: number, canEdit: boolean, loading: Signal<boolean>, onSuccess: Function = () => {}) {
+        if (!canEdit) {
+            return;
+        }
+        loading.value = true;
+        let fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.accept = "audio/*";
+        fileInput.onchange = async (e) => {
+            const fileTarget = e.target as HTMLInputElement;
+            let file = fileTarget.files![0];
+            if (!file) {
+                loading.value = false;
+                return;
+            }
+            try {
+                await MediaUploader.upload(MediaFileType.audio, id, file);
+                notify("Audio updated", NotificationType.success);
+                onSuccess();
+            } catch (e) {
+                notify("Failed to upload audio", NotificationType.error);
+            }
+            loading.value = false;
+        };
+        fileInput.onabort = () => loading.value = false;
+        fileInput.oncancel = () => loading.value = false;
+        fileInput.onreset = () => loading.value = false;
+        fileInput.click();
+    }
+
     static replyToComment(e: any, trackId: number, commentId: number, username: string, parentCommentId: Signal<number>) {
         const input = document.querySelector(".comment-box-input[track_id='" + trackId.toString() + "']") as HTMLInputElement;
         if (e.target.innerText === "Reply") {
