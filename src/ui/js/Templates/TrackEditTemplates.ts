@@ -149,12 +149,11 @@ export class TrackEditTemplates {
         ], "edit-track");
     }
 
-    static upDownButtons(state: Signal<UploadableTrack|Track>, uploadEnabled = false) {
+    static upDownButtons(state: Signal<any>, uploadEnabled = false) {
         const buttons = [
             FJSC.button({
                 text: "Download Info",
                 icon: { icon: "file_save" },
-                title: "At the moment, linked users are not included in the download. This will be fixed soon™️.",
                 onclick: () => {
                     const json = JSON.stringify(state.value);
                     Util.downloadFile(`${state.value.title}_${Date.now()}.json`, json);
