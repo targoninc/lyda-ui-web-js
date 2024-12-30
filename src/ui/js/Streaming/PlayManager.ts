@@ -162,6 +162,7 @@ export class PlayManager {
             await streamClient.startAsync();
             StreamingBroadcaster.send(StreamingEvent.trackStart, id);
             playingHere.value = true;
+            TrackActions.savePlayAfterTimeIf(id, 5, () => id === currentTrackId.value && PlayManager.isPlaying(id));
         }
 
         await StreamingUpdater.updatePlayState();

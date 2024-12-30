@@ -688,7 +688,7 @@ export class TrackTemplates {
                             .classes("collaborators")
                             .text(track.credits)
                             .build(),
-                        description,
+                        ifjs(track.description.length > 0, description),
                         create("div")
                             .classes("flex")
                             .children(

@@ -25,6 +25,7 @@ import {TrackCollaborator} from "../Models/DbModels/lyda/TrackCollaborator.ts";
 export class TrackActions {
     static async savePlay(id: number) {
         if (!playingHere.value) {
+            console.log("Not saving play because not playing in this tab.");
             return;
         }
         return await Api.postAsync(ApiRoutes.saveTrackPlay, { id, quality: currentQuality.value });
