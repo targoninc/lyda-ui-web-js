@@ -57,12 +57,4 @@ export class FormTemplates {
             classes
         });
     }
-
-    static genre(parentState: Signal<any>) {
-        const genres = Object.values(Genre).map((genre: string) => {
-            return { name: genre, id: genre };
-        }) as SelectOption[];
-        const value = compute((p: any) => p.genre ?? "other", parentState);
-        return FormTemplates.dropDownField("Genre", signal(genres), value);
-    }
 }

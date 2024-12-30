@@ -21,7 +21,7 @@ import {
 import {Track} from "../Models/DbModels/lyda/Track.ts";
 import {FJSC} from "../../fjsc";
 import {User} from "../Models/DbModels/lyda/User.ts";
-import {InputType} from "../../fjsc/src/Types.ts";
+import {InputType, SelectOption} from "../../fjsc/src/Types.ts";
 import {TrackCollaborator} from "../Models/DbModels/lyda/TrackCollaborator.ts";
 import {UploadableTrack} from "../Models/UploadableTrack.ts";
 import {UploadInfo} from "../Models/UploadInfo.ts";
@@ -32,22 +32,9 @@ import {reload} from "../Routing/Router.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
 
 export class TrackEditTemplates {
-    static getStateWithParentUpdate(key: any, value: any, parentState: Signal<any>) {
-        const state = signal(value);
-        state.onUpdate = (newValue) => {
-            if (parentState) parentState.value = {...parentState.value, [key]: newValue};
-        };
-        parentState.onUpdate = (newValue) => {
-            if (newValue[key] !== state.value) {
-                state.value = newValue[key];
-            }
-        };
-        return state;
-    }
-
     static uploadForm(title: string, credits: string, releaseDate: Date, visibility: string, genre: Genre,
                       isrc: string, upc: string, description: string, monetization: boolean, price: number,
-                      linkedUsers: TrackCollaborator[], termsOfService: boolean) {
+                      linkedUsers: TrackCollaborator[]) {
         const state = signal(<UploadableTrack>{
             title: title ?? "",
             credits: credits ?? "",
@@ -162,7 +149,7 @@ export class TrackEditTemplates {
         ], "edit-track");
     }
 
-    static upDownButtons(state: Signal<UploadableTrack>, uploadEnabled = false) {
+    static upDownButtons(state: Signal<UploadableTrack|Track>, uploadEnabled = false) {
         const buttons = [
             FJSC.button({
                 text: "Download Info",
@@ -265,7 +252,7 @@ export class TrackEditTemplates {
             ).build();
     }
 
-    static filesSection(isNewTrack = false, state: Signal<UploadableTrack>, errorSections: Signal<string[]>, errorFields: Signal<string[]>) {
+    static filesSection(isNewTrack = false, state: Signal<UploadableTrack>, errorSections: Signal<string[]>) {
         return create("div")
             .classes("flex-v")
             .children(
@@ -297,94 +284,144 @@ export class TrackEditTemplates {
                                 }
                             }),
                         ).build(),
-                    FJSC.input<string>({
-                        type: InputType.text,
-                        required: true,
-                        name: "title",
-                        label: "Title*",
-                        placeholder: "Track title",
-                        value: compute(s => s.title, state),
-                        onchange: (v) => {
-                            state.value = { ...state.value, title: v };
-                        }
-                    }),
-                    FJSC.input<string>({
-                        type: InputType.text,
-                        name: "credits",
-                        label: "Collaborators",
-                        placeholder: "John Music, Alice Frequency",
-                        value: compute(s => s.credits, state),
-                        onchange: (v) => {
-                            state.value = { ...state.value, credits: v };
-                        }
-                    }),
+                    TrackEditTemplates.titleInput(state),
+                    TrackEditTemplates.creditsInput(state),
+                    TrackEditTemplates.artistNameInput(state),
                     ifjs(enableLinkedUsers, TrackEditTemplates.linkedUsers(state.value.collaborators, state)),
-                    FJSC.input<string>({
-                        type: InputType.date,
-                        name: "release_date",
-                        label: "Release Date",
-                        placeholder: "YYYY-MM-DD",
-                        value: compute(s => s.release_date.toISOString().split("T")[0], state),
-                        onchange: (v) => {
-                            state.value = { ...state.value, release_date: new Date(v) };
-                        }
-                    }),
-                    FormTemplates.genre(state),
-                    FJSC.input<string>({
-                        type: InputType.text,
-                        name: "isrc",
-                        label: "ISRC",
-                        placeholder: "QZNWX2227540",
-                        value: compute(s => s.isrc, state),
-                        onchange: (v) => {
-                            state.value = { ...state.value, isrc: v };
-                        }
-                    }),
-                    FJSC.input<string>({
-                        type: InputType.text,
-                        name: "upc",
-                        label: "UPC",
-                        placeholder: "00888072469600",
-                        value: compute(s => s.upc, state),
-                        onchange: (v) => {
-                            state.value = { ...state.value, upc: v };
-                        }
-                    }),
-                    FJSC.textarea({
-                        name: "description",
-                        label: "Description",
-                        placeholder: "My cool track",
-                        value: compute(s => s.description, state),
-                        onchange: (v) => {
-                            state.value = { ...state.value, description: v };
-                        }
-                    }),
+                    TrackEditTemplates.releaseDateInput(state),
+                    TrackEditTemplates.genreInput(state),
+                    TrackEditTemplates.isrcInput(state),
+                    TrackEditTemplates.upcInput(state),
+                    TrackEditTemplates.descriptionInput(state),
                 ], "info", ["flex-grow"]),
                 create("div")
                     .classes("flex-v")
                     .children(
-                        TrackEditTemplates.sectionCard("Monetization", errorSections, "monetization", [
-                            TrackEditTemplates.monetization(),
-                            FJSC.input<number>({
-                                type: InputType.number,
-                                name: "price",
-                                label: "Minimum track price in USD",
-                                placeholder: "1$",
-                                value: compute(s => s.price, state),
-                                validators: [
-                                    (v) => {
-                                        if (v < 0) {
-                                            return ["Minimum track price must be a positive number"];
-                                        }
-                                    }
-                                ],
-                                onchange: (v) => {
-                                    state.value = { ...state.value, price: v };
-                                }
-                            }),
-                        ], "attach_money"),
+                        TrackEditTemplates.monetizationSection(errorSections, state),
                     ).build()
             ).build();
+    }
+
+    private static monetizationSection(errorSections: Signal<string[]>, state: Signal<UploadableTrack>) {
+        return TrackEditTemplates.sectionCard("Monetization", errorSections, "monetization", [
+            TrackEditTemplates.monetizationInfo(),
+            FJSC.input<number>({
+                type: InputType.number,
+                name: "price",
+                label: "Minimum track price in USD",
+                placeholder: "1$",
+                value: compute(s => s.price, state),
+                validators: [
+                    (v) => {
+                        if (v < 0) {
+                            return ["Minimum track price must be a positive number"];
+                        }
+                    }
+                ],
+                onchange: (v) => {
+                    state.value = {...state.value, price: v};
+                }
+            }),
+        ], "attach_money");
+    }
+
+    private static titleInput(state: Signal<UploadableTrack>) {
+        return FJSC.input<string>({
+            type: InputType.text,
+            required: true,
+            name: "title",
+            label: "Title*",
+            placeholder: "Track title",
+            value: compute(s => s.title, state),
+            onchange: (v) => {
+                state.value = {...state.value, title: v};
+            }
+        });
+    }
+
+    private static creditsInput(state: Signal<UploadableTrack>) {
+        return FJSC.input<string>({
+            type: InputType.text,
+            name: "credits",
+            label: "Collaborators",
+            placeholder: "John Music, Alice Frequency",
+            value: compute(s => s.credits, state),
+            onchange: (v) => {
+                state.value = {...state.value, credits: v};
+            }
+        });
+    }
+
+    private static descriptionInput(state: Signal<UploadableTrack>) {
+        return FJSC.textarea({
+            name: "description",
+            label: "Description",
+            placeholder: "My cool track",
+            value: compute(s => s.description, state),
+            onchange: (v) => {
+                state.value = {...state.value, description: v};
+            }
+        });
+    }
+
+    private static upcInput(state: Signal<UploadableTrack>) {
+        return FJSC.input<string>({
+            type: InputType.text,
+            name: "upc",
+            label: "UPC",
+            placeholder: "00888072469600",
+            value: compute(s => s.upc, state),
+            onchange: (v) => {
+                state.value = {...state.value, upc: v};
+            }
+        });
+    }
+
+    static genreInput(parentState: Signal<UploadableTrack>) {
+        const genres = Object.values(Genre).map((genre: string) => {
+            return { name: genre, id: genre };
+        }) as SelectOption[];
+        const value = compute(p => p.genre ?? "other", parentState);
+        return FormTemplates.dropDownField("Genre", signal(genres), value);
+    }
+
+    private static isrcInput(state: Signal<UploadableTrack>) {
+        return FJSC.input<string>({
+            type: InputType.text,
+            name: "isrc",
+            label: "ISRC",
+            placeholder: "QZNWX2227540",
+            value: compute(s => s.isrc, state),
+            onchange: (v) => {
+                state.value = {...state.value, isrc: v};
+            }
+        });
+    }
+
+    private static releaseDateInput(state: Signal<UploadableTrack>) {
+        return FJSC.input<string>({
+            type: InputType.date,
+            name: "release_date",
+            label: "Release Date",
+            placeholder: "YYYY-MM-DD",
+            value: compute(s => s.release_date.toISOString().split("T")[0], state),
+            onchange: (v) => {
+                state.value = {...state.value, release_date: new Date(v)};
+            }
+        });
+    }
+
+    private static artistNameInput(state: Signal<UploadableTrack>) {
+        return FJSC.input<string>({
+            type: InputType.text,
+            name: "artistname",
+            label: "Artist display name",
+            placeholder: "My other alias",
+            value: compute(s => s.artistname, state),
+            onchange: (v) => {
+                state.value = {...state.value, artistname: v};
+            }
+        });
     }
 
     static trackUpload(state: Signal<UploadableTrack>, errorSections: Signal<string[]>, errorFields: Signal<string[]>, enableTos = true, enableLinkedUsers = true) {
@@ -407,100 +444,28 @@ export class TrackEditTemplates {
                                 }
                             }),
                         ).build(),
-                    FJSC.input<string>({
-                        type: InputType.text,
-                        required: true,
-                        name: "title",
-                        label: "Title*",
-                        placeholder: "Track title",
-                        value: compute(s => s.title, state),
-                        onchange: (v) => {
-                            state.value = { ...state.value, title: v };
-                        }
-                    }),
-                    FJSC.input<string>({
-                        type: InputType.text,
-                        name: "credits",
-                        label: "Collaborators",
-                        placeholder: "John Music, Alice Frequency",
-                        value: compute(s => s.credits, state),
-                        onchange: (v) => {
-                            state.value = { ...state.value, credits: v };
-                        }
-                    }),
+                    TrackEditTemplates.titleInput(state),
+                    TrackEditTemplates.creditsInput(state),
+                    TrackEditTemplates.artistNameInput(state),
                     ifjs(enableLinkedUsers, TrackEditTemplates.linkedUsers(state.value.collaborators, state)),
-                    FJSC.input<string>({
-                        type: InputType.date,
-                        name: "release_date",
-                        label: "Release Date",
-                        placeholder: "YYYY-MM-DD",
-                        value: compute(s => s.release_date.toISOString().split("T")[0], state),
-                        onchange: (v) => {
-                            state.value = { ...state.value, release_date: new Date(v) };
-                        }
-                    }),
-                    FormTemplates.genre(state),
-                    FJSC.input<string>({
-                        type: InputType.text,
-                        name: "isrc",
-                        label: "ISRC",
-                        placeholder: "QZNWX2227540",
-                        value: compute(s => s.isrc, state),
-                        onchange: (v) => {
-                            state.value = { ...state.value, isrc: v };
-                        }
-                    }),
-                    FJSC.input<string>({
-                        type: InputType.text,
-                        name: "upc",
-                        label: "UPC",
-                        placeholder: "00888072469600",
-                        value: compute(s => s.upc, state),
-                        onchange: (v) => {
-                            state.value = { ...state.value, upc: v };
-                        }
-                    }),
-                    FJSC.textarea({
-                        name: "description",
-                        label: "Description",
-                        placeholder: "My cool track",
-                        value: compute(s => s.description, state),
-                        onchange: (v) => {
-                            state.value = { ...state.value, description: v };
-                        }
-                    }),
+                    TrackEditTemplates.releaseDateInput(state),
+                    TrackEditTemplates.genreInput(state),
+                    TrackEditTemplates.isrcInput(state),
+                    TrackEditTemplates.upcInput(state),
+                    TrackEditTemplates.descriptionInput(state),
                 ], "info", ["flex-grow"]),
                 create("div")
                     .classes("flex-v")
                     .children(
-                        TrackEditTemplates.filesSection(true, state, errorSections, errorFields),
-                        TrackEditTemplates.sectionCard("Monetization", errorSections, "monetization", [
-                            TrackEditTemplates.monetization(),
-                            FJSC.input<number>({
-                                type: InputType.number,
-                                name: "price",
-                                label: "Minimum track price in USD",
-                                placeholder: "1$",
-                                value: compute(s => s.price, state),
-                                validators: [
-                                    (v) => {
-                                        if (v < 0) {
-                                            return ["Minimum track price must be a positive number"];
-                                        }
-                                    }
-                                ],
-                                onchange: (v) => {
-                                    state.value = { ...state.value, price: v };
-                                }
-                            }),
-                        ], "attach_money"),
+                        TrackEditTemplates.filesSection(true, state, errorSections),
+                        TrackEditTemplates.monetizationSection(errorSections, state),
                         enableTos ? TrackEditTemplates.sectionCard("Terms of Service", errorSections, "terms", [
                             FJSC.checkbox({
                                 name: "termsOfService",
                                 text: "I have read and agree to the Terms of Service and Privacy Policy*",
                                 checked: compute(s => s.termsOfService, state),
                                 required: true,
-                                onchange: (v) => {
+                                onchange: () => {
                                     const old = state.value;
                                     state.value = { ...old, termsOfService: !old.termsOfService };
                                 }
@@ -510,7 +475,7 @@ export class TrackEditTemplates {
             ).build();
     }
 
-    static sectionCard(title: HtmlPropertyValue, errorSections: Signal<string[]>, id: string, children: TypeOrSignal<(AnyNode|AnyElement|null)>[], icon: string|null = null, classes: StringOrSignal[] = []) {
+    static sectionCard(title: HtmlPropertyValue, errorSections: Signal<string[]>, id: string, children: (TypeOrSignal<DomNode>|TypeOrSignal<AnyElement>|TypeOrSignal<AnyNode>|null)[], icon: string|null = null, classes: StringOrSignal[] = []) {
         const hasError = compute((e: string[]) => e.includes(id), errorSections);
 
         return create("div")
@@ -560,7 +525,7 @@ export class TrackEditTemplates {
             .build();
     }
 
-    static monetization() {
+    static monetizationInfo() {
         return create("span")
             .text("This track will be monetized through streaming subscriptions and available for buying.")
             .build();
@@ -577,7 +542,7 @@ export class TrackEditTemplates {
             text: "Delete",
             icon: { icon: "delete" },
             classes: ["negative"],
-            onclick: async (e) => {
+            onclick: async () => {
                 await Ui.getConfirmationModal("Delete track", "Are you sure you want to delete this track?", "Yes", "No", () => TrackActions.deleteTrack(trackId), () => {
                 }, Icons.WARNING);
             }
@@ -590,13 +555,13 @@ export class TrackEditTemplates {
             id: "add_linked_user",
             icon: { icon: "person_add" },
             classes,
-            onclick: () => {
-                Ui.getAddLinkedUserModal("Link a user", "Enter the username of the user you want to link", "", "Link", "Cancel", callback, () => {}, "person_add");
+            onclick: async () => {
+                await Ui.getAddLinkedUserModal("Link a user", "Enter the username of the user you want to link", "", "Link", "Cancel", callback, () => {}, "person_add");
             },
         });
     }
 
-    static linkedUsers(linkedUsers: Partial<TrackCollaborator>[] = [], parentState: Signal<Track>|null = null) {
+    static linkedUsers(linkedUsers: Partial<TrackCollaborator>[] = [], parentState: Signal<UploadableTrack>|null = null) {
         const linkedUserState = signal(linkedUsers);
         const sendJson = signal(JSON.stringify(linkedUsers));
         const userMap = new Map();

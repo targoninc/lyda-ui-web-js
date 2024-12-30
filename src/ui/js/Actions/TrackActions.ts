@@ -501,6 +501,7 @@ export class TrackActions {
             id: track.id,
             title: track.title,
             collaborators: track.collaborators,
+            artistname: track.artistname,
             description: track.description,
             genre: track.genre,
             release_date: track.release_date,

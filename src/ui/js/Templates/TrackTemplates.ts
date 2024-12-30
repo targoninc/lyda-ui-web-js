@@ -33,7 +33,6 @@ import {CollaboratorType} from "../Models/DbModels/lyda/CollaboratorType.ts";
 import {currentTrackId} from "../state.ts";
 import {PillOption} from "../Models/PillOption.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
-import {UploadableTrack} from "../Models/UploadableTrack.ts";
 
 export class TrackTemplates {
     static trackCard(track: Track, profileId: number) {
@@ -676,7 +675,10 @@ export class TrackTemplates {
                                     .build(),
                                 ...icons,
                             ).build(),
-                        UserTemplates.userWidget(trackUser, Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "following_user_id"), [], [], UserWidgetContext.singlePage),
+                        UserTemplates.userWidget({
+                            ...trackUser,
+                            displayname: track.artistname ?? trackUser.displayname
+                        }, Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "following_user_id"), [], [], UserWidgetContext.singlePage),
                     ).build(),
                 ...toAppend,
                 create("div")
@@ -748,7 +750,7 @@ export class TrackTemplates {
             ).build();
     }
 
-    static collaboratorSection(collaboratorChildren: AnyNode, linkedUserState: Signal<TrackCollaborator[]>) {
+    static collaboratorSection(collaboratorChildren: AnyNode|Signal<AnyElement>, linkedUserState: Signal<TrackCollaborator[]>) {
         const collabText = signal("");
         linkedUserState.subscribe((newCollaborators: TrackCollaborator[]) => {
             collabText.value = newCollaborators.length > 0 ? "Collaborators" : "";

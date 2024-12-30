@@ -22,6 +22,7 @@ export interface Track extends Record<string, any> {
     user_id: number;
     title: string;
     isrc: string;
+    artistname: string;
     upc: string;
     visibility: string;
     credits: string;
