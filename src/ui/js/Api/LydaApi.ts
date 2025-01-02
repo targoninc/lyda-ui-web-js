@@ -14,7 +14,7 @@ export class LydaApi {
         Api.getAsync<Log[]>(ApiRoutes.getLogs, {
             logLevel: filterState.value,
             offset: 0,
-            limit: 100
+            limit: 50
         }).then(logs => {
             LydaApi.handleResponse(logs, errorText, successCallback);
         });
