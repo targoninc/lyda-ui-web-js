@@ -127,7 +127,7 @@ export class LogTemplates {
             .children(
                 create("td")
                     .classes("log-timestamp")
-                    .text(Time.ago(l.time))
+                    .text(Time.agoUpdating(new Date(l.time)))
                     .build(),
                 create("td")
                     .classes("log-host", "color-dim")
