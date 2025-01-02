@@ -6,6 +6,7 @@ import {Time} from "../Classes/Helpers/Time.ts";
 import {compute, signal, Signal} from "../../fjsc/src/signals.ts";
 import {AvailableSubscription} from "../Models/DbModels/finance/AvailableSubscription.ts";
 import {Subscription} from "../Models/DbModels/finance/Subscription.ts";
+import {SubscriptionStatus} from "../Enums/SubscriptionStatus.ts";
 
 export class SubscriptionTemplates {
     static page(currency: string, options: Signal<AvailableSubscription[]>, currentSubscription: Signal<Subscription | null>) {
@@ -64,8 +65,9 @@ export class SubscriptionTemplates {
     }
 
     static option(currentSubscription: Signal<Subscription | null>, selectedOption: Signal<number | null>, currency: string, option: AvailableSubscription) {
-        const active = compute(sub => sub && sub.subscription_id === option.id, currentSubscription);
-        const enabled = compute(a => !a, active);
+        const active = compute(sub => sub && sub.subscription_id === option.id && sub.status === SubscriptionStatus.active, currentSubscription);
+        const pending = compute(sub => sub && sub.subscription_id === option.id && sub.status === SubscriptionStatus.pending, currentSubscription);
+        const enabled = compute((a, p) => !a && !p, active, pending);
         const activeClass = compute((a): string => a ? "active" : "_", active);
         const isSelectedOption = compute(selected => selected === option.id, selectedOption);
         const selectedClass = compute((s): string => s === option.id ? "selected" : "_", selectedOption);
@@ -80,6 +82,7 @@ export class SubscriptionTemplates {
             .classes("flex-v", "card", "relative", "subscription-option", selectedClass, activeClass)
             .children(
                 ifjs(active, GenericTemplates.checkInCorner("This subscription is active")),
+                ifjs(pending, GenericTemplates.checkInCorner("This subscription is pending", ["warning"])),
                 create("div")
                     .classes("flex-v", "space-outwards")
                     .children(

@@ -857,9 +857,9 @@ export class GenericTemplates {
         });
     }
 
-    static checkInCorner(title = "") {
+    static checkInCorner(title = "", extraClasses: string[] = []) {
         return create("img")
-            .classes("corner-check")
+            .classes("corner-check", ...extraClasses)
             .title(title)
             .src(Icons.CHECK)
             .build();

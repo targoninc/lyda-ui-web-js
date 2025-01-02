@@ -233,10 +233,19 @@ export class LogTemplates {
 
     static logsPage() {
         const filterState = signal(LogLevel.debug);
+        const refreshOnInterval = signal(false);
         const logsList = signal<AnyElement>(create("div").build());
-        LydaApi.getLogs(filterState, async (logs: Log[]) => {
-            logsList.value = LogTemplates.logs(logs);
-        });
+        const refresh = () => {
+            LydaApi.getLogs(filterState, async (logs: Log[]) => {
+                logsList.value = LogTemplates.logs(logs);
+            });
+        };
+        setInterval(() => {
+            if (refreshOnInterval.value) {
+                refresh();
+            }
+        }, 1000 * 5);
+        refresh();
 
         return create("div")
             .classes("flex-v")
@@ -251,11 +260,17 @@ export class LogTemplates {
                             classes: ["positive"],
                             onclick: async () => {
                                 logsList.value = create("div").build();
-                                LydaApi.getLogs(filterState, async (logs: Log[]) => {
-                                    logsList.value = LogTemplates.logs(logs);
-                                });
+                                refresh();
                             }
-                        })
+                        }),
+                        FJSC.toggle({
+                            text: "Auto-refresh",
+                            id: "auto-refresh",
+                            checked: refreshOnInterval,
+                            onchange: (v) => {
+                                refreshOnInterval.value = v;
+                            }
+                        }),
                     ).build(),
                 logsList
             ).build();
