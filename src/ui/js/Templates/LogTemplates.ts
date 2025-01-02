@@ -4,7 +4,7 @@ import {GenericTemplates} from "./GenericTemplates.ts";
 import {Util} from "../Classes/Util.ts";
 import {AnyElement, create, ifjs} from "../../fjsc/src/f2.ts";
 import {User} from "../Models/DbModels/lyda/User.ts";
-import {signal, Signal} from "../../fjsc/src/signals.ts";
+import {compute, signal, Signal} from "../../fjsc/src/signals.ts";
 import {PillOption} from "../Models/PillOption.ts";
 import {LogLevel} from "../Enums/LogLevel.ts";
 import {Log} from "../Models/DbModels/lyda/Log.ts";
@@ -121,13 +121,15 @@ export class LogTemplates {
 
     private static logEntry(logLevelMap: Record<number, string>, l: Log) {
         const type = logLevelMap[l.logLevel].toLowerCase();
+        const ago = Time.agoUpdating(new Date(l.time), true);
+        const timestamp = compute(t => Time.toTimeString(l.time) + " | " + t, ago);
 
         return create("tr")
             .classes("log", type)
             .children(
                 create("td")
                     .classes("log-timestamp")
-                    .text(Time.agoUpdating(new Date(l.time)))
+                    .text(timestamp)
                     .build(),
                 create("td")
                     .classes("log-host", "color-dim")

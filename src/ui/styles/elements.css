@@ -816,6 +816,8 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .log-timestamp {
     text-wrap: nowrap;
+    font-family: monospace;
+    font-size: var(--font-size-small);
 }
 
 .search-result-type.album {
