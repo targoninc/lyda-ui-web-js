@@ -67,3 +67,15 @@ button.positive:hover {
 .audio-player-buffer-indicator {
     background: var(--color-6);
 }
+
+.fixed-bar {
+    box-shadow: 0 10px 20px 7px var(--color-7);
+}
+
+th {
+    background: var(--color-3);
+}
+
+tr:hover {
+    background: var(--color-9);
+}
