@@ -797,6 +797,22 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     font-size: 12px;
 }
 
+.search-result-type.album {
+    background: color-mix(in oklab, var(--color-1), transparent 50%);
+}
+
+.search-result-type.user {
+    background: color-mix(in oklab, var(--red), transparent 50%);
+}
+
+.search-result-type.playlist {
+    background: color-mix(in oklab, var(--green), transparent 50%)
+}
+
+.search-result-type.track {
+    background: color-mix(in oklab, var(--blue), transparent 50%);
+}
+
 .log > td:first-child {
     --log-color: var(--blue);
     border-left: 5px solid var(--log-color);
@@ -818,22 +834,6 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     text-wrap: nowrap;
     font-family: monospace;
     font-size: var(--font-size-small);
-}
-
-.search-result-type.album {
-    background: color-mix(in oklab, var(--color-1), transparent 50%);
-}
-
-.search-result-type.user {
-    background: color-mix(in oklab, var(--red), transparent 50%);
-}
-
-.search-result-type.playlist {
-    background: color-mix(in oklab, var(--green), transparent 50%)
-}
-
-.search-result-type.track {
-    background: color-mix(in oklab, var(--blue), transparent 50%);
 }
 
 .tab {
