@@ -35,6 +35,7 @@ import {router} from "../../main.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 import {currentUser} from "../state.ts";
 import {Follow} from "../Models/DbModels/lyda/Follow.ts";
+import {Ui} from "../Classes/Ui.ts";
 
 export class UserTemplates {
     static userWidget(user: User|Signal<User|null>, following: boolean|Signal<boolean>, extraAttributes: HtmlPropertyValue[] = [], extraClasses: StringOrSignal[] = [], context: UserWidgetContext = UserWidgetContext.unknown) {
@@ -300,6 +301,7 @@ export class UserTemplates {
                 .classes("banner-container", "relative", isOwnProfile ? "clickable" : "_", isOwnProfile ? "blurOnParentHover" : "_")
                 .onclick(async e => {
                     if (!isOwnProfile) {
+                        Ui.showImageModal(userBanner);
                         return;
                     }
                     await UserActions.replaceBanner(e, user, userBanner, bannerLoading);
@@ -332,7 +334,13 @@ export class UserTemplates {
                     .children(
                         create("div")
                             .classes("avatar-container", "relative", isOwnProfile ? "pointer" : "_")
-                            .onclick(() => UserActions.replaceAvatar(user, userAvatar, avatarLoading).then())
+                            .onclick(() => {
+                                if (!isOwnProfile) {
+                                    Ui.showImageModal(userAvatar);
+                                    return;
+                                }
+                                UserActions.replaceAvatar(user, userAvatar, avatarLoading).then()
+                            })
                             .onmouseover(() => {
                                 if (!isOwnProfile) {
                                     return;
