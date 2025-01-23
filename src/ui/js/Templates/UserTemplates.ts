@@ -298,8 +298,12 @@ export class UserTemplates {
         let bannerDeleteButton = UserTemplates.bannerDeleteButton(user, userBanner, bannerLoading);
         const bannerContainer = create("div")
                 .classes("banner-container", "relative", isOwnProfile ? "clickable" : "_", isOwnProfile ? "blurOnParentHover" : "_")
-                .attributes("isOwnProfile", isOwnProfile.toString())
-                .onclick(e => UserActions.replaceBanner(e, user, userBanner, bannerLoading))
+                .onclick(async e => {
+                    if (!isOwnProfile) {
+                        return;
+                    }
+                    await UserActions.replaceBanner(e, user, userBanner, bannerLoading);
+                })
                 .children(
                     create("img")
                         .classes("nopointer", "user-banner", "banner-image")
@@ -325,11 +329,9 @@ export class UserTemplates {
                     .build()),
                 create("div")
                     .classes("header-info-container", "flex")
-                    .attributes("isOwnProfile", isOwnProfile.toString())
                     .children(
                         create("div")
                             .classes("avatar-container", "relative", isOwnProfile ? "pointer" : "_")
-                            .attributes("isOwnProfile", isOwnProfile.toString())
                             .onclick(() => UserActions.replaceAvatar(user, userAvatar, avatarLoading).then())
                             .onmouseover(() => {
                                 if (!isOwnProfile) {
