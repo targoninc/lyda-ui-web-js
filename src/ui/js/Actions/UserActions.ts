@@ -139,11 +139,14 @@ export class UserActions {
         let res;
         if (!newestId) {
             res = await Api.getAsync<Notification[]>(ApiRoutes.getAllNotifications);
+            if (res.code === 200) {
+                notifications.value = res.data;
+            }
         } else {
             res = await Api.getAsync<Notification[]>(ApiRoutes.getAllNotifications, {after: newestId});
-        }
-        if (res.code === 200) {
-            notifications.value = res.data;
+            if (res.code === 200) {
+                notifications.value = notifications.value.concat(res.data).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+            }
         }
     }
 
