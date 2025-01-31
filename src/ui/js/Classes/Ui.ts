@@ -87,8 +87,12 @@ export class Ui {
         let footer = document.querySelector("footer");
         if (nav === null && !navInitialized.value) {
             navInitialized.value = true;
-            await Ui.initializeNavBar();
-            nav = document.querySelector("nav");
+            Ui.initializeNavBar().then(() => {
+                nav = document.querySelector("nav");
+                if (nav && footer && pageBackground) {
+                    pageBackground.style.height = (window.innerHeight - nav.clientHeight - footer.clientHeight - 1) + "px";
+                }
+            });
         }
         if (nav && footer && pageBackground) {
             pageBackground.style.height = (window.innerHeight - nav.clientHeight - footer.clientHeight - 1) + "px";
