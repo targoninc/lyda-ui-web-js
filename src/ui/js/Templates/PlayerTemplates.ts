@@ -59,6 +59,7 @@ export class PlayerTemplates {
                         }, async () => {
                             PlayManager.togglePlayAsync(track.id).then();
                         }, "Play/Pause"),
+                        PlayerTemplates.loopModeButton(),
                         PlayerTemplates.trackScrubbar(track, bufferPercent, positionPercent),
                         PlayerTemplates.trackTime(track),
                         PlayerTemplates.loudnessControl(track)
@@ -99,7 +100,7 @@ export class PlayerTemplates {
 
     private static trackTime(track: Track) {
         return create("div")
-            .classes("audio-player-time", "flex", "rounded", "padded-inline")
+            .classes("audio-player-time", "flex", "rounded", "padded-inline", "hideOnSmallBreakpoint")
             .children(
                 create("span")
                     .id(track.id)
@@ -175,8 +176,7 @@ export class PlayerTemplates {
                         create("div")
                             .classes("flex")
                             .children(
-                                ...await PlayerTemplates.bottomTrackInfo(track, trackUser),
-                                ...PlayerTemplates.audioControls()
+                                ...await PlayerTemplates.bottomTrackInfo(track, trackUser)
                             ).build(),
                         create("div")
                             .classes("flex")
@@ -208,8 +208,7 @@ export class PlayerTemplates {
             .classes("no-sub-info", "rounded", "clickable", "text-small", "padded-inline", "align-center")
             .text("Listening in 96kbps. Subscribe for up to 320kbps.")
             .onclick(() => {
-                window.open("https://finance.targoninc.com", "_blank");
-                notify("Subscriptions page opened in new tab.");
+                navigate("subscribe");
             }).build();
     }
 
@@ -298,21 +297,19 @@ export class PlayerTemplates {
             ).build();
     }
 
-    static audioControls() {
+    static loopModeButton() {
         const map: Record<LoopMode, string> = {
             [LoopMode.off]: Icons.LOOP_OFF,
             [LoopMode.single]: Icons.LOOP_SINGLE,
             [LoopMode.context]: Icons.LOOP_CONTEXT,
         };
 
-        return [
-            GenericTemplates.roundIconButton({
-                icon: compute(mode => map[mode], loopMode),
-                adaptive: true,
-                isUrl: true,
-            }, async () => {
-                await PlayManager.nextLoopMode();
-            }, "Change loop mode"),
-        ];
+        return GenericTemplates.roundIconButton({
+            icon: compute(mode => map[mode], loopMode),
+            adaptive: true,
+            isUrl: true,
+        }, async () => {
+            await PlayManager.nextLoopMode();
+        }, "Change loop mode");
     }
 }

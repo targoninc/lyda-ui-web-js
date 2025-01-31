@@ -155,7 +155,7 @@ export class QueueTemplates {
             .classes("relative", "align-center")
             .children(
                 create("div")
-                    .classes(queueListVisClass, "queue-list", "flex-v", "no-gap", "padded", "rounded")
+                    .classes(queueListVisClass, "popout-above", "flex-v", "no-gap", "padded", "rounded")
                     .styles("width", "max-content")
                     .children(
                         create("div")

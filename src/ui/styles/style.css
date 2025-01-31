@@ -852,7 +852,6 @@ td:last-child, th:last-child {
     position: absolute;
     z-index: 3;
     bottom: calc(100% + 3px);
-    right: 50%;
     width: max-content;
     background: var(--color-3);
     border: 1px solid var(--color-7);
