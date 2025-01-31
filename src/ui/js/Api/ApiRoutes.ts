@@ -128,6 +128,7 @@ export class ApiRoutes {
     // region Comments
     private static comments = ApiRoutes.base + "/comments";
     static getModerationComments = ApiRoutes.comments + "/get";
+    static getCommentsByTrackId = ApiRoutes.comments + "/byTrackId";
 
     private static commentActions = ApiRoutes.comments + "/actions";
     static newComment = ApiRoutes.commentActions + "/new";

@@ -966,14 +966,10 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 #track-description, #user-description {
-    height: 100px;
     max-height: max-content;
     min-width: 100px;
     overflow: auto;
     position: relative;
-    background: var(--color-6);
-    padding: var(--inline-padding);
-    border-radius: var(--border-radius);
 }
 
 #track-description.overflowing, #user-description.overflowing {

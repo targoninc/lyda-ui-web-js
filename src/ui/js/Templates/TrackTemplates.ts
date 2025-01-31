@@ -34,6 +34,9 @@ import {currentTrackId, manualQueue} from "../state.ts";
 import {PillOption} from "../Models/PillOption.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 import {Ui} from "../Classes/Ui.ts";
+import {Api} from "../Api/Api.ts";
+import {ApiRoutes} from "../Api/ApiRoutes.ts";
+import {Comment} from "../Models/DbModels/lyda/Comment.ts";
 
 export class TrackTemplates {
     static trackCard(track: Track, profileId: number) {
@@ -602,7 +605,6 @@ export class TrackTemplates {
             return null;
         }
         const track = trackData.track as Track;
-        const trackState = signal(TrackProcessor.forDownload(track));
         if (!track.likes || !track.reposts || !track.comments) {
             throw new Error(`Track ${track.id} is missing property likes, reposts or comments`);
         }
@@ -672,7 +674,13 @@ export class TrackTemplates {
             });
         }
         const showComments = signal(false);
-        const comments = signal(track.comments);
+        const comments = signal<Comment[]>([]);
+        Api.getAsync<Comment[]>(ApiRoutes.getCommentsByTrackId, {track_id: track.id}).then((c) => {
+            if (!c.data) {
+                return;
+            }
+            comments.value = c.data;
+        });
 
         return create("div")
             .classes("single-page", "noflexwrap", "padded-large", "rounded-large", "flex-v")
