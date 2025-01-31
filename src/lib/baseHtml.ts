@@ -50,6 +50,10 @@ export async function baseHtml(req: Request) {
     <meta name="theme-color" content="#202025">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
+    <!-- Preconnect to API -->
+    <link rel="preconnect" href="${apiUrl}" crossorigin>
+    
+    <!-- Preconnect to Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
