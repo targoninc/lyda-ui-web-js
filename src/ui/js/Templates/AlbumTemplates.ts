@@ -532,16 +532,19 @@ export class AlbumTemplates {
 
     private static addToQueueButton(isPlaying: null | boolean, album: Album) {
         const allTracksInQueue = compute(q => album.tracks && album.tracks.every((t) => q.includes(t.track_id)), manualQueue);
+        const text = compute((q: boolean): string => q ? "Unqueue" : "Queue", allTracksInQueue);
+        const icon = compute((q: boolean): string => q ? Icons.UNQUEUE : Icons.QUEUE, allTracksInQueue);
+        const buttonClass = compute((q: boolean): string => q ? "audio-queueremove" : "audio-queueadd", allTracksInQueue);
 
         return FJSC.button({
-            text: allTracksInQueue ? "Unqueue" : "Queue",
+            text,
             icon: {
-                icon: isPlaying ? Icons.UNQUEUE : Icons.QUEUE,
+                icon,
                 classes: ["inline-icon", "svg", "nopointer"],
                 adaptive: true,
                 isUrl: true
             },
-            classes: [allTracksInQueue ? "audio-queueremove" : "audio-queueadd", "secondary"],
+            classes: [buttonClass, "secondary"],
             onclick: async () => {
                 for (let track of album.tracks!) {
                     if (!manualQueue.value.includes(track.track_id)) {

@@ -445,15 +445,31 @@ export class TrackTemplates {
         };
         let itemNode: AnyElement;
         if (canEdit) {
-            trackActions.push(GenericTemplates.action(Icons.ARROW_UP, "Move up", list.id, async () => {
-                await TrackActions.moveTrackUpInList(positionsState, playlistTrack, type, list);
-            }, [], [upState]));
-            trackActions.push(GenericTemplates.action(Icons.ARROW_DOWN, "Move down", list.id, async () => {
-                await TrackActions.moveTrackDownInList(positionsState, playlistTrack, type, list);
-            }, [], [downState]));
-
-            trackActions.push(GenericTemplates.action(Icons.X, "Remove from " + type, list.id, async () => {
-                await TrackActions.removeTrackFromList(positionsState, playlistTrack, type, list, itemNode);
+            trackActions.push(FJSC.button({
+                text: "Move up",
+                icon: { icon: "keyboard_arrow_up" },
+                classes: ["positive"],
+                disabled: compute((p: number[]) => p[0] === track.id, positionsState),
+                onclick: async () => {
+                    await TrackActions.moveTrackUpInList(positionsState, playlistTrack, type, list);
+                }
+            }));
+            trackActions.push(FJSC.button({
+                text: "Move down",
+                icon: { icon: "keyboard_arrow_down" },
+                classes: ["positive"],
+                disabled: compute((p: number[]) => p[p.length - 1] === track.id, positionsState),
+                onclick: async () => {
+                    await TrackActions.moveTrackDownInList(positionsState, playlistTrack, type, list);
+                }
+            }));
+            trackActions.push(FJSC.button({
+                text: "Remove from " + type,
+                icon: { icon: "close" },
+                classes: ["negative"],
+                onclick: async () => {
+                    await TrackActions.removeTrackFromList(positionsState, playlistTrack, type, list, itemNode);
+                }
             }));
         }
 
