@@ -22,6 +22,7 @@ import {navigate} from "../Routing/Router.ts";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
+import {manualQueue} from "../state.ts";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
@@ -480,13 +481,9 @@ export class AlbumTemplates {
     static audioActions(album: Album, user: User, editActions: AnyNode[] = []) {
         const playingFrom = PlayManager.getPlayingFrom();
         const isPlaying = playingFrom && playingFrom.type === "album" && playingFrom.id === album.id;
-        const manualQueue = QueueManager.getManualQueue();
         if (!album.tracks) {
             throw new Error(`Album ${album.id} has no tracks`);
         }
-        const allTracksInQueue = album.tracks.every((t) =>
-            manualQueue.includes(t.track_id),
-        );
         const duration = album.tracks.reduce((acc, t) => acc + (t.track?.length ?? 0), 0);
 
         let actions: AnyNode[] = [];
@@ -508,23 +505,7 @@ export class AlbumTemplates {
                         await AlbumActions.startTrackInAlbum(album, firstTrack.track_id, true);
                     },
                 }),
-                FJSC.button({
-                    text: allTracksInQueue ? "Unqueue" : "Queue",
-                    icon: {
-                        icon: isPlaying ? Icons.UNQUEUE : Icons.QUEUE,
-                        classes: ["inline-icon", "svg", "nopointer"],
-                        adaptive: true,
-                        isUrl: true
-                    },
-                    classes: [allTracksInQueue ? "audio-queueremove" : "audio-queueadd", "secondary"],
-                    onclick: async () => {
-                        for (let track of album.tracks!) {
-                            if (!manualQueue.includes(track.track_id)) {
-                                QueueManager.addToManualQueue(track.track_id);
-                            }
-                        }
-                    },
-                }),
+                AlbumTemplates.addToQueueButton(isPlaying, album),
                 FJSC.button({
                     text: "Add to playlist",
                     icon: {
@@ -547,5 +528,27 @@ export class AlbumTemplates {
                 ...actions,
                 ...editActions
             ).build();
+    }
+
+    private static addToQueueButton(isPlaying: null | boolean, album: Album) {
+        const allTracksInQueue = compute(q => album.tracks && album.tracks.every((t) => q.includes(t.track_id)), manualQueue);
+
+        return FJSC.button({
+            text: allTracksInQueue ? "Unqueue" : "Queue",
+            icon: {
+                icon: isPlaying ? Icons.UNQUEUE : Icons.QUEUE,
+                classes: ["inline-icon", "svg", "nopointer"],
+                adaptive: true,
+                isUrl: true
+            },
+            classes: [allTracksInQueue ? "audio-queueremove" : "audio-queueadd", "secondary"],
+            onclick: async () => {
+                for (let track of album.tracks!) {
+                    if (!manualQueue.value.includes(track.track_id)) {
+                        QueueManager.addToManualQueue(track.track_id);
+                    }
+                }
+            },
+        });
     }
 }
