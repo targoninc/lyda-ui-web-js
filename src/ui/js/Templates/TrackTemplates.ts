@@ -30,7 +30,7 @@ import {AlbumTrack} from "../Models/DbModels/lyda/AlbumTrack.ts";
 import {Playlist} from "../Models/DbModels/lyda/Playlist.ts";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {CollaboratorType} from "../Models/DbModels/lyda/CollaboratorType.ts";
-import {currentTrackId} from "../state.ts";
+import {currentTrackId, manualQueue} from "../state.ts";
 import {PillOption} from "../Models/PillOption.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 import {Ui} from "../Classes/Ui.ts";
@@ -668,9 +668,8 @@ export class TrackTemplates {
                             .classes("flex")
                             .children(
                                 create("span")
-                                    .classes("text-xlarge")
+                                    .classes("text-xxlarge")
                                     .text(track.title)
-                                    .attributes("track_id", track.id)
                                     .build(),
                                 ...icons,
                             ).build(),
@@ -729,10 +728,15 @@ export class TrackTemplates {
                             .children(
                                 TrackTemplates.waveform(track, track.processed ? JSON.parse(track.loudness_data) : []),
                                 create("div")
-                                    .classes("flex", "align-children")
+                                    .classes("flex-v")
                                     .children(
-                                        TrackTemplates.playButton(track),
-                                        TrackEditTemplates.replaceAudioButton(track),
+                                        create("div")
+                                            .classes("flex", "align-children")
+                                            .children(
+                                                TrackTemplates.playButton(track),
+                                                TrackTemplates.addToQueueButton(track),
+                                                ifjs(trackData.canEdit, TrackEditTemplates.replaceAudioButton(track)),
+                                            ).build(),
                                         create("div")
                                             .classes("stats-container", "flex", "rounded")
                                             .children(
@@ -828,23 +832,9 @@ export class TrackTemplates {
     }
 
     static audioActions(track: Track, user: User, editActions: AnyNode[]) {
-        const inQueue = signal(QueueManager.isInManualQueue(track.id));
-        const text = compute((q: boolean): string => q ? "Unqueue" : "Queue", inQueue);
-        const icon = compute((q: boolean): string => q ? "remove" : "switch_access_shortcut_add", inQueue);
-        const queueClass = compute((q: boolean): string => q ? "negative" : "positive", inQueue);
-
         let actions: AnyElement[] = [];
         if (user) {
             actions = [
-                FJSC.button({
-                    text,
-                    icon: { icon },
-                    classes: [queueClass],
-                    onclick: () => {
-                        QueueManager.toggleInManualQueue(track.id);
-                        inQueue.value = QueueManager.isInManualQueue(track.id);
-                    }
-                }),
                 FJSC.button({
                     text: "Add to playlist",
                     icon: { icon: "playlist_add" },
@@ -861,6 +851,23 @@ export class TrackTemplates {
                 ...actions,
                 ...editActions
             ).build();
+    }
+
+    private static addToQueueButton(track: Track,) {
+        const inQueue = compute(q => q.includes(track.id), manualQueue);
+        const text = compute((q: boolean): string => q ? "Unqueue" : "Queue", inQueue);
+        const icon = compute((q: boolean): string => q ? "remove" : "switch_access_shortcut_add", inQueue);
+        const queueClass = compute((q: boolean): string => q ? "negative" : "positive", inQueue);
+
+        return FJSC.button({
+            text,
+            icon: {icon},
+            classes: [queueClass],
+            onclick: () => {
+                QueueManager.toggleInManualQueue(track.id);
+                inQueue.value = QueueManager.isInManualQueue(track.id);
+            }
+        });
     }
 
     static playButton(track: Track) {
