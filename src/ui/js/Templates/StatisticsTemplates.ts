@@ -52,10 +52,6 @@ export class StatisticsTemplates {
         return create("div")
             .classes("flex", "stats-indicator")
             .children(
-                create("span")
-                    .classes("stats-count", "nopointer", stats_type)
-                    .text(count$)
-                    .build(),
                 GenericTemplates.roundIconButton({
                     icon: icon,
                     adaptive: true,
@@ -100,6 +96,9 @@ export class StatisticsTemplates {
                 create("span")
                     .classes("stats-indicator-opener", type, "clickable", "rounded", "padded-inline")
                     .children(
+                        create("span")
+                            .text(items.length)
+                            .build(),
                         FJSC.icon({
                             icon: "arrow_drop_down",
                             adaptive: true,

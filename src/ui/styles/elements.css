@@ -224,7 +224,7 @@
 }
 
 .stats-indicator-opener {
-    padding-left: 32px;
+    padding-left: 2.5em;
     margin-left: -35px;
     border: 1px solid var(--color-9);
     border-radius: 50px;
