@@ -1,5 +1,9 @@
 export class CustomText {
     static renderToHtml(text: string): string {
+        if (!text) {
+            return "";
+        }
+
         let atMentionPattern = /(?<!<a[^>]*>)@(\w+)/gmi;
         let httpPattern = /(http(s)?:\/\/[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?)/gmi;
         let replacedText = text.replace(httpPattern, "<a href=\"$1\" target='_blank' class='inlineLink'>$1</a>");

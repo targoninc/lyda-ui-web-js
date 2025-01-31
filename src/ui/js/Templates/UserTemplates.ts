@@ -407,10 +407,7 @@ export class UserTemplates {
         const canVerify = compute(v => !v && permissions.some(p => p.name === Permissions.canVerifyUsers), verified);
         const canUnverify = compute(v => v && permissions.some(p => p.name === Permissions.canVerifyUsers), verified);
         const hasUnverifiedPrimaryEmail = isOwnProfile && user.emails && user.emails.some(e => e.primary && !e.verified);
-
-        if (user.badges && user.badges.length > 0) {
-            specialInfo = [UserTemplates.badges(user.badges)];
-        }
+        const hasBadges = user.badges && user.badges.length > 0;
 
         return create("div")
             .classes("name-container", "flex-v")
@@ -420,6 +417,7 @@ export class UserTemplates {
                     .classes("flex", "align-children")
                     .children(
                         UserTemplates.username(user, isOwnProfile),
+                        ifjs(hasBadges, UserTemplates.badges(user.badges ?? [])),
                         ifjs(verified, UserTemplates.verificationbadge()),
                         ifjs(canVerify, FJSC.button({
                             text: "Verify",
@@ -442,7 +440,7 @@ export class UserTemplates {
                         !isOwnProfile && currentUser.value ? UserTemplates.followButton(following, user.id) : null,
                         !isOwnProfile && followsBack ? UserTemplates.followsBackIndicator() : null,
                     ).build(),
-                UserTemplates.userDescription(user, isOwnProfile, specialInfo),
+                UserTemplates.userDescription(user, isOwnProfile),
                 ifjs(hasUnverifiedPrimaryEmail, create("div")
                     .classes("card", "padded", "flex", "warning", "align-children")
                     .children(
@@ -463,14 +461,11 @@ export class UserTemplates {
     }
 
     static badges(badges: Badge[]) {
-        let children = [];
-        for (let badge of badges) {
-            children.push(UserTemplates.badge(badge));
-        }
         return create("div")
             .classes("flex", "small-gap", "limitToContentWidth", "rounded", "hideOnSmallBreakpoint")
-            .children(...children)
-            .build();
+            .children(
+                ...badges.map(badge => UserTemplates.badge(badge))
+            ).build();
     }
 
     static badge(badge: Badge) {
@@ -641,8 +636,8 @@ export class UserTemplates {
         return base.build();
     }
 
-    static userDescription(user: User, isOwnProfile: boolean, specialInfo: AnyNode[]) {
-        if (specialInfo.length === 0 && (user.description === null || user.description === "")) {
+    static userDescription(user: User, isOwnProfile: boolean) {
+        if (user.description === null || user.description === "") {
             return create("div").build();
         }
         const description = create("span")
@@ -660,7 +655,6 @@ export class UserTemplates {
         return create("div")
             .classes("card", "rounded", "padded", "flex-v", "limitToContentWidth")
             .children(
-                ...specialInfo,
                 create("div")
                     .classes("flex-v")
                     .children(
