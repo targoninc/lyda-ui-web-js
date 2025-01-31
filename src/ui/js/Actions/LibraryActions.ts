@@ -5,18 +5,15 @@ import {Album} from "../Models/DbModels/lyda/Album.ts";
 import {Playlist} from "../Models/DbModels/lyda/Playlist.ts";
 import {Track} from "../Models/DbModels/lyda/Track.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
+import {Library} from "../Models/Library.ts";
 
 export class LibraryActions {
     static async getLibrary(name: string) {
-        const res = await Api.getAsync<{
-            albums: Album[],
-            playlists: Playlist[],
-            tracks: Track[],
-        }>(ApiRoutes.getLibrary, { name });
+        const res = await Api.getAsync<Library>(ApiRoutes.getLibrary, { name });
         if (res.code !== 200) {
             notify("Failed to get library", NotificationType.error);
-            return false;
+            return null;
         }
-        return res.data;
+        return res.data as Library;
     }
 }

@@ -33,7 +33,7 @@ import {Log} from "./Models/DbModels/lyda/Log.ts";
 import {NotificationType} from "./Enums/NotificationType.ts";
 import {AvailableSubscription} from "./Models/DbModels/finance/AvailableSubscription.ts";
 import {Subscription} from "./Models/DbModels/finance/Subscription.ts";
-import {currentSecretCode, currentUser} from "./state.ts";
+import {currentSecretCode, currentUser, permissions} from "./state.ts";
 
 export class Lyda {
     static async getEndpointData(endpoint: string, params = "") {
@@ -71,8 +71,6 @@ export class Lyda {
             data = await Lyda.getEndpointData(endpoint, paramsString);
         }
         const user = currentUser.value;
-        const permissionData = await Api.getAsync<Permission[]>(ApiRoutes.userPermissions);
-        const permissions = permissionData.data as Permission[];
 
         switch (element.getAttribute("datatype")) {
             case "uploadForm":
@@ -105,7 +103,7 @@ export class Lyda {
                     notify("You need to be logged in to see your profile", NotificationType.error);
                     return;
                 }
-                element.append(...UserTemplates.profile(isOwnProfile, data, permissions));
+                element.append(...UserTemplates.profile(isOwnProfile, data, permissions.value));
                 ProfilePage.addTabSectionAsync(element, data, isOwnProfile).then();
                 break;
             case "track":
@@ -161,7 +159,7 @@ export class Lyda {
                 }
                 const royaltyInfo = await Api.getAsync(ApiRoutes.getRoyaltyInfo);
                 element.append(await StatisticTemplates.statisticActions(user, royaltyInfo.data, permissions));
-                element.append(create("div").classes("flex").children(...(await StatisticsWrapper.getStatistics(permissions))).build());
+                element.append(create("div").classes("flex").children(...(await StatisticsWrapper.getStatistics(permissions.value))).build());
                 break;
             case "library":
                 if (!user) {
@@ -179,12 +177,7 @@ export class Lyda {
                 element.appendChild(page);
                 break;
             case "logs":
-                if (permissions.error) {
-                    notify("You do not have permission to view logs", NotificationType.error);
-                    navigate("explore");
-                    return;
-                }
-                if (!permissions.some((p: Permission) => p.name === Permissions.canViewLogs)) {
+                if (!permissions.value.some((p: Permission) => p.name === Permissions.canViewLogs)) {
                     notify("You do not have permission to view logs", NotificationType.error);
                     navigate("profile");
                     return;
@@ -196,7 +189,7 @@ export class Lyda {
                     notify("You need to be logged in to see action logs", NotificationType.error);
                     return;
                 }
-                if (!permissions.some(p => p.name === Permissions.canViewActionLogs)) {
+                if (!permissions.value.some(p => p.name === Permissions.canViewActionLogs)) {
                     notify("You do not have permission to view action logs", NotificationType.error);
                     return;
                 }
@@ -217,7 +210,7 @@ export class Lyda {
                     notify("You need to be logged in to moderate", NotificationType.error);
                     return;
                 }
-                if (!permissions.some(p => p.name === Permissions.canDeleteComments)) {
+                if (!permissions.value.some(p => p.name === Permissions.canDeleteComments)) {
                     notify("You do not have permission to moderate", NotificationType.error);
                     return;
                 }

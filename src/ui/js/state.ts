@@ -8,6 +8,7 @@ import {User} from "./Models/DbModels/lyda/User.ts";
 import {TrackPosition} from "./Models/TrackPosition.ts";
 import {LoopMode} from "./Enums/LoopMode.ts";
 import {Notification} from "./Models/DbModels/lyda/Notification.ts";
+import {Permission} from "./Models/DbModels/lyda/Permission.ts";
 
 export const dragging = signal(false);
 
@@ -85,3 +86,5 @@ loopMode.subscribe((newMode, changed) => {
 export const currentSecretCode = signal<string>("");
 
 export const notifications = signal<Notification[]>([]);
+
+export const permissions = signal<Permission[]>([]);

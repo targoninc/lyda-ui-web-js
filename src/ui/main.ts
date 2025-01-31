@@ -9,9 +9,12 @@ import {Ui} from "./js/Classes/Ui.ts";
 import {Util} from "./js/Classes/Util.ts";
 import {routes} from "./js/Routing/routes.js";
 import {GenericTemplates} from "./js/Templates/GenericTemplates.ts";
-import {currentTrackId, currentTrackPosition, currentUser} from "./js/state.ts";
+import {currentTrackId, currentTrackPosition, currentUser, permissions} from "./js/state.ts";
 import {StreamingBroadcaster} from "./js/Streaming/StreamingBroadcaster.ts";
 import {TrackPosition} from "./js/Models/TrackPosition.ts";
+import {Api} from "./js/Api/Api.ts";
+import {Permission} from "./js/Models/DbModels/lyda/Permission.ts";
+import {ApiRoutes} from "./js/Api/ApiRoutes.ts";
 
 //LydaCache.clear();
 let pageContainer = document.querySelector(".page-container");
@@ -47,6 +50,14 @@ export const router = new Router(routes, async (route: Route, params: any) => {
 });
 
 if (currentUser.value) {
+    Api.getAsync<Permission[]>(ApiRoutes.userPermissions).then(res => {
+        if (res.code !== 200) {
+            console.error("Failed to get permissions: ", res.data);
+            return;
+        }
+        permissions.value = res.data as Permission[];
+    });
+
     const currentTrackPositionTmp = LydaCache.get<TrackPosition>("currentTrackPosition").content;
     if (currentTrackPositionTmp) {
         currentTrackPosition.value = currentTrackPositionTmp;
