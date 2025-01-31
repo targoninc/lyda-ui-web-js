@@ -46,7 +46,10 @@ const server = serve({
 
         // Handle dynamic routes (fallback to baseHtml render)
         try {
-            const html = await baseHtml(req);
+            const start = performance.now();
+            const html = baseHtml(req);
+            const end = performance.now();
+            console.log(`Rendered HTML in ${end - start}ms`);
             return new Response(html, { headers: { "Content-Type": "text/html" } });
         } catch (error) {
             console.error("Error rendering HTML:", error);
