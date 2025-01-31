@@ -483,6 +483,10 @@ button.unread:before {
     box-sizing: border-box;
 }
 
+.subscription-option.pending {
+    border: 1px solid var(--green-dark);
+}
+
 .subscription-option.selected {
     border: 1px solid var(--blue);
 }

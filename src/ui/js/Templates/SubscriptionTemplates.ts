@@ -69,6 +69,7 @@ export class SubscriptionTemplates {
         const pending = compute(sub => sub && sub.subscription_id === option.id && sub.status === SubscriptionStatus.pending, currentSubscription);
         const enabled = compute((a, p) => !a && !p, active, pending);
         const activeClass = compute((a): string => a ? "active" : "_", active);
+        const pendingClass = compute((a): string => a ? "pending" : "_", pending);
         const isSelectedOption = compute(selected => selected === option.id, selectedOption);
         const selectedClass = compute((s): string => s === option.id ? "selected" : "_", selectedOption);
         const gifted = compute(s => !!(s && s.gifted), currentSubscription);
@@ -79,10 +80,9 @@ export class SubscriptionTemplates {
         const buttonText = compute((a): string => a ? "Switch plan" : "Subscribe", currentSubscription);
 
         return create("div")
-            .classes("flex-v", "card", "relative", "subscription-option", selectedClass, activeClass)
+            .classes("flex-v", "card", "relative", "subscription-option", selectedClass, activeClass, pendingClass)
             .children(
                 ifjs(active, GenericTemplates.checkInCorner("This subscription is active")),
-                ifjs(pending, GenericTemplates.checkInCorner("This subscription is pending", ["warning"])),
                 create("div")
                     .classes("flex-v", "space-outwards")
                     .children(
@@ -118,6 +118,11 @@ export class SubscriptionTemplates {
                                             .text("/" + option.term_type)
                                             .build(),
                                     ).build(),
+                                ifjs(pending, create("span")
+                                    .classes("text-small", "text-positive")
+                                    .title("Waiting for confirmation from payment provider")
+                                    .text("Pending")
+                                    .build()),
                                 ifjs(active, SubscriptionTemplates.subscribedFor(createdAt))
                             ).build(),
                         create("div")
