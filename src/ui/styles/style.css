@@ -83,13 +83,6 @@
     --fjsc-font: var(--default-font-family);
 }
 
-@font-face {
-    font-family: 'Material Symbols Outlined';
-    font-style: normal;
-    font-weight: 400;
-    src: url(../fonts/material-icons.woff) format('woff');
-}
-
 .material-symbols-outlined {
     font-family: 'Material Symbols Outlined';
     font-weight: normal;
