@@ -69,9 +69,7 @@ export class UserTemplates {
         const maxDisplaynameLength = [UserWidgetContext.singlePage, UserWidgetContext.list].includes(context) ? 100 : 15;
         const avatarState = signal(Images.DEFAULT_AVATAR);
         if (user.has_avatar) {
-            Util.getUserAvatar(user.id).then((src) => {
-                avatarState.value = src;
-            });
+            avatarState.value = Util.getUserAvatar(user.id);
         }
         const activeClass = compute((r, p): string => {
             return r && r.path === "profile" && p.name === user.username ? "active" : "_";
@@ -286,15 +284,11 @@ export class UserTemplates {
         const bannerLoading = signal(false);
         const userBanner = signal(Images.DEFAULT_BANNER);
         if (user.has_banner) {
-            Util.getUserBanner(user.id).then(banner => {
-                userBanner.value = banner;
-            });
+            userBanner.value = Util.getUserBanner(user.id);
         }
         const userAvatar = signal(Images.DEFAULT_AVATAR);
         if (user.has_avatar) {
-            Util.getUserAvatar(user.id).then(avatar => {
-                userAvatar.value = avatar;
-            });
+            userAvatar.value = Util.getUserAvatar(user.id);
         }
         let bannerDeleteButton = UserTemplates.bannerDeleteButton(user, userBanner, bannerLoading);
         const bannerContainer = create("div")

@@ -63,9 +63,7 @@ export class TrackTemplates {
         const collab = track.collaborators!.find((collab: TrackCollaborator) => collab.user_id === profileId);
         const avatarState = signal(Images.DEFAULT_AVATAR);
         if (track.user.has_avatar) {
-            Util.getUserAvatar(track.user_id).then((src) => {
-                avatarState.value = src;
-            });
+            avatarState.value = Util.getUserAvatar(track.user_id);
         }
 
         return create("div")
@@ -142,9 +140,7 @@ export class TrackTemplates {
     static trackCover(track: Track, coverType: string, startCallback: Function|null = null) {
         const imageState = signal(Images.DEFAULT_COVER_TRACK);
         if (track.has_cover) {
-            Util.getTrackCover(track.id).then((src) => {
-                imageState.value = src;
-            });
+            imageState.value = Util.getTrackCover(track.id);
         }
 
         return create("div")
@@ -340,9 +336,7 @@ export class TrackTemplates {
         }
         const avatarState = signal(Images.DEFAULT_AVATAR);
         if (track.user?.has_avatar) {
-            Util.getUserAvatar(track.user_id).then((src) => {
-                avatarState.value = src;
-            });
+            avatarState.value = Util.getUserAvatar(track.user_id);
         }
         const inQueue = signal(QueueManager.isInManualQueue(track.id));
         if (!track.comments || !track.likes || !track.reposts) {
@@ -577,9 +571,7 @@ export class TrackTemplates {
     static collaborator(track: Track, user: User, collaborator: TrackCollaborator): any {
         const avatarState = signal(Images.DEFAULT_AVATAR);
         if (collaborator.user?.has_avatar) {
-            Util.getUserAvatar(collaborator.user_id).then((src) => {
-                avatarState.value = src;
-            });
+            avatarState.value = Util.getUserAvatar(collaborator.user_id);
         }
         let actionButton = null, classes = [];
         if (user && user.id === track.user_id) {
@@ -669,9 +661,7 @@ export class TrackTemplates {
         const coverLoading = signal(false);
         const coverFile = signal(Images.DEFAULT_COVER_TRACK);
         if (track.has_cover) {
-            Util.getTrackCover(track.id).then((src) => {
-                coverFile.value = src;
-            });
+            coverFile.value = Util.getTrackCover(track.id);
         }
         const showComments = signal(false);
         const comments = signal<Comment[]>([]);
@@ -916,9 +906,7 @@ export class TrackTemplates {
     static toBeApprovedTrack(collabType: CollaboratorType, track: TrackCollaborator, user: User) {
         const avatarState = signal(Images.DEFAULT_AVATAR);
         if (track.user?.has_avatar) {
-            Util.getUserAvatar(track.user_id).then((src) => {
-                avatarState.value = src;
-            });
+            avatarState.value = Util.getUserAvatar(track.user_id);
         }
         if (!track.user) {
             throw new Error("User not set on to be approved track with ID ${track.track_id}");

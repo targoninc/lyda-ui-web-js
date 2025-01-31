@@ -262,9 +262,7 @@ export class PlaylistTemplates {
         }
         const coverState = signal(Images.DEFAULT_COVER_PLAYLIST);
         if (playlist.has_cover) {
-            Util.getPlaylistCover(playlist.id).then(cover => {
-                coverState.value = cover;
-            });
+            coverState.value = Util.getPlaylistCover(playlist.id);
         }
         if (!playlist.user) {
             throw new Error(`Playlist ${playlist.id} has no user`);
@@ -318,9 +316,7 @@ export class PlaylistTemplates {
     static playlistCover(playlist: Playlist, coverType: string) {
         const coverState = signal(Images.DEFAULT_COVER_PLAYLIST);
         if (playlist.has_cover) {
-            Util.getPlaylistCover(playlist.id).then(cover => {
-                coverState.value = cover;
-            });
+            coverState.value = Util.getPlaylistCover(playlist.id);
         }
         if (!playlist.tracks) {
             throw new Error(`Playlist ${playlist.id} has no tracks`);
@@ -358,9 +354,7 @@ export class PlaylistTemplates {
     static async smallPlaylistCover(playlist: Playlist) {
         const coverState = signal(Images.DEFAULT_COVER_PLAYLIST);
         if (playlist.has_cover) {
-            Util.getPlaylistCover(playlist.id).then(cover => {
-                coverState.value = cover;
-            });
+            coverState.value = Util.getPlaylistCover(playlist.id);
         }
 
         return create("img")
@@ -432,9 +426,7 @@ export class PlaylistTemplates {
         const coverLoading = signal(false);
         const coverState = signal(Images.DEFAULT_COVER_PLAYLIST);
         if (playlist.has_cover) {
-            Util.getPlaylistCover(playlist.id).then(cover => {
-                coverState.value = cover;
-            });
+            coverState.value = Util.getPlaylistCover(playlist.id);
         }
 
         return create("div")

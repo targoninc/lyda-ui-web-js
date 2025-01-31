@@ -58,9 +58,7 @@ export class QueueTemplates {
         }
         const coverState = signal(Images.DEFAULT_COVER_TRACK);
         if (track.has_cover) {
-            Util.getTrackCover(track.id).then((src) => {
-                coverState.value = src;
-            });
+            coverState.value = Util.getTrackCover(track.id);
         }
 
         return create("div")

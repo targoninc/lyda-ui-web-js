@@ -230,9 +230,7 @@ export class CommentTemplates {
         }
         const avatarState = signal(Images.DEFAULT_AVATAR);
         if (comment.user.has_avatar) {
-            Util.getUserAvatar(comment.user_id).then(avatar => {
-                avatarState.value = avatar;
-            });
+            avatarState.value = Util.getUserAvatar(comment.user_id);
         }
         const replyInputShown = signal(false);
         const newComment = signal("");

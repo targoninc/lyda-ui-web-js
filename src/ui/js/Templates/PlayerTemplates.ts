@@ -225,9 +225,7 @@ export class PlayerTemplates {
 
         const cover = signal(Images.DEFAULT_COVER_TRACK);
         if (track.has_cover) {
-            Util.getTrackCover(track.id).then((src) => {
-                cover.value = src;
-            });
+            cover.value = Util.getTrackCover(track.id);
         }
 
         const trackList = signal<{ track: Track }[]>([]);

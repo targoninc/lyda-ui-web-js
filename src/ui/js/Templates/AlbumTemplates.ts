@@ -303,9 +303,7 @@ export class AlbumTemplates {
 
         const srcState = signal(Images.DEFAULT_COVER_ALBUM);
         if (album.has_cover) {
-            Util.getAlbumCover(album.id).then((src) => {
-                srcState.value = src;
-            });
+            srcState.value = Util.getAlbumCover(album.id);
         }
 
         return create("div")
@@ -340,9 +338,7 @@ export class AlbumTemplates {
     static async smallAlbumCover(album: Album) {
         const coverState = signal(Images.DEFAULT_COVER_ALBUM);
         if (album.has_cover) {
-            Util.getAlbumCover(album.id).then((src) => {
-                coverState.value = src;
-            });
+            coverState.value = Util.getAlbumCover(album.id);
         }
 
         return create("img")
@@ -413,9 +409,7 @@ export class AlbumTemplates {
         const coverLoading = signal(false);
         const coverState = signal(Images.DEFAULT_COVER_ALBUM);
         if (album.has_cover) {
-            Util.getAlbumCover(album.id).then((src) => {
-                coverState.value = src;
-            });
+            coverState.value = Util.getAlbumCover(album.id);
         }
 
         return create("div")

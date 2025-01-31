@@ -288,9 +288,7 @@ export class SearchTemplates {
         };
         const image = signal(Images.DEFAULT_COVER_TRACK);
         if (searchResult.hasImage) {
-            imageGetterMap[searchResult.type](searchResult.id).then((url: string) => {
-                image.value = url;
-            });
+            image.value = imageGetterMap[searchResult.type](searchResult.id);
         }
         const contextClasses = context === SearchContext.searchPage ? ["fjsc", "fullWidth"] : ["_"]
 
