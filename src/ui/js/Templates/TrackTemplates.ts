@@ -634,7 +634,6 @@ export class TrackTemplates {
                 editActions.push(TrackTemplates.copyPrivateLinkButton(track.id, track.secretcode));
             }
             editActions.push(TrackEditTemplates.openEditPageButton(track));
-            editActions.push(TrackEditTemplates.upDownButtons(trackState));
             editActions.push(TrackEditTemplates.deleteTrackButton(track.id));
         }
 

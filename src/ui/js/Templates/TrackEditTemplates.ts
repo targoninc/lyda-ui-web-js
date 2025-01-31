@@ -30,6 +30,7 @@ import {AlbumActions} from "../Actions/AlbumActions.ts";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {reload} from "../Routing/Router.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
+import {dayFromValue} from "../Classes/date.ts";
 
 export class TrackEditTemplates {
     static uploadForm(title: string, credits: string, releaseDate: Date, visibility: string, genre: Genre,
@@ -126,6 +127,7 @@ export class TrackEditTemplates {
                     create("p")
                         .text("Edit the track details below")
                         .build(),
+                    TrackEditTemplates.upDownButtons(state, true),
                     TrackEditTemplates.trackEdit(state, signal<string[]>([]), false),
                     create("div")
                         .classes("flex")
@@ -403,7 +405,7 @@ export class TrackEditTemplates {
             name: "release_date",
             label: "Release Date",
             placeholder: "YYYY-MM-DD",
-            value: compute(s => s.release_date.toISOString().split("T")[0], state),
+            value: compute(s => dayFromValue(s.release_date), state),
             onchange: (v) => {
                 state.value = {...state.value, release_date: new Date(v)};
             }
