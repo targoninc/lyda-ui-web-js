@@ -9,13 +9,13 @@ import {AuthActions} from "../Actions/AuthActions.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {Util} from "../Classes/Util.ts";
 import {navigate, reload} from "../Routing/Router.ts";
-import {AnyNode, create, StringOrSignal} from "../../fjsc/src/f2.ts";
+import {AnyNode, create, ifjs, signalMap, StringOrSignal} from "../../fjsc/src/f2.ts";
 import {compute, signal} from "../../fjsc/src/signals.ts";
 import {Notification} from "../Models/DbModels/lyda/Notification.ts";
 import {FJSC} from "../../fjsc";
 import {router} from "../../main.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
-import {currentUser} from "../state.ts";
+import {currentUser, notifications} from "../state.ts";
 import {SearchContext} from "../Enums/SearchContext.ts";
 
 export class NavTemplates {
@@ -131,7 +131,7 @@ export class NavTemplates {
         });
     }
 
-    static accountSection(notifications: Notification[]) {
+    static accountSection() {
         return create("div")
             .classes("widest-fill-right", "relative")
             .children(
@@ -144,7 +144,7 @@ export class NavTemplates {
                         navigate("upload");
                     }
                 }),
-                NavTemplates.notifications(notifications),
+                NavTemplates.notifications(),
                 UserTemplates.userWidget(currentUser, true, [], [], UserWidgetContext.nav),
                 FJSC.button({
                     text: "Log out",
@@ -231,40 +231,38 @@ export class NavTemplates {
             .build();
     }
 
-    static notifications(notifications: Notification[]) {
-        let notificationList;
-        if (!notifications || notifications.length === 0 || notifications.constructor !== Array) {
-            notificationList = [
-                create("div")
-                    .classes("text-center", "padded")
-                    .text("No notifications")
-                    .build()
-            ];
-        } else {
-            notificationList = [];
-            for (let notification of notifications) {
-                notificationList.push(NavTemplates.notificationInList(notification));
-            }
-        }
-        let unreadNotifications = notifications.filter(notification => !notification.is_read);
+    static notifications() {
+        const hasNotifs = compute(notifs => notifs.length > 0, notifications);
+        const unreadNotifications = compute(notifs => notifs.filter(notification => !notification.is_read), notifications);
+        const notifsClass = compute(u => u.length > 0 ? "unread" : "_", unreadNotifications);
+        const newestTimestamp = compute(unreadNotifs => unreadNotifs.length > 0 ? unreadNotifs[0].created_at : null, unreadNotifications);
+
+        const notifsVisible = signal(false);
+        const listClass = compute(v => v ? "_" : "hidden", notifsVisible);
 
         const notificationContainer = create("div")
-            .classes("hidden", "popout-below", "rounded", "absolute-align-right", "notification-list")
-            .children(...notificationList)
-            .build();
+            .classes(listClass, "popout-below", "rounded", "absolute-align-right", "notification-list")
+            .children(
+                signalMap(notifications, create("div").classes("flex-v", "nogap"), notif => NavTemplates.notificationInList(notif)),
+                ifjs(hasNotifs, create("div")
+                    .classes("text-center", "padded")
+                    .text("No notifications")
+                    .build(), true)
+            ).build();
 
-        const notificationButton = FJSC.button({
-            icon: { icon: "notifications" },
-            onclick: UserActions.markNotificationsAsRead,
-            text: "",
-            classes: ["fullHeight", "round-on-tiny-breakpoint", unreadNotifications.length === 0 ? "unread" : "_"]
-        });
-
-        UserActions.getNotificationsPeriodically(notificationButton);
+        UserActions.getNotificationsPeriodically();
         return create("div")
             .classes("notification-container", "relative")
             .children(
-                notificationButton,
+                FJSC.button({
+                    icon: { icon: "notifications" },
+                    onclick: async () => {
+                        notifsVisible.value = !notifsVisible.value;
+                        await UserActions.markNotificationsAsRead(newestTimestamp, notifsVisible);
+                    },
+                    text: "",
+                    classes: ["fullHeight", "round-on-tiny-breakpoint", notifsClass]
+                }),
                 notificationContainer
             ).build();
     }

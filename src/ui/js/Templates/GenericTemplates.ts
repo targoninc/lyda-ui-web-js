@@ -25,6 +25,7 @@ import {compute, signal, Signal} from "../../fjsc/src/signals.ts";
 import {SearchResult} from "../Models/SearchResult.ts";
 import {openMenus} from "../state.ts";
 import {PillOption} from "../Models/PillOption.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class GenericTemplates {
     static icon(icon: StringOrSignal, adaptive = false, classes: StringOrSignal[] = [], title = "", onclick: Function | undefined = undefined) {
@@ -371,7 +372,7 @@ export class GenericTemplates {
             .build();
     }
 
-    static notification(type = "success", text = "Success!") {
+    static notification(type: NotificationType = NotificationType.success, text = "Success!") {
         return create("div")
             .classes("notification", type)
             .text(text)

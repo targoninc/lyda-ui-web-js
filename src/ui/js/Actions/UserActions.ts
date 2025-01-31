@@ -17,7 +17,7 @@ import {LydaApi} from "../Api/LydaApi.ts";
 import {Images} from "../Enums/Images.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {AnyElement} from "../../fjsc/src/f2.ts";
-import {currentQuality} from "../state.ts";
+import {currentQuality, notifications} from "../state.ts";
 import {StreamingQuality} from "../Enums/StreamingQuality.ts";
 
 export class UserActions {
@@ -71,7 +71,8 @@ export class UserActions {
                 UserActions.updateImagesWithSource(Images.DEFAULT_AVATAR, avatar.value);
                 avatar.value = Images.DEFAULT_BANNER;
             }
-        }, () => {}, Icons.WARNING);
+        }, () => {
+        }, Icons.WARNING);
     }
 
     static async replaceBanner(e: Event, user: User, banner: Signal<string>, loading: Signal<boolean>) {
@@ -122,56 +123,35 @@ export class UserActions {
                     notify(`Failed to remove banner: ${response.data.error}`, NotificationType.error);
                 }
             },
-            () => {}, Icons.WARNING
+            () => {
+            }, Icons.WARNING
         );
     }
 
-    static getNotificationsPeriodically(e: AnyElement) {
+    static getNotificationsPeriodically() {
         setInterval(async () => {
-            const id = document.querySelector(".listNotification")?.id;
-            if (!id) {
-                return;
-            }
-            const res = await Api.getAsync(ApiRoutes.getAllNotifications, { after: id });
-            if (res.code !== 200) {
-                return;
-            }
-            const notifications = res.data as Notification[];
-            if (notifications.length > 0) {
-                const notificationList = document.querySelector(".notification-list");
-                if (notificationList) {
-                    for (const notification of notifications) {
-                        notificationList.prepend(NavTemplates.notificationInList(notification));
-                    }
-                    const notificationBubble = document.querySelector(".notification-bubble");
-                    if (notificationBubble) {
-                        notificationBubble.classList.remove("hidden");
-                    }
-                    e.setAttribute("markedAsRead", "false");
-                }
-            }
+            await UserActions.getNotifications();
         }, 60000);
     }
 
-    static async markNotificationsAsRead(e: Event) {
-        let notificationList = document.querySelector(".notification-list");
-        notificationList?.classList.toggle("hidden");
-        let timestamp;
-        try {
-            timestamp = document.querySelector(".listNotification.unread")?.getAttribute("data-created_at");
-        } catch (e) {
-            console.warn(e);
-            return;
+    static async getNotifications() {
+        const newestId = notifications.value.sort((a, b) => b.created_at - a.created_at)[0]?.id;
+        let res;
+        if (!newestId) {
+            res = await Api.getAsync<Notification[]>(ApiRoutes.getAllNotifications);
+        } else {
+            res = await Api.getAsync<Notification[]>(ApiRoutes.getAllNotifications, {after: newestId});
         }
-        const target = e.target as HTMLElement;
-        if (target.getAttribute("markedAsRead") === "true" || !timestamp) {
-            return;
+        if (res.code === 200) {
+            notifications.value = res.data;
         }
-        await Api.postAsync(ApiRoutes.markAllNotificationsAsRead, {newest: timestamp});
-        target.setAttribute("markedAsRead", "true");
-        const notificationBubble = document.querySelector(".notification-bubble");
-        if (notificationBubble) {
-            notificationBubble.classList.add("hidden");
+    }
+
+    static async markNotificationsAsRead(newestTimestamp: Signal<string | null>, visible: Signal<boolean>) {
+        if (visible.value) {
+            await Api.postAsync(ApiRoutes.markAllNotificationsAsRead, {newest: newestTimestamp.value});
+        } else {
+            await UserActions.getNotifications();
         }
     }
 
@@ -204,7 +184,7 @@ export class UserActions {
             return;
         }
 
-        const res = await Api.postAsync(ApiRoutes.updateUserSetting, { setting: UserSettings.theme, value: themeName });
+        const res = await Api.postAsync(ApiRoutes.updateUserSetting, {setting: UserSettings.theme, value: themeName});
         if (res.code !== 200) {
             notify(`Failed to update theme: ${getErrorMessage(res)}`, NotificationType.error);
         }
@@ -247,7 +227,7 @@ export class UserActions {
     }
 
     static async unverifyUser(id: number) {
-        const res = await Api.postAsync(ApiRoutes.unverifyUser, { id });
+        const res = await Api.postAsync(ApiRoutes.unverifyUser, {id});
         if (res.code !== 200) {
             notify("Failed to unverify user", NotificationType.error);
             return false;
@@ -256,7 +236,7 @@ export class UserActions {
     }
 
     static async verifyUser(id: number) {
-        const res = await Api.postAsync(ApiRoutes.verifyUser, { id });
+        const res = await Api.postAsync(ApiRoutes.verifyUser, {id});
         if (res.code !== 200) {
             notify("Failed to verify user", NotificationType.error);
             return false;
@@ -266,15 +246,16 @@ export class UserActions {
 
     static editDescription(currentDescription: string, successCallback: Function) {
         Ui.getTextAreaInputModal("Edit description", "Enter your new description", currentDescription, "Save", "Cancel", async (description: string) => {
-            if (await LydaApi.updateUser({ description })) {
+            if (await LydaApi.updateUser({description})) {
                 successCallback(description);
             }
-        }, () => {}, Icons.PEN).then();
+        }, () => {
+        }, Icons.PEN).then();
     }
 
     static editDisplayname(currentDisplayname: string, successCallback: Function) {
         Ui.getTextInputModal("Edit displayname", "Enter your new displayname", currentDisplayname, "Save", "Cancel", async (displayname: string) => {
-            if (await LydaApi.updateUser({ displayname })) {
+            if (await LydaApi.updateUser({displayname})) {
                 successCallback(displayname);
             }
         }, () => {
@@ -283,7 +264,7 @@ export class UserActions {
 
     static editUsername(currentUsername: string, successCallback: Function) {
         Ui.getTextInputModal("Edit username", "Enter your new username", currentUsername, "Save", "Cancel", async (username: string) => {
-            if (await LydaApi.updateUser({ username })) {
+            if (await LydaApi.updateUser({username})) {
                 successCallback(username);
             }
         }, () => {
@@ -291,6 +272,6 @@ export class UserActions {
     }
 
     private static setStringSetting(settingKey: string, value: string) {
-        return Api.postAsync(ApiRoutes.updateUserSetting, { setting: settingKey, value });
+        return Api.postAsync(ApiRoutes.updateUserSetting, {setting: settingKey, value});
     }
 }

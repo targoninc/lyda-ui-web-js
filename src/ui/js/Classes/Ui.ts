@@ -10,7 +10,7 @@ import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {Theme} from "../Enums/Theme.ts";
 import {navigate} from "../Routing/Router.ts";
 import {signal} from "../../fjsc/src/signals.ts";
-import {currentUser, navInitialized} from "../state.ts";
+import {currentUser, navInitialized, notifications} from "../state.ts";
 import {User} from "../Models/DbModels/lyda/User.ts";
 import {CollaboratorType} from "../Models/DbModels/lyda/CollaboratorType.ts";
 import {TrackCollaborator} from "../Models/DbModels/lyda/TrackCollaborator.ts";
@@ -46,14 +46,8 @@ export class Ui {
         if (document.getElementById("navTop") === null) {
             let userTemplateRender;
             if (signedIn) {
-                const res = await Api.getAsync<Notification[]>(ApiRoutes.getAllNotifications);
-                let notifications = [];
-                if (res.code !== 200) {
-                    userTemplateRender = NavTemplates.notSignedInNote();
-                } else {
-                    notifications = res.data;
-                    userTemplateRender = NavTemplates.accountSection(notifications);
-                }
+                await UserActions.getNotifications();
+                userTemplateRender = NavTemplates.accountSection();
             } else {
                 userTemplateRender = NavTemplates.notSignedInNote();
             }

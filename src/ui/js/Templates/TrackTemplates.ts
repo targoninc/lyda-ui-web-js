@@ -33,6 +33,7 @@ import {CollaboratorType} from "../Models/DbModels/lyda/CollaboratorType.ts";
 import {currentTrackId} from "../state.ts";
 import {PillOption} from "../Models/PillOption.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
+import {Ui} from "../Classes/Ui.ts";
 
 export class TrackTemplates {
     static trackCard(track: Track, profileId: number) {
@@ -632,7 +633,6 @@ export class TrackTemplates {
             if (isPrivate) {
                 editActions.push(TrackTemplates.copyPrivateLinkButton(track.id, track.secretcode));
             }
-            editActions.push(TrackEditTemplates.replaceAudioButton(track));
             editActions.push(TrackEditTemplates.openEditPageButton(track));
             editActions.push(TrackEditTemplates.upDownButtons(trackState));
             editActions.push(TrackEditTemplates.deleteTrackButton(track.id));
@@ -707,7 +707,13 @@ export class TrackTemplates {
                     .children(
                         create("div")
                             .classes("cover-container", "relative", trackData.canEdit ? "pointer" : "_")
-                            .onclick(() => TrackActions.replaceCover(track.id, trackData.canEdit, coverFile, coverLoading))
+                            .onclick(() => {
+                                if (!trackData.canEdit) {
+                                    Ui.showImageModal(coverFile);
+                                    return;
+                                }
+                                TrackActions.replaceCover(track.id, trackData.canEdit, coverFile, coverLoading)
+                            })
                             .children(
                                 ifjs(coverLoading, create("div")
                                     .classes("loader", "loader-small", "centeredInParent")
@@ -724,9 +730,10 @@ export class TrackTemplates {
                             .children(
                                 TrackTemplates.waveform(track, track.processed ? JSON.parse(track.loudness_data) : []),
                                 create("div")
-                                    .classes("flex")
+                                    .classes("flex", "align-children")
                                     .children(
                                         TrackTemplates.playButton(track),
+                                        TrackEditTemplates.replaceAudioButton(track),
                                         create("div")
                                             .classes("stats-container", "flex", "rounded")
                                             .children(

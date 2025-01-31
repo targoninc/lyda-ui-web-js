@@ -629,7 +629,6 @@ export class TrackEditTemplates {
         return FJSC.button({
             text: "Replace Audio",
             icon: { icon: "upload" },
-            classes: ["positive"],
             disabled: loading,
             onclick: async () => {
                 await TrackActions.replaceAudio(track.id, true, loading, () => {

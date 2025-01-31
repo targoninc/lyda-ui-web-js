@@ -524,16 +524,10 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .queue-bubble {
-    position: absolute;
-    top: -10px;
-    left: calc(100% - 8px);
-    height: 20px;
-    border-radius: 8px;
-    background: var(--color-4);
+    border-radius: var(--border-radius);
+    background: var(--color-7);
     font-size: var(--font-size-small);
-    width: max-content;
-    padding: 0 2px;
-    border: 1px solid var(--color-5);
+    padding: var(--inline-padding);
 }
 
 .cover-container {
