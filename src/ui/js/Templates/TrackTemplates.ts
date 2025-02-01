@@ -522,7 +522,7 @@ export class TrackTemplates {
                                         .classes("flex-v", "flex-grow", "small-gap")
                                         .children(
                                             create("div")
-                                                .classes("flex")
+                                                .classes("flex", "align-children")
                                                 .children(
                                                     StatisticsTemplates.likesIndicator("track", track.id, track.likes.length ?? [],
                                                         Util.arrayPropertyMatchesUser(track.likes, "user_id")),
