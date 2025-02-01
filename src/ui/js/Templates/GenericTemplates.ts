@@ -166,7 +166,7 @@ export class GenericTemplates {
 
     static dragTargetInList(dragStopCallback: Function, id = "", dropEffect = "move") {
         return create("div")
-            .classes("dropzone", "fullWidth", "relative")
+            .classes("dropzone")
             .attributes("reference_id", id)
             .children(
                 create("div")

@@ -13,14 +13,13 @@ import {Track} from "../Models/DbModels/lyda/Track.ts";
 import {MediaFileType} from "../Enums/MediaFileType.ts";
 import {MediaUploader} from "../Api/MediaUploader.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {PlaylistTrack} from "../Models/DbModels/lyda/PlaylistTrack.ts";
-import {AlbumTrack} from "../Models/DbModels/lyda/AlbumTrack.ts";
 import {Album} from "../Models/DbModels/lyda/Album.ts";
 import {Playlist} from "../Models/DbModels/lyda/Playlist.ts";
 import {AnyElement} from "../../fjsc/src/f2.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {currentQuality, playingHere} from "../state.ts";
 import {TrackCollaborator} from "../Models/DbModels/lyda/TrackCollaborator.ts";
+import {ListTrack} from "../Models/ListTrack.ts";
 
 export class TrackActions {
     static async savePlay(id: number) {
@@ -322,63 +321,33 @@ export class TrackActions {
         }
     }
 
-    static async moveTrackDownInList(positionsState, track, type, list) {
-        let map = positionsState.value;
-        const position = map.findIndex(id => id === track.id);
-        let success;
-        if (type === "album") {
-            success = await AlbumActions.moveTrackInAlbum(list.id, track.id, position + 1);
-        } else {
-            success = await PlaylistActions.moveTrackInPlaylist(list.id, track.id, position + 1);
+    static moveTrackToPosition(idToMove: number, targetPosition: number, tracks: Signal<ListTrack[]>) {
+        // Extract the current list of tracks
+        const currentTracks = tracks.value;
+
+        // Find the index of the track to move
+        const indexToMove = currentTracks.findIndex(track => track.track_id === idToMove);
+        if (indexToMove === -1) {
+            throw new Error("Track to move not found");
         }
-        if (success) {
-            this.moveTrackToPosition(map, position, position + 1, positionsState);
-        }
+
+        // Clamp the targetPosition to be within bounds
+        const clampedTargetPosition = Math.max(0, Math.min(targetPosition, currentTracks.length - 1));
+
+        // Extract the track to move
+        const [trackToMove] = currentTracks.splice(indexToMove, 1);
+
+        // Insert the track at the target position
+        currentTracks.splice(clampedTargetPosition, 0, trackToMove);
+
+        // Update the position property of all tracks
+        tracks.value = currentTracks.map((track, index) => ({
+            ...track,
+            position: index
+        }));
     }
 
-    static async moveTrackUpInList(positionsState, track, type, list) {
-        let map = positionsState.value;
-        const position = map.findIndex(id => id === track.id);
-        let success;
-        if (type === "album") {
-            success = await AlbumActions.moveTrackInAlbum(list.id, track.id, position - 1);
-        } else {
-            success = await PlaylistActions.moveTrackInPlaylist(list.id, track.id, position - 1);
-        }
-        if (success) {
-            this.moveTrackToPosition(map, position, position - 1, positionsState);
-        }
-    }
-
-    static moveTrackToPosition(map, position, targetPosition, positionsState) {
-        const idToMove = map[position];
-        map = map.filter(id => id !== idToMove);
-
-        const mapBeforeTarget = map.slice(0, targetPosition);
-        const mapAfterTarget = map.slice(targetPosition);
-        map = mapBeforeTarget.concat([idToMove]).concat(mapAfterTarget);
-
-        const sourceElements = document.querySelectorAll(".track-in-list");
-        let i = 0;
-        for (const id of map) {
-            let insertAfterNode;
-            for (const element of sourceElements) {
-                if (element.getAttribute("track_id") === id.toString()) {
-                    insertAfterNode = element;
-                    break;
-                }
-            }
-            const anchorNode = insertAfterNode.parentNode.querySelector(".dropzone[reference_id='" + i + "']");
-            if (anchorNode === null) {
-                continue;
-            }
-            anchorNode.parentNode.insertBefore(insertAfterNode, anchorNode.nextSibling);
-            i++;
-        }
-        positionsState.value = map;
-    }
-
-    static async removeTrackFromList(positionsState: Signal<any>, track: PlaylistTrack | AlbumTrack, type: string, list: Playlist | Album, elementReference: AnyElement) {
+    static async removeTrackFromList(tracks: Signal<ListTrack[]>, list: Playlist | Album, type: string, track: ListTrack, elementReference: AnyElement) {
         await Ui.getConfirmationModal("Remove track from " + type, "Are you sure you want to remove this track from " + list.title +"?", "Yes", "No", async () => {
             let success;
             if (type === "album") {
@@ -388,22 +357,23 @@ export class TrackActions {
             }
             if (success && elementReference) {
                 elementReference.remove();
+                tracks.value = tracks.value.filter(t => t.track_id !== track.track_id);
             }
         }, () => {
         }, Icons.WARNING);
     }
 
-    static async reorderTrack(type: string, listId: number, trackId: number, positionsState: Signal<any>, newPosition: number) {
+    static async reorderTrack(type: string, listId: number, trackId: number, tracks: Signal<ListTrack[]>, newPosition: number) {
         let success;
+        const oldPosition = tracks.value.findIndex(t => t.track_id === trackId);
+        this.moveTrackToPosition(trackId, newPosition, tracks);
         if (type === "album") {
-            success = AlbumActions.moveTrackInAlbum(listId, trackId, newPosition);
+            success = AlbumActions.moveTrackInAlbum(listId, tracks.value);
         } else {
-            success = PlaylistActions.moveTrackInPlaylist(listId, trackId, newPosition);
+            success = PlaylistActions.moveTrackInPlaylist(listId, tracks.value);
         }
-        if (await success) {
-            let map = positionsState.value;
-            const position = map.findIndex((id: number) => id === trackId);
-            this.moveTrackToPosition(map, position, newPosition, positionsState);
+        if (!(await success)) {
+            this.moveTrackToPosition(trackId, oldPosition, tracks);
         }
     }
 

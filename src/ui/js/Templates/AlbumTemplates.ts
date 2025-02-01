@@ -13,7 +13,7 @@ import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
-import {AnyNode, create, HtmlPropertyValue, ifjs} from "../../fjsc/src/f2.ts";
+import {AnyNode, create, HtmlPropertyValue, ifjs, signalMap} from "../../fjsc/src/f2.ts";
 import {Album} from "../Models/DbModels/lyda/Album.ts";
 import {InputType} from "../../fjsc/src/Types.ts";
 import {Track} from "../Models/DbModels/lyda/Track.ts";
@@ -23,6 +23,9 @@ import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {manualQueue} from "../state.ts";
+import {PlaylistTrack} from "../Models/DbModels/lyda/PlaylistTrack.ts";
+import {AlbumTrack} from "../Models/DbModels/lyda/AlbumTrack.ts";
+import {ListTrack} from "../Models/ListTrack.ts";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
@@ -358,42 +361,20 @@ export class AlbumTemplates {
 
     static async albumPage(data: any, user: User) {
         const album = data.album as Album;
-        const tracks = album.tracks;
-        if (!tracks) {
+        if (!album.tracks) {
             throw new Error(`Album ${album.id} has no tracks`);
         }
+        const tracks = signal<ListTrack[]>(album.tracks);
+        const noTracks = compute(t => t.length === 0, tracks);
         const a_user = album.user;
         if (!a_user) {
             throw new Error(`Album ${album.id} has no user`);
         }
-        const trackChildren = [];
-        const positionMap = tracks.map(t => t.track_id);
-        const positionsState = signal(positionMap);
 
         async function startCallback(trackId: number) {
             await AlbumActions.startTrackInAlbum(album, trackId);
         }
 
-        for (let i = 0; i < tracks.length; i++) {
-            const track = tracks[i];
-            if (data.canEdit) {
-                trackChildren.push(GenericTemplates.dragTargetInList((data: any) => {
-                    TrackActions.reorderTrack("album", album.id, data.id, positionsState, i);
-                }, i.toString()));
-            }
-            trackChildren.push(TrackTemplates.listTrackInAlbumOrPlaylist(track, user, data.canEdit, album, positionsState, "album", startCallback));
-        }
-        if (tracks.length === 0) {
-            trackChildren.push(
-                create("div")
-                    .classes("card")
-                    .children(
-                        create("span")
-                            .text("This album has no tracks.")
-                            .build()
-                    ).build()
-            );
-        }
         const editActions = [];
         if (data.canEdit) {
             editActions.push(FJSC.button({
@@ -464,11 +445,7 @@ export class AlbumTemplates {
                                     ).build(),
                             ).build()
                     ).build(),
-                create("div")
-                    .classes("flex-v")
-                    .children(
-                        ...trackChildren
-                    ).build()
+                TrackTemplates.tracksInList(noTracks, tracks, data, album, "album", startCallback)
             ).build();
     }
 
@@ -499,7 +476,7 @@ export class AlbumTemplates {
                         await AlbumActions.startTrackInAlbum(album, firstTrack.track_id, true);
                     },
                 }),
-                AlbumTemplates.addToQueueButton(isPlaying, album),
+                AlbumTemplates.addToQueueButton(album),
                 FJSC.button({
                     text: "Add to playlist",
                     icon: {
@@ -524,11 +501,11 @@ export class AlbumTemplates {
             ).build();
     }
 
-    private static addToQueueButton(isPlaying: null | boolean, album: Album) {
+    private static addToQueueButton(album: Album) {
         const allTracksInQueue = compute(q => album.tracks && album.tracks.every((t) => q.includes(t.track_id)), manualQueue);
-        const text = compute((q: boolean): string => q ? "Unqueue" : "Queue", allTracksInQueue);
-        const icon = compute((q: boolean): string => q ? Icons.UNQUEUE : Icons.QUEUE, allTracksInQueue);
-        const buttonClass = compute((q: boolean): string => q ? "audio-queueremove" : "audio-queueadd", allTracksInQueue);
+        const text = compute((q): string => q ? "Unqueue" : "Queue", allTracksInQueue);
+        const icon = compute((q): string => q ? Icons.UNQUEUE : Icons.QUEUE, allTracksInQueue);
+        const buttonClass = compute((q): string => q ? "audio-queueremove" : "audio-queueadd", allTracksInQueue);
 
         return FJSC.button({
             text,

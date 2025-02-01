@@ -13,6 +13,8 @@ import {MediaUploader} from "../Api/MediaUploader.ts";
 import {MediaFileType} from "../Enums/MediaFileType.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
+import {AlbumTrack} from "../Models/DbModels/lyda/AlbumTrack.ts";
+import {ListTrack} from "../Models/ListTrack.ts";
 
 export class AlbumActions {
     static async deleteAlbumFromElement(e: any) {
@@ -104,10 +106,13 @@ export class AlbumActions {
         fileInput.click();
     }
 
-    static async moveTrackInAlbum(albumId: number, trackId: number, newPosition: number) {
-        const res = await Api.postAsync(ApiRoutes.reorderAlbumTracks, {id: albumId, track_id: trackId, new_position: newPosition});
+    static async moveTrackInAlbum(albumId: number, tracks: ListTrack[]) {
+        const res = await Api.postAsync(ApiRoutes.reorderAlbumTracks, {
+            album_id: albumId,
+            tracks
+        });
         if (res.code !== 200) {
-            notify("Failed to move track in album: " + getErrorMessage(res), NotificationType.error);
+            notify("Failed to move tracks: " + getErrorMessage(res), NotificationType.error);
             return false;
         }
         return true;

@@ -36,14 +36,22 @@
     opacity: 0;
 }
 
-.dragIndicator.dragover {
+.dropzone {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.dragIndicator.dragover, .dragIndicator.active {
     position: absolute;
     z-index: 5;
-    margin-top: 10px;
-    height: 4px;
+    height: 100%;
     width: 100%;
     background: var(--blue);
     border-radius: var(--border-radius);
+    opacity: .5;
 }
 
 .single-page {

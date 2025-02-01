@@ -22,6 +22,7 @@ import {InputType} from "../../fjsc/src/Types.ts";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
+import {ListTrack} from "../Models/ListTrack.ts";
 
 export class PlaylistTemplates {
     static async addTrackToPlaylistModal(track: Track, playlists: Playlist[]) {
@@ -374,10 +375,11 @@ export class PlaylistTemplates {
 
     static async playlistPage(data: { playlist: Playlist, canEdit: boolean }, user: User) {
         const playlist = data.playlist;
-        const tracks = playlist.tracks;
-        if (!tracks) {
+        if (!playlist.tracks) {
             throw new Error(`Playlist ${playlist.id} has no tracks`);
         }
+        const tracks = signal<ListTrack[]>(playlist.tracks);
+        const noTracks = compute(t => t.length === 0, tracks);
         const a_user = playlist.user;
         if (!a_user) {
             throw new Error(`Playlist ${playlist.id} has no user`);
@@ -385,32 +387,11 @@ export class PlaylistTemplates {
         if (!playlist.likes) {
             throw new Error(`Playlist ${playlist.id} has no likes array`);
         }
-        const trackChildren = [];
-        const positionMap = tracks.map(t => t.track_id);
-        const positionsState = signal(positionMap);
 
         async function startCallback(trackId: number) {
             await PlaylistActions.startTrackInPlaylist(playlist, trackId);
         }
 
-        for (let i = 0; i < tracks.length; i++) {
-            const track = tracks[i];
-            trackChildren.push(GenericTemplates.dragTargetInList((data: { id: number }) => {
-                TrackActions.reorderTrack("playlist", playlist.id, data.id, positionsState, i);
-            }, i.toString()));
-            trackChildren.push(TrackTemplates.listTrackInAlbumOrPlaylist(track, user, data.canEdit, playlist, positionsState, "playlist", startCallback));
-        }
-        if (tracks.length === 0) {
-            trackChildren.push(
-                create("div")
-                    .classes("card")
-                    .children(
-                        create("span")
-                            .text("This playlist has no tracks.")
-                            .build()
-                    ).build()
-            );
-        }
         const editActions = [];
         if (data.canEdit) {
             editActions.push(FJSC.button({
@@ -479,11 +460,7 @@ export class PlaylistTemplates {
                                     ).build(),
                             ).build()
                     ).build(),
-                create("div")
-                    .classes("flex-v")
-                    .children(
-                        ...trackChildren
-                    ).build()
+                TrackTemplates.tracksInList(noTracks, tracks, data, playlist, "playlist", startCallback)
             ).build();
     }
 

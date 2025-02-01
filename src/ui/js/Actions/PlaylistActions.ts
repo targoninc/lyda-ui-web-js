@@ -14,6 +14,8 @@ import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {MediaUploader} from "../Api/MediaUploader.ts";
 import {MediaFileType} from "../Enums/MediaFileType.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
+import {PlaylistTrack} from "../Models/DbModels/lyda/PlaylistTrack.ts";
+import {ListTrack} from "../Models/ListTrack.ts";
 
 export class PlaylistActions {
     static async openAddToPlaylistModal(objectToBeAdded: Album|Track, type: "track"|"album") {
@@ -106,10 +108,13 @@ export class PlaylistActions {
         fileInput.click();
     }
 
-    static async moveTrackInPlaylist(playlistId, trackId, newPosition) {
-        const res = await Api.postAsync(ApiRoutes.reorderPlaylistTracks, {id: playlistId, track_id: trackId, new_position: newPosition});
+    static async moveTrackInPlaylist(playlistId: number, tracks: ListTrack[]) {
+        const res = await Api.postAsync(ApiRoutes.reorderPlaylistTracks, {
+            playlist_id: playlistId,
+            tracks
+        });
         if (res.code !== 200) {
-            notify("Failed to move track in playlist: " + getErrorMessage(res), NotificationType.error);
+            notify("Failed to move tracks: " + getErrorMessage(res), NotificationType.error);
             return false;
         }
         return true;
