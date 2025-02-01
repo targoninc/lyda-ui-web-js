@@ -14,7 +14,7 @@ export class StreamClient {
         this.id = id;
         const src = compute(q => `${ApiRoutes.getTrackAudio}?id=${this.id}&quality=${q}&code=${code}`, currentQuality);
         this.audio = create("audio")
-            .attributes("crossOrigin", "anonymous")
+            .attributes("crossOrigin", "use-credentials")
             .attributes("preload", "auto")
             .attributes("autoplay", "false")
             .src(src)
