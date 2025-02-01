@@ -42,6 +42,7 @@ export const router = new Router(routes, async (route: Route, params: any) => {
     Ui.loadTheme().then();
     await Lyda.initPage(params);
 }, () => {}, () => {
+    console.log(window.location.pathname);
     setTimeout(() => {
         console.log("No route found, attempting to redirect to profile");
         const path = window.location.pathname;

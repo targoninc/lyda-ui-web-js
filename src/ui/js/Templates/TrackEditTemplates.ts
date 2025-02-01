@@ -418,7 +418,10 @@ export class TrackEditTemplates {
             name: "artistname",
             label: "Artist display name",
             placeholder: "My other alias",
-            value: compute(s => s.artistname, state),
+            value: compute(s => {
+                console.log(s.artistname);
+                return s.artistname;
+            }, state),
             onchange: (v) => {
                 state.value = {...state.value, artistname: v};
             }

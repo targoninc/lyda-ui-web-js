@@ -2,6 +2,11 @@ import {Route} from "./Router.ts";
 
 export const routes: Route[] = [
     {
+        path: "explore",
+        title: "Explore",
+        aliases: ["discover", "home", "app", "/"]
+    },
+    {
         path: "404",
         title: "404",
         aliases: ["error", "not-found"]
@@ -11,11 +16,6 @@ export const routes: Route[] = [
         title: "Profile",
         params: ["name"],
         aliases: ["user"]
-    },
-    {
-        path: "explore",
-        title: "Explore",
-        aliases: ["discover", "home", "app"]
     },
     {
         path: "following",

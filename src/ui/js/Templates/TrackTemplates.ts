@@ -30,7 +30,7 @@ import {AlbumTrack} from "../Models/DbModels/lyda/AlbumTrack.ts";
 import {Playlist} from "../Models/DbModels/lyda/Playlist.ts";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {CollaboratorType} from "../Models/DbModels/lyda/CollaboratorType.ts";
-import {currentTrackId, manualQueue} from "../state.ts";
+import {currentTrackId, currentUser, manualQueue} from "../state.ts";
 import {PillOption} from "../Models/PillOption.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 import {Ui} from "../Classes/Ui.ts";
@@ -568,12 +568,13 @@ export class TrackTemplates {
             ).build();
     }
 
-    static collaborator(track: Track, user: User, collaborator: TrackCollaborator): any {
+    static collaborator(track: Track, collaborator: TrackCollaborator): any {
         const avatarState = signal(Images.DEFAULT_AVATAR);
         if (collaborator.user?.has_avatar) {
             avatarState.value = Util.getUserAvatar(collaborator.user_id);
         }
         let actionButton = null, classes = [];
+        const user = currentUser.value;
         if (user && user.id === track.user_id) {
             actionButton = GenericTemplates.action(Icons.X, "Remove", track.id, async () => {
                 await TrackActions.removeCollaboratorFromTrack(track.id, collaborator.user_id);
@@ -590,7 +591,7 @@ export class TrackTemplates {
         return UserTemplates.linkedUser(collaborator.user_id, collaborator.user.username, collaborator.user.displayname, avatarState, collaborator.collab_type.name, actionButton, [], classes);
     }
 
-    static async trackPage(trackData: any, user: User) {
+    static async trackPage(trackData: any) {
         if (!trackData.track) {
             console.log(trackData);
             console.error("Invalid track data");
@@ -600,8 +601,8 @@ export class TrackTemplates {
         if (!track.likes || !track.reposts || !track.comments) {
             throw new Error(`Track ${track.id} is missing property likes, reposts or comments`);
         }
-        const liked = user ? track.likes.some((like: TrackLike) => like.user_id === user.id) : false;
-        const reposted = user ? track.reposts.some(repost => repost.user_id === user.id) : false;
+        const liked = compute(u => !!(track.likes?.some((like: TrackLike) => like.user_id === u?.id)), currentUser);
+        const reposted = compute(u => !!(track.reposts?.some(repost => repost.user_id === u?.id)), currentUser);
         const collaborators = track.collaborators ?? [];
         const toAppend = [];
         const linkedUserState = signal(collaborators);
@@ -610,7 +611,7 @@ export class TrackTemplates {
             return create("div")
                 .classes("flex")
                 .children(
-                    ...collaborators.map(collaborator => TrackTemplates.collaborator(track, user, collaborator)),
+                    ...collaborators.map(collaborator => TrackTemplates.collaborator(track, collaborator)),
                     trackData.canEdit ? TrackEditTemplates.addLinkedUserButton(async (newUsername: string, newUser: TrackCollaborator) => {
                         const newCollab = await TrackActions.addCollaboratorToTrack(track.id, newUser.user_id, newUser.type);
                         if (!newCollab) {
@@ -763,7 +764,7 @@ export class TrackTemplates {
                                     ).build()
                             ).build(),
                     ).build(),
-                TrackTemplates.audioActions(track, user, editActions),
+                TrackTemplates.audioActions(track, editActions),
                 create("div")
                     .classes("flex")
                     .children(
@@ -845,24 +846,17 @@ export class TrackTemplates {
             ).build();
     }
 
-    static audioActions(track: Track, user: User, editActions: AnyNode[]) {
-        let actions: AnyElement[] = [];
-        if (user) {
-            actions = [
-                FJSC.button({
+    static audioActions(track: Track, editActions: AnyNode[]) {
+        return create("div")
+            .classes("audio-actions", "flex")
+            .children(
+                ifjs(currentUser, FJSC.button({
                     text: "Add to playlist",
                     icon: { icon: "playlist_add" },
                     onclick: async () => {
                         await PlaylistActions.openAddToPlaylistModal(track, "track");
                     }
-                })
-            ];
-        }
-
-        return create("div")
-            .classes("audio-actions", "flex")
-            .children(
-                ...actions,
+                })),
                 ...editActions
             ).build();
     }

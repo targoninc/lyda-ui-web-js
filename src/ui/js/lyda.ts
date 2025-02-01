@@ -78,11 +78,11 @@ export class Lyda {
                 element.appendChild(TrackEditTemplates.uploadForm());
                 break;
             case "tracks":
-                if (!user) {
+                const feedType = element.getAttribute("feedType");
+                if (!user && feedType !== "explore") {
                     notify("You need to be logged in to see your feed", NotificationType.error);
                     return;
                 }
-                const feedType = element.getAttribute("feedType");
                 if (!feedType) {
                     throw new Error("Missing feed type");
                 }
@@ -107,10 +107,6 @@ export class Lyda {
                 ProfilePage.addTabSectionAsync(element, data, isOwnProfile).then();
                 break;
             case "track":
-                if (!user) {
-                    navigate("explore");
-                    return;
-                }
                 if (data.error) {
                     notify(data.error, NotificationType.error);
                     return;
@@ -118,7 +114,7 @@ export class Lyda {
                 document.title = data.track.title;
                 currentSecretCode.value = params.code;
                 await PlayManager.cacheTrackData(data);
-                const trackPage = await TrackTemplates.trackPage(data, user);
+                const trackPage = await TrackTemplates.trackPage(data);
                 if (!trackPage) {
                     return;
                 }
