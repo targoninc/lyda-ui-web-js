@@ -190,7 +190,7 @@ export class PlayerTemplates {
     static playingFrom() {
         const id = compute(pf => pf?.id, playingFrom);
         const type = compute(pf => pf?.type, playingFrom);
-        const name = compute(pf => pf?.name, playingFrom);
+        const name = compute(pf => `Playing from ${pf?.name}`, playingFrom);
 
         return ifjs(playingFrom, create("div")
             .classes("playing-from", "flex")
@@ -198,7 +198,7 @@ export class PlayerTemplates {
                 create("span")
                     .classes("text-small", "padded-inline", "align-center", "clickable", "rounded")
                     .onclick(() => navigate(`${type.value}/${id.value}`))
-                    .text("Playing from " + name)
+                    .text(name)
                     .build(),
             ).build());
     }

@@ -52,6 +52,12 @@ manualQueue.subscribe((newQueue, changed) => {
 });
 
 export const contextQueue = signal<number[]>([]);
+contextQueue.subscribe((newQueue, changed) => {
+    if (!changed) {
+        return;
+    }
+    LydaCache.set("contextQueue", new CacheItem(newQueue));
+});
 export const autoQueue = signal<number[]>([]);
 
 export const playingFrom = signal<PlayingFrom|null>(null);

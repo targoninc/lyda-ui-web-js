@@ -524,6 +524,8 @@ export class TrackTemplates {
                                             create("div")
                                                 .classes("flex")
                                                 .children(
+                                                    StatisticsTemplates.likesIndicator("track", track.id, track.likes.length ?? [],
+                                                        Util.arrayPropertyMatchesUser(track.likes, "user_id")),
                                                     TrackTemplates.title(track.title, track.id, icons),
                                                     create("span")
                                                         .classes("nopointer", "text-small", "align-center")
@@ -533,8 +535,6 @@ export class TrackTemplates {
                                                         .classes("date", "text-small", "nopointer", "color-dim", "align-center")
                                                         .text(Time.ago(track.created_at))
                                                         .build(),
-                                                    StatisticsTemplates.likesIndicator("track", track.id, track.likes.length ?? [],
-                                                        Util.arrayPropertyMatchesUser(track.likes, "user_id")),
                                                     create("div")
                                                         .classes("flex-grow")
                                                         .build(),
