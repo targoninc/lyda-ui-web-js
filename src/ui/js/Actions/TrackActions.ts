@@ -347,7 +347,7 @@ export class TrackActions {
         }));
     }
 
-    static async removeTrackFromList(tracks: Signal<ListTrack[]>, list: Playlist | Album, type: string, track: ListTrack, elementReference: AnyElement) {
+    static async removeTrackFromList(tracks: Signal<ListTrack[]>, list: Playlist | Album, type: string, track: ListTrack) {
         await Ui.getConfirmationModal("Remove track from " + type, "Are you sure you want to remove this track from " + list.title +"?", "Yes", "No", async () => {
             let success;
             if (type === "album") {
@@ -355,8 +355,7 @@ export class TrackActions {
             } else {
                 success = await PlaylistActions.removeTrackFromPlaylist(track.track_id, [list.id]);
             }
-            if (success && elementReference) {
-                elementReference.remove();
+            if (success) {
                 tracks.value = tracks.value.filter(t => t.track_id !== track.track_id);
             }
         }, () => {
@@ -366,6 +365,9 @@ export class TrackActions {
     static async reorderTrack(type: string, listId: number, trackId: number, tracks: Signal<ListTrack[]>, newPosition: number) {
         let success;
         const oldPosition = tracks.value.findIndex(t => t.track_id === trackId);
+        if (oldPosition === newPosition) {
+            return;
+        }
         this.moveTrackToPosition(trackId, newPosition, tracks);
         if (type === "album") {
             success = AlbumActions.moveTrackInAlbum(listId, tracks.value);

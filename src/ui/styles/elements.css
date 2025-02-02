@@ -44,6 +44,34 @@
     height: 100%;
 }
 
+.vertical-drag-indicator {
+    height: 100%;
+    width: 1em;
+    cursor: grab;
+    position: relative;
+    border-radius: var(--border-radius);
+}
+
+.vertical-drag-indicator:hover {
+    background: var(--blue);
+}
+
+.vertical-drag-indicator::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%) translateX(-50%);
+    width: .5em;
+    height: 2em;
+    background: var(--color-6);
+    border-radius: var(--border-radius);
+}
+
+.vertical-drag-indicator:hover::before {
+    background: var(--color-5);
+}
+
 .dragIndicator.dragover, .dragIndicator.active {
     position: absolute;
     z-index: 5;

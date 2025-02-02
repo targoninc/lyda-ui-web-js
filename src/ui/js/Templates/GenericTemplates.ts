@@ -940,4 +940,10 @@ export class GenericTemplates {
                     ).build())
             ).build();
     }
+
+    static verticalDragIndicator() {
+        return create("div")
+            .classes("vertical-drag-indicator")
+            .build();
+    }
 }

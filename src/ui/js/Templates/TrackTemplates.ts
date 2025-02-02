@@ -15,7 +15,6 @@ import {Images} from "../Enums/Images.ts";
 import {TrackEditTemplates} from "./TrackEditTemplates.ts";
 import {CustomText} from "../Classes/Helpers/CustomText.ts";
 import {CommentTemplates} from "./CommentTemplates.ts";
-import {TrackProcessor} from "../Classes/Helpers/TrackProcessor.ts";
 import {AnyElement, AnyNode, create, HtmlPropertyValue, ifjs, signalMap} from "../../fjsc/src/f2.ts";
 import {navigate} from "../Routing/Router.ts";
 import {Track} from "../Models/DbModels/lyda/Track.ts";
@@ -25,8 +24,6 @@ import {TrackLike} from "../Models/DbModels/lyda/TrackLike.ts";
 import {Repost} from "../Models/DbModels/lyda/Repost.ts";
 import {Album} from "../Models/DbModels/lyda/Album.ts";
 import {FJSC} from "../../fjsc";
-import {PlaylistTrack} from "../Models/DbModels/lyda/PlaylistTrack.ts";
-import {AlbumTrack} from "../Models/DbModels/lyda/AlbumTrack.ts";
 import {Playlist} from "../Models/DbModels/lyda/Playlist.ts";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {CollaboratorType} from "../Models/DbModels/lyda/CollaboratorType.ts";
@@ -412,8 +409,8 @@ export class TrackTemplates {
             ).build();
     }
 
-    static listTrackInAlbumOrPlaylist(listTrack: ListTrack, canEdit: boolean, list: Album|Playlist,
-                                      tracks: Signal<ListTrack[]>, type: "album" | "playlist", startCallback: Function | null = null) {
+    static trackInList(listTrack: ListTrack, canEdit: boolean, list: Album|Playlist,
+                       tracks: Signal<ListTrack[]>, type: "album" | "playlist", startCallback: Function | null = null) {
         const icons = [];
         const track = listTrack.track;
         if (!track) {
@@ -434,45 +431,13 @@ export class TrackTemplates {
             graphics.push(TrackTemplates.waveform(track, [], true));
         }
 
-        const trackActions = [];
-        let itemNode: AnyElement;
-        if (canEdit) {
-            trackActions.push(FJSC.button({
-                text: "Move up",
-                icon: { icon: "keyboard_arrow_up" },
-                classes: ["positive"],
-                disabled: compute(p => p[0].track_id === track.id, tracks),
-                onclick: async () => {
-                    await TrackActions.reorderTrack(type, list.id, track.id, tracks, listTrack.position - 1);
-                }
-            }));
-            trackActions.push(FJSC.button({
-                text: "Move down",
-                icon: { icon: "keyboard_arrow_down" },
-                classes: ["positive"],
-                disabled: compute(p => p[p.length - 1].track_id === track.id, tracks),
-                onclick: async () => {
-                    await TrackActions.reorderTrack(type, list.id, track.id, tracks, listTrack.position + 1);
-                }
-            }));
-            trackActions.push(FJSC.button({
-                text: "Remove from " + type,
-                icon: { icon: "close" },
-                classes: ["negative"],
-                onclick: async () => {
-                    await TrackActions.removeTrackFromList(tracks, list, type, listTrack, itemNode);
-                }
-            }));
-        }
-
         const dragData = {
             type: "track",
             id: track.id,
         };
 
         let item = create("div")
-            .classes("flex", "fadeIn", "track-in-list")
-            .attributes("track_id", track.id);
+            .classes("flex", "fadeIn", "track-in-list");
 
         if (canEdit) {
             item = item
@@ -492,10 +457,9 @@ export class TrackTemplates {
 
         const playingClasses = currentTrackId.value === track.id ? ["playing"] : [];
 
-        itemNode = item.children(
+        return item.children(
             create("div")
                 .classes("list-track", "flex", "padded", "rounded", "fullWidth", "card", ...playingClasses)
-                .attributes("track_id", track.id)
                 .styles("max-width", "100%")
                 .ondblclick(async () => {
                     if (!startCallback) {
@@ -506,6 +470,7 @@ export class TrackTemplates {
                     }
                 })
                 .children(
+                    ifjs(canEdit, GenericTemplates.verticalDragIndicator()),
                     TrackTemplates.smallListTrackCover(track, startCallback),
                     create("div")
                         .classes("flex-v", "flex-grow")
@@ -533,7 +498,7 @@ export class TrackTemplates {
                                                     create("div")
                                                         .classes("flex-grow")
                                                         .build(),
-                                                    ...trackActions
+                                                    ifjs(canEdit, TrackTemplates.trackInListActions(track, list, listTrack, tracks, type)),
                                                 ).build(),
                                         ).build(),
                                 ).build(),
@@ -545,8 +510,40 @@ export class TrackTemplates {
                         ).build()
                 ).build()
         ).build();
+    }
 
-        return itemNode;
+    static trackInListActions(track: Track, list: Album|Playlist,
+                              listTrack: ListTrack, tracks: Signal<ListTrack[]>, type: "album" | "playlist") {
+        return create("div")
+            .classes("flex")
+            .children(
+                FJSC.button({
+                    text: "Move up",
+                    icon: { icon: "keyboard_arrow_up" },
+                    classes: ["positive"],
+                    disabled: compute(p => p[0].track_id === track.id, tracks),
+                    onclick: async () => {
+                        await TrackActions.reorderTrack(type, list.id, track.id, tracks, listTrack.position - 1);
+                    }
+                }),
+                FJSC.button({
+                    text: "Move down",
+                    icon: { icon: "keyboard_arrow_down" },
+                    classes: ["positive"],
+                    disabled: compute(p => p[p.length - 1].track_id === track.id, tracks),
+                    onclick: async () => {
+                        await TrackActions.reorderTrack(type, list.id, track.id, tracks, listTrack.position + 1);
+                    }
+                }),
+                FJSC.button({
+                    text: "Remove from " + type,
+                    icon: { icon: "close" },
+                    classes: ["negative"],
+                    onclick: async () => {
+                        await TrackActions.removeTrackFromList(tracks, list, type, listTrack);
+                    }
+                })
+            ).build();
     }
 
     static tracksInList(noTracks: Signal<boolean>, tracks: Signal<ListTrack[]>, data: any, list: Album|Playlist,
@@ -568,7 +565,7 @@ export class TrackTemplates {
                             ifjs(data.canEdit, GenericTemplates.dragTargetInList(async (data: any) => {
                                 await TrackActions.reorderTrack(type, list.id, data.id, tracks, i);
                             }, i.toString())),
-                            TrackTemplates.listTrackInAlbumOrPlaylist(track, data.canEdit, list, tracks, "album", startCallback)
+                            TrackTemplates.trackInList(track, data.canEdit, list, tracks, "album", startCallback)
                         ).build();
                 })
             ).build();
