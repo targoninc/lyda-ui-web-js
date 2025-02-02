@@ -124,9 +124,8 @@ export class SearchTemplates {
                         if (pressedKey !== "Backspace" && pressedKey !== "Delete" && pressedKey.length > 1) {
                             return;
                         }
-                        search = search.trim();
 
-                        if (search.length === 0) {
+                        if (search.trim().length === 0) {
                             results.value = [];
                             currentSearch.value = "";
                             return;
