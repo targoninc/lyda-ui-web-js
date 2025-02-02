@@ -209,7 +209,13 @@ export class Ui {
     }
 }
 
+const currentNotifications = signal<string[]>([]);
+
 export function notify(text: string, type = NotificationType.info, time = 7000) {
+    if (currentNotifications.value.includes(text)) {
+        return;
+    }
+    currentNotifications.value.push(text);
     const notifications = document.querySelector(".notifications");
     const notification = GenericTemplates.notification(type, text);
     const previousNotifications = document.querySelectorAll(".notification") as NodeListOf<HTMLElement>;
@@ -222,5 +228,6 @@ export function notify(text: string, type = NotificationType.info, time = 7000) 
     notifications?.appendChild(notification);
     setTimeout(() => {
         notification.remove();
+        currentNotifications.value = currentNotifications.value.filter(n => n !== text);
     }, time);
 }
