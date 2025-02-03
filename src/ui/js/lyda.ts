@@ -159,7 +159,8 @@ export class Lyda {
                 break;
             case "library":
                 if (!user) {
-                    navigate("explore");
+                    notify("You need to be logged in to view your library", NotificationType.error);
+                    navigate("login");
                     return;
                 }
                 const name = params.name ?? "";
@@ -195,6 +196,7 @@ export class Lyda {
             case "unapprovedTracks":
                 if (!user) {
                     notify("You need to be logged in to see unapproved tracks", NotificationType.error);
+                    navigate("login");
                     return;
                 }
                 TrackActions.getUnapprovedTracks().then(tracks => {
@@ -204,6 +206,7 @@ export class Lyda {
             case "moderation":
                 if (!user) {
                     notify("You need to be logged in to moderate", NotificationType.error);
+                    navigate("login");
                     return;
                 }
                 if (!permissions.value.some(p => p.name === Permissions.canDeleteComments)) {
@@ -214,6 +217,7 @@ export class Lyda {
                 break;
             case "subscribe":
                 if (!user) {
+                    notify("You can only subscribe if you have an account already", NotificationType.warning);
                     navigate("login");
                     return;
                 }

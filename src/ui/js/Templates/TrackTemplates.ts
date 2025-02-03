@@ -684,7 +684,7 @@ export class TrackTemplates {
         const showComments = signal(false);
         const comments = signal<Comment[]>([]);
         Api.getAsync<Comment[]>(ApiRoutes.getCommentsByTrackId, {track_id: track.id}).then((c) => {
-            if (!c.data) {
+            if (!c.data || c.data.error) {
                 return;
             }
             comments.value = c.data;

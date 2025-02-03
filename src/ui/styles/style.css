@@ -516,6 +516,12 @@ button.unread:before {
     max-width: 100dvw;
 }
 
+.notification.warning {
+    background: var(--orange);
+    border: 1px solid var(--orange);
+    color: var(--color-4);
+}
+
 .notification.error {
     background: var(--red);
     border: 1px solid var(--red);

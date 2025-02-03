@@ -325,7 +325,7 @@ export class CommentTemplates {
     }
 
     static commentButton(showButton: boolean, comments: Signal<Comment[]>, showComments: Signal<boolean> = signal(false)) {
-        const count = compute(c => c.length.toString(), comments);
+        const count = compute(c => c.length && c.length.toString(), comments);
 
         return create("div")
             .children(
