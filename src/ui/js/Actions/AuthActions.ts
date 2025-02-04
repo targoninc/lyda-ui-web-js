@@ -27,8 +27,8 @@ export class AuthActions {
         AuthActions.resetUiState();
         const res = await Api.postAsync(ApiRoutes.logout);
         if (res.code === 200) {
-            window.location.reload();
             notify("Logged out!", NotificationType.success);
+            navigate("login");
         }
         return res;
     }
