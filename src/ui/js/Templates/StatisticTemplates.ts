@@ -1,6 +1,6 @@
 import {Chart, registerables} from "chart.js";
 import {BoxPlotChart} from "@sgratzl/chartjs-chart-boxplot";
-import {create, HtmlPropertyValue} from "../../fjsc/src/f2.ts";
+import {create, HtmlPropertyValue, ifjs, nullElement} from "../../fjsc/src/f2.ts";
 import {Colors} from "../Classes/Colors.ts";
 import {ChartOptions} from "../Classes/ChartOptions.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
@@ -11,10 +11,12 @@ import {Permissions} from "../Enums/Permissions.ts";
 import {FormTemplates} from "./FormTemplates.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {signal} from "../../fjsc/src/signals.ts";
+import {compute, signal} from "../../fjsc/src/signals.ts";
 import {User} from "../Models/DbModels/lyda/User.ts";
 import {getErrorMessage} from "../Classes/Util.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
+import {Permission} from "../Models/DbModels/lyda/Permission.ts";
+import {permissions} from "../state.ts";
 
 Chart.register(...registerables);
 
@@ -171,12 +173,12 @@ export class StatisticTemplates {
         return StatisticTemplates.barChart(labels, values, title, `${title} by time`, `activityByTimeChart-${id}`, usedColors);
     }
 
-    static royaltyCalculator(royaltyInfo) {
+    static royaltyCalculator(royaltyInfo: any) {
         if (!royaltyInfo.calculatableMonths) {
-            return [];
+            return nullElement();
         }
 
-        const months = royaltyInfo.calculatableMonths.map(m => {
+        const months = royaltyInfo.calculatableMonths.map((m: any) => {
             return {
                 value: m.month,
                 text: m.month + (m.calculated ? " (calculated)" : "")
@@ -184,73 +186,33 @@ export class StatisticTemplates {
         });
         const selectedState = signal(months[0]);
 
-        return [
-            FormTemplates.dropDownField("Month", months, selectedState),
-            GenericTemplates.action(Icons.CALCULATE, "Calculate royalties", "calculateRoyalties", async () => {
-                const res = await Api.postAsync(ApiRoutes.calculateRoyalties, {
-                    month: selectedState.value
-                });
-                if (res.code !== 200) {
-                    notify(getErrorMessage(res), NotificationType.error);
-                    return;
-                }
-                notify("Royalties calculated");
-            }),
-        ];
-    }
-
-    static statisticActions(user: User, royaltyInfo, permissions) {
-        let actions = [];
-
-        if (permissions.find(p => p.name === Permissions.canCalculateRoyalties)) {
-            actions = actions.concat(StatisticTemplates.royaltyCalculator(royaltyInfo));
-        }
-
-        if (royaltyInfo.available && parseFloat(royaltyInfo.available) >= 0.5) {
-            const paypalMailExistsState = signal(royaltyInfo.paypalMail !== null);
-            const visibilityClass = signal(paypalMailExistsState.value ? "visible" : "hidden");
-            const invertVisibilityClass = signal(paypalMailExistsState.value ? "hidden" : "visible");
-            paypalMailExistsState.onUpdate = (exists) => {
-                visibilityClass.value = exists ? "visible" : "hidden";
-                invertVisibilityClass.value = exists ? "hidden" : "visible";
-            };
-
-            actions.push(GenericTemplates.action(Icons.PAYPAL, "Set PayPal mail", "setPaypalMail", async () => {
-                await Ui.getTextInputModal("Set PayPal mail", "The account you will receive payments with", "", "Save", "Cancel", async (address) => {
-                    const res = await Api.postAsync(ApiRoutes.updateUser, {address});
-                    if (res.code !== 200) {
-                        notify(getErrorMessage(res), NotificationType.error);
-                        return;
-                    }
-                    notify("PayPal mail set", NotificationType.success);
-                    paypalMailExistsState.value = true;
-                }, () => {
-                }, Icons.PAYPAL);
-            }, [], [invertVisibilityClass, "secondary"]));
-            actions.push(GenericTemplates.action(Icons.PAYPAL, "Remove PayPal mail", "removePaypalMail", async () => {
-                await Ui.getConfirmationModal("Remove PayPal mail", "Are you sure you want to remove your paypal mail? You'll have to add it again manually.", "Yes", "No", async () => {
-                    const res = await Api.postAsync(ApiRoutes.updateUserSetting, {
-                        setting: "paypalMail",
-                        value: ""
+        return create("div")
+            .classes("flex")
+            .children(
+                FormTemplates.dropDownField("Month", months, selectedState),
+                GenericTemplates.action(Icons.CALCULATE, "Calculate royalties", "calculateRoyalties", async () => {
+                    const res = await Api.postAsync(ApiRoutes.calculateRoyalties, {
+                        month: selectedState.value
                     });
                     if (res.code !== 200) {
                         notify(getErrorMessage(res), NotificationType.error);
                         return;
                     }
-                    notify("PayPal mail removed", NotificationType.success);
-                    paypalMailExistsState.value = false;
-                }, () => {
-                }, Icons.WARNING);
-            }, [], [visibilityClass, "secondary"]));
-            actions.push(GenericTemplates.action(Icons.PAY, "Request payment", "requestPayment", async () => {
-                const res = await Api.postAsync(ApiRoutes.requestPayment);
-                if (res.code !== 200) {
-                    notify(getErrorMessage(res), NotificationType.error);
-                    return;
-                }
-                notify("Payment requested", NotificationType.success);
-            }, [], [visibilityClass, "secondary"]));
-        }
+                    notify("Royalties calculated");
+                }),
+            ).build();
+    }
+
+    static statisticActions(royaltyInfo: any) {
+        const canCalculateRoyalties = compute(p => p.some(p => p.name === Permissions.canCalculateRoyalties), permissions);
+        const hasPayableRoyalties = royaltyInfo.available && parseFloat(royaltyInfo.available) >= 0.5;
+        const paypalMailExistsState = signal(royaltyInfo.paypalMail !== null);
+        const visibilityClass = signal(paypalMailExistsState.value ? "visible" : "hidden");
+        const invertVisibilityClass = signal(paypalMailExistsState.value ? "hidden" : "visible");
+        paypalMailExistsState.onUpdate = (exists) => {
+            visibilityClass.value = exists ? "visible" : "hidden";
+            invertVisibilityClass.value = exists ? "hidden" : "visible";
+        };
 
         return create("div")
             .classes("flex-v", "card")
@@ -258,9 +220,49 @@ export class StatisticTemplates {
                 StatisticTemplates.royaltyInfo(royaltyInfo),
                 create("div")
                     .classes("flex")
-                    .children(...actions)
-                    .build()
-            ).build();
+                    .children(
+                        ifjs(canCalculateRoyalties, StatisticTemplates.royaltyCalculator(royaltyInfo)),
+                        ifjs(hasPayableRoyalties, create("div")
+                            .classes("flex")
+                            .children(
+                                GenericTemplates.action(Icons.PAYPAL, "Set PayPal mail", "setPaypalMail", async () => {
+                                    await Ui.getTextInputModal("Set PayPal mail", "The account you will receive payments with", "", "Save", "Cancel", async (address) => {
+                                        const res = await Api.postAsync(ApiRoutes.updateUser, {address});
+                                        if (res.code !== 200) {
+                                            notify(getErrorMessage(res), NotificationType.error);
+                                            return;
+                                        }
+                                        notify("PayPal mail set", NotificationType.success);
+                                        paypalMailExistsState.value = true;
+                                    }, () => {
+                                    }, Icons.PAYPAL);
+                                }, [], [invertVisibilityClass, "secondary"]),
+                                GenericTemplates.action(Icons.PAYPAL, "Remove PayPal mail", "removePaypalMail", async () => {
+                                    await Ui.getConfirmationModal("Remove PayPal mail", "Are you sure you want to remove your paypal mail? You'll have to add it again manually.", "Yes", "No", async () => {
+                                        const res = await Api.postAsync(ApiRoutes.updateUserSetting, {
+                                            setting: "paypalMail",
+                                            value: ""
+                                        });
+                                        if (res.code !== 200) {
+                                            notify(getErrorMessage(res), NotificationType.error);
+                                            return;
+                                        }
+                                        notify("PayPal mail removed", NotificationType.success);
+                                        paypalMailExistsState.value = false;
+                                    }, () => {
+                                    }, Icons.WARNING);
+                                }, [], [visibilityClass, "secondary"]),
+                                GenericTemplates.action(Icons.PAY, "Request payment", "requestPayment", async () => {
+                                        const res = await Api.postAsync(ApiRoutes.requestPayment);
+                                        if (res.code !== 200) {
+                                            notify(getErrorMessage(res), NotificationType.error);
+                                            return;
+                                        }
+                                        notify("Payment requested", NotificationType.success);
+                                    }, [], [visibilityClass, "secondary"])
+                                ).build())
+                        ).build()
+                    ).build();
     }
 
     static royaltyInfo(royaltyInfo) {
