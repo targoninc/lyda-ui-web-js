@@ -10,7 +10,6 @@ export class ApiRoutes {
 
     // region User
     private static auth = ApiRoutes.base + "/auth";
-    static isLoggedIn = ApiRoutes.auth + "/isLoggedIn";
 
     private static user = ApiRoutes.base + "/user";
     static getUser = ApiRoutes.user + "/get";

@@ -13,6 +13,7 @@ import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {navigate} from "../Routing/Router.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
+import {currentUser} from "../state.ts";
 
 export interface AuthData {
     termsOfService: boolean;
@@ -102,7 +103,10 @@ export class LandingPageTemplates {
     }
 
     static completeBox() {
-        window.location.href = "/";
+        AuthApi.user(null, user => {
+            currentUser.value = user;
+        });
+        navigate("profile");
 
         return LandingPageTemplates.waitingBox("Complete", "Redirecting...");
     }

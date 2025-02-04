@@ -2,6 +2,7 @@ import {Api, ApiResponse} from "./Api.ts";
 import {notify} from "../Classes/Ui.ts";
 import {ApiRoutes} from "./ApiRoutes.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
+import {User} from "../Models/DbModels/lyda/User.ts";
 
 export class AuthApi {
     static userExists(email: string, successCallback: Function = () => {
@@ -31,10 +32,10 @@ export class AuthApi {
         });
     }
 
-    static user(id: number, successCallback: Function) {
+    static user(id: number|null, successCallback: (user: User) => void) {
         Api.getAsync(ApiRoutes.getUser, {id}).then((response) => {
             if (response.code === 200) {
-                successCallback(response.data);
+                successCallback(response.data as User);
             }
         });
     }

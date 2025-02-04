@@ -38,20 +38,9 @@ export class Ui {
     }
 
     static async initializeNavBar() {
-        let signedIn = true;
         await Util.getUser();
-        if (!currentUser.value) {
-            signedIn = false;
-        }
         if (document.getElementById("navTop") === null) {
-            let userTemplateRender;
-            if (signedIn) {
-                await UserActions.getNotifications();
-                userTemplateRender = NavTemplates.accountSection();
-            } else {
-                userTemplateRender = NavTemplates.notSignedInNote();
-            }
-            document.body.prepend(NavTemplates.navTop(userTemplateRender));
+            document.body.prepend(NavTemplates.navTop());
 
             setTimeout(() => {
                 window.onresize = async () => {

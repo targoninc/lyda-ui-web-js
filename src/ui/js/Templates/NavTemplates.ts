@@ -19,7 +19,11 @@ import {currentUser, notifications} from "../state.ts";
 import {SearchContext} from "../Enums/SearchContext.ts";
 
 export class NavTemplates {
-    static navTop(userTemplate: AnyNode) {
+    static navTop() {
+        currentUser.subscribe(async () => {
+            await UserActions.getNotifications();
+        });
+
         return create("nav")
             .id("navTop")
             .children(
@@ -40,7 +44,8 @@ export class NavTemplates {
                         }),
                         SearchTemplates.search(SearchContext.navBar),
                     ).build(),
-                userTemplate
+                ifjs(currentUser, NavTemplates.accountSection()),
+                ifjs(currentUser, NavTemplates.notSignedInNote(), true)
             ).build();
     }
 
