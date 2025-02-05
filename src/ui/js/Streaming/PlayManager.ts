@@ -171,11 +171,6 @@ export class PlayManager {
     static async startAsync(id: number) {
         await PlayManager.stopAllAsync();
 
-        if (!Util.isLoggedIn()) {
-            notify("You need to be logged in to play music", NotificationType.error);
-            return;
-        }
-
         const track = await PlayManager.getTrackData(id);
         const streamClient = PlayManager.addStreamClientIfNotExists(id, track.track.length);
 

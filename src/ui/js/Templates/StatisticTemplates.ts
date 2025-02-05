@@ -12,10 +12,8 @@ import {FormTemplates} from "./FormTemplates.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {compute, signal} from "../../fjsc/src/signals.ts";
-import {User} from "../Models/DbModels/lyda/User.ts";
 import {getErrorMessage} from "../Classes/Util.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
-import {Permission} from "../Models/DbModels/lyda/Permission.ts";
 import {permissions} from "../state.ts";
 
 Chart.register(...registerables);
