@@ -15,13 +15,17 @@ import {compute, signal} from "../../fjsc/src/signals.ts";
 import {getErrorMessage} from "../Classes/Util.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {permissions} from "../state.ts";
+import {RoyaltyInfo} from "../Models/RoyaltyInfo.ts";
+import {UserSettings} from "../Enums/UserSettings.ts";
+import {FJSC} from "../../fjsc";
+import {SelectOption} from "../../fjsc/src/Types.ts";
 
 Chart.register(...registerables);
 
 const usedColors = Colors.themedList;
 
 export class StatisticTemplates {
-    static donutChart(labels, values, valueTitle, title, id, colors = usedColors) {
+    static donutChart(labels: string[], values: number[], valueTitle: string, title: string, id: string, colors = usedColors) {
         const ctx = create("canvas")
             .classes("chart")
             .id(id)
@@ -59,7 +63,7 @@ export class StatisticTemplates {
             ).build();
     }
 
-    static barChart(labels, values, valueTitle, title, id, colors = usedColors) {
+    static barChart(labels: string[], values: number[], valueTitle: string, title: string, id: string, colors = usedColors) {
         const ctx = create("canvas")
             .classes("chart")
             .id(id)
@@ -94,7 +98,7 @@ export class StatisticTemplates {
             ).build();
     }
 
-    static boxPlotChart(values, title, id, colors = usedColors) {
+    static boxPlotChart(values: number[], title: string, id: string, colors = usedColors) {
         const ctx = create("canvas")
             .classes("chart")
             .id(id)
@@ -171,32 +175,37 @@ export class StatisticTemplates {
         return StatisticTemplates.barChart(labels, values, title, `${title} by time`, `activityByTimeChart-${id}`, usedColors);
     }
 
-    static royaltyCalculator(royaltyInfo: any) {
+    static royaltyCalculator(royaltyInfo: RoyaltyInfo) {
         if (!royaltyInfo.calculatableMonths) {
             return nullElement();
         }
 
         const months = royaltyInfo.calculatableMonths.map((m: any) => {
-            return {
-                value: m.month,
-                text: m.month + (m.calculated ? " (calculated)" : "")
+            return <SelectOption>{
+                id: m.year * 100 + m.month,
+                name: m.year + "-" + m.month + (m.calculated ? " (calculated)" : "")
             };
         });
-        const selectedState = signal(months[0]);
+        const selectedState = signal(months[0]?.id ?? null);
 
         return create("div")
-            .classes("flex")
+            .classes("flex", "align-children")
             .children(
-                FormTemplates.dropDownField("Month", months, selectedState),
-                GenericTemplates.action(Icons.CALCULATE, "Calculate royalties", "calculateRoyalties", async () => {
-                    const res = await Api.postAsync(ApiRoutes.calculateRoyalties, {
-                        month: selectedState.value
-                    });
-                    if (res.code !== 200) {
-                        notify(getErrorMessage(res), NotificationType.error);
-                        return;
+                FormTemplates.dropDownField("Month", signal(months), selectedState),
+                FJSC.button({
+                    text: "Calculate royalties",
+                    icon: { icon: "calculate" },
+                    classes: ["positive"],
+                    onclick: async () => {
+                        const res = await Api.postAsync(ApiRoutes.calculateRoyalties, {
+                            month: selectedState.value
+                        });
+                        if (res.code !== 200) {
+                            notify(getErrorMessage(res), NotificationType.error);
+                            return;
+                        }
+                        notify("Royalties calculated");
                     }
-                    notify("Royalties calculated");
                 }),
             ).build();
     }
@@ -224,8 +233,11 @@ export class StatisticTemplates {
                             .classes("flex")
                             .children(
                                 GenericTemplates.action(Icons.PAYPAL, "Set PayPal mail", "setPaypalMail", async () => {
-                                    await Ui.getTextInputModal("Set PayPal mail", "The account you will receive payments with", "", "Save", "Cancel", async (address) => {
-                                        const res = await Api.postAsync(ApiRoutes.updateUser, {address});
+                                    await Ui.getTextInputModal("Set PayPal mail", "The account you will receive payments with", "", "Save", "Cancel", async (address: string) => {
+                                        const res = await Api.postAsync(ApiRoutes.updateUserSetting, {
+                                            key: UserSettings.paypalMail,
+                                            value: address
+                                        });
                                         if (res.code !== 200) {
                                             notify(getErrorMessage(res), NotificationType.error);
                                             return;
@@ -263,7 +275,7 @@ export class StatisticTemplates {
                     ).build();
     }
 
-    static royaltyInfo(royaltyInfo) {
+    static royaltyInfo(royaltyInfo: RoyaltyInfo) {
         return create("div")
             .classes("flex")
             .children(
