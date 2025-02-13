@@ -144,12 +144,13 @@ export class ApiRoutes {
     static getRoyaltiesByMonth = ApiRoutes.statistics + "/royaltiesByMonth";
     static getRoyaltiesByTrack = ApiRoutes.statistics + "/royaltiesByTrack";
     static getActivityByTime = ApiRoutes.statistics + "/activityByTime";
-    static getRoyaltyInfo = ApiRoutes.statistics + "/royaltyInfo";
     // endregion
 
     // region Royalties
     private static royalties = ApiRoutes.base + "/royalties";
+    static getRoyaltyInfo = ApiRoutes.royalties + "/info";
     static requestPayment = ApiRoutes.royalties + "/requestPayment";
+    static calculateEarnings = ApiRoutes.royalties + "/calculateEarnings";
     static calculateRoyalties = ApiRoutes.royalties + "/calculate";
     // endregion
 

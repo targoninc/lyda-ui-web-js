@@ -183,22 +183,52 @@ export class StatisticTemplates {
         const months = royaltyInfo.calculatableMonths.map((m: any) => {
             return <SelectOption>{
                 id: m.year * 100 + m.month,
-                name: m.year + "-" + m.month + (m.calculated ? " (calculated)" : "")
+                name: m.year + "-" + m.month + (m.calculated ? " (calculated)" : ""),
             };
         });
         const selectedState = signal(months[0]?.id ?? null);
+        const selectedMonth = compute(id => royaltyInfo.calculatableMonths.find(m => m.year * 100 + m.month === id), selectedState);
+        const hasEarnings = compute(month => month?.hasEarnings ?? false, selectedMonth);
 
         return create("div")
             .classes("flex", "align-children")
             .children(
                 FormTemplates.dropDownField("Month", signal(months), selectedState),
                 FJSC.button({
+                    text: "Calculate earnings",
+                    icon: { icon: "account_balance" },
+                    classes: ["positive"],
+                    onclick: async () => {
+                        const month = selectedMonth.value;
+                        if (!month) {
+                            notify("Please select a month", NotificationType.error);
+                            return;
+                        }
+                        const res = await Api.postAsync(ApiRoutes.calculateEarnings, {
+                            month: month.month,
+                            year: month.year,
+                        });
+                        if (res.code !== 200) {
+                            notify(getErrorMessage(res), NotificationType.error);
+                            return;
+                        }
+                        notify("Earnings calculated");
+                    }
+                }),
+                FJSC.button({
                     text: "Calculate royalties",
                     icon: { icon: "calculate" },
                     classes: ["positive"],
+                    disabled: compute(has => !has, hasEarnings),
                     onclick: async () => {
+                        const month = selectedMonth.value;
+                        if (!month) {
+                            notify("Please select a month", NotificationType.error);
+                            return;
+                        }
                         const res = await Api.postAsync(ApiRoutes.calculateRoyalties, {
-                            month: selectedState.value
+                            month: month.month,
+                            year: month.year,
                         });
                         if (res.code !== 200) {
                             notify(getErrorMessage(res), NotificationType.error);

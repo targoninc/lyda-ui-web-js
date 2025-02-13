@@ -1,4 +1,6 @@
 export interface RoyaltyMonth {
-    month: string;
+    month: number;
+    year: number;
+    hasEarnings: boolean;
     calculated: boolean;
 }
