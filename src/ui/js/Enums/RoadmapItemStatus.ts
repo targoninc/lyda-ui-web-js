@@ -6,6 +6,6 @@ export enum RoadmapItemStatus {
 
 export const roadMapItemIcons: Record<RoadmapItemStatus, string> = {
     [RoadmapItemStatus.todo]: "hourglass_empty",
-    [RoadmapItemStatus.inProgress]: "timelapse",
+    [RoadmapItemStatus.inProgress]: "progress_activity",
     [RoadmapItemStatus.done]: "check",
 };

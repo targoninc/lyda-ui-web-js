@@ -2,8 +2,12 @@ import {create} from "../../fjsc/src/f2.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {roadMapItemIcons, RoadmapItemStatus} from "../Enums/RoadmapItemStatus.ts";
 
+let index = 0;
+
 export class RoadmapTemplates {
     static roadmapPage() {
+        index = 0;
+
         return create("div")
             .classes("flex-v")
             .children(
@@ -22,8 +26,9 @@ export class RoadmapTemplates {
     }
 
     static roadmapItem(status: RoadmapItemStatus, plannedTime: string, title: string) {
-        return create("div")
+        const item = create("div")
             .classes("flex-v", "card", "roadmap-item", status)
+            .styles("animation-delay", `calc(.1s * ${index})`)
             .children(
                 create("div")
                     .classes("flex", "align-children", status != RoadmapItemStatus.done ? "text-large" : "_")
@@ -37,13 +42,17 @@ export class RoadmapTemplates {
                             .build()
                     ).build(),
             ).build();
+
+        index++;
+
+        return item;
     }
 
     static itemStatus(status: RoadmapItemStatus) {
         return create("div")
             .classes("flex-v", "align-children", "roadmap-item-status")
             .children(
-                GenericTemplates.icon(roadMapItemIcons[status], true, ["roadmap-item-status-icon"])
+                GenericTemplates.icon(roadMapItemIcons[status], true, ["roadmap-item-status-icon", status])
             ).build();
     }
 }

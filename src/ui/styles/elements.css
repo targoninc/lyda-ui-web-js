@@ -949,6 +949,11 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .roadmap-item {
     color: var(--item-color) !important;
+    opacity: 0;
+}
+
+.roadmap-item {
+    animation: fadeIn .5s ease forwards;
 }
 
 .roadmap-item * {
@@ -957,15 +962,15 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     font-size: 1rem !important;
 }
 
-.roadmap-item.todo {
-    opacity: .8;
-}
-
 .roadmap-item-status-icon {
     background: var(--color-4);
     border-radius: 50%;
     padding: var(--base-padding);
     font-size: 1em !important;
+}
+
+.roadmap-item-status-icon.inProgress {
+    animation: spin 3s linear infinite;
 }
 
 .search-select-options {
