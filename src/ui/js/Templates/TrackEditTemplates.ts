@@ -30,7 +30,7 @@ import {AlbumActions} from "../Actions/AlbumActions.ts";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {reload} from "../Routing/Router.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
-import {dayFromValue} from "../Classes/date.ts";
+import {dayFromValue} from "../Classes/Helpers/Date.ts";
 
 export class TrackEditTemplates {
     static uploadForm(title: string, credits: string, releaseDate: Date, visibility: string, genre: Genre,

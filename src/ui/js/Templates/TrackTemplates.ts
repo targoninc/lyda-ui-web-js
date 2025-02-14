@@ -1,6 +1,6 @@
 import {TrackActions} from "../Actions/TrackActions.ts";
 import {UserTemplates} from "./UserTemplates.ts";
-import {Util} from "../Classes/Util.ts";
+import {copy, Util} from "../Classes/Util.ts";
 import {Icons} from "../Enums/Icons.js";
 import {PlayManager} from "../Streaming/PlayManager.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
@@ -35,6 +35,8 @@ import {Api} from "../Api/Api.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {Comment} from "../Models/DbModels/lyda/Comment.ts";
 import {ListTrack} from "../Models/ListTrack.ts";
+import {MediaActions} from "../Actions/MediaActions.ts";
+import {MediaFileType} from "../Enums/MediaFileType.ts";
 
 export class TrackTemplates {
     static trackCard(track: Track, profileId: number) {
@@ -140,6 +142,7 @@ export class TrackTemplates {
         if (track.has_cover) {
             imageState.value = Util.getTrackCover(track.id);
         }
+        const coverLoading = signal(false);
 
         return create("div")
             .classes("cover-container", "relative", "pointer", coverType)
@@ -159,12 +162,18 @@ export class TrackTemplates {
                     .src(imageState)
                     .alt(track.title)
                     .build(),
+                create("div")
+                    .classes("hidden", !startCallback ? "showOnParentHover" : "_", "centeredInParent", "flex")
+                    .children(
+                        GenericTemplates.deleteIconButton("delete-image-button", () => MediaActions.deleteMedia(MediaFileType.trackCover, track.id, imageState, coverLoading)),
+                        GenericTemplates.uploadIconButton("replace-image-button", () => TrackActions.replaceCover(track.id, true, imageState, coverLoading)),
+                        ifjs(coverLoading, GenericTemplates.loadingSpinner()),
+                    ).build(),
                 create("img")
-                    .classes("play-button-icon", "centeredInParent", "showOnParentHover", "inline-icon", "svgInverted", "nopointer")
+                    .classes("play-button-icon", "centeredInParent", "hidden", !!startCallback ? "showOnParentHover" : "_", "inline-icon", "svgInverted", "nopointer")
                     .src(Icons.PLAY)
                     .build(),
-            )
-            .build();
+            ).build();
     }
 
     static feedTrackCover(track: Track) {
@@ -735,26 +744,27 @@ export class TrackTemplates {
                 create("div")
                     .classes("track-info-container", "flex", "align-bottom")
                     .children(
-                        create("div")
-                            .classes("cover-container", "relative", trackData.canEdit ? "pointer" : "_")
-                            .onclick(() => {
-                                if (!trackData.canEdit) {
-                                    Ui.showImageModal(coverFile);
-                                    return;
-                                }
-                                TrackActions.replaceCover(track.id, trackData.canEdit, coverFile, coverLoading)
-                            })
-                            .children(
-                                ifjs(coverLoading, create("div")
-                                    .classes("loader", "loader-small", "centeredInParent")
-                                    .id("cover-loader")
-                                    .build()),
-                                create("img")
-                                    .classes("cover", "blurOnParentHover", "nopointer")
-                                    .src(coverFile)
-                                    .alt(track.title)
-                                    .build()
-                            ).build(),
+                        TrackTemplates.trackCover(track, "cover"),
+                        // create("div")
+                        //     .classes("cover-container", "relative", trackData.canEdit ? "pointer" : "_")
+                        //     .onclick(() => {
+                        //         if (!trackData.canEdit) {
+                        //             Ui.showImageModal(coverFile);
+                        //             return;
+                        //         }
+                        //         TrackActions.replaceCover(track.id, trackData.canEdit, coverFile, coverLoading)
+                        //     })
+                        //     .children(
+                        //         ifjs(coverLoading, create("div")
+                        //             .classes("loader", "loader-small", "centeredInParent")
+                        //             .id("cover-loader")
+                        //             .build()),
+                        //         create("img")
+                        //             .classes("cover", "blurOnParentHover", "nopointer")
+                        //             .src(coverFile)
+                        //             .alt(track.title)
+                        //             .build()
+                        //     ).build(),
                         create("div")
                             .classes("flex-v")
                             .children(
@@ -984,9 +994,7 @@ export class TrackTemplates {
             text: "Copy private link",
             icon: { icon: "link" },
             classes: ["special"],
-            onclick: async () => {
-                await Util.copyToClipboard(window.location.origin + "/track/" + id + "/" + code);
-            }
+            onclick: async () => copy(window.location.origin + "/track/" + id + "/" + code)
         });
     }
 }

@@ -7,7 +7,7 @@ import {SearchTemplates} from "./SearchTemplates.ts";
 import {NotificationParser} from "../Classes/Helpers/NotificationParser.ts";
 import {AuthActions} from "../Actions/AuthActions.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
-import {Util} from "../Classes/Util.ts";
+import {copy, Util} from "../Classes/Util.ts";
 import {navigate, reload} from "../Routing/Router.ts";
 import {AnyNode, create, ifjs, signalMap, StringOrSignal} from "../../fjsc/src/f2.ts";
 import {compute, signal} from "../../fjsc/src/signals.ts";
@@ -224,7 +224,7 @@ export class NavTemplates {
             .onauxclick(async e => {
                 if (e.button === 2) {
                     e.preventDefault();
-                    await navigator.clipboard.writeText(window.location.origin + link);
+                    await copy(window.location.origin + link);
                 } else if (e.button === 1) {
                     e.preventDefault();
                     window.open(window.location.origin + link, "_blank");
@@ -237,11 +237,11 @@ export class NavTemplates {
     static notifications() {
         const hasNotifs = compute(notifs => notifs.length > 0, notifications);
         const unreadNotifications = compute(notifs => notifs.filter(notification => !notification.is_read), notifications);
-        const notifsClass = compute(u => u.length > 0 ? "unread" : "_", unreadNotifications);
+        const notifsClass = compute((u): string => u.length > 0 ? "unread" : "_", unreadNotifications);
         const newestTimestamp = compute(unreadNotifs => unreadNotifs.length > 0 ? unreadNotifs[0].created_at : null, unreadNotifications);
 
         const notifsVisible = signal(false);
-        const listClass = compute(v => v ? "_" : "hidden", notifsVisible);
+        const listClass = compute((v): string => v ? "_" : "hidden", notifsVisible);
 
         const notificationContainer = create("div")
             .classes(listClass, "popout-below", "rounded", "absolute-align-right", "notification-list")

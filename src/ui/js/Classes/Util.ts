@@ -25,76 +25,6 @@ export class Util {
         return urlParams.get(name);
     }
 
-    static showButtonLoader(e: Event) {
-        try {
-            target(e).querySelector(".loader")?.classList.remove("hidden");
-            target(e).querySelector("span")?.classList.add("hidden");
-        } catch (e) { /* empty */ }
-    }
-
-    static hideButtonLoader(t: HTMLInputElement) {
-        try { 
-            t.querySelector(".loader")?.classList.add("hidden");
-            t.querySelector("span")?.classList.remove("hidden");
-        } catch (e) { /* empty */ }
-    }
-
-    static closeAllDetails() {
-        const summaries = document.querySelectorAll("details");
-        summaries.forEach(summary => {
-            summary.removeAttribute("open");
-        });
-    }
-
-    static openAllDetails() {
-        const summaries = document.querySelectorAll("details");
-        summaries.forEach(summary => {
-            summary.setAttribute("open", "");
-        });
-    }
-
-    static toHexString(id: number|string) {
-        if (id === null || id === undefined) {
-            return "";
-        }
-        if (id.constructor === String) {
-            id = parseInt(id);
-        }
-        // noinspection JSCheckFunctionSignatures
-        return id.toString(16); // This accepts a parameter, radix, which is an integer between 2 and 36 that represents the base of the number in the string.
-    }
-
-    static initializeDraggable(draggable: HTMLElement) {
-        dragging.value = false;
-        let thisIsDragged = false;
-        let offset = { x: 0, y: 0 };
-        draggable.addEventListener("mousedown", function(e) {
-            if (dragging.value && !thisIsDragged) {
-                return;
-            }
-            dragging.value = true;
-            thisIsDragged = true;
-            offset = {
-                x: draggable.offsetLeft - e.clientX,
-                y: draggable.offsetTop - e.clientY
-            };
-        }, true);
-
-        document.addEventListener("mouseup", function() {
-            dragging.value = false;
-            thisIsDragged = false;
-        }, true);
-
-        document.addEventListener("mousemove", function(event) {
-            event.preventDefault();
-            if (dragging.value && thisIsDragged) {
-                draggable.style.left = (event.clientX + offset.x) + "px";
-                draggable.style.top = (event.clientY + offset.y) + "px";
-                window.getSelection()?.removeAllRanges();
-            }
-        }, true);
-    }
-
     static getUserAvatar(id: number|null) {
         if (id === null) {
             return Images.DEFAULT_AVATAR;
@@ -121,11 +51,6 @@ export class Util {
         return ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.playlistCover}&t=${Date.now()}`;
     }
 
-    static async copyToClipboard(text: string) {
-        await navigator.clipboard.writeText(text);
-        notify("Copied to clipboard", NotificationType.success);
-    }
-
     static async fileExists(url: string) {
         let response = await fetch(url);
         return response.status === 200;
@@ -147,62 +72,11 @@ export class Util {
         }
     }
 
-    static getTrackIdFromEvent(e: Event) {
-        try {
-            return target(e).getAttribute("track_id");
-        } catch (e) {
-            console.error(e);
-            return "";
-        }
-    }
-
-    static getAlbumIdFromEvent(e: Event) {
-        try {
-            return target(e).getAttribute("album_id");
-        } catch (e) {
-            console.error(e);
-            return "";
-        }
-    }
-
-    static getPlaylistIdFromEvent(e: Event) {
-        try {
-            return target(e).getAttribute("playlist_id");
-        } catch (e) {
-            console.error(e);
-            return "";
-        }
-    }
-
-    static toggleClass(e: HTMLElement|null, className: string, baseClass: string|null = null) {
-        if (e === null) {
-            return;
-        }
-        if (e.classList.contains(className)) {
-            if (baseClass !== null) {
-                const list = document.querySelectorAll("." + baseClass);
-                list.forEach((e) => {
-                    e.classList.add(className);
-                });
-            }
-            e.classList.remove(className);
-        } else {
-            e.classList.add(className);
-        }
-    }
-
     static formatDate(date: string|Date) {
         if (date.constructor === String) {
             date = new Date(date);
         }
         return (date as Date).toLocaleDateString();
-    }
-
-    static getDateForPicker(date: string|Date) {
-        if (date.constructor === String) {
-            date = new Date(date);
-        }
-        return (date as Date).toISOString().split("T")[0];
     }
 
     static hideElementIfCondition(conditionFunc: Function, className: string, e: any) {
@@ -333,29 +207,6 @@ export class Util {
         return currentUser.value;
     }
 
-    static mergeObjects(obj1: any, obj2: any) {
-        for (const key in obj2) {
-            obj1[key] = obj2[key];
-        }
-        return obj1;
-    }
-
-    static mergeObjectList(objList: any) {
-        let obj = {};
-        objList.forEach((o: any) => {
-            obj = Util.mergeObjects(obj, o);
-        });
-        return obj;
-    }
-
-    static getUserIdFromEvent(e: Event) {
-        const userId = target(e).getAttribute("user_id");
-        if (userId === null) {
-            return "";
-        }
-        return userId;
-    }
-
     static includeStylesheet(css: string) {
         const links = document.head.querySelectorAll("link[href='" + css + "']");
         if (links !== null && links.length > 0) {
@@ -481,5 +332,21 @@ export function getErrorMessage(res: ApiResponse<any>) {
             return "Server error";
         default:
             return "Unknown error";
+    }
+}
+
+export async function copy(text: string) {
+    await navigator.clipboard.writeText(text);
+    notify("Copied to clipboard", NotificationType.success);
+}
+
+
+export function updateImagesWithSource(newSrc: string, oldSrc: string) {
+    oldSrc = oldSrc.replace(/&t=\d+/, "");
+    const imgs = document.querySelectorAll("img") as NodeListOf<HTMLImageElement>;
+    for (const img of imgs) {
+        if (img.src.includes(oldSrc)) {
+            img.src = newSrc;
+        }
     }
 }

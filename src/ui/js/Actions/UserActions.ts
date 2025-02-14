@@ -1,10 +1,15 @@
 import {Api} from "../Api/Api.ts";
-import {getErrorMessage, getUserSettingValue, target, updateUserSetting, Util} from "../Classes/Util.ts";
+import {
+    getErrorMessage,
+    getUserSettingValue,
+    updateImagesWithSource,
+    updateUserSetting,
+    Util
+} from "../Classes/Util.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {Icons} from "../Enums/Icons.js";
-import {NavTemplates} from "../Templates/NavTemplates.ts";
 import {Theme} from "../Enums/Theme.ts";
 import {UserSettings} from "../Enums/UserSettings.ts";
 import {MediaFileType} from "../Enums/MediaFileType.ts";
@@ -14,23 +19,11 @@ import {Signal} from "../../fjsc/src/signals.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {Notification} from "../Models/DbModels/lyda/Notification.ts";
 import {LydaApi} from "../Api/LydaApi.ts";
-import {Images} from "../Enums/Images.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
-import {AnyElement} from "../../fjsc/src/f2.ts";
 import {currentQuality, notifications} from "../state.ts";
 import {StreamingQuality} from "../Enums/StreamingQuality.ts";
 
 export class UserActions {
-    static updateImagesWithSource(newSrc: string, oldSrc: string) {
-        oldSrc = oldSrc.replace(/&t=\d+/, "");
-        const imgs = document.querySelectorAll("img") as NodeListOf<HTMLImageElement>;
-        for (const img of imgs) {
-            if (img.src.includes(oldSrc)) {
-                img.src = newSrc;
-            }
-        }
-    }
-
     static async replaceAvatar(user: User, avatar: Signal<string>, loading: Signal<boolean>) {
         let fileInput = document.createElement("input");
         fileInput.type = "file";
@@ -46,7 +39,7 @@ export class UserActions {
                 await MediaUploader.upload(MediaFileType.userAvatar, user.id, file)
                 notify("Avatar updated", NotificationType.success);
                 const newSrc = Util.getUserAvatar(user.id);
-                UserActions.updateImagesWithSource(newSrc, avatar.value);
+                updateImagesWithSource(newSrc, avatar.value);
                 avatar.value = newSrc;
             } catch (e: any) {
                 notify(`Failed to upload avatar: ${e}`, NotificationType.error);
@@ -58,28 +51,7 @@ export class UserActions {
         fileInput.click();
     }
 
-    static async deleteAvatar(user: User, avatar: Signal<string>, loading: Signal<boolean>) {
-        await Ui.getConfirmationModal("Remove avatar", "Are you sure you want to remove your avatar?", "Yes", "No", async () => {
-            loading.value = true;
-            let response = await Api.postAsync(ApiRoutes.deleteMedia, {
-                type: MediaFileType.userAvatar,
-                referenceId: user.id
-            });
-            loading.value = false;
-            if (response.code === 200) {
-                notify("Avatar removed", NotificationType.success);
-                UserActions.updateImagesWithSource(Images.DEFAULT_AVATAR, avatar.value);
-                avatar.value = Images.DEFAULT_BANNER;
-            }
-        }, () => {
-        }, Icons.WARNING);
-    }
-
     static async replaceBanner(e: Event, user: User, banner: Signal<string>, loading: Signal<boolean>) {
-        if (target(e).classList.contains("avatar-container")) {
-            return;
-        }
-
         let fileInput = document.createElement("input");
         fileInput.type = "file";
         fileInput.accept = "image/*";
@@ -94,7 +66,7 @@ export class UserActions {
                 await MediaUploader.upload(MediaFileType.userBanner, user.id, file);
                 notify("Banner updated", NotificationType.success);
                 const newSrc = Util.getUserBanner(user.id);
-                UserActions.updateImagesWithSource(newSrc, banner.value);
+                updateImagesWithSource(newSrc, banner.value);
                 banner.value = newSrc;
             } catch (e: any) {
                 notify(`Failed to upload banner: ${e}`, NotificationType.error);
@@ -104,28 +76,6 @@ export class UserActions {
             }
         };
         fileInput.click();
-    }
-
-    static async deleteBanner(user: User, banner: Signal<string>, loading: Signal<boolean>) {
-        await Ui.getConfirmationModal("Remove banner", "Are you sure you want to remove your banner?", "Yes", "No",
-            async () => {
-                loading.value = true;
-                let response = await Api.postAsync(ApiRoutes.deleteMedia, {
-                    type: MediaFileType.userBanner,
-                    referenceId: user.id
-                });
-                loading.value = false;
-                if (response.code === 200) {
-                    notify("Banner removed", NotificationType.success);
-                    UserActions.updateImagesWithSource(Images.DEFAULT_BANNER, banner.value);
-                    banner.value = Images.DEFAULT_BANNER;
-                } else {
-                    notify(`Failed to remove banner: ${response.data.error}`, NotificationType.error);
-                }
-            },
-            () => {
-            }, Icons.WARNING
-        );
     }
 
     static getNotificationsPeriodically() {

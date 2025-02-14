@@ -359,9 +359,26 @@ export class GenericTemplates {
         return FJSC.button({
             id,
             classes: ["negative", ...extraClasses],
-            onclick: callback,
+            onclick: e => {
+                e.stopPropagation();
+                callback();
+            },
             icon: { icon: "delete" },
             title: "Delete",
+            text: ""
+        });
+    }
+
+    static uploadIconButton(id: HtmlPropertyValue, callback: Function, extraClasses: string[] = []) {
+        return FJSC.button({
+            id,
+            classes: ["positive", ...extraClasses],
+            onclick: e => {
+                e.stopPropagation();
+                callback();
+            },
+            icon: { icon: "upload" },
+            title: "Upload",
             text: ""
         });
     }

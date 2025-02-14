@@ -233,17 +233,6 @@ export class TrackActions {
         }
     }
 
-    static async openTrackFromElement(e: any) {
-        if (e.target.classList.contains("cover-container")) {
-            return;
-        }
-        let trackId = Util.getTrackIdFromEvent(e);
-        if (trackId === "") {
-            return;
-        }
-        navigate("track/" + trackId);
-    }
-
     static async replaceCover(id: number, canEdit: boolean, oldSrc: Signal<string>, loading: Signal<boolean>) {
         if (!canEdit) {
             return;

@@ -36,6 +36,8 @@ import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 import {currentUser} from "../state.ts";
 import {Follow} from "../Models/DbModels/lyda/Follow.ts";
 import {Ui} from "../Classes/Ui.ts";
+import {MediaActions} from "../Actions/MediaActions.ts";
+import {MediaFileType} from "../Enums/MediaFileType.ts";
 
 export class UserTemplates {
     static userWidget(user: User|Signal<User|null>, following: boolean|Signal<boolean>, extraAttributes: HtmlPropertyValue[] = [], extraClasses: StringOrSignal[] = [], context: UserWidgetContext = UserWidgetContext.unknown) {
@@ -263,11 +265,10 @@ export class UserTemplates {
                     }
                 }),
                 UserTemplates.unapprovedTracksLink(),
-            )
-            .build();
+            ).build();
     }
 
-    static verificationbadge() {
+    static verificationBadge() {
         return create("div")
             .classes("verification-badge")
             .children(
@@ -290,16 +291,9 @@ export class UserTemplates {
         if (user.has_avatar) {
             userAvatar.value = Util.getUserAvatar(user.id);
         }
-        let bannerDeleteButton = UserTemplates.bannerDeleteButton(user, userBanner, bannerLoading);
         const bannerContainer = create("div")
                 .classes("banner-container", "relative", isOwnProfile ? "clickable" : "_", isOwnProfile ? "blurOnParentHover" : "_")
-                .onclick(async e => {
-                    if (!isOwnProfile) {
-                        Ui.showImageModal(userBanner);
-                        return;
-                    }
-                    await UserActions.replaceBanner(e, user, userBanner, bannerLoading);
-                })
+                .onclick(() => Ui.showImageModal(userBanner))
                 .children(
                     create("img")
                         .classes("nopointer", "user-banner", "banner-image")
@@ -316,7 +310,7 @@ export class UserTemplates {
                 ifjs(isOwnProfile, create("div")
                     .classes("hidden", "showOnParentHover", "centeredInParent", "flex")
                     .children(
-                        bannerDeleteButton,
+                        UserTemplates.bannerDeleteButton(user, userBanner, bannerLoading),
                         UserTemplates.bannerReplaceButton(user, userBanner, bannerLoading)
                     ).build()),
                 ifjs(bannerLoading, create("div")
@@ -328,13 +322,7 @@ export class UserTemplates {
                     .children(
                         create("div")
                             .classes("avatar-container", "relative", isOwnProfile ? "pointer" : "_")
-                            .onclick(() => {
-                                if (!isOwnProfile) {
-                                    Ui.showImageModal(userAvatar);
-                                    return;
-                                }
-                                UserActions.replaceAvatar(user, userAvatar, avatarLoading).then()
-                            })
+                            .onclick(() => Ui.showImageModal(userAvatar))
                             .onmouseover(() => {
                                 if (!isOwnProfile) {
                                     return;
@@ -368,35 +356,22 @@ export class UserTemplates {
     }
 
     static bannerReplaceButton(user: User, userBanner: Signal<string> = signal(""), bannerLoading: Signal<boolean> = signal(false)) {
-        return FJSC.button({
-            icon: {icon: "upload"},
-            classes: ["positive"],
-            title: "Upload new banner",
-            text: "",
-            onclick: e => UserActions.replaceBanner(e, user, userBanner, bannerLoading)
-        });
+        return GenericTemplates.uploadIconButton("banner-upload-button", (e: Event) => UserActions.replaceBanner(e, user, userBanner, bannerLoading), ["positive"]);
     }
 
     static avatarDeleteButton(user: User, userAvatar: Signal<string> = signal(""), avatarLoading: Signal<boolean> = signal(false)) {
-        return GenericTemplates.deleteIconButton("avatar-delete-button", () => UserActions.deleteAvatar(user, userAvatar, avatarLoading));
+        return GenericTemplates.deleteIconButton("avatar-delete-button", () => MediaActions.deleteMedia(MediaFileType.userAvatar, user.id, userAvatar, avatarLoading));
     }
 
     static avatarReplaceButton(user: User, userAvatar: Signal<string> = signal(""), avatarLoading: Signal<boolean> = signal(false)) {
-        return FJSC.button({
-            icon: {icon: "upload"},
-            classes: ["positive"],
-            title: "Upload new avatar",
-            text: "",
-            onclick: () => UserActions.replaceAvatar(user, userAvatar, avatarLoading)
-        });
+        return GenericTemplates.uploadIconButton("avatar-upload-button", () => UserActions.replaceAvatar(user, userAvatar, avatarLoading), ["positive"]);
     }
 
     static bannerDeleteButton(user: User, userBanner: Signal<string> = signal(""), bannerLoading: Signal<boolean> = signal(false)) {
-        return GenericTemplates.deleteIconButton("banner-delete-button", () => UserActions.deleteBanner(user, userBanner, bannerLoading));
+        return GenericTemplates.deleteIconButton("banner-delete-button", () => MediaActions.deleteMedia(MediaFileType.userBanner, user.id, userBanner, bannerLoading));
     }
 
     static profileInfo(user: User, isOwnProfile: boolean, permissions: Permission[], following: boolean, followsBack: boolean) {
-        let specialInfo: AnyNode[] = [];
         const verified = signal(user.verified);
         const canVerify = compute(v => !v && permissions.some(p => p.name === Permissions.canVerifyUsers), verified);
         const canUnverify = compute(v => v && permissions.some(p => p.name === Permissions.canVerifyUsers), verified);
@@ -412,7 +387,7 @@ export class UserTemplates {
                     .children(
                         UserTemplates.username(user, isOwnProfile),
                         ifjs(hasBadges, UserTemplates.badges(user.badges ?? [])),
-                        ifjs(verified, UserTemplates.verificationbadge()),
+                        ifjs(verified, UserTemplates.verificationBadge()),
                         ifjs(canVerify, FJSC.button({
                             text: "Verify",
                             icon: { icon: "verified" },
@@ -504,7 +479,7 @@ export class UserTemplates {
 
         const tracksContainer = UserTemplates.libraryTracks(tracks, user);
         const albumsContainer = UserTemplates.libraryAlbums(albums);
-        const playlistsContainer = UserTemplates.libraryPlaylists(playlists, user);
+        const playlistsContainer = UserTemplates.libraryPlaylists(playlists);
 
         const tabs = ["Tracks", "Albums", "Playlists"];
         const tabContents = [tracksContainer, albumsContainer, playlistsContainer];
@@ -567,7 +542,7 @@ export class UserTemplates {
         return template;
     }
 
-    static libraryPlaylists(playlists: Playlist[], user: User) {
+    static libraryPlaylists(playlists: Playlist[]) {
         const template = signal(create("div").build());
 
         const update = (playlists: Playlist[]) => {

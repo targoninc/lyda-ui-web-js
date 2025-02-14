@@ -1,7 +1,7 @@
 import {Time} from "../Classes/Helpers/Time.ts";
 import {UserTemplates} from "./UserTemplates.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
-import {Util} from "../Classes/Util.ts";
+import {copy, Util} from "../Classes/Util.ts";
 import {AnyElement, create, ifjs} from "../../fjsc/src/f2.ts";
 import {User} from "../Models/DbModels/lyda/User.ts";
 import {compute, signal, Signal} from "../../fjsc/src/signals.ts";
@@ -9,8 +9,6 @@ import {PillOption} from "../Models/PillOption.ts";
 import {LogLevel} from "../Enums/LogLevel.ts";
 import {Log} from "../Models/DbModels/lyda/Log.ts";
 import {FJSC} from "../../fjsc";
-import {notify} from "../Classes/Ui.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
 import {LydaApi} from "../Api/LydaApi.ts";
 import {truncateText} from "../Classes/Helpers/CustomText.ts";
 
@@ -143,10 +141,7 @@ export class LogTemplates {
                     .classes("log-message", type, "color-dim", "text-small")
                     .title(l.message)
                     .text(truncateText(l.message, 200))
-                    .onclick(async () => {
-                        await navigator.clipboard.writeText(l.message);
-                        notify("Copied message to clipboard", NotificationType.success);
-                    })
+                    .onclick(() => copy(l.message))
                     .build(),
                 create("td")
                     .classes("log-stack")
@@ -154,10 +149,7 @@ export class LogTemplates {
                         FJSC.button({
                             text: "Copy stack",
                             icon: {icon: "content_copy"},
-                            onclick: () => {
-                                navigator.clipboard.writeText(l.stack);
-                                notify("Copied stack to clipboard", NotificationType.success);
-                            }
+                            onclick: () => copy(l.stack)
                         }),
                     ).build(),
                 LogTemplates.properties(l.properties),
