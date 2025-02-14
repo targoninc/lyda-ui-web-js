@@ -321,7 +321,8 @@ export class SettingsTemplates {
                         GenericTemplates.gif8831("/img/88x31/discord.gif", "https://discord.gg/QeNU8b7Hbb"),
                         GenericTemplates.gif8831("/img/88x31/ubuntu.gif", "https://ubuntu.com/"),
                         GenericTemplates.gif8831("/img/88x31/hetzner.gif", "https://www.hetzner.com/"),
-                    ).build()
+                    ).build(),
+                GenericTemplates.inlineLink("/roadmap", "Roadmap"),
             ).build();
     }
 
