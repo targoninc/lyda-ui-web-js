@@ -292,7 +292,7 @@ export class LandingPageTemplates {
                                 });
                             },
                         }),
-                        LandingPageTemplates.passwordInput(password, user, () => step.value = "checking-mfa"),
+                        LandingPageTemplates.passwordInput(password, user, () => step.value = "checking-mfa", true),
                         FJSC.button({
                             text: "Login",
                             id: "mfaCheckTrigger",
@@ -444,7 +444,14 @@ export class LandingPageTemplates {
             ).build();
     }
 
-    private static passwordInput(password: Signal<string>, user: Signal<AuthData>, onEnter: Function = () => {}) {
+    private static passwordInput(password: Signal<string>, user: Signal<AuthData>, onEnter: Function = () => {}, focusImmediately = false) {
+        setTimeout(() => {
+            if (focusImmediately) {
+                const input = document.querySelector("[name='password']") as HTMLInputElement;
+                input?.focus();
+            }
+        }, 100);
+
         return FJSC.input<string>({
             type: InputType.password,
             name: "password",
