@@ -322,7 +322,9 @@ export class SettingsTemplates {
                         GenericTemplates.gif8831("/img/88x31/ubuntu.gif", "https://ubuntu.com/"),
                         GenericTemplates.gif8831("/img/88x31/hetzner.gif", "https://www.hetzner.com/"),
                     ).build(),
-                GenericTemplates.inlineLink("/roadmap", "Roadmap"),
+                GenericTemplates.inlineLink(() => {
+                    navigate("roadmap");
+                }, "Roadmap"),
             ).build();
     }
 
