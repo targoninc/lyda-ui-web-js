@@ -716,7 +716,7 @@ export class GenericTemplates {
         });
     }
 
-    static addUserLinkSearchResult(entry: { id: number, display: string, image: string }, selectedState: Signal<number>) {
+    static addUserLinkSearchResult(entry: { id: number, display: string, image?: string }, selectedState: Signal<number>) {
         const selectedClassState = signal(selectedState.value === entry.id ? "active" : "_");
         selectedState.onUpdate = (newSelected: number) => {
             selectedClassState.value = newSelected === entry.id ? "active" : "_";

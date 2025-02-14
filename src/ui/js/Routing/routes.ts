@@ -22,6 +22,10 @@ export const routes: Route[] = [
         title: "Following",
     },
     {
+        path: "roadmap",
+        title: "Roadmap",
+    },
+    {
         path: "album",
         title: "Album",
         params: ["id"]

@@ -10,6 +10,7 @@ import {compute, signal} from "../../fjsc/src/signals.ts";
 import {User} from "../Models/DbModels/lyda/User.ts";
 import {SearchTemplates} from "./SearchTemplates.ts";
 import {SettingsTemplates} from "./SettingsTemplates.ts";
+import {RoadmapTemplates} from "./RoadmapTemplates.ts";
 
 export class PageTemplates {
     static mapping: {[key: string]: Function} = {
@@ -36,6 +37,7 @@ export class PageTemplates {
         "password-reset": LandingPageTemplates.newLandingPage,
         "verify-email": LandingPageTemplates.newLandingPage,
         search: SearchTemplates.searchPage,
+        roadmap: RoadmapTemplates.roadmapPage,
     };
     static needLoginPages: string[] = [
         "library",

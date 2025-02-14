@@ -935,6 +935,39 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     border-radius: var(--border-radius);
 }
 
+.roadmap-item.done {
+    --item-color: var(--green);
+}
+
+.roadmap-item.inProgress {
+    --item-color: var(--blue);
+}
+
+.roadmap-item.todo {
+    --item-color: var(--color-7);
+}
+
+.roadmap-item {
+    color: var(--item-color) !important;
+}
+
+.roadmap-item * {
+    color: var(--item-color) !important;
+    border-color: var(--item-color) !important;
+    font-size: 1rem !important;
+}
+
+.roadmap-item.todo {
+    opacity: .8;
+}
+
+.roadmap-item-status-icon {
+    background: var(--color-4);
+    border-radius: 50%;
+    padding: var(--base-padding);
+    font-size: 1em !important;
+}
+
 .search-select-options {
     max-height: 200px;
     overflow: auto;
