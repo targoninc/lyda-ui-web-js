@@ -16,17 +16,17 @@ export class Num {
         }
         return number;
     }
+}
 
-    static currency(number, currency = "USD") {
-        if (!number) {
-            return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(0);
-        }
-        if (number.constructor === String && number.includes(".")) {
-            number = parseFloat(number);
-        }
-        if (number.constructor !== Number) {
-            number = parseInt(number);
-        }
-        return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(number);
+export function currency(number: any, currency = "USD") {
+    if (!number) {
+        return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(0);
     }
+    if (number.constructor === String && number.includes(".")) {
+        number = parseFloat(number as string);
+    }
+    if (number.constructor !== Number) {
+        number = parseInt(number);
+    }
+    return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(number);
 }

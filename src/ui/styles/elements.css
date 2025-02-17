@@ -620,6 +620,8 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     max-width: 100% !important;
     max-height: 100% !important;
     background: var(--color-3);
+    padding: var(--base-padding);
+    border-radius: var(--border-radius);
 }
 
 .chart-container {

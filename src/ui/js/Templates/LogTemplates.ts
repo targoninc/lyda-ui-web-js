@@ -185,6 +185,19 @@ export class LogTemplates {
             ).build();
     }
 
+    static signalProperty(key: string, value: Signal<any>): AnyElement {
+        const el = create("div")
+            .children(
+                LogTemplates.property(key, value.value)
+            ).build();
+        value.subscribe(v => {
+            el.innerHTML = "";
+            el.appendChild(LogTemplates.property(key, v));
+        });
+
+        return el;
+    }
+
     static property(key: string, value: any): AnyElement {
         if (value === null) {
             value = "null";

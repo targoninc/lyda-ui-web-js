@@ -23,7 +23,7 @@ import {notify} from "./Classes/Ui.ts";
 import {navigate} from "./Routing/Router.ts";
 import {Permission} from "./Models/DbModels/lyda/Permission.ts";
 import {Follow} from "./Models/DbModels/lyda/Follow.ts";
-import {AnyElement, create} from "../fjsc/src/f2.ts";
+import {AnyElement, create, ifjs} from "../fjsc/src/f2.ts";
 import {User} from "./Models/DbModels/lyda/User.ts";
 import {ApiRoutes} from "./Api/ApiRoutes.ts";
 import {signal} from "../fjsc/src/signals.ts";
@@ -34,6 +34,8 @@ import {NotificationType} from "./Enums/NotificationType.ts";
 import {AvailableSubscription} from "./Models/DbModels/finance/AvailableSubscription.ts";
 import {Subscription} from "./Models/DbModels/finance/Subscription.ts";
 import {currentSecretCode, currentUser, permissions} from "./state.ts";
+import {RoyaltyInfo} from "./Models/RoyaltyInfo.ts";
+import {RoyaltyTemplates} from "./Templates/RoyaltyTemplates.ts";
 
 export class Lyda {
     static async getEndpointData(endpoint: string, params = "") {
@@ -153,8 +155,9 @@ export class Lyda {
                     navigate("explore");
                     return;
                 }
-                const royaltyInfo = await Api.getAsync(ApiRoutes.getRoyaltyInfo);
-                element.append(await StatisticTemplates.statisticActions(royaltyInfo.data));
+                const royaltyInfo = await Api.getAsync<RoyaltyInfo>(ApiRoutes.getRoyaltyInfo);
+                element.append(RoyaltyTemplates.artistRoyaltyActions(royaltyInfo.data));
+                element.append(RoyaltyTemplates.royaltyOverview(royaltyInfo.data));
                 element.append(create("div").classes("flex").children(...(await StatisticsWrapper.getStatistics(permissions.value))).build());
                 break;
             case "library":

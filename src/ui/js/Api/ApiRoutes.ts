@@ -152,6 +152,7 @@ export class ApiRoutes {
     static requestPayment = ApiRoutes.royalties + "/requestPayment";
     static calculateEarnings = ApiRoutes.royalties + "/calculateEarnings";
     static calculateRoyalties = ApiRoutes.royalties + "/calculate";
+    static setRoyaltyActivation = ApiRoutes.royalties + "/setActivation";
     // endregion
 
     // region Search
