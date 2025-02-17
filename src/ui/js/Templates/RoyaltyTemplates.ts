@@ -129,10 +129,6 @@ export class RoyaltyTemplates {
     }
 
     static royaltyCalculator(royaltyInfo: RoyaltyInfo) {
-        if (!royaltyInfo.calculatableMonths) {
-            return nullElement();
-        }
-
         const months = royaltyInfo.calculatableMonths.map((m: any) => {
             return <SelectOption>{
                 id: m.year * 100 + m.month,
@@ -230,6 +226,10 @@ export class RoyaltyTemplates {
     }
 
     static royaltyOverview(royaltyInfo: RoyaltyInfo) {
+        if (!royaltyInfo.calculatableMonths) {
+            return nullElement();
+        }
+
         const canCalculateRoyalties = compute(p => p.some(p => p.name === Permissions.canCalculateRoyalties), permissions);
 
         return create("div")
