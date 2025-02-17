@@ -15,9 +15,12 @@ import {AuthActions} from "../Actions/AuthActions.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {StreamingQuality} from "../Enums/StreamingQuality.ts";
 import {UserTemplates} from "./UserTemplates.ts";
-import {currentUser} from "../state.ts";
+import {currentUser, permissions} from "../state.ts";
 import {AuthApi} from "../Api/AuthApi.ts";
 import {UserEmail} from "../Models/DbModels/lyda/UserEmail.ts";
+import {Api} from "../Api/Api.ts";
+import {Permission} from "../Models/DbModels/lyda/Permission.ts";
+import {ApiRoutes} from "../Api/ApiRoutes.ts";
 
 export class SettingsTemplates {
     static settingsPage() {
@@ -36,10 +39,36 @@ export class SettingsTemplates {
                 SettingsTemplates.accountSection(user),
                 SettingsTemplates.themeSection(getUserSettingValue<Theme>(user, UserSettings.theme)),
                 SettingsTemplates.qualitySection(getUserSettingValue<StreamingQuality>(user, UserSettings.streamingQuality) ?? "m"),
+                SettingsTemplates.permissionsSection(),
                 SettingsTemplates.behaviourSection(user),
                 SettingsTemplates.notificationsSection(user),
                 SettingsTemplates.dangerSection(user),
                 SettingsTemplates.linksSection(),
+            ).build();
+    }
+
+    static permissionsSection() {
+        const hasAnyPermissions = compute(p => p.length > 0, permissions);
+
+        return create("div")
+            .children(
+                ifjs(hasAnyPermissions, create("div")
+                    .classes("card", "flex-v")
+                    .children(
+                        create("h2")
+                            .text("My Permissions")
+                            .build(),
+                        signalMap(permissions, create("div").classes("flex-v"), (permission: Permission) => SettingsTemplates.permissionCard(permission))
+                    ).build()),
+            ).build();
+    }
+
+    static permissionCard(permission: Permission) {
+        return create("div")
+            .children(
+                create("span")
+                    .text(permission.name)
+                    .build(),
             ).build();
     }
 
@@ -59,7 +88,7 @@ export class SettingsTemplates {
                 FJSC.button({
                     text: "Log out",
                     classes: ["negative", "showOnSmallBreakpoint"],
-                    icon: { icon: "logout" },
+                    icon: {icon: "logout"},
                     onclick: async () => {
                         await AuthActions.logOut();
                     }
@@ -68,7 +97,7 @@ export class SettingsTemplates {
                     .text("Change your account settings here.")
                     .build(),
                 ifjs(user.subscription, FJSC.button({
-                    icon: { icon: "payments" },
+                    icon: {icon: "payments"},
                     text: "Manage subscription",
                     classes: ["positive"],
                     onclick: () => {
@@ -76,7 +105,7 @@ export class SettingsTemplates {
                     }
                 })),
                 ifjs(user.subscription, FJSC.button({
-                    icon: { icon: "payments" },
+                    icon: {icon: "payments"},
                     text: "Subscribe for more features",
                     classes: ["special"],
                     onclick: () => {
@@ -94,7 +123,7 @@ export class SettingsTemplates {
                             required: true,
                             value: user.username,
                             onchange: v => {
-                                updatedUser.value = { ...updatedUser.value, username: v };
+                                updatedUser.value = {...updatedUser.value, username: v};
                             }
                         }),
                         FJSC.input(<InputConfig<string>>{
@@ -104,7 +133,7 @@ export class SettingsTemplates {
                             required: true,
                             value: user.displayname,
                             onchange: v => {
-                                updatedUser.value = { ...updatedUser.value, displayname: v };
+                                updatedUser.value = {...updatedUser.value, displayname: v};
                             }
                         }),
                         FJSC.textarea(<TextareaConfig>{
@@ -112,7 +141,7 @@ export class SettingsTemplates {
                             name: "description",
                             value: user.description,
                             onchange: v => {
-                                updatedUser.value = { ...updatedUser.value, description: v };
+                                updatedUser.value = {...updatedUser.value, description: v};
                             }
                         }),
                         SettingsTemplates.emailSettings(user.emails, updatedUser),
@@ -121,10 +150,10 @@ export class SettingsTemplates {
                     disabled: saveDisabled,
                     classes: ["positive"],
                     text: "Save changes",
-                    icon: { icon: "save" },
+                    icon: {icon: "save"},
                     onclick: async () => {
                         if (await LydaApi.updateUser(updatedUser.value)) {
-                            user = { ...user, ...updatedUser.value };
+                            user = {...user, ...updatedUser.value};
                             currentUser.value = await Util.getUserAsync(null, false);
                             reload();
                         }
@@ -266,30 +295,31 @@ export class SettingsTemplates {
                     .children(
                         FJSC.button({
                             text: "Delete account",
-                            icon: { icon: "delete" },
+                            icon: {icon: "delete"},
                             classes: ["negative"],
                             onclick: () => {
                                 Ui.getConfirmationModal("Delete account", "Are you sure you want to delete your account? This action cannot be undone.",
                                     "Yes, delete my account", "No, keep account", async () => {
-                                    LydaApi.deleteUser().then(res => {
-                                        if (res.code === 200) {
-                                            notify("Account deleted", NotificationType.success);
-                                            navigate("login");
-                                            window.location.reload();
-                                        } else {
-                                            notify("Account deletion failed", NotificationType.error);
-                                        }
-                                    })
-                                }, () => {}, "delete").then();
+                                        LydaApi.deleteUser().then(res => {
+                                            if (res.code === 200) {
+                                                notify("Account deleted", NotificationType.success);
+                                                navigate("login");
+                                                window.location.reload();
+                                            } else {
+                                                notify("Account deletion failed", NotificationType.error);
+                                            }
+                                        })
+                                    }, () => {
+                                    }, "delete").then();
                             }
                         }),
                         FJSC.button({
                             text: "Download data",
-                            icon: { icon: "download" },
+                            icon: {icon: "download"},
                             onclick: () => {
                                 LydaApi.exportUser().then(res => {
                                     if (res.code === 200) {
-                                        const blob = new Blob([JSON.stringify(res.data)], { type: 'application/octet-stream' });
+                                        const blob = new Blob([JSON.stringify(res.data)], {type: 'application/octet-stream'});
                                         const url = URL.createObjectURL(blob);
                                         const a = document.createElement('a');
                                         a.href = url;
@@ -356,7 +386,7 @@ export class SettingsTemplates {
     private static emailSettings(emails: UserEmail[], updatedUser: Signal<Partial<User>>) {
         const emails$ = signal<UserEmail[]>(emails);
         emails$.subscribe(emails => {
-            updatedUser.value = { ...updatedUser.value, emails };
+            updatedUser.value = {...updatedUser.value, emails};
         });
         const primaryEmailIndex = signal(emails.findIndex(e => e.primary));
         primaryEmailIndex.subscribe(index => {
@@ -380,7 +410,7 @@ export class SettingsTemplates {
                 signalMap(emails$, create("div").classes("flex-v", "card", "secondary"), (email, index) => SettingsTemplates.emailSetting(email, signal(index), primaryEmailIndex, emails$)),
                 FJSC.button({
                     text: "Add E-Mail",
-                    icon: { icon: "add" },
+                    icon: {icon: "add"},
                     classes: ["positive"],
                     onclick: async () => {
                         emails$.value = [
@@ -452,7 +482,7 @@ export class SettingsTemplates {
                                     .build()
                             ).build()),
                         ifjs(email.verified || email.email === "", FJSC.button({
-                            icon: { icon: "verified_user" },
+                            icon: {icon: "verified_user"},
                             text: "Verify",
                             classes: ["positive"],
                             disabled: activationTimedOut,
@@ -495,12 +525,13 @@ export class SettingsTemplates {
                             .build()),
                         ifjs(email.primary, FJSC.button({
                             text: "Delete",
-                            icon: { icon: "delete" },
+                            icon: {icon: "delete"},
                             classes: ["negative"],
                             onclick: async () => {
                                 await Ui.getConfirmationModal("Delete email", "Are you sure you want to delete this email? This can't be undone.", "Yes", "No", async () => {
                                     emails$.value = emails$.value.filter((e, i) => i !== index.value);
-                                }, () => {}, "delete");
+                                }, () => {
+                                }, "delete");
                             }
                         }), true),
                     ).build(),
