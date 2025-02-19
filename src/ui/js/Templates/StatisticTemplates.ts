@@ -37,7 +37,7 @@ export class StatisticTemplates {
         new Chart(ctx, config);
 
         return create("div")
-            .classes("chart-container", "flex-v")
+            .classes("chart-container", "card", "flex-v")
             .children(
                 create("h4")
                     .classes("chart-title")
@@ -72,7 +72,7 @@ export class StatisticTemplates {
         new Chart(ctx, config);
 
         return create("div")
-            .classes("chart-container-full", "flex-v")
+            .classes("chart-container-full", "card", "flex-v")
             .children(
                 create("h4")
                     .classes("chart-title")
@@ -108,7 +108,7 @@ export class StatisticTemplates {
         new BoxPlotChart(ctx, config);
 
         return create("div")
-            .classes("chart-container-vertical", "flex-v")
+            .classes("chart-container-vertical", "card", "flex-v")
             .children(
                 ctx,
             ).build();
@@ -116,7 +116,7 @@ export class StatisticTemplates {
 
     static noData(title: HtmlPropertyValue) {
         return create("div")
-            .classes("chart-container", "flex-v")
+            .classes("chart-container", "card", "flex-v")
             .children(
                 create("h4")
                     .classes("chart-title")

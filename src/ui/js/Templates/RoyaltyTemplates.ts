@@ -159,69 +159,77 @@ export class RoyaltyTemplates {
 
     private static royaltyActions(months: SelectOption[], selectedState: Signal<any>, selectedMonth: Signal<RoyaltyMonth | undefined>, hasEarnings: Signal<boolean>, isApproved: Signal<any>) {
         return create("div")
-            .classes("flex", "align-children")
+            .classes("flex-v")
             .children(
-                FormTemplates.dropDownField("Month", signal(months), selectedState),
-                FJSC.button({
-                    text: "Calculate earnings",
-                    icon: {icon: "account_balance"},
-                    classes: ["positive"],
-                    onclick: async () => {
-                        const month = selectedMonth.value;
-                        if (!month) {
-                            notify("Please select a month", NotificationType.error);
-                            return;
-                        }
-                        const res = await Api.postAsync(ApiRoutes.calculateEarnings, {
-                            month: month.month,
-                            year: month.year,
-                        });
-                        if (res.code !== 200) {
-                            notify(getErrorMessage(res), NotificationType.error);
-                            return;
-                        }
-                        notify("Earnings calculated", NotificationType.success);
-                    }
-                }),
-                FJSC.button({
-                    text: "Calculate royalties",
-                    icon: {icon: "calculate"},
-                    classes: ["positive"],
-                    disabled: compute(has => !has, hasEarnings),
-                    onclick: async () => {
-                        const month = selectedMonth.value;
-                        if (!month) {
-                            notify("Please select a month", NotificationType.error);
-                            return;
-                        }
-                        const res = await Api.postAsync(ApiRoutes.calculateRoyalties, {
-                            month: month.month,
-                            year: month.year,
-                        });
-                        if (res.code !== 200) {
-                            notify(getErrorMessage(res), NotificationType.error);
-                            return;
-                        }
-                        notify("Royalties calculated", NotificationType.success);
-                    }
-                }),
-                FJSC.toggle({
-                    text: "Approve monthly earnings",
-                    checked: isApproved,
-                    onchange: async (v) => {
-                        const month = selectedMonth.value;
-                        if (!month) {
-                            notify("Please select a month", NotificationType.error);
-                            return;
-                        }
-                        await Api.postAsync(ApiRoutes.setRoyaltyActivation, {
-                            month: month.month,
-                            year: month.year,
-                            approved: v,
-                        });
-                        notify("Switched approval status", NotificationType.success);
-                    }
-                })
+                create("div")
+                    .classes("flex", "align-children")
+                    .children(
+                        FormTemplates.dropDownField("Month", signal(months), selectedState),
+                    ).build(),
+                create("div")
+                    .classes("flex", "align-children")
+                    .children(
+                        FJSC.button({
+                            text: "Calculate earnings",
+                            icon: {icon: "account_balance"},
+                            classes: ["positive"],
+                            onclick: async () => {
+                                const month = selectedMonth.value;
+                                if (!month) {
+                                    notify("Please select a month", NotificationType.error);
+                                    return;
+                                }
+                                const res = await Api.postAsync(ApiRoutes.calculateEarnings, {
+                                    month: month.month,
+                                    year: month.year,
+                                });
+                                if (res.code !== 200) {
+                                    notify(getErrorMessage(res), NotificationType.error);
+                                    return;
+                                }
+                                notify("Earnings calculated", NotificationType.success);
+                            }
+                        }),
+                        FJSC.button({
+                            text: "Calculate royalties",
+                            icon: {icon: "calculate"},
+                            classes: ["positive"],
+                            disabled: compute(has => !has, hasEarnings),
+                            onclick: async () => {
+                                const month = selectedMonth.value;
+                                if (!month) {
+                                    notify("Please select a month", NotificationType.error);
+                                    return;
+                                }
+                                const res = await Api.postAsync(ApiRoutes.calculateRoyalties, {
+                                    month: month.month,
+                                    year: month.year,
+                                });
+                                if (res.code !== 200) {
+                                    notify(getErrorMessage(res), NotificationType.error);
+                                    return;
+                                }
+                                notify("Royalties calculated", NotificationType.success);
+                            }
+                        }),
+                        FJSC.toggle({
+                            text: "Approve monthly earnings",
+                            checked: isApproved,
+                            onchange: async (v) => {
+                                const month = selectedMonth.value;
+                                if (!month) {
+                                    notify("Please select a month", NotificationType.error);
+                                    return;
+                                }
+                                await Api.postAsync(ApiRoutes.setRoyaltyActivation, {
+                                    month: month.month,
+                                    year: month.year,
+                                    approved: v,
+                                });
+                                notify("Switched approval status", NotificationType.success);
+                            }
+                        })
+                    ).build(),
             ).build();
     }
 
