@@ -748,13 +748,28 @@ export class LandingPageTemplates {
                         LandingPageTemplates.lydaBenefits(),
                         create("p")
                             .styles("max-width", "300px")
-                            .text("We are focused on building a platform that is both good for artists as well as listeners.")
-                            .build(),
+                            .children(
+                                create("span")
+                                    .text("We are focused on building a platform that is both good for artists as well as listeners.")
+                                    .build(),
+                            ).build(),
                         create("p")
                             .classes("color-dim")
                             .styles("max-width", "300px")
-                            .text("We want to make sure that artists can earn money from their work, and listeners can enjoy their music without ads.")
-                            .build()
+                            .children(
+                                create("span")
+                                    .text("We want to make sure that artists can earn money from their work, and listeners can enjoy their music without ads.")
+                                    .build(),
+                            ).build(),
+                        create("p")
+                            .classes("color-dim")
+                            .styles("max-width", "300px")
+                            .children(
+                                create("span")
+                                    .text(" If you're curious about what we're building, you can take a look at our ")
+                                    .build(),
+                                GenericTemplates.inlineLink(() => navigate("/roadmap"), "roadmap"),
+                            ).build(),
                     ).build(),
             ).build();
     }
