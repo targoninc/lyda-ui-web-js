@@ -14,18 +14,27 @@ import {InputType} from "../../../fjsc/src/Types.ts";
 export class EventsTemplates {
     static eventsPage() {
         const events = signal<PaypalWebhook[]>([]);
-        Api.getAsync<PaypalWebhook[]>(ApiRoutes.getEvents)
-            .then(e => events.value = e.data);
+        const skip = signal(0);
+        Api.getAsync<PaypalWebhook[]>(ApiRoutes.getEvents, {
+            skip: skip.value
+        }).then(e => events.value = e.data);
         const loading = signal(false);
+        skip.subscribe(s => {
+            loading.value = true;
+            Api.getAsync<PaypalWebhook[]>(ApiRoutes.getEvents, {
+                skip: s
+            }).then(e => events.value = e.data)
+                .finally(() => loading.value = false);
+        });
 
         return create("div")
             .classes("flex-v")
             .children(
-                EventsTemplates.eventsList(events, loading)
+                EventsTemplates.eventsList(events, skip, loading)
             ).build();
     }
 
-    static eventsList(events: Signal<PaypalWebhook[]>, loading: Signal<boolean>) {
+    static eventsList(events: Signal<PaypalWebhook[]>, skip: Signal<number>, loading: Signal<boolean>) {
         const docsLink = "https://developer.paypal.com/api/rest/webhooks/event-names/";
         const filter = signal("");
         const filteredEvents = compute((e, f) => e.filter(e => JSON.stringify(e).includes(f)), events, filter);
@@ -46,6 +55,22 @@ export class EventsTemplates {
                                 const newEvents = await Api.getAsync<PaypalWebhook[]>(ApiRoutes.getEvents);
                                 loading.value = false;
                                 events.value = newEvents.data;
+                            }
+                        }),
+                        FJSC.button({
+                            text: "Previous page",
+                            icon: {icon: "skip_previous"},
+                            disabled: compute((l, s) => l || s <= 0, loading, skip),
+                            onclick: () => {
+                                skip.value = Math.max(0, skip.value - 100);
+                            }
+                        }),
+                        FJSC.button({
+                            text: "Next page",
+                            icon: {icon: "skip_next"},
+                            disabled: compute((l, e) => l || e.length < 100, loading, events),
+                            onclick: () => {
+                                skip.value = skip.value + 100;
                             }
                         }),
                         FJSC.input<string>({
