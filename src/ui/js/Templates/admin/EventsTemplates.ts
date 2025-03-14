@@ -4,11 +4,12 @@ import {create, ifjs, signalMap} from "../../../fjsc/src/f2.ts";
 import {Api} from "../../Api/Api.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {FJSC} from "../../../fjsc";
-import {copy} from "../../Classes/Util.ts";
+import {copy, target} from "../../Classes/Util.ts";
 import {GenericTemplates} from "../GenericTemplates.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
 import {notify} from "../../Classes/Ui.ts";
 import {NotificationType} from "../../Enums/NotificationType.ts";
+import {InputType} from "../../../fjsc/src/Types.ts";
 
 export class EventsTemplates {
     static eventsPage() {
@@ -26,6 +27,8 @@ export class EventsTemplates {
 
     static eventsList(events: Signal<PaypalWebhook[]>, loading: Signal<boolean>) {
         const docsLink = "https://developer.paypal.com/api/rest/webhooks/event-names/";
+        const filter = signal("");
+        const filteredEvents = compute((e, f) => e.filter(e => JSON.stringify(e).includes(f)), events, filter);
 
         return create("div")
             .classes("flex-v")
@@ -45,12 +48,19 @@ export class EventsTemplates {
                                 events.value = newEvents.data;
                             }
                         }),
+                        FJSC.input<string>({
+                            type: InputType.text,
+                            name: "filter",
+                            placeholder: "Filter",
+                            value: filter,
+                            onchange: (newValue: string) => filter.value = newValue,
+                        }),
                         create("span")
                             .text(compute(e => e.length + " events", events))
                             .build(),
                         GenericTemplates.inlineLink(docsLink, "PayPal Docs", true),
                     ).build(),
-                signalMap(events, create("div").classes("flex-v", "fixed-bar-content"), (event: PaypalWebhook) => EventsTemplates.event(event))
+                signalMap(filteredEvents, create("div").classes("flex-v", "fixed-bar-content"), (event: PaypalWebhook) => EventsTemplates.event(event))
             ).build();
     }
 
@@ -64,6 +74,7 @@ export class EventsTemplates {
             "PAYMENT.PAYOUTSBATCH.DENIED": "money_off",
         };
 
+        const resourceId = JSON.parse(event.content).resource?.id;
         const relevantReferenceIdMap: Record<string, Function> = {
             "PAYMENT.SALE.COMPLETED": (e: PaypalWebhook) => JSON.parse(e.content).resource?.billing_agreement_id,
             "BILLING.SUBSCRIPTION.CREATED": (e: PaypalWebhook) => JSON.parse(e.content).resource?.plan_id,
@@ -83,6 +94,9 @@ export class EventsTemplates {
                         create("span")
                             .classes("flex", "align-children", "text-large")
                             .children(
+                                GenericTemplates.roundIconButton({
+                                    icon: "data_object"
+                                }, () => copy(JSON.stringify(JSON.parse(event.content), null, 2)), "Copy content"),
                                 ifjs(typeIconMap[event.type], GenericTemplates.icon(typeIconMap[event.type], true)),
                                 create("span")
                                     .text(event.type)
@@ -108,12 +122,16 @@ export class EventsTemplates {
                                 GenericTemplates.roundIconButton({
                                     icon: "content_copy"
                                 }, () => copy(event.id), "Copy ID"),
-                                GenericTemplates.roundIconButton({
-                                    icon: "data_object"
-                                }, () => copy(JSON.stringify(JSON.parse(event.content), null, 2)), "Copy content"),
                                 create("span")
                                     .classes("text-small")
-                                    .text(event.id)
+                                    .text("E | " + event.id)
+                                    .build(),
+                                GenericTemplates.roundIconButton({
+                                    icon: "content_copy"
+                                }, () => copy(resourceId), "Copy resource ID"),
+                                create("span")
+                                    .classes("text-small")
+                                    .text("R | " + resourceId)
                                     .build(),
                             ).build(),
                         ifjs(referenceId, create("div")
