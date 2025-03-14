@@ -11,6 +11,7 @@ import {User} from "../Models/DbModels/lyda/User.ts";
 import {SearchTemplates} from "./SearchTemplates.ts";
 import {SettingsTemplates} from "./SettingsTemplates.ts";
 import {RoadmapTemplates} from "./RoadmapTemplates.ts";
+import {EventsTemplates} from "./admin/EventsTemplates.ts";
 
 export class PageTemplates {
     static mapping: {[key: string]: Function} = {
@@ -38,6 +39,7 @@ export class PageTemplates {
         "verify-email": LandingPageTemplates.newLandingPage,
         search: SearchTemplates.searchPage,
         roadmap: RoadmapTemplates.roadmapPage,
+        events: EventsTemplates.eventsPage,
     };
     static needLoginPages: string[] = [
         "library",

@@ -9,7 +9,7 @@ import {PlaylistTemplates} from "./Templates/PlaylistTemplates.ts";
 import {LibraryActions} from "./Actions/LibraryActions.ts";
 import {Api} from "./Api/Api.ts";
 import {StatisticTemplates} from "./Templates/StatisticTemplates.ts";
-import {LogTemplates} from "./Templates/LogTemplates.ts";
+import {LogTemplates} from "./Templates/admin/LogTemplates.ts";
 import {Permissions} from "./Enums/Permissions.ts";
 import {LydaApi} from "./Api/LydaApi.ts";
 import {TrackActions} from "./Actions/TrackActions.ts";
@@ -35,7 +35,7 @@ import {AvailableSubscription} from "./Models/DbModels/finance/AvailableSubscrip
 import {Subscription} from "./Models/DbModels/finance/Subscription.ts";
 import {currentSecretCode, currentUser, permissions} from "./state.ts";
 import {RoyaltyInfo} from "./Models/RoyaltyInfo.ts";
-import {RoyaltyTemplates} from "./Templates/RoyaltyTemplates.ts";
+import {RoyaltyTemplates} from "./Templates/admin/RoyaltyTemplates.ts";
 
 export class Lyda {
     static async getEndpointData(endpoint: string, params = "") {
@@ -156,7 +156,7 @@ export class Lyda {
                     return;
                 }
                 const royaltyInfo = await Api.getAsync<RoyaltyInfo>(ApiRoutes.getRoyaltyInfo);
-                element.append(RoyaltyTemplates.artistRoyaltyActions(royaltyInfo.data));
+                element.append(StatisticTemplates.artistRoyaltyActions(royaltyInfo.data));
                 element.append(RoyaltyTemplates.royaltyOverview(royaltyInfo.data));
                 element.append(create("div").classes("flex").children(...(await StatisticsWrapper.getStatistics(permissions.value))).build());
                 break;

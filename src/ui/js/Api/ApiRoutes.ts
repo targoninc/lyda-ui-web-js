@@ -162,4 +162,10 @@ export class ApiRoutes {
     static searchPlaylists = ApiRoutes.search + "/playlists";
     static searchUsers = ApiRoutes.search + "/users";
     // endregion
+
+    // region Webhooks
+    private static webhooks = ApiRoutes.base + "/webhooks";
+    static getEvents = ApiRoutes.webhooks + "/events";
+    static triggerEventHandling = ApiRoutes.webhooks + "/triggerEventHandling";
+    // endregion
 }

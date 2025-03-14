@@ -101,5 +101,9 @@ export const routes: Route[] = [
     {
         path: "verify-email",
         title: "Verify Email",
-    }
+    },
+    {
+        path: "events",
+        title: "Events",
+    },
 ];

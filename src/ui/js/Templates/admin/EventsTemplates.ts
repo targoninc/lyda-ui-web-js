@@ -1,0 +1,151 @@
+import {compute, Signal, signal} from "../../../fjsc/src/signals.ts";
+import {PaypalWebhook} from "../../Models/DbModels/finance/PaypalWebhook.ts";
+import {create, ifjs, signalMap} from "../../../fjsc/src/f2.ts";
+import {Api} from "../../Api/Api.ts";
+import {ApiRoutes} from "../../Api/ApiRoutes.ts";
+import {FJSC} from "../../../fjsc";
+import {copy} from "../../Classes/Util.ts";
+import {GenericTemplates} from "../GenericTemplates.ts";
+import {Time} from "../../Classes/Helpers/Time.ts";
+import {notify} from "../../Classes/Ui.ts";
+import {NotificationType} from "../../Enums/NotificationType.ts";
+
+export class EventsTemplates {
+    static eventsPage() {
+        const events = signal<PaypalWebhook[]>([]);
+        Api.getAsync<PaypalWebhook[]>(ApiRoutes.getEvents)
+            .then(e => events.value = e.data);
+        const loading = signal(false);
+
+        return create("div")
+            .classes("flex-v")
+            .children(
+                EventsTemplates.eventsList(events, loading)
+            ).build();
+    }
+
+    static eventsList(events: Signal<PaypalWebhook[]>, loading: Signal<boolean>) {
+        const docsLink = "https://developer.paypal.com/api/rest/webhooks/event-names/";
+
+        return create("div")
+            .classes("flex-v")
+            .children(
+                create("div")
+                    .classes("flex", "align-children", "fixed-bar")
+                    .children(
+                        FJSC.button({
+                            text: "Refresh",
+                            icon: {icon: "refresh"},
+                            classes: ["positive"],
+                            disabled: loading,
+                            onclick: async () => {
+                                loading.value = true;
+                                const newEvents = await Api.getAsync<PaypalWebhook[]>(ApiRoutes.getEvents);
+                                loading.value = false;
+                                events.value = newEvents.data;
+                            }
+                        }),
+                        create("span")
+                            .text(compute(e => e.length + " events", events))
+                            .build(),
+                        GenericTemplates.inlineLink(docsLink, "PayPal Docs", true),
+                    ).build(),
+                signalMap(events, create("div").classes("flex-v", "fixed-bar-content"), (event: PaypalWebhook) => EventsTemplates.event(event))
+            ).build();
+    }
+
+    static event(event: PaypalWebhook) {
+        const typeIconMap: Record<string, string> = {
+            "PAYMENT.SALE.COMPLETED": "price_check",
+            "BILLING.SUBSCRIPTION.CREATED": "line_start",
+            "BILLING.SUBSCRIPTION.ACTIVATED": "line_start_circle",
+            "PAYMENT.PAYOUTSBATCH.PROCESSING": "pending",
+            "PAYMENT.PAYOUTSBATCH.SUCCESS": "finance_chip",
+            "PAYMENT.PAYOUTSBATCH.DENIED": "money_off",
+        };
+
+        const relevantReferenceIdMap: Record<string, Function> = {
+            "PAYMENT.SALE.COMPLETED": (e: PaypalWebhook) => JSON.parse(e.content).resource?.billing_agreement_id,
+            "BILLING.SUBSCRIPTION.CREATED": (e: PaypalWebhook) => JSON.parse(e.content).resource?.plan_id,
+            "BILLING.SUBSCRIPTION.ACTIVATED": (e: PaypalWebhook) => JSON.parse(e.content).resource?.plan_id,
+            "PAYMENT.PAYOUTSBATCH.PROCESSING": (e: PaypalWebhook) => JSON.parse(e.content).resource?.batch_header.sender_batch_header.sender_batch_id,
+            "PAYMENT.PAYOUTSBATCH.SUCCESS": (e: PaypalWebhook) => JSON.parse(e.content).resource?.batch_header.sender_batch_header.sender_batch_id,
+            "PAYMENT.PAYOUTSBATCH.DENIED": (e: PaypalWebhook) => JSON.parse(e.content).resource?.batch_header.sender_batch_header.sender_batch_id,
+        };
+        const referenceId = (relevantReferenceIdMap[event.type] ?? (() => null))(event);
+
+        return create("div")
+            .classes("card", "flex", "space-outwards")
+            .children(
+                create("div")
+                    .classes("flex-v")
+                    .children(
+                        create("span")
+                            .classes("flex", "align-children", "text-large")
+                            .children(
+                                ifjs(typeIconMap[event.type], GenericTemplates.icon(typeIconMap[event.type], true)),
+                                create("span")
+                                    .text(event.type)
+                                    .build(),
+                                FJSC.button({
+                                    text: "Trigger",
+                                    icon: {icon: "start"},
+                                    classes: ["positive"],
+                                    onclick: () => {
+                                        Api.postAsync(ApiRoutes.triggerEventHandling, {
+                                            id: event.id,
+                                        }).then(() => {
+                                            notify("Event triggered", NotificationType.success);
+                                        }).catch(e => {
+                                            notify("Failed to trigger event: " + e, NotificationType.error);
+                                        });
+                                    }
+                                }),
+                            ).build(),
+                        create("div")
+                            .classes("flex", "align-children")
+                            .children(
+                                GenericTemplates.roundIconButton({
+                                    icon: "content_copy"
+                                }, () => copy(event.id), "Copy ID"),
+                                GenericTemplates.roundIconButton({
+                                    icon: "data_object"
+                                }, () => copy(JSON.stringify(JSON.parse(event.content), null, 2)), "Copy content"),
+                                create("span")
+                                    .classes("text-small")
+                                    .text(event.id)
+                                    .build(),
+                            ).build(),
+                        ifjs(referenceId, create("div")
+                            .classes("flex", "align-children")
+                            .children(
+                                GenericTemplates.roundIconButton({
+                                    icon: "fingerprint"
+                                }, () => copy(referenceId), "Copy reference ID"),
+                                create("span")
+                                    .classes("text-small")
+                                    .text(referenceId)
+                                    .build()
+                            ).build()),
+                    ).build(),
+                create("div")
+                    .classes("flex-v")
+                    .children(
+                        create("div")
+                            .classes("flex", "no-gap")
+                            .children(
+                                create("span")
+                                    .classes("text-small")
+                                    .text(compute(t => `Received ${t}`, Time.agoUpdating(event.received_at)))
+                                    .title(new Date(event.received_at).toLocaleDateString())
+                                    .build(),
+                                create("span")
+                                    .classes("text-small")
+                                    .text(compute(t => `, Updated ${t}`, Time.agoUpdating(event.updated_at)))
+                                    .title(new Date(event.updated_at).toLocaleDateString())
+                                    .build(),
+                            ).build(),
+                    ).build(),
+            ).build();
+    }
+}

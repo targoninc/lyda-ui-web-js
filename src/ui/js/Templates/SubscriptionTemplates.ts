@@ -1,5 +1,5 @@
 import {create, ifjs, signalMap} from "../../fjsc/src/f2.ts";
-import {Num as NumberFormatter} from "../Classes/Helpers/Num.ts";
+import {currency, Num as NumberFormatter} from "../Classes/Helpers/Num.ts";
 import {SubscriptionActions} from "../Actions/SubscriptionActions.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
@@ -64,7 +64,7 @@ export class SubscriptionTemplates {
             ).build();
     }
 
-    static option(currentSubscription: Signal<Subscription | null>, selectedOption: Signal<number | null>, currency: string, option: AvailableSubscription) {
+    static option(currentSubscription: Signal<Subscription | null>, selectedOption: Signal<number | null>, cur: string, option: AvailableSubscription) {
         const active = compute(sub => sub && sub.subscription_id === option.id && sub.status === SubscriptionStatus.active, currentSubscription);
         const pending = compute(sub => sub && sub.subscription_id === option.id && sub.status === SubscriptionStatus.pending, currentSubscription);
         const enabled = compute((a, p) => !a && !p, active, pending);
@@ -111,7 +111,7 @@ export class SubscriptionTemplates {
                                     .children(
                                         create("span")
                                             .classes("text-xlarge")
-                                            .text(NumberFormatter.currency(option.price_per_term, currency))
+                                            .text(currency(option.price_per_term, cur))
                                             .build(),
                                         create("span")
                                             .classes("text-small")

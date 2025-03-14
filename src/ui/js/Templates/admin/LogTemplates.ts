@@ -1,16 +1,16 @@
-import {Time} from "../Classes/Helpers/Time.ts";
-import {UserTemplates} from "./UserTemplates.ts";
-import {GenericTemplates} from "./GenericTemplates.ts";
-import {copy, Util} from "../Classes/Util.ts";
-import {AnyElement, create, ifjs} from "../../fjsc/src/f2.ts";
-import {User} from "../Models/DbModels/lyda/User.ts";
-import {compute, signal, Signal} from "../../fjsc/src/signals.ts";
-import {PillOption} from "../Models/PillOption.ts";
-import {LogLevel} from "../Enums/LogLevel.ts";
-import {Log} from "../Models/DbModels/lyda/Log.ts";
-import {FJSC} from "../../fjsc";
-import {LydaApi} from "../Api/LydaApi.ts";
-import {truncateText} from "../Classes/Helpers/CustomText.ts";
+import {Time} from "../../Classes/Helpers/Time.ts";
+import {UserTemplates} from "../UserTemplates.ts";
+import {GenericTemplates} from "../GenericTemplates.ts";
+import {copy, Util} from "../../Classes/Util.ts";
+import {AnyElement, create, ifjs} from "../../../fjsc/src/f2.ts";
+import {User} from "../../Models/DbModels/lyda/User.ts";
+import {compute, signal, Signal} from "../../../fjsc/src/signals.ts";
+import {PillOption} from "../../Models/PillOption.ts";
+import {LogLevel} from "../../Enums/LogLevel.ts";
+import {Log} from "../../Models/DbModels/lyda/Log.ts";
+import {FJSC} from "../../../fjsc";
+import {LydaApi} from "../../Api/LydaApi.ts";
+import {truncateText} from "../../Classes/Helpers/CustomText.ts";
 
 export class LogTemplates {
     static async actionLogs(selfUser: User, data: any[]) {
