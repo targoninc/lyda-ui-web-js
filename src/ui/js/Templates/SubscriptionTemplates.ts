@@ -72,7 +72,7 @@ export class SubscriptionTemplates {
         const pendingClass = compute((a): string => a ? "pending" : "_", pending);
         const isSelectedOption = compute(selected => selected === option.id, selectedOption);
         const selectedClass = compute((s): string => s === option.id ? "selected" : "_", selectedOption);
-        const gifted = compute(s => !!(s && s.gifted), currentSubscription);
+        const gifted = compute(s => !!(s && s.gifted_by_user_id), currentSubscription);
         const createdAt = compute(s => s && new Date(s.created_at), currentSubscription);
         const previousId = compute(s => s && s.previous_subscription, currentSubscription);
         const startSubClass = compute(p => "startSubscription_" + option.id + "_" + p, previousId);
