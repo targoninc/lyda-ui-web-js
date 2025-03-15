@@ -1,5 +1,5 @@
 {
-  "name": "lyda-ui-web-js",
+  "name": "lyda-ui-web",
   "type": "module",
   "scripts": {
     "build-web": "bun build src/ui/main.ts --outdir ./out --sourcemap=linked --minify --watch",
@@ -27,5 +27,5 @@
     "express": "^5.0.0",
     "typescript": "^5.5.3"
   },
-  "version": "0.0.25"
+  "version": "0.0.26"
 }
