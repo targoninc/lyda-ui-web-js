@@ -67,36 +67,48 @@ export class SubscriptionTemplates {
         const isActive = compute(sub => sub && sub.id === payment.subscription_id, currentSubscription);
 
         return create("div")
-            .classes("card", "flex-v", "subscription-payment")
+            .classes("card", "flex", "space-outwards", "subscription-payment")
             .children(
-                create("div")
-                    .classes("flex", "align-children")
-                    .children(
-                        ifjs(isActive, GenericTemplates.pill({
-                            text: "For active subscription",
-                            icon: "credit_card",
-                            value: payment.payment_processor,
-                            onclick: () => {
-                                console.log(getSubscriptionLink(currentSubscription.value));
-                                window.open(getSubscriptionLink(currentSubscription.value), "_blank");
-                            }
-                        }, signal(payment.succeeded))),
-                        create("span")
-                            .classes("text-large")
-                            .text(currency(payment.total, payment.currency))
-                            .build(),
-                    ).build(),
                 create("div")
                     .classes("flex-v")
                     .children(
+                        create("div")
+                            .classes("flex", "align-children")
+                            .children(
+                                ifjs(isActive, GenericTemplates.pill({
+                                    text: "For active subscription",
+                                    icon: "credit_card",
+                                    value: payment.payment_processor,
+                                    onclick: () => {
+                                        console.log(getSubscriptionLink(currentSubscription.value));
+                                        window.open(getSubscriptionLink(currentSubscription.value), "_blank");
+                                    }
+                                }, signal(payment.succeeded))),
+                                create("span")
+                                    .classes("text-large")
+                                    .text(currency(payment.total, payment.currency))
+                                    .build(),
+                            ).build(),
+                        create("div")
+                            .classes("flex-v")
+                            .children(
+                                create("span")
+                                    .classes("text-small")
+                                    .text(`Fees by payment provider: ${currency(payment.fees, payment.currency)}`)
+                                    .build(),
+                                create("span")
+                                    .classes("text-small", "clickable")
+                                    .text(`Transaction ID from payment provider: ${payment.external_id}`)
+                                    .onclick(() => copy(payment.external_id))
+                                    .build(),
+                            ).build()
+                    ).build(),
+                create("div")
+                    .classes("flex")
+                    .children(
                         create("span")
                             .classes("text-small")
-                            .text(`Fees by payment provider: ${currency(payment.fees, payment.currency)}`)
-                            .build(),
-                        create("span")
-                            .classes("text-small", "clickable")
-                            .text(`Transaction ID from payment provider: ${payment.external_id}`)
-                            .onclick(() => copy(payment.external_id))
+                            .text(Time.agoUpdating(new Date(payment.received_at)))
                             .build(),
                     ).build()
             ).build();
