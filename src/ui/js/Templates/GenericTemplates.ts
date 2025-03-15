@@ -26,6 +26,7 @@ import {SearchResult} from "../Models/SearchResult.ts";
 import {openMenus} from "../state.ts";
 import {PillOption} from "../Models/PillOption.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
+import {dayFromValue} from "../Classes/Helpers/Date.ts";
 
 export class GenericTemplates {
     static icon(icon: StringOrSignal, adaptive = false, classes: StringOrSignal[] = [], title = "", onclick: Function | undefined = undefined) {
@@ -961,6 +962,21 @@ export class GenericTemplates {
             .build();
     }
 
+    static releaseDateInput(state: Signal<{
+        release_date: Date;
+    }|any>) {
+        return FJSC.input<string>({
+            type: InputType.date,
+            name: "release_date",
+            label: "Release Date",
+            placeholder: "YYYY-MM-DD",
+            value: compute(s => dayFromValue(s.release_date), state),
+            onchange: (v) => {
+                state.value = {...state.value, release_date: new Date(v)};
+            }
+        });
+    }
+
     static updateAvailable(version: string) {
         return create("div")
             .classes("update-available")
@@ -979,7 +995,8 @@ export class GenericTemplates {
                         FJSC.button({
                             text: "Reload",
                             onclick: () => {
-                                window.location.reload();
+                                // @ts-ignore
+                                window.location.reload(true);
                             },
                             classes: ["positive"],
                             icon: {icon: "download"}

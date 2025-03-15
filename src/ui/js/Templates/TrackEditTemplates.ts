@@ -289,7 +289,7 @@ export class TrackEditTemplates {
                     TrackEditTemplates.creditsInput(state),
                     TrackEditTemplates.artistNameInput(state),
                     ifjs(enableLinkedUsers, TrackEditTemplates.linkedUsers(state.value.collaborators, state)),
-                    TrackEditTemplates.releaseDateInput(state),
+                    GenericTemplates.releaseDateInput(state),
                     TrackEditTemplates.genreInput(state),
                     TrackEditTemplates.isrcInput(state),
                     TrackEditTemplates.upcInput(state),
@@ -409,19 +409,6 @@ export class TrackEditTemplates {
         });
     }
 
-    private static releaseDateInput(state: Signal<UploadableTrack>) {
-        return FJSC.input<string>({
-            type: InputType.date,
-            name: "release_date",
-            label: "Release Date",
-            placeholder: "YYYY-MM-DD",
-            value: compute(s => dayFromValue(s.release_date), state),
-            onchange: (v) => {
-                state.value = {...state.value, release_date: new Date(v)};
-            }
-        });
-    }
-
     private static artistNameInput(state: Signal<UploadableTrack>) {
         return FJSC.input<string>({
             type: InputType.text,
@@ -459,7 +446,7 @@ export class TrackEditTemplates {
                     TrackEditTemplates.creditsInput(state),
                     TrackEditTemplates.artistNameInput(state),
                     ifjs(enableLinkedUsers, TrackEditTemplates.linkedUsers(state.value.collaborators, state)),
-                    TrackEditTemplates.releaseDateInput(state),
+                    GenericTemplates.releaseDateInput(state),
                     TrackEditTemplates.genreInput(state),
                     TrackEditTemplates.isrcInput(state),
                     TrackEditTemplates.upcInput(state),

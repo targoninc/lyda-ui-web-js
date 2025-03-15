@@ -77,4 +77,4 @@ KeyBinds.initiate();
 UiActions.runMobileCheck();
 StreamingBroadcaster.initializeReceiver();
 
-startUpdateCheck();
+//startUpdateCheck();

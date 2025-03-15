@@ -2,7 +2,6 @@ import {Icons} from "../Enums/Icons.js";
 import {AlbumActions} from "../Actions/AlbumActions.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
-import {TrackActions} from "../Actions/TrackActions.ts";
 import {UserTemplates} from "./UserTemplates.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
 import {TrackTemplates} from "./TrackTemplates.ts";
@@ -10,10 +9,10 @@ import {QueueManager} from "../Streaming/QueueManager.ts";
 import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {StatisticsTemplates} from "./StatisticsTemplates.ts";
 import {Images} from "../Enums/Images.ts";
-import {Util} from "../Classes/Util.ts";
+import {getErrorMessage, Util} from "../Classes/Util.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
-import {AnyNode, create, HtmlPropertyValue, ifjs, signalMap} from "../../fjsc/src/f2.ts";
+import {AnyNode, create, HtmlPropertyValue, ifjs} from "../../fjsc/src/f2.ts";
 import {Album} from "../Models/DbModels/lyda/Album.ts";
 import {InputType} from "../../fjsc/src/Types.ts";
 import {Track} from "../Models/DbModels/lyda/Track.ts";
@@ -23,9 +22,9 @@ import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {manualQueue} from "../state.ts";
-import {PlaylistTrack} from "../Models/DbModels/lyda/PlaylistTrack.ts";
-import {AlbumTrack} from "../Models/DbModels/lyda/AlbumTrack.ts";
 import {ListTrack} from "../Models/ListTrack.ts";
+import {Api} from "../Api/Api.ts";
+import {ApiRoutes} from "../Api/ApiRoutes.ts";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
@@ -79,7 +78,7 @@ export class AlbumTemplates {
                         FJSC.button({
                             text: buttonText,
                             classes: ["positive"],
-                            icon: { icon: "forms_add_on" },
+                            icon: {icon: "forms_add_on"},
                             disabled: compute((ch: number[]) => ch.length === 0, checkedAlbums),
                             onclick: async () => {
                                 await AlbumActions.addTrackToAlbums(track.id, checkedAlbums.value);
@@ -88,13 +87,13 @@ export class AlbumTemplates {
                         FJSC.button({
                             text: "Cancel",
                             classes: ["negative"],
-                            icon: { icon: "close" },
+                            icon: {icon: "close"},
                             onclick: Util.removeModal
                         }),
                     ).build()
             ).build();
     }
-	
+
     static async albumInAddList(item: Album, checkedItems: Signal<number[]>) {
         const checked = compute((ch) => ch.includes(item.id), checkedItems);
         const checkedClass = compute((c): string => c ? "active" : "_", checked);
@@ -155,8 +154,51 @@ export class AlbumTemplates {
                                 await AlbumActions.createNewAlbum(album.value);
                                 Util.removeModal();
                             },
-                            icon: { icon: "playlist_add" },
+                            icon: {icon: "playlist_add"},
                             classes: ["positive"],
+                        }),
+                        GenericTemplates.modalCancelButton()
+                    ).build()
+            ).build();
+    }
+
+    static editAlbumModal(album: Partial<Album>) {
+        const state = signal(album);
+        const loading = signal(false);
+
+        return create("div")
+            .classes("flex-v")
+            .children(
+                create("div")
+                    .classes("flex")
+                    .children(
+                        create("img")
+                            .styles("width", "30px", "height", "auto")
+                            .classes("inline-icon", "svg", "nopointer")
+                            .attributes("src", Icons.ALBUM_ADD)
+                            .build(),
+                        create("h2")
+                            .text("Edit album")
+                            .build()
+                    )
+                    .build(),
+                AlbumTemplates.albumInputs(state),
+                create("div")
+                    .classes("flex")
+                    .children(
+                        FJSC.button({
+                            text: "Update",
+                            disabled: loading,
+                            classes: ["positive"],
+                            icon: {icon: "save"},
+                            onclick: async () => {
+                                loading.value = true;
+                                Api.postAsync(ApiRoutes.updateAlbum, state.value).then(() => {
+                                    Util.removeModal();
+                                }).catch(e => {
+                                    notify("Failed to update album: " + getErrorMessage(e), NotificationType.error);
+                                }).finally(() => loading.value = false);
+                            },
                         }),
                         GenericTemplates.modalCancelButton()
                     ).build()
@@ -167,7 +209,6 @@ export class AlbumTemplates {
         const name = compute((s) => s.title ?? "", album);
         const upc = compute((s) => s.upc ?? "", album);
         const description = compute((s) => s.description ?? "", album);
-        const releaseDate = compute((s) => s.release_date ?? new Date(), album);
         const visibility = compute((s) => s.visibility === "private", album);
 
         return create("div")
@@ -182,7 +223,7 @@ export class AlbumTemplates {
                     placeholder: "Album name",
                     value: name,
                     onchange: (v) => {
-                        album.value = { ...album.value, title: v };
+                        album.value = {...album.value, title: v};
                     }
                 }),
                 FJSC.input<string>({
@@ -192,7 +233,7 @@ export class AlbumTemplates {
                     placeholder: "12-digit number",
                     value: upc,
                     onchange: (v) => {
-                        album.value = { ...album.value, upc: v };
+                        album.value = {...album.value, upc: v};
                     }
                 }),
                 FJSC.textarea({
@@ -201,26 +242,17 @@ export class AlbumTemplates {
                     placeholder: "My cool album",
                     value: description,
                     onchange: (v) => {
-                        album.value = { ...album.value, description: v };
+                        album.value = {...album.value, description: v};
                     }
                 }),
-                FJSC.input<Date>({
-                    type: InputType.date,
-                    name: "release_date",
-                    label: "Release Date",
-                    placeholder: "YYYY-MM-DD",
-                    value: releaseDate,
-                    onchange: (v) => {
-                        album.value = { ...album.value, release_date: new Date(v) };
-                    }
-                }),
+                GenericTemplates.releaseDateInput(album),
                 FJSC.toggle({
                     name: "visibility",
                     label: "Private",
                     text: "Private",
                     checked: visibility,
                     onchange: (v) => {
-                        album.value = { ...album.value, visibility: v ? "private" : "public" };
+                        album.value = {...album.value, visibility: v ? "private" : "public"};
                     }
                 }),
             ).build();
@@ -380,17 +412,28 @@ export class AlbumTemplates {
             await AlbumActions.startTrackInAlbum(album, trackId);
         }
 
-        const editActions = [];
+        let editActions: AnyNode[] = [];
         if (data.canEdit) {
-            editActions.push(FJSC.button({
-                text: "Delete",
-                icon: { icon: "delete" },
-                classes: ["negative"],
-                onclick: async (e) => {
-                    await Ui.getConfirmationModal("Delete album", "Are you sure you want to delete this album?", "Yes", "No", () => AlbumActions.deleteAlbum(album.id), () => {
-                    }, Icons.WARNING);
-                }
-            }));
+            editActions = [
+                FJSC.button({
+                    text: "Edit",
+                    icon: {icon: "edit"},
+                    classes: ["positive"],
+                    onclick: async () => {
+                        let modal = GenericTemplates.modal([AlbumTemplates.editAlbumModal(album)], "edit-album");
+                        Ui.addModal(modal);
+                    }
+                }),
+                FJSC.button({
+                    text: "Delete",
+                    icon: {icon: "delete"},
+                    classes: ["negative"],
+                    onclick: async (e) => {
+                        await Ui.getConfirmationModal("Delete album", "Are you sure you want to delete this album?", "Yes", "No", () => AlbumActions.deleteAlbum(album.id), () => {
+                        }, Icons.WARNING);
+                    }
+                })
+            ];
         }
         const coverLoading = signal(false);
         const coverState = signal(Images.DEFAULT_COVER_ALBUM);

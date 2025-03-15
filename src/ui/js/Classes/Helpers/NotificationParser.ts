@@ -24,13 +24,13 @@ export class NotificationParser {
     static getDisplayTextByType(type: string, id: any, refs: NotificationReference[]) {
         switch (type) {
             case "profile":
-                return refs.find(item => item.id === id)?.object.username;
+                return refs.find(item => item.type === "u" && item.id === id)?.object.username;
             case "track":
-                return refs.find(item => item.id === id)?.object.title;
+                return refs.find(item => item.type === "t" && item.id === id)?.object.title;
             case "album":
-                return refs.find(item => item.id === id)?.object.title;
+                return refs.find(item => item.type === "a" && item.id === id)?.object.title;
             case "playlist":
-                return refs.find(item => item.id === id)?.object.title;
+                return refs.find(item => item.type === "p" && item.id === id)?.object.title;
         }
         return id;
     }

@@ -97,6 +97,7 @@ export class ApiRoutes {
 
     private static albumActions = ApiRoutes.albums + "/actions";
     static newAlbum = ApiRoutes.albumActions + "/new";
+    static updateAlbum = ApiRoutes.albumActions + "/update";
     static deleteAlbum = ApiRoutes.albumActions + "/delete";
     static addTrackToAlbums = ApiRoutes.albumActions + "/addTrack";
     static removeTrackFromAlbums = ApiRoutes.albumActions + "/removeTrack";
