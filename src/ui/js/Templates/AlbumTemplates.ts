@@ -124,11 +124,6 @@ export class AlbumTemplates {
             release_date: new Date(),
             visibility: "private",
         });
-        const name = compute((s) => s.title ?? "", album);
-        const upc = compute((s) => s.upc ?? "", album);
-        const description = compute((s) => s.description ?? "", album);
-        const releaseDate = compute((s) => s.release_date ?? new Date(), album);
-        const visibility = compute((s) => s.visibility === "private", album);
         const disabled = compute((s) => {
             return !s.title || s.title === "";
         }, album);
@@ -149,60 +144,7 @@ export class AlbumTemplates {
                             .build()
                     )
                     .build(),
-                create("div")
-                    .classes("flex-v")
-                    .id("newAlbumForm")
-                    .children(
-                        FJSC.input<string>({
-                            type: InputType.text,
-                            required: true,
-                            name: "name",
-                            label: "Name",
-                            placeholder: "Album name",
-                            value: name,
-                            onchange: (v) => {
-                                album.value = { ...album.value, title: v };
-                            }
-                        }),
-                        FJSC.input<string>({
-                            type: InputType.text,
-                            name: "upc",
-                            label: "UPC",
-                            placeholder: "12-digit number",
-                            value: upc,
-                            onchange: (v) => {
-                                album.value = { ...album.value, upc: v };
-                            }
-                        }),
-                        FJSC.textarea({
-                            name: "description",
-                            label: "Description",
-                            placeholder: "My cool album",
-                            value: description,
-                            onchange: (v) => {
-                                album.value = { ...album.value, description: v };
-                            }
-                        }),
-                        FJSC.input<Date>({
-                            type: InputType.date,
-                            name: "release_date",
-                            label: "Release Date",
-                            placeholder: "YYYY-MM-DD",
-                            value: releaseDate,
-                            onchange: (v) => {
-                                album.value = { ...album.value, release_date: new Date(v) };
-                            }
-                        }),
-                        FJSC.toggle({
-                            name: "visibility",
-                            label: "Private",
-                            text: "Private",
-                            checked: visibility,
-                            onchange: (v) => {
-                                album.value = { ...album.value, visibility: v ? "private" : "public" };
-                            }
-                        }),
-                    ).build(),
+                AlbumTemplates.albumInputs(album),
                 create("div")
                     .classes("flex")
                     .children(
@@ -218,6 +160,69 @@ export class AlbumTemplates {
                         }),
                         GenericTemplates.modalCancelButton()
                     ).build()
+            ).build();
+    }
+
+    static albumInputs(album: Signal<Partial<Album>>) {
+        const name = compute((s) => s.title ?? "", album);
+        const upc = compute((s) => s.upc ?? "", album);
+        const description = compute((s) => s.description ?? "", album);
+        const releaseDate = compute((s) => s.release_date ?? new Date(), album);
+        const visibility = compute((s) => s.visibility === "private", album);
+
+        return create("div")
+            .classes("flex-v")
+            .id("newAlbumForm")
+            .children(
+                FJSC.input<string>({
+                    type: InputType.text,
+                    required: true,
+                    name: "name",
+                    label: "Name",
+                    placeholder: "Album name",
+                    value: name,
+                    onchange: (v) => {
+                        album.value = { ...album.value, title: v };
+                    }
+                }),
+                FJSC.input<string>({
+                    type: InputType.text,
+                    name: "upc",
+                    label: "UPC",
+                    placeholder: "12-digit number",
+                    value: upc,
+                    onchange: (v) => {
+                        album.value = { ...album.value, upc: v };
+                    }
+                }),
+                FJSC.textarea({
+                    name: "description",
+                    label: "Description",
+                    placeholder: "My cool album",
+                    value: description,
+                    onchange: (v) => {
+                        album.value = { ...album.value, description: v };
+                    }
+                }),
+                FJSC.input<Date>({
+                    type: InputType.date,
+                    name: "release_date",
+                    label: "Release Date",
+                    placeholder: "YYYY-MM-DD",
+                    value: releaseDate,
+                    onchange: (v) => {
+                        album.value = { ...album.value, release_date: new Date(v) };
+                    }
+                }),
+                FJSC.toggle({
+                    name: "visibility",
+                    label: "Private",
+                    text: "Private",
+                    checked: visibility,
+                    onchange: (v) => {
+                        album.value = { ...album.value, visibility: v ? "private" : "public" };
+                    }
+                }),
             ).build();
     }
 
@@ -382,7 +387,7 @@ export class AlbumTemplates {
                 icon: { icon: "delete" },
                 classes: ["negative"],
                 onclick: async (e) => {
-                    await Ui.getConfirmationModal("Delete album", "Are you sure you want to delete this album?", "Yes", "No", AlbumActions.deleteAlbumFromElement.bind(null, e), () => {
+                    await Ui.getConfirmationModal("Delete album", "Are you sure you want to delete this album?", "Yes", "No", () => AlbumActions.deleteAlbum(album.id), () => {
                     }, Icons.WARNING);
                 }
             }));

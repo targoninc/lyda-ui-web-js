@@ -17,13 +17,6 @@ import {AlbumTrack} from "../Models/DbModels/lyda/AlbumTrack.ts";
 import {ListTrack} from "../Models/ListTrack.ts";
 
 export class AlbumActions {
-    static async deleteAlbumFromElement(e: any) {
-        if (!confirm) {
-            return;
-        }
-        await AlbumActions.deleteAlbum(e.target.id);
-    }
-
     static async openAddToAlbumModal(track: Track) {
         const res = await Api.getAsync<Album[]>(ApiRoutes.getAlbumsByUserId, {id: track.user_id});
         if (res.code !== 200) {
