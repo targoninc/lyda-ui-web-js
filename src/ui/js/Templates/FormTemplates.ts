@@ -29,7 +29,10 @@ export class FormTemplates {
                     .build(),
                 FJSC.searchableSelect({
                     options: optionsState as Signal<SelectOption[]>,
-                    value: selectedValue
+                    value: selectedValue,
+                    onchange: (v) => {
+                        selectedValue.value = v;
+                    }
                 })
             ).build();
     }

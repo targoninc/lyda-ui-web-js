@@ -23,12 +23,12 @@ export class RoyaltyTemplates {
     static royaltyCalculator(royaltyInfo: RoyaltyInfo) {
         const months = royaltyInfo.calculatableMonths.map((m: any) => {
             return <SelectOption>{
-                id: m.year * 100 + m.month,
+                id: (m.year * 100 + m.month).toString(),
                 name: m.year + "-" + m.month + (m.calculated ? " (calculated)" : ""),
             };
         });
-        const selectedState = signal(months[0]?.id ?? null);
-        const selectedMonth = compute(id => royaltyInfo.calculatableMonths.find(m => m.year * 100 + m.month === id), selectedState);
+        const selectedState = signal<string>(months[0]?.id ?? null);
+        const selectedMonth = compute(id => royaltyInfo.calculatableMonths.find(m => (m.year * 100 + m.month).toString() === id), selectedState);
         const hasEarnings = compute(month => month?.hasEarnings ?? false, selectedMonth);
         const isApproved = compute(month => month?.approved ?? false, selectedMonth);
         const earnings = compute(month => currency((month?.earnings ?? 0) / 100), selectedMonth);
@@ -49,7 +49,7 @@ export class RoyaltyTemplates {
             ).build();
     }
 
-    private static royaltyActions(months: SelectOption[], selectedState: Signal<any>, selectedMonth: Signal<RoyaltyMonth | undefined>, hasEarnings: Signal<boolean>, isApproved: Signal<any>) {
+    private static royaltyActions(months: SelectOption[], selectedState: Signal<string>, selectedMonth: Signal<RoyaltyMonth | undefined>, hasEarnings: Signal<boolean>, isApproved: Signal<any>) {
         return create("div")
             .classes("flex-v")
             .children(
