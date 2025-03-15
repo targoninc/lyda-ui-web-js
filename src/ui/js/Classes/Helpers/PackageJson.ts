@@ -25,6 +25,7 @@ export function startUpdateCheck() {
                 existingVersion.remove();
             }
             document.appendChild(GenericTemplates.updateAvailable());
+            console.log(`Update (version ${currentVersion}) available`);
         }
     }, 1000 * 10);
 }
