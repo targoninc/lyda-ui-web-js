@@ -15,7 +15,6 @@
   "devDependencies": {
     "@types/express": "^4.17.21",
     "husky": "^9.1.7",
-    "standard-version": "^9.5.0",
     "three": "^0.156.1"
   },
   "dependencies": {
@@ -27,5 +26,5 @@
     "express": "^5.0.0",
     "typescript": "^5.5.3"
   },
-  "version": "0.0.17"
+  "version": "0.0.18"
 }
