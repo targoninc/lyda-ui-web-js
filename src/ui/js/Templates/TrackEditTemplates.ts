@@ -383,6 +383,16 @@ export class TrackEditTemplates {
             return { name: genre, id: genre };
         }) as SelectOption[];
         const value = compute(p => p.genre ?? "other", parentState);
+        value.subscribe((v, changed) => {
+            if (!changed) {
+                return;
+            }
+
+            parentState.value = {
+                ...parentState.value,
+                genre: v
+            };
+        });
         return FormTemplates.dropDownField("Genre", signal(genres), value);
     }
 
