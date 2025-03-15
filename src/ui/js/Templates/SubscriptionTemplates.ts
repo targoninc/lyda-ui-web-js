@@ -75,8 +75,12 @@ export class SubscriptionTemplates {
                         create("div")
                             .classes("flex", "align-children")
                             .children(
+                                create("span")
+                                    .classes("text-large")
+                                    .text(currency(payment.total, payment.currency))
+                                    .build(),
                                 ifjs(isActive, GenericTemplates.pill({
-                                    text: "For active subscription",
+                                    text: "Active subscription",
                                     icon: "credit_card",
                                     value: payment.payment_processor,
                                     onclick: () => {
@@ -84,28 +88,28 @@ export class SubscriptionTemplates {
                                         window.open(getSubscriptionLink(currentSubscription.value), "_blank");
                                     }
                                 }, signal(payment.succeeded))),
-                                create("span")
-                                    .classes("text-large")
-                                    .text(currency(payment.total, payment.currency))
-                                    .build(),
                             ).build(),
                         create("div")
                             .classes("flex-v")
                             .children(
                                 create("span")
                                     .classes("text-small")
-                                    .text(`Fees by payment provider: ${currency(payment.fees, payment.currency)}`)
+                                    .text(`${currency(payment.fees, payment.currency)} fees by payment provider`)
                                     .build(),
                                 create("span")
                                     .classes("text-small", "clickable")
-                                    .text(`Transaction ID from payment provider: ${payment.external_id}`)
+                                    .text(`External transaction ID: ${payment.external_id}`)
                                     .onclick(() => copy(payment.external_id))
                                     .build(),
                             ).build()
                     ).build(),
                 create("div")
-                    .classes("flex")
+                    .classes("flex", "small-gap")
                     .children(
+                        create("span")
+                            .classes("text-small")
+                            .text(new Date(payment.received_at).toLocaleDateString() + ",")
+                            .build(),
                         create("span")
                             .classes("text-small")
                             .text(Time.agoUpdating(new Date(payment.received_at)))
