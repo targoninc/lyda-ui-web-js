@@ -960,4 +960,31 @@ export class GenericTemplates {
             .classes("vertical-drag-indicator")
             .build();
     }
+
+    static updateAvailable() {
+        return create("div")
+            .classes("update-available")
+            .children(
+                create("div")
+                    .classes("card", "flex-v")
+                    .children(
+                        create("span")
+                            .classes("text-large")
+                            .text("Update available")
+                            .build(),
+                        create("span")
+                            .classes("text-small")
+                            .text("A new version of Lyda is available.")
+                            .build(),
+                        FJSC.button({
+                            text: "Reload",
+                            onclick: () => {
+                                window.location.reload();
+                            },
+                            classes: ["positive"],
+                            icon: {icon: "download"}
+                        }),
+                    ).build(),
+            ).build();
+    }
 }

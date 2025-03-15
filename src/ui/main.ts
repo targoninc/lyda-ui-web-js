@@ -15,6 +15,7 @@ import {TrackPosition} from "./js/Models/TrackPosition.ts";
 import {Api} from "./js/Api/Api.ts";
 import {Permission} from "./js/Models/DbModels/lyda/Permission.ts";
 import {ApiRoutes} from "./js/Api/ApiRoutes.ts";
+import {startUpdateCheck} from "./js/Classes/Helpers/PackageJson.ts";
 
 //LydaCache.clear();
 let pageContainer = document.querySelector(".page-container");
@@ -75,3 +76,5 @@ if (currentUser.value) {
 KeyBinds.initiate();
 UiActions.runMobileCheck();
 StreamingBroadcaster.initializeReceiver();
+
+startUpdateCheck();
