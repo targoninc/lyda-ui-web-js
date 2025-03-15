@@ -16,10 +16,16 @@ export async function getVersion(): Promise<string> {
     return "unknown";
 }
 
+let newestKnownVersion = version;
+
 export function startUpdateCheck() {
     setInterval(async () => {
         const currentVersion = await getVersion();
         if (currentVersion !== version) {
+            if (currentVersion === newestKnownVersion) {
+                return;
+            }
+            newestKnownVersion = currentVersion;
             const existingVersion = document.querySelector(".update-available");
             if (existingVersion) {
                 existingVersion.remove();
