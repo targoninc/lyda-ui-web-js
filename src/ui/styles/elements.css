@@ -1215,6 +1215,15 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     flex-wrap: nowrap;
 }
 
+.update-available {
+    position: fixed;
+    bottom: var(--base-padding);
+    right: var(--base-padding);
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+}
+
 @keyframes scroll-left {
     0% {
         transform: translateX(0%);

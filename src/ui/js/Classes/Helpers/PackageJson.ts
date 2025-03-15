@@ -20,6 +20,10 @@ export function startUpdateCheck() {
     setInterval(async () => {
         const currentVersion = await getVersion();
         if (currentVersion !== version) {
+            const existingVersion = document.querySelector(".update-available");
+            if (existingVersion) {
+                existingVersion.remove();
+            }
             document.appendChild(GenericTemplates.updateAvailable());
         }
     }, 1000 * 10);
