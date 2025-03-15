@@ -31,7 +31,6 @@ export function startUpdateCheck() {
                 existingVersion.remove();
             }
             document.body.appendChild(GenericTemplates.updateAvailable());
-            console.log(`Update (version ${currentVersion}) available`);
         }
     }, 1000 * 10);
 }
