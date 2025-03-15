@@ -30,7 +30,7 @@ export function startUpdateCheck() {
             if (existingVersion) {
                 existingVersion.remove();
             }
-            document.body.appendChild(GenericTemplates.updateAvailable());
+            document.body.appendChild(GenericTemplates.updateAvailable(newestKnownVersion));
         }
     }, 1000 * 10);
 }

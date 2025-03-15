@@ -961,7 +961,7 @@ export class GenericTemplates {
             .build();
     }
 
-    static updateAvailable() {
+    static updateAvailable(version: string) {
         return create("div")
             .classes("update-available")
             .children(
@@ -970,7 +970,7 @@ export class GenericTemplates {
                     .children(
                         create("span")
                             .classes("text-large")
-                            .text("Update available")
+                            .text(`Update available (v${version})`)
                             .build(),
                         create("span")
                             .classes("text-small")
