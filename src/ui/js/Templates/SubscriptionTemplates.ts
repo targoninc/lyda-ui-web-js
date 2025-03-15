@@ -54,9 +54,9 @@ export class SubscriptionTemplates {
                 ifjs(optionsLoading, GenericTemplates.loadingSpinner()),
                 signalMap(options, create("div").classes("flex"),
                     (option) => SubscriptionTemplates.option(currentSubscription, selectedOption, currency, option)),
-                create("h2")
+                ifjs(compute(p => p.length > 0, payments), create("h2")
                     .text("Payment history")
-                    .build(),
+                    .build()),
                 ifjs(paymentsLoading, GenericTemplates.loadingSpinner()),
                 signalMap(payments, create("div").classes("flex-v"),
                     (payment) => SubscriptionTemplates.payment(payment, currentSubscription)),
