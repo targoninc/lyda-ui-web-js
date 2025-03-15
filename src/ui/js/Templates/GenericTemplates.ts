@@ -302,10 +302,7 @@ export class GenericTemplates {
     }
 
     static pill(p: PillOption, pillState: Signal<any>, extraClasses: string[] = []) {
-        const selectedState = signal(pillState.value === p.value ? "active" : "_");
-        pillState.onUpdate = (newSelected: any) => {
-            selectedState.value = newSelected === p.value ? "active" : "_";
-        };
+        const selectedState = compute((s): string => s === p.value ? "active" : "_", pillState);
 
         return FJSC.button({
             text: p.text,

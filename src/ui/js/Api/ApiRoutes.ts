@@ -9,8 +9,6 @@ export class ApiRoutes {
     // endregion
 
     // region User
-    private static auth = ApiRoutes.base + "/auth";
-
     private static user = ApiRoutes.base + "/user";
     static getUser = ApiRoutes.user + "/get";
     static userSettings = ApiRoutes.user + "/settings";
@@ -31,7 +29,6 @@ export class ApiRoutes {
     static register = ApiRoutes.userActions + "/register";
     static requestMfaCode = ApiRoutes.userActions + "/mfa-request";
     static updateUserSetting = ApiRoutes.userActions + "/update-setting";
-    static changePassword = ApiRoutes.userActions + "/change-password";
     static requestPasswordReset = ApiRoutes.userActions + "/request-password-reset";
     static resetPassword = ApiRoutes.userActions + "/reset-password";
     static updateUser = ApiRoutes.userActions + "/update";
@@ -43,6 +40,7 @@ export class ApiRoutes {
     // region Subscriptions
     private static subscriptions = ApiRoutes.base + "/subscriptions";
     static getSubscriptionOptions = ApiRoutes.subscriptions + "/options";
+    static getPaymentHistory = ApiRoutes.subscriptions + "/payments";
 
     private static subscriptionActions = ApiRoutes.subscriptions + "/actions";
     static subscribe = ApiRoutes.subscriptionActions + "/subscribe";
@@ -77,7 +75,6 @@ export class ApiRoutes {
     static unlikeTrack = ApiRoutes.tracksActions + "/unlike";
     static repostTrack = ApiRoutes.tracksActions + "/repost";
     static unrepostTrack = ApiRoutes.tracksActions + "/unrepost";
-    static regenerateSecret = ApiRoutes.tracksActions + "/regenerateSecret";
     static deleteTrack = ApiRoutes.tracksActions + "/delete";
     static updateTrack = ApiRoutes.tracksActions + "/update";
     static updateTrackFull = ApiRoutes.tracksActions + "/updateFull";

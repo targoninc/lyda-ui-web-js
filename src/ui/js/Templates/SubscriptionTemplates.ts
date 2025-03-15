@@ -1,17 +1,41 @@
 import {create, ifjs, signalMap} from "../../fjsc/src/f2.ts";
 import {currency, Num as NumberFormatter} from "../Classes/Helpers/Num.ts";
-import {SubscriptionActions} from "../Actions/SubscriptionActions.ts";
+import {getSubscriptionLink, SubscriptionActions} from "../Actions/SubscriptionActions.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {compute, signal, Signal} from "../../fjsc/src/signals.ts";
 import {AvailableSubscription} from "../Models/DbModels/finance/AvailableSubscription.ts";
 import {Subscription} from "../Models/DbModels/finance/Subscription.ts";
 import {SubscriptionStatus} from "../Enums/SubscriptionStatus.ts";
+import {notify} from "../Classes/Ui.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
+import {PaymentHistory} from "../Models/DbModels/finance/PaymentHistory.ts";
+import {Api} from "../Api/Api.ts";
+import {ApiRoutes} from "../Api/ApiRoutes.ts";
+import {copy} from "../Classes/Util.ts";
 
 export class SubscriptionTemplates {
-    static page(currency: string, options: Signal<AvailableSubscription[]>, currentSubscription: Signal<Subscription | null>) {
+    static page() {
+        const options = signal<AvailableSubscription[]>([]);
+        const currentSubscription = signal<Subscription|null>(null);
+        SubscriptionActions.loadSubscriptionOptions().then(res => {
+            if (!res || res.error) {
+                return;
+            }
+            options.value = res.options;
+            currentSubscription.value = res.currentSubscription;
+        });
+        const currency = "USD";
         const selectedOption = signal<number | null>(null);
         const optionsLoading = compute(o => o.length === 0, options);
+        const payments = signal<PaymentHistory[]>([]);
+        const paymentsLoading = signal(false);
+        paymentsLoading.value = true;
+        Api.getAsync<PaymentHistory[]>(ApiRoutes.getPaymentHistory).then(res => {
+            if (res.code === 200) {
+                payments.value = res.data;
+            }
+        }).finally(() => paymentsLoading.value = false);
 
         return create("div")
             .classes("flex-v")
@@ -28,9 +52,53 @@ export class SubscriptionTemplates {
                     .build(),
                 SubscriptionTemplates.subscriptionBenefits(),
                 ifjs(optionsLoading, GenericTemplates.loadingSpinner()),
-                signalMap(options, create("div")
-                        .classes("flex"),
+                signalMap(options, create("div").classes("flex"),
                     (option) => SubscriptionTemplates.option(currentSubscription, selectedOption, currency, option)),
+                create("h2")
+                    .text("Payment history")
+                    .build(),
+                ifjs(paymentsLoading, GenericTemplates.loadingSpinner()),
+                signalMap(payments, create("div").classes("flex-v"),
+                    (payment) => SubscriptionTemplates.payment(payment, currentSubscription)),
+            ).build();
+    }
+
+    static payment(payment: PaymentHistory, currentSubscription: Signal<Subscription|null>) {
+        const isActive = compute(sub => sub && sub.id === payment.subscription_id, currentSubscription);
+
+        return create("div")
+            .classes("card", "flex-v", "subscription-payment")
+            .children(
+                create("div")
+                    .classes("flex", "align-children")
+                    .children(
+                        ifjs(isActive, GenericTemplates.pill({
+                            text: "For active subscription",
+                            icon: "credit_card",
+                            value: payment.payment_processor,
+                            onclick: () => {
+                                console.log(getSubscriptionLink(currentSubscription.value));
+                                window.open(getSubscriptionLink(currentSubscription.value), "_blank");
+                            }
+                        }, signal(payment.succeeded))),
+                        create("span")
+                            .classes("text-large")
+                            .text(currency(payment.total, payment.currency))
+                            .build(),
+                    ).build(),
+                create("div")
+                    .classes("flex-v")
+                    .children(
+                        create("span")
+                            .classes("text-small")
+                            .text(`Fees by payment provider: ${currency(payment.fees, payment.currency)}`)
+                            .build(),
+                        create("span")
+                            .classes("text-small", "clickable")
+                            .text(`Transaction ID from payment provider: ${payment.external_id}`)
+                            .onclick(() => copy(payment.external_id))
+                            .build(),
+                    ).build()
             ).build();
     }
 
@@ -78,6 +146,7 @@ export class SubscriptionTemplates {
         const startSubClass = compute(p => "startSubscription_" + option.id + "_" + p, previousId);
         const optionMessage = signal("Available payment providers:");
         const buttonText = compute((a): string => a ? "Switch plan" : "Subscribe", currentSubscription);
+        const link = compute(sub => getSubscriptionLink(sub), currentSubscription);
 
         return create("div")
             .classes("flex-v", "card", "relative", "subscription-option", selectedClass, activeClass, pendingClass)
@@ -128,6 +197,7 @@ export class SubscriptionTemplates {
                         create("div")
                             .classes("flex-v", startSubClass)
                             .children(
+                                ifjs(active, GenericTemplates.inlineLink(link, "Manage on PayPal")),
                                 create("div")
                                     .classes("flex", "small-gap")
                                     .children(

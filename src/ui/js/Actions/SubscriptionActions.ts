@@ -121,3 +121,14 @@ export class SubscriptionActions {
         return res.data;
     }
 }
+
+export function getSubscriptionLink(subscription: Subscription|null) {
+    if (!subscription) {
+        return "";
+    }
+
+    const providerLinkMap: Record<string, string> = {
+        paypal: "https://www.paypal.com/myaccount/autopay/connect/",
+    };
+    return providerLinkMap["paypal"] + subscription.external_subscription_id;
+}

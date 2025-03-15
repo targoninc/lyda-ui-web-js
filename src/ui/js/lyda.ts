@@ -1,6 +1,5 @@
 import {PlayManager} from "./Streaming/PlayManager.ts";
 import {UserTemplates} from "./Templates/UserTemplates.ts";
-import {SettingsTemplates} from "./Templates/SettingsTemplates.ts";
 import {TrackEditTemplates} from "./Templates/TrackEditTemplates.ts";
 import {TrackTemplates} from "./Templates/TrackTemplates.ts";
 import {ProfilePage} from "./Classes/ProfilePage.ts";
@@ -11,28 +10,18 @@ import {Api} from "./Api/Api.ts";
 import {StatisticTemplates} from "./Templates/StatisticTemplates.ts";
 import {LogTemplates} from "./Templates/admin/LogTemplates.ts";
 import {Permissions} from "./Enums/Permissions.ts";
-import {LydaApi} from "./Api/LydaApi.ts";
 import {TrackActions} from "./Actions/TrackActions.ts";
-import {CommentActions} from "./Actions/CommentActions.ts";
 import {CommentTemplates} from "./Templates/CommentTemplates.ts";
 import {SubscriptionTemplates} from "./Templates/SubscriptionTemplates.ts";
-import {SubscriptionActions} from "./Actions/SubscriptionActions.ts";
-import {Util} from "./Classes/Util.ts";
 import {StatisticsWrapper} from "./Classes/StatisticsWrapper.ts";
 import {notify} from "./Classes/Ui.ts";
 import {navigate} from "./Routing/Router.ts";
 import {Permission} from "./Models/DbModels/lyda/Permission.ts";
-import {Follow} from "./Models/DbModels/lyda/Follow.ts";
-import {AnyElement, create, ifjs} from "../fjsc/src/f2.ts";
-import {User} from "./Models/DbModels/lyda/User.ts";
+import {AnyElement, create} from "../fjsc/src/f2.ts";
 import {ApiRoutes} from "./Api/ApiRoutes.ts";
 import {signal} from "../fjsc/src/signals.ts";
 import {Track} from "./Models/DbModels/lyda/Track.ts";
-import {LogLevel} from "./Enums/LogLevel.ts";
-import {Log} from "./Models/DbModels/lyda/Log.ts";
 import {NotificationType} from "./Enums/NotificationType.ts";
-import {AvailableSubscription} from "./Models/DbModels/finance/AvailableSubscription.ts";
-import {Subscription} from "./Models/DbModels/finance/Subscription.ts";
 import {currentSecretCode, currentUser, permissions} from "./state.ts";
 import {RoyaltyInfo} from "./Models/RoyaltyInfo.ts";
 import {RoyaltyTemplates} from "./Templates/admin/RoyaltyTemplates.ts";
@@ -224,18 +213,7 @@ export class Lyda {
                     navigate("login");
                     return;
                 }
-                const options = signal<AvailableSubscription[]>([]);
-                const currentSubscription = signal<Subscription|null>(null);
-                SubscriptionActions.loadSubscriptionOptions().then(res => {
-                    if (!res || res.error) {
-                        notify("Failed to load subscription options", NotificationType.error);
-                        return;
-                    }
-                    options.value = res.options;
-                    currentSubscription.value = res.currentSubscription;
-                });
-                const currency = "USD";
-                element.appendChild(SubscriptionTemplates.page(currency, options, currentSubscription));
+                element.appendChild(SubscriptionTemplates.page());
                 break;
             default:
                 element.innerHTML = JSON.stringify(data, null, 2);
