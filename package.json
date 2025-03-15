@@ -10,7 +10,7 @@
     "fetch-submodules": "git submodule update --init",
     "update-submodules": "git submodule update --remote --merge",
     "copy-version-to-file": "node ./.scripts/copy-version.js",
-    "bump-version": "npm version patch --no-git-tag-version && npm run copy-version-to-file && git add package.json package-lock.json",
+    "bump-version": "npm version patch --no-git-tag-version && npm run copy-version-to-file && git add package.json package-lock.json src/ui/js/Classes/Helpers/version.txt",
     "prepare": "husky"
   },
   "devDependencies": {
@@ -27,5 +27,5 @@
     "express": "^5.0.0",
     "typescript": "^5.5.3"
   },
-  "version": "0.0.21"
+  "version": "0.0.22"
 }
