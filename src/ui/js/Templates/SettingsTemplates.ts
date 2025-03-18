@@ -352,9 +352,8 @@ export class SettingsTemplates {
                         GenericTemplates.gif8831("/img/88x31/ubuntu.gif", "https://ubuntu.com/"),
                         GenericTemplates.gif8831("/img/88x31/hetzner.gif", "https://www.hetzner.com/"),
                     ).build(),
-                GenericTemplates.inlineLink(() => {
-                    navigate("roadmap");
-                }, "Roadmap"),
+                GenericTemplates.inlineLink(() => navigate("roadmap"), "Roadmap"),
+                GenericTemplates.inlineLink(() => window.open("https://github.com/targoninc/lyda-ui-web-js", "_blank"), "Source code"),
             ).build();
     }
 
