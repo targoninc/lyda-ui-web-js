@@ -23,10 +23,11 @@ import {ProgressState} from "../Enums/ProgressState.ts";
 import {ProgressPart} from "../Models/ProgressPart.ts";
 import {compute, signal, Signal} from "../../fjsc/src/signals.ts";
 import {SearchResult} from "../Models/SearchResult.ts";
-import {openMenus} from "../state.ts";
+import {currentTrackId, openMenus, playingHere} from "../state.ts";
 import {PillOption} from "../Models/PillOption.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {dayFromValue} from "../Classes/Helpers/Date.ts";
+import {PlayManager} from "../Streaming/PlayManager.ts";
 
 export class GenericTemplates {
     static icon(icon: StringOrSignal, adaptive = false, classes: StringOrSignal[] = [], title = "", onclick: Function | undefined = undefined) {
@@ -709,6 +710,24 @@ export class GenericTemplates {
                     classes: ["round-button-icon", "align-center", "inline-icon", "svg", "nopointer"]
                 }),
             ).build()
+    }
+
+    static playButton(trackId: number, start: Function) {
+        const isPlaying = compute((c, p) => c === trackId && p, currentTrackId, playingHere);
+        const icon = compute(p => p ? Icons.PAUSE : Icons.PLAY, isPlaying);
+        const onclick = async () => {
+            if (isPlaying.value) {
+                await PlayManager.pauseAsync(trackId);
+            } else {
+                start();
+            }
+        };
+
+        return GenericTemplates.roundIconButton({
+            icon,
+            isUrl: true,
+            classes: ["inline-icon", "svgInverted"]
+        }, onclick)
     }
 
     static benefit(benefit: string, icon: string) {

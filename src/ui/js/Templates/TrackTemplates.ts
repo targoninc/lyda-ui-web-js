@@ -143,19 +143,19 @@ export class TrackTemplates {
             imageState.value = Util.getTrackCover(track.id);
         }
         const coverLoading = signal(false);
+        const start = async () => {
+            if (!startCallback) {
+                PlayManager.addStreamClientIfNotExists(track.id, track.length);
+                await PlayManager.startAsync(track.id);
+            } else {
+                await startCallback(track.id);
+            }
+        }
 
         return create("div")
             .classes("cover-container", "relative", "pointer", coverType)
             .attributes("track_id", track.id)
             .id(track.id)
-            .onclick(async () => {
-                if (!startCallback) {
-                    PlayManager.addStreamClientIfNotExists(track.id, track.length);
-                    await PlayManager.startAsync(track.id);
-                } else {
-                    await startCallback(track.id);
-                }
-            })
             .children(
                 create("img")
                     .classes("cover", "nopointer", "blurOnParentHover")
@@ -163,16 +163,17 @@ export class TrackTemplates {
                     .alt(track.title)
                     .build(),
                 create("div")
-                    .classes("hidden", !startCallback ? "showOnParentHover" : "_", "centeredInParent", "flex")
+                    .classes("hidden", coverType === "cover" ? "showOnParentHover" : "_", "centeredInParent", "flex")
                     .children(
                         GenericTemplates.deleteIconButton("delete-image-button", () => MediaActions.deleteMedia(MediaFileType.trackCover, track.id, imageState, coverLoading)),
                         GenericTemplates.uploadIconButton("replace-image-button", () => TrackActions.replaceCover(track.id, true, imageState, coverLoading)),
                         ifjs(coverLoading, GenericTemplates.loadingSpinner()),
                     ).build(),
-                create("img")
-                    .classes("play-button-icon", "centeredInParent", "hidden", !!startCallback ? "showOnParentHover" : "_", "inline-icon", "svgInverted", "nopointer")
-                    .src(Icons.PLAY)
-                    .build(),
+                ifjs(coverType !== "cover", create("div")
+                    .classes("centeredInParent", "hidden", coverType !== "cover" ? "showOnParentHover" : "_")
+                    .children(
+                        GenericTemplates.playButton(track.id, start)
+                    ).build()),
             ).build();
     }
 
@@ -745,26 +746,6 @@ export class TrackTemplates {
                     .classes("track-info-container", "flex", "align-bottom")
                     .children(
                         TrackTemplates.trackCover(track, "cover"),
-                        // create("div")
-                        //     .classes("cover-container", "relative", trackData.canEdit ? "pointer" : "_")
-                        //     .onclick(() => {
-                        //         if (!trackData.canEdit) {
-                        //             Ui.showImageModal(coverFile);
-                        //             return;
-                        //         }
-                        //         TrackActions.replaceCover(track.id, trackData.canEdit, coverFile, coverLoading)
-                        //     })
-                        //     .children(
-                        //         ifjs(coverLoading, create("div")
-                        //             .classes("loader", "loader-small", "centeredInParent")
-                        //             .id("cover-loader")
-                        //             .build()),
-                        //         create("img")
-                        //             .classes("cover", "blurOnParentHover", "nopointer")
-                        //             .src(coverFile)
-                        //             .alt(track.title)
-                        //             .build()
-                        //     ).build(),
                         create("div")
                             .classes("flex-v")
                             .children(

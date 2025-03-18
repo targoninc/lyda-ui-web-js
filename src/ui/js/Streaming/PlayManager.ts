@@ -147,6 +147,19 @@ export class PlayManager {
         }
     }
 
+    static async pauseAsync(id: number) {
+        const streamClient = PlayManager.getStreamClient(id);
+        if (streamClient === undefined) {
+            return;
+        }
+
+        await streamClient.stopAsync();
+        playingHere.value = false;
+        StreamingBroadcaster.send(StreamingEvent.trackStop, id);
+
+        await StreamingUpdater.updatePlayState();
+    }
+
     static async togglePlayAsync(id: number) {
         const streamClient = PlayManager.getStreamClient(id);
         if (streamClient === undefined) {
@@ -154,18 +167,16 @@ export class PlayManager {
         }
 
         if (streamClient.playing) {
-            await streamClient.stopAsync();
-            playingHere.value = false;
-            StreamingBroadcaster.send(StreamingEvent.trackStop, id);
+            await PlayManager.pauseAsync(id);
         } else {
             await PlayManager.stopAllAsync();
             await streamClient.startAsync();
             StreamingBroadcaster.send(StreamingEvent.trackStart, id);
             playingHere.value = true;
             TrackActions.savePlayAfterTimeIf(id, 5, () => id === currentTrackId.value && PlayManager.isPlaying(id));
-        }
 
-        await StreamingUpdater.updatePlayState();
+            await StreamingUpdater.updatePlayState();
+        }
     }
 
     static async startAsync(id: number) {
