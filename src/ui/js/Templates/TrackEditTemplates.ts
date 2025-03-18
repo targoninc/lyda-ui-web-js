@@ -549,7 +549,7 @@ export class TrackEditTemplates {
 
     static addLinkedUserButton(callback: Function, classes: string[] = []) {
         return FJSC.button({
-            text: "Add User",
+            text: "Add collaborator",
             id: "add_linked_user",
             icon: { icon: "person_add" },
             classes,
