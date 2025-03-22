@@ -556,7 +556,7 @@ export class TrackTemplates {
             ).build();
     }
 
-    static tracksInList(noTracks: Signal<boolean>, tracks: Signal<ListTrack[]>, data: any, list: Album|Playlist,
+    static tracksInList(noTracks: Signal<boolean>, tracks: Signal<ListTrack[]>, canEdit: boolean, list: Album|Playlist,
                         type: "album" | "playlist", startCallback: (trackId: number) => Promise<void>) {
         return create("div")
             .classes("flex-v")
@@ -572,10 +572,10 @@ export class TrackTemplates {
                     return create("div")
                         .classes("flex-v", "relative")
                         .children(
-                            ifjs(data.canEdit, GenericTemplates.dragTargetInList(async (data: any) => {
+                            ifjs(canEdit, GenericTemplates.dragTargetInList(async (data: any) => {
                                 await TrackActions.reorderTrack(type, list.id, data.id, tracks, i);
                             }, i.toString())),
-                            TrackTemplates.trackInList(track, data.canEdit, list, tracks, "album", startCallback)
+                            TrackTemplates.trackInList(track, canEdit, list, tracks, "album", startCallback)
                         ).build();
                 })
             ).build();

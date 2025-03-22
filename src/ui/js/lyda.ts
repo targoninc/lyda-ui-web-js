@@ -115,18 +115,6 @@ export class Lyda {
                     return;
                 }
                 break;
-            case "album":
-                if (!user) {
-                    navigate("explore");
-                    return;
-                }
-                document.title = data.album.title;
-                element.appendChild(await AlbumTemplates.albumPage(data, user));
-                if (data.error) {
-                    element.innerHTML = data.error;
-                    return;
-                }
-                break;
             case "playlist":
                 if (!user) {
                     navigate("explore");

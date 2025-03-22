@@ -12,12 +12,13 @@ import {SearchTemplates} from "./SearchTemplates.ts";
 import {SettingsTemplates} from "./SettingsTemplates.ts";
 import {RoadmapTemplates} from "./RoadmapTemplates.ts";
 import {EventsTemplates} from "./admin/EventsTemplates.ts";
+import {AlbumTemplates} from "./AlbumTemplates.ts";
 
 export class PageTemplates {
     static mapping: {[key: string]: Function} = {
         explore: this.explorePage,
         following: this.followingPage,
-        album: this.albumPage,
+        album: AlbumTemplates.albumPage,
         playlist: this.playlistPage,
         profile: this.profilePage,
         settings: SettingsTemplates.settingsPage,
@@ -51,15 +52,6 @@ export class PageTemplates {
         "moderation",
         "subscribe"
     ];
-
-    static albumPage() {
-        return create("div")
-            .attributes("lyda", "")
-            .attributes("endpoint", ApiRoutes.getAlbumById)
-            .attributes("params", "id")
-            .attributes("datatype", "album")
-            .build();
-    }
 
     static explorePage() {
         return create("div")

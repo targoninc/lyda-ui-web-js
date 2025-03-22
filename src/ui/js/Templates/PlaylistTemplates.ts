@@ -460,7 +460,7 @@ export class PlaylistTemplates {
                                     ).build(),
                             ).build()
                     ).build(),
-                TrackTemplates.tracksInList(noTracks, tracks, data, playlist, "playlist", startCallback)
+                TrackTemplates.tracksInList(noTracks, tracks, data.canEdit, playlist, "playlist", startCallback)
             ).build();
     }
 

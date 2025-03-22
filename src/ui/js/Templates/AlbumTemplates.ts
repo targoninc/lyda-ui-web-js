@@ -12,19 +12,19 @@ import {Images} from "../Enums/Images.ts";
 import {getErrorMessage, Util} from "../Classes/Util.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {FJSC} from "../../fjsc";
-import {AnyNode, create, HtmlPropertyValue, ifjs} from "../../fjsc/src/f2.ts";
+import {AnyNode, create, HtmlPropertyValue, ifjs, nullElement} from "../../fjsc/src/f2.ts";
 import {Album} from "../Models/DbModels/lyda/Album.ts";
 import {InputType} from "../../fjsc/src/Types.ts";
 import {Track} from "../Models/DbModels/lyda/Track.ts";
-import {User} from "../Models/DbModels/lyda/User.ts";
-import {navigate} from "../Routing/Router.ts";
+import {navigate, Route} from "../Routing/Router.ts";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
-import {manualQueue} from "../state.ts";
-import {ListTrack} from "../Models/ListTrack.ts";
+import {currentUser, manualQueue, playingFrom} from "../state.ts";
 import {Api} from "../Api/Api.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
+import {PageTemplates} from "./PageTemplates.ts";
+import {ListTrack} from "../Models/ListTrack.ts";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
@@ -348,7 +348,6 @@ export class AlbumTemplates {
 
         return create("div")
             .classes("cover-container", "relative", "pointer", coverType)
-            .attributes("album_id", album.id)
             .id(album.id)
             .onclick(async () => {
                 PlayManager.playFrom("album", album.title, album.id);
@@ -396,49 +395,19 @@ export class AlbumTemplates {
             .build();
     }
 
-    static async albumPage(data: any, user: User) {
-        const album = data.album as Album;
-        if (!album.tracks) {
-            throw new Error(`Album ${album.id} has no tracks`);
-        }
-        const tracks = signal<ListTrack[]>(album.tracks);
-        const noTracks = compute(t => t.length === 0, tracks);
-        const a_user = album.user;
-        if (!a_user) {
-            throw new Error(`Album ${album.id} has no user`);
-        }
-
-        async function startCallback(trackId: number) {
-            await AlbumActions.startTrackInAlbum(album, trackId);
-        }
-
-        let editActions: AnyNode[] = [];
-        if (data.canEdit) {
-            editActions = [
-                FJSC.button({
-                    text: "Edit",
-                    icon: {icon: "edit"},
-                    classes: ["positive"],
-                    onclick: async () => {
-                        let modal = GenericTemplates.modal([AlbumTemplates.editAlbumModal(album)], "edit-album");
-                        Ui.addModal(modal);
-                    }
-                }),
-                FJSC.button({
-                    text: "Delete",
-                    icon: {icon: "delete"},
-                    classes: ["negative"],
-                    onclick: async (e) => {
-                        await Ui.getConfirmationModal("Delete album", "Are you sure you want to delete this album?", "Yes", "No", () => AlbumActions.deleteAlbum(album.id), () => {
-                        }, Icons.WARNING);
-                    }
-                })
-            ];
-        }
+    private static albumPageDisplay(album: Album, canEdit: boolean) {
         const coverLoading = signal(false);
         const coverState = signal(Images.DEFAULT_COVER_ALBUM);
         if (album.has_cover) {
             coverState.value = Util.getAlbumCover(album.id);
+        }
+        const albumUser = album.user!;
+        const following = Util.userIsFollowing(albumUser);
+        const noTracks = signal(album.tracks?.length === 0);
+        const tracks = signal<ListTrack[]>(album.tracks ?? []);
+
+        async function startCallback(trackId: number) {
+            await AlbumActions.startTrackInAlbum(album, trackId);
         }
 
         return create("div")
@@ -451,15 +420,14 @@ export class AlbumTemplates {
                             .classes("title", "wordwrap")
                             .text(album.title)
                             .build(),
-                        UserTemplates.userWidget(a_user, Util.arrayPropertyMatchesUser(a_user.follows ?? [], "following_user_id"), [], [], UserWidgetContext.singlePage)
+                        UserTemplates.userWidget(albumUser, following, [], [], UserWidgetContext.singlePage)
                     ).build(),
                 create("div")
                     .classes("album-info-container", "flex")
                     .children(
                         create("div")
-                            .classes("cover-container", "relative", data.canEdit ? "pointer" : "_")
-                            .attributes("album_id", album.id, "canEdit", data.canEdit)
-                            .onclick(e => AlbumActions.replaceCover(e, album.id, data.canEdit, coverLoading))
+                            .classes("cover-container", "relative", canEdit ? "pointer" : "_")
+                            .onclick(e => AlbumActions.replaceCover(e, album.id, canEdit, coverLoading))
                             .children(
                                 ifjs(coverLoading, create("div")
                                     .classes("loader", "loader-small", "centeredInParent")
@@ -470,12 +438,11 @@ export class AlbumTemplates {
                                     .src(coverState)
                                     .alt(album.title)
                                     .build()
-                            )
-                            .build(),
+                            ).build(),
                         create("div")
                             .classes("flex-v")
                             .children(
-                                AlbumTemplates.audioActions(album, user, editActions),
+                                AlbumTemplates.audioActions(album, canEdit),
                                 create("div")
                                     .classes("album-title-container", "flex-v", "small-gap")
                                     .children(
@@ -493,59 +460,110 @@ export class AlbumTemplates {
                                     ).build(),
                             ).build()
                     ).build(),
-                TrackTemplates.tracksInList(noTracks, tracks, data, album, "album", startCallback)
+                TrackTemplates.tracksInList(noTracks, tracks, canEdit, album, "album", startCallback)
             ).build();
     }
 
-    static audioActions(album: Album, user: User, editActions: AnyNode[] = []) {
-        const playingFrom = PlayManager.getPlayingFrom();
-        const isPlaying = playingFrom && playingFrom.type === "album" && playingFrom.id === album.id;
-        if (!album.tracks) {
-            throw new Error(`Album ${album.id} has no tracks`);
+    static albumPage(route: Route, params: Record<string, string>) {
+        if (!currentUser.value) {
+            navigate("explore");
+            return nullElement();
         }
-        const duration = album.tracks.reduce((acc, t) => acc + (t.track?.length ?? 0), 0);
 
-        let actions: AnyNode[] = [];
-        if (user) {
-            actions = [
-                FJSC.button({
-                    text: isPlaying ? "Pause" : "Play",
-                    icon: {
-                        icon: isPlaying ? Icons.PAUSE : Icons.PLAY,
-                        classes: ["inline-icon", "svg", "nopointer"],
-                        adaptive: true,
-                        isUrl: true
-                    },
-                    classes: [album.tracks.length === 0 ? "nonclickable" : "_", "secondary"],
-                    attributes: ["duration", duration.toString()],
-                    id: album.id,
-                    onclick: async () => {
-                        const firstTrack = (album.tracks!)[0];
-                        await AlbumActions.startTrackInAlbum(album, firstTrack.track_id, true);
-                    },
-                }),
-                AlbumTemplates.addToQueueButton(album),
-                FJSC.button({
-                    text: "Add to playlist",
-                    icon: {
-                        icon: Icons.PLAYLIST_ADD,
-                        classes: ["inline-icon", "svg", "nopointer"],
-                        adaptive: true,
-                        isUrl: true
-                    },
-                    classes: ["secondary"],
-                    onclick: async () => {
-                        await PlaylistActions.openAddToPlaylistModal(album, "album");
-                    },
-                }),
-            ];
-        }
+        const data = signal<{ album: Album|null, canEdit: boolean }>({
+            album: null,
+            canEdit: false
+        });
+        const loading = signal(true);
+        Api.getAsync<{ album: Album, canEdit: boolean }>(ApiRoutes.getAlbumById, {id: params.id}).then(async res => {
+            if (res.code === 200) {
+                data.value = res.data;
+                return;
+            }
+            data.value = {
+                album: null,
+                canEdit: false
+            };
+        }).finally(() => loading.value = false);
+
+        const template = compute((d, l) => {
+            if (!d || l) {
+                return GenericTemplates.loadingSpinner();
+            }
+
+            if (!d.album || !d.album.tracks) {
+                return PageTemplates.notFoundPage();
+            }
+
+            return AlbumTemplates.albumPageDisplay(d.album, d.canEdit);
+        }, data, loading);
+
+        return create("div")
+            .children(
+                template
+            ).build();
+    }
+
+    static audioActions(album: Album, canEdit: boolean) {
+        const isPlaying = compute(p => p && p.type === "album" && p.id === album.id, playingFrom);
+        const duration = album.tracks!.reduce((acc, t) => acc + (t.track?.length ?? 0), 0);
+        const hasTracks = album.tracks!.length > 0;
 
         return create("div")
             .classes("audio-actions", "flex")
             .children(
-                ...actions,
-                ...editActions
+                ifjs(currentUser, create("div")
+                    .classes("flex")
+                    .children(
+                        ifjs(hasTracks, FJSC.button({
+                            text: isPlaying ? "Pause" : "Play",
+                            icon: {
+                                icon: isPlaying ? Icons.PAUSE : Icons.PLAY,
+                                classes: ["inline-icon", "svg", "nopointer"],
+                                adaptive: true,
+                                isUrl: true
+                            },
+                            classes: [hasTracks ? "_" : "nonclickable", "secondary"],
+                            attributes: ["duration", duration.toString()],
+                            id: album.id,
+                            onclick: async () => {
+                                const firstTrack = album.tracks![0];
+                                await AlbumActions.startTrackInAlbum(album, firstTrack.track_id, true);
+                            },
+                        })),
+                        AlbumTemplates.addToQueueButton(album),
+                        FJSC.button({
+                            text: "Add to playlist",
+                            icon: {
+                                icon: Icons.PLAYLIST_ADD,
+                                classes: ["inline-icon", "svg", "nopointer"],
+                                adaptive: true,
+                                isUrl: true
+                            },
+                            classes: ["secondary"],
+                            onclick: async () => {
+                                await PlaylistActions.openAddToPlaylistModal(album, "album");
+                            },
+                        }),
+                    ).build()),
+                ifjs(canEdit, FJSC.button({
+                    text: "Edit",
+                    icon: {icon: "edit"},
+                    classes: ["positive"],
+                    onclick: async () => {
+                        let modal = GenericTemplates.modal([AlbumTemplates.editAlbumModal(album)], "edit-album");
+                        Ui.addModal(modal);
+                    }
+                })),
+                ifjs(canEdit, FJSC.button({
+                    text: "Delete",
+                    icon: {icon: "delete"},
+                    classes: ["negative"],
+                    onclick: async () => {
+                        await Ui.getConfirmationModal("Delete album", "Are you sure you want to delete this album?", "Yes", "No", () => AlbumActions.deleteAlbum(album.id), () => {
+                        }, Icons.WARNING);
+                    }
+                }))
             ).build();
     }
 

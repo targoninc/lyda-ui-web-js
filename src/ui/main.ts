@@ -33,7 +33,7 @@ export const router = new Router(routes, async (route: Route, params: any) => {
 
     currentUser.value = await Util.getUserAsync(null, false);
     pageContainer.innerHTML = "";
-    let template = PageTemplates.mapping[page]();
+    let template = PageTemplates.mapping[page](route, params);
     if (!currentUser.value && PageTemplates.needLoginPages.includes(page)) {
         navigate("login");
     }

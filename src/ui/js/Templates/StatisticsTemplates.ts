@@ -5,7 +5,7 @@ import {AlbumActions} from "../Actions/AlbumActions.ts";
 import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
-import {create, StringOrSignal} from "../../fjsc/src/f2.ts";
+import {create, StringOrSignal, TypeOrSignal} from "../../fjsc/src/f2.ts";
 import {FJSC} from "../../fjsc";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
@@ -22,17 +22,17 @@ export class StatisticsTemplates {
         const toggleClass = compute((l): string => l ? "enabled" : "_", liked);
         const imageState = compute(l => l ? Icons.LIKE : Icons.LIKE_OUTLINE, liked);
 
-        return StatisticsTemplates.toggleIndicator("likes", liked, like_count, imageState, reference_id, functionMap[type], [toggleClass]);
+        return StatisticsTemplates.toggleIndicator(liked, like_count, imageState, reference_id, functionMap[type], [toggleClass]);
     }
 
     static repostIndicator(reference_id: number, repost_count: number, reposted: boolean|Signal<boolean>) {
         reposted = reposted.constructor === Signal ? reposted : signal(reposted as boolean);
         const toggleClass = compute((r): string => r ? "enabled" : "_", reposted);
 
-        return StatisticsTemplates.toggleIndicator("reposts", reposted, repost_count, Icons.REPOST, reference_id, TrackActions.toggleRepost, [toggleClass]);
+        return StatisticsTemplates.toggleIndicator(reposted, repost_count, Icons.REPOST, reference_id, TrackActions.toggleRepost, [toggleClass]);
     }
 
-    static toggleIndicator(stats_type: string, toggleObservable: Signal<boolean>, count: number, icon: StringOrSignal, reference_id = -1, clickFunc: Function = () => {}, extraClasses: StringOrSignal[] = []) {
+    static toggleIndicator(toggleObservable: Signal<boolean>, count: number, icon: StringOrSignal, reference_id = -1, clickFunc: Function = () => {}, extraClasses: StringOrSignal[] = []) {
         const count$ = signal(count);
         toggleObservable.onUpdate = (value: boolean) => {
             if (!Util.isLoggedIn()) {
