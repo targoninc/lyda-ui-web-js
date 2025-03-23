@@ -575,7 +575,7 @@ export class TrackTemplates {
                             ifjs(canEdit, GenericTemplates.dragTargetInList(async (data: any) => {
                                 await TrackActions.reorderTrack(type, list.id, data.id, tracks, i);
                             }, i.toString())),
-                            TrackTemplates.trackInList(track, canEdit, list, tracks, "album", startCallback)
+                            TrackTemplates.trackInList(track, canEdit, list, tracks, type, startCallback)
                         ).build();
                 })
             ).build();
