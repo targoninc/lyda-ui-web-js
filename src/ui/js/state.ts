@@ -28,7 +28,7 @@ export const currentQuality = signal("h");
 
 export const trackInfo = signal<Record<number, { track: Track }>>({});
 
-export const volume = signal(0.25);
+export const volume = signal(LydaCache.get<number>("volume").content ?? 0.25);
 volume.subscribe((newValue, changed) => {
     if (!changed) {
         return;
