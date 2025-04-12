@@ -686,7 +686,6 @@ export class TrackTemplates {
                 description.classList.add("overflowing");
             }
         }, 200);
-        const coverLoading = signal(false);
         const coverFile = signal(Images.DEFAULT_COVER_TRACK);
         if (track.has_cover) {
             coverFile.value = Util.getTrackCover(track.id);
@@ -717,7 +716,7 @@ export class TrackTemplates {
                             ).build(),
                         UserTemplates.userWidget({
                             ...trackUser,
-                            displayname: track.artistname ?? trackUser.displayname
+                            displayname: (track.artistname && track.artistname.trim().length > 0) ? track.artistname.trim() : trackUser.displayname
                         }, Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "following_user_id"), [], [], UserWidgetContext.singlePage),
                     ).build(),
                 ...toAppend,
