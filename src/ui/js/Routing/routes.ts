@@ -25,6 +25,8 @@ export enum RoutePath {
     passwordReset = "password-reset",
     verifyEmail = "verify-email",
     events = "events",
+    admin = "admin",
+    faq = "faq",
 }
 
 export const routes: Route[] = [
@@ -133,4 +135,12 @@ export const routes: Route[] = [
         path: RoutePath.events,
         title: "Events",
     },
+    {
+        path: RoutePath.admin,
+        title: "Admin",
+    },
+    {
+        path: RoutePath.faq,
+        title: "FAQ",
+    }
 ];

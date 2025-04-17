@@ -5,7 +5,6 @@ import {UserTemplates} from "./account/UserTemplates.ts";
 import {Api} from "../Api/Api.ts";
 import {Util} from "../Classes/Util.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {Follow} from "../Models/DbModels/lyda/Follow.ts";
 import {compute, signal} from "../../fjsc/src/signals.ts";
 import {User} from "../Models/DbModels/lyda/User.ts";
 import {SearchTemplates} from "./SearchTemplates.ts";
@@ -13,44 +12,49 @@ import {SettingsTemplates} from "./account/SettingsTemplates.ts";
 import {RoadmapTemplates} from "./RoadmapTemplates.ts";
 import {EventsTemplates} from "./admin/EventsTemplates.ts";
 import {AlbumTemplates} from "./music/AlbumTemplates.ts";
+import {RoutePath} from "../Routing/routes.ts";
+import {DashboardTemplates} from "./admin/DashboardTemplates.ts";
 
 export class PageTemplates {
-    static mapping: {[key: string]: Function} = {
-        explore: this.explorePage,
-        following: this.followingPage,
-        album: AlbumTemplates.albumPage,
-        playlist: this.playlistPage,
-        profile: this.profilePage,
-        settings: SettingsTemplates.settingsPage,
-        statistics: this.statisticsPage,
-        track: this.trackPage,
-        upload: this.uploadPage,
-        library: this.libraryPage,
-        logout: this.logoutPage,
-        login: LandingPageTemplates.newLandingPage,
-        faq: this.faqPage,
-        logs: this.logsPage,
-        "action-logs": this.actionLogsPage,
-        "404": this.notFoundPage,
-        "unapproved-tracks": this.unapprovedTracksPage,
-        moderation: this.moderationPage,
-        test: LandingPageTemplates.newLandingPage,
-        subscribe: this.subscribePage,
-        "password-reset": LandingPageTemplates.newLandingPage,
-        "verify-email": LandingPageTemplates.newLandingPage,
-        search: SearchTemplates.searchPage,
-        roadmap: RoadmapTemplates.roadmapPage,
-        events: EventsTemplates.eventsPage,
+    static mapping: Record<RoutePath, Function> = {
+        [RoutePath.explore]: this.explorePage,
+        [RoutePath.following]: this.followingPage,
+        [RoutePath.album]: AlbumTemplates.albumPage,
+        [RoutePath.playlist]: this.playlistPage,
+        [RoutePath.profile]: this.profilePage,
+        [RoutePath.settings]: SettingsTemplates.settingsPage,
+        [RoutePath.statistics]: this.statisticsPage,
+        [RoutePath.track]: this.trackPage,
+        [RoutePath.upload]: this.uploadPage,
+        [RoutePath.library]: this.libraryPage,
+        [RoutePath.logout]: this.logoutPage,
+        [RoutePath.login]: LandingPageTemplates.newLandingPage,
+        [RoutePath.faq]: this.faqPage,
+        [RoutePath.notFound]: this.notFoundPage,
+        [RoutePath.unapprovedTracks]: this.unapprovedTracksPage,
+        [RoutePath.test]: LandingPageTemplates.newLandingPage,
+        [RoutePath.subscribe]: this.subscribePage,
+        [RoutePath.passwordReset]: LandingPageTemplates.newLandingPage,
+        [RoutePath.verifyEmail]: LandingPageTemplates.newLandingPage,
+        [RoutePath.search]: SearchTemplates.searchPage,
+        [RoutePath.roadmap]: RoadmapTemplates.roadmapPage,
+        [RoutePath.events]: EventsTemplates.eventsPage,
+
+        // admin pages
+        [RoutePath.admin]: DashboardTemplates.dashboardPage,
+        [RoutePath.moderation]: this.moderationPage,
+        [RoutePath.logs]: this.logsPage,
+        [RoutePath.actionLogs]: this.actionLogsPage,
     };
-    static needLoginPages: string[] = [
-        "library",
-        "upload",
-        "settings",
-        "statistics",
-        "following",
-        "unapproved-tracks",
-        "moderation",
-        "subscribe"
+    static needLoginPages: RoutePath[] = [
+        RoutePath.library,
+        RoutePath.upload,
+        RoutePath.settings,
+        RoutePath.statistics,
+        RoutePath.following,
+        RoutePath.unapprovedTracks,
+        RoutePath.moderation,
+        RoutePath.subscribe
     ];
 
     static explorePage() {

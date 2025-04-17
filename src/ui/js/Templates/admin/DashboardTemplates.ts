@@ -8,7 +8,9 @@ export class DashboardTemplates {
         return create("div")
             .classes("flex-v")
             .children(
-                GenericTemplates.inlineLink(() => navigate(RoutePath.moderation), "Moderation")
+                GenericTemplates.inlineLink(() => navigate(RoutePath.moderation), "Moderation"),
+                GenericTemplates.inlineLink(() => navigate(RoutePath.logs), "Logs"),
+                GenericTemplates.inlineLink(() => navigate(RoutePath.events), "Events"),
             ).build();
     }
 }
