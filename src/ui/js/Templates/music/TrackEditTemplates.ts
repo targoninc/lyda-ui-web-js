@@ -1,13 +1,13 @@
-import {FormTemplates} from "./FormTemplates.ts";
-import {GenericTemplates} from "./GenericTemplates.ts";
-import {Icons} from "../Enums/Icons.ts";
-import {UserTemplates} from "./UserTemplates.ts";
-import {Images} from "../Enums/Images.ts";
-import {TrackActions} from "../Actions/TrackActions.ts";
-import {Genre} from "../Enums/Genre.ts";
-import {target, Util} from "../Classes/Util.ts";
-import {AudioUpload} from "../Classes/AudioUpload.ts";
-import {Ui} from "../Classes/Ui.ts";
+import {FormTemplates} from "../FormTemplates.ts";
+import {GenericTemplates} from "../GenericTemplates.ts";
+import {Icons} from "../../Enums/Icons.ts";
+import {UserTemplates} from "../account/UserTemplates.ts";
+import {Images} from "../../Enums/Images.ts";
+import {TrackActions} from "../../Actions/TrackActions.ts";
+import {Genre} from "../../Enums/Genre.ts";
+import {target, Util} from "../../Classes/Util.ts";
+import {AudioUpload} from "../../Classes/AudioUpload.ts";
+import {Ui} from "../../Classes/Ui.ts";
 import {
     AnyElement,
     AnyNode,
@@ -17,20 +17,20 @@ import {
     ifjs,
     signalMap, StringOrSignal,
     TypeOrSignal
-} from "../../fjsc/src/f2.ts";
-import {Track} from "../Models/DbModels/lyda/Track.ts";
-import {FJSC} from "../../fjsc";
-import {User} from "../Models/DbModels/lyda/User.ts";
-import {InputType, SelectOption} from "../../fjsc/src/Types.ts";
-import {TrackCollaborator} from "../Models/DbModels/lyda/TrackCollaborator.ts";
-import {UploadableTrack} from "../Models/UploadableTrack.ts";
-import {UploadInfo} from "../Models/UploadInfo.ts";
-import {ProgressPart} from "../Models/ProgressPart.ts";
-import {AlbumActions} from "../Actions/AlbumActions.ts";
-import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
-import {reload} from "../Routing/Router.ts";
-import {PlayManager} from "../Streaming/PlayManager.ts";
-import {dayFromValue} from "../Classes/Helpers/Date.ts";
+} from "../../../fjsc/src/f2.ts";
+import {Track} from "../../Models/DbModels/lyda/Track.ts";
+import {FJSC} from "../../../fjsc";
+import {User} from "../../Models/DbModels/lyda/User.ts";
+import {InputType, SelectOption} from "../../../fjsc/src/Types.ts";
+import {TrackCollaborator} from "../../Models/DbModels/lyda/TrackCollaborator.ts";
+import {UploadableTrack} from "../../Models/UploadableTrack.ts";
+import {UploadInfo} from "../../Models/UploadInfo.ts";
+import {ProgressPart} from "../../Models/ProgressPart.ts";
+import {AlbumActions} from "../../Actions/AlbumActions.ts";
+import {compute, Signal, signal} from "../../../fjsc/src/signals.ts";
+import {reload} from "../../Routing/Router.ts";
+import {PlayManager} from "../../Streaming/PlayManager.ts";
+import {dayFromValue} from "../../Classes/Helpers/Date.ts";
 
 export class TrackEditTemplates {
     static uploadForm(title: string, credits: string, releaseDate: Date, visibility: string, genre: Genre,

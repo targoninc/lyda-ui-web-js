@@ -1,6 +1,6 @@
 import {Api} from "../Api/Api.ts";
 import {notify} from "./Ui.ts";
-import {UserTemplates} from "../Templates/UserTemplates.ts";
+import {UserTemplates} from "../Templates/account/UserTemplates.ts";
 import {GenericTemplates} from "../Templates/GenericTemplates.ts";
 import {User} from "../Models/DbModels/lyda/User.ts";
 import {AnyElement} from "../../fjsc/src/f2.ts";

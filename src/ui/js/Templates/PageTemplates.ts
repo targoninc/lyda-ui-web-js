@@ -1,7 +1,7 @@
 import {create, ifjs} from "../../fjsc/src/f2.ts";
 import {AuthActions} from "../Actions/AuthActions.ts";
 import {LandingPageTemplates} from "./LandingPageTemplates.ts";
-import {UserTemplates} from "./UserTemplates.ts";
+import {UserTemplates} from "./account/UserTemplates.ts";
 import {Api} from "../Api/Api.ts";
 import {Util} from "../Classes/Util.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
@@ -9,10 +9,10 @@ import {Follow} from "../Models/DbModels/lyda/Follow.ts";
 import {compute, signal} from "../../fjsc/src/signals.ts";
 import {User} from "../Models/DbModels/lyda/User.ts";
 import {SearchTemplates} from "./SearchTemplates.ts";
-import {SettingsTemplates} from "./SettingsTemplates.ts";
+import {SettingsTemplates} from "./account/SettingsTemplates.ts";
 import {RoadmapTemplates} from "./RoadmapTemplates.ts";
 import {EventsTemplates} from "./admin/EventsTemplates.ts";
-import {AlbumTemplates} from "./AlbumTemplates.ts";
+import {AlbumTemplates} from "./music/AlbumTemplates.ts";
 
 export class PageTemplates {
     static mapping: {[key: string]: Function} = {

@@ -1,10 +1,10 @@
 import {PlayManager} from "./Streaming/PlayManager.ts";
-import {UserTemplates} from "./Templates/UserTemplates.ts";
-import {TrackEditTemplates} from "./Templates/TrackEditTemplates.ts";
-import {TrackTemplates} from "./Templates/TrackTemplates.ts";
+import {UserTemplates} from "./Templates/account/UserTemplates.ts";
+import {TrackEditTemplates} from "./Templates/music/TrackEditTemplates.ts";
+import {TrackTemplates} from "./Templates/music/TrackTemplates.ts";
 import {ProfilePage} from "./Classes/ProfilePage.ts";
-import {AlbumTemplates} from "./Templates/AlbumTemplates.ts";
-import {PlaylistTemplates} from "./Templates/PlaylistTemplates.ts";
+import {AlbumTemplates} from "./Templates/music/AlbumTemplates.ts";
+import {PlaylistTemplates} from "./Templates/music/PlaylistTemplates.ts";
 import {LibraryActions} from "./Actions/LibraryActions.ts";
 import {Api} from "./Api/Api.ts";
 import {StatisticTemplates} from "./Templates/StatisticTemplates.ts";
@@ -25,6 +25,7 @@ import {NotificationType} from "./Enums/NotificationType.ts";
 import {currentSecretCode, currentUser, permissions} from "./state.ts";
 import {RoyaltyInfo} from "./Models/RoyaltyInfo.ts";
 import {RoyaltyTemplates} from "./Templates/admin/RoyaltyTemplates.ts";
+import {RoutePath} from "./Routing/routes.ts";
 
 export class Lyda {
     static async getEndpointData(endpoint: string, params = "") {
@@ -85,7 +86,7 @@ export class Lyda {
                 break;
             case "profile":
                 if (!data || data.error) {
-                    navigate("404");
+                    navigate(RoutePath.notFound);
                     return;
                 }
                 document.title = data.displayname;
@@ -117,7 +118,7 @@ export class Lyda {
                 break;
             case "playlist":
                 if (!user) {
-                    navigate("explore");
+                    navigate(RoutePath.explore);
                     return;
                 }
                 document.title = data.playlist.title;
@@ -129,7 +130,7 @@ export class Lyda {
                 break;
             case "statistics":
                 if (!user) {
-                    navigate("explore");
+                    navigate(RoutePath.explore);
                     return;
                 }
                 const royaltyInfo = await Api.getAsync<RoyaltyInfo>(ApiRoutes.getRoyaltyInfo);
@@ -140,7 +141,7 @@ export class Lyda {
             case "library":
                 if (!user) {
                     notify("You need to be logged in to view your library", NotificationType.error);
-                    navigate("login");
+                    navigate(RoutePath.login);
                     return;
                 }
                 const name = params.name ?? "";
@@ -156,7 +157,7 @@ export class Lyda {
             case "logs":
                 if (!permissions.value.some((p: Permission) => p.name === Permissions.canViewLogs)) {
                     notify("You do not have permission to view logs", NotificationType.error);
-                    navigate("profile");
+                    navigate(RoutePath.profile);
                     return;
                 }
                 element.appendChild(LogTemplates.logsPage());
@@ -176,7 +177,7 @@ export class Lyda {
             case "unapprovedTracks":
                 if (!user) {
                     notify("You need to be logged in to see unapproved tracks", NotificationType.error);
-                    navigate("login");
+                    navigate(RoutePath.login);
                     return;
                 }
                 TrackActions.getUnapprovedTracks().then(tracks => {
@@ -186,7 +187,7 @@ export class Lyda {
             case "moderation":
                 if (!user) {
                     notify("You need to be logged in to moderate", NotificationType.error);
-                    navigate("login");
+                    navigate(RoutePath.login);
                     return;
                 }
                 if (!permissions.value.some(p => p.name === Permissions.canDeleteComments)) {
@@ -198,7 +199,7 @@ export class Lyda {
             case "subscribe":
                 if (!user) {
                     notify("You can only subscribe if you have an account already", NotificationType.warning);
-                    navigate("login");
+                    navigate(RoutePath.login);
                     return;
                 }
                 element.appendChild(SubscriptionTemplates.page());

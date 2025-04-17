@@ -1,42 +1,43 @@
-import {TrackActions} from "../Actions/TrackActions.ts";
-import {UserTemplates} from "./UserTemplates.ts";
-import {copy, Util} from "../Classes/Util.ts";
-import {Icons} from "../Enums/Icons.js";
-import {PlayManager} from "../Streaming/PlayManager.ts";
-import {GenericTemplates} from "./GenericTemplates.ts";
-import {Time} from "../Classes/Helpers/Time.ts";
-import {QueueManager} from "../Streaming/QueueManager.ts";
-import {StatisticsTemplates} from "./StatisticsTemplates.ts";
+import {TrackActions} from "../../Actions/TrackActions.ts";
+import {UserTemplates} from "../account/UserTemplates.ts";
+import {copy, Util} from "../../Classes/Util.ts";
+import {Icons} from "../../Enums/Icons.ts";
+import {PlayManager} from "../../Streaming/PlayManager.ts";
+import {GenericTemplates} from "../GenericTemplates.ts";
+import {Time} from "../../Classes/Helpers/Time.ts";
+import {QueueManager} from "../../Streaming/QueueManager.ts";
+import {StatisticsTemplates} from "../StatisticsTemplates.ts";
 import {AlbumTemplates} from "./AlbumTemplates.ts";
-import {PlaylistActions} from "../Actions/PlaylistActions.ts";
+import {PlaylistActions} from "../../Actions/PlaylistActions.ts";
 import {PlaylistTemplates} from "./PlaylistTemplates.ts";
-import {DragActions} from "../Actions/DragActions.ts";
-import {Images} from "../Enums/Images.ts";
+import {DragActions} from "../../Actions/DragActions.ts";
+import {Images} from "../../Enums/Images.ts";
 import {TrackEditTemplates} from "./TrackEditTemplates.ts";
-import {CustomText} from "../Classes/Helpers/CustomText.ts";
-import {CommentTemplates} from "./CommentTemplates.ts";
-import {AnyElement, AnyNode, create, HtmlPropertyValue, ifjs, signalMap} from "../../fjsc/src/f2.ts";
-import {navigate} from "../Routing/Router.ts";
-import {Track} from "../Models/DbModels/lyda/Track.ts";
-import {User} from "../Models/DbModels/lyda/User.ts";
-import {TrackCollaborator} from "../Models/DbModels/lyda/TrackCollaborator.ts";
-import {TrackLike} from "../Models/DbModels/lyda/TrackLike.ts";
-import {Repost} from "../Models/DbModels/lyda/Repost.ts";
-import {Album} from "../Models/DbModels/lyda/Album.ts";
-import {FJSC} from "../../fjsc";
-import {Playlist} from "../Models/DbModels/lyda/Playlist.ts";
-import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
-import {CollaboratorType} from "../Models/DbModels/lyda/CollaboratorType.ts";
-import {currentTrackId, currentUser, manualQueue} from "../state.ts";
-import {PillOption} from "../Models/PillOption.ts";
-import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
-import {Ui} from "../Classes/Ui.ts";
-import {Api} from "../Api/Api.ts";
-import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {Comment} from "../Models/DbModels/lyda/Comment.ts";
-import {ListTrack} from "../Models/ListTrack.ts";
-import {MediaActions} from "../Actions/MediaActions.ts";
-import {MediaFileType} from "../Enums/MediaFileType.ts";
+import {CustomText} from "../../Classes/Helpers/CustomText.ts";
+import {CommentTemplates} from "../CommentTemplates.ts";
+import {AnyElement, AnyNode, create, HtmlPropertyValue, ifjs, signalMap} from "../../../fjsc/src/f2.ts";
+import {navigate} from "../../Routing/Router.ts";
+import {Track} from "../../Models/DbModels/lyda/Track.ts";
+import {User} from "../../Models/DbModels/lyda/User.ts";
+import {TrackCollaborator} from "../../Models/DbModels/lyda/TrackCollaborator.ts";
+import {TrackLike} from "../../Models/DbModels/lyda/TrackLike.ts";
+import {Repost} from "../../Models/DbModels/lyda/Repost.ts";
+import {Album} from "../../Models/DbModels/lyda/Album.ts";
+import {FJSC} from "../../../fjsc";
+import {Playlist} from "../../Models/DbModels/lyda/Playlist.ts";
+import {compute, Signal, signal} from "../../../fjsc/src/signals.ts";
+import {CollaboratorType} from "../../Models/DbModels/lyda/CollaboratorType.ts";
+import {currentTrackId, currentUser, manualQueue} from "../../state.ts";
+import {PillOption} from "../../Models/PillOption.ts";
+import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
+import {Ui} from "../../Classes/Ui.ts";
+import {Api} from "../../Api/Api.ts";
+import {ApiRoutes} from "../../Api/ApiRoutes.ts";
+import {Comment} from "../../Models/DbModels/lyda/Comment.ts";
+import {ListTrack} from "../../Models/ListTrack.ts";
+import {MediaActions} from "../../Actions/MediaActions.ts";
+import {MediaFileType} from "../../Enums/MediaFileType.ts";
+import {RoutePath} from "../../Routing/routes.ts";
 
 export class TrackTemplates {
     static trackCard(track: Track, profileId: number) {
@@ -323,9 +324,7 @@ export class TrackTemplates {
                 isUrl: true,
                 adaptive: true },
             classes: ["special", "rounded-max", "align-center", "text-small"],
-            onclick: () => {
-                navigate("profile/" + repost.user!.username);
-            }
+            onclick: () => navigate(`${RoutePath.profile}/` + repost.user!.username)
         });
     }
 
@@ -588,9 +587,8 @@ export class TrackTemplates {
                 create("span")
                     .classes("clickable", "text-large", "pointer")
                     .text(title)
-                    .onclick(() => {
-                        navigate("track/" + id);
-                    }).build(),
+                    .onclick(() => navigate(`${RoutePath.track}/` + id))
+                    .build(),
                 ...icons,
             ).build();
     }

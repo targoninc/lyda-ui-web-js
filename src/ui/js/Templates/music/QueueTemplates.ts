@@ -1,16 +1,17 @@
-import {Icons} from "../Enums/Icons.js";
-import {Time} from "../Classes/Helpers/Time.ts";
-import {QueueManager} from "../Streaming/QueueManager.ts";
-import {GenericTemplates} from "./GenericTemplates.ts";
-import {DragActions} from "../Actions/DragActions.ts";
-import {Util} from "../Classes/Util.ts";
-import {navigate} from "../Routing/Router.ts";
-import {Track} from "../Models/DbModels/lyda/Track.ts";
-import {create} from "../../fjsc/src/f2.ts";
-import {FJSC} from "../../fjsc";
-import {User} from "../Models/DbModels/lyda/User.ts";
-import {compute, signal} from "../../fjsc/src/signals.ts";
-import {Images} from "../Enums/Images.ts";
+import {Icons} from "../../Enums/Icons.ts";
+import {Time} from "../../Classes/Helpers/Time.ts";
+import {QueueManager} from "../../Streaming/QueueManager.ts";
+import {GenericTemplates} from "../GenericTemplates.ts";
+import {DragActions} from "../../Actions/DragActions.ts";
+import {Util} from "../../Classes/Util.ts";
+import {navigate} from "../../Routing/Router.ts";
+import {Track} from "../../Models/DbModels/lyda/Track.ts";
+import {create} from "../../../fjsc/src/f2.ts";
+import {FJSC} from "../../../fjsc";
+import {User} from "../../Models/DbModels/lyda/User.ts";
+import {compute, signal} from "../../../fjsc/src/signals.ts";
+import {Images} from "../../Enums/Images.ts";
+import {RoutePath} from "../../Routing/routes.ts";
 
 export class QueueTemplates {
     static queueItem(track: Track, index: number, totalCount: number, attributes = [], classes = []) {
@@ -87,9 +88,8 @@ export class QueueTemplates {
                         create("span")
                             .classes("align-center", "clickable")
                             .text(track.user.displayname)
-                            .onclick(() => {
-                                navigate("profile/" + track.user!.username);
-                            }).build(),
+                            .onclick(() => navigate(`${RoutePath.profile}/` + track.user!.username))
+                            .build(),
                         create("span")
                             .classes("align-center")
                             .text(" - ")
@@ -97,9 +97,8 @@ export class QueueTemplates {
                         create("span")
                             .classes("align-center", "clickable", "flex-grow")
                             .text(track.title)
-                            .onclick(() => {
-                                navigate("track/" + track.id);
-                            }).build(),
+                            .onclick(() => navigate(`${RoutePath.track}/` + track.id))
+                            .build(),
                         create("div")
                             .classes("align-center", "fakeButton", "rounded", "padded-inline", "clickablePreserveWidth")
                             .alt("Remove from queue")

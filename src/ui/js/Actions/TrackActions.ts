@@ -4,7 +4,7 @@ import {Icons} from "../Enums/Icons.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
 import {AlbumActions} from "./AlbumActions.ts";
 import {PlaylistActions} from "./PlaylistActions.ts";
-import {TrackEditTemplates} from "../Templates/TrackEditTemplates.ts";
+import {TrackEditTemplates} from "../Templates/music/TrackEditTemplates.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {navigate, reload} from "../Routing/Router.ts";
 import {Signal} from "../../fjsc/src/signals.ts";
@@ -20,6 +20,7 @@ import {NotificationType} from "../Enums/NotificationType.ts";
 import {currentQuality, playingHere} from "../state.ts";
 import {TrackCollaborator} from "../Models/DbModels/lyda/TrackCollaborator.ts";
 import {ListTrack} from "../Models/ListTrack.ts";
+import {RoutePath} from "../Routing/routes.ts";
 
 export class TrackActions {
     static async savePlay(id: number) {
@@ -58,7 +59,7 @@ export class TrackActions {
         if (res.code === 200) {
             await PlayManager.removeTrackFromAllStates(id);
             notify(res.data, NotificationType.success);
-            navigate("profile");
+            navigate(RoutePath.profile);
         } else {
             notify("Error trying to delete track: " + getErrorMessage(res), NotificationType.error);
         }

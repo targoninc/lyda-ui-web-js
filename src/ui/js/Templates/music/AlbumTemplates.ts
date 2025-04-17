@@ -1,30 +1,31 @@
-import {Icons} from "../Enums/Icons.js";
-import {AlbumActions} from "../Actions/AlbumActions.ts";
-import {Time} from "../Classes/Helpers/Time.ts";
-import {GenericTemplates} from "./GenericTemplates.ts";
-import {UserTemplates} from "./UserTemplates.ts";
-import {PlayManager} from "../Streaming/PlayManager.ts";
+import {Icons} from "../../Enums/Icons.ts";
+import {AlbumActions} from "../../Actions/AlbumActions.ts";
+import {Time} from "../../Classes/Helpers/Time.ts";
+import {GenericTemplates} from "../GenericTemplates.ts";
+import {UserTemplates} from "../account/UserTemplates.ts";
+import {PlayManager} from "../../Streaming/PlayManager.ts";
 import {TrackTemplates} from "./TrackTemplates.ts";
-import {QueueManager} from "../Streaming/QueueManager.ts";
-import {PlaylistActions} from "../Actions/PlaylistActions.ts";
-import {StatisticsTemplates} from "./StatisticsTemplates.ts";
-import {Images} from "../Enums/Images.ts";
-import {getErrorMessage, Util} from "../Classes/Util.ts";
-import {notify, Ui} from "../Classes/Ui.ts";
-import {FJSC} from "../../fjsc";
-import {AnyNode, create, HtmlPropertyValue, ifjs, nullElement} from "../../fjsc/src/f2.ts";
-import {Album} from "../Models/DbModels/lyda/Album.ts";
-import {InputType} from "../../fjsc/src/Types.ts";
-import {Track} from "../Models/DbModels/lyda/Track.ts";
-import {navigate, Route} from "../Routing/Router.ts";
-import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
-import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
-import {currentUser, manualQueue, playingFrom} from "../state.ts";
-import {Api} from "../Api/Api.ts";
-import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {PageTemplates} from "./PageTemplates.ts";
-import {ListTrack} from "../Models/ListTrack.ts";
+import {QueueManager} from "../../Streaming/QueueManager.ts";
+import {PlaylistActions} from "../../Actions/PlaylistActions.ts";
+import {StatisticsTemplates} from "../StatisticsTemplates.ts";
+import {Images} from "../../Enums/Images.ts";
+import {getErrorMessage, Util} from "../../Classes/Util.ts";
+import {notify, Ui} from "../../Classes/Ui.ts";
+import {FJSC} from "../../../fjsc";
+import {AnyNode, create, HtmlPropertyValue, ifjs, nullElement} from "../../../fjsc/src/f2.ts";
+import {Album} from "../../Models/DbModels/lyda/Album.ts";
+import {InputType} from "../../../fjsc/src/Types.ts";
+import {Track} from "../../Models/DbModels/lyda/Track.ts";
+import {navigate, Route} from "../../Routing/Router.ts";
+import {compute, Signal, signal} from "../../../fjsc/src/signals.ts";
+import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
+import {NotificationType} from "../../Enums/NotificationType.ts";
+import {currentUser, manualQueue, playingFrom} from "../../state.ts";
+import {Api} from "../../Api/Api.ts";
+import {ApiRoutes} from "../../Api/ApiRoutes.ts";
+import {PageTemplates} from "../PageTemplates.ts";
+import {ListTrack} from "../../Models/ListTrack.ts";
+import {RoutePath} from "../../Routing/routes.ts";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
@@ -328,9 +329,7 @@ export class AlbumTemplates {
                 create("span")
                     .classes("clickable", "text-large", "pointer")
                     .text(title)
-                    .onclick(() => {
-                        navigate("album/" + id);
-                    })
+                    .onclick(() => navigate(`${RoutePath.album}/` + id))
                     .build(),
                 ...icons,
             ).build();
@@ -466,7 +465,7 @@ export class AlbumTemplates {
 
     static albumPage(route: Route, params: Record<string, string>) {
         if (!currentUser.value) {
-            navigate("explore");
+            navigate(RoutePath.explore);
             return nullElement();
         }
 

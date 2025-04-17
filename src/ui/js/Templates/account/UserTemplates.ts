@@ -1,17 +1,17 @@
-import {target, Util} from "../Classes/Util.ts";
-import {TrackActions} from "../Actions/TrackActions.ts";
-import {TrackTemplates} from "./TrackTemplates.ts";
-import {UserActions} from "../Actions/UserActions.ts";
-import {GenericTemplates} from "./GenericTemplates.ts";
-import {AlbumTemplates} from "./AlbumTemplates.ts";
-import {Icons as Icons} from "../Enums/Icons.js";
-import {Badges} from "../Enums/Badges.ts";
-import {Links} from "../Enums/Links.ts";
-import {PlaylistTemplates} from "./PlaylistTemplates.ts";
-import {CustomText, truncateText} from "../Classes/Helpers/CustomText.ts";
-import {Permissions} from "../Enums/Permissions.ts";
-import {Images} from "../Enums/Images.ts";
-import {navigate} from "../Routing/Router.ts";
+import {target, Util} from "../../Classes/Util.ts";
+import {TrackActions} from "../../Actions/TrackActions.ts";
+import {TrackTemplates} from "../music/TrackTemplates.ts";
+import {UserActions} from "../../Actions/UserActions.ts";
+import {GenericTemplates} from "../GenericTemplates.ts";
+import {AlbumTemplates} from "../music/AlbumTemplates.ts";
+import {Icons as Icons} from "../../Enums/Icons.ts";
+import {Badges} from "../../Enums/Badges.ts";
+import {Links} from "../../Enums/Links.ts";
+import {PlaylistTemplates} from "../music/PlaylistTemplates.ts";
+import {CustomText, truncateText} from "../../Classes/Helpers/CustomText.ts";
+import {Permissions} from "../../Enums/Permissions.ts";
+import {Images} from "../../Enums/Images.ts";
+import {navigate} from "../../Routing/Router.ts";
 import {
     AnyElement,
     AnyNode,
@@ -21,23 +21,24 @@ import {
     ifjs,
     nullElement,
     StringOrSignal
-} from "../../fjsc/src/f2.ts";
-import {Track} from "../Models/DbModels/lyda/Track.ts";
-import {User} from "../Models/DbModels/lyda/User.ts";
-import {Permission} from "../Models/DbModels/lyda/Permission.ts";
-import {Playlist} from "../Models/DbModels/lyda/Playlist.ts";
-import {Album} from "../Models/DbModels/lyda/Album.ts";
-import {Badge} from "../Models/DbModels/lyda/Badge.ts";
-import {FJSC} from "../../fjsc";
-import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
-import {UiActions} from "../Actions/UiActions.ts";
-import {router} from "../../main.ts";
-import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
-import {currentUser} from "../state.ts";
-import {Follow} from "../Models/DbModels/lyda/Follow.ts";
-import {Ui} from "../Classes/Ui.ts";
-import {MediaActions} from "../Actions/MediaActions.ts";
-import {MediaFileType} from "../Enums/MediaFileType.ts";
+} from "../../../fjsc/src/f2.ts";
+import {Track} from "../../Models/DbModels/lyda/Track.ts";
+import {User} from "../../Models/DbModels/lyda/User.ts";
+import {Permission} from "../../Models/DbModels/lyda/Permission.ts";
+import {Playlist} from "../../Models/DbModels/lyda/Playlist.ts";
+import {Album} from "../../Models/DbModels/lyda/Album.ts";
+import {Badge} from "../../Models/DbModels/lyda/Badge.ts";
+import {FJSC} from "../../../fjsc";
+import {compute, Signal, signal} from "../../../fjsc/src/signals.ts";
+import {UiActions} from "../../Actions/UiActions.ts";
+import {router} from "../../../main.ts";
+import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
+import {currentUser} from "../../state.ts";
+import {Follow} from "../../Models/DbModels/lyda/Follow.ts";
+import {Ui} from "../../Classes/Ui.ts";
+import {MediaActions} from "../../Actions/MediaActions.ts";
+import {MediaFileType} from "../../Enums/MediaFileType.ts";
+import {RoutePath} from "../../Routing/routes.ts";
 
 export class UserTemplates {
     static userWidget(user: User|Signal<User|null>, following: boolean|Signal<boolean>, extraAttributes: HtmlPropertyValue[] = [], extraClasses: StringOrSignal[] = [], context: UserWidgetContext = UserWidgetContext.unknown) {
@@ -87,7 +88,7 @@ export class UserTemplates {
             .onclick((e: MouseEvent) => {
                 if (e.button === 0 && target(e).tagName.toLowerCase() === "button") {
                     e.preventDefault();
-                    navigate("profile/" + user.username);
+                    navigate(`${RoutePath.profile}/` + user.username);
                 }
             })
             .href(Links.PROFILE(user.username))
@@ -124,7 +125,7 @@ export class UserTemplates {
                 if (noredirect) {
                     return;
                 }
-                navigate(`profile/${username}`);
+                navigate(`${RoutePath.profile}/${username}`);
             })
             .href(Links.PROFILE(username))
             .children(
@@ -208,8 +209,8 @@ export class UserTemplates {
         unapprovedTracks.onUpdate = (tracks: Track[]) => {
             link.value = tracks.length === 0 ? nullElement() : GenericTemplates.action(Icons.APPROVAL, "Unapproved tracks", "unapproved-tracks", async (e: Event) => {
                 e.preventDefault();
-                navigate("unapproved-tracks");
-            }, [], [], Links.LINK("unapproved-tracks"));
+                navigate(RoutePath.unapprovedTracks);
+            }, [], [], Links.LINK(RoutePath.unapprovedTracks));
         };
 
         return link;
@@ -253,16 +254,12 @@ export class UserTemplates {
                 FJSC.button({
                     text: "Settings",
                     icon: { icon: "settings" },
-                    onclick: async () => {
-                        navigate("settings");
-                    }
+                    onclick: () => navigate(RoutePath.settings)
                 }),
                 FJSC.button({
                     text: "Statistics",
                     icon: { icon: "finance" },
-                    onclick: async () => {
-                        navigate("statistics");
-                    }
+                    onclick: () => navigate(RoutePath.statistics)
                 }),
                 UserTemplates.unapprovedTracksLink(),
             ).build();
@@ -421,9 +418,7 @@ export class UserTemplates {
                             text: "Go to settings",
                             icon: { icon: "settings" },
                             classes: ["positive"],
-                            onclick: async () => {
-                                navigate("settings");
-                            }
+                            onclick: () => navigate(RoutePath.settings)
                         })
                     ).build())
             ).build();

@@ -1,5 +1,5 @@
 import {GenericTemplates} from "../Templates/GenericTemplates.ts";
-import {PlaylistTemplates} from "../Templates/PlaylistTemplates.ts";
+import {PlaylistTemplates} from "../Templates/music/PlaylistTemplates.ts";
 import {Api} from "../Api/Api.ts";
 import {getErrorMessage, Util} from "../Classes/Util.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
@@ -16,6 +16,7 @@ import {MediaFileType} from "../Enums/MediaFileType.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {PlaylistTrack} from "../Models/DbModels/lyda/PlaylistTrack.ts";
 import {ListTrack} from "../Models/ListTrack.ts";
+import {RoutePath} from "../Routing/routes.ts";
 
 export class PlaylistActions {
     static async openAddToPlaylistModal(objectToBeAdded: Album|Track, type: "track"|"album") {
@@ -53,7 +54,7 @@ export class PlaylistActions {
             PlayManager.removeStreamClient(id);
             QueueManager.removeFromManualQueue(id);
             notify("Successfully deleted playlist", NotificationType.success);
-            navigate("profile");
+            navigate(RoutePath.profile);
         } else {
             notify("Error trying to delete playlist: " + getErrorMessage(res), NotificationType.error);
         }

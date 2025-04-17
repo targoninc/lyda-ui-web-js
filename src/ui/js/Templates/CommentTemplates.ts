@@ -2,7 +2,7 @@ import {GenericTemplates} from "./GenericTemplates.ts";
 import {Icons} from "../Enums/Icons.js";
 import {CommentActions} from "../Actions/CommentActions.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
-import {UserTemplates} from "./UserTemplates.ts";
+import {UserTemplates} from "./account/UserTemplates.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";

@@ -1,6 +1,6 @@
 import {Icons} from "../Enums/Icons.js";
 import {TrackActions} from "../Actions/TrackActions.ts";
-import {UserTemplates} from "./UserTemplates.ts";
+import {UserTemplates} from "./account/UserTemplates.ts";
 import {AlbumActions} from "../Actions/AlbumActions.ts";
 import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {Images} from "../Enums/Images.ts";

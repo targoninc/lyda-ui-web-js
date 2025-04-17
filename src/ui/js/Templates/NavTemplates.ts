@@ -1,7 +1,6 @@
 import {Icons} from "../Enums/Icons.js";
-import {UserTemplates} from "./UserTemplates.ts";
+import {UserTemplates} from "./account/UserTemplates.ts";
 import {UserActions} from "../Actions/UserActions.ts";
-import {NavActions} from "../Actions/NavActions.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
 import {SearchTemplates} from "./SearchTemplates.ts";
 import {NotificationParser} from "../Classes/Helpers/NotificationParser.ts";
@@ -9,39 +8,35 @@ import {AuthActions} from "../Actions/AuthActions.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {copy, Util} from "../Classes/Util.ts";
 import {navigate, reload} from "../Routing/Router.ts";
-import {AnyNode, create, ifjs, signalMap, StringOrSignal} from "../../fjsc/src/f2.ts";
-import {compute, signal} from "../../fjsc/src/signals.ts";
+import {create, ifjs, signalMap, StringOrSignal} from "../../fjsc/src/f2.ts";
+import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {Notification} from "../Models/DbModels/lyda/Notification.ts";
 import {FJSC} from "../../fjsc";
 import {router} from "../../main.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 import {currentUser, notifications} from "../state.ts";
 import {SearchContext} from "../Enums/SearchContext.ts";
+import {RoutePath} from "../Routing/routes.ts";
 
 export class NavTemplates {
     static navTop() {
         currentUser.subscribe(async () => {
             await UserActions.getNotifications();
         });
+        const burgerMenuOpen = signal(false);
 
         return create("nav")
             .id("navTop")
             .children(
                 NavTemplates.navLogo(),
-                NavTemplates.burgerMenu(),
-                NavTemplates.burgerMenuContent(),
+                NavTemplates.burgerMenu(burgerMenuOpen),
+                ifjs(burgerMenuOpen, NavTemplates.burgerMenuContent(burgerMenuOpen)),
                 create("div")
                     .classes("flex", "flex-grow")
                     .children(
-                        NavTemplates.navButton("following", "Feed", "rss_feed", async () => {
-                            navigate("following");
-                        }),
-                        NavTemplates.navButton("explore", "Explore", "explore", async () => {
-                            navigate("explore");
-                        }),
-                        NavTemplates.navButton("library", "Library", "category", async () => {
-                            navigate("library");
-                        }),
+                        NavTemplates.navButton(RoutePath.following, "Feed", "rss_feed"),
+                        NavTemplates.navButton(RoutePath.explore, "Explore", "explore"),
+                        NavTemplates.navButton(RoutePath.library, "Library", "category"),
                         SearchTemplates.search(SearchContext.navBar),
                     ).build(),
                 ifjs(currentUser, NavTemplates.accountSection()),
@@ -58,22 +53,22 @@ export class NavTemplates {
             ).build();
     }
 
-    static burgerMenu() {
+    static burgerMenu(open: Signal<boolean>) {
         return create("div")
             .classes("burger-menu", "flexOnMidBreakpoint", "flex", "clickable")
-            .onclick(NavActions.openBurgerMenu)
+            .onclick(() => open.value = true)
             .children(
                 GenericTemplates.icon(Icons.BURGER, true, ["nopointer", "icon", "svg", "align-center"], "Open Menu")
             ).build();
     }
 
-    static burgerMenuContent() {
+    static burgerMenuContent(open: Signal<boolean>) {
         return create("div")
-            .classes("burger-menu-content", "hidden", "padded-page", "flex-v")
+            .classes("burger-menu-content", "padded-page", "flex-v")
             .children(
                 create("div")
                     .classes("flex", "clickable", "burger-menu-topbar")
-                    .onclick(NavActions.closeBurgerMenu)
+                    .onclick(() => open.value = false)
                     .children(
                         create("div")
                             .children(
@@ -91,23 +86,23 @@ export class NavTemplates {
                                     .build(),
                             ).build(),
                     ).build(),
-                NavTemplates.navButtonInBurger("following", "Feed", "rss_feed", async () => {
-                    NavActions.closeBurgerMenu();
-                    navigate("following");
+                NavTemplates.navButtonInBurger(RoutePath.following, "Feed", "rss_feed", async () => {
+                    open.value = false;
+                    navigate(RoutePath.following);
                 }),
-                NavTemplates.navButtonInBurger("explore", "Explore", "explore", async () => {
-                    NavActions.closeBurgerMenu();
-                    navigate("explore");
+                NavTemplates.navButtonInBurger(RoutePath.following, "Explore", "explore", async () => {
+                    open.value = false;
+                    navigate(RoutePath.explore);
                 }),
-                NavTemplates.navButtonInBurger("library", "Library", "category", async () => {
-                    NavActions.closeBurgerMenu();
-                    navigate("library");
+                NavTemplates.navButtonInBurger(RoutePath.following, "Library", "category", async () => {
+                    open.value = false;
+                    navigate(RoutePath.library);
                 }),
             ).build();
     }
 
-    static navButton(id: string, text: string, icon: StringOrSignal, clickFunc: Function) {
-        const active = compute(r => r && r.path === id, router.currentRoute);
+    static navButton(pageRoute: RoutePath, text: string, icon: StringOrSignal) {
+        const active = compute(r => r && r.path === pageRoute, router.currentRoute);
         const activeClass = compute((a): string => a ? "active" : "_", active);
 
         return FJSC.button({
@@ -117,9 +112,9 @@ export class NavTemplates {
                 adaptive: true,
                 classes: ["inline-icon", "svg", "nopointer"]
             },
-            onclick: clickFunc,
+            onclick: () => navigate(pageRoute),
             classes: ["hideOnMidBreakpoint", activeClass],
-            id,
+            id: pageRoute,
         });
     }
 
@@ -146,7 +141,7 @@ export class NavTemplates {
                     icon: { icon: "upload" },
                     onclick: async (e: MouseEvent) => {
                         e.preventDefault();
-                        navigate("upload");
+                        navigate(RoutePath.upload);
                     }
                 }),
                 NavTemplates.notifications(),
@@ -171,9 +166,7 @@ export class NavTemplates {
                     icon: { icon: "login" },
                     classes: ["special"],
                     disabled: compute((r) => (r && r.path === "login") as boolean, router.currentRoute),
-                    onclick: async () => {
-                        navigate("login");
-                    }
+                    onclick: () => navigate(RoutePath.login)
                 })
             ).build();
     }

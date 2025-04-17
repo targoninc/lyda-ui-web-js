@@ -10,6 +10,7 @@ import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {ProgressPart} from "../Models/ProgressPart.ts";
 import {ProgressState} from "../Enums/ProgressState.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
+import {RoutePath} from "../Routing/routes.ts";
 
 export class AudioUpload {
     triggerEvent: Event;
@@ -74,7 +75,7 @@ export class AudioUpload {
         }
 
         notify("Track upload completed", NotificationType.success);
-        navigate(`track/${this.id}`);
+        navigate(`${RoutePath.track}/${this.id}`);
     }
 
     async uploadAudioThenNext() {

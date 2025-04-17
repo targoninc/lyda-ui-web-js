@@ -1,5 +1,5 @@
 import {GenericTemplates} from "../Templates/GenericTemplates.ts";
-import {AlbumTemplates} from "../Templates/AlbumTemplates.ts";
+import {AlbumTemplates} from "../Templates/music/AlbumTemplates.ts";
 import {Api} from "../Api/Api.ts";
 import {getErrorMessage, Util} from "../Classes/Util.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
@@ -15,6 +15,7 @@ import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {AlbumTrack} from "../Models/DbModels/lyda/AlbumTrack.ts";
 import {ListTrack} from "../Models/ListTrack.ts";
+import {RoutePath} from "../Routing/routes.ts";
 
 export class AlbumActions {
     static async openAddToAlbumModal(track: Track) {
@@ -47,7 +48,7 @@ export class AlbumActions {
             PlayManager.removeStreamClient(id);
             QueueManager.removeFromManualQueue(id);
             notify("Successfully deleted album", NotificationType.success);
-            navigate("profile");
+            navigate(RoutePath.profile);
         } else {
             notify("Error trying to delete album: " + getErrorMessage(res), NotificationType.error);
         }

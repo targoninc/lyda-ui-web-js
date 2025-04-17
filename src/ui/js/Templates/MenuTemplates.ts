@@ -6,6 +6,7 @@ import {navigate} from "../Routing/Router.ts";
 import {AnyElement, create, HtmlPropertyValue, StringOrSignal} from "../../fjsc/src/f2.ts";
 import {FJSC} from "../../fjsc";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
+import {RoutePath} from "../Routing/routes.ts";
 
 export class MenuTemplates {
     static genericMenu(title: HtmlPropertyValue, menuItems: any[]) {
@@ -74,7 +75,7 @@ export class MenuTemplates {
                 icon: "upload",
                 action: async () => {
                     Util.removeModal(modal);
-                    navigate("upload");
+                    navigate(RoutePath.upload);
                 }
             },
             {

@@ -14,6 +14,7 @@ import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {navigate} from "../Routing/Router.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {currentUser} from "../state.ts";
+import {RoutePath} from "../Routing/routes.ts";
 
 export interface AuthData {
     termsOfService: boolean;
@@ -106,7 +107,7 @@ export class LandingPageTemplates {
         AuthApi.user(null, user => {
             currentUser.value = user;
         });
-        navigate("profile");
+        navigate(RoutePath.profile);
 
         return LandingPageTemplates.waitingBox("Complete", "Redirecting...");
     }
@@ -179,9 +180,7 @@ export class LandingPageTemplates {
                             text: "Go to profile",
                             icon: { icon: "person" },
                             classes: ["positive"],
-                            onclick: () => {
-                                navigate("profile");
-                            }
+                            onclick: () => navigate(RoutePath.profile)
                         })),
                         ifjs(compute(e => e.length > 0, error), FJSC.error(error))
                     ).build()
@@ -768,7 +767,7 @@ export class LandingPageTemplates {
                                 create("span")
                                     .text(" If you're curious about what we're building, you can take a look at our ")
                                     .build(),
-                                GenericTemplates.inlineLink(() => navigate("/roadmap"), "roadmap"),
+                                GenericTemplates.inlineLink(() => navigate(RoutePath.roadmap), "roadmap"),
                             ).build(),
                     ).build(),
             ).build();

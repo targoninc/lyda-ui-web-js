@@ -1,109 +1,136 @@
 import {Route} from "./Router.ts";
 
+export enum RoutePath {
+    explore = "explore",
+    notFound = "404",
+    profile = "profile",
+    following = "following",
+    roadmap = "roadmap",
+    album = "album",
+    playlist = "playlist",
+    track = "track",
+    settings = "settings",
+    statistics = "statistics",
+    search = "search",
+    upload = "upload",
+    library = "library",
+    logout = "logout",
+    login = "login",
+    logs = "logs",
+    actionLogs = "action-logs",
+    unapprovedTracks = "unapproved-tracks",
+    moderation = "moderation",
+    test = "test",
+    subscribe = "subscribe",
+    passwordReset = "password-reset",
+    verifyEmail = "verify-email",
+    events = "events",
+}
+
 export const routes: Route[] = [
     {
-        path: "explore",
+        path: RoutePath.explore,
         title: "Explore",
         aliases: ["discover", "home", "app", "/"]
     },
     {
-        path: "404",
+        path: RoutePath.notFound,
         title: "404",
         aliases: ["error", "not-found"]
     },
     {
-        path: "profile",
+        path: RoutePath.profile,
         title: "Profile",
         params: ["name"],
         aliases: ["user"]
     },
     {
-        path: "following",
+        path: RoutePath.following,
         title: "Following",
     },
     {
-        path: "roadmap",
+        path: RoutePath.roadmap,
         title: "Roadmap",
     },
     {
-        path: "album",
+        path: RoutePath.album,
         title: "Album",
         params: ["id"]
     },
     {
-        path: "playlist",
+        path: RoutePath.playlist,
         title: "Playlist",
         params: ["id"]
     },
     {
-        path: "track",
+        path: RoutePath.track,
         title: "Track",
         params: ["id", "code"]
     },
     {
-        path: "settings",
+        path: RoutePath.settings,
         title: "Settings",
     },
     {
-        path: "statistics",
+        path: RoutePath.statistics,
         title: "Statistics",
     },
     {
-        path: "search",
+        path: RoutePath.search,
         title: "Search",
         params: ["q"]
     },
     {
-        path: "upload",
+        path: RoutePath.upload,
         title: "Upload",
     },
     {
-        path: "library",
+        path: RoutePath.library,
         title: "Library",
         params: ["name"]
     },
     {
-        path: "logout",
+        path: RoutePath.logout,
         title: "Logout",
     },
     {
-        path: "login",
+        path: RoutePath.login,
         title: "Login",
     },
     {
-        path: "logs",
+        path: RoutePath.logs,
         title: "Logs",
     },
     {
-        path: "action-logs",
+        path: RoutePath.actionLogs,
         title: "Action Logs",
     },
     {
-        path: "unapproved-tracks",
+        path: RoutePath.unapprovedTracks,
         title: "Unapproved Tracks",
     },
     {
-        path: "moderation",
+        path: RoutePath.moderation,
         title: "Moderation",
     },
     {
-        path: "test",
+        path: RoutePath.test,
         title: "Test",
     },
     {
-        path: "subscribe",
+        path: RoutePath.subscribe,
         title: "Subscribe",
     },
     {
-        path: "password-reset",
+        path: RoutePath.passwordReset,
         title: "Password Reset",
     },
     {
-        path: "verify-email",
+        path: RoutePath.verifyEmail,
         title: "Verify Email",
     },
     {
-        path: "events",
+        path: RoutePath.events,
         title: "Events",
     },
 ];

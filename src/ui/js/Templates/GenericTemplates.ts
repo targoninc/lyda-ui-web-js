@@ -28,6 +28,7 @@ import {PillOption} from "../Models/PillOption.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {dayFromValue} from "../Classes/Helpers/Date.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
+import {RoutePath} from "../Routing/routes.ts";
 
 export class GenericTemplates {
     static icon(icon: StringOrSignal, adaptive = false, classes: StringOrSignal[] = [], title = "", onclick: Function | undefined = undefined) {
@@ -247,9 +248,7 @@ export class GenericTemplates {
             text: "Upload",
             icon: { icon: "upload" },
             classes: ["positive", ...classes],
-            onclick: async () => {
-                navigate("upload");
-            }
+            onclick: () => navigate(RoutePath.upload)
         });
     }
 

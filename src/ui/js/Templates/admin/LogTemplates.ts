@@ -1,5 +1,5 @@
 import {Time} from "../../Classes/Helpers/Time.ts";
-import {UserTemplates} from "../UserTemplates.ts";
+import {UserTemplates} from "../account/UserTemplates.ts";
 import {GenericTemplates} from "../GenericTemplates.ts";
 import {copy, Util} from "../../Classes/Util.ts";
 import {AnyElement, create, ifjs} from "../../../fjsc/src/f2.ts";

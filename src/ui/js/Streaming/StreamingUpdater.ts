@@ -3,9 +3,9 @@ import {Time} from "../Classes/Helpers/Time.ts";
 import {Icons} from "../Enums/Icons.js";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
-import {QueueTemplates} from "../Templates/QueueTemplates.ts";
+import {QueueTemplates} from "../Templates/music/QueueTemplates.ts";
 import {QueueManager} from "./QueueManager.ts";
-import {PlayerTemplates} from "../Templates/PlayerTemplates.ts";
+import {PlayerTemplates} from "../Templates/music/PlayerTemplates.ts";
 import {Util} from "../Classes/Util.ts";
 import {
     currentlyBuffered,

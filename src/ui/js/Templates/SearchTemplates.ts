@@ -12,6 +12,7 @@ import {Images} from "../Enums/Images.ts";
 import {SearchContext} from "../Enums/SearchContext.ts";
 import {FJSC} from "../../fjsc";
 import {router} from "../../main.ts";
+import {RoutePath} from "../Routing/routes.ts";
 
 export class SearchTemplates {
     static search(context: SearchContext) {
@@ -107,7 +108,7 @@ export class SearchTemplates {
                         if (pressedKey === "Enter") {
                             if (selectedResult.value === null) {
                                 resultsShown.value = false;
-                                navigate("search?q=" + currentSearch.value);
+                                navigate(`${RoutePath.search}?q=` + currentSearch.value);
                                 return;
                             }
                             const result = results.value.find(r => r.id === selectedResult.value);
@@ -196,7 +197,7 @@ export class SearchTemplates {
                                     classes: ["positive"],
                                     onclick: () => {
                                         resultsShown.value = false;
-                                        navigate("search?q=" + currentSearch.value);
+                                        navigate(`${RoutePath.search}?q=` + currentSearch.value);
                                     }
                                 }),
                             ).build(),

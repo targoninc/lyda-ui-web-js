@@ -7,7 +7,7 @@ import {Lyda} from "./js/lyda.ts";
 import {UiActions} from "./js/Actions/UiActions.ts";
 import {Ui} from "./js/Classes/Ui.ts";
 import {Util} from "./js/Classes/Util.ts";
-import {routes} from "./js/Routing/routes.js";
+import {RoutePath, routes} from "./js/Routing/routes.js";
 import {GenericTemplates} from "./js/Templates/GenericTemplates.ts";
 import {currentTrackId, currentTrackPosition, currentUser, permissions} from "./js/state.ts";
 import {StreamingBroadcaster} from "./js/Streaming/StreamingBroadcaster.ts";
@@ -16,7 +16,6 @@ import {Api} from "./js/Api/Api.ts";
 import {Permission} from "./js/Models/DbModels/lyda/Permission.ts";
 import {ApiRoutes} from "./js/Api/ApiRoutes.ts";
 
-//LydaCache.clear();
 let pageContainer = document.querySelector(".page-container");
 if (!pageContainer) {
     throw new Error("No page container found");
@@ -34,7 +33,7 @@ export const router = new Router(routes, async (route: Route, params: any) => {
     pageContainer.innerHTML = "";
     let template = PageTemplates.mapping[page](route, params);
     if (!currentUser.value && PageTemplates.needLoginPages.includes(page)) {
-        navigate("login");
+        navigate(RoutePath.login);
     }
     pageContainer.appendChild(template);
     pageContainer.scrollIntoView();
@@ -46,7 +45,7 @@ export const router = new Router(routes, async (route: Route, params: any) => {
     setTimeout(() => {
         console.log("No route found, attempting to redirect to profile");
         const path = window.location.pathname;
-        navigate("profile" + path);
+        navigate(RoutePath.profile + path);
     }, 100);
 });
 

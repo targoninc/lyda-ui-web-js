@@ -1,32 +1,33 @@
-import {create, ifjs, signalMap} from "../../fjsc/src/f2.ts";
-import {UserActions} from "../Actions/UserActions.ts";
-import {Theme} from "../Enums/Theme.ts";
-import {GenericTemplates} from "./GenericTemplates.ts";
-import {getUserSettingValue, Util} from "../Classes/Util.ts";
-import {UserSettings} from "../Enums/UserSettings.ts";
-import {FJSC} from "../../fjsc";
-import {ButtonConfig, InputConfig, InputType, TextareaConfig} from "../../fjsc/src/Types.ts";
-import {notify, Ui} from "../Classes/Ui.ts";
-import {LydaApi} from "../Api/LydaApi.ts";
-import {User} from "../Models/DbModels/lyda/User.ts";
-import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
-import {navigate, reload} from "../Routing/Router.ts";
-import {AuthActions} from "../Actions/AuthActions.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
-import {StreamingQuality} from "../Enums/StreamingQuality.ts";
+import {create, ifjs, signalMap} from "../../../fjsc/src/f2.ts";
+import {UserActions} from "../../Actions/UserActions.ts";
+import {Theme} from "../../Enums/Theme.ts";
+import {GenericTemplates} from "../GenericTemplates.ts";
+import {getUserSettingValue, Util} from "../../Classes/Util.ts";
+import {UserSettings} from "../../Enums/UserSettings.ts";
+import {FJSC} from "../../../fjsc";
+import {ButtonConfig, InputConfig, InputType, TextareaConfig} from "../../../fjsc/src/Types.ts";
+import {notify, Ui} from "../../Classes/Ui.ts";
+import {LydaApi} from "../../Api/LydaApi.ts";
+import {User} from "../../Models/DbModels/lyda/User.ts";
+import {compute, Signal, signal} from "../../../fjsc/src/signals.ts";
+import {navigate, reload} from "../../Routing/Router.ts";
+import {AuthActions} from "../../Actions/AuthActions.ts";
+import {NotificationType} from "../../Enums/NotificationType.ts";
+import {StreamingQuality} from "../../Enums/StreamingQuality.ts";
 import {UserTemplates} from "./UserTemplates.ts";
-import {currentUser, permissions} from "../state.ts";
-import {AuthApi} from "../Api/AuthApi.ts";
-import {UserEmail} from "../Models/DbModels/lyda/UserEmail.ts";
-import {Api} from "../Api/Api.ts";
-import {Permission} from "../Models/DbModels/lyda/Permission.ts";
-import {ApiRoutes} from "../Api/ApiRoutes.ts";
+import {currentUser, permissions} from "../../state.ts";
+import {AuthApi} from "../../Api/AuthApi.ts";
+import {UserEmail} from "../../Models/DbModels/lyda/UserEmail.ts";
+import {Api} from "../../Api/Api.ts";
+import {Permission} from "../../Models/DbModels/lyda/Permission.ts";
+import {ApiRoutes} from "../../Api/ApiRoutes.ts";
+import {RoutePath} from "../../Routing/routes.ts";
 
 export class SettingsTemplates {
     static settingsPage() {
         const user = currentUser.value;
         if (!user) {
-            navigate("login");
+            navigate(RoutePath.login);
             return;
         }
 
@@ -100,17 +101,13 @@ export class SettingsTemplates {
                     icon: {icon: "payments"},
                     text: "Manage subscription",
                     classes: ["positive"],
-                    onclick: () => {
-                        navigate("subscribe");
-                    }
+                    onclick: () => navigate(RoutePath.subscribe)
                 })),
                 ifjs(user.subscription, FJSC.button({
                     icon: {icon: "payments"},
                     text: "Subscribe for more features",
                     classes: ["special"],
-                    onclick: () => {
-                        navigate("subscribe");
-                    }
+                    onclick: () => navigate(RoutePath.subscribe)
                 }), true),
                 SettingsTemplates.userImageSettings(user),
                 create("div")
@@ -303,7 +300,7 @@ export class SettingsTemplates {
                                         LydaApi.deleteUser().then(res => {
                                             if (res.code === 200) {
                                                 notify("Account deleted", NotificationType.success);
-                                                navigate("login");
+                                                navigate(RoutePath.login);
                                                 window.location.reload();
                                             } else {
                                                 notify("Account deletion failed", NotificationType.error);
@@ -352,7 +349,7 @@ export class SettingsTemplates {
                         GenericTemplates.gif8831("/img/88x31/ubuntu.gif", "https://ubuntu.com/"),
                         GenericTemplates.gif8831("/img/88x31/hetzner.gif", "https://www.hetzner.com/"),
                     ).build(),
-                GenericTemplates.inlineLink(() => navigate("roadmap"), "Roadmap"),
+                GenericTemplates.inlineLink(() => navigate(RoutePath.roadmap), "Roadmap"),
                 GenericTemplates.inlineLink(() => window.open("https://github.com/targoninc/lyda-ui-web-js", "_blank"), "Source code"),
             ).build();
     }

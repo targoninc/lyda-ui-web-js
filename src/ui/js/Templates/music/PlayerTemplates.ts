@@ -1,22 +1,22 @@
-import {PlayManager} from "../Streaming/PlayManager.ts";
-import {StreamingUpdater} from "../Streaming/StreamingUpdater.ts";
-import {Icons} from "../Enums/Icons.js";
-import {Time} from "../Classes/Helpers/Time.ts";
-import {QueueManager} from "../Streaming/QueueManager.ts";
-import {Images} from "../Enums/Images.ts";
+import {PlayManager} from "../../Streaming/PlayManager.ts";
+import {StreamingUpdater} from "../../Streaming/StreamingUpdater.ts";
+import {Icons} from "../../Enums/Icons.ts";
+import {Time} from "../../Classes/Helpers/Time.ts";
+import {QueueManager} from "../../Streaming/QueueManager.ts";
+import {Images} from "../../Enums/Images.ts";
 import {QueueTemplates} from "./QueueTemplates.ts";
-import {UserTemplates} from "./UserTemplates.ts";
-import {StatisticsTemplates} from "./StatisticsTemplates.ts";
-import {CommentTemplates} from "./CommentTemplates.ts";
-import {GenericTemplates} from "./GenericTemplates.ts";
-import {notify, Ui} from "../Classes/Ui.ts";
-import {Util} from "../Classes/Util.ts";
-import {AnyElement, AnyNode, create, ifjs, StringOrSignal} from "../../fjsc/src/f2.ts";
-import {Track} from "../Models/DbModels/lyda/Track.ts";
-import {User} from "../Models/DbModels/lyda/User.ts";
-import {navigate} from "../Routing/Router.ts";
-import {FJSC} from "../../fjsc";
-import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
+import {UserTemplates} from "../account/UserTemplates.ts";
+import {StatisticsTemplates} from "../StatisticsTemplates.ts";
+import {CommentTemplates} from "../CommentTemplates.ts";
+import {GenericTemplates} from "../GenericTemplates.ts";
+import {notify, Ui} from "../../Classes/Ui.ts";
+import {Util} from "../../Classes/Util.ts";
+import {AnyElement, AnyNode, create, ifjs, StringOrSignal} from "../../../fjsc/src/f2.ts";
+import {Track} from "../../Models/DbModels/lyda/Track.ts";
+import {User} from "../../Models/DbModels/lyda/User.ts";
+import {navigate} from "../../Routing/Router.ts";
+import {FJSC} from "../../../fjsc";
+import {compute, Signal, signal} from "../../../fjsc/src/signals.ts";
 import {
     currentlyBuffered,
     currentTrackId,
@@ -24,10 +24,11 @@ import {
     playingElsewhere,
     playingFrom,
     playingHere, volume
-} from "../state.ts";
-import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
-import {IconConfig} from "../../fjsc/src/Types.ts";
-import {LoopMode} from "../Enums/LoopMode.ts";
+} from "../../state.ts";
+import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
+import {IconConfig} from "../../../fjsc/src/Types.ts";
+import {LoopMode} from "../../Enums/LoopMode.ts";
+import {RoutePath} from "../../Routing/routes.ts";
 
 export class PlayerTemplates {
     static audioPlayer(track: Track) {
@@ -207,9 +208,7 @@ export class PlayerTemplates {
         return create("span")
             .classes("no-sub-info", "rounded", "clickable", "text-small", "padded-inline", "align-center")
             .text("Listening in 96kbps. Subscribe for up to 320kbps.")
-            .onclick(() => {
-                navigate("subscribe");
-            }).build();
+            .onclick(() => navigate(RoutePath.subscribe)).build();
     }
 
     static async bottomTrackInfo(track: Track, trackUser: User) {
@@ -243,7 +242,7 @@ export class PlayerTemplates {
                 .onclick(async () => {
                     const windowWidth = window.innerWidth;
                     if (windowWidth < 600) {
-                        navigate("track/" + track.id);
+                        navigate(`${RoutePath.track}/` + track.id);
                     } else {
                         Ui.showImageModal(cover);
                     }
@@ -251,9 +250,8 @@ export class PlayerTemplates {
             create("span")
                 .classes("title", "clickable", "padded-inline", "align-center")
                 .text(track.title)
-                .onclick(() => {
-                    navigate("track/" + track.id);
-                }).build(),
+                .onclick(() => navigate(`${RoutePath.track}/` + track.id))
+                .build(),
             ...icons,
             UserTemplates.userWidget(trackUser, Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "following_user_id"),
                 [], ["hideOnSmallBreakpoint", "align-center"], UserWidgetContext.player),
