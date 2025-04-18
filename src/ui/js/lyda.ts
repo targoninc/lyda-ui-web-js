@@ -3,7 +3,6 @@ import {UserTemplates} from "./Templates/account/UserTemplates.ts";
 import {TrackEditTemplates} from "./Templates/music/TrackEditTemplates.ts";
 import {TrackTemplates} from "./Templates/music/TrackTemplates.ts";
 import {ProfilePage} from "./Classes/ProfilePage.ts";
-import {AlbumTemplates} from "./Templates/music/AlbumTemplates.ts";
 import {PlaylistTemplates} from "./Templates/music/PlaylistTemplates.ts";
 import {LibraryActions} from "./Actions/LibraryActions.ts";
 import {Api} from "./Api/Api.ts";
@@ -135,7 +134,6 @@ export class Lyda {
                 }
                 const royaltyInfo = await Api.getAsync<RoyaltyInfo>(ApiRoutes.getRoyaltyInfo);
                 element.append(StatisticTemplates.artistRoyaltyActions(royaltyInfo.data));
-                element.append(RoyaltyTemplates.royaltyOverview(royaltyInfo.data));
                 element.append(create("div").classes("flex").children(...(await StatisticsWrapper.getStatistics(permissions.value))).build());
                 break;
             case "library":

@@ -11,6 +11,7 @@ export enum RoutePath {
     track = "track",
     settings = "settings",
     statistics = "statistics",
+    royaltyManagement = "royalty-management",
     search = "search",
     upload = "upload",
     library = "library",
@@ -142,5 +143,9 @@ export const routes: Route[] = [
     {
         path: RoutePath.faq,
         title: "FAQ",
+    },
+    {
+        path: RoutePath.royaltyManagement,
+        title: "Royalties",
     }
 ];

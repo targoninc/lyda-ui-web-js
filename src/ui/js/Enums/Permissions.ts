@@ -1,12 +1,12 @@
-export class Permissions {
-    static canDeleteComments = 'canDeleteComments';
-    static canEditListsOfOthers = 'canEditListsOfOthers';
-    static canEditTracksOfOthers = 'canEditTracksOfOthers';
-    static canBan = 'canBan';
-    static canDeleteTracksOfOthers = 'canDeleteTracksOfOthers';
-    static canDeleteListsOfOthers = 'canDeleteListsOfOthers';
-    static canCalculateRoyalties = 'canCalculateRoyalties';
-    static canVerifyUsers = 'canVerifyUsers';
-    static canViewLogs = 'canViewLogs';
-    static canViewActionLogs = 'canViewActionLogs';
+export enum Permissions {
+    canDeleteComments = 'canDeleteComments',
+    canEditListsOfOthers = 'canEditListsOfOthers',
+    canEditTracksOfOthers = 'canEditTracksOfOthers',
+    canBan = 'canBan',
+    canDeleteTracksOfOthers = 'canDeleteTracksOfOthers',
+    canDeleteListsOfOthers = 'canDeleteListsOfOthers',
+    canCalculateRoyalties = 'canCalculateRoyalties',
+    canVerifyUsers = 'canVerifyUsers',
+    canViewLogs = 'canViewLogs',
+    canViewActionLogs = 'canViewActionLogs',
 }

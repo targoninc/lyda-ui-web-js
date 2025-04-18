@@ -42,6 +42,7 @@ export class PageTemplates {
 
         // admin pages
         [RoutePath.admin]: DashboardTemplates.dashboardPage,
+        [RoutePath.royaltyManagement]: DashboardTemplates.royaltyManagementPage,
         [RoutePath.moderation]: this.moderationPage,
         [RoutePath.logs]: this.logsPage,
         [RoutePath.actionLogs]: this.actionLogsPage,
