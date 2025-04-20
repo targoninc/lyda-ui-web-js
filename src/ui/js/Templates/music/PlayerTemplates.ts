@@ -260,10 +260,10 @@ export class PlayerTemplates {
             create("div")
                 .classes("flex", "align-center", "hideOnMidBreakpoint")
                 .children(
+                    queueComponent,
                     StatisticsTemplates.likesIndicator("track", track.id, track.likes.length,
                         Util.arrayPropertyMatchesUser(track.likes, "user_id")),
                     isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, Util.arrayPropertyMatchesUser(track.reposts, "user_id")),
-                    queueComponent
                 ).build()
         ];
     }

@@ -231,6 +231,9 @@ nav, footer {
     display: flex;
     gap: 1em;
     padding: var(--page-padding);
+}
+
+nav, footer, .fixed-bar {
     background: var(--background-glass);
     backdrop-filter: saturate(180%) blur(10px);
 }

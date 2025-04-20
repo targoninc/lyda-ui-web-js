@@ -911,7 +911,6 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .fixed-bar {
     position: fixed;
-    background: var(--color-3);
     z-index: 1;
     padding: var(--base-padding);
     border-radius: var(--border-radius);
