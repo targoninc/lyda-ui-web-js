@@ -254,6 +254,7 @@ footer {
     border: 1px solid var(--color-7);
     transform: translateX(-50%);
     border-radius: calc(2 * var(--border-radius));
+    padding: var(--base-padding);
 }
 
 .icon {
