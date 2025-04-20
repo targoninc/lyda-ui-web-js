@@ -241,6 +241,7 @@ nav, footer, .fixed-bar {
 footer:empty {
     padding: 0;
     width: 100%;
+    border: none;
 }
 
 footer {
