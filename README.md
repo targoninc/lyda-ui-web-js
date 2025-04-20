@@ -10,9 +10,9 @@ Install bun:
 
 # Start
 
-`bun run build-web` to run a continuous build of the web app.
+`bun run build-dev` to run a continuous build of the web app.
 
-`bun run start-bun` to run a dev server that will automatically reload the web app when you make changes.
+`bun run start-dev` to run a dev server that will automatically reload the web app when you make changes.
 
 # Host
 

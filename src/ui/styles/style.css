@@ -31,8 +31,8 @@
     --purple: #a855f7;
     --purple-dark: #8a4dd9;
     --verified: var(--blue);
-    --background-glass: rgba(var(--color-4-rgb), .8);
-    --background-light-glass: rgba(var(--color-6-rgb), .8);
+    --background-glass: linear-gradient(-45deg, rgba(var(--color-4-rgb), .5), rgba(var(--color-6-rgb), .5));
+    --background-light-glass: rgba(var(--color-6-rgb), .5);
 
     --stats-1: var(--color-1);
     --stats-2: color-mix(in oklab, var(--color-1) 75%, var(--red) 25%);

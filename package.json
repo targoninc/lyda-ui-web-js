@@ -2,9 +2,9 @@
   "name": "lyda-ui-web",
   "type": "module",
   "scripts": {
-    "build-web": "bun build src/ui/main.ts --outdir ./out --sourcemap=linked --minify --watch",
+    "build-dev": "bun build src/ui/main.ts --outdir ./out --sourcemap=linked --minify --watch",
     "start": "npm run build && node dist/server.js",
-    "start-bun": "bun --watch ./src/server.ts",
+    "start-dev": "bun --watch ./src/server.ts",
     "build-prod": "bun build src/ui/main.ts --outdir ./out --sourcemap=linked --minify",
     "start-bun-prod": "bun ./src/server.ts",
     "fetch-submodules": "git submodule update --init",
@@ -27,5 +27,5 @@
     "express": "^5.0.0",
     "typescript": "^5.5.3"
   },
-  "version": "0.0.48"
+  "version": "0.0.49"
 }
