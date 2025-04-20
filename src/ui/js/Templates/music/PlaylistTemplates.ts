@@ -73,7 +73,8 @@ export class PlaylistTemplates {
                     .classes("flex")
                     .children(
                         FJSC.button({
-                            text: "Ok",
+                            text: compute(p => `Add to ${p.length} playlists`, checkedPlaylists),
+                            disabled: compute(p => p.length === 0, checkedPlaylists),
                             onclick: async () => PlaylistActions.addTrackToPlaylists(track.id, checkedPlaylists.value),
                             icon: {icon: "playlist_add"},
                             classes: ["positive"],
@@ -120,7 +121,8 @@ export class PlaylistTemplates {
                     .classes("flex")
                     .children(
                         FJSC.button({
-                            text: "Ok",
+                            text: compute(p => `Add to ${p.length} playlists`, checkedPlaylists),
+                            disabled: compute(p => p.length === 0, checkedPlaylists),
                             onclick: async () => PlaylistActions.addAlbumToPlaylists(album.id, checkedPlaylists.value),
                             icon: {icon: "playlist_add"},
                             classes: ["positive"],

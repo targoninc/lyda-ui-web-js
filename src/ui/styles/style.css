@@ -234,7 +234,7 @@ nav, footer {
     padding: var(--page-padding);
 }
 
-nav, footer, .fixed-bar {
+nav, footer, .fixed-bar, .modal-overlay, .modal {
     background: var(--background-glass);
     backdrop-filter: saturate(180%) blur(10px);
 }
@@ -943,7 +943,6 @@ td:last-child, th:last-child {
 
 .modal {
     position: absolute;
-    background: var(--color-3);
     border: 1px solid var(--color-7);
     top: 50%;
     left: 50%;
@@ -958,8 +957,6 @@ td:last-child, th:last-child {
 
 .modal-overlay {
     position: absolute;
-    background: var(--color-4);
-    opacity: .95;
     top: 0;
     left: 0;
     width: 100%;
