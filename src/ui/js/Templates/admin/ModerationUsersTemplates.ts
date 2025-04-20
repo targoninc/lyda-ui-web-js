@@ -93,7 +93,7 @@ export class ModerationUsersTemplates {
                             ModerationUsersTemplates.permissionsPopup(permissions, u))
                     ).build(),
                 create("td")
-                    .text(Time.agoUpdating(new Date(u.lastlogin)))
+                    .text(u.lastlogin ? Time.agoUpdating(new Date(u.lastlogin)) : "")
                     .build(),
             ).build()
     }
