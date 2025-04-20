@@ -8,6 +8,7 @@ import {GenericTemplates} from "../GenericTemplates.ts";
 import {Permissions} from "../../Enums/Permissions.ts";
 import {DashboardTemplates} from "./DashboardTemplates.ts";
 import {Permission} from "../../Models/DbModels/lyda/Permission.ts";
+import {Time} from "../../Classes/Helpers/Time.ts";
 
 export class ModerationUsersTemplates {
     static usersPage() {
@@ -59,6 +60,7 @@ export class ModerationUsersTemplates {
                 {title: "Username"},
                 {title: "Display name"},
                 {title: "Permissions"},
+                {title: "Last login"},
             ]),
             create("tbody")
                 .children(
@@ -90,6 +92,9 @@ export class ModerationUsersTemplates {
                         ifjs(permissionsOpen,
                             ModerationUsersTemplates.permissionsPopup(permissions, u))
                     ).build(),
+                create("td")
+                    .text(Time.agoUpdating(new Date(u.lastlogin)))
+                    .build(),
             ).build()
     }
 
