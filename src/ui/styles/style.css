@@ -31,6 +31,7 @@
     --purple: #a855f7;
     --purple-dark: #8a4dd9;
     --verified: var(--blue);
+    --background-glass: rgba(var(--color-4-rgb), .8);
 
     --stats-1: var(--color-1);
     --stats-2: color-mix(in oklab, var(--color-1) 75%, var(--red) 25%);
@@ -59,7 +60,7 @@
     --large-border-radius: calc(var(--border-radius) * 2);
     --base-padding: 10px;
     --large-padding: calc(var(--base-padding) * 2);
-    --page-padding: 20px 30px;
+    --page-padding: 10px 20px;
     --inline-padding: 2px 7px;
     --gap: 5px;
     --layout-gap: 10px;
@@ -225,7 +226,7 @@ nav, footer {
     display: flex;
     gap: 30px;
     padding: var(--page-padding);
-    border-bottom: 1px solid var(--color-5);
+    border-bottom: 1px solid var(--color-7);
 }
 
 footer:empty {
@@ -236,13 +237,15 @@ footer:empty {
 footer {
     position: absolute;
     z-index: 2;
-    bottom: 0;
-    left: 0;
-    border-bottom: none;
-    border-top: 1px solid var(--color-5);
-    width: 100%;
+    bottom: var(--base-padding);
+    left: 50%;
+    width: calc(100% - 2 * var(--base-padding));
     box-sizing: border-box;
-    background: var(--color-4);
+    border: 1px solid var(--color-7);
+    transform: translateX(-50%);
+    border-radius: calc(2 * var(--border-radius));
+    background: var(--background-glass);
+    backdrop-filter: saturate(180%) blur(10px);
 }
 
 .icon {

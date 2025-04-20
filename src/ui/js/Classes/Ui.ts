@@ -73,18 +73,17 @@ export class Ui {
     static async windowResize() {
         let pageBackground = document.querySelector(".page-background") as HTMLElement;
         let nav = document.querySelector("nav");
-        let footer = document.querySelector("footer");
         if (nav === null && !navInitialized.value) {
             navInitialized.value = true;
             Ui.initializeNavBar().then(() => {
                 nav = document.querySelector("nav");
-                if (nav && footer && pageBackground) {
-                    pageBackground.style.height = (window.innerHeight - nav.clientHeight - footer.clientHeight - 1) + "px";
+                if (nav && pageBackground) {
+                    pageBackground.style.height = (window.innerHeight - nav.clientHeight) + "px";
                 }
             });
         }
-        if (nav && footer && pageBackground) {
-            pageBackground.style.height = (window.innerHeight - nav.clientHeight - footer.clientHeight - 1) + "px";
+        if (nav && pageBackground) {
+            pageBackground.style.height = (window.innerHeight - nav.clientHeight) + "px";
         }
     }
 
