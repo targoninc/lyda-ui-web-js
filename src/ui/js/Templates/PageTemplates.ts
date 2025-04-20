@@ -14,6 +14,7 @@ import {EventsTemplates} from "./admin/EventsTemplates.ts";
 import {AlbumTemplates} from "./music/AlbumTemplates.ts";
 import {RoutePath} from "../Routing/routes.ts";
 import {DashboardTemplates} from "./admin/DashboardTemplates.ts";
+import {ModerationUsersTemplates} from "./admin/ModerationUsersTemplates.ts";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, Function> = {
@@ -46,6 +47,7 @@ export class PageTemplates {
         [RoutePath.moderation]: this.moderationPage,
         [RoutePath.logs]: this.logsPage,
         [RoutePath.actionLogs]: this.actionLogsPage,
+        [RoutePath.users]: ModerationUsersTemplates.usersPage,
     };
     static needLoginPages: RoutePath[] = [
         RoutePath.library,
@@ -55,7 +57,13 @@ export class PageTemplates {
         RoutePath.following,
         RoutePath.unapprovedTracks,
         RoutePath.moderation,
-        RoutePath.subscribe
+        RoutePath.subscribe,
+        RoutePath.admin,
+        RoutePath.royaltyManagement,
+        RoutePath.moderation,
+        RoutePath.logs,
+        RoutePath.actionLogs,
+        RoutePath.users,
     ];
 
     static explorePage() {
@@ -104,14 +112,6 @@ export class PageTemplates {
             .build();
     }
 
-    static settingsPage() {
-        return create("div")
-            .classes("settings", "flex-v")
-            .attributes("lyda", "")
-            .attributes("datatype", "settings")
-            .build();
-    }
-
     static statisticsPage() {
         return create("div")
             .classes("statistics", "flex-v")
@@ -142,13 +142,6 @@ export class PageTemplates {
         AuthActions.logOutWithRedirect().then();
         return create("div")
             .text("Logging out...")
-            .build();
-    }
-
-    static loginPage() {
-        return create("div")
-            .id("landingPage")
-            .children(LandingPageTemplates.newLandingPage())
             .build();
     }
 

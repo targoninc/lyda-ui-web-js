@@ -30,7 +30,10 @@ export class Router {
             path = "/";
         }
         const page = path.split("/").filter(p => p !== "")[0] ?? "/";
-        const route = this.routes.find(r => page.startsWith(r.path) || (r.aliases && r.aliases.some((a: string) => path.startsWith(a))));
+        let route = this.routes.find(r => page === r.path || (r.aliases && r.aliases.some((a: string) => path === a)));
+        if (!route) {
+            route = this.routes.find(r => page.startsWith(r.path) || (r.aliases && r.aliases.some((a: string) => path.startsWith(a))));
+        }
         this.currentRoute.value = route;
         if (route) {
             const params = this.getParams(path, route);

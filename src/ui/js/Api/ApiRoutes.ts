@@ -9,6 +9,8 @@ export class ApiRoutes {
     // endregion
 
     // region User
+    static getUsers = ApiRoutes.base + "/users";
+
     private static user = ApiRoutes.base + "/user";
     static getUser = ApiRoutes.user + "/get";
     static userSettings = ApiRoutes.user + "/settings";
@@ -35,6 +37,7 @@ export class ApiRoutes {
     static verifyEmail = ApiRoutes.userActions + "/verify-email";
     static deleteUser = ApiRoutes.userActions + "/delete";
     static sendActivationEmail = ApiRoutes.userActions + "/send-activation-email";
+    static setUserPermission = ApiRoutes.userActions + "/set-permission";
     // endregion
 
     // region Subscriptions

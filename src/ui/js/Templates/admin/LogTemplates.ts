@@ -14,7 +14,7 @@ import {truncateText} from "../../Classes/Helpers/CustomText.ts";
 
 export class LogTemplates {
     static async actionLogs(selfUser: User, data: any[]) {
-        const users = {};
+        const users: Record<number, User> = {};
         for (const log of data) {
             if (!users[log.user_id]) {
                 users[log.user_id] = await Util.getUserAsync(log.user_id);
@@ -28,57 +28,52 @@ export class LogTemplates {
             .classes("logs")
             .attributes("cellspacing", "0", "cellpadding", "0")
             .children(
-                create("thead")
-                    .children(
-                        create("tr")
-                            .classes("log")
-                            .children(
-                                LogTemplates.header("Timestamp", "log-timestamp"),
-                                LogTemplates.header("User", "log-user"),
-                                LogTemplates.header("Action Name", "log-action-name"),
-                                LogTemplates.header("Actioned User", "log-user"),
-                                LogTemplates.header("Properties", "log-properties"),
-                            ).build(),
-                    ).build(),
+                LogTemplates.logsTableHeader(),
                 create("tbody")
                     .children(
-                        ...data.map(l => {
-                            return create("tr")
-                                .classes("log", l.type)
-                                .children(
-                                    create("td")
-                                        .classes("log-timestamp")
-                                        .text(Time.ago(l.createdAt))
-                                        .build(),
-                                    create("td")
-                                        .classes("log-user")
-                                        .children(
-                                            UserTemplates.userWidget(users[l.user_id], users[l.user_id].follows.some(f => f.following_user_id === selfUser.id)),
-                                        ).build(),
-                                    create("td")
-                                        .classes("log-action-name")
-                                        .text(l.actionName)
-                                        .build(),
-                                    create("td")
-                                        .classes("log-user")
-                                        .children(
-                                            UserTemplates.userWidget(users[l.actioned_user_id], users[l.actionedUserId].follows.some(f => f.following_user_id === selfUser.id)),
-                                        ).build(),
-                                    LogTemplates.properties(l.additional_info),
-                                ).build();
-                        })
+                        ...data.map(l => LogTemplates.actionLogEntry(l, users, selfUser))
                     ).build(),
             ).build();
     }
 
-    static header(title: string, type: string) {
-        return create("th")
-            .classes(type)
+    private static actionLogEntry(l: any, users: Record<number, User>, selfUser: User) {
+        return create("tr")
+            .classes("log", l.type)
             .children(
-                create("span")
-                    .classes("table-header")
-                    .text(title)
+                create("td")
+                    .classes("log-timestamp")
+                    .text(Time.ago(l.createdAt))
                     .build(),
+                create("td")
+                    .classes("log-user")
+                    .children(
+                        UserTemplates.userWidget(users[l.user_id], users[l.user_id].follows?.some(f => f.following_user_id === selfUser.id) ?? false),
+                    ).build(),
+                create("td")
+                    .classes("log-action-name")
+                    .text(l.actionName)
+                    .build(),
+                create("td")
+                    .classes("log-user")
+                    .children(
+                        UserTemplates.userWidget(users[l.actioned_user_id], users[l.actionedUserId].follows?.some(f => f.following_user_id === selfUser.id) ?? false),
+                    ).build(),
+                LogTemplates.properties(l.additional_info),
+            ).build();
+    }
+
+    private static logsTableHeader() {
+        return create("thead")
+            .children(
+                create("tr")
+                    .classes("log")
+                    .children(
+                        GenericTemplates.tableHeader("Timestamp", "log-timestamp"),
+                        GenericTemplates.tableHeader("User", "log-user"),
+                        GenericTemplates.tableHeader("Action Name", "log-action-name"),
+                        GenericTemplates.tableHeader("Actioned User", "log-user"),
+                        GenericTemplates.tableHeader("Properties", "log-properties"),
+                    ).build(),
             ).build();
     }
 
@@ -98,23 +93,13 @@ export class LogTemplates {
             [LogLevel.unknown]: "Unknown",
         };
 
-        return create("table")
-            .classes("logs", "fixed-bar-content")
-            .attributes("cellspacing", "0", "cellpadding", "0")
-            .children(
-                create("thead")
-                    .children(
-                        create("tr")
-                            .classes("log")
-                            .children(
-                                ...headerDefinitions.map(h => LogTemplates.header(h.title, h.className)),
-                            ).build(),
-                    ).build(),
-                create("tbody")
-                    .children(
-                        ...data.map(l => LogTemplates.logEntry(logLevelMap, l))
-                    ).build(),
-            ).build();
+        return GenericTemplates.tableBody(
+            GenericTemplates.tableHeaders(headerDefinitions),
+            create("tbody")
+                .children(
+                    ...data.map(l => LogTemplates.logEntry(logLevelMap, l))
+                ).build(),
+        );
     }
 
     private static logEntry(logLevelMap: Record<number, string>, l: Log) {
@@ -241,10 +226,10 @@ export class LogTemplates {
     static logsPage() {
         const filterState = signal(LogLevel.debug);
         const refreshOnInterval = signal(false);
-        const logsList = signal<AnyElement>(create("div").build());
+        const logs = signal<Log[]>([]);
         const refresh = () => {
-            LydaApi.getLogs(filterState, async (logs: Log[]) => {
-                logsList.value = LogTemplates.logs(logs);
+            LydaApi.getLogs(filterState, async (newLogs: Log[]) => {
+                logs.value = newLogs;
             });
         };
         setInterval(() => {
@@ -266,7 +251,7 @@ export class LogTemplates {
                             icon: { icon: "refresh" },
                             classes: ["positive"],
                             onclick: async () => {
-                                logsList.value = create("div").build();
+                                logs.value = [];
                                 refresh();
                             }
                         }),
@@ -279,7 +264,7 @@ export class LogTemplates {
                             }
                         }),
                     ).build(),
-                logsList
+                compute(l => LogTemplates.logs(l), logs)
             ).build();
     }
 

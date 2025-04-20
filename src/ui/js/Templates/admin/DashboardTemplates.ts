@@ -22,19 +22,7 @@ export class DashboardTemplates {
             .classes("flex-v")
             .children(
                 GenericTemplates.title("Dashboard"),
-                ifjs(hasAnyPermission, create("div")
-                    .classes("flex-v")
-                    .children(
-                        create("span")
-                            .classes("warning")
-                            .text("Nothing for you here, unfortunately.")
-                            .build(),
-                        FJSC.button({
-                            text: "Go explore somewhere else",
-                            onclick: () => navigate(RoutePath.explore),
-                            icon: { icon: "explore" }
-                        }),
-                    ).build(), true),
+                ifjs(hasAnyPermission, GenericTemplates.missingPermission(), true),
                 ifjs(hasAnyPermission, create("div")
                     .classes("flex")
                     .children(
@@ -57,6 +45,11 @@ export class DashboardTemplates {
                             text: "Royalties",
                             onclick: () => navigate(RoutePath.royaltyManagement),
                             icon: { icon: "currency_exchange" },
+                        })),
+                        ifjs(hasPermission(Permissions.canSetPermissions), FJSC.button({
+                            text: "Users",
+                            onclick: () => navigate(RoutePath.users),
+                            icon: { icon: "groups" },
                         })),
                     ).build())
             ).build();

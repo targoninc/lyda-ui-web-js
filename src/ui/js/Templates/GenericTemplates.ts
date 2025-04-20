@@ -153,6 +153,53 @@ export class GenericTemplates {
             ).build();
     }
 
+    static missingPermission() {
+        return create("div")
+            .classes("flex-v")
+            .children(
+                create("span")
+                    .classes("warning")
+                    .text("Nothing for you here, unfortunately.")
+                    .build(),
+                FJSC.button({
+                    text: "Go explore somewhere else",
+                    onclick: () => navigate(RoutePath.explore),
+                    icon: { icon: "explore" }
+                }),
+            ).build();
+    }
+
+    static tableBody(...children: AnyNode[]) {
+        return create("table")
+            .classes("fixed-bar-content")
+            .attributes("cellspacing", "0", "cellpadding", "0")
+            .children(
+                ...children
+            ).build();
+    }
+
+    static tableHeaders(headerDefinitions: { title: string; className?: string }[]) {
+        return create("thead")
+            .children(
+                create("tr")
+                    .classes("log")
+                    .children(
+                        ...headerDefinitions.map(h => GenericTemplates.tableHeader(h.title, h.className)),
+                    ).build(),
+            ).build();
+    }
+
+    static tableHeader(title: string, type?: string) {
+        return create("th")
+            .classes(type ?? "_")
+            .children(
+                create("span")
+                    .classes("table-header")
+                    .text(title)
+                    .build(),
+            ).build();
+    }
+
     static text(text: HtmlPropertyValue, extraClasses: string[] = []) {
         return create("span")
             .classes("text", ...extraClasses)

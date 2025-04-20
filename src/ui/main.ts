@@ -24,7 +24,7 @@ pageContainer.appendChild(GenericTemplates.loadingSpinner());
 currentUser.value = await Util.getUserAsync(null, false);
 
 export const router = new Router(routes, async (route: Route, params: any) => {
-    const page = route.path.replace("/", "");
+    const page = route.path.replace("/", "") as RoutePath;
     console.log(`Navigating to ${page} with params`, params);
 
     await Ui.windowResize();
