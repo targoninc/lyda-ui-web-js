@@ -16,7 +16,7 @@ import {Permissions} from "../../Enums/Permissions.ts";
 export class EventsTemplates {
     static eventsPage() {
         return DashboardTemplates.pageNeedingPermissions(
-            [Permissions.canViewLogs],
+            [Permissions.canTriggerEventHandling],
             EventsTemplates.eventsPageInternal()
         );
     }

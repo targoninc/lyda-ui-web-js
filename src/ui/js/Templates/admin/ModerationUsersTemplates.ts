@@ -1,5 +1,5 @@
 import {User} from "../../Models/DbModels/lyda/User";
-import {compute, signal} from "../../../fjsc/src/signals.ts";
+import {compute, Signal, signal} from "../../../fjsc/src/signals.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {Api} from "../../Api/Api.ts";
 import {create, ifjs} from "../../../fjsc/src/f2.ts";
@@ -7,6 +7,7 @@ import {FJSC} from "../../../fjsc";
 import {GenericTemplates} from "../GenericTemplates.ts";
 import {Permissions} from "../../Enums/Permissions.ts";
 import {DashboardTemplates} from "./DashboardTemplates.ts";
+import {Permission} from "../../Models/DbModels/lyda/Permission.ts";
 
 export class ModerationUsersTemplates {
     static usersPage() {
@@ -18,7 +19,7 @@ export class ModerationUsersTemplates {
 
     static usersListWithFilter() {
         const users = signal<User[]>([]);
-        const query = signal<string|null>(null);
+        const query = signal<string | null>(null);
         const offset = signal<number>(0);
 
         const refresh = async () => {
@@ -40,7 +41,7 @@ export class ModerationUsersTemplates {
                     .children(
                         FJSC.button({
                             text: "Refresh",
-                            icon: { icon: "refresh" },
+                            icon: {icon: "refresh"},
                             classes: ["positive"],
                             onclick: async () => {
                                 users.value = [];
@@ -55,9 +56,9 @@ export class ModerationUsersTemplates {
     static usersList(users: User[]) {
         return GenericTemplates.tableBody(
             GenericTemplates.tableHeaders([
-                { title: "Username" },
-                { title: "Display name" },
-                { title: "Permissions" },
+                {title: "Username"},
+                {title: "Display name"},
+                {title: "Permissions"},
             ]),
             create("tbody")
                 .children(
@@ -84,51 +85,59 @@ export class ModerationUsersTemplates {
                         FJSC.button({
                             text: compute(p => p.length.toString(), permissions),
                             onclick: () => permissionsOpen.value = !permissionsOpen.value,
-                            icon: { icon: "lock_open" },
+                            icon: {icon: "lock_open"},
                         }),
                         ifjs(permissionsOpen,
-                            create("div")
-                                .classes("popout-below", "flex-v", "padded", "rounded")
-                                .children(
-                                    ...Object.values(Permissions).map(p => {
-                                        const hasPermission = compute(up => up.some(upp => upp.name === p), permissions);
-
-                                        return create("div")
-                                            .classes("flex", "space-outwards")
-                                            .children(
-                                                FJSC.checkbox({
-                                                    text: p,
-                                                    checked: hasPermission,
-                                                    onchange: () => {
-                                                        const val = !hasPermission.value;
-                                                        Api.postAsync(ApiRoutes.setUserPermission, {
-                                                            permissionName: p,
-                                                            user_id: u.id,
-                                                            userHasPermission: val
-                                                        }).then(res => {
-                                                            if (res.code === 200) {
-                                                                if (val) {
-                                                                    permissions.value = [
-                                                                        ...permissions.value,
-                                                                        {
-                                                                            name: p,
-                                                                            id: -1,
-                                                                            created_at: new Date(),
-                                                                            updated_at: new Date(),
-                                                                            description: "",
-                                                                        }
-                                                                    ];
-                                                                } else {
-                                                                    permissions.value = permissions.value.filter(pm => pm.name !== p);
-                                                                }
-                                                            }
-                                                        })
-                                                    }
-                                                })
-                                            ).build();
-                                    }),
-                                ).build())
+                            ModerationUsersTemplates.permissionsPopup(permissions, u))
                     ).build(),
             ).build()
+    }
+
+    private static permissionsPopup(permissions: Signal<Permission[]>, u: User) {
+        return create("div")
+            .classes("popout-below", "flex-v", "padded", "rounded")
+            .children(
+                ...Object.values(Permissions).map(p => {
+                    const hasPermission = compute(up => up.some(upp => upp.name === p), permissions);
+
+                    return create("div")
+                        .classes("flex", "space-outwards")
+                        .children(
+                            ModerationUsersTemplates.permissionCheckbox(p, hasPermission, u, permissions)
+                        ).build();
+                }),
+            ).build();
+    }
+
+    private static permissionCheckbox(p: string, hasPermission: Signal<any>, u: User, permissions: Signal<Permission[]>) {
+        return FJSC.checkbox({
+            text: p,
+            checked: hasPermission,
+            onchange: () => {
+                const val = !hasPermission.value;
+                Api.postAsync(ApiRoutes.setUserPermission, {
+                    permissionName: p,
+                    user_id: u.id,
+                    userHasPermission: val
+                }).then(res => {
+                    if (res.code === 200) {
+                        if (val) {
+                            permissions.value = [
+                                ...permissions.value,
+                                {
+                                    name: p,
+                                    id: -1,
+                                    created_at: new Date(),
+                                    updated_at: new Date(),
+                                    description: "",
+                                }
+                            ];
+                        } else {
+                            permissions.value = permissions.value.filter(pm => pm.name !== p);
+                        }
+                    }
+                })
+            }
+        });
     }
 }

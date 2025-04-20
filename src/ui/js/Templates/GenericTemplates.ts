@@ -124,16 +124,6 @@ export class GenericTemplates {
             ).build();
     }
 
-    static button(text: HtmlPropertyValue, callback: Function = () => {
-    }, extraClasses: string[] = [], id: HtmlPropertyValue | null = null) {
-        return create("button")
-            .classes(...extraClasses)
-            .id(id)
-            .onclick(callback)
-            .text(text)
-            .build();
-    }
-
     static lock() {
         return create("img")
             .classes("inline-icon", "svg", "nopointer")

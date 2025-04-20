@@ -9,5 +9,6 @@ export enum Permissions {
     canVerifyUsers = 'canVerifyUsers',
     canViewLogs = 'canViewLogs',
     canViewActionLogs = 'canViewActionLogs',
+    canTriggerEventHandling = "canTriggerEventHandling",
     canSetPermissions = "canSetPermissions",
 }

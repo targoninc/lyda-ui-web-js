@@ -15,6 +15,8 @@ import {AlbumTemplates} from "./music/AlbumTemplates.ts";
 import {RoutePath} from "../Routing/routes.ts";
 import {DashboardTemplates} from "./admin/DashboardTemplates.ts";
 import {ModerationUsersTemplates} from "./admin/ModerationUsersTemplates.ts";
+import {ModerationCommentsTemplates} from "./admin/ModerationCommentsTemplates.ts";
+import {LogTemplates} from "./admin/LogTemplates.ts";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, Function> = {
@@ -39,15 +41,15 @@ export class PageTemplates {
         [RoutePath.verifyEmail]: LandingPageTemplates.newLandingPage,
         [RoutePath.search]: SearchTemplates.searchPage,
         [RoutePath.roadmap]: RoadmapTemplates.roadmapPage,
-        [RoutePath.events]: EventsTemplates.eventsPage,
 
         // admin pages
         [RoutePath.admin]: DashboardTemplates.dashboardPage,
         [RoutePath.royaltyManagement]: DashboardTemplates.royaltyManagementPage,
-        [RoutePath.moderation]: this.moderationPage,
-        [RoutePath.logs]: this.logsPage,
+        [RoutePath.moderation]: ModerationCommentsTemplates.commentModerationPage,
+        [RoutePath.logs]: LogTemplates.logsPage,
         [RoutePath.actionLogs]: this.actionLogsPage,
         [RoutePath.users]: ModerationUsersTemplates.usersPage,
+        [RoutePath.events]: EventsTemplates.eventsPage,
     };
     static needLoginPages: RoutePath[] = [
         RoutePath.library,
@@ -64,6 +66,7 @@ export class PageTemplates {
         RoutePath.logs,
         RoutePath.actionLogs,
         RoutePath.users,
+        RoutePath.events,
     ];
 
     static explorePage() {
@@ -177,14 +180,6 @@ export class PageTemplates {
             .build();
     }
 
-    static logsPage() {
-        return create("div")
-            .classes("logs")
-            .attributes("lyda", "")
-            .attributes("datatype", "logs")
-            .build();
-    }
-
     static actionLogsPage() {
         return create("div")
             .classes("logs")
@@ -232,14 +227,6 @@ export class PageTemplates {
             .classes("unapprovedTracks")
             .attributes("lyda", "")
             .attributes("datatype", "unapprovedTracks")
-            .build();
-    }
-
-    static moderationPage() {
-        return create("div")
-            .classes("moderation")
-            .attributes("lyda", "")
-            .attributes("datatype", "moderation")
             .build();
     }
 

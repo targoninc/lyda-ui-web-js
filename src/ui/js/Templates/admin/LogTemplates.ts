@@ -11,6 +11,8 @@ import {Log} from "../../Models/DbModels/lyda/Log.ts";
 import {FJSC} from "../../../fjsc";
 import {LydaApi} from "../../Api/LydaApi.ts";
 import {truncateText} from "../../Classes/Helpers/CustomText.ts";
+import {DashboardTemplates} from "./DashboardTemplates.ts";
+import {Permissions} from "../../Enums/Permissions.ts";
 
 export class LogTemplates {
     static async actionLogs(selfUser: User, data: any[]) {
@@ -224,6 +226,13 @@ export class LogTemplates {
     }
 
     static logsPage() {
+        return DashboardTemplates.pageNeedingPermissions(
+            [Permissions.canViewLogs],
+            LogTemplates.logsView()
+        )
+    }
+
+    static logsView() {
         const filterState = signal(LogLevel.debug);
         const refreshOnInterval = signal(false);
         const logs = signal<Log[]>([]);

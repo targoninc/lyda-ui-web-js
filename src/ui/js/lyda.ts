@@ -152,14 +152,6 @@ export class Lyda {
                 const page = UserTemplates.libraryPage(library.albums, library.playlists, library.tracks, user);
                 element.appendChild(page);
                 break;
-            case "logs":
-                if (!permissions.value.some((p: Permission) => p.name === Permissions.canViewLogs)) {
-                    notify("You do not have permission to view logs", NotificationType.error);
-                    navigate(RoutePath.profile);
-                    return;
-                }
-                element.appendChild(LogTemplates.logsPage());
-                break;
             case "actionLogs":
                 if (!user) {
                     notify("You need to be logged in to see action logs", NotificationType.error);
@@ -183,16 +175,6 @@ export class Lyda {
                 });
                 break;
             case "moderation":
-                if (!user) {
-                    notify("You need to be logged in to moderate", NotificationType.error);
-                    navigate(RoutePath.login);
-                    return;
-                }
-                if (!permissions.value.some(p => p.name === Permissions.canDeleteComments)) {
-                    notify("You do not have permission to moderate", NotificationType.error);
-                    return;
-                }
-                element.appendChild(await CommentTemplates.moderatableCommentsPage());
                 break;
             case "subscribe":
                 if (!user) {

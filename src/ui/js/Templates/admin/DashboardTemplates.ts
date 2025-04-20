@@ -57,18 +57,10 @@ export class DashboardTemplates {
     }
 
     static royaltyManagementPage() {
-        const royaltyInfo = signal<any>(null);
-        Api.getAsync<RoyaltyInfo>(ApiRoutes.getRoyaltyInfo).then(res => {
-            if (res.data) {
-                royaltyInfo.value = res.data;
-            }
-        });
-
-        return create("div")
-            .classes("flex-v")
-            .children(
-                compute(r => r ? RoyaltyTemplates.royaltyOverview(r) : nullElement(), royaltyInfo)
-            ).build();
+        return DashboardTemplates.pageNeedingPermissions(
+            [Permissions.canCalculateRoyalties],
+            RoyaltyTemplates.royaltyManagementPage()
+        );
     }
 
     static pageNeedingPermissions(needed: Permissions[], page: AnyElement) {
@@ -77,6 +69,11 @@ export class DashboardTemplates {
         return create("div")
             .classes("flex-v")
             .children(
+                FJSC.button({
+                    text: "Dashboard",
+                    onclick: () => navigate(RoutePath.admin),
+                    icon: { icon: "terminal" },
+                }),
                 ifjs(hasPermission, GenericTemplates.missingPermission(), true),
                 ifjs(hasPermission, page),
             ).build();

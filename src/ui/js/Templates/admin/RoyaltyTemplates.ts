@@ -125,6 +125,21 @@ export class RoyaltyTemplates {
             ).build();
     }
 
+    static royaltyManagementPage() {
+        const royaltyInfo = signal<any>(null);
+        Api.getAsync<RoyaltyInfo>(ApiRoutes.getRoyaltyInfo).then(res => {
+            if (res.data) {
+                royaltyInfo.value = res.data;
+            }
+        });
+
+        return create("div")
+            .classes("flex-v")
+            .children(
+                compute(r => r ? RoyaltyTemplates.royaltyOverview(r) : nullElement(), royaltyInfo)
+            ).build();
+    }
+
     static royaltyOverview(royaltyInfo: RoyaltyInfo) {
         if (!royaltyInfo.calculatableMonths) {
             return nullElement();
