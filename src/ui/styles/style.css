@@ -32,6 +32,7 @@
     --purple-dark: #8a4dd9;
     --verified: var(--blue);
     --background-glass: rgba(var(--color-4-rgb), .8);
+    --background-light-glass: rgba(var(--color-6-rgb), .8);
 
     --stats-1: var(--color-1);
     --stats-2: color-mix(in oklab, var(--color-1) 75%, var(--red) 25%);
@@ -72,7 +73,7 @@
     --fjsc-text-color: var(--color-5);
     --fjsc-error-color: var(--red);
 
-    --fjsc-interactive-background: var(--color-6);
+    --fjsc-interactive-background: var(--background-light-glass);
     --fjsc-interactive-background-hover: var(--color-3);
     --fjsc-interactive-background-active: var(--color-9);
     --fjsc-interactive-color: var(--color-5);
@@ -222,11 +223,16 @@ button > * {
     align-self: center;
 }
 
+nav {
+    border-bottom: 1px solid var(--color-7);
+}
+
 nav, footer {
     display: flex;
-    gap: 30px;
+    gap: 1em;
     padding: var(--page-padding);
-    border-bottom: 1px solid var(--color-7);
+    background: var(--background-glass);
+    backdrop-filter: saturate(180%) blur(10px);
 }
 
 footer:empty {
@@ -244,8 +250,6 @@ footer {
     border: 1px solid var(--color-7);
     transform: translateX(-50%);
     border-radius: calc(2 * var(--border-radius));
-    background: var(--background-glass);
-    backdrop-filter: saturate(180%) blur(10px);
 }
 
 .icon {
