@@ -1,4 +1,4 @@
-import {create, ifjs, nullElement} from "../../../fjsc/src/f2.ts";
+import {AnyElement, AnyNode, create, ifjs, nullElement} from "../../../fjsc/src/f2.ts";
 import {navigate} from "../../Routing/Router.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {FJSC} from "../../../fjsc";
@@ -10,6 +10,7 @@ import {RoyaltyTemplates} from "./RoyaltyTemplates.ts";
 import {Api} from "../../Api/Api.ts";
 import {RoyaltyInfo} from "../../Models/RoyaltyInfo.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
+import {Permission} from "../../Models/DbModels/lyda/Permission.ts";
 
 export class DashboardTemplates {
     static dashboardPage() {
@@ -67,6 +68,17 @@ export class DashboardTemplates {
             .classes("flex-v")
             .children(
                 compute(r => r ? RoyaltyTemplates.royaltyOverview(r) : nullElement(), royaltyInfo)
+            ).build();
+    }
+
+    static pageNeedingPermissions(needed: Permissions[], page: AnyElement) {
+        const hasPermission = compute(ps => needed.every(n => ps.some(p => p.name === n)), permissions);
+
+        return create("div")
+            .classes("flex-v")
+            .children(
+                ifjs(hasPermission, GenericTemplates.missingPermission(), true),
+                ifjs(hasPermission, page),
             ).build();
     }
 }

@@ -10,9 +10,18 @@ import {Time} from "../../Classes/Helpers/Time.ts";
 import {notify} from "../../Classes/Ui.ts";
 import {NotificationType} from "../../Enums/NotificationType.ts";
 import {InputType} from "../../../fjsc/src/Types.ts";
+import {DashboardTemplates} from "./DashboardTemplates.ts";
+import {Permissions} from "../../Enums/Permissions.ts";
 
 export class EventsTemplates {
     static eventsPage() {
+        return DashboardTemplates.pageNeedingPermissions(
+            [Permissions.canViewLogs],
+            EventsTemplates.eventsPageInternal()
+        );
+    }
+
+    private static eventsPageInternal() {
         const events = signal<PaypalWebhook[]>([]);
         const skip = signal(0);
         Api.getAsync<PaypalWebhook[]>(ApiRoutes.getEvents, {

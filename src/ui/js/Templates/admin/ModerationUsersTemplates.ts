@@ -6,21 +6,14 @@ import {create, ifjs} from "../../../fjsc/src/f2.ts";
 import {FJSC} from "../../../fjsc";
 import {GenericTemplates} from "../GenericTemplates.ts";
 import {Permissions} from "../../Enums/Permissions.ts";
-import {permissions} from "../../state.ts";
+import {DashboardTemplates} from "./DashboardTemplates.ts";
 
 export class ModerationUsersTemplates {
     static usersPage() {
-        const hasPermission = (name: Permissions) => {
-            return compute(ps => ps.some(p => p.name === name), permissions);
-        }
-        const hasSetPermissionPermission = hasPermission(Permissions.canSetPermissions);
-
-        return create("div")
-            .classes("flex-v")
-            .children(
-                ifjs(hasSetPermissionPermission, GenericTemplates.missingPermission(), true),
-                ifjs(hasSetPermissionPermission, ModerationUsersTemplates.usersListWithFilter()),
-            ).build();
+        return DashboardTemplates.pageNeedingPermissions(
+            [Permissions.canSetPermissions],
+            ModerationUsersTemplates.usersListWithFilter()
+        );
     }
 
     static usersListWithFilter() {
@@ -34,7 +27,6 @@ export class ModerationUsersTemplates {
                 offset: offset.value,
                 limit: 100
             });
-            console.log(res);
             if (res.data) {
                 users.value = res.data;
             }
@@ -65,6 +57,7 @@ export class ModerationUsersTemplates {
             GenericTemplates.tableHeaders([
                 { title: "Username" },
                 { title: "Display name" },
+                { title: "Permissions" },
             ]),
             create("tbody")
                 .children(
@@ -74,6 +67,9 @@ export class ModerationUsersTemplates {
     }
 
     static user(u: User) {
+        const permissionsOpen = signal(false);
+        const permissions = signal(u.permissions ?? []);
+
         return create("tr")
             .children(
                 create("td")
@@ -82,6 +78,57 @@ export class ModerationUsersTemplates {
                 create("td")
                     .text(u.displayname)
                     .build(),
+                create("td")
+                    .classes("relative")
+                    .children(
+                        FJSC.button({
+                            text: compute(p => p.length.toString(), permissions),
+                            onclick: () => permissionsOpen.value = !permissionsOpen.value,
+                            icon: { icon: "lock_open" },
+                        }),
+                        ifjs(permissionsOpen,
+                            create("div")
+                                .classes("popout-below", "flex-v", "padded", "rounded")
+                                .children(
+                                    ...Object.values(Permissions).map(p => {
+                                        const hasPermission = compute(up => up.some(upp => upp.name === p), permissions);
+
+                                        return create("div")
+                                            .classes("flex", "space-outwards")
+                                            .children(
+                                                FJSC.checkbox({
+                                                    text: p,
+                                                    checked: hasPermission,
+                                                    onchange: () => {
+                                                        const val = !hasPermission.value;
+                                                        Api.postAsync(ApiRoutes.setUserPermission, {
+                                                            permissionName: p,
+                                                            user_id: u.id,
+                                                            userHasPermission: val
+                                                        }).then(res => {
+                                                            if (res.code === 200) {
+                                                                if (val) {
+                                                                    permissions.value = [
+                                                                        ...permissions.value,
+                                                                        {
+                                                                            name: p,
+                                                                            id: -1,
+                                                                            created_at: new Date(),
+                                                                            updated_at: new Date(),
+                                                                            description: "",
+                                                                        }
+                                                                    ];
+                                                                } else {
+                                                                    permissions.value = permissions.value.filter(pm => pm.name !== p);
+                                                                }
+                                                            }
+                                                        })
+                                                    }
+                                                })
+                                            ).build();
+                                    }),
+                                ).build())
+                    ).build(),
             ).build()
     }
 }

@@ -4,6 +4,7 @@ import {Usersetting} from "./Usersetting.ts";
 import {Badge} from "./Badge.ts";
 import {Subscription} from "../finance/Subscription.ts";
 import {UserEmail} from "./UserEmail.ts";
+import {Permission} from "./Permission.ts";
 
 export interface User extends Record<string, any> {
     subscription?: Subscription;
@@ -12,6 +13,7 @@ export interface User extends Record<string, any> {
     userBadges?: UserBadge[];
     follows?: Follow[];
     following?: Follow[];
+    permissions?: Permission[];
     id: number;
     username: string;
     mfa_enabled: boolean;
@@ -19,8 +21,8 @@ export interface User extends Record<string, any> {
     password_hash: string;
     displayname: string;
     description: string;
-    activation: string|null;
-    password_token: string|null;
+    activation: string | null;
+    password_token: string | null;
     verified: boolean;
     verification_status: string;
     created_at: Date;
