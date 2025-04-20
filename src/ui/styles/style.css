@@ -74,7 +74,7 @@
     --fjsc-text-color: var(--color-5);
     --fjsc-error-color: var(--red);
 
-    --fjsc-interactive-background: var(--background-light-glass);
+    --fjsc-interactive-background: var(--color-6);
     --fjsc-interactive-background-hover: var(--color-3);
     --fjsc-interactive-background-active: var(--color-9);
     --fjsc-interactive-color: var(--color-5);
