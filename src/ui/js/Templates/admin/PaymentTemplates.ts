@@ -7,6 +7,8 @@ import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {GenericTemplates} from "../GenericTemplates.ts";
 import {PaymentHistory} from "../../Models/DbModels/finance/PaymentHistory.ts";
 import {InputType} from "../../../fjsc/src/Types.ts";
+import { Time } from "../../Classes/Helpers/Time.ts";
+import {currency} from "../../Classes/Helpers/Num.ts";
 
 export class PaymentTemplates {
     static paymentsPage() {
@@ -52,10 +54,18 @@ export class PaymentTemplates {
 
     static payment(p: PaymentHistory) {
         return create("div")
-            .classes("flex")
+            .classes("flex", "card", "space-outwards")
             .children(
+                create("div")
+                    .classes("flex-v", p.succeeded ? "positive" : "negative")
+                    .children(
+                        create("span")
+                            .text(currency(p.received, p.currency) + ` | ${p.payment_processor}`)
+                            .build(),
+                    ).build(),
                 create("span")
-                    .text(p.id)
+                    .classes("text-small")
+                    .text(Time.agoUpdating(new Date(p.received_at)))
                     .build(),
             ).build()
     }

@@ -966,6 +966,8 @@ export class GenericTemplates {
         }, results, localSearch);
         const filter = signal<Record<string, any>>({});
         filters ??= [];
+        skip.subscribe(() => load(filter.value));
+        filter.subscribe((f) => load(f));
 
         return create("div")
             .classes("flex-v")
