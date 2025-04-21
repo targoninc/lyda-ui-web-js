@@ -152,6 +152,7 @@ export class TrackTemplates {
                 await startCallback(track.id);
             }
         }
+        const isOwnTrack = compute(u => u.id === track.user_id, currentUser);
 
         return create("div")
             .classes("cover-container", "relative", "pointer", coverType)
@@ -159,17 +160,20 @@ export class TrackTemplates {
             .id(track.id)
             .children(
                 create("img")
-                    .classes("cover", "nopointer", "blurOnParentHover")
+                    .classes("cover", "blurOnParentHover")
                     .src(imageState)
                     .alt(track.title)
+                    .onclick(() => {
+                        Ui.showImageModal(imageState);
+                    })
                     .build(),
-                create("div")
+                ifjs(isOwnTrack, create("div")
                     .classes("hidden", coverType === "cover" ? "showOnParentHover" : "_", "centeredInParent", "flex")
                     .children(
                         GenericTemplates.deleteIconButton("delete-image-button", () => MediaActions.deleteMedia(MediaFileType.trackCover, track.id, imageState, coverLoading)),
                         GenericTemplates.uploadIconButton("replace-image-button", () => TrackActions.replaceCover(track.id, true, imageState, coverLoading)),
                         ifjs(coverLoading, GenericTemplates.loadingSpinner()),
-                    ).build(),
+                    ).build()),
                 ifjs(coverType !== "cover", create("div")
                     .classes("centeredInParent", "hidden", coverType !== "cover" ? "showOnParentHover" : "_")
                     .children(
