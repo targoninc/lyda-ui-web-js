@@ -1,16 +1,11 @@
-import {AnyElement, AnyNode, create, ifjs, nullElement} from "../../../fjsc/src/f2.ts";
+import {AnyElement, create, ifjs} from "../../../fjsc/src/f2.ts";
 import {navigate} from "../../Routing/Router.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {FJSC} from "../../../fjsc";
 import {GenericTemplates} from "../GenericTemplates.ts";
 import {permissions} from "../../state.ts";
-import {compute, signal} from "../../../fjsc/src/signals.ts";
+import {compute} from "../../../fjsc/src/signals.ts";
 import {Permissions} from "../../Enums/Permissions.ts";
-import {RoyaltyTemplates} from "./RoyaltyTemplates.ts";
-import {Api} from "../../Api/Api.ts";
-import {RoyaltyInfo} from "../../Models/RoyaltyInfo.ts";
-import {ApiRoutes} from "../../Api/ApiRoutes.ts";
-import {Permission} from "../../Models/DbModels/lyda/Permission.ts";
 
 export class DashboardTemplates {
     static dashboardPage() {
@@ -42,6 +37,11 @@ export class DashboardTemplates {
                             onclick: () => navigate(RoutePath.events),
                             icon: { icon: "manage_history" },
                         })),
+                        ifjs(hasPermission(Permissions.canViewPayments), FJSC.button({
+                            text: "Payments",
+                            onclick: () => navigate(RoutePath.payments),
+                            icon: { icon: "payments" },
+                        })),
                         ifjs(hasPermission(Permissions.canCalculateRoyalties), FJSC.button({
                             text: "Royalties",
                             onclick: () => navigate(RoutePath.royaltyManagement),
@@ -54,13 +54,6 @@ export class DashboardTemplates {
                         })),
                     ).build())
             ).build();
-    }
-
-    static royaltyManagementPage() {
-        return DashboardTemplates.pageNeedingPermissions(
-            [Permissions.canCalculateRoyalties],
-            RoyaltyTemplates.royaltyManagementPage()
-        );
     }
 
     static pageNeedingPermissions(needed: Permissions[], page: AnyElement) {

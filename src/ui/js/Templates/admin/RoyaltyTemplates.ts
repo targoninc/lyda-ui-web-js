@@ -18,6 +18,7 @@ import {UserSettings} from "../../Enums/UserSettings.ts";
 import {currency} from "../../Classes/Helpers/Num.ts";
 import {StatisticTemplates, usedColors} from "../StatisticTemplates.ts";
 import {LogTemplates} from "./LogTemplates.ts";
+import {DashboardTemplates} from "./DashboardTemplates.ts";
 
 export class RoyaltyTemplates {
     static royaltyCalculator(royaltyInfo: RoyaltyInfo) {
@@ -125,7 +126,7 @@ export class RoyaltyTemplates {
             ).build();
     }
 
-    static royaltyManagementPage() {
+    static royaltyManagement() {
         const royaltyInfo = signal<any>(null);
         Api.getAsync<RoyaltyInfo>(ApiRoutes.getRoyaltyInfo).then(res => {
             if (res.data) {
@@ -158,5 +159,12 @@ export class RoyaltyTemplates {
                         RoyaltyTemplates.royaltyCalculator(royaltyInfo)
                     ).build())
             ).build();
+    }
+
+    static royaltyManagementPage() {
+        return DashboardTemplates.pageNeedingPermissions(
+            [Permissions.canCalculateRoyalties],
+            RoyaltyTemplates.royaltyManagement()
+        );
     }
 }

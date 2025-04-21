@@ -10,7 +10,7 @@ import {
     create,
     HtmlPropertyValue,
     ifjs,
-    signalMap,
+    signalMap, SignalMapCallback,
     StringOrSignal,
     TypeOrSignal
 } from "../../fjsc/src/f2.ts";
@@ -30,6 +30,8 @@ import {dayFromValue} from "../Classes/Helpers/Date.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
 import {RoutePath} from "../Routing/routes.ts";
 import {AuthActions} from "../Actions/AuthActions.ts";
+import {PaypalWebhook} from "../Models/DbModels/finance/PaypalWebhook.ts";
+import {Filter} from "../Models/Filter.ts";
 
 export class GenericTemplates {
     static icon(icon: StringOrSignal, adaptive = false, classes: StringOrSignal[] = [], title = "", onclick: Function | undefined = undefined) {
@@ -950,6 +952,80 @@ export class GenericTemplates {
 
     static giftIcon(title = "") {
         return GenericTemplates.icon("featured_seasonal_and_gifts", true, ["gift-icon"], title);
+    }
+
+    static searchWithFilter<T>(results: Signal<T[]>, entryFunction: SignalMapCallback<T>, skip: Signal<number>,
+                               loading: Signal<boolean>, load: (f: Record<string, any>) => void, filters?: Filter[], docsLink?: StringOrSignal) {
+        const localSearch = signal("");
+        const filteredResults = compute((r, f) => {
+            if (!r) {
+                console.log(r);
+                return [];
+            }
+            return r.filter(e => JSON.stringify(e).includes(f));
+        }, results, localSearch);
+        const filter = signal<Record<string, any>>({});
+        filters ??= [];
+
+        return create("div")
+            .classes("flex-v")
+            .children(
+                create("div")
+                    .classes("flex", "align-children", "fixed-bar")
+                    .children(
+                        FJSC.button({
+                            text: "Refresh",
+                            icon: {icon: "refresh"},
+                            classes: ["positive"],
+                            disabled: loading,
+                            onclick: () => load(filter.value)
+                        }),
+                        FJSC.button({
+                            text: "Previous page",
+                            icon: {icon: "skip_previous"},
+                            disabled: compute((l, s) => l || s <= 0, loading, skip),
+                            onclick: () => {
+                                skip.value = Math.max(0, skip.value - 100);
+                            }
+                        }),
+                        FJSC.button({
+                            text: "Next page",
+                            icon: {icon: "skip_next"},
+                            disabled: compute((l, e) => l || e.length < 100, loading, results),
+                            onclick: () => {
+                                skip.value = skip.value + 100;
+                            }
+                        }),
+                        FJSC.input<string>({
+                            type: InputType.text,
+                            name: "filter",
+                            placeholder: "Filter",
+                            value: localSearch,
+                            onchange: (newValue: string) => localSearch.value = newValue,
+                        }),
+                        ...filters.map(f => {
+                            const filterValue = compute(fv => fv[f.key] ?? f.default, filter);
+
+                            return FJSC.input({
+                                type: f.type,
+                                name: f.key,
+                                placeholder: f.name,
+                                value: filterValue,
+                                onchange: (newValue: string) => {
+                                    filter.value = {
+                                        ...filter.value,
+                                        [f.key]: newValue,
+                                    }
+                                },
+                            });
+                        }),
+                        create("span")
+                            .text(compute(e => e.length + " events", results))
+                            .build(),
+                        ifjs(docsLink, GenericTemplates.inlineLink(docsLink ?? "", "Docs", true)),
+                    ).build(),
+                signalMap(filteredResults, create("div").classes("flex-v", "fixed-bar-content"), entryFunction)
+            ).build();
     }
 
     static inlineLink(link: Function|StringOrSignal, text: HtmlPropertyValue, newTab = true) {

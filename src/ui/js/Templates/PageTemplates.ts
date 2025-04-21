@@ -17,6 +17,8 @@ import {DashboardTemplates} from "./admin/DashboardTemplates.ts";
 import {ModerationUsersTemplates} from "./admin/ModerationUsersTemplates.ts";
 import {ModerationCommentsTemplates} from "./admin/ModerationCommentsTemplates.ts";
 import {LogTemplates} from "./admin/LogTemplates.ts";
+import {RoyaltyTemplates} from "./admin/RoyaltyTemplates.ts";
+import {PaymentTemplates} from "./admin/PaymentTemplates.ts";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, Function> = {
@@ -44,7 +46,8 @@ export class PageTemplates {
 
         // admin pages
         [RoutePath.admin]: DashboardTemplates.dashboardPage,
-        [RoutePath.royaltyManagement]: DashboardTemplates.royaltyManagementPage,
+        [RoutePath.royaltyManagement]: RoyaltyTemplates.royaltyManagementPage,
+        [RoutePath.payments]: PaymentTemplates.paymentsPage,
         [RoutePath.moderation]: ModerationCommentsTemplates.commentModerationPage,
         [RoutePath.logs]: LogTemplates.logsPage,
         [RoutePath.actionLogs]: this.actionLogsPage,

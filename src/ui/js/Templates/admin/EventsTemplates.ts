@@ -24,77 +24,21 @@ export class EventsTemplates {
     private static eventsPageInternal() {
         const events = signal<PaypalWebhook[]>([]);
         const skip = signal(0);
-        Api.getAsync<PaypalWebhook[]>(ApiRoutes.getEvents, {
-            skip: skip.value
-        }).then(e => events.value = e.data);
-        const loading = signal(false);
-        skip.subscribe(s => {
+        const load = (filter?: any) => {
             loading.value = true;
             Api.getAsync<PaypalWebhook[]>(ApiRoutes.getEvents, {
-                skip: s
+                skip: skip.value,
+                ...(filter ?? {})
             }).then(e => events.value = e.data)
                 .finally(() => loading.value = false);
-        });
+        }
+        const loading = signal(false);
+        load();
 
         return create("div")
             .classes("flex-v")
             .children(
-                EventsTemplates.eventsList(events, skip, loading)
-            ).build();
-    }
-
-    static eventsList(events: Signal<PaypalWebhook[]>, skip: Signal<number>, loading: Signal<boolean>) {
-        const docsLink = "https://developer.paypal.com/api/rest/webhooks/event-names/";
-        const filter = signal("");
-        const filteredEvents = compute((e, f) => e.filter(e => JSON.stringify(e).includes(f)), events, filter);
-
-        return create("div")
-            .classes("flex-v")
-            .children(
-                create("div")
-                    .classes("flex", "align-children", "fixed-bar")
-                    .children(
-                        FJSC.button({
-                            text: "Refresh",
-                            icon: {icon: "refresh"},
-                            classes: ["positive"],
-                            disabled: loading,
-                            onclick: async () => {
-                                loading.value = true;
-                                const newEvents = await Api.getAsync<PaypalWebhook[]>(ApiRoutes.getEvents);
-                                loading.value = false;
-                                events.value = newEvents.data;
-                            }
-                        }),
-                        FJSC.button({
-                            text: "Previous page",
-                            icon: {icon: "skip_previous"},
-                            disabled: compute((l, s) => l || s <= 0, loading, skip),
-                            onclick: () => {
-                                skip.value = Math.max(0, skip.value - 100);
-                            }
-                        }),
-                        FJSC.button({
-                            text: "Next page",
-                            icon: {icon: "skip_next"},
-                            disabled: compute((l, e) => l || e.length < 100, loading, events),
-                            onclick: () => {
-                                skip.value = skip.value + 100;
-                            }
-                        }),
-                        FJSC.input<string>({
-                            type: InputType.text,
-                            name: "filter",
-                            placeholder: "Filter",
-                            value: filter,
-                            onchange: (newValue: string) => filter.value = newValue,
-                        }),
-                        create("span")
-                            .text(compute(e => e.length + " events", events))
-                            .build(),
-                        GenericTemplates.inlineLink(docsLink, "PayPal Docs", true),
-                    ).build(),
-                signalMap(filteredEvents, create("div").classes("flex-v", "fixed-bar-content"), (event: PaypalWebhook) => EventsTemplates.event(event))
+                GenericTemplates.searchWithFilter(events, EventsTemplates.event, skip, loading, load, [], "https://developer.paypal.com/api/rest/webhooks/event-names/"),
             ).build();
     }
 
