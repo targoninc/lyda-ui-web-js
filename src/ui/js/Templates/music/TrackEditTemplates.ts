@@ -54,7 +54,6 @@ export class TrackEditTemplates {
         const uploadInfo = signal<UploadInfo[]>([]);
 
         return create("div")
-            .classes("card")
             .children(
                 create("progress")
                     .classes("progress")
@@ -71,7 +70,7 @@ export class TrackEditTemplates {
                     .classes("flex-v")
                     .children(
                         create("h3")
-                            .text("Upload a track")
+                            .text("Upload")
                             .build(),
                         TrackEditTemplates.upDownButtons(state, true),
                         TrackEditTemplates.trackUpload(state, errorSections, errorFields),
