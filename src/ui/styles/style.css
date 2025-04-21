@@ -288,10 +288,10 @@ footer {
     position: relative;
     padding: var(--page-padding);
     overflow: auto;
-    margin: 0 auto;
     max-width: var(--breakpoint-big);
     background: var(--color-4);
-    min-height: 150%;
+    min-height: 100%;
+    margin: 0 auto 50%;
 }
 
 .content {
