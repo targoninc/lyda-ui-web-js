@@ -236,6 +236,10 @@ export class PlayerTemplates {
             const tasks = queue.map(id => PlayManager.getTrackData(id));
             trackList.value = await Promise.all(tasks);
         });
+        const tasks = manualQueue.value.map(id => PlayManager.getTrackData(id));
+        Promise.all(tasks).then(tracks => {
+            trackList.value = tracks;
+        });
         const queueComponentMore = compute((q: any[]) => QueueTemplates.queue(q), trackList);
         const queueComponent = compute((q: any[]) => QueueTemplates.queue(q), trackList);
 
