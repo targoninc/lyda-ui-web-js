@@ -363,6 +363,7 @@ label {
     top: 50%;
     left: 0;
     transform: translateY(-50%);
+    border: 1px solid var(--color-7);
 }
 
 .audio-player-scrubbar-time {

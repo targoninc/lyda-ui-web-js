@@ -25,6 +25,9 @@
     --blue: #1a91f8;
     --blue-dark: #316fd1;
 
+    --background-glass: linear-gradient(-45deg, rgba(var(--color-4-rgb), var(--glass-transparency)), rgba(var(--color-3-rgb), var(--glass-transparency)));
+    --background-light-glass: rgba(var(--color-3-rgb), var(--glass-transparency));
+
     --fjsc-interactive-background: var(--color-3);
     --fjsc-interactive-color: var(--color-5);
     --fjsc-interactive-color-active: var(--color-5);
