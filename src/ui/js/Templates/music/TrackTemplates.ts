@@ -197,7 +197,7 @@ export class TrackTemplates {
             .build();
     }
 
-    static async trackList(tracksState: Signal<Track[]>, pageState: Signal<number>, type: string, filterState: Signal<string>, loadingState: Signal<boolean>) {
+    static async trackList(tracksState: Signal<Track[]>, pageState: Signal<number>, type: string, filterState: Signal<string>) {
         const trackList = tracksState.value.map(track => TrackTemplates.feedTrack(track));
         const trackListContainer = signal(TrackTemplates.#trackList(trackList));
         tracksState.onUpdate = async (newTracks) => {
@@ -208,39 +208,19 @@ export class TrackTemplates {
         return create("div")
             .classes("flex-v")
             .children(
-                type === "following" ? TrackTemplates.feedFilters(filterState, loadingState) : null,
+                type === "following" ? TrackTemplates.feedFilters(filterState) : null,
                 TrackTemplates.paginationControls(pageState),
                 trackListContainer,
                 TrackTemplates.paginationControls(pageState)
             ).build();
     }
 
-    static feedFilters(filterState: Signal<string>, loadingState: Signal<boolean>) {
-        const filterMap: Record<string, Partial<PillOption>> = {
-            all: {
-                text: "All",
-                icon: "filter_list_off"
-            },
-            originals: {
-                text: "Originals",
-                icon: "draw"
-            },
-            reposts: {
-                text: "Reposts",
-                icon: "share"
-            },
-        };
-        const options = Object.keys(filterMap).map(k => {
-            return {
-                ...filterMap[k],
-                value: k,
-                onclick: () => {
-                    filterState.value = k;
-                }
-            };
-        }) as PillOption[];
+    static feedFilters(filterState: Signal<string>) {
+        const tabs = ["All", "Originals", "Reposts"];
 
-        return GenericTemplates.pills(options, filterState, [], loadingState);
+        return GenericTemplates.tabSelector(tabs, (i: number) => {
+            filterState.value = tabs[i].toLowerCase();
+        }, 0);
     }
 
     static #trackList(trackList: any[]) {

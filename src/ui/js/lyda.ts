@@ -225,7 +225,7 @@ export class Lyda {
         };
         pageState.onUpdate = update;
         filterState.onUpdate = update;
-        element.appendChild(await TrackTemplates.trackList(tracksState, pageState, type, filterState, loadingState));
+        element.appendChild(await TrackTemplates.trackList(tracksState, pageState, type, filterState));
         pageState.value = 1;
     }
 }
