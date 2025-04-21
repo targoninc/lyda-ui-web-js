@@ -29,6 +29,7 @@ import {NotificationType} from "../Enums/NotificationType.ts";
 import {dayFromValue} from "../Classes/Helpers/Date.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
 import {RoutePath} from "../Routing/routes.ts";
+import {AuthActions} from "../Actions/AuthActions.ts";
 
 export class GenericTemplates {
     static icon(icon: StringOrSignal, adaptive = false, classes: StringOrSignal[] = [], title = "", onclick: Function | undefined = undefined) {
@@ -122,6 +123,17 @@ export class GenericTemplates {
                     .text(text)
                     .build(),
             ).build();
+    }
+
+    static logoutButton() {
+        return FJSC.button({
+            text: "Log out",
+            classes: ["hideOnSmallBreakpoint", "negative"],
+            icon: { icon: "logout" },
+            onclick: async () => {
+                await AuthActions.logOut();
+            }
+        });
     }
 
     static lock() {

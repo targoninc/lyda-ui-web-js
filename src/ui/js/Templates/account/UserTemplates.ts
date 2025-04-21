@@ -240,28 +240,37 @@ export class UserTemplates {
         }
 
         return create("div")
-            .classes("flex", "fullWidth")
+            .classes("flex", "fullWidth", "space-outwards")
             .children(
-                GenericTemplates.newTrackButton(["hideOnSmallBreakpoint"]),
-                GenericTemplates.newAlbumButton(["hideOnSmallBreakpoint"]),
-                GenericTemplates.newPlaylistButton(["hideOnSmallBreakpoint"]),
-                FJSC.button({
-                    classes: ["showOnSmallBreakpoint", "positive"],
-                    text: "New",
-                    icon: { icon: "add" },
-                    onclick: UiActions.openCreateMenu
-                }),
-                FJSC.button({
-                    text: "Settings",
-                    icon: { icon: "settings" },
-                    onclick: () => navigate(RoutePath.settings)
-                }),
-                FJSC.button({
-                    text: "Statistics",
-                    icon: { icon: "finance" },
-                    onclick: () => navigate(RoutePath.statistics)
-                }),
-                UserTemplates.unapprovedTracksLink(),
+                create("div")
+                    .classes("flex")
+                    .children(
+                        GenericTemplates.newTrackButton(["hideOnSmallBreakpoint"]),
+                        GenericTemplates.newAlbumButton(["hideOnSmallBreakpoint"]),
+                        GenericTemplates.newPlaylistButton(["hideOnSmallBreakpoint"]),
+                        FJSC.button({
+                            classes: ["showOnSmallBreakpoint", "positive"],
+                            text: "New",
+                            icon: { icon: "add" },
+                            onclick: UiActions.openCreateMenu
+                        }),
+                        FJSC.button({
+                            text: "Statistics",
+                            icon: { icon: "finance" },
+                            onclick: () => navigate(RoutePath.statistics)
+                        }),
+                        UserTemplates.unapprovedTracksLink(),
+                    ).build(),
+                create("div")
+                    .classes("flex")
+                    .children(
+                        FJSC.button({
+                            text: "Settings",
+                            icon: { icon: "settings" },
+                            onclick: () => navigate(RoutePath.settings)
+                        }),
+                        GenericTemplates.logoutButton(),
+                    ).build(),
             ).build();
     }
 

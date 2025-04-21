@@ -86,14 +86,7 @@ export class SettingsTemplates {
                 create("h2")
                     .text("Account")
                     .build(),
-                FJSC.button({
-                    text: "Log out",
-                    classes: ["negative", "showOnSmallBreakpoint"],
-                    icon: {icon: "logout"},
-                    onclick: async () => {
-                        await AuthActions.logOut();
-                    }
-                }),
+                GenericTemplates.logoutButton(),
                 create("p")
                     .text("Change your account settings here.")
                     .build(),

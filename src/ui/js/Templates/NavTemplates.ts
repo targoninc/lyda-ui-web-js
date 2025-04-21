@@ -146,14 +146,6 @@ export class NavTemplates {
                 }),
                 NavTemplates.notifications(),
                 UserTemplates.userWidget(currentUser, true, [], [], UserWidgetContext.nav),
-                FJSC.button({
-                    text: "Log out",
-                    classes: ["hideOnSmallBreakpoint", "negative"],
-                    icon: { icon: "logout" },
-                    onclick: async () => {
-                        await AuthActions.logOut();
-                    }
-                }),
             ).build();
     }
 
