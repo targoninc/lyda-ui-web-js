@@ -1020,7 +1020,7 @@ export class GenericTemplates {
                             });
                         }),
                         create("span")
-                            .text(compute(e => e.length + " events", results))
+                            .text(compute(e => e.length + " results", results))
                             .build(),
                         ifjs(docsLink, GenericTemplates.inlineLink(docsLink ?? "", "Docs", true)),
                     ).build(),

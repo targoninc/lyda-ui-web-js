@@ -233,8 +233,8 @@ export class StatisticTemplates {
                                     }, () => {
                                     }, Icons.WARNING);
                                 }, [], [visibilityClass, "secondary"]),
-                                GenericTemplates.action(Icons.PAY, "Request payment", "requestPayment", async () => {
-                                    const res = await Api.postAsync(ApiRoutes.requestPayment);
+                                GenericTemplates.action(Icons.PAY, "Request payout", "requestPayout", async () => {
+                                    const res = await Api.postAsync(ApiRoutes.requestPayout);
                                     if (res.code !== 200) {
                                         notify(getErrorMessage(res), NotificationType.error);
                                         return;
