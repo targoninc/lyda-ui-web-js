@@ -208,8 +208,12 @@ export class TrackTemplates {
         return create("div")
             .classes("flex-v")
             .children(
-                type === "following" ? TrackTemplates.feedFilters(filterState) : null,
-                TrackTemplates.paginationControls(pageState),
+                create("div")
+                    .classes("flex", "space-outwards")
+                    .children(
+                        TrackTemplates.paginationControls(pageState),
+                        type === "following" ? TrackTemplates.feedFilters(filterState) : null,
+                    ).build(),
                 trackListContainer,
                 TrackTemplates.paginationControls(pageState)
             ).build();
