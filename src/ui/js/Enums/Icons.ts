@@ -244,8 +244,4 @@ export class Icons {
     static get DROPDOWN() {
         return Icons.ICON("dropdown");
     }
-
-    static get GIFT() {
-        return Icons.ICON("gift");
-    }
 }

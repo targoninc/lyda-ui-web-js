@@ -949,11 +949,7 @@ export class GenericTemplates {
     }
 
     static giftIcon(title = "") {
-        return create("img")
-            .classes("gift-icon", "inline-icon", "svg", "nopointer")
-            .title(title)
-            .src(Icons.GIFT)
-            .build();
+        return GenericTemplates.icon("featured_seasonal_and_gifts", true, ["gift-icon"], title);
     }
 
     static inlineLink(link: Function|StringOrSignal, text: HtmlPropertyValue, newTab = true) {

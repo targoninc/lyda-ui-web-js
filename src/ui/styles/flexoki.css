@@ -16,10 +16,10 @@
     --color-6-rgb: 64, 62, 60;
     --color-7: #6F6E69;
     --color-7-rgb: 111, 110, 105;
-    --green: #879A39;
-    --color-8-rgb: 135, 154, 57;
-    --green-dark: #66800B;
-    --color-8-dark-rgb: 102, 128, 11;
+    --green: #99b238;
+    --color-8-rgb: 153, 178, 56;
+    --green-dark: #7a9615;
+    --color-8-dark-rgb: 122, 150, 21;
     --filter-8: brightness(0) saturate(100%) invert(29%) sepia(96%) saturate(1386%) hue-rotate(53deg) brightness(107%) contrast(91%);
     --color-9: #DAD8CE;
     --blue: #1a91f8;
