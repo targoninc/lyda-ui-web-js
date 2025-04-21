@@ -60,6 +60,10 @@ export class PlayerTemplates {
                         }, async () => {
                             PlayManager.togglePlayAsync(track.id).then();
                         }, "Play/Pause"),
+                        GenericTemplates.roundIconButton({
+                            icon: "skip_next",
+                            adaptive: true,
+                        }, PlayManager.playNextFromQueues, "Next"),
                         PlayerTemplates.loopModeButton(),
                         PlayerTemplates.trackScrubbar(track, bufferPercent, positionPercent),
                         PlayerTemplates.trackTime(track),

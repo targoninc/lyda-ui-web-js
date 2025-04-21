@@ -236,9 +236,13 @@ nav, footer {
     padding: var(--page-padding);
 }
 
-nav, footer, .fixed-bar, .modal-overlay, .modal {
+nav, footer, .fixed-bar, .modal-overlay, .modal, .card {
     background: var(--background-glass);
     backdrop-filter: saturate(180%) blur(10px);
+}
+
+.card {
+    background: var(--background-light-glass);
 }
 
 footer:empty {
@@ -576,10 +580,6 @@ button.unread:before {
 
 .border-card {
     background: var(--color-6);
-}
-
-.card {
-    background: var(--color-3);
 }
 
 .card.active {

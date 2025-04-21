@@ -27,7 +27,7 @@ import {LoopMode} from "../Enums/LoopMode.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class PlayManager {
-    static async playCheck(track: any) {
+    static async playCheck(track: Track) {
         if (PlayManager.isPlaying(track.id)) {
             const currentTime = PlayManager.getCurrentTime(track.id);
 
@@ -37,7 +37,7 @@ export class PlayManager {
                     await PlayManager.togglePlayAsync(track.id);
                     await PlayManager.scrubTo(track.id, 0);
                 } else {
-                    await this.playNextFromQueues(track);
+                    await this.playNextFromQueues();
                 }
                 TrackActions.savePlayAfterTimeIf(track.id, 5, () => track.id === currentTrackId.value && PlayManager.isPlaying(track.id));
             }
@@ -46,7 +46,7 @@ export class PlayManager {
         }
     }
 
-    static async playNextFromQueues(currentTrack: any) {
+    static async playNextFromQueues() {
         const queue = QueueManager.getManualQueue();
         const nextTrackId = queue[0];
         if (nextTrackId !== undefined) {
@@ -56,7 +56,7 @@ export class PlayManager {
             const loopingContext = PlayManager.isLoopingContext();
             const contextQueue = QueueManager.getContextQueue();
             if (contextQueue.length > 0) {
-                let nextTrackId = QueueManager.getNextTrackInContextQueue(currentTrack.id);
+                let nextTrackId = QueueManager.getNextTrackInContextQueue(currentTrackId.value);
                 if (nextTrackId !== undefined && nextTrackId !== null) {
                     await PlayManager.safeStartAsync(nextTrackId);
                 } else {
