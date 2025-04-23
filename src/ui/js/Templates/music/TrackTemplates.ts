@@ -365,7 +365,7 @@ export class TrackTemplates {
 
         return item.children(
             create("div")
-                .classes("list-track", "flex", "padded", "rounded", "fullWidth", "card", ...playingClasses)
+                .classes("feed-track", "flex", "padded", "rounded", "fullWidth", "card", ...playingClasses)
                 .styles("max-width", "100%")
                 .ondblclick(async () => {
                     if (!startCallback) {

@@ -33,7 +33,8 @@ export class MusicTemplates {
             .classes("flex")
             .children(
                 create("div")
-                    .classes("list-track", "flex", "padded", "rounded", "fullWidth", "card", currentTrackId.value === item.id ? "playing" : "_")
+                    .classes(`feed-${type}`, "flex", "padded", "rounded", "fullWidth", "card", currentTrackId.value === item.id ? "playing" : "_")
+                    .id(item.id)
                     .styles("max-width", "100%")
                     .children(
                         MusicTemplates.cover(type, item, "inline-cover"),

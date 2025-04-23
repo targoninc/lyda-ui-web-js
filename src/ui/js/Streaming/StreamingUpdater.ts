@@ -25,7 +25,7 @@ export class StreamingUpdater {
         for (const playingElement of playingElements) {
             playingElement.classList.remove("playing");
         }
-        const listTracks = document.querySelectorAll(".list-track[track_id='" + currentTrackId.value + "']");
+        const listTracks = document.querySelectorAll(".feed-track[id='" + currentTrackId.value + "']");
         for (const listTrack of listTracks) {
             listTrack.classList.add("playing");
         }

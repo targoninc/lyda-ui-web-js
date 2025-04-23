@@ -732,11 +732,11 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     background: var(--green-dark);
 }
 
-.list-track {
+.feed-track {
     border: 1px solid var(--color-7);
 }
 
-.list-track.playing, .inlineTrack.playing, .track-card.playing {
+.feed-track.playing, .inlineTrack.playing, .track-card.playing {
     border: 1px solid var(--green);
     animation: pulse-glow 4s ease infinite;
 }
