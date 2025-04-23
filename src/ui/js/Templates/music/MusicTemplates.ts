@@ -28,12 +28,13 @@ export class MusicTemplates {
         if (isPrivate) {
             icons.push(GenericTemplates.lock());
         }
+        const playingClass = compute((id): string => id === item.id ? "playing" : "_", currentTrackId);
 
         return create("div")
             .classes("flex")
             .children(
                 create("div")
-                    .classes(`feed-${type}`, "flex", "padded", "rounded", "fullWidth", "card", currentTrackId.value === item.id ? "playing" : "_")
+                    .classes(`feed-${type}`, "flex", "padded", "rounded", "fullWidth", "card", playingClass)
                     .id(item.id)
                     .styles("max-width", "100%")
                     .children(
@@ -51,6 +52,7 @@ export class MusicTemplates {
                                                     .classes("flex")
                                                     .children(
                                                         TrackTemplates.title(item.title, item.id, icons),
+                                                        item.collab ? TrackTemplates.collabIndicator(item.collab) : null,
                                                         item.repost ? TrackTemplates.repostIndicator(item.repost) : null,
                                                     ).build(),
                                                 create("div")

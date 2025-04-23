@@ -149,7 +149,7 @@ export class Lyda {
                     element.appendChild(UserTemplates.notPublicLibrary(name));
                     return;
                 }
-                const page = UserTemplates.libraryPage(library.albums, library.playlists, library.tracks, user);
+                const page = UserTemplates.libraryPage(library.albums, library.playlists, library.tracks);
                 element.appendChild(page);
                 break;
             case "actionLogs":

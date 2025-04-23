@@ -42,67 +42,6 @@ import {ItemType} from "../../Enums/ItemType.ts";
 import {MusicTemplates} from "./MusicTemplates.ts";
 
 export class TrackTemplates {
-    static trackCard(track: Track, profileId: number) {
-        const icons = [];
-        const isPrivate = track.visibility === "private";
-        if (isPrivate) {
-            icons.push(GenericTemplates.lock());
-        }
-        if (!track.collaborators) {
-            throw new Error(`Track ${track.id} has no collaborators`);
-        }
-        if (!track.user) {
-            throw new Error(`Track ${track.id} has no user`);
-        }
-        if (!track.likes) {
-            throw new Error(`Track ${track.id} has no likes`);
-        }
-        if (!track.reposts) {
-            throw new Error(`Track ${track.id} has no reposts`);
-        }
-        if (!track.comments) {
-            throw new Error(`Track ${track.id} has no comments`);
-        }
-        const collab = track.collaborators!.find((collab: TrackCollaborator) => collab.user_id === profileId);
-        const avatarState = signal(Images.DEFAULT_AVATAR);
-        if (track.user.has_avatar) {
-            avatarState.value = Util.getUserAvatar(track.user_id);
-        }
-
-        return create("div")
-            .classes("track-card", "noflexwrap", "small-gap", "padded", "flex-v", currentTrackId.value === track.id ? "playing" : "_")
-            .attributes("track_id", track.id)
-            .children(
-                create("div")
-                    .classes("flex")
-                    .children(
-                        TrackTemplates.title(track.title, track.id, icons),
-                        collab ? TrackTemplates.collabIndicator(collab) : null,
-                    ).build(),
-                create("div")
-                    .classes("flex", "noflexwrap")
-                    .children(
-                        TrackTemplates.trackCover(track, "card-cover"),
-                        create("div")
-                            .classes("flex-v", "small-gap")
-                            .children(
-                                UserTemplates.userWidget(track.user, Util.arrayPropertyMatchesUser(track.user.follows ?? [], "following_user_id"), [], [], UserWidgetContext.card),
-                                create("span")
-                                    .classes("date", "text-small", "nopointer", "color-dim")
-                                    .text(Time.ago(track.release_date ?? track.created_at))
-                                    .build(),
-                                create("div")
-                                    .classes("flex")
-                                    .children(
-                                        StatisticsTemplates.likesIndicator(ItemType.track, track.id, track.likes.length,
-                                            Util.arrayPropertyMatchesUser(track.likes, "user_id")),
-                                        isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, Util.arrayPropertyMatchesUser(track.reposts, "user_id")),
-                                    ).build()
-                            ).build(),
-                    ).build(),
-            ).build();
-    }
-
     static collabIndicator(collab: TrackCollaborator): any {
         return create("div")
             .classes("pill", "padded-inline", "flex", "rounded-max", "bordered")
@@ -190,7 +129,7 @@ export class TrackTemplates {
 
     static trackCardsContainer(children: AnyNode[]) {
         return create("div")
-            .classes("profileContent", "tracks", "flex")
+            .classes("profileContent", "tracks", "flex-v")
             .children(...children)
             .build();
     }

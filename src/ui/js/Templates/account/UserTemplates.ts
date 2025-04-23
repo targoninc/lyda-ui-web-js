@@ -39,6 +39,8 @@ import {Ui} from "../../Classes/Ui.ts";
 import {MediaActions} from "../../Actions/MediaActions.ts";
 import {MediaFileType} from "../../Enums/MediaFileType.ts";
 import {RoutePath} from "../../Routing/routes.ts";
+import {MusicTemplates} from "../music/MusicTemplates.ts";
+import {ItemType} from "../../Enums/ItemType.ts";
 
 export class UserTemplates {
     static userWidget(user: User|Signal<User|null>, following: boolean|Signal<boolean>, extraAttributes: HtmlPropertyValue[] = [], extraClasses: StringOrSignal[] = [], context: UserWidgetContext = UserWidgetContext.unknown) {
@@ -212,12 +214,15 @@ export class UserTemplates {
             .build();
     }
 
-    static trackCards(tracks: Track[], profileId: number, isOwnProfile: boolean) {
+    static trackCards(tracks: Track[], user: User, isOwnProfile: boolean) {
         let children = [];
         if (tracks.length === 0) {
             return TrackTemplates.noTracksUploadedYet(isOwnProfile);
         } else {
-            children = tracks.map(track => TrackTemplates.trackCard(track, profileId));
+            children = tracks.map(track => MusicTemplates.feedEntry(ItemType.track, {
+                ...track,
+                user
+            }));
         }
 
         return TrackTemplates.trackCardsContainer(children);
@@ -501,10 +506,10 @@ export class UserTemplates {
         return PlaylistTemplates.playlistCardsContainer(children);
     }
 
-    static libraryPage(albums: Album[], playlists: Playlist[], tracks: Track[], user: User) {
+    static libraryPage(albums: Album[], playlists: Playlist[], tracks: Track[]) {
         const container = create("div").build();
 
-        const tracksContainer = UserTemplates.libraryTracks(tracks, user);
+        const tracksContainer = UserTemplates.libraryTracks(tracks);
         const albumsContainer = UserTemplates.libraryAlbums(albums);
         const playlistsContainer = UserTemplates.libraryPlaylists(playlists);
 
@@ -548,7 +553,7 @@ export class UserTemplates {
         return template;
     }
 
-    static libraryTracks(tracks: Track[], user: User) {
+    static libraryTracks(tracks: Track[]) {
         const template = signal(create("div").build());
         const update = (tracks: Track[]) => {
             let children;
@@ -559,7 +564,7 @@ export class UserTemplates {
                         .build()
                 ];
             } else {
-                children = tracks.map((track: Track) => TrackTemplates.trackCard(track, user.id));
+                children = tracks.map((track: Track) => MusicTemplates.feedEntry(ItemType.track, track));
             }
 
             template.value = TrackTemplates.trackCardsContainer(children);

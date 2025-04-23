@@ -29,6 +29,7 @@ export class ProfilePage {
             });
         }, 0);
         container.append(tabSelector, tracksContainer, albumsContainer, playlistsContainer, repostsContainer);
+        console.log(user);
         ProfilePage.addAlbumsAsync(albumsContainer, user, isOwnProfile).then();
         ProfilePage.addTracksAsync(tracksContainer, user, isOwnProfile).then();
         ProfilePage.addPlaylistsAsync(playlistsContainer, user, isOwnProfile).then();
@@ -42,7 +43,7 @@ export class ProfilePage {
             return;
         }
         const tracks = res.data;
-        const trackCards = UserTemplates.trackCards(tracks, user.id, isOwnProfile);
+        const trackCards = UserTemplates.trackCards(tracks, user, isOwnProfile);
         element.innerHTML = "";
         element.appendChild(trackCards);
     }
@@ -84,7 +85,7 @@ export class ProfilePage {
             return;
         }
         const reposts = res.data;
-        const repostCards = UserTemplates.trackCards(reposts, user.id, isOwnProfile);
+        const repostCards = UserTemplates.trackCards(reposts, user, isOwnProfile);
         element.innerHTML = "";
         element.appendChild(repostCards);
     }

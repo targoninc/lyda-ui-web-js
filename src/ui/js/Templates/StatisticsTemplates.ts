@@ -5,7 +5,7 @@ import {AlbumActions} from "../Actions/AlbumActions.ts";
 import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
-import {create, StringOrSignal, TypeOrSignal} from "../../fjsc/src/f2.ts";
+import {create, nullElement, StringOrSignal, TypeOrSignal} from "../../fjsc/src/f2.ts";
 import {FJSC} from "../../fjsc";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
@@ -83,10 +83,15 @@ export class StatisticsTemplates {
 
         const itemsList = items.map(item => {
             const avatar = signal(Images.DEFAULT_AVATAR);
+
+            if (!item.user) {
+                return nullElement();
+            }
+
             if (item.user.has_avatar) {
                 avatar.value = Util.getUserAvatar(item.user_id);
             }
-            return UserTemplates.userWidget(item.user, Util.arrayPropertyMatchesUser(item.user.follows, "following_user_id"), [], [], UserWidgetContext.list);
+            return UserTemplates.userWidget(item.user, Util.arrayPropertyMatchesUser(item.user.follows ?? [], "following_user_id"), [], [], UserWidgetContext.list);
         });
 
         return create("div")
