@@ -26,6 +26,7 @@ import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {PageTemplates} from "../PageTemplates.ts";
 import {ListTrack} from "../../Models/ListTrack.ts";
 import {RoutePath} from "../../Routing/routes.ts";
+import {ItemType} from "../../Enums/ItemType.ts";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
@@ -316,7 +317,7 @@ export class AlbumTemplates {
                 create("div")
                     .classes("stats-container", "flex", "rounded")
                     .children(
-                        StatisticsTemplates.likesIndicator("album", album.id, album.likes.length, Util.userHasLiked(album)),
+                        StatisticsTemplates.likesIndicator(ItemType.album, album.id, album.likes.length, Util.userHasLiked(album)),
                         StatisticsTemplates.likeListOpener(album.likes),
                     ).build()
             ).build();
@@ -453,7 +454,7 @@ export class AlbumTemplates {
                                 create("div")
                                     .classes("stats-container", "flex", "rounded")
                                     .children(
-                                        StatisticsTemplates.likesIndicator("album", album.id, album.likes.length,
+                                        StatisticsTemplates.likesIndicator(ItemType.album, album.id, album.likes.length,
                                             Util.arrayPropertyMatchesUser(album.likes, "user_id")),
                                         StatisticsTemplates.likeListOpener(album.likes),
                                     ).build(),

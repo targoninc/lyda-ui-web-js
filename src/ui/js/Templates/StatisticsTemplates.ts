@@ -10,13 +10,14 @@ import {FJSC} from "../../fjsc";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 import {GenericTemplates} from "./GenericTemplates.ts";
+import {ItemType} from "../Enums/ItemType.ts";
 
 export class StatisticsTemplates {
-    static likesIndicator(type: string, reference_id: number, like_count: number, liked: boolean|Signal<boolean>) {
-        const functionMap: Record<string, Function> = {
-            "track": TrackActions.toggleLike,
-            "album": AlbumActions.toggleLike,
-            "playlist": PlaylistActions.toggleLike,
+    static likesIndicator(type: ItemType, reference_id: number, like_count: number, liked: boolean|Signal<boolean>) {
+        const functionMap: Record<ItemType, Function> = {
+            [ItemType.track]: TrackActions.toggleLike,
+            [ItemType.album]: AlbumActions.toggleLike,
+            [ItemType.playlist]: PlaylistActions.toggleLike,
         };
         liked = liked.constructor === Signal ? liked : signal(liked as boolean);
         const toggleClass = compute((l): string => l ? "enabled" : "_", liked);

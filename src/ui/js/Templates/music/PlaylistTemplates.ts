@@ -4,7 +4,6 @@ import {PlaylistActions} from "../../Actions/PlaylistActions.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
 import {TrackTemplates} from "./TrackTemplates.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
-import {TrackActions} from "../../Actions/TrackActions.ts";
 import {QueueManager} from "../../Streaming/QueueManager.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
 import {StatisticsTemplates} from "../StatisticsTemplates.ts";
@@ -24,6 +23,7 @@ import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
 import {NotificationType} from "../../Enums/NotificationType.ts";
 import {ListTrack} from "../../Models/ListTrack.ts";
 import {RoutePath} from "../../Routing/routes.ts";
+import {ItemType} from "../../Enums/ItemType.ts";
 
 export class PlaylistTemplates {
     static async addTrackToPlaylistModal(track: Track, playlists: Playlist[]) {
@@ -296,7 +296,7 @@ export class PlaylistTemplates {
                 create("div")
                     .classes("stats-container", "flex", "rounded")
                     .children(
-                        StatisticsTemplates.likesIndicator("playlist", playlist.id, playlist.likes.length,
+                        StatisticsTemplates.likesIndicator(ItemType.playlist, playlist.id, playlist.likes.length,
                             Util.arrayPropertyMatchesUser(playlist.likes, "user_id")),
                         StatisticsTemplates.likeListOpener(playlist.likes),
                     ).build()
@@ -456,7 +456,7 @@ export class PlaylistTemplates {
                                 create("div")
                                     .classes("stats-container", "flex", "rounded")
                                     .children(
-                                        StatisticsTemplates.likesIndicator("playlist", playlist.id, playlist.likes.length,
+                                        StatisticsTemplates.likesIndicator(ItemType.playlist, playlist.id, playlist.likes.length,
                                             Util.arrayPropertyMatchesUser(playlist.likes, "user_id")),
                                         StatisticsTemplates.likeListOpener(playlist.likes),
                                     ).build(),

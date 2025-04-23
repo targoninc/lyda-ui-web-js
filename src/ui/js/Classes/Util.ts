@@ -8,7 +8,7 @@ import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {MediaFileType} from "../Enums/MediaFileType.ts";
 import {User} from "../Models/DbModels/lyda/User.ts";
 import {currentUser, dragging} from "../state.ts";
-import {compute, Signal} from "../../fjsc/src/signals.ts";
+import {compute, signal, Signal} from "../../fjsc/src/signals.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {Comment} from "../Models/DbModels/lyda/Comment.ts";
 import {Likable} from "../Models/Likable.ts";
@@ -25,18 +25,22 @@ export class Util {
         return urlParams.get(name);
     }
 
-    static getUserAvatar(id: number|null) {
+    static getUserAvatar(id: number | null) {
         if (id === null) {
             return Images.DEFAULT_AVATAR;
         }
         return ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.userAvatar}&t=${Date.now()}`;
     }
 
-    static getUserBanner(id: number|null) {
+    static getUserBanner(id: number | null) {
         if (id === null) {
             return Images.DEFAULT_BANNER;
         }
         return ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.userBanner}&t=${Date.now()}`;
+    }
+
+    static getCover(id: number, type: MediaFileType) {
+        return ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${type}&t=${Date.now()}`;
     }
 
     static getTrackCover(id: number) {
@@ -72,7 +76,7 @@ export class Util {
         }
     }
 
-    static formatDate(date: string|Date) {
+    static formatDate(date: string | Date) {
         if (date.constructor === String) {
             date = new Date(date);
         }
@@ -90,11 +94,11 @@ export class Util {
             }
             target.classList.add("hidden");
         } else {
-            document.addEventListener("click", e => Util.hideElementIfCondition(conditionFunc, className, e), { once: true });
+            document.addEventListener("click", e => Util.hideElementIfCondition(conditionFunc, className, e), {once: true});
         }
     }
 
-    static async getUserAsync(id: number|null = null, allowCache = true) {
+    static async getUserAsync(id: number | null = null, allowCache = true) {
         if (!id) {
             if (allowCache) {
                 const userData = currentUser.value;
@@ -107,7 +111,7 @@ export class Util {
             if (allowCache) {
                 // TODO: Implement caching for user by id
             }
-            const res = await Api.getAsync<User>(ApiRoutes.getUser, { id: nullIfEmpty(id) });
+            const res = await Api.getAsync<User>(ApiRoutes.getUser, {id: nullIfEmpty(id)});
             if (res.code === 401) {
                 return null;
             }
@@ -143,7 +147,7 @@ export class Util {
     }
 
     static async getUserByNameAsync(name: string) {
-        const res = await Api.getAsync(ApiRoutes.getUser, { name: nullIfEmpty(name) });
+        const res = await Api.getAsync(ApiRoutes.getUser, {name: nullIfEmpty(name)});
         if (res.code === 401) {
             return null;
         }
@@ -165,7 +169,7 @@ export class Util {
         }, 100);
     }
 
-    static removeModal(modal: AnyElement|null = null) {
+    static removeModal(modal: AnyElement | null = null) {
         if (modal === null || !(modal instanceof HTMLElement)) {
             modal = document.querySelector(".modal-container");
         }
@@ -174,11 +178,11 @@ export class Util {
         }
     }
 
-    static parseCachedUser(rawCachedUser: string|User|null) {
+    static parseCachedUser(rawCachedUser: string | User | null) {
         let userData;
         try {
             userData = JSON.parse(rawCachedUser as string);
-        } catch(e) {
+        } catch (e) {
             userData = rawCachedUser;
         }
         return userData;
@@ -249,7 +253,7 @@ export class Util {
             if (!commentMap[parentId]) {
                 commentMap[parentId] = [];
             }
-            commentMap[parentId].push({ ...comment, comments: [] }); // Ensure comments array exists
+            commentMap[parentId].push({...comment, comments: []}); // Ensure comments array exists
         });
 
         // Step 2: Recursively nest comments
@@ -349,4 +353,12 @@ export function updateImagesWithSource(newSrc: string, oldSrc: string) {
             img.src = newSrc;
         }
     }
+}
+
+export function getAvatar(user: User | null | undefined) {
+    const avatarState = signal(Images.DEFAULT_AVATAR);
+    if (user?.has_avatar) {
+        avatarState.value = Util.getUserAvatar(user.id);
+    }
+    return avatarState;
 }

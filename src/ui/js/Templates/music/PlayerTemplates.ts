@@ -1,17 +1,15 @@
 import {PlayManager} from "../../Streaming/PlayManager.ts";
-import {StreamingUpdater} from "../../Streaming/StreamingUpdater.ts";
 import {Icons} from "../../Enums/Icons.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
-import {QueueManager} from "../../Streaming/QueueManager.ts";
 import {Images} from "../../Enums/Images.ts";
 import {QueueTemplates} from "./QueueTemplates.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
 import {StatisticsTemplates} from "../StatisticsTemplates.ts";
 import {CommentTemplates} from "../CommentTemplates.ts";
 import {GenericTemplates} from "../GenericTemplates.ts";
-import {notify, Ui} from "../../Classes/Ui.ts";
+import {Ui} from "../../Classes/Ui.ts";
 import {Util} from "../../Classes/Util.ts";
-import {AnyElement, AnyNode, create, ifjs, StringOrSignal} from "../../../fjsc/src/f2.ts";
+import {AnyElement, create, ifjs} from "../../../fjsc/src/f2.ts";
 import {Track} from "../../Models/DbModels/lyda/Track.ts";
 import {User} from "../../Models/DbModels/lyda/User.ts";
 import {navigate} from "../../Routing/Router.ts";
@@ -20,15 +18,19 @@ import {compute, Signal, signal} from "../../../fjsc/src/signals.ts";
 import {
     currentlyBuffered,
     currentTrackId,
-    currentTrackPosition, loopMode, manualQueue, muted,
+    currentTrackPosition,
+    loopMode,
+    manualQueue,
+    muted,
     playingElsewhere,
     playingFrom,
-    playingHere, volume
+    playingHere,
+    volume
 } from "../../state.ts";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
-import {IconConfig} from "../../../fjsc/src/Types.ts";
 import {LoopMode} from "../../Enums/LoopMode.ts";
 import {RoutePath} from "../../Routing/routes.ts";
+import {ItemType} from "../../Enums/ItemType.ts";
 
 export class PlayerTemplates {
     static audioPlayer(track: Track) {
@@ -76,10 +78,10 @@ export class PlayerTemplates {
         return create("div")
             .classes("audio-player-scrubber", "flex-grow", "flex", "rounded", "padded-inline")
             .id(track.id)
-            .onmousedown(PlayManager.scrubFromElement)
+            .onmousedown(e => PlayManager.scrubFromElement(e, track.id))
             .onmousemove(async e => {
                 if (e.buttons === 1) {
-                    await PlayManager.scrubFromElement(e);
+                    await PlayManager.scrubFromElement(e, track.id);
                 }
             })
             .children(
@@ -269,7 +271,7 @@ export class PlayerTemplates {
                 .classes("flex", "align-center", "hideOnMidBreakpoint")
                 .children(
                     queueComponent,
-                    StatisticsTemplates.likesIndicator("track", track.id, track.likes.length,
+                    StatisticsTemplates.likesIndicator(ItemType.track, track.id, track.likes.length,
                         Util.arrayPropertyMatchesUser(track.likes, "user_id")),
                     isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, Util.arrayPropertyMatchesUser(track.reposts, "user_id")),
                 ).build()
@@ -292,7 +294,7 @@ export class PlayerTemplates {
                 ifjs(menuShown, create("div")
                     .classes("popout-above", "card", "flex-v")
                     .children(
-                        StatisticsTemplates.likesIndicator("track", track.id, track.likes!.length,
+                        StatisticsTemplates.likesIndicator(ItemType.track, track.id, track.likes!.length,
                             Util.arrayPropertyMatchesUser(track.likes!, "user_id")),
                         isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts!.length, Util.arrayPropertyMatchesUser(track.reposts!, "user_id")),
                         CommentTemplates.commentButton(false, signal(track.comments!)),

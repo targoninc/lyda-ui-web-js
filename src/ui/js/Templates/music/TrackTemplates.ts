@@ -28,7 +28,6 @@ import {Playlist} from "../../Models/DbModels/lyda/Playlist.ts";
 import {compute, Signal, signal} from "../../../fjsc/src/signals.ts";
 import {CollaboratorType} from "../../Models/DbModels/lyda/CollaboratorType.ts";
 import {currentTrackId, currentUser, manualQueue} from "../../state.ts";
-import {PillOption} from "../../Models/PillOption.ts";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
 import {Ui} from "../../Classes/Ui.ts";
 import {Api} from "../../Api/Api.ts";
@@ -38,6 +37,9 @@ import {ListTrack} from "../../Models/ListTrack.ts";
 import {MediaActions} from "../../Actions/MediaActions.ts";
 import {MediaFileType} from "../../Enums/MediaFileType.ts";
 import {RoutePath} from "../../Routing/routes.ts";
+import {DefaultImages} from "../../Enums/DefaultImages.ts";
+import {ItemType} from "../../Enums/ItemType.ts";
+import {MusicTemplates} from "./MusicTemplates.ts";
 
 export class TrackTemplates {
     static trackCard(track: Track, profileId: number) {
@@ -92,7 +94,7 @@ export class TrackTemplates {
                                 create("div")
                                     .classes("flex")
                                     .children(
-                                        StatisticsTemplates.likesIndicator("track", track.id, track.likes.length,
+                                        StatisticsTemplates.likesIndicator(ItemType.track, track.id, track.likes.length,
                                             Util.arrayPropertyMatchesUser(track.likes, "user_id")),
                                         isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, Util.arrayPropertyMatchesUser(track.reposts, "user_id")),
                                     ).build()
@@ -139,9 +141,9 @@ export class TrackTemplates {
     }
 
     static trackCover(track: Track, coverType: string, startCallback: Function|null = null) {
-        const imageState = signal(Images.DEFAULT_COVER_TRACK);
+        const imageState = signal(DefaultImages[ItemType.track]);
         if (track.has_cover) {
-            imageState.value = Util.getTrackCover(track.id);
+            imageState.value = Util.getCover(track.id, MediaFileType.trackCover);
         }
         const coverLoading = signal(false);
         const start = async () => {
@@ -152,7 +154,7 @@ export class TrackTemplates {
                 await startCallback(track.id);
             }
         }
-        const isOwnTrack = compute(u => u.id === track.user_id, currentUser);
+        const isOwnTrack = compute(u => u?.id === track.user_id, currentUser);
 
         return create("div")
             .classes("cover-container", "relative", "pointer", coverType)
@@ -182,10 +184,6 @@ export class TrackTemplates {
             ).build();
     }
 
-    static feedTrackCover(track: Track) {
-        return TrackTemplates.trackCover(track, "inline-cover");
-    }
-
     static smallListTrackCover(track: Track, startCallback: Function|null = null) {
         return TrackTemplates.trackCover(track, "small-cover", startCallback);
     }
@@ -198,10 +196,10 @@ export class TrackTemplates {
     }
 
     static async trackList(tracksState: Signal<Track[]>, pageState: Signal<number>, type: string, filterState: Signal<string>) {
-        const trackList = tracksState.value.map(track => TrackTemplates.feedTrack(track));
+        const trackList = tracksState.value.map(track => MusicTemplates.feedEntry(ItemType.track, track));
         const trackListContainer = signal(TrackTemplates.#trackList(trackList));
         tracksState.onUpdate = async (newTracks) => {
-            const trackList = newTracks.map(track => TrackTemplates.feedTrack(track));
+            const trackList = newTracks.map(track => MusicTemplates.feedEntry(ItemType.track, track));
             trackListContainer.value = TrackTemplates.#trackList(trackList);
         };
 
@@ -274,19 +272,20 @@ export class TrackTemplates {
         if (!track.processed) {
             return create("div")
                 .classes("waveform", small ? "waveform-small" : "_", "processing-box", "rounded-max", "relative", "flex", "nogap")
-                .title("This track is still processing, please check back later.")
+                .title("Still processing, please check back later.")
                 .build();
         }
+
         return create("div")
             .classes("waveform", small ? "waveform-small" : "_", "relative", "flex", "nogap", "pointer")
             .id(track.id)
             .onmousedown(async (e) => {
                 PlayManager.addStreamClientIfNotExists(track.id, track.length);
-                await PlayManager.scrubFromElement(e);
+                await PlayManager.scrubFromElement(e, track.id);
             })
             .onmousemove(async e => {
                 if (e.buttons === 1) {
-                    await PlayManager.scrubFromElement(e);
+                    await PlayManager.scrubFromElement(e, track.id);
                 }
             })
             .children(
@@ -314,96 +313,6 @@ export class TrackTemplates {
             classes: ["special", "rounded-max", "align-center", "text-small"],
             onclick: () => navigate(`${RoutePath.profile}/` + repost.user!.username)
         });
-    }
-
-    static feedTrack(track: Track) {
-        const icons = [];
-        const isPrivate = track.visibility === "private";
-        if (isPrivate) {
-            icons.push(GenericTemplates.lock());
-        }
-
-        const graphics = [];
-        if (track.processed) {
-            graphics.push(TrackTemplates.waveform(track, JSON.parse(track.loudness_data)));
-        } else {
-            graphics.push(TrackTemplates.waveform(track, []));
-        }
-        const avatarState = signal(Images.DEFAULT_AVATAR);
-        if (track.user?.has_avatar) {
-            avatarState.value = Util.getUserAvatar(track.user_id);
-        }
-        const inQueue = signal(QueueManager.isInManualQueue(track.id));
-        if (!track.comments || !track.likes || !track.reposts) {
-            throw new Error(`Track ${track.id} has no comments, likes or reposts`);
-        }
-
-        return create("div")
-            .classes("flex")
-            .children(
-                create("div")
-                    .classes("list-track", "flex", "padded", "rounded", "fullWidth", "card", currentTrackId.value === track.id ? "playing" : "_")
-                    .styles("max-width", "100%")
-                    .children(
-                        TrackTemplates.feedTrackCover(track),
-                        create("div")
-                            .classes("flex-v", "flex-grow")
-                            .children(
-                                create("div")
-                                    .classes("flex")
-                                    .children(
-                                        create("div")
-                                            .classes("flex-v", "flex-grow", "small-gap")
-                                            .children(
-                                                create("div")
-                                                    .classes("flex")
-                                                    .children(
-                                                        TrackTemplates.title(track.title, track.id, icons),
-                                                        track.repost ? TrackTemplates.repostIndicator(track.repost) : null,
-                                                    ).build(),
-                                                create("div")
-                                                    .classes("flex")
-                                                    .children(
-                                                        UserTemplates.userWidget(track.user!, Util.arrayPropertyMatchesUser(track.user!.follows ?? [], "following_user_id"), [], [], UserWidgetContext.card),
-                                                        create("span")
-                                                            .classes("date", "text-small", "nopointer", "color-dim", "align-center")
-                                                            .text(Time.ago(track.created_at))
-                                                            .build(),
-                                                    ).build()
-                                            ).build(),
-                                    ).build(),
-                                create("div")
-                                    .classes("flex", "align-children")
-                                    .children(
-                                        StatisticsTemplates.likesIndicator("track", track.id, track.likes.length,
-                                            Util.arrayPropertyMatchesUser(track.likes, "user_id")),
-                                        StatisticsTemplates.likeListOpener(track.likes),
-                                        isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, Util.arrayPropertyMatchesUser(track.reposts, "user_id")),
-                                        isPrivate ? null : StatisticsTemplates.repostListOpener(track.reposts),
-                                        FJSC.button({
-                                            text: compute((q: boolean): string => q ? "Unqueue" : "Queue", inQueue),
-                                            icon: {
-                                                icon: compute((q: boolean): string => q ? "remove" : "switch_access_shortcut_add", inQueue),
-                                                adaptive: true },
-                                            classes: [compute((q: boolean): string => q ? "negative" : "positive", inQueue)],
-                                            onclick: () => {
-                                                QueueManager.toggleInManualQueue(track.id);
-                                                inQueue.value = QueueManager.isInManualQueue(track.id);
-                                            }
-                                        }),
-                                    ).build(),
-                                create("div")
-                                    .classes("flex")
-                                    .children(
-                                        ...graphics,
-                                        create("span")
-                                            .classes("nopointer", "text-small", "align-center")
-                                            .text(Time.format(track.length))
-                                            .build(),
-                                    ).build(),
-                            ).build()
-                    ).build()
-            ).build();
     }
 
     static trackInList(listTrack: ListTrack, canEdit: boolean, list: Album|Playlist,
@@ -481,7 +390,7 @@ export class TrackTemplates {
                                             create("div")
                                                 .classes("flex", "align-children")
                                                 .children(
-                                                    StatisticsTemplates.likesIndicator("track", track.id, track.likes.length ?? [],
+                                                    StatisticsTemplates.likesIndicator(ItemType.track, track.id, track.likes.length ?? [],
                                                         Util.arrayPropertyMatchesUser(track.likes, "user_id")),
                                                     TrackTemplates.title(track.title, track.id, icons),
                                                     create("span")
@@ -748,7 +657,7 @@ export class TrackTemplates {
                                         create("div")
                                             .classes("stats-container", "flex", "rounded")
                                             .children(
-                                                StatisticsTemplates.likesIndicator("track", track.id, track.likes.length, liked),
+                                                StatisticsTemplates.likesIndicator(ItemType.track, track.id, track.likes.length, liked),
                                                 StatisticsTemplates.likeListOpener(track.likes),
                                                 ifjs(isPrivate, StatisticsTemplates.repostIndicator(track.id, track.reposts.length, reposted), true),
                                                 ifjs(isPrivate, StatisticsTemplates.repostListOpener(track.reposts), true),
@@ -854,7 +763,7 @@ export class TrackTemplates {
             ).build();
     }
 
-    private static addToQueueButton(track: Track,) {
+    public static addToQueueButton(track: Track) {
         const inQueue = compute(q => q.includes(track.id), manualQueue);
         const text = compute((q: boolean): string => q ? "Unqueue" : "Queue", inQueue);
         const icon = compute((q: boolean): string => q ? "remove" : "switch_access_shortcut_add", inQueue);

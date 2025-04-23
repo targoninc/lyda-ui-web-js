@@ -241,12 +241,12 @@ export class PlayManager {
         await StreamingUpdater.updatePlayState();
     }
 
-    static async scrubFromElement(e: any) {
+    static async scrubFromElement(e: any, id: number) {
         const value = e.offsetX / e.target.offsetWidth;
-        if (e.target.id !== currentTrackId.value) {
-            await PlayManager.startAsync(e.target.id);
+        if (id !== currentTrackId.value) {
+            await PlayManager.startAsync(id);
         }
-        await PlayManager.scrubTo(e.target.id, value);
+        await PlayManager.scrubTo(id, value);
     }
 
     static isLoopingSingle() {
