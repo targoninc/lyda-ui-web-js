@@ -94,10 +94,10 @@ export class MusicTemplates {
         switch (type) {
             case ItemType.track:
                 item = item as Track;
-                if (item.visibility !== "private") {
-                    items.push(StatisticsTemplates.repostIndicator(item.id, item.reposts?.length ?? 0, Util.arrayPropertyMatchesUser(item.reposts ?? [], "user_id")));
-                    items.push(StatisticsTemplates.repostListOpener(item.reposts ?? []));
-                }
+                const reposted = Util.arrayPropertyMatchesUser(item.reposts ?? [], "user_id");
+                const disabled = signal(item.visibility === "private");
+                items.push(StatisticsTemplates.repostIndicator(item.id, item.reposts?.length ?? 0, reposted, disabled));
+                items.push(StatisticsTemplates.repostListOpener(item.reposts ?? []));
                 items.push(TrackTemplates.addToQueueButton(item));
         }
 

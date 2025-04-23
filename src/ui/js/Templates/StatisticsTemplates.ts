@@ -5,7 +5,7 @@ import {AlbumActions} from "../Actions/AlbumActions.ts";
 import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
-import {create, nullElement, StringOrSignal, TypeOrSignal} from "../../fjsc/src/f2.ts";
+import {create, ifjs, nullElement, StringOrSignal, TypeOrSignal} from "../../fjsc/src/f2.ts";
 import {FJSC} from "../../fjsc";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
@@ -26,11 +26,12 @@ export class StatisticsTemplates {
         return StatisticsTemplates.toggleIndicator(liked, like_count, imageState, reference_id, functionMap[type], [toggleClass]);
     }
 
-    static repostIndicator(reference_id: number, repost_count: number, reposted: boolean|Signal<boolean>) {
+    static repostIndicator(reference_id: number, repost_count: number, reposted: boolean|Signal<boolean>, disabled: Signal<boolean> = signal(false)) {
         reposted = reposted.constructor === Signal ? reposted : signal(reposted as boolean);
         const toggleClass = compute((r): string => r ? "enabled" : "_", reposted);
+        const disabledClass = compute((d): string => d ? "disabled" : "_", disabled);
 
-        return StatisticsTemplates.toggleIndicator(reposted, repost_count, Icons.REPOST, reference_id, TrackActions.toggleRepost, [toggleClass]);
+        return StatisticsTemplates.toggleIndicator(reposted, repost_count, Icons.REPOST, reference_id, TrackActions.toggleRepost, [toggleClass, disabledClass]);
     }
 
     static toggleIndicator(toggleObservable: Signal<boolean>, count: number, icon: StringOrSignal, reference_id = -1, clickFunc: Function = () => {}, extraClasses: StringOrSignal[] = []) {
@@ -69,17 +70,18 @@ export class StatisticsTemplates {
             ).build();
     }
 
-    static genericUserListOpener(type: string, items: any[]) {
-        const openState = signal(false);
-        const listClass = signal("hidden");
+    static genericUserListOpener(type: string, items: any[], disabled: Signal<boolean> = signal(false)) {
+        const open$ = signal(false);
+        open$.subscribe((value: boolean) => {
+            if (!value) {
+                return;
+            }
 
-        openState.onUpdate = (value: boolean) => {
-            listClass.value = value ? "visible" : "hidden";
             document.addEventListener("click", e => Util.hideElementIfCondition((e: any) => {
                 return !(e.target.parentElement.classList.contains(type)
                     || e.target.classList.contains(type));
             }, `listFromStatsIndicator.${type}`, e), {once: true});
-        };
+        });
 
         const itemsList = items.map(item => {
             const avatar = signal(Images.DEFAULT_AVATAR);
@@ -98,7 +100,7 @@ export class StatisticsTemplates {
             .classes("listFromStatsOpener", type, "flex", "relative")
             .children(
                 create("span")
-                    .classes("stats-indicator-opener", type, "clickable", "rounded", "padded-inline")
+                    .classes("stats-indicator-opener", type, "clickable", "rounded", "padded-inline", items.length === 0 ? "disabled" : "_")
                     .children(
                         create("span")
                             .text(items.length)
@@ -109,10 +111,10 @@ export class StatisticsTemplates {
                             classes: ["inline-icon", "svg", "nopointer"],
                         }),
                     ).onclick(() => {
-                        openState.value = !openState.value;
+                        open$.value = !open$.value;
                     }).build(),
-                create("div")
-                    .classes("listFromStatsIndicator", "popout-below", type, "flex-v", "padded", "rounded", listClass)
+                ifjs(open$, create("div")
+                    .classes("listFromStatsIndicator", "popout-below", type, "flex-v", "padded", "rounded")
                     .children(
                         create("span")
                             .classes("text", "label", "padded-inline", "rounded", "text-small")
@@ -122,7 +124,7 @@ export class StatisticsTemplates {
                             .classes("flex-v")
                             .children(...itemsList)
                             .build()
-                    ).build()
+                    ).build())
             ).build();
     }
 
