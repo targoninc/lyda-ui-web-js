@@ -109,6 +109,29 @@ export class UserTemplates {
             ).build();
     }
 
+    public static userLink(context: UserWidgetContext, user: User) {
+        const maxDisplaynameLength = [UserWidgetContext.singlePage, UserWidgetContext.list].includes(context) ? 100 : 15;
+
+        return create("a")
+            .classes("user-link", "color-dim")
+            .attributes("user_id", user.id, "username", user.username)
+            .onclick((e: MouseEvent) => {
+                if (e.button === 0 && target(e).tagName.toLowerCase() === "button") {
+                    e.preventDefault();
+                    navigate(`${RoutePath.profile}/` + user.username);
+                }
+            })
+            .href(Links.PROFILE(user.username))
+            .title(user.displayname + " (@" + user.username + ")")
+            .children(
+                create("span")
+                    .classes("text", "align-center", "nopointer", "user-displayname")
+                    .text(truncateText(user.displayname, maxDisplaynameLength))
+                    .attributes("data-user-id", user.id)
+                    .build(),
+            ).build();
+    }
+
     static linkedUser(user_id: number, username: string, displayname: string, avatar: StringOrSignal, collab_type: HtmlPropertyValue, actionButton: AnyNode|null = null, extraAttributes: HtmlPropertyValue[] | undefined = undefined, extraClasses: StringOrSignal[] = []) {
         const noredirect = extraClasses.includes("no-redirect");
         const base = noredirect ? create("div") : create("a");

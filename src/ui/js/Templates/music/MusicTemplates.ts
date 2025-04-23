@@ -38,13 +38,13 @@ export class MusicTemplates {
                     .children(
                         MusicTemplates.cover(type, item, "inline-cover"),
                         create("div")
-                            .classes("flex-v", "flex-grow")
+                            .classes("flex-v", "flex-grow", "no-gap")
                             .children(
                                 create("div")
                                     .classes("flex")
                                     .children(
                                         create("div")
-                                            .classes("flex-v", "flex-grow", "small-gap")
+                                            .classes("flex-v", "flex-grow", "no-gap")
                                             .children(
                                                 create("div")
                                                     .classes("flex")
@@ -55,7 +55,7 @@ export class MusicTemplates {
                                                 create("div")
                                                     .classes("flex")
                                                     .children(
-                                                        UserTemplates.userWidget(item.user!, Util.arrayPropertyMatchesUser(item.user!.follows ?? [], "following_user_id"), [], [], UserWidgetContext.card),
+                                                        UserTemplates.userLink(UserWidgetContext.card, item.user!),
                                                         create("span")
                                                             .classes("date", "text-small", "nopointer", "color-dim", "align-center")
                                                             .text(Time.ago(item.created_at))
@@ -64,17 +64,21 @@ export class MusicTemplates {
                                             ).build(),
                                     ).build(),
                                 create("div")
-                                    .classes("flex", "align-children")
+                                    .classes("flex", "space-outwards", "align-children")
                                     .children(
-                                        StatisticsTemplates.likesIndicator(type, item.id, item.likes?.length ?? 0,
-                                            Util.arrayPropertyMatchesUser(item.likes ?? [], "user_id")),
-                                        StatisticsTemplates.likeListOpener(item.likes ?? []),
-                                        ...MusicTemplates.itemSpecificActions(type, item),
-                                    ).build(),
-                                create("div")
-                                    .classes("flex")
-                                    .children(
-                                        ...MusicTemplates.itemSpecificItems(type, item),
+                                        create("div")
+                                            .classes("flex", "align-children")
+                                            .children(
+                                                ...MusicTemplates.itemSpecificItems(type, item),
+                                            ).build(),
+                                        create("div")
+                                            .classes("flex", "align-children")
+                                            .children(
+                                                StatisticsTemplates.likesIndicator(type, item.id, item.likes?.length ?? 0,
+                                                    Util.arrayPropertyMatchesUser(item.likes ?? [], "user_id")),
+                                                StatisticsTemplates.likeListOpener(item.likes ?? []),
+                                                ...MusicTemplates.itemSpecificActions(type, item),
+                                            ).build(),
                                     ).build(),
                             ).build()
                     ).build()
@@ -87,11 +91,11 @@ export class MusicTemplates {
         switch (type) {
             case ItemType.track:
                 item = item as Track;
-                if (item.visibility === "private") {
+                if (item.visibility !== "private") {
                     items.push(StatisticsTemplates.repostIndicator(item.id, item.reposts?.length ?? 0, Util.arrayPropertyMatchesUser(item.reposts ?? [], "user_id")));
                     items.push(StatisticsTemplates.repostListOpener(item.reposts ?? []));
-                    items.push(TrackTemplates.addToQueueButton(item));
                 }
+                items.push(TrackTemplates.addToQueueButton(item));
         }
 
         return items;

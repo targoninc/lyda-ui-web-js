@@ -1,5 +1,5 @@
 :root {
-    --inline-track-height: 150px;
+    --inline-track-height: 85px;
     --small-track-height: 75px;
     --card-width: 405px;
     --round-button-size: 36px;
@@ -498,6 +498,14 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     overflow: auto;
 }
 
+.user-link {
+    color: var(--color-5);
+}
+
+.user-link:hover {
+    text-decoration: underline;
+}
+
 .user-widget {
     padding-left: var(--base-padding);
     padding-right: var(--base-padding);
@@ -654,16 +662,12 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     background: var(--color-4);
 }
 
-.waveform, .waveform-small {
+.waveform {
     width: 100%;
-    height: 35px;
+    height: 1em;
     display: flex;
     align-items: end;
     gap: 1px;
-}
-
-.waveform-small {
-    height: 33px;
 }
 
 .processing-box {
@@ -697,7 +701,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .waveform-bar {
     min-width: 1px;
-    width: 2px;
+    width: 1px;
     background: var(--color-5);
 }
 
@@ -1280,19 +1284,11 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 @media screen and (max-width: 600px) {
-    .waveform-bar {
-        width: 1px;
-    }
-
     .waveform-bar.odd {
         display: none;
     }
 
     .cover-container.card-cover {
         --cover-size: 90px;
-    }
-
-    :root {
-        --inline-track-height: 100px;
     }
 }
