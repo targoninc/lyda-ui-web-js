@@ -134,7 +134,7 @@ export class TrackTemplates {
             .build();
     }
 
-    static async trackList(tracksState: Signal<Track[]>, pageState: Signal<number>, type: string, filterState: Signal<string>) {
+    static trackList(tracksState: Signal<Track[]>, pageState: Signal<number>, type: string, filterState: Signal<string>) {
         const trackList = tracksState.value.map(track => MusicTemplates.feedEntry(ItemType.track, track));
         const trackListContainer = signal(TrackTemplates.#trackList(trackList));
         tracksState.onUpdate = async (newTracks) => {

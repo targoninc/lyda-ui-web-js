@@ -10,6 +10,7 @@ import {Track} from "../Models/DbModels/lyda/Track.ts";
 import {Album} from "../Models/DbModels/lyda/Album.ts";
 import {Playlist} from "../Models/DbModels/lyda/Playlist.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
+import {MusicTemplates} from "../Templates/music/MusicTemplates.ts";
 
 export class ProfilePage {
     static async addTabSectionAsync(element: AnyElement, user: User, isOwnProfile: boolean) {
@@ -20,20 +21,21 @@ export class ProfilePage {
         const albumsContainer = GenericTemplates.containerWithSpinner("albums-container");
         const playlistsContainer = GenericTemplates.containerWithSpinner("playlists-container");
         const repostsContainer = GenericTemplates.containerWithSpinner("reposts-container");
+        const historyContainer = GenericTemplates.containerWithSpinner("history-container");
 
-        const tabs = ["Tracks", "Albums", "Playlists", "Reposts"];
-        const tabContents = [tracksContainer, albumsContainer, playlistsContainer, repostsContainer];
+        const tabs = ["Tracks", "Albums", "Playlists", "Reposts", "Listening History"];
+        const tabContents = [tracksContainer, albumsContainer, playlistsContainer, repostsContainer, historyContainer];
         const tabSelector = GenericTemplates.tabSelector(tabs, (i: number) => {
             tabContents.forEach((c, j) => {
                 c.style.display = i === j ? "block" : "none";
             });
         }, 0);
-        container.append(tabSelector, tracksContainer, albumsContainer, playlistsContainer, repostsContainer);
-        console.log(user);
+        container.append(tabSelector, ...tabContents);
         ProfilePage.addAlbumsAsync(albumsContainer, user, isOwnProfile).then();
         ProfilePage.addTracksAsync(tracksContainer, user, isOwnProfile).then();
         ProfilePage.addPlaylistsAsync(playlistsContainer, user, isOwnProfile).then();
         ProfilePage.addRepostsAsync(repostsContainer, user, isOwnProfile).then();
+        historyContainer.replaceChildren(MusicTemplates.feed("history"));
     }
 
     static async addTracksAsync(element: AnyElement, user: User, isOwnProfile: boolean) {

@@ -19,11 +19,13 @@ import {ModerationCommentsTemplates} from "./admin/ModerationCommentsTemplates.t
 import {LogTemplates} from "./admin/LogTemplates.ts";
 import {RoyaltyTemplates} from "./admin/RoyaltyTemplates.ts";
 import {PaymentTemplates} from "./admin/PaymentTemplates.ts";
+import {MusicTemplates} from "./music/MusicTemplates.ts";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, Function> = {
-        [RoutePath.explore]: this.explorePage,
-        [RoutePath.following]: this.followingPage,
+        [RoutePath.explore]: () => MusicTemplates.feed("explore"),
+        [RoutePath.following]: () => MusicTemplates.feed("following"),
+        [RoutePath.history]: () => MusicTemplates.feed("history"),
         [RoutePath.album]: AlbumTemplates.albumPage,
         [RoutePath.playlist]: this.playlistPage,
         [RoutePath.profile]: this.profilePage,
@@ -71,24 +73,6 @@ export class PageTemplates {
         RoutePath.users,
         RoutePath.events,
     ];
-
-    static explorePage() {
-        return create("div")
-            .classes("tracks", "flex-v")
-            .attributes("lyda", "")
-            .attributes("feedType", "explore")
-            .attributes("datatype", "tracks")
-            .build();
-    }
-
-    static followingPage() {
-        return create("div")
-            .classes("tracks", "flex-v")
-            .attributes("lyda", "")
-            .attributes("feedType", "following")
-            .attributes("datatype", "tracks")
-            .build();
-    }
 
     static libraryPage() {
         return create("div")

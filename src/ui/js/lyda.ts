@@ -68,21 +68,6 @@ export class Lyda {
                 // @ts-ignore
                 element.appendChild(TrackEditTemplates.uploadForm());
                 break;
-            case "tracks":
-                const feedType = element.getAttribute("feedType");
-                if (!user && feedType !== "explore") {
-                    notify("You need to be logged in to see your feed", NotificationType.error);
-                    return;
-                }
-                if (!feedType) {
-                    throw new Error("Missing feed type");
-                }
-                this.loadFeed(feedType, element).then();
-                if (data && data.error) {
-                    element.innerHTML = data.error;
-                    return;
-                }
-                break;
             case "profile":
                 if (!data || data.error) {
                     navigate(RoutePath.notFound);
@@ -188,44 +173,5 @@ export class Lyda {
                 element.innerHTML = JSON.stringify(data, null, 2);
                 break;
         }
-    }
-
-    static async loadFeed(type: string, element: AnyElement) {
-        const feedMap = {
-            following: ApiRoutes.followingFeed,
-            explore: ApiRoutes.exploreFeed,
-            autoQueue: ApiRoutes.autoQueueFeed,
-        };
-        const endpoint = feedMap[type as keyof typeof feedMap];
-        const pageState = signal(1);
-        const tracksState = signal<Track[]>([]);
-        const filterState = signal("all");
-        const loadingState = signal(false);
-        const pageSize = 10;
-        const update = async () => {
-            const pageNumber = pageState.value;
-            const filter = filterState.value;
-            const offset = (pageNumber - 1) * pageSize;
-            const params = type === "following" ? {offset, filter} : {offset};
-            loadingState.value = true;
-            const res = await Api.getAsync<Track[]>(endpoint, params);
-            if (res.code !== 200) {
-                notify(`Failed to get tracks: ${res.data.error}`, NotificationType.error);
-                loadingState.value = false;
-                return;
-            }
-            const newTracks = res.data as Track[];
-            if (newTracks && newTracks.length === 0 && pageNumber > 1) {
-                pageState.value -= 1;
-                loadingState.value = false;
-                return;
-            }
-            tracksState.value = newTracks;
-            loadingState.value = false;
-        };
-        pageState.onUpdate = update;
-        filterState.onUpdate = update;
-        element.appendChild(await TrackTemplates.trackList(tracksState, pageState, type, filterState));
-        pageState.value = 1;
     }
 }

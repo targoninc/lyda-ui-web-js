@@ -15,11 +15,14 @@ import {compute, signal} from "../../../fjsc/src/signals.ts";
 import {DefaultImages} from "../../Enums/DefaultImages.ts";
 import {MediaFileType} from "../../Enums/MediaFileType.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
-import {Ui} from "../../Classes/Ui.ts";
+import {notify, Ui} from "../../Classes/Ui.ts";
 import {MediaActions} from "../../Actions/MediaActions.ts";
 import {TrackActions} from "../../Actions/TrackActions.ts";
 import {startItem} from "../../Actions/MusicActions.ts";
 import {Icons} from "../../Enums/Icons.ts";
+import {ApiRoutes} from "../../Api/ApiRoutes.ts";
+import {Api} from "../../Api/Api.ts";
+import {NotificationType} from "../../Enums/NotificationType.ts";
 
 export class MusicTemplates {
     static feedEntry(type: ItemType, item: Track | Playlist | Album) {
@@ -183,5 +186,53 @@ export class MusicTemplates {
             isUrl: true,
             classes: ["inline-icon", "svgInverted"]
         }, onclick);
+    }
+
+    static feed(type: string) {
+        const feedMap: Record<string, string> = {
+            following: ApiRoutes.followingFeed,
+            explore: ApiRoutes.exploreFeed,
+            history: ApiRoutes.historyFeed,
+            autoQueue: ApiRoutes.autoQueueFeed,
+        };
+        const endpoint = feedMap[type];
+        const pageState = signal(1);
+        const tracksState = signal<Track[]>([]);
+        const filterState = signal("all");
+        const loadingState = signal(false);
+        const pageSize = 10;
+        const update = async () => {
+            const pageNumber = pageState.value;
+            const filter = filterState.value;
+            const offset = (pageNumber - 1) * pageSize;
+            const params = type === "following" ? {offset, filter} : {offset};
+            loadingState.value = true;
+            const res = await Api.getAsync<Track[]>(endpoint, params);
+            if (res.code !== 200) {
+                notify(`Failed to get tracks: ${res.data.error}`, NotificationType.error);
+                loadingState.value = false;
+                return;
+            }
+            const newTracks = res.data as Track[];
+            if (newTracks && newTracks.length === 0 && pageNumber > 1) {
+                pageState.value -= 1;
+                loadingState.value = false;
+                return;
+            }
+            tracksState.value = newTracks;
+            loadingState.value = false;
+        };
+        pageState.onUpdate = update;
+        filterState.onUpdate = update;
+        pageState.value = 1;
+        const feedVisible = compute(u => u || type === "explore", currentUser);
+
+        return create("div")
+            .children(
+                ifjs(feedVisible, create("span")
+                    .text("Log in to see this feed")
+                    .build(), true),
+                ifjs(feedVisible, TrackTemplates.trackList(tracksState, pageState, type, filterState))
+            ).build();
     }
 }
