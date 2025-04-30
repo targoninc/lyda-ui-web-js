@@ -35,7 +35,9 @@ export class ProfilePage {
         ProfilePage.addTracksAsync(tracksContainer, user, isOwnProfile).then();
         ProfilePage.addPlaylistsAsync(playlistsContainer, user, isOwnProfile).then();
         ProfilePage.addRepostsAsync(repostsContainer, user, isOwnProfile).then();
-        historyContainer.replaceChildren(MusicTemplates.feed("history"));
+        historyContainer.replaceChildren(MusicTemplates.feed("history", {
+            userId: user.id
+        }));
     }
 
     static async addTracksAsync(element: AnyElement, user: User, isOwnProfile: boolean) {

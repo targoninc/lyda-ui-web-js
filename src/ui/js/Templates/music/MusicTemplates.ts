@@ -188,7 +188,7 @@ export class MusicTemplates {
         }, onclick);
     }
 
-    static feed(type: string) {
+    static feed(type: string, options: any) {
         const feedMap: Record<string, string> = {
             following: ApiRoutes.followingFeed,
             explore: ApiRoutes.exploreFeed,
@@ -207,7 +207,7 @@ export class MusicTemplates {
             const offset = (pageNumber - 1) * pageSize;
             const params = type === "following" ? {offset, filter} : {offset};
             loadingState.value = true;
-            const res = await Api.getAsync<Track[]>(endpoint, params);
+            const res = await Api.getAsync<Track[]>(endpoint, Object.assign(params, options));
             if (res.code !== 200) {
                 notify(`Failed to get tracks: ${res.data.error}`, NotificationType.error);
                 loadingState.value = false;
