@@ -188,7 +188,7 @@ export class MusicTemplates {
         }, onclick);
     }
 
-    static feed(type: string, options: any) {
+    static feed(type: string, options: any = {}) {
         const feedMap: Record<string, string> = {
             following: ApiRoutes.followingFeed,
             explore: ApiRoutes.exploreFeed,
