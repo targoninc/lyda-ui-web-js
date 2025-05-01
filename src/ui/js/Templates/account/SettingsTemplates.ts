@@ -59,6 +59,11 @@ export class SettingsTemplates {
                         create("h2")
                             .text("My Permissions")
                             .build(),
+                        FJSC.button({
+                            text: "Go to Administration",
+                            icon: { icon: "terminal" },
+                            onclick: () => navigate(RoutePath.admin)
+                        }),
                         signalMap(permissions, create("div").classes("flex-v"), (permission: Permission) => SettingsTemplates.permissionCard(permission))
                     ).build()),
             ).build();
