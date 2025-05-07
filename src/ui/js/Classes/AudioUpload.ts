@@ -137,10 +137,11 @@ export class AudioUpload {
     async createTrack() {
         const state = this.state.value;
 
-        const res = await Api.postAsync<Track>(ApiRoutes.createTrack, {
+        const res = await Api.postAsync<Track>(ApiRoutes.createTrack, <Partial<Track>>{
             title: state.title,
             isrc: state.isrc,
             upc: state.upc,
+            artistname: state.artistname,
             visibility: state.visibility,
             collaborators: state.collaborators,
             credits: state.credits,
