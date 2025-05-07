@@ -812,7 +812,7 @@ export class GenericTemplates {
         }
 
         return create("div")
-            .classes("flex", "clickable", "fakeButton", "padded", "rounded", selectedClassState)
+            .classes("flex", "clickable", "align-children", "fakeButton", "padded", "rounded", selectedClassState)
             .onclick(() => {
                 selectedState.value = entry.id;
             })
