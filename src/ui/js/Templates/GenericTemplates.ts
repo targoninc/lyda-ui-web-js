@@ -15,7 +15,7 @@ import {
     TypeOrSignal
 } from "../../fjsc/src/f2.ts";
 import {FJSC} from "../../fjsc";
-import {IconConfig, InputType, SearchableSelectConfig} from "../../fjsc/src/Types.ts";
+import {IconConfig, InputType, SearchableSelectConfig, SelectOption} from "../../fjsc/src/Types.ts";
 import {getAvatar, Util} from "../Classes/Util.ts";
 import {navigate} from "../Routing/Router.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
@@ -33,6 +33,7 @@ import {AuthActions} from "../Actions/AuthActions.ts";
 import {PaypalWebhook} from "../Models/DbModels/finance/PaypalWebhook.ts";
 import {Filter} from "../Models/Filter.ts";
 import { Images } from "../Enums/Images.ts";
+import {CollaboratorType} from "../Models/DbModels/lyda/CollaboratorType.ts";
 
 export class GenericTemplates {
     static icon(icon: StringOrSignal, adaptive = false, classes: StringOrSignal[] = [], title = "", onclick: Function | undefined = undefined) {
@@ -832,12 +833,13 @@ export class GenericTemplates {
                               icon: StringOrSignal, confirmText: StringOrSignal, cancelText: StringOrSignal,
                               confirmCallback: Function, cancelCallback: Function) {
         const selectedState = signal(0);
-        const userMap = new Map();
         const collabTypeOptions = signal(create("span").text("Loading collab types...").build());
         const collabType = signal("1");
-        TrackActions.getCollabTypes().then(types => {
+        let collabTypes: CollaboratorType[] = [];
+        TrackActions.getCollabTypes().then((types) => {
+            collabTypes = types;
             collabTypeOptions.value = FJSC.searchableSelect(<SearchableSelectConfig>{
-                options: signal(types),
+                options: signal(types as SelectOption[]),
                 value: collabType,
                 onchange: (v) => {
                     collabType.value = v;
@@ -896,9 +898,7 @@ export class GenericTemplates {
                                 FJSC.button({
                                     text: confirmText ?? "Confirm",
                                     onclick: async () => {
-                                        const user = userMap.get(selectedState.value); // TODO: Typing lol
-                                        user.collab_type = parseInt(collabType.value);
-                                        confirmCallback(selectedState.value, user, collabType);
+                                        confirmCallback(selectedState.value, parseInt(collabType.value), collabTypes);
                                     },
                                     icon: {
                                         icon: "person_add"

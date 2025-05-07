@@ -182,10 +182,10 @@ export class Ui {
                                        confirmText: StringOrSignal, cancelText: StringOrSignal,
                                        confirmCallback: Function = () => {}, cancelCallback: Function = () => {},
                                        icon = "") {
-        const confirmCallback2 = async (username: string, newUser: TrackCollaborator, collabTypes: CollaboratorType[]) => {
+        const confirmCallback2 = async (username: string, collabType: number, collabTypes: CollaboratorType[]) => {
             Util.removeModal();
             const user = await Util.getUserByNameAsync(username);
-            user.collab_type = collabTypes.find(x => x.id === newUser.collab_type?.id);
+            user.collab_type = collabTypes.find(x => x.id === collabType);
             confirmCallback(username, user);
         };
         const cancelCallback2 = () => {

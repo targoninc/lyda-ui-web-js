@@ -21,6 +21,7 @@ import {currentQuality, playingHere} from "../state.ts";
 import {TrackCollaborator} from "../Models/DbModels/lyda/TrackCollaborator.ts";
 import {ListTrack} from "../Models/ListTrack.ts";
 import {RoutePath} from "../Routing/routes.ts";
+import {CollaboratorType} from "../Models/DbModels/lyda/CollaboratorType.ts";
 
 export class TrackActions {
     static async savePlay(id: number) {
@@ -195,12 +196,12 @@ export class TrackActions {
     }
 
     static async getCollabTypes() {
-        const res = await Api.getAsync(ApiRoutes.getTrackCollabTypes);
+        const res = await Api.getAsync<CollaboratorType[]>(ApiRoutes.getTrackCollabTypes);
         if (res.code !== 200) {
             notify("Error while trying to get collab types: " + getErrorMessage(res), NotificationType.error);
             return [];
         }
-        return res.data;
+        return res.data as CollaboratorType[];
     }
 
     static async toggleLike(id: number, isEnabled: boolean) {
