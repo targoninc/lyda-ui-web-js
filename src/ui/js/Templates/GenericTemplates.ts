@@ -16,7 +16,7 @@ import {
 } from "../../fjsc/src/f2.ts";
 import {FJSC} from "../../fjsc";
 import {IconConfig, InputType, SearchableSelectConfig} from "../../fjsc/src/Types.ts";
-import {Util} from "../Classes/Util.ts";
+import {getAvatar, Util} from "../Classes/Util.ts";
 import {navigate} from "../Routing/Router.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {ProgressState} from "../Enums/ProgressState.ts";
@@ -32,6 +32,7 @@ import {RoutePath} from "../Routing/routes.ts";
 import {AuthActions} from "../Actions/AuthActions.ts";
 import {PaypalWebhook} from "../Models/DbModels/finance/PaypalWebhook.ts";
 import {Filter} from "../Models/Filter.ts";
+import { Images } from "../Enums/Images.ts";
 
 export class GenericTemplates {
     static icon(icon: StringOrSignal, adaptive = false, classes: StringOrSignal[] = [], title = "", onclick: Function | undefined = undefined) {
@@ -800,11 +801,16 @@ export class GenericTemplates {
         });
     }
 
-    static addUserLinkSearchResult(entry: { id: number, display: string, image?: string }, selectedState: Signal<number>) {
+    static addUserLinkSearchResult(entry: SearchResult, selectedState: Signal<number>) {
         const selectedClassState = signal(selectedState.value === entry.id ? "active" : "_");
         selectedState.onUpdate = (newSelected: number) => {
             selectedClassState.value = newSelected === entry.id ? "active" : "_";
         };
+        const avatar = signal(Images.DEFAULT_AVATAR);
+        if (entry.hasImage) {
+            avatar.value = Util.getUserAvatar(entry.id);
+        }
+
         return create("div")
             .classes("flex", "clickable", "fakeButton", "padded", "rounded", selectedClassState)
             .onclick(() => {
@@ -813,7 +819,7 @@ export class GenericTemplates {
             .children(
                 create("img")
                     .classes("user-icon", "nopointer")
-                    .attributes("src", entry.image)
+                    .attributes("src", avatar)
                     .build(),
                 create("span")
                     .classes("nopointer")
@@ -838,6 +844,7 @@ export class GenericTemplates {
                 }
             });
         });
+        const users = signal<SearchResult[]>([]);
 
         return GenericTemplates.modal([
                 create("div")
@@ -871,22 +878,17 @@ export class GenericTemplates {
                                     filters: JSON.stringify(["users"])
                                 });
                                 if (res.code === 200) {
-                                    const results = document.getElementById("user-search-results");
-                                    if (results) {
-                                        results.innerHTML = "";
-                                        for (const user of res.data) {
-                                            userMap.set(user.id, user);
-                                            results.appendChild(GenericTemplates.addUserLinkSearchResult(user, selectedState));
-                                        }
-                                    }
+                                    users.value = res.data;
                                 }
                             },
                         }),
                         create("div")
                             .classes("flex-v")
                             .styles("max-height", "200px", "overflow", "auto", "flex-wrap", "nowrap")
-                            .id("user-search-results")
-                            .build(),
+                            .children(
+                                signalMap(users, create("div").classes("flex-v"),
+                                    user => GenericTemplates.addUserLinkSearchResult(user, selectedState))
+                            ).build(),
                         collabTypeOptions,
                         create("div")
                             .classes("flex")
