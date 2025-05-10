@@ -24,5 +24,5 @@ export function anonymize(text: string, startLength: number = 2, endLength: numb
         return "";
     }
 
-    return text.substring(0, startLength) + "***" + text.substring(-endLength);
+    return text.substring(0, startLength) + "***" + text.substring(text.length - endLength - 1, endLength);
 }
