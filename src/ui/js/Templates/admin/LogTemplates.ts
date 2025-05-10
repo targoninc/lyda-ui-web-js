@@ -2,7 +2,7 @@ import {Time} from "../../Classes/Helpers/Time.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
 import {GenericTemplates} from "../GenericTemplates.ts";
 import {copy, Util} from "../../Classes/Util.ts";
-import {AnyElement, create, ifjs} from "../../../fjsc/src/f2.ts";
+import {AnyElement, create, ifjs, signalMap} from "../../../fjsc/src/f2.ts";
 import {User} from "../../Models/DbModels/lyda/User.ts";
 import {compute, signal, Signal} from "../../../fjsc/src/signals.ts";
 import {PillOption} from "../../Models/PillOption.ts";
@@ -13,32 +13,42 @@ import {LydaApi} from "../../Api/LydaApi.ts";
 import {truncateText} from "../../Classes/Helpers/CustomText.ts";
 import {DashboardTemplates} from "./DashboardTemplates.ts";
 import {Permissions} from "../../Enums/Permissions.ts";
+import {notify} from "../../Classes/Ui.ts";
+import {NotificationType} from "../../Enums/NotificationType.ts";
+import {permissions} from "../../state.ts";
+import {Api} from "../../Api/Api.ts";
+import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 
 export class LogTemplates {
-    static async actionLogs(selfUser: User, data: any[]) {
-        const users: Record<number, User> = {};
-        for (const log of data) {
-            if (!users[log.user_id]) {
-                users[log.user_id] = await Util.getUserAsync(log.user_id);
-            }
-            if (!users[log.actionedUserId]) {
-                users[log.actionedUserId] = await Util.getUserAsync(log.actionedUserId);
-            }
-        }
+    static actionLogsPage() {
+        return DashboardTemplates.pageNeedingPermissions(
+            [Permissions.canViewActionLogs],
+            LogTemplates.actionLogsView()
+        );
+    }
 
+    static actionLogsView() {
+        const actionLogs = signal<any[]>([]);
+        Api.getAsync<any[]>(ApiRoutes.getActionLogs).then(res => {
+            if (res.code === 200) {
+                actionLogs.value = res.data;
+            }
+        });
+
+        return LogTemplates.actionLogs(actionLogs);
+    }
+
+    static actionLogs(logs: Signal<any[]>) {
         return create("table")
             .classes("logs")
             .attributes("cellspacing", "0", "cellpadding", "0")
             .children(
                 LogTemplates.logsTableHeader(),
-                create("tbody")
-                    .children(
-                        ...data.map(l => LogTemplates.actionLogEntry(l, users, selfUser))
-                    ).build(),
+                signalMap(logs, create("tbody"), l => LogTemplates.actionLogEntry(l)),
             ).build();
     }
 
-    private static actionLogEntry(l: any, users: Record<number, User>, selfUser: User) {
+    private static actionLogEntry(l: any) {
         return create("tr")
             .classes("log", l.type)
             .children(
@@ -49,7 +59,7 @@ export class LogTemplates {
                 create("td")
                     .classes("log-user")
                     .children(
-                        UserTemplates.userWidget(users[l.user_id], users[l.user_id].follows?.some(f => f.following_user_id === selfUser.id) ?? false),
+                        UserTemplates.userWidget(l.user, Util.userIsFollowing(l.user)),
                     ).build(),
                 create("td")
                     .classes("log-action-name")
@@ -58,7 +68,7 @@ export class LogTemplates {
                 create("td")
                     .classes("log-user")
                     .children(
-                        UserTemplates.userWidget(users[l.actioned_user_id], users[l.actionedUserId].follows?.some(f => f.following_user_id === selfUser.id) ?? false),
+                        UserTemplates.userWidget(l.actioned_user, Util.userIsFollowing(l.actioned_user)),
                     ).build(),
                 LogTemplates.properties(l.additional_info),
             ).build();

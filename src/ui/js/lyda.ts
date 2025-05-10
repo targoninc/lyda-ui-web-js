@@ -137,18 +137,6 @@ export class Lyda {
                 const page = UserTemplates.libraryPage(library.albums, library.playlists, library.tracks);
                 element.appendChild(page);
                 break;
-            case "actionLogs":
-                if (!user) {
-                    notify("You need to be logged in to see action logs", NotificationType.error);
-                    return;
-                }
-                if (!permissions.value.some(p => p.name === Permissions.canViewActionLogs)) {
-                    notify("You do not have permission to view action logs", NotificationType.error);
-                    return;
-                }
-                const actionLogs = await Api.getAsync<any[]>(ApiRoutes.getActionLogs);
-                element.appendChild(await LogTemplates.actionLogs(user, actionLogs.data));
-                break;
             case "unapprovedTracks":
                 if (!user) {
                     notify("You need to be logged in to see unapproved tracks", NotificationType.error);

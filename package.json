@@ -27,5 +27,5 @@
     "express": "^5.0.0",
     "typescript": "^5.5.3"
   },
-  "version": "0.0.87"
+  "version": "0.0.88"
 }

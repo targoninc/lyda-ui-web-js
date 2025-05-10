@@ -52,7 +52,7 @@ export class PageTemplates {
         [RoutePath.payments]: PaymentTemplates.paymentsPage,
         [RoutePath.moderation]: ModerationCommentsTemplates.commentModerationPage,
         [RoutePath.logs]: LogTemplates.logsPage,
-        [RoutePath.actionLogs]: this.actionLogsPage,
+        [RoutePath.actionLogs]: LogTemplates.actionLogsPage,
         [RoutePath.users]: ModerationUsersTemplates.usersPage,
         [RoutePath.events]: EventsTemplates.eventsPage,
     };
@@ -164,14 +164,6 @@ export class PageTemplates {
                     .text("We take a percentage of all subscriptions and sales. This varies based on how high our income and expenses are.")
                     .build()
             )
-            .build();
-    }
-
-    static actionLogsPage() {
-        return create("div")
-            .classes("logs")
-            .attributes("lyda", "")
-            .attributes("datatype", "actionLogs")
             .build();
     }
 
