@@ -668,6 +668,10 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     gap: 1px;
 }
 
+.trackPage .waveform {
+    height: 2em;
+}
+
 .processing-box {
     background: linear-gradient(45deg, var(--color-6), var(--color-7));
     position: relative;
