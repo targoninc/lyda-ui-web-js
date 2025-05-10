@@ -1,9 +1,9 @@
-import {Icons} from "../Enums/Icons.ts";
-import {AlbumActions} from "../Actions/AlbumActions.ts";
-import {PlaylistActions} from "../Actions/PlaylistActions.ts";
-import {Links} from "../Enums/Links.ts";
-import {Api} from "../Api/Api.ts";
-import {TrackActions} from "../Actions/TrackActions.ts";
+import {Icons} from "../../Enums/Icons.ts";
+import {AlbumActions} from "../../Actions/AlbumActions.ts";
+import {PlaylistActions} from "../../Actions/PlaylistActions.ts";
+import {Links} from "../../Enums/Links.ts";
+import {Api} from "../../Api/Api.ts";
+import {TrackActions} from "../../Actions/TrackActions.ts";
 import {
     AnyElement,
     AnyNode,
@@ -13,27 +13,27 @@ import {
     signalMap, SignalMapCallback,
     StringOrSignal,
     TypeOrSignal
-} from "../../fjsc/src/f2.ts";
-import {FJSC} from "../../fjsc";
-import {IconConfig, InputType, SearchableSelectConfig, SelectOption} from "../../fjsc/src/Types.ts";
-import {getAvatar, Util} from "../Classes/Util.ts";
-import {navigate} from "../Routing/Router.ts";
-import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {ProgressState} from "../Enums/ProgressState.ts";
-import {ProgressPart} from "../Models/ProgressPart.ts";
-import {compute, signal, Signal} from "../../fjsc/src/signals.ts";
-import {SearchResult} from "../Models/SearchResult.ts";
-import {currentTrackId, openMenus, playingHere} from "../state.ts";
-import {PillOption} from "../Models/PillOption.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
-import {dayFromValue} from "../Classes/Helpers/Date.ts";
-import {PlayManager} from "../Streaming/PlayManager.ts";
-import {RoutePath} from "../Routing/routes.ts";
-import {AuthActions} from "../Actions/AuthActions.ts";
-import {PaypalWebhook} from "../Models/DbModels/finance/PaypalWebhook.ts";
-import {Filter} from "../Models/Filter.ts";
-import { Images } from "../Enums/Images.ts";
-import {CollaboratorType} from "../Models/DbModels/lyda/CollaboratorType.ts";
+} from "../../../fjsc/src/f2.ts";
+import {FJSC} from "../../../fjsc";
+import {IconConfig, InputType, SearchableSelectConfig, SelectOption} from "../../../fjsc/src/Types.ts";
+import {getAvatar, Util} from "../../Classes/Util.ts";
+import {navigate} from "../../Routing/Router.ts";
+import {ApiRoutes} from "../../Api/ApiRoutes.ts";
+import {ProgressState} from "../../Enums/ProgressState.ts";
+import {ProgressPart} from "../../Models/ProgressPart.ts";
+import {compute, signal, Signal} from "../../../fjsc/src/signals.ts";
+import {SearchResult} from "../../Models/SearchResult.ts";
+import {currentTrackId, openMenus, playingHere} from "../../state.ts";
+import {PillOption} from "../../Models/PillOption.ts";
+import {NotificationType} from "../../Enums/NotificationType.ts";
+import {dayFromValue} from "../../Classes/Helpers/Date.ts";
+import {PlayManager} from "../../Streaming/PlayManager.ts";
+import {RoutePath} from "../../Routing/routes.ts";
+import {AuthActions} from "../../Actions/AuthActions.ts";
+import {PaypalWebhook} from "../../Models/DbModels/finance/PaypalWebhook.ts";
+import {Filter} from "../../Models/Filter.ts";
+import { Images } from "../../Enums/Images.ts";
+import {CollaboratorType} from "../../Models/DbModels/lyda/CollaboratorType.ts";
 
 export class GenericTemplates {
     static icon(icon: StringOrSignal, adaptive = false, classes: StringOrSignal[] = [], title = "", onclick: Function | undefined = undefined) {

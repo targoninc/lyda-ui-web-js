@@ -1,7 +1,7 @@
 import {create, ifjs, signalMap} from "../../fjsc/src/f2.ts";
 import {currency, Num as NumberFormatter} from "../Classes/Helpers/Num.ts";
 import {getSubscriptionLink, SubscriptionActions} from "../Actions/SubscriptionActions.ts";
-import {GenericTemplates} from "./GenericTemplates.ts";
+import {GenericTemplates} from "./generic/GenericTemplates.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {compute, signal, Signal} from "../../fjsc/src/signals.ts";
 import {AvailableSubscription} from "../Models/DbModels/finance/AvailableSubscription.ts";

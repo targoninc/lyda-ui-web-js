@@ -7,7 +7,7 @@ import {AnyElement, create, ifjs} from "../../../fjsc/src/f2.ts";
 import {FJSC} from "../../../fjsc";
 import {TrackActions} from "../../Actions/TrackActions.ts";
 import {CommentActions} from "../../Actions/CommentActions.ts";
-import {GenericTemplates} from "../GenericTemplates.ts";
+import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {InputType} from "../../../fjsc/src/Types.ts";
 
 export class ModerationCommentsTemplates {

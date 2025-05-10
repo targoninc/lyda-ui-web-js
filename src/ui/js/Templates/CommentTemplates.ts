@@ -1,4 +1,4 @@
-import {GenericTemplates} from "./GenericTemplates.ts";
+import {GenericTemplates} from "./generic/GenericTemplates.ts";
 import {Icons} from "../Enums/Icons.js";
 import {CommentActions} from "../Actions/CommentActions.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";

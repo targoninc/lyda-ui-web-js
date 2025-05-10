@@ -1,5 +1,5 @@
 import {NavTemplates} from "../../Templates/NavTemplates.ts";
-import {GenericTemplates} from "../../Templates/GenericTemplates.ts";
+import {GenericTemplates} from "../../Templates/generic/GenericTemplates.ts";
 import {NotificationReference} from "../../Models/NotificationReference.ts";
 import {Notification} from "../../Models/DbModels/lyda/Notification.ts";
 

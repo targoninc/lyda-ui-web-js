@@ -4,7 +4,7 @@ import {notify} from "../Classes/Ui.ts";
 import {navigate} from "../Routing/Router.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
-import {GenericTemplates} from "./GenericTemplates.ts";
+import {GenericTemplates} from "./generic/GenericTemplates.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {SearchResult} from "../Models/SearchResult.ts";
 import {Util} from "../Classes/Util.ts";

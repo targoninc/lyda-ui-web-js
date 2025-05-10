@@ -5,7 +5,7 @@ import {Api} from "../../Api/Api.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {FJSC} from "../../../fjsc";
 import {copy, target} from "../../Classes/Util.ts";
-import {GenericTemplates} from "../GenericTemplates.ts";
+import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
 import {notify} from "../../Classes/Ui.ts";
 import {NotificationType} from "../../Enums/NotificationType.ts";

@@ -2,7 +2,7 @@ import {target, Util} from "../../Classes/Util.ts";
 import {TrackActions} from "../../Actions/TrackActions.ts";
 import {TrackTemplates} from "../music/TrackTemplates.ts";
 import {UserActions} from "../../Actions/UserActions.ts";
-import {GenericTemplates} from "../GenericTemplates.ts";
+import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {AlbumTemplates} from "../music/AlbumTemplates.ts";
 import {Icons as Icons} from "../../Enums/Icons.ts";
 import {Badges} from "../../Enums/Badges.ts";

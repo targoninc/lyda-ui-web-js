@@ -635,6 +635,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 .chart-container {
     width: 600px !important;
     max-width: 100% !important;
+    max-height: 400px;
 }
 
 .chart-container-full {

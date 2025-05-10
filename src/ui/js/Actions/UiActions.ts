@@ -1,4 +1,4 @@
-import {GenericTemplates} from "../Templates/GenericTemplates.ts";
+import {GenericTemplates} from "../Templates/generic/GenericTemplates.ts";
 import {MenuTemplates} from "../Templates/MenuTemplates.ts";
 import {Util} from "../Classes/Util.ts";
 import {FeatureDetector} from "../Classes/Helpers/FeatureDetector.ts";

@@ -8,7 +8,7 @@ import {UiActions} from "./js/Actions/UiActions.ts";
 import {Ui} from "./js/Classes/Ui.ts";
 import {Util} from "./js/Classes/Util.ts";
 import {RoutePath, routes} from "./js/Routing/routes.js";
-import {GenericTemplates} from "./js/Templates/GenericTemplates.ts";
+import {GenericTemplates} from "./js/Templates/generic/GenericTemplates.ts";
 import {currentTrackId, currentTrackPosition, currentUser, permissions} from "./js/state.ts";
 import {StreamingBroadcaster} from "./js/Streaming/StreamingBroadcaster.ts";
 import {TrackPosition} from "./js/Models/TrackPosition.ts";

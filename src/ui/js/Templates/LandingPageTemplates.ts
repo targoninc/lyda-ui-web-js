@@ -1,6 +1,6 @@
 import {AuthApi} from "../Api/AuthApi.ts";
-import {GenericTemplates} from "./GenericTemplates.ts";
-import {FormTemplates} from "./FormTemplates.ts";
+import {GenericTemplates} from "./generic/GenericTemplates.ts";
+import {FormTemplates} from "./generic/FormTemplates.ts";
 import {UserValidator} from "../Classes/Validators/UserValidator.ts";
 import {finalizeLogin, target, Util} from "../Classes/Util.ts";
 import {notify} from "../Classes/Ui.ts";

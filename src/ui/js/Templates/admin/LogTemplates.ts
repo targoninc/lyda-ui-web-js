@@ -1,6 +1,6 @@
 import {Time} from "../../Classes/Helpers/Time.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
-import {GenericTemplates} from "../GenericTemplates.ts";
+import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {copy, Util} from "../../Classes/Util.ts";
 import {AnyElement, create, ifjs, signalMap} from "../../../fjsc/src/f2.ts";
 import {User} from "../../Models/DbModels/lyda/User.ts";

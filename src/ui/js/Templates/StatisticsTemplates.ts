@@ -9,7 +9,7 @@ import {create, ifjs, nullElement, StringOrSignal, TypeOrSignal} from "../../fjs
 import {FJSC} from "../../fjsc";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
-import {GenericTemplates} from "./GenericTemplates.ts";
+import {GenericTemplates} from "./generic/GenericTemplates.ts";
 import {ItemType} from "../Enums/ItemType.ts";
 
 export class StatisticsTemplates {
@@ -70,7 +70,7 @@ export class StatisticsTemplates {
             ).build();
     }
 
-    static genericUserListOpener(type: string, items: any[], disabled: Signal<boolean> = signal(false)) {
+    static genericUserListOpener(type: string, items: any[]) {
         const open$ = signal(false);
         open$.subscribe((value: boolean) => {
             if (!value) {

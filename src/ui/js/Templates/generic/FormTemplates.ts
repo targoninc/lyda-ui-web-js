@@ -1,9 +1,9 @@
 import {GenericTemplates} from "./GenericTemplates.ts";
-import {FJSC} from "../../fjsc";
-import {InputType, SelectOption} from "../../fjsc/src/Types.ts";
-import {Genre} from "../Enums/Genre.ts";
-import {create, HtmlPropertyValue, StringOrSignal, TypeOrSignal} from "../../fjsc/src/f2.ts";
-import {compute, signal, Signal} from "../../fjsc/src/signals.ts";
+import {FJSC} from "../../../fjsc";
+import {InputType, SelectOption} from "../../../fjsc/src/Types.ts";
+import {Genre} from "../../Enums/Genre.ts";
+import {create, HtmlPropertyValue, StringOrSignal, TypeOrSignal} from "../../../fjsc/src/f2.ts";
+import {compute, signal, Signal} from "../../../fjsc/src/signals.ts";
 
 export class FormTemplates {
     static fileField(title: string, text: string, name: string, accept: string, required = false, onchange = (v: string, files: FileList | null) => {}) {

@@ -4,7 +4,7 @@ import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {Api} from "../../Api/Api.ts";
 import {create, ifjs} from "../../../fjsc/src/f2.ts";
 import {FJSC} from "../../../fjsc";
-import {GenericTemplates} from "../GenericTemplates.ts";
+import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {Permissions} from "../../Enums/Permissions.ts";
 import {DashboardTemplates} from "./DashboardTemplates.ts";
 import {Permission} from "../../Models/DbModels/lyda/Permission.ts";

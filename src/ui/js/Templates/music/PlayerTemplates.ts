@@ -6,7 +6,7 @@ import {QueueTemplates} from "./QueueTemplates.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
 import {StatisticsTemplates} from "../StatisticsTemplates.ts";
 import {CommentTemplates} from "../CommentTemplates.ts";
-import {GenericTemplates} from "../GenericTemplates.ts";
+import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {Ui} from "../../Classes/Ui.ts";
 import {Util} from "../../Classes/Util.ts";
 import {AnyElement, create, ifjs} from "../../../fjsc/src/f2.ts";

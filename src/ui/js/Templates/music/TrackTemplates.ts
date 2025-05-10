@@ -3,7 +3,7 @@ import {UserTemplates} from "../account/UserTemplates.ts";
 import {copy, Util} from "../../Classes/Util.ts";
 import {Icons} from "../../Enums/Icons.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
-import {GenericTemplates} from "../GenericTemplates.ts";
+import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
 import {QueueManager} from "../../Streaming/QueueManager.ts";
 import {StatisticsTemplates} from "../StatisticsTemplates.ts";

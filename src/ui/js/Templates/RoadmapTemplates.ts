@@ -1,5 +1,5 @@
 import {create} from "../../fjsc/src/f2.ts";
-import {GenericTemplates} from "./GenericTemplates.ts";
+import {GenericTemplates} from "./generic/GenericTemplates.ts";
 import {roadMapItemIcons, RoadmapItemStatus} from "../Enums/RoadmapItemStatus.ts";
 
 let index = 0;

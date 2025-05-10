@@ -1,4 +1,4 @@
-import {GenericTemplates} from "../Templates/GenericTemplates.ts";
+import {GenericTemplates} from "../Templates/generic/GenericTemplates.ts";
 import {PlaylistTemplates} from "../Templates/music/PlaylistTemplates.ts";
 import {Api} from "../Api/Api.ts";
 import {getErrorMessage, Util} from "../Classes/Util.ts";

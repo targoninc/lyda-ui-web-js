@@ -1,5 +1,5 @@
 import {Icons} from "../../Enums/Icons.ts";
-import {GenericTemplates} from "../GenericTemplates.ts";
+import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {PlaylistActions} from "../../Actions/PlaylistActions.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
 import {TrackTemplates} from "./TrackTemplates.ts";

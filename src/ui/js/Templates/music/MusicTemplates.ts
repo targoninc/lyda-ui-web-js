@@ -1,4 +1,4 @@
-import {GenericTemplates} from "../GenericTemplates.ts";
+import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {Track} from "../../Models/DbModels/lyda/Track.ts";
 import {Album} from "../../Models/DbModels/lyda/Album.ts";
 import {Playlist} from "../../Models/DbModels/lyda/Playlist.ts";

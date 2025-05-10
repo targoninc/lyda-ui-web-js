@@ -1,5 +1,5 @@
 import data from "../../../../../package.json";
-import {GenericTemplates} from "../../Templates/GenericTemplates.ts";
+import {GenericTemplates} from "../../Templates/generic/GenericTemplates.ts";
 
 export const version: string = data.version;
 

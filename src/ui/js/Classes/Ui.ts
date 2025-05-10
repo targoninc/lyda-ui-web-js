@@ -2,7 +2,7 @@ import {Util} from "./Util.ts";
 import {Api} from "../Api/Api.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {NavTemplates} from "../Templates/NavTemplates.ts";
-import {GenericTemplates} from "../Templates/GenericTemplates.ts";
+import {GenericTemplates} from "../Templates/generic/GenericTemplates.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {UserActions} from "../Actions/UserActions.ts";
 import {AnyElement, HtmlPropertyValue, StringOrSignal} from "../../fjsc/src/f2.ts";

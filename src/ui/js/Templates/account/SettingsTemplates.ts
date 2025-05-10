@@ -1,7 +1,7 @@
 import {create, ifjs, signalMap} from "../../../fjsc/src/f2.ts";
 import {UserActions} from "../../Actions/UserActions.ts";
 import {Theme} from "../../Enums/Theme.ts";
-import {GenericTemplates} from "../GenericTemplates.ts";
+import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {getUserSettingValue, Util} from "../../Classes/Util.ts";
 import {UserSettings} from "../../Enums/UserSettings.ts";
 import {FJSC} from "../../../fjsc";

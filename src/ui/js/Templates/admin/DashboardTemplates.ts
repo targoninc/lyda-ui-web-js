@@ -2,7 +2,7 @@ import {AnyElement, create, ifjs} from "../../../fjsc/src/f2.ts";
 import {navigate} from "../../Routing/Router.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {FJSC} from "../../../fjsc";
-import {GenericTemplates} from "../GenericTemplates.ts";
+import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {permissions} from "../../state.ts";
 import {compute} from "../../../fjsc/src/signals.ts";
 import {Permissions} from "../../Enums/Permissions.ts";

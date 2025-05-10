@@ -4,7 +4,7 @@ import {signal} from "../../../fjsc/src/signals.ts";
 import {create} from "../../../fjsc/src/f2.ts";
 import {Api} from "../../Api/Api.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
-import {GenericTemplates} from "../GenericTemplates.ts";
+import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {PaymentHistory} from "../../Models/DbModels/finance/PaymentHistory.ts";
 import {InputType} from "../../../fjsc/src/Types.ts";
 import { Time } from "../../Classes/Helpers/Time.ts";

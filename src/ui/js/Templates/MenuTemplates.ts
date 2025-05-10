@@ -1,6 +1,6 @@
 import {AlbumActions} from "../Actions/AlbumActions.ts";
 import {PlaylistActions} from "../Actions/PlaylistActions.ts";
-import {GenericTemplates} from "./GenericTemplates.ts";
+import {GenericTemplates} from "./generic/GenericTemplates.ts";
 import {Util} from "../Classes/Util.ts";
 import {navigate} from "../Routing/Router.ts";
 import {AnyElement, create, HtmlPropertyValue, StringOrSignal} from "../../fjsc/src/f2.ts";

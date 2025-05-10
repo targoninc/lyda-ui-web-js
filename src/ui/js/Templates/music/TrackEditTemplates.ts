@@ -1,5 +1,5 @@
-import {FormTemplates} from "../FormTemplates.ts";
-import {GenericTemplates} from "../GenericTemplates.ts";
+import {FormTemplates} from "../generic/FormTemplates.ts";
+import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {Icons} from "../../Enums/Icons.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
 import {Images} from "../../Enums/Images.ts";
