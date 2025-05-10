@@ -132,26 +132,16 @@ export class StatisticTemplates {
                         create("span")
                             .text("Available")
                             .build(),
-                    ).build(),
-                create("div")
-                    .classes("card", "secondary", "flex-v")
-                    .children(
-                        create("h1")
-                            .text(currency(royaltyInfo.totalRoyalties))
+                        create("span")
+                            .classes("text-small")
+                            .text(currency(royaltyInfo.totalRoyalties) + " Total royalties")
                             .build(),
                         create("span")
-                            .text("Total royalties")
-                            .build(),
-                    ).build(),
-                create("div")
-                    .classes("flex-v")
-                    .children(
-                        create("span")
-                            .classes("royalty-info-text", "card", "secondary")
+                            .classes("text-small")
                             .text(currency(royaltyInfo.paidTotal) + " paid out")
                             .build(),
                         create("span")
-                            .classes("royalty-info-text", "card", "secondary")
+                            .classes("text-small")
                             .text(currency(royaltyInfo.meanTrackRoyalty) + " average track royalty")
                             .build(),
                     ).build(),
