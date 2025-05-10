@@ -18,8 +18,9 @@ import {ModerationUsersTemplates} from "./admin/ModerationUsersTemplates.ts";
 import {ModerationCommentsTemplates} from "./admin/ModerationCommentsTemplates.ts";
 import {LogTemplates} from "./admin/LogTemplates.ts";
 import {RoyaltyTemplates} from "./admin/RoyaltyTemplates.ts";
-import {PaymentTemplates} from "./admin/PaymentTemplates.ts";
+import {PayoutTemplates} from "./money/PayoutTemplates.ts";
 import {MusicTemplates} from "./music/MusicTemplates.ts";
+import {PaymentTemplates} from "./money/PaymentTemplates.ts";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, Function> = {
@@ -45,11 +46,12 @@ export class PageTemplates {
         [RoutePath.verifyEmail]: LandingPageTemplates.newLandingPage,
         [RoutePath.search]: SearchTemplates.searchPage,
         [RoutePath.roadmap]: RoadmapTemplates.roadmapPage,
+        [RoutePath.payouts]: PayoutTemplates.payoutsPage,
+        [RoutePath.payments]: PaymentTemplates.paymentsPage,
 
         // admin pages
         [RoutePath.admin]: DashboardTemplates.dashboardPage,
         [RoutePath.royaltyManagement]: RoyaltyTemplates.royaltyManagementPage,
-        [RoutePath.payouts]: PaymentTemplates.payoutsPage,
         [RoutePath.moderation]: ModerationCommentsTemplates.commentModerationPage,
         [RoutePath.logs]: LogTemplates.logsPage,
         [RoutePath.actionLogs]: LogTemplates.actionLogsPage,

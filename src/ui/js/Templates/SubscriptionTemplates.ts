@@ -1,5 +1,5 @@
 import {create, ifjs, signalMap} from "../../fjsc/src/f2.ts";
-import {currency, Num as NumberFormatter} from "../Classes/Helpers/Num.ts";
+import {currency} from "../Classes/Helpers/Num.ts";
 import {getSubscriptionLink, SubscriptionActions} from "../Actions/SubscriptionActions.ts";
 import {GenericTemplates} from "./generic/GenericTemplates.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
@@ -7,12 +7,9 @@ import {compute, signal, Signal} from "../../fjsc/src/signals.ts";
 import {AvailableSubscription} from "../Models/DbModels/finance/AvailableSubscription.ts";
 import {Subscription} from "../Models/DbModels/finance/Subscription.ts";
 import {SubscriptionStatus} from "../Enums/SubscriptionStatus.ts";
-import {notify} from "../Classes/Ui.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
-import {PaymentHistory} from "../Models/DbModels/finance/PaymentHistory.ts";
-import {Api} from "../Api/Api.ts";
-import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {copy} from "../Classes/Util.ts";
+import {FJSC} from "../../fjsc";
+import {RoutePath} from "../Routing/routes.ts";
+import {navigate} from "../Routing/Router.ts";
 
 export class SubscriptionTemplates {
     static page() {
@@ -28,14 +25,6 @@ export class SubscriptionTemplates {
         const currency = "USD";
         const selectedOption = signal<number | null>(null);
         const optionsLoading = compute(o => o.length === 0, options);
-        const payments = signal<PaymentHistory[]>([]);
-        const paymentsLoading = signal(false);
-        paymentsLoading.value = true;
-        Api.getAsync<PaymentHistory[]>(ApiRoutes.getPaymentHistory).then(res => {
-            if (res.code === 200) {
-                payments.value = res.data;
-            }
-        }).finally(() => paymentsLoading.value = false);
 
         return create("div")
             .classes("flex-v")
@@ -54,67 +43,11 @@ export class SubscriptionTemplates {
                 ifjs(optionsLoading, GenericTemplates.loadingSpinner()),
                 signalMap(options, create("div").classes("flex"),
                     (option) => SubscriptionTemplates.option(currentSubscription, selectedOption, currency, option)),
-                ifjs(compute(p => p.length > 0, payments), create("h2")
-                    .text("Payment history")
-                    .build()),
-                ifjs(paymentsLoading, GenericTemplates.loadingSpinner()),
-                signalMap(payments, create("div").classes("flex-v"),
-                    (payment) => SubscriptionTemplates.payment(payment, currentSubscription)),
-            ).build();
-    }
-
-    static payment(payment: PaymentHistory, currentSubscription: Signal<Subscription|null>) {
-        const isActive = compute(sub => sub && sub.id === payment.subscription_id, currentSubscription);
-
-        return create("div")
-            .classes("card", "flex", "space-outwards", "subscription-payment")
-            .children(
-                create("div")
-                    .classes("flex-v")
-                    .children(
-                        create("div")
-                            .classes("flex", "align-children")
-                            .children(
-                                create("span")
-                                    .classes("text-large")
-                                    .text(currency(payment.total, payment.currency))
-                                    .build(),
-                                ifjs(isActive, GenericTemplates.pill({
-                                    text: "Active subscription",
-                                    icon: "credit_card",
-                                    value: payment.payment_processor,
-                                    onclick: () => {
-                                        console.log(getSubscriptionLink(currentSubscription.value));
-                                        window.open(getSubscriptionLink(currentSubscription.value), "_blank");
-                                    }
-                                }, signal(payment.succeeded))),
-                            ).build(),
-                        create("div")
-                            .classes("flex-v")
-                            .children(
-                                create("span")
-                                    .classes("text-small")
-                                    .text(`${currency(payment.fees, payment.currency)} fees by payment provider`)
-                                    .build(),
-                                create("span")
-                                    .classes("text-small", "clickable")
-                                    .text(`External transaction ID: ${payment.external_id}`)
-                                    .onclick(() => copy(payment.external_id))
-                                    .build(),
-                            ).build()
-                    ).build(),
-                create("div")
-                    .classes("flex", "small-gap")
-                    .children(
-                        create("span")
-                            .classes("text-small")
-                            .text(new Date(payment.received_at).toLocaleDateString() + ",")
-                            .build(),
-                        create("span")
-                            .classes("text-small")
-                            .text(Time.agoUpdating(new Date(payment.received_at)))
-                            .build(),
-                    ).build()
+                FJSC.button({
+                    text: "Payment history",
+                    icon: {icon: "receipt"},
+                    onclick: () => navigate(RoutePath.payments)
+                }),
             ).build();
     }
 

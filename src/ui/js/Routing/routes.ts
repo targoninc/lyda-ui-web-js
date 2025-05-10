@@ -31,6 +31,7 @@ export enum RoutePath {
     users = "users",
     payouts = "payouts",
     history = "history",
+    payments = "payments",
 }
 
 export const routes: Route[] = [
@@ -157,6 +158,10 @@ export const routes: Route[] = [
     },
     {
         path: RoutePath.payouts,
+        title: "Payouts",
+    },
+    {
+        path: RoutePath.payments,
         title: "Payments",
     },
     {
