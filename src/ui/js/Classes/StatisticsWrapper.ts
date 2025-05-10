@@ -78,7 +78,7 @@ export class StatisticsWrapper {
     }
 
     static async getRoyaltiesByMonth() {
-        return StatisticsWrapper.getSingleStat(StatisticTemplates.royaltiesByMonthChart, ApiRoutes.getRoyaltiesByMonth, true);
+        return StatisticTemplates.royaltiesByMonthChart();
     }
 
     static async getRoyaltiesByTrack() {
@@ -90,7 +90,7 @@ export class StatisticsWrapper {
     }
 
     static async getPlayCountByMonth() {
-        return StatisticsWrapper.getSingleStat(StatisticTemplates.playCountByMonthChart, ApiRoutes.getPlayCountByMonth, true);
+        return StatisticTemplates.playCountByMonthChart();
     }
 
     static async getLikesByTrack() {

@@ -20,11 +20,8 @@ export class StatisticTemplates {
         return ChartTemplates.donutChart(trackNames, playCounts, "Plays", "Play count by track", "playCountByTrackChart", trackColors);
     }
 
-    static playCountByMonthChart(monthNames: string[], playCounts: number[], trackColors = usedColors) {
-        if (monthNames.length === 0) {
-            return ChartTemplates.noData("Play count by month");
-        }
-        return ChartTemplates.barChart(monthNames, playCounts, "Plays", "Play count by month", "playCountByMonthChart", [trackColors[0]]);
+    static playCountByMonthChart() {
+        return ChartTemplates.paginatedBarChart("Play count by month", ApiRoutes.getPlayCountByMonth);
     }
 
     static likesByTrackChart(trackNames: string[], likeCounts: number[], trackColors = usedColors) {
@@ -39,11 +36,8 @@ export class StatisticTemplates {
         return ChartTemplates.barChart(labels, values, title, `${title} by time`, `activityByTimeChart-${id}`, usedColors);
     }
 
-    static royaltiesByMonthChart(labels: string[], values: number[]) {
-        if (labels.length === 0) {
-            return ChartTemplates.noData("Royalties by month");
-        }
-        return ChartTemplates.barChart(labels, values, "Royalties", "Royalties by month", "royaltiesByMonthChart", [usedColors[8]]);
+    static royaltiesByMonthChart() {
+        return ChartTemplates.paginatedBarChart("Royalties by month", ApiRoutes.getRoyaltiesByMonth);
     }
 
     static royaltiesByTrackChart(labels: string[], values: number[]) {
