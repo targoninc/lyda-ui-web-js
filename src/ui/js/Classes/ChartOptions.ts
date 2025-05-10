@@ -24,7 +24,6 @@ export class ChartOptions {
                         font: {
                             size: 14
                         },
-                        stepSize: 1,
                         beginAtZero: true
                     },
                     grid: {
@@ -37,7 +36,6 @@ export class ChartOptions {
                         font: {
                             size: 14
                         },
-                        stepSize: 1,
                         beginAtZero: true
                     },
                     grid: {
