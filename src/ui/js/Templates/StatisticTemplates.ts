@@ -2,8 +2,6 @@ import {create, ifjs} from "../../fjsc/src/f2.ts";
 import {RoyaltyInfo} from "../Models/RoyaltyInfo.ts";
 import {currency} from "../Classes/Helpers/Num.ts";
 import {signal} from "../../fjsc/src/signals.ts";
-import {GenericTemplates} from "./generic/GenericTemplates.ts";
-import {Icons} from "../Enums/Icons.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {Api} from "../Api/Api.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
@@ -12,8 +10,11 @@ import {getErrorMessage} from "../Classes/Util.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {ChartTemplates} from "./generic/ChartTemplates.ts";
 import {FJSC} from "../../fjsc";
-import { anonymize } from "../Classes/Helpers/CustomText.ts";
-import {reload} from "../Routing/Router.ts";
+import {anonymize} from "../Classes/Helpers/CustomText.ts";
+import {navigate, reload} from "../Routing/Router.ts";
+import {StatisticsWrapper} from "../Classes/StatisticsWrapper.ts";
+import {permissions} from "../state.ts";
+import {RoutePath} from "../Routing/routes.ts";
 
 export class StatisticTemplates {
     static playCountByMonthChart() {
@@ -58,6 +59,14 @@ export class StatisticTemplates {
         return ChartTemplates.barChart(trackNames, playCounts, "Plays", "Play count by track", "playCountByTrackChart");
     }
 
+    static async allStats() {
+        return create("div")
+            .classes("flex", "fullWidth")
+            .children(
+                ...(await StatisticsWrapper.getStatistics(permissions.value))
+            ).build();
+    }
+
     static artistRoyaltyActions(royaltyInfo: any) {
         const hasPayableRoyalties = royaltyInfo.available && parseFloat(royaltyInfo.available) >= 0.5;
         const paypalMailExists$ = signal(royaltyInfo.paypalMail !== null);
@@ -69,6 +78,11 @@ export class StatisticTemplates {
                 create("div")
                     .classes("flex")
                     .children(
+                        FJSC.button({
+                            text: "Payout history",
+                            icon: {icon: "account_balance"},
+                            onclick: () => navigate(RoutePath.payouts)
+                        }),
                         ifjs(hasPayableRoyalties, create("div")
                             .classes("flex")
                             .children(

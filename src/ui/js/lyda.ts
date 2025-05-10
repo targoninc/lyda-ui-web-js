@@ -119,7 +119,7 @@ export class Lyda {
                 }
                 const royaltyInfo = await Api.getAsync<RoyaltyInfo>(ApiRoutes.getRoyaltyInfo);
                 element.append(StatisticTemplates.artistRoyaltyActions(royaltyInfo.data));
-                element.append(create("div").classes("flex").children(...(await StatisticsWrapper.getStatistics(permissions.value))).build());
+                element.append(await StatisticTemplates.allStats());
                 break;
             case "library":
                 if (!user) {

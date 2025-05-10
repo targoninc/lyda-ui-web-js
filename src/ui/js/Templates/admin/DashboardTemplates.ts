@@ -39,7 +39,7 @@ export class DashboardTemplates {
                         })),
                         ifjs(hasPermission(Permissions.canViewPayments), FJSC.button({
                             text: "Payments",
-                            onclick: () => navigate(RoutePath.payments),
+                            onclick: () => navigate(RoutePath.payouts),
                             icon: { icon: "payments" },
                         })),
                         ifjs(hasPermission(Permissions.canCalculateRoyalties), FJSC.button({

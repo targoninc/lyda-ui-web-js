@@ -49,7 +49,7 @@ export class PageTemplates {
         // admin pages
         [RoutePath.admin]: DashboardTemplates.dashboardPage,
         [RoutePath.royaltyManagement]: RoyaltyTemplates.royaltyManagementPage,
-        [RoutePath.payments]: PaymentTemplates.paymentsPage,
+        [RoutePath.payouts]: PaymentTemplates.payoutsPage,
         [RoutePath.moderation]: ModerationCommentsTemplates.commentModerationPage,
         [RoutePath.logs]: LogTemplates.logsPage,
         [RoutePath.actionLogs]: LogTemplates.actionLogsPage,

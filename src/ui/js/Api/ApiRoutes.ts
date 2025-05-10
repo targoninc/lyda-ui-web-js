@@ -149,7 +149,6 @@ export class ApiRoutes {
     // endregion
 
     // region Royalties
-
     private static royalties = ApiRoutes.base + "/royalties";
     static getPayouts = ApiRoutes.royalties + "/payouts";
     static getRoyaltyInfo = ApiRoutes.royalties + "/info";

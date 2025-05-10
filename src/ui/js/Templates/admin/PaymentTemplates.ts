@@ -1,5 +1,3 @@
-import {DashboardTemplates} from "./DashboardTemplates.ts";
-import {Permissions} from "../../Enums/Permissions.ts";
 import {signal} from "../../../fjsc/src/signals.ts";
 import {create} from "../../../fjsc/src/f2.ts";
 import {Api} from "../../Api/Api.ts";
@@ -11,14 +9,7 @@ import { Time } from "../../Classes/Helpers/Time.ts";
 import {currency} from "../../Classes/Helpers/Num.ts";
 
 export class PaymentTemplates {
-    static paymentsPage() {
-        return DashboardTemplates.pageNeedingPermissions(
-            [Permissions.canViewPayments],
-            PaymentTemplates.payments()
-        )
-    }
-
-    static payments() {
+    static payoutsPage() {
         const payments = signal<PaymentHistory[]>([]);
         const skip = signal(0);
         const load = (filter?: any) => {
@@ -35,6 +26,9 @@ export class PaymentTemplates {
         return create("div")
             .classes("flex-v")
             .children(
+                create("h1")
+                    .text("Payout history")
+                    .build(),
                 GenericTemplates.searchWithFilter(payments, PaymentTemplates.payment, skip, loading, load, [
                     {
                         key: "year",

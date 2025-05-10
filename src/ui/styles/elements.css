@@ -922,7 +922,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     border-radius: var(--border-radius);
     border: 1px solid var(--color-7);
     align-self: center;
-    box-shadow: 0 10px 20px 7px var(--color-4);
+    box-shadow: 0 10px 20px -7px var(--color-4);
 }
 
 .fixed-bar-content {

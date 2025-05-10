@@ -71,10 +71,7 @@ export class StatisticsWrapper {
             charts.value = components;
         });
 
-        return create("div")
-            .children(
-                signalMap(charts, create("div").classes("flex"), (chart: any) => chart),
-            ).build();
+        return signalMap(charts, create("div").classes("flex", "fullWidth"), (chart: any) => chart);
     }
 
     static async getRoyaltiesByMonth() {
