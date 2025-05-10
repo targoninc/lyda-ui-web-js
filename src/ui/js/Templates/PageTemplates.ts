@@ -170,7 +170,7 @@ export class PageTemplates {
     static notFoundPage() {
         const randomUserWidget = signal(create("span").text("loading...").build());
         const user = signal<User|null>(null);
-        const following = compute(u => !!(u && Util.arrayPropertyMatchesUser(u.follows ?? [], "following_user_id")), user);
+        const following = compute(u => !!(u && Util.userIsFollowing(u)), user);
 
         Api.getAsync(ApiRoutes.randomUser).then(async data => {
             if (data.code !== 200) {

@@ -551,7 +551,7 @@ export class TrackTemplates {
                         UserTemplates.userWidget({
                             ...trackUser,
                             displayname: (track.artistname && track.artistname.trim().length > 0) ? track.artistname.trim() : trackUser.displayname
-                        }, Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "following_user_id"), [], [], UserWidgetContext.singlePage),
+                        }, Util.userIsFollowing(trackUser), [], [], UserWidgetContext.singlePage),
                     ).build(),
                 ...toAppend,
                 create("div")

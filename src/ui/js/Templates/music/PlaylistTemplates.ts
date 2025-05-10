@@ -422,7 +422,7 @@ export class PlaylistTemplates {
                             .classes("title", "wordwrap")
                             .text(playlist.title)
                             .build(),
-                        UserTemplates.userWidget(a_user, Util.arrayPropertyMatchesUser(a_user.follows ?? [], "following_user_id"), [], [], UserWidgetContext.singlePage)
+                        UserTemplates.userWidget(a_user, Util.userIsFollowing(a_user), [], [], UserWidgetContext.singlePage)
                     ).build(),
                 create("div")
                     .classes("playlist-info-container", "flex")

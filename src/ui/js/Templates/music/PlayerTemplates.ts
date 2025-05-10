@@ -263,7 +263,7 @@ export class PlayerTemplates {
                 .onclick(() => navigate(`${RoutePath.track}/` + track.id))
                 .build(),
             ...icons,
-            UserTemplates.userWidget(trackUser, Util.arrayPropertyMatchesUser(trackUser.follows ?? [], "following_user_id"),
+            UserTemplates.userWidget(trackUser, Util.userIsFollowing(trackUser),
                 [], ["hideOnSmallBreakpoint", "align-center"], UserWidgetContext.player),
             PlayerTemplates.playingFrom(),
             await PlayerTemplates.moreMenu(track, isPrivate, queueComponentMore),

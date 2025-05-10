@@ -93,7 +93,7 @@ export class StatisticsTemplates {
             if (item.user.has_avatar) {
                 avatar.value = Util.getUserAvatar(item.user_id);
             }
-            return UserTemplates.userWidget(item.user, Util.arrayPropertyMatchesUser(item.user.follows ?? [], "following_user_id"), [], [], UserWidgetContext.list);
+            return UserTemplates.userWidget(item.user, Util.userIsFollowing(item.user), [], [], UserWidgetContext.list);
         });
 
         return create("div")
