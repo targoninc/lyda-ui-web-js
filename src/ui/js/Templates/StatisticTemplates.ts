@@ -1,12 +1,12 @@
 import {create, ifjs} from "../../fjsc/src/f2.ts";
 import {RoyaltyInfo} from "../Models/RoyaltyInfo.ts";
 import {currency} from "../Classes/Helpers/Num.ts";
-import {signal} from "../../fjsc/src/signals.ts";
+import {compute, signal} from "../../fjsc/src/signals.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {Api} from "../Api/Api.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {UserSettings} from "../Enums/UserSettings.ts";
-import {getErrorMessage} from "../Classes/Util.ts";
+import {downloadFile, getErrorMessage} from "../Classes/Util.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {ChartTemplates} from "./generic/ChartTemplates.ts";
 import {FJSC} from "../../fjsc";
@@ -15,6 +15,9 @@ import {navigate, reload} from "../Routing/Router.ts";
 import {StatisticsWrapper} from "../Classes/StatisticsWrapper.ts";
 import {permissions} from "../state.ts";
 import {RoutePath} from "../Routing/routes.ts";
+import {yearAndMonthByOffset} from "../Classes/Helpers/Date.ts";
+import {Royalty} from "../Models/Royalty.ts";
+import { exportToFile, ExportType } from "@targoninc/data-exporter";
 
 export class StatisticTemplates {
     static playCountByMonthChart() {
@@ -181,6 +184,59 @@ export class StatisticTemplates {
                     .children(
                         ChartTemplates.boxPlotChart([royaltyInfo.trackRoyaltyValues], "Average track royalty", "averageTrackRoyaltyChart")
                     ).build(),
+            ).build();
+    }
+
+    static dataExport() {
+        const offset = signal(0);
+        const month = compute(yearAndMonthByOffset, offset);
+
+        return create("div")
+            .classes("flex-v", "card")
+            .children(
+                create("div")
+                    .classes("flex-v")
+                    .children(
+                        create("h1")
+                            .text("Royalty data export")
+                            .build(),
+                        create("span")
+                            .text(compute(m => `Month: ${m.year}-${m.month}`, month))
+                            .build(),
+                        FJSC.button({
+                            text: "Download",
+                            icon: {icon: "download"},
+                            onclick: async () => {
+                                const res = await Api.getAsync<Royalty[]>(ApiRoutes.royaltiesForExport, month.value);
+                                if (res.code !== 200) {
+                                    notify(getErrorMessage(res), NotificationType.error);
+                                    return;
+                                }
+
+                                const csv = await exportToFile(res.data, ExportType.csv);
+                                downloadFile(`Lyda Royalties ${month.value.year}-${month.value.month}`, csv);
+                            }
+                        })
+                    ).build(),
+                create("div")
+                    .classes("flex")
+                    .children(
+                        FJSC.button({
+                            text: "Previous",
+                            icon: {icon: "skip_previous"},
+                            onclick: () => offset.value += 1
+                        }),
+                        FJSC.button({
+                            text: "Next",
+                            icon: {icon: "skip_next"},
+                            onclick: () => offset.value -= 1
+                        }),
+                        FJSC.button({
+                            text: "Current",
+                            icon: {icon: "today"},
+                            onclick: () => offset.value = 0
+                        }),
+                    ).build()
             ).build();
     }
 }

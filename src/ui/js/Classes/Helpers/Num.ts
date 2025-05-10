@@ -1,13 +1,13 @@
 export class Num {
-    static shortenInArray(array) {
+    static shortenInArray(array: (number|string)[]) {
         return array.map((a) => {
             return Num.shorten(a);
         });
     }
 
-    static shorten(number) {
+    static shorten(number: string|number) {
         if (number.constructor !== Number) {
-            number = parseInt(number);
+            number = parseInt(number as string);
         }
         if (number > 1000000) {
             return Math.round(number / 1000000) + "m";

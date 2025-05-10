@@ -7,23 +7,15 @@ import {PlaylistTemplates} from "./Templates/music/PlaylistTemplates.ts";
 import {LibraryActions} from "./Actions/LibraryActions.ts";
 import {Api} from "./Api/Api.ts";
 import {StatisticTemplates} from "./Templates/StatisticTemplates.ts";
-import {LogTemplates} from "./Templates/admin/LogTemplates.ts";
-import {Permissions} from "./Enums/Permissions.ts";
 import {TrackActions} from "./Actions/TrackActions.ts";
-import {CommentTemplates} from "./Templates/CommentTemplates.ts";
 import {SubscriptionTemplates} from "./Templates/SubscriptionTemplates.ts";
-import {StatisticsWrapper} from "./Classes/StatisticsWrapper.ts";
 import {notify} from "./Classes/Ui.ts";
 import {navigate} from "./Routing/Router.ts";
-import {Permission} from "./Models/DbModels/lyda/Permission.ts";
-import {AnyElement, create} from "../fjsc/src/f2.ts";
+import {AnyElement} from "../fjsc/src/f2.ts";
 import {ApiRoutes} from "./Api/ApiRoutes.ts";
-import {signal} from "../fjsc/src/signals.ts";
-import {Track} from "./Models/DbModels/lyda/Track.ts";
 import {NotificationType} from "./Enums/NotificationType.ts";
 import {currentSecretCode, currentUser, permissions} from "./state.ts";
 import {RoyaltyInfo} from "./Models/RoyaltyInfo.ts";
-import {RoyaltyTemplates} from "./Templates/admin/RoyaltyTemplates.ts";
 import {RoutePath} from "./Routing/routes.ts";
 
 export class Lyda {
@@ -120,6 +112,7 @@ export class Lyda {
                 const royaltyInfo = await Api.getAsync<RoyaltyInfo>(ApiRoutes.getRoyaltyInfo);
                 element.append(StatisticTemplates.artistRoyaltyActions(royaltyInfo.data));
                 element.append(await StatisticTemplates.allStats());
+                element.append(StatisticTemplates.dataExport());
                 break;
             case "library":
                 if (!user) {

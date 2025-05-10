@@ -5,7 +5,7 @@ import {UserTemplates} from "../account/UserTemplates.ts";
 import {Images} from "../../Enums/Images.ts";
 import {TrackActions} from "../../Actions/TrackActions.ts";
 import {Genre} from "../../Enums/Genre.ts";
-import {target, Util} from "../../Classes/Util.ts";
+import {downloadFile, target, Util} from "../../Classes/Util.ts";
 import {AudioUpload} from "../../Classes/AudioUpload.ts";
 import {Ui} from "../../Classes/Ui.ts";
 import {
@@ -156,7 +156,7 @@ export class TrackEditTemplates {
                 icon: { icon: "file_save" },
                 onclick: () => {
                     const json = JSON.stringify(state.value);
-                    Util.downloadFile(`${state.value.title}_${Date.now()}.json`, json);
+                    downloadFile(`${state.value.title}_${Date.now()}.json`, json);
                 }
             }),
         ];

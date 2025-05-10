@@ -235,13 +235,6 @@ export class Util {
         return currentUser.value !== null;
     }
 
-    static downloadFile(fileName: string, content: string) {
-        const link = document.createElement("a");
-        link.href = "data:text/plain;charset=utf-8," + encodeURIComponent(content);
-        link.download = fileName;
-        link.click();
-    }
-
     static nestComments(comments: Comment[]): Comment[] {
         const commentMap: Record<number, Comment[]> = {};
 
@@ -366,4 +359,11 @@ export function getAvatar(user: User | null | undefined) {
         avatarState.value = Util.getUserAvatar(user.id);
     }
     return avatarState;
+}
+
+export function downloadFile(fileName: string, content: string) {
+    const link = document.createElement("a");
+    link.href = "data:text/plain;charset=utf-8," + encodeURIComponent(content);
+    link.download = fileName;
+    link.click();
 }
