@@ -23,7 +23,7 @@ export class PaymentTemplates {
         const skip = signal(0);
         const load = (filter?: any) => {
             loading.value = true;
-            Api.getAsync<PaymentHistory[]>(ApiRoutes.getPayments, {
+            Api.getAsync<PaymentHistory[]>(ApiRoutes.getPayouts, {
                 skip: skip.value,
                 ...(filter ?? {})
             }).then(e => payments.value = e.data)
