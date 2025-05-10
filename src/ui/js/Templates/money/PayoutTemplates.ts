@@ -44,7 +44,7 @@ export class PayoutTemplates {
                     .classes("flex-v", p.status !== PaymentStatus.failed ? "positive" : "negative")
                     .children(
                         create("span")
-                            .text(currency(p.amount_ct, "USD"))
+                            .text(currency(p.amount_ct / 100, "USD"))
                             .build(),
                     ).build(),
                 create("span")
