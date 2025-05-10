@@ -191,7 +191,7 @@ export class StatisticTemplates {
     static dataExport() {
         const offset = signal(0);
         const month = compute(yearAndMonthByOffset, offset);
-        const types = ["xlsx", "csv", "json"];
+        const types = ["excel", "csv", "json"];
         const selectedTypeIndex = signal(0);
 
         return create("div")
@@ -214,13 +214,20 @@ export class StatisticTemplates {
                                     text: "Download",
                                     icon: {icon: "download"},
                                     onclick: async () => {
-                                        const res = await Api.getAsync<string>(ApiRoutes.royaltiesForExport, month.value);
+                                        const res = await Api.getAsync<string>(ApiRoutes.royaltiesForExport, {
+                                            ...month.value,
+                                            type: types[selectedTypeIndex.value]
+                                        });
                                         if (res.code !== 200) {
                                             notify(getErrorMessage(res), NotificationType.error);
                                             return;
                                         }
 
-                                        downloadFile(`Lyda Royalties ${month.value.year}-${month.value.month}${types[selectedTypeIndex.value]}`, res.data);
+                                        let extension = types[selectedTypeIndex.value];
+                                        if (extension === "excel") {
+                                            extension = "xlsx";
+                                        }
+                                        downloadFile(`Lyda Royalties ${month.value.year}-${month.value.month}.${extension}`, res.data);
                                     }
                                 })
                             ).build()
