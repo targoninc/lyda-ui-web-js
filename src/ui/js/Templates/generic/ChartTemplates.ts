@@ -2,7 +2,6 @@ import {Chart, registerables} from "chart.js";
 import {BoxPlotChart} from "@sgratzl/chartjs-chart-boxplot";
 import {create, HtmlPropertyValue} from "../../../fjsc/src/f2.ts";
 import {ChartOptions} from "../../Classes/ChartOptions.ts";
-import {Colors} from "../../Classes/Colors.ts";
 import {asyncCompute, compute, signal} from "../../../fjsc/src/signals.ts";
 import {Statistic} from "../../Models/Statistic.ts";
 import {Api} from "../../Api/Api.ts";
@@ -11,10 +10,8 @@ import {chartColor} from "../../state.ts";
 
 Chart.register(...registerables);
 
-export const usedColors = Colors.themedList;
-
 export class ChartTemplates {
-    static donutChart(labels: string[], values: number[], valueTitle: string, title: string, id: string, colors = usedColors) {
+    static donutChart(labels: string[], values: number[], valueTitle: string, title: string, id: string) {
         const ctx = create("canvas")
             .classes("chart")
             .id(id)
@@ -25,7 +22,7 @@ export class ChartTemplates {
             datasets: [{
                 label: valueTitle,
                 data: values,
-                backgroundColor: colors,
+                backgroundColor: chartColor.value,
                 hoverOffset: 4
             }]
         };
@@ -52,7 +49,7 @@ export class ChartTemplates {
             ).build();
     }
 
-    static barChart(labels: string[], values: number[], valueTitle: string, title: string, id: string, colors = usedColors) {
+    static barChart(labels: string[], values: number[], valueTitle: string, title: string, id: string) {
         const ctx = create("canvas")
             .classes("chart")
             .id(id)
@@ -63,7 +60,7 @@ export class ChartTemplates {
             datasets: [{
                 label: valueTitle,
                 data: values,
-                backgroundColor: colors,
+                backgroundColor: chartColor.value,
                 hoverOffset: 4
             }]
         };
@@ -87,7 +84,7 @@ export class ChartTemplates {
             ).build();
     }
 
-    static boxPlotChart(values: number[], title: string, id: string, colors = usedColors) {
+    static boxPlotChart(values: number[], title: string, id: string) {
         const ctx = create("canvas")
             .classes("chart")
             .id(id)
@@ -98,8 +95,8 @@ export class ChartTemplates {
             datasets: [{
                 label: title,
                 data: values,
-                backgroundColor: colors,
-                borderColor: colors,
+                backgroundColor: chartColor.value,
+                borderColor: chartColor.value,
                 hoverOffset: 4
             }]
         };

@@ -1,3 +1,5 @@
+import {chartColor} from "../state.ts";
+
 export class Colors {
     static uniqueList = [
         "hsl(0, 100%, 50%)",
@@ -20,7 +22,8 @@ export class Colors {
         const css = getComputedStyle(document.documentElement);
         const colors = [];
         for (let i = 1; i <= 12; i++) {
-            colors.push(css.getPropertyValue(`--stats-${i}`));
+            //colors.push(css.getPropertyValue(`--stats-${i}`));
+            colors.push(chartColor.value);
         }
         return colors;
     }

@@ -10,7 +10,7 @@ import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {UserSettings} from "../Enums/UserSettings.ts";
 import {getErrorMessage} from "../Classes/Util.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
-import {ChartTemplates, usedColors} from "./generic/ChartTemplates.ts";
+import {ChartTemplates} from "./generic/ChartTemplates.ts";
 
 export class StatisticTemplates {
     static playCountByMonthChart() {
@@ -29,30 +29,30 @@ export class StatisticTemplates {
         });
     }
 
-    static likesByTrackChart(trackNames: string[], likeCounts: number[], trackColors = usedColors) {
+    static likesByTrackChart(trackNames: string[], likeCounts: number[]) {
         if (trackNames.length === 0) {
             return ChartTemplates.noData("Likes by track");
         }
-        return ChartTemplates.barChart(trackNames, likeCounts, "Likes", "Likes by track", "likesByTrackChart", trackColors);
+        return ChartTemplates.barChart(trackNames, likeCounts, "Likes", "Likes by track", "likesByTrackChart");
     }
 
     static activityByTimeChart(labels: string[], values: number[], title: string) {
         const id = Math.floor(Math.random() * 1000);
-        return ChartTemplates.barChart(labels, values, title, `${title} by time`, `activityByTimeChart-${id}`, usedColors);
+        return ChartTemplates.barChart(labels, values, title, `${title} by time`, `activityByTimeChart-${id}`);
     }
 
     static royaltiesByTrackChart(labels: string[], values: number[]) {
         if (labels.length === 0) {
             return ChartTemplates.noData("Royalties by track");
         }
-        return ChartTemplates.barChart(labels, values, "Royalties", "Royalties by track", "royaltiesByTrackChart", usedColors);
+        return ChartTemplates.barChart(labels, values, "Royalties", "Royalties by track", "royaltiesByTrackChart");
     }
 
-    static playCountByTrackChart(trackNames: string[], playCounts: number[], trackColors = usedColors) {
+    static playCountByTrackChart(trackNames: string[], playCounts: number[]) {
         if (trackNames.length === 0) {
             return ChartTemplates.noData("Play count by track");
         }
-        return ChartTemplates.barChart(trackNames, playCounts, "Plays", "Play count by track", "playCountByTrackChart", trackColors);
+        return ChartTemplates.barChart(trackNames, playCounts, "Plays", "Play count by track", "playCountByTrackChart");
     }
 
     static artistRoyaltyActions(royaltyInfo: any) {
@@ -148,7 +148,7 @@ export class StatisticTemplates {
                 create("div")
                     .classes("flex-v")
                     .children(
-                        ChartTemplates.boxPlotChart([royaltyInfo.trackRoyaltyValues], "Average track royalty", "averageTrackRoyaltyChart", usedColors)
+                        ChartTemplates.boxPlotChart([royaltyInfo.trackRoyaltyValues], "Average track royalty", "averageTrackRoyaltyChart")
                     ).build(),
             ).build();
     }
