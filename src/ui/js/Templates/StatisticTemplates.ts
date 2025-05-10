@@ -18,6 +18,7 @@ import {RoutePath} from "../Routing/routes.ts";
 import {yearAndMonthByOffset} from "../Classes/Helpers/Date.ts";
 import {Royalty} from "../Models/Royalty.ts";
 import { exportToFile, ExportType } from "@targoninc/data-exporter";
+import {GenericTemplates} from "./generic/GenericTemplates.ts";
 
 export class StatisticTemplates {
     static playCountByMonthChart() {
@@ -190,6 +191,8 @@ export class StatisticTemplates {
     static dataExport() {
         const offset = signal(0);
         const month = compute(yearAndMonthByOffset, offset);
+        const types = ["xlsx", "csv", "json"];
+        const selectedTypeIndex = signal(0);
 
         return create("div")
             .classes("flex-v", "card")
@@ -203,20 +206,24 @@ export class StatisticTemplates {
                         create("span")
                             .text(compute(m => `Month: ${m.year}-${m.month}`, month))
                             .build(),
-                        FJSC.button({
-                            text: "Download",
-                            icon: {icon: "download"},
-                            onclick: async () => {
-                                const res = await Api.getAsync<Royalty[]>(ApiRoutes.royaltiesForExport, month.value);
-                                if (res.code !== 200) {
-                                    notify(getErrorMessage(res), NotificationType.error);
-                                    return;
-                                }
+                        create("div")
+                            .classes("flex")
+                            .children(
+                                GenericTemplates.tabSelector(types, (i: number) => selectedTypeIndex.value = i, 0),
+                                FJSC.button({
+                                    text: "Download",
+                                    icon: {icon: "download"},
+                                    onclick: async () => {
+                                        const res = await Api.getAsync<string>(ApiRoutes.royaltiesForExport, month.value);
+                                        if (res.code !== 200) {
+                                            notify(getErrorMessage(res), NotificationType.error);
+                                            return;
+                                        }
 
-                                const csv = await exportToFile(res.data, ExportType.csv);
-                                downloadFile(`Lyda Royalties ${month.value.year}-${month.value.month}`, csv);
-                            }
-                        })
+                                        downloadFile(`Lyda Royalties ${month.value.year}-${month.value.month}${types[selectedTypeIndex.value]}`, res.data);
+                                    }
+                                })
+                            ).build()
                     ).build(),
                 create("div")
                     .classes("flex")
