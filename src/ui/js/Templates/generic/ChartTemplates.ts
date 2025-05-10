@@ -113,7 +113,7 @@ export class ChartTemplates {
         new BoxPlotChart(ctx, config);
 
         return create("div")
-            .classes("chart-container-vertical", "card", "flex-v")
+            .classes("chart-container-vertical", "card", "secondary", "flex-v")
             .children(
                 ctx,
             ).build();
