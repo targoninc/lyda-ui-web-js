@@ -11,6 +11,8 @@ import {UserSettings} from "../Enums/UserSettings.ts";
 import {getErrorMessage} from "../Classes/Util.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {ChartTemplates} from "./generic/ChartTemplates.ts";
+import {FJSC} from "../../fjsc";
+import { anonymize } from "../Classes/Helpers/CustomText.ts";
 
 export class StatisticTemplates {
     static playCountByMonthChart() {
@@ -57,10 +59,10 @@ export class StatisticTemplates {
 
     static artistRoyaltyActions(royaltyInfo: any) {
         const hasPayableRoyalties = royaltyInfo.available && parseFloat(royaltyInfo.available) >= 0.5;
-        const paypalMailExistsState = signal(royaltyInfo.paypalMail !== null);
-        const visibilityClass = signal(paypalMailExistsState.value ? "visible" : "hidden");
-        const invertVisibilityClass = signal(paypalMailExistsState.value ? "hidden" : "visible");
-        paypalMailExistsState.onUpdate = (exists) => {
+        const paypalMailExists$ = signal(royaltyInfo.paypalMail !== null);
+        const visibilityClass = signal(paypalMailExists$.value ? "visible" : "hidden");
+        const invertVisibilityClass = signal(paypalMailExists$.value ? "hidden" : "visible");
+        paypalMailExists$.onUpdate = (exists) => {
             visibilityClass.value = exists ? "visible" : "hidden";
             invertVisibilityClass.value = exists ? "hidden" : "visible";
         };
@@ -75,44 +77,60 @@ export class StatisticTemplates {
                         ifjs(hasPayableRoyalties, create("div")
                             .classes("flex")
                             .children(
-                                GenericTemplates.action(Icons.PAYPAL, "Set PayPal mail", "setPaypalMail", async () => {
-                                    await Ui.getTextInputModal("Set PayPal mail", "The account you will receive payments with", "", "Save", "Cancel", async (address: string) => {
-                                        const res = await Api.postAsync(ApiRoutes.updateUserSetting, {
-                                            setting: UserSettings.paypalMail,
-                                            value: address
-                                        });
-                                        if (res.code !== 200) {
-                                            notify(getErrorMessage(res), NotificationType.error);
-                                            return;
-                                        }
-                                        notify("PayPal mail set", NotificationType.success);
-                                        paypalMailExistsState.value = true;
-                                    }, () => {
-                                    }, Icons.PAYPAL);
-                                }, [], [invertVisibilityClass, "secondary"]),
-                                GenericTemplates.action(Icons.PAYPAL, "Remove PayPal mail", "removePaypalMail", async () => {
-                                    await Ui.getConfirmationModal("Remove PayPal mail", "Are you sure you want to remove your paypal mail? You'll have to add it again manually.", "Yes", "No", async () => {
-                                        const res = await Api.postAsync(ApiRoutes.updateUserSetting, {
-                                            setting: "paypalMail",
-                                            value: ""
-                                        });
-                                        if (res.code !== 200) {
-                                            notify(getErrorMessage(res), NotificationType.error);
-                                            return;
-                                        }
-                                        notify("PayPal mail removed", NotificationType.success);
-                                        paypalMailExistsState.value = false;
-                                    }, () => {
-                                    }, Icons.WARNING);
-                                }, [], [visibilityClass, "secondary"]),
-                                GenericTemplates.action(Icons.PAY, "Request payout", "requestPayout", async () => {
-                                    const res = await Api.postAsync(ApiRoutes.requestPayout);
-                                    if (res.code !== 200) {
-                                        notify(getErrorMessage(res), NotificationType.error);
-                                        return;
+                                ifjs(paypalMailExists$, FJSC.button({
+                                    text: "Set PayPal mail",
+                                    icon: {icon: "mail"},
+                                    classes: ["positive"],
+                                    onclick: async () => {
+                                        await Ui.getTextInputModal("Set PayPal mail", "The account you will receive payments with", "", "Save", "Cancel", async (address: string) => {
+                                            const res = await Api.postAsync(ApiRoutes.updateUserSetting, {
+                                                setting: UserSettings.paypalMail,
+                                                value: address
+                                            });
+                                            if (res.code !== 200) {
+                                                notify(getErrorMessage(res), NotificationType.error);
+                                                return;
+                                            }
+                                            notify("PayPal mail set", NotificationType.success);
+                                            paypalMailExists$.value = true;
+                                        }, () => {
+                                        }, Icons.PAYPAL);
                                     }
-                                    notify("Payment requested", NotificationType.success);
-                                }, [], [visibilityClass, "secondary"])
+                                }), true),
+                                ifjs(paypalMailExists$, FJSC.button({
+                                    text: "Remove PayPal mail",
+                                    title: "You won't be able to receive payments until you set a mail address again",
+                                    icon: {icon: "unsubscribe"},
+                                    classes: ["negative"],
+                                    onclick: async () => {
+                                        await Ui.getConfirmationModal("Remove PayPal mail", "Are you sure you want to remove your paypal mail? You'll have to add it again manually.", "Yes", "No", async () => {
+                                            const res = await Api.postAsync(ApiRoutes.updateUserSetting, {
+                                                setting: "paypalMail",
+                                                value: ""
+                                            });
+                                            if (res.code !== 200) {
+                                                notify(getErrorMessage(res), NotificationType.error);
+                                                return;
+                                            }
+                                            notify("PayPal mail removed", NotificationType.success);
+                                            paypalMailExists$.value = false;
+                                        }, () => {
+                                        }, Icons.WARNING);
+                                    }
+                                })),
+                                ifjs(paypalMailExists$, FJSC.button({
+                                    text: `Request payout to ${anonymize(royaltyInfo.paypalMail, 2, 8)}`,
+                                    icon: {icon: "mintmark"},
+                                    classes: ["positive"],
+                                    onclick: async () => {
+                                        const res = await Api.postAsync(ApiRoutes.requestPayout);
+                                        if (res.code !== 200) {
+                                            notify(getErrorMessage(res), NotificationType.error);
+                                            return;
+                                        }
+                                        notify("Payment requested", NotificationType.success);
+                                    }
+                                })),
                             ).build())
                     ).build()
             ).build();

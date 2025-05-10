@@ -61,28 +61,12 @@ export class Icons {
         return Icons.ICON("like_outline");
     }
 
-    static get COMMENT() {
-        return Icons.ICON("comment");
-    }
-
     static get LYDA() {
         return Icons.ICON("lyda_black");
     }
 
     static get DELETE() {
         return Icons.ICON("delete");
-    }
-
-    static get BELL() {
-        return Icons.ICON("bell");
-    }
-
-    static get LAMP_ON() {
-        return Icons.ICON("lamp_on");
-    }
-
-    static get LAMP_OFF() {
-        return Icons.ICON("lamp_off");
     }
 
     static get BURGER() {
@@ -93,60 +77,12 @@ export class Icons {
         return Icons.ICON("x");
     }
 
-    static get REPLY() {
-        return Icons.ICON("reply");
-    }
-
     static get ALBUM_ADD() {
         return Icons.ICON("album_add");
     }
 
     static get PLAYLIST_ADD() {
         return Icons.ICON("playlist_add");
-    }
-
-    static get ARROW_UP() {
-        return Icons.ICON("arrow_up");
-    }
-
-    static get ARROW_DOWN() {
-        return Icons.ICON("arrow_down");
-    }
-
-    static get ARROW_LEFT() {
-        return Icons.ICON("arrow_left");
-    }
-
-    static get ARROW_RIGHT() {
-        return Icons.ICON("arrow_right");
-    }
-
-    static get UPLOAD() {
-        return Icons.ICON("upload");
-    }
-
-    static get SETTINGS() {
-        return Icons.ICON("settings");
-    }
-
-    static get STATISTICS() {
-        return Icons.ICON("statistics");
-    }
-
-    static get UP() {
-        return Icons.ICON("up");
-    }
-
-    static get DOWN() {
-        return Icons.ICON("down");
-    }
-
-    static get LEFT() {
-        return Icons.ICON("left");
-    }
-
-    static get RIGHT() {
-        return Icons.ICON("right");
     }
 
     static get LOCK() {
@@ -165,10 +101,6 @@ export class Icons {
         return Icons.ICON("loop_off");
     }
 
-    static get LOGOUT() {
-        return Icons.ICON("logout");
-    }
-
     static get FOLLOW() {
         return Icons.ICON("follow");
     }
@@ -179,30 +111,6 @@ export class Icons {
 
     static get VERIFIED() {
         return Icons.ICON("verified");
-    }
-
-    static get LOGIN() {
-        return Icons.ICON("login");
-    }
-
-    static get RELOAD() {
-        return Icons.ICON("reload");
-    }
-
-    static get ACCOUNTS() {
-        return Icons.ICON("accounts");
-    }
-
-    static get SUBSCRIPTIONS() {
-        return Icons.ICON("subscriptions");
-    }
-
-    static get CALCULATE() {
-        return Icons.ICON("calculate");
-    }
-
-    static get PAY() {
-        return Icons.ICON("pay");
     }
 
     static get PAYPAL() {
@@ -229,19 +137,7 @@ export class Icons {
         return Icons.ICON("check");
     }
 
-    static get PEOPLE() {
-        return Icons.ICON("people");
-    }
-
     static get STARS() {
         return Icons.ICON("stars");
-    }
-
-    static get COPY() {
-        return Icons.ICON("copy");
-    }
-
-    static get DROPDOWN() {
-        return Icons.ICON("dropdown");
     }
 }

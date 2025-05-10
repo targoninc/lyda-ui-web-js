@@ -18,3 +18,11 @@ export function truncateText(text: string, length: number): string {
     }
     return text.length > length ? text.substring(0, length - 3) + "..." : text;
 }
+
+export function anonymize(text: string, startLength: number = 2, endLength: number = 2): string {
+    if (!text) {
+        return "";
+    }
+
+    return text.substring(0, startLength) + "***" + text.substring(-endLength);
+}
