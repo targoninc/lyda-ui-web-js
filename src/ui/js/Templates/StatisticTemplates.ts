@@ -13,6 +13,7 @@ import {NotificationType} from "../Enums/NotificationType.ts";
 import {ChartTemplates} from "./generic/ChartTemplates.ts";
 import {FJSC} from "../../fjsc";
 import { anonymize } from "../Classes/Helpers/CustomText.ts";
+import {reload} from "../Routing/Router.ts";
 
 export class StatisticTemplates {
     static playCountByMonthChart() {
@@ -124,6 +125,7 @@ export class StatisticTemplates {
                                                 return;
                                             }
                                             notify("Payment requested", NotificationType.success);
+                                            reload();
                                         }, () => {
                                         }, "wallet");
                                     }
