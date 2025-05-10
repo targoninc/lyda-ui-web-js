@@ -60,12 +60,6 @@ export class StatisticTemplates {
     static artistRoyaltyActions(royaltyInfo: any) {
         const hasPayableRoyalties = royaltyInfo.available && parseFloat(royaltyInfo.available) >= 0.5;
         const paypalMailExists$ = signal(royaltyInfo.paypalMail !== null);
-        const visibilityClass = signal(paypalMailExists$.value ? "visible" : "hidden");
-        const invertVisibilityClass = signal(paypalMailExists$.value ? "hidden" : "visible");
-        paypalMailExists$.onUpdate = (exists) => {
-            visibilityClass.value = exists ? "visible" : "hidden";
-            invertVisibilityClass.value = exists ? "hidden" : "visible";
-        };
 
         return create("div")
             .classes("flex-v", "card")
@@ -94,7 +88,7 @@ export class StatisticTemplates {
                                             notify("PayPal mail set", NotificationType.success);
                                             paypalMailExists$.value = true;
                                         }, () => {
-                                        }, Icons.PAYPAL);
+                                        }, "mail");
                                     }
                                 }), true),
                                 ifjs(paypalMailExists$, FJSC.button({
@@ -115,7 +109,7 @@ export class StatisticTemplates {
                                             notify("PayPal mail removed", NotificationType.success);
                                             paypalMailExists$.value = false;
                                         }, () => {
-                                        }, Icons.WARNING);
+                                        }, "warning");
                                     }
                                 })),
                                 ifjs(paypalMailExists$, FJSC.button({
@@ -123,12 +117,15 @@ export class StatisticTemplates {
                                     icon: {icon: "mintmark"},
                                     classes: ["positive"],
                                     onclick: async () => {
-                                        const res = await Api.postAsync(ApiRoutes.requestPayout);
-                                        if (res.code !== 200) {
-                                            notify(getErrorMessage(res), NotificationType.error);
-                                            return;
-                                        }
-                                        notify("Payment requested", NotificationType.success);
+                                        await Ui.getConfirmationModal("Request payment", "Are you sure you want to request a payment?", "Yes", "No", async () => {
+                                            const res = await Api.postAsync(ApiRoutes.requestPayout);
+                                            if (res.code !== 200) {
+                                                notify(getErrorMessage(res), NotificationType.error);
+                                                return;
+                                            }
+                                            notify("Payment requested", NotificationType.success);
+                                        }, () => {
+                                        }, "wallet");
                                     }
                                 })),
                             ).build())
