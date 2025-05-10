@@ -94,3 +94,5 @@ export const currentSecretCode = signal<string>("");
 export const notifications = signal<Notification[]>([]);
 
 export const permissions = signal<Permission[]>([]);
+
+export const chartColor = signal("black");

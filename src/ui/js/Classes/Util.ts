@@ -7,7 +7,7 @@ import {AnyElement} from "../../fjsc/src/f2.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {MediaFileType} from "../Enums/MediaFileType.ts";
 import {User} from "../Models/DbModels/lyda/User.ts";
-import {currentUser, dragging} from "../state.ts";
+import {chartColor, currentUser} from "../state.ts";
 import {compute, signal, Signal} from "../../fjsc/src/signals.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {Comment} from "../Models/DbModels/lyda/Comment.ts";
@@ -271,6 +271,11 @@ export class Util {
 
         // Step 3: Start nesting from root-level comments (parent_id === 0)
         return buildNestedComments(0);
+    }
+
+    static setForeGroundColor() {
+        const rootElement = document.documentElement;
+        chartColor.value = getComputedStyle(rootElement).getPropertyValue('--color-5').trim();
     }
 }
 

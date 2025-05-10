@@ -1,19 +1,55 @@
+import {chartColor} from "../state.ts";
+
 export class ChartOptions {
-    static defaultOptions = {
-        plugins: {
-            customCanvasBackgroundColor: {
-                color: "transparent",
-            }
-        },
-        animation: {
-            duration: 0
-        },
-        hover: {
-            animationDuration: 0,
-        },
-        responsiveAnimationDuration: 0,
-        devicePixelRatio: 2,
-    };
+    static get defaultOptions() {
+        return {
+            plugins: {
+                customCanvasBackgroundColor: {
+                    color: "transparent",
+                },
+                legend: {
+                    display: false
+                }
+            },
+            animation: {
+                duration: 0
+            },
+            hover: {
+                animationDuration: 0,
+            },
+            scales: {
+                y: {
+                    ticks: {
+                        color: chartColor.value,
+                        font: {
+                            size: 14
+                        },
+                        stepSize: 1,
+                        beginAtZero: true
+                    },
+                    grid: {
+                        color: "rgba(123, 123, 123, .2)",
+                    },
+                },
+                x: {
+                    ticks: {
+                        color: chartColor.value,
+                        font: {
+                            size: 14
+                        },
+                        stepSize: 1,
+                        beginAtZero: true
+                    },
+                    grid: {
+                        color: "rgba(123, 123, 123, .2)",
+                    },
+                }
+            },
+            responsiveAnimationDuration: 0,
+            devicePixelRatio: 2,
+        };
+    }
+
     static noGridOptions = {
         scales: {
             x: {

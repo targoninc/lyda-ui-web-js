@@ -133,6 +133,7 @@ export class UserActions {
             Util.removeStylesheet("/styles/" + t + ".css");
         });
         Util.includeStylesheet(`/styles/${themeName}.css`);
+        Util.setForeGroundColor();
         if (onlyLocal) {
             return;
         }
