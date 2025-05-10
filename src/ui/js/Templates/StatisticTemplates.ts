@@ -70,7 +70,7 @@ export class StatisticTemplates {
                                 GenericTemplates.action(Icons.PAYPAL, "Set PayPal mail", "setPaypalMail", async () => {
                                     await Ui.getTextInputModal("Set PayPal mail", "The account you will receive payments with", "", "Save", "Cancel", async (address: string) => {
                                         const res = await Api.postAsync(ApiRoutes.updateUserSetting, {
-                                            key: UserSettings.paypalMail,
+                                            setting: UserSettings.paypalMail,
                                             value: address
                                         });
                                         if (res.code !== 200) {
