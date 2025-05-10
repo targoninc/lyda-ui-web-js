@@ -1,4 +1,4 @@
-import {signal} from "../../../fjsc/src/signals.ts";
+import {compute, signal} from "../../../fjsc/src/signals.ts";
 import {create} from "../../../fjsc/src/f2.ts";
 import {Api} from "../../Api/Api.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
@@ -7,6 +7,8 @@ import {PaymentHistory} from "../../Models/DbModels/finance/PaymentHistory.ts";
 import {InputType} from "../../../fjsc/src/Types.ts";
 import { Time } from "../../Classes/Helpers/Time.ts";
 import {currency} from "../../Classes/Helpers/Num.ts";
+import {permissions} from "../../state.ts";
+import {Permissions} from "../../Enums/Permissions.ts";
 
 export class PaymentTemplates {
     static payoutsPage() {
@@ -22,6 +24,20 @@ export class PaymentTemplates {
         }
         const loading = signal(false);
         load();
+        const extendedOptions = [
+            {
+                key: "year",
+                type: InputType.number,
+                name: "Year",
+                default: new Date().getFullYear(),
+            },
+            {
+                key: "month",
+                type: InputType.number,
+                name: "Month",
+                default: new Date().getMonth() + 1,
+            }
+        ];
 
         return create("div")
             .classes("flex-v")
@@ -29,20 +45,10 @@ export class PaymentTemplates {
                 create("h1")
                     .text("Payout history")
                     .build(),
-                GenericTemplates.searchWithFilter(payments, PaymentTemplates.payment, skip, loading, load, [
-                    {
-                        key: "year",
-                        type: InputType.number,
-                        name: "Year",
-                        default: new Date().getFullYear(),
-                    },
-                    {
-                        key: "month",
-                        type: InputType.number,
-                        name: "Month",
-                        default: new Date().getMonth() + 1,
-                    }
-                ]),
+                compute(p => {
+                    const filterOptions = p.some(perm => perm.name === Permissions.canViewPayments) ? extendedOptions : [];
+                    return GenericTemplates.searchWithFilter(payments, PaymentTemplates.payment, skip, loading, load, filterOptions);
+                }, permissions),
             ).build();
     }
 
