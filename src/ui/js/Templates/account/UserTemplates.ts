@@ -118,7 +118,7 @@ export class UserTemplates {
             .classes("user-link", "color-dim")
             .attributes("user_id", user.id, "username", user.username)
             .onclick((e: MouseEvent) => {
-                if (e.button === 0 && target(e).tagName.toLowerCase() === "button") {
+                if (e.button === 0) {
                     e.preventDefault();
                     navigate(`${RoutePath.profile}/` + user.username);
                 }
