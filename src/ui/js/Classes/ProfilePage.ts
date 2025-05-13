@@ -47,7 +47,7 @@ export class ProfilePage {
             return;
         }
         const tracks = res.data;
-        const trackCards = UserTemplates.trackCards(tracks, user, isOwnProfile);
+        const trackCards = UserTemplates.trackCards(tracks, isOwnProfile);
         element.innerHTML = "";
         element.appendChild(trackCards);
     }
@@ -89,7 +89,7 @@ export class ProfilePage {
             return;
         }
         const reposts = res.data;
-        const repostCards = UserTemplates.trackCards(reposts, user, isOwnProfile);
+        const repostCards = UserTemplates.trackCards(reposts, isOwnProfile);
         element.innerHTML = "";
         element.appendChild(repostCards);
     }

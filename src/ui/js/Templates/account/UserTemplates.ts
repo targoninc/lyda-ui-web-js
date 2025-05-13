@@ -214,15 +214,12 @@ export class UserTemplates {
             .build();
     }
 
-    static trackCards(tracks: Track[], user: User, isOwnProfile: boolean) {
+    static trackCards(tracks: Track[], isOwnProfile: boolean) {
         let children = [];
         if (tracks.length === 0) {
             return TrackTemplates.noTracksUploadedYet(isOwnProfile);
         } else {
-            children = tracks.map(track => MusicTemplates.feedEntry(ItemType.track, {
-                ...track,
-                user
-            }));
+            children = tracks.map(track => MusicTemplates.feedEntry(ItemType.track, track));
         }
 
         return TrackTemplates.trackCardsContainer(children);
