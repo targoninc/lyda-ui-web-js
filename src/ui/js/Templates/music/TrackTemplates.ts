@@ -135,13 +135,6 @@ export class TrackTemplates {
     }
 
     static trackList(tracksState: Signal<Track[]>, pageState: Signal<number>, type: string, filterState: Signal<string>) {
-        const trackList = tracksState.value.map(track => MusicTemplates.feedEntry(ItemType.track, track));
-        const trackListContainer = signal(TrackTemplates.#trackList(trackList));
-        tracksState.onUpdate = async (newTracks) => {
-            const trackList = newTracks.map(track => MusicTemplates.feedEntry(ItemType.track, track));
-            trackListContainer.value = TrackTemplates.#trackList(trackList);
-        };
-
         return create("div")
             .classes("flex-v")
             .children(
@@ -151,7 +144,7 @@ export class TrackTemplates {
                         TrackTemplates.paginationControls(pageState),
                         type === "following" ? TrackTemplates.feedFilters(filterState) : null,
                     ).build(),
-                trackListContainer,
+                compute(list => TrackTemplates.#trackList(list.reverse().map(track => MusicTemplates.feedEntry(ItemType.track, track))), tracksState),
                 TrackTemplates.paginationControls(pageState)
             ).build();
     }
@@ -166,7 +159,7 @@ export class TrackTemplates {
 
     static #trackList(trackList: any[]) {
         return create("div")
-            .classes("flex-v", "track-list")
+            .classes("flex-v", "reverse", "track-list")
             .children(...trackList)
             .build();
     }

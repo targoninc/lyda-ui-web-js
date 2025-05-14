@@ -175,6 +175,10 @@ a {
     flex-direction: column;
 }
 
+.flex-v.reverse {
+    flex-direction: column-reverse;
+}
+
 body {
     background: var(--color-4);
     color: var(--color-5);
