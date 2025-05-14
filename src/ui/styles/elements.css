@@ -670,6 +670,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .trackPage .waveform {
     height: 2em;
+    gap: 2px;
 }
 
 .processing-box {

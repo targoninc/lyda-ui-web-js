@@ -83,21 +83,6 @@ export class Util {
         return (date as Date).toLocaleDateString();
     }
 
-    static hideElementIfCondition(conditionFunc: Function, className: string, e: any) {
-        if (conditionFunc(e)) {
-            const target = e.target.parentElement.querySelector("." + className);
-            if (target === null) {
-                return;
-            }
-            if (target.classList.contains("hidden")) {
-                return;
-            }
-            target.classList.add("hidden");
-        } else {
-            document.addEventListener("click", e => Util.hideElementIfCondition(conditionFunc, className, e), {once: true});
-        }
-    }
-
     static async getUserAsync(id: number | null = null, allowCache = true) {
         if (!id) {
             if (allowCache) {

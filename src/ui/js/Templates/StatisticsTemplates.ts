@@ -4,8 +4,8 @@ import {UserTemplates} from "./account/UserTemplates.ts";
 import {AlbumActions} from "../Actions/AlbumActions.ts";
 import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {Images} from "../Enums/Images.ts";
-import {Util} from "../Classes/Util.ts";
-import {create, ifjs, nullElement, StringOrSignal, TypeOrSignal} from "../../fjsc/src/f2.ts";
+import {target, Util} from "../Classes/Util.ts";
+import {AnyElement, create, ifjs, nullElement, StringOrSignal, TypeOrSignal} from "../../fjsc/src/f2.ts";
 import {FJSC} from "../../fjsc";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
@@ -77,10 +77,16 @@ export class StatisticsTemplates {
                 return;
             }
 
-            document.addEventListener("click", e => Util.hideElementIfCondition((e: any) => {
-                return !(e.target.parentElement.classList.contains(type)
-                    || e.target.classList.contains(type));
-            }, `listFromStatsIndicator.${type}`, e), {once: true});
+            function eventWithinSelector(e: MouseEvent, selector: string) {
+                const el = document.querySelector(selector);
+                return el && e.x > el.clientLeft && e.x < el.clientLeft + el.clientWidth && e.y > el.clientTop && e.y < el.clientTop + el.clientHeight;
+            }
+
+            document.addEventListener("click", (e) => {
+                if (!eventWithinSelector(e, `.listFromStatsOpener.${type}`)) {
+                    open$.value = false;
+                }
+            }, {once: true});
         });
 
         const itemsList = items.map(item => {
@@ -101,6 +107,9 @@ export class StatisticsTemplates {
             .children(
                 create("span")
                     .classes("stats-indicator-opener", type, "clickable", "rounded", "padded-inline", items.length === 0 ? "disabled" : "_")
+                    .onclick(() => {
+                        open$.value = !open$.value;
+                    })
                     .children(
                         create("span")
                             .text(items.length)
@@ -110,9 +119,7 @@ export class StatisticsTemplates {
                             adaptive: true,
                             classes: ["inline-icon", "svg", "nopointer"],
                         }),
-                    ).onclick(() => {
-                        open$.value = !open$.value;
-                    }).build(),
+                    ).build(),
                 ifjs(open$, create("div")
                     .classes("listFromStatsIndicator", "popout-below", type, "flex-v", "padded", "rounded")
                     .children(
