@@ -295,7 +295,8 @@ footer {
     max-width: var(--breakpoint-big);
     background: var(--color-4);
     min-height: 100%;
-    margin: 0 auto 50%;
+    margin: 0 auto;
+    padding-bottom: 50%;
 }
 
 .content {
