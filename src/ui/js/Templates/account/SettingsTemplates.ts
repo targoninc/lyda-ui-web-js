@@ -50,6 +50,9 @@ export class SettingsTemplates {
 
     static permissionsSection() {
         const hasAnyPermissions = compute(p => p.length > 0, permissions);
+        if (!hasAnyPermissions.value) {
+
+        }
 
         return create("div")
             .children(

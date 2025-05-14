@@ -13,6 +13,7 @@ import {NotificationType} from "../Enums/NotificationType.ts";
 import {Comment} from "../Models/DbModels/lyda/Comment.ts";
 import {Likable} from "../Models/Likable.ts";
 import {Track} from "../Models/DbModels/lyda/Track.ts";
+import {getUserPermissions} from "../../main.ts";
 
 export class Util {
     static capitalizeFirstLetter(string: string) {
@@ -267,6 +268,7 @@ export function nullIfEmpty(value: any) {
 
 export function finalizeLogin(step: Signal<string>, user: User) {
     LydaCache.set("user", new CacheItem(JSON.stringify(user)));
+    getUserPermissions();
     step.value = "complete";
 
     let referrer = document.referrer;
