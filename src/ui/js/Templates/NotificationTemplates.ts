@@ -1,6 +1,6 @@
 import {Notification} from "../Models/DbModels/lyda/Notification.ts";
 import {NotificationParser} from "../Classes/Helpers/NotificationParser.ts";
-import {create, ifjs, signalMap} from "../../fjsc/src/f2.ts";
+import {create, HtmlPropertyValue, ifjs, nullElement, signalMap, StringOrSignal} from "../../fjsc/src/f2.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {navigate} from "../Routing/Router.ts";
 import {copy, Util} from "../Classes/Util.ts";
@@ -10,6 +10,7 @@ import {FJSC} from "../../fjsc";
 import { notifications } from "../state.ts";
 import {UserTemplates} from "./account/UserTemplates.ts";
 import {NotificationPart} from "../Models/NotifcationPart.ts";
+import {Images} from "../Enums/Images.ts";
 
 export class NotificationTemplates {
     static notificationInList(notification: Notification) {
@@ -53,10 +54,40 @@ export class NotificationTemplates {
                 }
             })
             .children(
-                ifjs(part.type === "profile", UserTemplates.userIcon(part.id, Util.getUserAvatar(part.id))),
+                NotificationTemplates.referenceImage(part),
                 create("span")
                     .text(text),
             ).build();
+    }
+
+    static referenceIcon(image: StringOrSignal, fallback: StringOrSignal) {
+        const img = create("img")
+            .classes("user-icon", "align-center", "nopointer")
+            .attributes("src", image)
+            .onerror(() => {
+                img.src(fallback);
+            });
+
+        return img;
+    }
+
+    static referenceImage(part: NotificationPart) {
+        if (!part.id) {
+            return nullElement();
+        }
+
+        switch (part.type) {
+            case "profile":
+                return NotificationTemplates.referenceIcon(Util.getUserAvatar(part.id), Images.DEFAULT_AVATAR);
+            case "track":
+                return NotificationTemplates.referenceIcon(Util.getTrackCover(part.id), Images.DEFAULT_COVER_TRACK);
+            case "album":
+                return NotificationTemplates.referenceIcon(Util.getAlbumCover(part.id), Images.DEFAULT_COVER_ALBUM);
+            case "playlist":
+                return NotificationTemplates.referenceIcon(Util.getPlaylistCover(part.id), Images.DEFAULT_COVER_PLAYLIST);
+        }
+
+        return nullElement();
     }
 
     static notifications() {
