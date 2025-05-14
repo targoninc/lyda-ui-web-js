@@ -82,11 +82,13 @@ export class StatisticsTemplates {
                 return el && e.x > el.clientLeft && e.x < el.clientLeft + el.clientWidth && e.y > el.clientTop && e.y < el.clientTop + el.clientHeight;
             }
 
-            document.addEventListener("click", (e) => {
-                if (!eventWithinSelector(e, `.listFromStatsOpener.${type}`)) {
-                    open$.value = false;
-                }
-            }, {once: true});
+            setTimeout(() => {
+                document.addEventListener("click", (e) => {
+                    if (!eventWithinSelector(e, `.listFromStatsOpener.${type}`)) {
+                        open$.value = false;
+                    }
+                }, {once: true});
+            });
         });
 
         const itemsList = items.map(item => {
