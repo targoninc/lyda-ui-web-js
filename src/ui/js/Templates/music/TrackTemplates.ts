@@ -136,7 +136,7 @@ export class TrackTemplates {
 
     static trackList(tracksState: Signal<Track[]>, pageState: Signal<number>, type: string, filterState: Signal<string>) {
         return create("div")
-            .classes("flex-v")
+            .classes("flex-v", "fullHeight")
             .children(
                 create("div")
                     .classes("flex", "space-outwards")

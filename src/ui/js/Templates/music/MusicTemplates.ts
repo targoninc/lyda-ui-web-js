@@ -228,6 +228,7 @@ export class MusicTemplates {
         const feedVisible = compute(u => u || type === "explore", currentUser);
 
         return create("div")
+            .classes("fullHeight")
             .children(
                 ifjs(feedVisible, create("span")
                     .text("Log in to see this feed")
