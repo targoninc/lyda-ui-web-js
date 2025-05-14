@@ -21,7 +21,7 @@
   "dependencies": {
     "@paypal/paypal-js": "^8.1.2",
     "@sgratzl/chartjs-chart-boxplot": "^4.4.3",
-    "@types/bun": "^1.1.11",
+    "@types/bun": "^1.2.13",
     "chart.js": "^4.4.6",
     "dotenv": "^16.4.5",
     "express": "^5.0.0",
