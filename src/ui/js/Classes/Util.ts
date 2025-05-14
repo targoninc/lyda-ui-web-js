@@ -26,7 +26,7 @@ export class Util {
         return urlParams.get(name);
     }
 
-    static getUserAvatar(id: number | null) {
+    static getUserAvatar(id: number | null | undefined) {
         if (id === null) {
             return Images.DEFAULT_AVATAR;
         }

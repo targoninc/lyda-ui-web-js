@@ -79,13 +79,11 @@ export class UserActions {
     }
 
     static getNotificationsPeriodically() {
-        setInterval(async () => {
-            await UserActions.getNotifications();
-        }, 60000);
+        setInterval(UserActions.getNotifications, 60000);
     }
 
     static async getNotifications() {
-        const newestId = notifications.value.sort((a, b) => b.created_at - a.created_at)[0]?.id;
+        const newestId = notifications.value.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]?.id;
         let res;
         if (!newestId) {
             res = await Api.getAsync<Notification[]>(ApiRoutes.getAllNotifications);
@@ -100,12 +98,8 @@ export class UserActions {
         }
     }
 
-    static async markNotificationsAsRead(newestTimestamp: Signal<string | null>, visible: Signal<boolean>) {
-        if (visible.value) {
-            await Api.postAsync(ApiRoutes.markAllNotificationsAsRead, {newest: newestTimestamp.value});
-        } else {
-            await UserActions.getNotifications();
-        }
+    static async markNotificationsAsRead(newestTimestamp: Signal<Date | null>) {
+        await Api.postAsync(ApiRoutes.markAllNotificationsAsRead, {newest: newestTimestamp.value});
     }
 
     static async setTheme(theme: Theme) {

@@ -1,7 +1,8 @@
-import {NavTemplates} from "../../Templates/NavTemplates.ts";
 import {GenericTemplates} from "../../Templates/generic/GenericTemplates.ts";
 import {NotificationReference} from "../../Models/NotificationReference.ts";
 import {Notification} from "../../Models/DbModels/lyda/Notification.ts";
+import {NotificationTemplates} from "../../Templates/NotificationTemplates.ts";
+import {NotificationPart} from "../../Models/NotifcationPart.ts";
 
 export class NotificationParser {
     static parse(notification: Notification) {
@@ -12,8 +13,7 @@ export class NotificationParser {
                 elements.push(GenericTemplates.textWithHtml(part.text));
             } else {
                 if (notification.references) {
-                    const relativeLink = `/${part.type}/${NotificationParser.getLinkIdentifierByType(part.type, part.id, notification.references)}`;
-                    const link = NavTemplates.notificationLink(relativeLink, NotificationParser.getDisplayTextByType(part.type, part.id, notification.references));
+                    const link = NotificationTemplates.notificationLink(notification, part);
                     elements.push(link);
                 }
             }
@@ -21,7 +21,7 @@ export class NotificationParser {
         return elements;
     }
 
-    static getDisplayTextByType(type: string, id: any, refs: NotificationReference[]) {
+    static getDisplayTextByType(type: string, id: number|undefined, refs: NotificationReference[]) {
         switch (type) {
             case "profile":
                 return refs.find(item => item.type === "u" && item.id === id)?.object.username;
@@ -43,7 +43,7 @@ export class NotificationParser {
         return id;
     }
 
-    static getMessageParts(message: string): { type: string, text?: string, id?: number }[] {
+    static getMessageParts(message: string): NotificationPart[] {
         const entities: { [key: string]: string } = {
             "u": "profile",
             "t": "track",
@@ -51,7 +51,7 @@ export class NotificationParser {
             "p": "playlist",
         };
 
-        const result: { type: string, text?: string, id?: number }[] = [];
+        const result: NotificationPart[] = [];
 
         // Regex to match `{entity:id|text}` pattern
         const regex = /\{([utap]:\d+)}/g;
@@ -67,7 +67,7 @@ export class NotificationParser {
             // Push plain text before the match
             if (match.index > lastIndex) {
                 const plainText = message.slice(lastIndex, match.index);
-                result.push({ type: 'text', text: plainText });
+                result.push({type: 'text', text: plainText});
             }
 
             // Push matched tag with its parsed details
@@ -84,7 +84,7 @@ export class NotificationParser {
 
         // Push remaining plain text after the last match
         if (lastIndex < message.length) {
-            result.push({ type: 'text', text: message.slice(lastIndex) });
+            result.push({type: 'text', text: message.slice(lastIndex)});
         }
 
         return result;

@@ -3,20 +3,16 @@ import {UserTemplates} from "./account/UserTemplates.ts";
 import {UserActions} from "../Actions/UserActions.ts";
 import {GenericTemplates} from "./generic/GenericTemplates.ts";
 import {SearchTemplates} from "./SearchTemplates.ts";
-import {NotificationParser} from "../Classes/Helpers/NotificationParser.ts";
-import {AuthActions} from "../Actions/AuthActions.ts";
-import {Time} from "../Classes/Helpers/Time.ts";
-import {copy, Util} from "../Classes/Util.ts";
 import {navigate, reload} from "../Routing/Router.ts";
-import {create, ifjs, signalMap, StringOrSignal} from "../../fjsc/src/f2.ts";
+import {create, ifjs, StringOrSignal} from "../../fjsc/src/f2.ts";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
-import {Notification} from "../Models/DbModels/lyda/Notification.ts";
 import {FJSC} from "../../fjsc";
 import {router} from "../../main.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
-import {currentUser, notifications} from "../state.ts";
+import {currentUser} from "../state.ts";
 import {SearchContext} from "../Enums/SearchContext.ts";
 import {RoutePath} from "../Routing/routes.ts";
+import {NotificationTemplates} from "./NotificationTemplates.ts";
 
 export class NavTemplates {
     static navTop() {
@@ -144,7 +140,7 @@ export class NavTemplates {
                         navigate(RoutePath.upload);
                     }
                 }),
-                NavTemplates.notifications(),
+                NotificationTemplates.notifications(),
                 UserTemplates.userWidget(currentUser, true, [], [], UserWidgetContext.nav),
             ).build();
     }
@@ -160,98 +156,6 @@ export class NavTemplates {
                     disabled: compute((r) => (r && r.path === "login") as boolean, router.currentRoute),
                     onclick: () => navigate(RoutePath.login)
                 })
-            ).build();
-    }
-
-    static notificationInList(notification: Notification) {
-        const elements = NotificationParser.parse(notification);
-
-        return create("div")
-            .classes("listNotification", "flex", notification.type, "rounded", "padded-inline", "hoverable", "text-left", notification.is_read ? "read" : "unread")
-            .id(notification.id)
-            .children(
-                create("div")
-                    .classes("flex-v", "no-gap")
-                    .children(
-                        create("span")
-                            .children(...elements)
-                            .build(),
-                        create("span")
-                            .classes("notification-time", "text-small")
-                            .text(Time.ago(notification.created_at))
-                            .build()
-                    ).build()
-            ).build();
-    }
-
-    static notificationImage(image: { type: string, id: string }) {
-        const type = image.type;
-        const id = image.id;
-        const srcState = signal("");
-        srcState.value = Util.getUserAvatar(parseInt(id));
-
-        if (type === "user") {
-            return create("img")
-                .classes("nopointer", "user-icon-big", "align-center")
-                .attributes("src", srcState)
-                .build();
-        }
-
-        return null;
-    }
-
-    static notificationLink(link: string, text: string) {
-        return create("span")
-            .classes("inlineLink")
-            .onclick(async () => {
-                navigate(link);
-            })
-            .onauxclick(async e => {
-                if (e.button === 2) {
-                    e.preventDefault();
-                    await copy(window.location.origin + link);
-                } else if (e.button === 1) {
-                    e.preventDefault();
-                    window.open(window.location.origin + link, "_blank");
-                }
-            })
-            .text(text)
-            .build();
-    }
-
-    static notifications() {
-        const hasNotifs = compute(notifs => notifs.length > 0, notifications);
-        const unreadNotifications = compute(notifs => notifs.filter(notification => !notification.is_read), notifications);
-        const notifsClass = compute((u): string => u.length > 0 ? "unread" : "_", unreadNotifications);
-        const newestTimestamp = compute(unreadNotifs => unreadNotifs.length > 0 ? unreadNotifs[0].created_at : null, unreadNotifications);
-
-        const notifsVisible = signal(false);
-        const listClass = compute((v): string => v ? "_" : "hidden", notifsVisible);
-
-        const notificationContainer = create("div")
-            .classes(listClass, "popout-below", "rounded", "absolute-align-right", "notification-list")
-            .children(
-                signalMap(notifications, create("div").classes("flex-v", "nogap"), notif => NavTemplates.notificationInList(notif)),
-                ifjs(hasNotifs, create("div")
-                    .classes("text-center", "padded")
-                    .text("No notifications")
-                    .build(), true)
-            ).build();
-
-        UserActions.getNotificationsPeriodically();
-        return create("div")
-            .classes("notification-container", "relative")
-            .children(
-                FJSC.button({
-                    icon: { icon: "notifications" },
-                    onclick: async () => {
-                        notifsVisible.value = !notifsVisible.value;
-                        await UserActions.markNotificationsAsRead(newestTimestamp, notifsVisible);
-                    },
-                    text: "",
-                    classes: ["fullHeight", "round-on-tiny-breakpoint", notifsClass]
-                }),
-                notificationContainer
             ).build();
     }
 }
