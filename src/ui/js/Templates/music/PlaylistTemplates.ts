@@ -13,7 +13,7 @@ import {notify, Ui} from "../../Classes/Ui.ts";
 import {FJSC} from "../../../fjsc";
 import {User} from "../../Models/DbModels/lyda/User.ts";
 import {Playlist} from "../../Models/DbModels/lyda/Playlist.ts";
-import {AnyNode, create, HtmlPropertyValue, ifjs} from "../../../fjsc/src/f2.ts";
+import {AnyElement, AnyNode, create, HtmlPropertyValue, ifjs, nullElement} from "../../../fjsc/src/f2.ts";
 import {Track} from "../../Models/DbModels/lyda/Track.ts";
 import {Album} from "../../Models/DbModels/lyda/Album.ts";
 import {navigate} from "../../Routing/Router.ts";
@@ -26,27 +26,27 @@ import {RoutePath} from "../../Routing/routes.ts";
 import {ItemType} from "../../Enums/ItemType.ts";
 
 export class PlaylistTemplates {
-    static async addTrackToPlaylistModal(track: Track, playlists: Playlist[]) {
+    static addTrackToPlaylistModal(track: Track, playlists: Playlist[]) {
         if (playlists.some(p => !p.tracks)) {
             return create("div").text("No playlists found").build();
         }
 
         const checkedPlaylists = signal(playlists.filter(p => p.tracks!.some(t => t.track_id === track.id)).map(p => p.id));
-        let playlistList = [];
+        let playlistList: AnyElement[] = [];
         if (playlists.length === 0) {
             playlistList.push(create("span")
                 .classes("nopointer")
                 .text("No playlists found")
                 .build());
         } else {
-            playlistList = await Promise.all(playlists.map(async (playlist) => {
+            playlistList = playlists.map((playlist) => {
                 if (!playlist.tracks) {
                     console.warn("Playlist has no tracks: ", playlist);
-                    return;
+                    return nullElement();
                 }
 
-                return await PlaylistTemplates.playlistInAddList(playlist, checkedPlaylists);
-            })) as AnyNode[];
+                return PlaylistTemplates.playlistInAddList(playlist, checkedPlaylists);
+            }) as AnyElement[];
         }
 
         return create("div")
@@ -84,7 +84,7 @@ export class PlaylistTemplates {
             ).build();
     }
 
-    static async addAlbumToPlaylistModal(album: Album, playlists: Playlist[]) {
+    static addAlbumToPlaylistModal(album: Album, playlists: Playlist[]) {
         const checkedPlaylists = signal(playlists.filter(p => p.tracks?.some(t => album.tracks?.some(ata => ata.track_id === t.track_id))).map(p => p.id));
         let playlistList = [];
         if (playlists.length === 0) {
@@ -93,9 +93,7 @@ export class PlaylistTemplates {
                 .text("No playlists found")
                 .build());
         } else {
-            playlistList = await Promise.all(playlists.map(async (playlist: Playlist) => {
-                return await PlaylistTemplates.playlistInAddList(playlist, checkedPlaylists);
-            }));
+            playlistList = playlists.map((playlist: Playlist) => PlaylistTemplates.playlistInAddList(playlist, checkedPlaylists));
         }
 
         return create("div")
@@ -132,7 +130,7 @@ export class PlaylistTemplates {
             ).build();
     }
 
-    static async playlistInAddList(item: Playlist, checkedItems: Signal<number[]>) {
+    static playlistInAddList(item: Playlist, checkedItems: Signal<number[]>) {
         const checked = compute((ch) => ch.includes(item.id), checkedItems);
         const checkedClass = compute((c): string => c ? "active" : "_", checked);
 
@@ -146,7 +144,7 @@ export class PlaylistTemplates {
                 }
             })
             .children(
-                await PlaylistTemplates.smallPlaylistCover(item),
+                PlaylistTemplates.smallPlaylistCover(item),
                 create("span")
                     .text(item.title)
                     .build(),
@@ -354,7 +352,7 @@ export class PlaylistTemplates {
             ).build();
     }
 
-    static async smallPlaylistCover(playlist: Playlist) {
+    static smallPlaylistCover(playlist: Playlist) {
         const coverState = signal(Images.DEFAULT_COVER_PLAYLIST);
         if (playlist.has_cover) {
             coverState.value = Util.getPlaylistCover(playlist.id);
