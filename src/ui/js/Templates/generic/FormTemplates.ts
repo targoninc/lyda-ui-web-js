@@ -1,9 +1,6 @@
+import {input, searchableSelect, SelectOption } from "@targoninc/jess-components";
 import {GenericTemplates} from "./GenericTemplates.ts";
-import {FJSC} from "../../../fjsc";
-import {InputType, SelectOption} from "../../../fjsc/src/Types.ts";
-import {Genre} from "../../Enums/Genre.ts";
-import {create, HtmlPropertyValue, StringOrSignal, TypeOrSignal} from "../../../fjsc/src/f2.ts";
-import {compute, signal, Signal} from "../../../fjsc/src/signals.ts";
+import {InputType, create, HtmlPropertyValue, StringOrSignal, TypeOrSignal, signal, Signal} from "@targoninc/jess";
 
 export class FormTemplates {
     static fileField(title: string, text: string, name: string, accept: string, required = false, onchange = (v: string, files: FileList | null) => {}) {
@@ -27,7 +24,7 @@ export class FormTemplates {
                 create("label")
                     .text(title)
                     .build(),
-                FJSC.searchableSelect({
+                searchableSelect({
                     options: optionsState as Signal<SelectOption[]>,
                     value: selectedValue,
                     onchange: (v) => {
@@ -47,7 +44,7 @@ export class FormTemplates {
     static textField(title: string, name: string, placeholder: string, type = "text", value: StringOrSignal = "", required = false, onchange: Function = (val: string) => {
     }, autofocus = false, onkeydown: Function = () => {
     }, classes: StringOrSignal[] = []) {
-        return FJSC.input<string>({
+        return input<string>({
             type: type as InputType,
             name,
             label: title,

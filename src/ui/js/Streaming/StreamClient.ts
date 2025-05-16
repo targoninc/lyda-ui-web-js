@@ -1,8 +1,7 @@
 import {PlayManager} from "./PlayManager.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {currentQuality, currentTrackId, currentTrackPosition, volume} from "../state.ts";
-import {create} from "../../fjsc/src/f2.ts";
-import {compute} from "../../fjsc/src/signals.ts";
+import {compute, create} from "@targoninc/jess";
 
 export class StreamClient {
     id: number;

@@ -6,7 +6,7 @@ import {notify, Ui} from "../Classes/Ui.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
 import {QueueManager} from "../Streaming/QueueManager.ts";
 import {navigate} from "../Routing/Router.ts";
-import {Signal} from "../../fjsc/src/signals.ts";
+import {Signal} from "@targoninc/jess";
 import {Playlist} from "../Models/DbModels/lyda/Playlist.ts";
 import {Track} from "../Models/DbModels/lyda/Track.ts";
 import {Album} from "../Models/DbModels/lyda/Album.ts";
@@ -14,7 +14,6 @@ import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {MediaUploader} from "../Api/MediaUploader.ts";
 import {MediaFileType} from "../Enums/MediaFileType.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
-import {PlaylistTrack} from "../Models/DbModels/lyda/PlaylistTrack.ts";
 import {ListTrack} from "../Models/ListTrack.ts";
 import {RoutePath} from "../Routing/routes.ts";
 
@@ -27,9 +26,9 @@ export class PlaylistActions {
         }
         let modal;
         if (type === "track") {
-            modal = GenericTemplates.modal([await PlaylistTemplates.addTrackToPlaylistModal(objectToBeAdded as Track, res.data)], "add-to-playlist");
+            modal = GenericTemplates.modal([PlaylistTemplates.addTrackToPlaylistModal(objectToBeAdded as Track, res.data)], "add-to-playlist");
         } else {
-            modal = GenericTemplates.modal([await PlaylistTemplates.addAlbumToPlaylistModal(objectToBeAdded as Album, res.data)], "add-to-playlist");
+            modal = GenericTemplates.modal([PlaylistTemplates.addAlbumToPlaylistModal(objectToBeAdded as Album, res.data)], "add-to-playlist");
         }
         Ui.addModal(modal);
     }

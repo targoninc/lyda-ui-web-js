@@ -1,18 +1,17 @@
-import {AnyElement, create, ifjs} from "../../fjsc/src/f2.ts";
+import {compute, Signal, signal, AnyElement, create, when} from "@targoninc/jess";
 import {Api} from "../Api/Api.ts";
 import {notify} from "../Classes/Ui.ts";
 import {navigate} from "../Routing/Router.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {GenericTemplates} from "./generic/GenericTemplates.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {SearchResult} from "../Models/SearchResult.ts";
 import {Util} from "../Classes/Util.ts";
 import {Images} from "../Enums/Images.ts";
 import {SearchContext} from "../Enums/SearchContext.ts";
-import {FJSC} from "../../fjsc";
 import {router} from "../../main.ts";
 import {RoutePath} from "../Routing/routes.ts";
+import { button, icon } from "@targoninc/jess-components";
 
 export class SearchTemplates {
     static search(context: SearchContext) {
@@ -84,7 +83,7 @@ export class SearchTemplates {
                     resultsShown.value = false;
                 }),
                 create("input")
-                    .classes("fjsc", "search-input")
+                    .classes("jess", "search-input")
                     .placeholder("Search")
                     .value(currentSearch)
                     .onclick(() => {
@@ -191,7 +190,7 @@ export class SearchTemplates {
                         create("div")
                             .classes("padded")
                             .children(
-                                FJSC.button({
+                                button({
                                     icon: { icon: "manage_search" },
                                     text: "Open search",
                                     classes: ["positive"],
@@ -201,7 +200,7 @@ export class SearchTemplates {
                                     }
                                 }),
                             ).build(),
-                        ifjs(exactMatches.length > 0,
+                        when(exactMatches.length > 0,
                             create("span")
                                 .classes("search-result-header")
                                 .text("Exact Matches")
@@ -209,7 +208,7 @@ export class SearchTemplates {
                         ...exactMatches.map(result => {
                             return this.searchResult(result, selectedResult, resultsShown, SearchContext.navBar);
                         }),
-                        ifjs(partialMatches.length > 0,
+                        when(partialMatches.length > 0,
                             create("span")
                                 .classes("search-result-header")
                                 .text("Partial Matches")
@@ -239,7 +238,7 @@ export class SearchTemplates {
                 create("div")
                     .classes("flex")
                     .children(
-                        ifjs(searchResults.length === 0, create("div")
+                        when(searchResults.length === 0, create("div")
                             .classes("flex-v")
                             .children(
                                 create("span")
@@ -290,7 +289,7 @@ export class SearchTemplates {
         if (searchResult.hasImage) {
             image.value = imageGetterMap[searchResult.type](searchResult.id);
         }
-        const contextClasses = context === SearchContext.searchPage ? ["fjsc", "fullWidth"] : ["_"]
+        const contextClasses = context === SearchContext.searchPage ? ["jess", "fullWidth"] : ["_"]
 
         elementReference = create(context === SearchContext.navBar ? "div" : "button")
             .classes("search-result", "space-outwards", "padded", "flex", addClass, ...contextClasses)
@@ -315,7 +314,7 @@ export class SearchTemplates {
                                 create("div")
                                     .classes("flex")
                                     .children(
-                                        ifjs(searchResult.exactMatch, FJSC.icon({
+                                        when(searchResult.exactMatch, icon({
                                             icon: "star",
                                             classes: ["nopointer", "svg", "inline-icon"]
                                         })),

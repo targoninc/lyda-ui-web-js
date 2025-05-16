@@ -49,7 +49,7 @@ export const router = new Router(routes, async (route: Route, params: any) => {
     }, 100);
 });
 
-if (currentUser.value) {
+export function getUserPermissions() {
     Api.getAsync<Permission[]>(ApiRoutes.userPermissions).then(res => {
         if (res.code !== 200) {
             console.error("Failed to get permissions: ", res.data);
@@ -57,6 +57,10 @@ if (currentUser.value) {
         }
         permissions.value = res.data as Permission[];
     });
+}
+
+if (currentUser.value) {
+    getUserPermissions();
 
     const currentTrackPositionTmp = LydaCache.get<TrackPosition>("currentTrackPosition").content;
     if (currentTrackPositionTmp) {

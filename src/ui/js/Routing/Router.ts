@@ -1,5 +1,5 @@
 import {router} from "../../main.ts";
-import {signal} from "../../fjsc/src/signals.ts";
+import {signal} from "@targoninc/jess";
 
 export class Router {
     public currentRoute = signal<Route|null>(null);

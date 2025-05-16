@@ -1,4 +1,4 @@
-import {InputType} from "../../fjsc/src/Types.ts";
+import {InputType} from "@targoninc/jess";
 
 export interface Filter {
     key: string;

@@ -3,10 +3,9 @@ import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {GenericTemplates} from "./generic/GenericTemplates.ts";
 import {Util} from "../Classes/Util.ts";
 import {navigate} from "../Routing/Router.ts";
-import {AnyElement, create, HtmlPropertyValue, StringOrSignal} from "../../fjsc/src/f2.ts";
-import {FJSC} from "../../fjsc";
-import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
+import {compute, Signal, signal, AnyElement, create, HtmlPropertyValue, StringOrSignal} from "@targoninc/jess";
 import {RoutePath} from "../Routing/routes.ts";
+import { button } from "@targoninc/jess-components";
 
 export class MenuTemplates {
     static genericMenu(title: HtmlPropertyValue, menuItems: any[]) {
@@ -50,7 +49,7 @@ export class MenuTemplates {
         const isSelected = compute(i => i === index, selectedIndex);
         const selectedClass = compute((is): string => is ? "active" : "_", isSelected);
 
-        return FJSC.button({
+        return button({
             text: text as StringOrSignal,
             icon: { icon },
             onclick: action,

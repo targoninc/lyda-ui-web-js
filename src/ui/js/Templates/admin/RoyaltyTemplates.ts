@@ -1,10 +1,7 @@
 import {RoyaltyInfo} from "../../Models/RoyaltyInfo.ts";
-import {create, ifjs, nullElement} from "../../../fjsc/src/f2.ts";
-import {SelectOption} from "../../../fjsc/src/Types.ts";
-import {compute, Signal, signal} from "../../../fjsc/src/signals.ts";
+import {compute, Signal, signal, create, when, nullElement} from "@targoninc/jess";
 import {RoyaltyMonth} from "../../Models/RoyaltyMonth.ts";
 import {FormTemplates} from "../generic/FormTemplates.ts";
-import {FJSC} from "../../../fjsc";
 import {notify} from "../../Classes/Ui.ts";
 import {NotificationType} from "../../Enums/NotificationType.ts";
 import {Api} from "../../Api/Api.ts";
@@ -15,6 +12,7 @@ import {permissions} from "../../state.ts";
 import {currency} from "../../Classes/Helpers/Num.ts";
 import {LogTemplates} from "./LogTemplates.ts";
 import {DashboardTemplates} from "./DashboardTemplates.ts";
+import {button, SelectOption, toggle } from "@targoninc/jess-components";
 
 export class RoyaltyTemplates {
     static royaltyCalculator(royaltyInfo: RoyaltyInfo) {
@@ -36,7 +34,7 @@ export class RoyaltyTemplates {
             .classes("flex-v")
             .children(
                 RoyaltyTemplates.royaltyActions(months, selectedState, selectedMonth, hasEarnings, isApproved),
-                ifjs(hasEarnings, create("div")
+                when(hasEarnings, create("div")
                     .classes("flex-v")
                     .children(
                         LogTemplates.signalProperty("Earnings", earnings),
@@ -58,7 +56,7 @@ export class RoyaltyTemplates {
                 create("div")
                     .classes("flex", "align-children")
                     .children(
-                        FJSC.button({
+                        button({
                             text: "Calculate earnings",
                             icon: {icon: "account_balance"},
                             classes: ["positive"],
@@ -79,7 +77,7 @@ export class RoyaltyTemplates {
                                 notify("Earnings calculated", NotificationType.success);
                             }
                         }),
-                        FJSC.button({
+                        button({
                             text: "Calculate royalties",
                             icon: {icon: "calculate"},
                             classes: ["positive"],
@@ -101,7 +99,7 @@ export class RoyaltyTemplates {
                                 notify("Royalties calculated", NotificationType.success);
                             }
                         }),
-                        FJSC.toggle({
+                        toggle({
                             text: "Approve monthly earnings",
                             checked: isApproved,
                             onchange: async (v) => {
@@ -146,7 +144,7 @@ export class RoyaltyTemplates {
 
         return create("div")
             .children(
-                ifjs(canCalculateRoyalties, create("div")
+                when(canCalculateRoyalties, create("div")
                     .classes("card", "flex-v")
                     .children(
                         create("h2")

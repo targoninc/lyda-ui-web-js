@@ -15,7 +15,6 @@ import {Images} from "../../Enums/Images.ts";
 import {TrackEditTemplates} from "./TrackEditTemplates.ts";
 import {CustomText} from "../../Classes/Helpers/CustomText.ts";
 import {CommentTemplates} from "../CommentTemplates.ts";
-import {AnyElement, AnyNode, create, HtmlPropertyValue, ifjs, signalMap} from "../../../fjsc/src/f2.ts";
 import {navigate} from "../../Routing/Router.ts";
 import {Track} from "../../Models/DbModels/lyda/Track.ts";
 import {User} from "../../Models/DbModels/lyda/User.ts";
@@ -23,9 +22,8 @@ import {TrackCollaborator} from "../../Models/DbModels/lyda/TrackCollaborator.ts
 import {TrackLike} from "../../Models/DbModels/lyda/TrackLike.ts";
 import {Repost} from "../../Models/DbModels/lyda/Repost.ts";
 import {Album} from "../../Models/DbModels/lyda/Album.ts";
-import {FJSC} from "../../../fjsc";
 import {Playlist} from "../../Models/DbModels/lyda/Playlist.ts";
-import {compute, Signal, signal} from "../../../fjsc/src/signals.ts";
+import {compute, Signal, signal, AnyElement, AnyNode, create, HtmlPropertyValue, when, signalMap} from "@targoninc/jess";
 import {CollaboratorType} from "../../Models/DbModels/lyda/CollaboratorType.ts";
 import {currentTrackId, currentUser, manualQueue} from "../../state.ts";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
@@ -40,6 +38,7 @@ import {RoutePath} from "../../Routing/routes.ts";
 import {DefaultImages} from "../../Enums/DefaultImages.ts";
 import {ItemType} from "../../Enums/ItemType.ts";
 import {MusicTemplates} from "./MusicTemplates.ts";
+import { button } from "@targoninc/jess-components";
 
 export class TrackTemplates {
     static collabIndicator(collab: TrackCollaborator): any {
@@ -108,14 +107,14 @@ export class TrackTemplates {
                         Ui.showImageModal(imageState);
                     })
                     .build(),
-                ifjs(isOwnTrack, create("div")
+                when(isOwnTrack, create("div")
                     .classes("hidden", coverType === "cover" ? "showOnParentHover" : "_", "centeredInParent", "flex")
                     .children(
                         GenericTemplates.deleteIconButton("delete-image-button", () => MediaActions.deleteMedia(MediaFileType.trackCover, track.id, imageState, coverLoading)),
                         GenericTemplates.uploadIconButton("replace-image-button", () => TrackActions.replaceCover(track.id, true, imageState, coverLoading)),
-                        ifjs(coverLoading, GenericTemplates.loadingSpinner()),
+                        when(coverLoading, GenericTemplates.loadingSpinner()),
                     ).build()),
-                ifjs(coverType !== "cover", create("div")
+                when(coverType !== "cover", create("div")
                     .classes("centeredInParent", "hidden", coverType !== "cover" ? "showOnParentHover" : "_")
                     .children(
                         GenericTemplates.playButton(track.id, start)
@@ -184,14 +183,14 @@ export class TrackTemplates {
         return create("div")
             .classes("flex")
             .children(
-                FJSC.button({
+                button({
                     text: "Previous page",
                     icon: { icon: "arrow_left" },
                     onclick: previousCallback,
                     disabled: currentPage === 1,
                     classes: ["previousPage"],
                 }),
-                FJSC.button({
+                button({
                     text: "Next page",
                     icon: { icon: "arrow_right" },
                     onclick: nextCallback,
@@ -235,7 +234,7 @@ export class TrackTemplates {
             throw new Error(`Repost has no user`);
         }
 
-        return FJSC.button({
+        return button({
             text: "@" + repost.user.username,
             icon: {
                 icon: Icons.REPOST,
@@ -308,7 +307,7 @@ export class TrackTemplates {
                     }
                 })
                 .children(
-                    ifjs(canEdit, GenericTemplates.verticalDragIndicator()),
+                    when(canEdit, GenericTemplates.verticalDragIndicator()),
                     TrackTemplates.smallListTrackCover(track, startCallback),
                     create("div")
                         .classes("flex-v", "flex-grow")
@@ -336,7 +335,7 @@ export class TrackTemplates {
                                                     create("div")
                                                         .classes("flex-grow")
                                                         .build(),
-                                                    ifjs(canEdit, TrackTemplates.trackInListActions(track, list, listTrack, tracks, type)),
+                                                    when(canEdit, TrackTemplates.trackInListActions(track, list, listTrack, tracks, type)),
                                                 ).build(),
                                         ).build(),
                                 ).build(),
@@ -355,7 +354,7 @@ export class TrackTemplates {
         return create("div")
             .classes("flex")
             .children(
-                FJSC.button({
+                button({
                     text: "Move up",
                     icon: { icon: "keyboard_arrow_up" },
                     classes: ["positive"],
@@ -364,7 +363,7 @@ export class TrackTemplates {
                         await TrackActions.reorderTrack(type, list.id, track.id, tracks, listTrack.position - 1);
                     }
                 }),
-                FJSC.button({
+                button({
                     text: "Move down",
                     icon: { icon: "keyboard_arrow_down" },
                     classes: ["positive"],
@@ -373,7 +372,7 @@ export class TrackTemplates {
                         await TrackActions.reorderTrack(type, list.id, track.id, tracks, listTrack.position + 1);
                     }
                 }),
-                FJSC.button({
+                button({
                     text: "Remove from " + type,
                     icon: { icon: "close" },
                     classes: ["negative"],
@@ -389,7 +388,7 @@ export class TrackTemplates {
         return create("div")
             .classes("flex-v")
             .children(
-                ifjs(noTracks, create("div")
+                when(noTracks, create("div")
                     .classes("card")
                     .children(
                         create("span")
@@ -400,7 +399,7 @@ export class TrackTemplates {
                     return create("div")
                         .classes("flex-v", "relative")
                         .children(
-                            ifjs(canEdit, GenericTemplates.dragTargetInList(async (data: any) => {
+                            when(canEdit, GenericTemplates.dragTargetInList(async (data: any) => {
                                 await TrackActions.reorderTrack(type, list.id, data.id, tracks, i);
                             }, i.toString())),
                             TrackTemplates.trackInList(track, canEdit, list, tracks, type, startCallback)
@@ -554,7 +553,7 @@ export class TrackTemplates {
                             .classes("collaborators")
                             .text(track.credits)
                             .build(),
-                        ifjs(track.description.length > 0, description),
+                        when(track.description.length > 0, description),
                         create("div")
                             .classes("flex")
                             .children(
@@ -584,15 +583,15 @@ export class TrackTemplates {
                                             .children(
                                                 TrackTemplates.playButton(track),
                                                 TrackTemplates.addToQueueButton(track),
-                                                ifjs(trackData.canEdit, TrackEditTemplates.replaceAudioButton(track)),
+                                                when(trackData.canEdit, TrackEditTemplates.replaceAudioButton(track)),
                                             ).build(),
                                         create("div")
                                             .classes("stats-container", "flex", "rounded")
                                             .children(
                                                 StatisticsTemplates.likesIndicator(ItemType.track, track.id, track.likes.length, liked),
                                                 StatisticsTemplates.likeListOpener(track.likes),
-                                                ifjs(isPrivate, StatisticsTemplates.repostIndicator(track.id, track.reposts.length, reposted), true),
-                                                ifjs(isPrivate, StatisticsTemplates.repostListOpener(track.reposts), true),
+                                                when(isPrivate, StatisticsTemplates.repostIndicator(track.id, track.reposts.length, reposted), true),
+                                                when(isPrivate, StatisticsTemplates.repostListOpener(track.reposts), true),
                                                 CommentTemplates.commentButton(true, comments, showComments)
                                             ).build(),
                                     ).build()
@@ -684,7 +683,7 @@ export class TrackTemplates {
         return create("div")
             .classes("audio-actions", "flex")
             .children(
-                ifjs(currentUser, FJSC.button({
+                when(currentUser, button({
                     text: "Add to playlist",
                     icon: { icon: "playlist_add" },
                     onclick: async () => {
@@ -701,7 +700,7 @@ export class TrackTemplates {
         const icon = compute((q: boolean): string => q ? "remove" : "switch_access_shortcut_add", inQueue);
         const queueClass = compute((q: boolean): string => q ? "negative" : "positive", inQueue);
 
-        return FJSC.button({
+        return button({
             text,
             icon: {icon},
             classes: [queueClass],
@@ -715,7 +714,7 @@ export class TrackTemplates {
     static playButton(track: Track) {
         const isPlaying = PlayManager.isPlaying(track.id);
 
-        return FJSC.button({
+        return button({
             text: isPlaying ? "Pause": "Play",
             icon: {
                 icon: isPlaying ? Icons.PAUSE : Icons.PLAY,
@@ -797,7 +796,7 @@ export class TrackTemplates {
     }
 
     static copyPrivateLinkButton(id: number, code: string) {
-        return FJSC.button({
+        return button({
             text: "Copy private link",
             icon: { icon: "link" },
             classes: ["special"],

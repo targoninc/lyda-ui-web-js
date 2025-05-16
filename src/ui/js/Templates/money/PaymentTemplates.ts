@@ -1,5 +1,4 @@
-import {compute, signal} from "../../../fjsc/src/signals.ts";
-import {create} from "../../../fjsc/src/f2.ts";
+import {create, compute, signal} from "@targoninc/jess";
 import {Api} from "../../Api/Api.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";

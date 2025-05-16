@@ -9,19 +9,18 @@ import {
     AnyNode,
     create,
     HtmlPropertyValue,
-    ifjs,
+    when,
     signalMap, SignalMapCallback,
     StringOrSignal,
-    TypeOrSignal
-} from "../../../fjsc/src/f2.ts";
-import {FJSC} from "../../../fjsc";
-import {IconConfig, InputType, SearchableSelectConfig, SelectOption} from "../../../fjsc/src/Types.ts";
-import {getAvatar, Util} from "../../Classes/Util.ts";
+    TypeOrSignal,
+    compute, signal, Signal,
+    InputType
+} from "@targoninc/jess";
+import {Util} from "../../Classes/Util.ts";
 import {navigate} from "../../Routing/Router.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {ProgressState} from "../../Enums/ProgressState.ts";
 import {ProgressPart} from "../../Models/ProgressPart.ts";
-import {compute, signal, Signal} from "../../../fjsc/src/signals.ts";
 import {SearchResult} from "../../Models/SearchResult.ts";
 import {currentTrackId, openMenus, playingHere} from "../../state.ts";
 import {PillOption} from "../../Models/PillOption.ts";
@@ -30,21 +29,21 @@ import {dayFromValue} from "../../Classes/Helpers/Date.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {AuthActions} from "../../Actions/AuthActions.ts";
-import {PaypalWebhook} from "../../Models/DbModels/finance/PaypalWebhook.ts";
 import {Filter} from "../../Models/Filter.ts";
 import { Images } from "../../Enums/Images.ts";
 import {CollaboratorType} from "../../Models/DbModels/lyda/CollaboratorType.ts";
+import { button, input, searchableSelect, icon, textarea, IconConfig, SearchableSelectConfig, SelectOption } from "@targoninc/jess-components";
 
 export class GenericTemplates {
-    static icon(icon: StringOrSignal, adaptive = false, classes: StringOrSignal[] = [], title = "", onclick: Function | undefined = undefined) {
+    static icon(icon$: StringOrSignal, adaptive = false, classes: StringOrSignal[] = [], title = "", onclick: Function | undefined = undefined) {
         const urlIndicators = [window.location.origin, "http", "data:", "blob:"];
         // @ts-ignore
-        const isMaterial = icon && (icon as string) && icon.includes && !urlIndicators.some(i => icon.includes(i));
+        const isMaterial = icon$ && (icon$ as string) && icon$.includes && !urlIndicators.some(i => icon$.includes(i));
         const iconClass = adaptive ? "adaptive-icon" : "inline-icon";
         const svgClass = isMaterial ? "_" : "svg";
 
-        return FJSC.icon({
-            icon,
+        return icon({
+            icon: icon$,
             adaptive,
             title,
             isUrl: !isMaterial,
@@ -93,12 +92,12 @@ export class GenericTemplates {
                 create("div")
                     .classes("card-label", "flex", "small-gap", errorClass)
                     .children(
-                        ifjs(icon, GenericTemplates.icon(icon ?? "")),
+                        when(icon, GenericTemplates.icon(icon ?? "")),
                         create("span")
                             .text(text)
                             .build(),
                     ).build(),
-                ifjs(hasError, GenericTemplates.icon("warning", true, ["error"], "This section has errors"))
+                when(hasError, GenericTemplates.icon("warning", true, ["error"], "This section has errors"))
             ).build();
     }
 
@@ -130,7 +129,7 @@ export class GenericTemplates {
     }
 
     static logoutButton() {
-        return FJSC.button({
+        return button({
             text: "Log out",
             classes: ["hideOnSmallBreakpoint", "negative"],
             icon: { icon: "logout" },
@@ -167,7 +166,7 @@ export class GenericTemplates {
                     .classes("warning")
                     .text("Nothing for you here, unfortunately.")
                     .build(),
-                FJSC.button({
+                button({
                     text: "Go explore somewhere else",
                     onclick: () => navigate(RoutePath.explore),
                     icon: { icon: "explore" }
@@ -275,7 +274,7 @@ export class GenericTemplates {
     }
 
     static newAlbumButton(classes: string[] = []) {
-        return FJSC.button({
+        return button({
             text: "New album",
             icon: { icon: "forms_add_on" },
             classes: ["positive", ...classes],
@@ -286,7 +285,7 @@ export class GenericTemplates {
     }
 
     static newPlaylistButton(classes: string[] = []) {
-        return FJSC.button({
+        return button({
             text: "New playlist",
             icon: { icon: "playlist_add" },
             classes: ["positive", ...classes],
@@ -297,7 +296,7 @@ export class GenericTemplates {
     }
 
     static newTrackButton(classes: string[] = []) {
-        return FJSC.button({
+        return button({
             text: "Upload",
             icon: { icon: "upload" },
             classes: ["positive", ...classes],
@@ -358,7 +357,7 @@ export class GenericTemplates {
     static pill(p: PillOption, pillState: Signal<any>, extraClasses: string[] = []) {
         const selectedState = compute((s): string => s === p.value ? "active" : "_", pillState);
 
-        return FJSC.button({
+        return button({
             text: p.text,
             icon: p.icon ? {
                 icon: p.icon,
@@ -377,7 +376,7 @@ export class GenericTemplates {
                 ...options.map(p => {
                     return GenericTemplates.pill(p, pillState);
                 }),
-                ifjs(loadingState, create("img")
+                when(loadingState, create("img")
                     .src(Icons.SPINNER)
                     .alt("Loading...")
                     .classes("spinner-animation", "icon", "align-center", "nopointer")
@@ -385,7 +384,7 @@ export class GenericTemplates {
             ).build();
     }
 
-    static inlineAction(text: HtmlPropertyValue, icon: StringOrSignal, id: HtmlPropertyValue = null, callback: Function, extraAttributes: HtmlPropertyValue[] = [], extraClasses: StringOrSignal[] = []) {
+    static inlineAction(text: HtmlPropertyValue, icon$: StringOrSignal, id: HtmlPropertyValue = null, callback: Function, extraAttributes: HtmlPropertyValue[] = [], extraClasses: StringOrSignal[] = []) {
         return create("div")
             .classes("inline-action", "flex", "clickable", "fakeButton", "padded-inline", "rounded", "align-center")
             .id(id)
@@ -393,8 +392,8 @@ export class GenericTemplates {
             .classes(...extraClasses)
             .onclick(callback)
             .children(
-                FJSC.icon({
-                    icon: icon,
+                icon({
+                    icon: icon$,
                     adaptive: true,
                     classes: ["inline-icon", "svg", "nopointer"],
                     isUrl: false,
@@ -407,7 +406,7 @@ export class GenericTemplates {
     }
 
     static deleteIconButton(id: HtmlPropertyValue, callback: Function, extraClasses: string[] = []) {
-        return FJSC.button({
+        return button({
             id,
             classes: ["negative", ...extraClasses],
             onclick: e => {
@@ -421,7 +420,7 @@ export class GenericTemplates {
     }
 
     static uploadIconButton(id: HtmlPropertyValue, callback: Function, extraClasses: string[] = []) {
-        return FJSC.button({
+        return button({
             id,
             classes: ["positive", ...extraClasses],
             onclick: e => {
@@ -449,9 +448,8 @@ export class GenericTemplates {
 
     static fileInput(id: HtmlPropertyValue, name: HtmlPropertyValue, accept: string, initialText: string, required = false, changeCallback = (v: string, files: FileList | null) => {
     }) {
-        // TODO: Use signals
         const text = signal(initialText);
-        const button = FJSC.button({
+        const fileButton = button({
             text: text,
             onclick: () => {
                 text.value = "Choosing file...";
@@ -475,8 +473,8 @@ export class GenericTemplates {
                         return;
                     }
                 }
-                button.value = truncate(fileName);
-                button.title = fileName;
+                fileButton.value = truncate(fileName);
+                fileButton.title = fileName;
                 const probableName = fileName.substring(fileName.lastIndexOf("\\") + 1);
                 text.value = probableName;
                 changeCallback(probableName, input.files);
@@ -494,7 +492,7 @@ export class GenericTemplates {
 
         return create("div")
             .children(
-                button,
+                fileButton,
                 input
             ).build();
     };
@@ -572,13 +570,13 @@ export class GenericTemplates {
                 create("div")
                     .classes("flex")
                     .children(
-                        FJSC.button({
+                        button({
                             text: confirmText ?? "Confirm",
                             onclick: confirmCallback,
                             classes: ["positive"],
                             icon: {icon: "check"}
                         }),
-                        FJSC.button({
+                        button({
                             text: cancelText ?? "Cancel",
                             onclick: cancelCallback,
                             classes: ["negative"],
@@ -628,7 +626,7 @@ export class GenericTemplates {
                         create("p")
                             .text(text)
                             .build(),
-                        FJSC.input<string>({
+                        input<string>({
                             type: InputType.text,
                             name: "textInputModalInput",
                             label: "",
@@ -641,13 +639,13 @@ export class GenericTemplates {
                         create("div")
                             .classes("flex")
                             .children(
-                                FJSC.button({
+                                button({
                                     text: confirmText ?? "Confirm",
                                     onclick: confirmCallback,
                                     classes: ["positive"],
                                     icon: {icon: "check"}
                                 }),
-                                FJSC.button({
+                                button({
                                     text: cancelText ?? "Cancel",
                                     onclick: cancelCallback,
                                     classes: ["negative"],
@@ -680,7 +678,7 @@ export class GenericTemplates {
                         create("p")
                             .text(text)
                             .build(),
-                        FJSC.textarea({
+                        textarea({
                             name: "textInputModalInput",
                             label: "",
                             placeholder: "",
@@ -692,13 +690,13 @@ export class GenericTemplates {
                         create("div")
                             .classes("flex")
                             .children(
-                                FJSC.button({
+                                button({
                                     text: confirmText ?? "Confirm",
                                     onclick: confirmCallback,
                                     classes: ["positive"],
                                     icon: {icon: "check"}
                                 }),
-                                FJSC.button({
+                                button({
                                     text: cancelText ?? "Cancel",
                                     onclick: cancelCallback,
                                     classes: ["negative"],
@@ -751,14 +749,14 @@ export class GenericTemplates {
             .build();
     }
 
-    static roundIconButton(icon: IconConfig, onclick: Function, title: StringOrSignal = "", classes: StringOrSignal[] = []) {
+    static roundIconButton(iconConfig: IconConfig, onclick: Function, title: StringOrSignal = "", classes: StringOrSignal[] = []) {
         return create("button")
-            .classes("round-button", "fjsc", ...classes)
+            .classes("round-button", "jess", ...classes)
             .onclick(onclick)
             .title(title)
             .children(
-                FJSC.icon({
-                    ...icon,
+                icon({
+                    ...iconConfig,
                     classes: ["round-button-icon", "align-center", "inline-icon", "svg", "nopointer"]
                 }),
             ).build()
@@ -794,7 +792,7 @@ export class GenericTemplates {
     }
 
     static modalCancelButton(modal: AnyElement|null = null) {
-        return FJSC.button({
+        return button({
             text: "Cancel",
             onclick: () => Util.removeModal(modal),
             classes: ["negative"],
@@ -838,7 +836,7 @@ export class GenericTemplates {
         let collabTypes: CollaboratorType[] = [];
         TrackActions.getCollabTypes().then((types) => {
             collabTypes = types;
-            collabTypeOptions.value = FJSC.searchableSelect(<SearchableSelectConfig>{
+            collabTypeOptions.value = searchableSelect(<SearchableSelectConfig>{
                 options: signal(types as SelectOption[]),
                 value: collabType,
                 onchange: (v) => {
@@ -867,7 +865,7 @@ export class GenericTemplates {
                         create("p")
                             .text(text)
                             .build(),
-                        FJSC.input({
+                        input({
                             id: "addUserSearch",
                             name: "addUserSearch",
                             type: InputType.text,
@@ -895,7 +893,7 @@ export class GenericTemplates {
                         create("div")
                             .classes("flex")
                             .children(
-                                FJSC.button({
+                                button({
                                     text: confirmText ?? "Confirm",
                                     onclick: async () => {
                                         confirmCallback(selectedState.value, parseInt(collabType.value), collabTypes);
@@ -905,7 +903,7 @@ export class GenericTemplates {
                                     },
                                     classes: ["positive"],
                                 }),
-                                FJSC.button({
+                                button({
                                     text: cancelText ?? "Cancel",
                                     onclick: cancelCallback,
                                     classes: ["negative"],
@@ -939,7 +937,7 @@ export class GenericTemplates {
                             history.value = history.value.slice(0, index);
                             stepState.value = step;
                         }).build(),
-                    ifjs(isLast, create("span").text(">").build(), true)
+                    when(isLast, create("span").text(">").build(), true)
                 ).build();
         });
     }
@@ -977,14 +975,14 @@ export class GenericTemplates {
                 create("div")
                     .classes("flex", "align-children", "fixed-bar")
                     .children(
-                        FJSC.button({
+                        button({
                             text: "Refresh",
                             icon: {icon: "refresh"},
                             classes: ["positive"],
                             disabled: loading,
                             onclick: () => load(filter.value)
                         }),
-                        FJSC.button({
+                        button({
                             text: "Previous page",
                             icon: {icon: "skip_previous"},
                             disabled: compute((l, s) => l || s <= 0, loading, skip),
@@ -992,7 +990,7 @@ export class GenericTemplates {
                                 skip.value = Math.max(0, skip.value - 100);
                             }
                         }),
-                        FJSC.button({
+                        button({
                             text: "Next page",
                             icon: {icon: "skip_next"},
                             disabled: compute((l, e) => l || e.length < 100, loading, results),
@@ -1000,7 +998,7 @@ export class GenericTemplates {
                                 skip.value = skip.value + 100;
                             }
                         }),
-                        FJSC.input<string>({
+                        input<string>({
                             type: InputType.text,
                             name: "filter",
                             placeholder: "Filter",
@@ -1010,7 +1008,7 @@ export class GenericTemplates {
                         ...filters.map(f => {
                             const filterValue = compute(fv => fv[f.key] ?? f.default, filter);
 
-                            return FJSC.input({
+                            return input({
                                 type: f.type,
                                 name: f.key,
                                 placeholder: f.name,
@@ -1026,7 +1024,7 @@ export class GenericTemplates {
                         create("span")
                             .text(compute(e => e.length + " results", results))
                             .build(),
-                        ifjs(docsLink, GenericTemplates.inlineLink(docsLink ?? "", "Docs", true)),
+                        when(docsLink, GenericTemplates.inlineLink(docsLink ?? "", "Docs", true)),
                     ).build(),
                 signalMap(filteredResults, create("div").classes("flex-v", "fixed-bar-content"), entryFunction)
             ).build();
@@ -1074,7 +1072,7 @@ export class GenericTemplates {
             .classes("flex-v", "progress-section-part-container", "relative")
             .title(part.title ?? "")
             .children(
-                ifjs(part.progress, create("div").classes("progress-section-part-progress").css({
+                when(part.progress, create("div").classes("progress-section-part-progress").css({
                         width: compute(p => p + "%", part.progress ?? signal(0))
                     }).build()),
                 create("div")
@@ -1086,7 +1084,7 @@ export class GenericTemplates {
                             .text(part.text)
                             .build(),
                     ).build(),
-                ifjs(retryable, create("div")
+                when(retryable, create("div")
                     .classes("progress-section-retry", "flex", "small-gap")
                     .children(
                         GenericTemplates.icon("refresh", true, [part.state as Signal<string>]),
@@ -1108,7 +1106,7 @@ export class GenericTemplates {
     static releaseDateInput(state: Signal<{
         release_date: Date;
     }|any>) {
-        return FJSC.input<string>({
+        return input<string>({
             type: InputType.date,
             name: "release_date",
             label: "Release Date",
@@ -1135,7 +1133,7 @@ export class GenericTemplates {
                             .classes("text-small")
                             .text("A new version of Lyda is available.")
                             .build(),
-                        FJSC.button({
+                        button({
                             text: "Reload",
                             onclick: () => {
                                 // @ts-ignore

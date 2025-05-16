@@ -1,21 +1,16 @@
 import {PlayManager} from "./PlayManager.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {Icons} from "../Enums/Icons.js";
-import {LydaCache} from "../Cache/LydaCache.ts";
-import {CacheItem} from "../Cache/CacheItem.ts";
-import {QueueTemplates} from "../Templates/music/QueueTemplates.ts";
 import {QueueManager} from "./QueueManager.ts";
 import {PlayerTemplates} from "../Templates/music/PlayerTemplates.ts";
-import {Util} from "../Classes/Util.ts";
 import {
     currentlyBuffered,
     currentTrackId,
     currentTrackPosition,
-    manualQueue,
     playingHere,
     trackInfo
 } from "../state.ts";
-import {signal} from "../../fjsc/src/signals.ts";
+import {signal} from "@targoninc/jess";
 
 const updatingPlayState = signal(false);
 

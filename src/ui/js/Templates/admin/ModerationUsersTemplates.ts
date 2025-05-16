@@ -1,14 +1,13 @@
 import {User} from "../../Models/DbModels/lyda/User";
-import {compute, Signal, signal} from "../../../fjsc/src/signals.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {Api} from "../../Api/Api.ts";
-import {create, ifjs} from "../../../fjsc/src/f2.ts";
-import {FJSC} from "../../../fjsc";
+import {compute, Signal, signal, create, when} from "@targoninc/jess";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {Permissions} from "../../Enums/Permissions.ts";
 import {DashboardTemplates} from "./DashboardTemplates.ts";
 import {Permission} from "../../Models/DbModels/lyda/Permission.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
+import { button, checkbox } from "@targoninc/jess-components";
 
 export class ModerationUsersTemplates {
     static usersPage() {
@@ -40,7 +39,7 @@ export class ModerationUsersTemplates {
                 create("div")
                     .classes("flex", "align-children", "fixed-bar")
                     .children(
-                        FJSC.button({
+                        button({
                             text: "Refresh",
                             icon: {icon: "refresh"},
                             classes: ["positive"],
@@ -84,12 +83,12 @@ export class ModerationUsersTemplates {
                 create("td")
                     .classes("relative")
                     .children(
-                        FJSC.button({
+                        button({
                             text: compute(p => p.length.toString(), permissions),
                             onclick: () => permissionsOpen.value = !permissionsOpen.value,
                             icon: {icon: "lock_open"},
                         }),
-                        ifjs(permissionsOpen,
+                        when(permissionsOpen,
                             ModerationUsersTemplates.permissionsPopup(permissions, u))
                     ).build(),
                 create("td")
@@ -115,7 +114,7 @@ export class ModerationUsersTemplates {
     }
 
     private static permissionCheckbox(p: string, hasPermission: Signal<any>, u: User, permissions: Signal<Permission[]>) {
-        return FJSC.checkbox({
+        return checkbox({
             text: p,
             checked: hasPermission,
             onchange: () => {

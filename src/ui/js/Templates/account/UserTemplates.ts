@@ -18,18 +18,17 @@ import {
     create,
     DomNode,
     HtmlPropertyValue,
-    ifjs,
+    when,
     nullElement,
-    StringOrSignal
-} from "../../../fjsc/src/f2.ts";
+    StringOrSignal,
+    compute, Signal, signal
+} from "@targoninc/jess";
 import {Track} from "../../Models/DbModels/lyda/Track.ts";
 import {User} from "../../Models/DbModels/lyda/User.ts";
 import {Permission} from "../../Models/DbModels/lyda/Permission.ts";
 import {Playlist} from "../../Models/DbModels/lyda/Playlist.ts";
 import {Album} from "../../Models/DbModels/lyda/Album.ts";
 import {Badge} from "../../Models/DbModels/lyda/Badge.ts";
-import {FJSC} from "../../../fjsc";
-import {compute, Signal, signal} from "../../../fjsc/src/signals.ts";
 import {UiActions} from "../../Actions/UiActions.ts";
 import {router} from "../../../main.ts";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
@@ -41,6 +40,7 @@ import {MediaFileType} from "../../Enums/MediaFileType.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {MusicTemplates} from "../music/MusicTemplates.ts";
 import {ItemType} from "../../Enums/ItemType.ts";
+import { button } from "@targoninc/jess-components";
 
 export class UserTemplates {
     static userWidget(user: User|Signal<User|null>, following: boolean|Signal<boolean>, extraAttributes: HtmlPropertyValue[] = [], extraClasses: StringOrSignal[] = [], context: UserWidgetContext = UserWidgetContext.unknown) {
@@ -85,7 +85,7 @@ export class UserTemplates {
         const showFollowButton = compute(u => u && u.id && u.id !== user.id && !following.value, currentUser);
 
         return base
-            .classes("user-widget", "fjsc", activeClass, "round-on-tiny-breakpoint")
+            .classes("user-widget", "jess", activeClass, "round-on-tiny-breakpoint")
             .attributes("user_id", user.id, "username", user.username)
             .onclick((e: MouseEvent) => {
                 if (e.button === 0 && target(e).tagName.toLowerCase() === "button") {
@@ -107,7 +107,7 @@ export class UserTemplates {
                     .text("@" + user.username)
                     .attributes("data-user-id", user.id)
                     .build(),
-                ifjs(showFollowButton, UserTemplates.followButton(following, user.id, true))
+                when(showFollowButton, UserTemplates.followButton(following, user.id, true))
             ).build();
     }
 
@@ -273,13 +273,13 @@ export class UserTemplates {
                         GenericTemplates.newTrackButton(["hideOnSmallBreakpoint"]),
                         GenericTemplates.newAlbumButton(["hideOnSmallBreakpoint"]),
                         GenericTemplates.newPlaylistButton(["hideOnSmallBreakpoint"]),
-                        FJSC.button({
+                        button({
                             classes: ["showOnSmallBreakpoint", "positive"],
                             text: "New",
                             icon: { icon: "add" },
                             onclick: UiActions.openCreateMenu
                         }),
-                        FJSC.button({
+                        button({
                             text: "Statistics",
                             icon: { icon: "finance" },
                             onclick: () => navigate(RoutePath.statistics)
@@ -289,7 +289,7 @@ export class UserTemplates {
                 create("div")
                     .classes("flex")
                     .children(
-                        FJSC.button({
+                        button({
                             text: "Settings",
                             icon: { icon: "settings" },
                             onclick: () => navigate(RoutePath.settings)
@@ -338,13 +338,13 @@ export class UserTemplates {
             .classes("profile-header")
             .children(
                 bannerContainer,
-                ifjs(isOwnProfile, create("div")
+                when(isOwnProfile, create("div")
                     .classes("hidden", "showOnParentHover", "centeredInParent", "flex")
                     .children(
                         UserTemplates.bannerDeleteButton(user, userBanner, bannerLoading),
                         UserTemplates.bannerReplaceButton(user, userBanner, bannerLoading)
                     ).build()),
-                ifjs(bannerLoading, create("div")
+                when(bannerLoading, create("div")
                     .classes("loader", "loader-small", "centeredInParent", "hidden")
                     .attributes("id", "banner-loader")
                     .build()),
@@ -371,13 +371,13 @@ export class UserTemplates {
                                     .attributes("src", userAvatar)
                                     .attributes("alt", user.username)
                                     .build(),
-                                ifjs(isOwnProfile, create("div")
+                                when(isOwnProfile, create("div")
                                     .classes("hidden", "showOnParentHover", "centeredInParent", "flex")
                                     .children(
                                         UserTemplates.avatarDeleteButton(user, userAvatar, avatarLoading),
                                         UserTemplates.avatarReplaceButton(user, userAvatar, avatarLoading)
                                     ).build()),
-                                ifjs(avatarLoading, create("div")
+                                when(avatarLoading, create("div")
                                     .classes("loader", "loader-small", "centeredInParent", "hidden")
                                     .attributes("id", "avatar-loader")
                                     .build())
@@ -417,9 +417,9 @@ export class UserTemplates {
                     .classes("flex", "align-children")
                     .children(
                         UserTemplates.username(user, isOwnProfile),
-                        ifjs(hasBadges, UserTemplates.badges(user.badges ?? [])),
-                        ifjs(verified, UserTemplates.verificationBadge()),
-                        ifjs(canVerify, FJSC.button({
+                        when(hasBadges, UserTemplates.badges(user.badges ?? [])),
+                        when(verified, UserTemplates.verificationBadge()),
+                        when(canVerify, button({
                             text: "Verify",
                             icon: { icon: "verified" },
                             classes: ["positive"],
@@ -428,7 +428,7 @@ export class UserTemplates {
                                 verified.value = true;
                             }
                         })),
-                        ifjs(canUnverify, FJSC.button({
+                        when(canUnverify, button({
                             text: "Unverify",
                             icon: { icon: "close" },
                             classes: ["negative"],
@@ -441,14 +441,14 @@ export class UserTemplates {
                         !isOwnProfile && followsBack ? UserTemplates.followsBackIndicator() : null,
                     ).build(),
                 UserTemplates.userDescription(user, isOwnProfile),
-                ifjs(hasUnverifiedPrimaryEmail, create("div")
+                when(hasUnverifiedPrimaryEmail, create("div")
                     .classes("card", "padded", "flex", "warning", "align-children")
                     .children(
                         GenericTemplates.icon("warning", true, ["warning"]),
                         create("span")
                             .text("Your primary email is not verified. Please verify it to ensure you can recover your account.")
                             .build(),
-                        FJSC.button({
+                        button({
                             text: "Go to settings",
                             icon: { icon: "settings" },
                             classes: ["positive"],
@@ -665,7 +665,7 @@ export class UserTemplates {
     static editDescriptionButton(currentDescription: string) {
         const descState = signal(currentDescription);
 
-        return FJSC.button({
+        return button({
             icon: { icon: "edit_note" },
             text: "Edit description",
             onclick: async (e: Event) => {
