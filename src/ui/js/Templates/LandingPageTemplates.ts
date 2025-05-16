@@ -4,10 +4,7 @@ import {FormTemplates} from "./generic/FormTemplates.ts";
 import {UserValidator} from "../Classes/Validators/UserValidator.ts";
 import {finalizeLogin, target, Util} from "../Classes/Util.ts";
 import {notify} from "../Classes/Ui.ts";
-import {FJSC} from "../../fjsc";
-import {InputType} from "../../fjsc/src/Types.ts";
 import {User} from "../Models/DbModels/lyda/User.ts";
-import {AnyNode, create, HtmlPropertyValue, ifjs} from "../../fjsc/src/f2.ts";
 import {Api, ApiResponse} from "../Api/Api.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
@@ -15,6 +12,9 @@ import {navigate} from "../Routing/Router.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {currentUser} from "../state.ts";
 import {RoutePath} from "../Routing/routes.ts";
+import {AnyNode, create, InputType, when } from "@targoninc/jess";
+import { button, error, errorList, input } from "@targoninc/jess-components";
+import {HtmlPropertyValue} from "../../fjsc/src/f2.ts";
 
 export interface AuthData {
     termsOfService: boolean;
@@ -132,7 +132,7 @@ export class LandingPageTemplates {
                             };
                         }, true, () => {
                         }),
-                        FJSC.button({
+                        button({
                             text: "Submit",
                             icon: { icon: "login" },
                             classes: ["positive"],
@@ -146,7 +146,7 @@ export class LandingPageTemplates {
 
     static verifyEmailBox(step: Signal<string>, user: Signal<AuthData>) {
         const code = Util.getUrlParameter("code");
-        const error = signal<string>("");
+        const error$ = signal<string>("");
         const done = signal(false);
         const activating = signal(true);
 
@@ -155,7 +155,7 @@ export class LandingPageTemplates {
         }).then(res => {
             activating.value = false;
             if (res.code !== 200) {
-                error.value = res.data.error ?? "Unknown error";
+                error$.value = res.data.error ?? "Unknown error";
             } else {
                 done.value = true;
             }
@@ -170,19 +170,19 @@ export class LandingPageTemplates {
                 create("div")
                     .classes("flex-v")
                     .children(
-                        ifjs(activating, create("p")
+                        when(activating, create("p")
                             .text(`We're verifying your email with code ${code}...`)
                             .build()),
-                        ifjs(done, create("p")
+                        when(done, create("p")
                             .text(`This email is now verified!`)
                             .build()),
-                        ifjs(done, FJSC.button({
+                        when(done, button({
                             text: "Go to profile",
                             icon: { icon: "person" },
                             classes: ["positive"],
                             onclick: () => navigate(RoutePath.profile)
                         })),
-                        ifjs(compute(e => e.length > 0, error), FJSC.error(error))
+                        when(compute(e => e.length > 0, error$), error(error$))
                     ).build()
             ).build();
     }
@@ -270,7 +270,7 @@ export class LandingPageTemplates {
                 create("div")
                     .classes("flex-v")
                     .children(
-                        FJSC.input<string>({
+                        input<string>({
                             type: InputType.text,
                             name: "email",
                             label: "E-Mail",
@@ -292,7 +292,7 @@ export class LandingPageTemplates {
                             },
                         }),
                         LandingPageTemplates.passwordInput(password, user, () => step.value = "checking-mfa", true),
-                        FJSC.button({
+                        button({
                             text: "Login",
                             id: "mfaCheckTrigger",
                             disabled: compute(u => !u.email || !u.password || u.email.trim().length === 0 || u.password.trim().length === 0, user),
@@ -303,7 +303,7 @@ export class LandingPageTemplates {
                             },
                             classes: ["secondary", "positive"]
                         }),
-                        FJSC.errorList(errors),
+                        errorList(errors),
                         GenericTemplates.inlineLink(() => {
                             step.value = "reset-password";
                         }, "Change/forgot password?", false),
@@ -333,7 +333,7 @@ export class LandingPageTemplates {
                         create("div")
                             .classes("flex", "space-outwards")
                             .children(
-                                FJSC.input<string>({
+                                input<string>({
                                     type: InputType.text,
                                     name: "email",
                                     label: "E-Mail",
@@ -356,7 +356,7 @@ export class LandingPageTemplates {
                                     },
                                 }),
                             ).build(),
-                        FJSC.button({
+                        button({
                             text: "Next",
                             id: "checkEmailTrigger",
                             classes: ["positive"],
@@ -372,7 +372,7 @@ export class LandingPageTemplates {
                                 }
                             },
                         }),
-                        FJSC.errorList(errors),
+                        errorList(errors),
                     ).build(),
             ).build();
     }
@@ -396,7 +396,7 @@ export class LandingPageTemplates {
                     .classes("flex-v")
                     .children(
                         LandingPageTemplates.passwordInput(password, user),
-                        FJSC.input<string>({
+                        input<string>({
                             type: InputType.password,
                             name: "password-confirm",
                             label: "Confirm password",
@@ -419,7 +419,7 @@ export class LandingPageTemplates {
                                 }
                             },
                         }),
-                        FJSC.button({
+                        button({
                             text: "Next",
                             classes: ["positive"],
                             disabled: compute(u => !u.password || u.password.trim().length === 0 || u.password !== u.password2 || u.password2.trim().length === 0 || !token, user),
@@ -438,7 +438,7 @@ export class LandingPageTemplates {
                                 }
                             },
                         }),
-                        FJSC.errorList(errors),
+                        errorList(errors),
                     ).build(),
             ).build();
     }
@@ -451,7 +451,7 @@ export class LandingPageTemplates {
             }
         }, 100);
 
-        return FJSC.input<string>({
+        return input<string>({
             type: InputType.password,
             name: "password",
             label: "Password",
@@ -490,7 +490,7 @@ export class LandingPageTemplates {
                         create("span")
                             .text("Please check your email for a password reset link. After you've reset your password, you can log in.")
                             .build(),
-                        FJSC.button({
+                        button({
                             text: "Go to Login",
                             id: "mfaCheckTrigger",
                             disabled: compute(u => !u.email || u.email.trim().length === 0, user),
@@ -582,7 +582,7 @@ export class LandingPageTemplates {
                             };
                         }, false, () => {
                         }, ["flex-grow"]),
-                        FJSC.input<string>({
+                        input<string>({
                             type: InputType.email,
                             name: "email",
                             label: "Email",
@@ -649,7 +649,7 @@ export class LandingPageTemplates {
                             };
                         }),
                         GenericTemplates.inlineLink("https://targoninc.com/tos", "Read the Terms of Service / Privacy Policy"),
-                        FJSC.button({
+                        button({
                             text: "Register",
                             id: "registerTrigger",
                             disabled: compute((e, allTouched) => e.length > 0 || !allTouched, errors, allFieldsTouched),
@@ -660,8 +660,8 @@ export class LandingPageTemplates {
                             },
                             classes: ["secondary", "positive"]
                         }),
-                        ifjs(allFieldsTouched, create("div").classes("flex-v").children(
-                            FJSC.errorList(errors)
+                        when(allFieldsTouched, create("div").classes("flex-v").children(
+                            errorList(errors)
                         ).build()),
                     ).build(),
             ).build();
@@ -691,7 +691,7 @@ export class LandingPageTemplates {
                         create("div")
                             .classes("flex", "space-outwards")
                             .children(
-                                FJSC.input<string>({
+                                input<string>({
                                     type: InputType.text,
                                     name: "email",
                                     label: "E-Mail",
@@ -726,7 +726,7 @@ export class LandingPageTemplates {
                                     })
                                     .build(),
                             ).build(),
-                        FJSC.button({
+                        button({
                             text: "Next",
                             id: "checkEmailTrigger",
                             disabled: compute((u, e) => !u.email || u.email.trim().length === 0 || e.length > 0, user, errors),
@@ -795,13 +795,5 @@ export class LandingPageTemplates {
                         GenericTemplates.benefit("Social features", "people"),
                     ).build()
             ).build();*/
-    }
-
-    static footer() {
-        return create("a")
-            .href("https://targoninc.com/tos")
-            .target("_blank")
-            .text("Terms of Service")
-            .build();
     }
 }

@@ -34,6 +34,7 @@ import {PaypalWebhook} from "../../Models/DbModels/finance/PaypalWebhook.ts";
 import {Filter} from "../../Models/Filter.ts";
 import { Images } from "../../Enums/Images.ts";
 import {CollaboratorType} from "../../Models/DbModels/lyda/CollaboratorType.ts";
+import { button } from "@targoninc/jess-components";
 
 export class GenericTemplates {
     static icon(icon: StringOrSignal, adaptive = false, classes: StringOrSignal[] = [], title = "", onclick: Function | undefined = undefined) {
@@ -297,7 +298,7 @@ export class GenericTemplates {
     }
 
     static newTrackButton(classes: string[] = []) {
-        return FJSC.button({
+        return button({
             text: "Upload",
             icon: { icon: "upload" },
             classes: ["positive", ...classes],
