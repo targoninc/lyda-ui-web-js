@@ -166,7 +166,7 @@ export class QueueTemplates {
                         ...children
                     ).build(),
                 create("button")
-                    .classes("fjsc", "relative", "align-center")
+                    .classes("jess", "relative", "align-center")
                     .onclick(() => {
                         queueListHidden.value = !queueListHidden.value;
                     })

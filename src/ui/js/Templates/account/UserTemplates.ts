@@ -85,7 +85,7 @@ export class UserTemplates {
         const showFollowButton = compute(u => u && u.id && u.id !== user.id && !following.value, currentUser);
 
         return base
-            .classes("user-widget", "fjsc", activeClass, "round-on-tiny-breakpoint")
+            .classes("user-widget", "jess", activeClass, "round-on-tiny-breakpoint")
             .attributes("user_id", user.id, "username", user.username)
             .onclick((e: MouseEvent) => {
                 if (e.button === 0 && target(e).tagName.toLowerCase() === "button") {

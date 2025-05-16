@@ -430,7 +430,7 @@ label {
     left: 0;
     width: calc(100% - 2px);
     bottom: -17px;
-    border: 1px solid var(--fjsc-interactive-border);
+    border: 1px solid var(--jessc-interactive-border);
 }
 
 .loudness-button {
@@ -768,7 +768,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     min-width: 300px;
     border: 1px solid var(--color-7);
     z-index: 9999;
-    border-radius: var(--fjsc-border-radius-medium);
+    border-radius: var(--jessc-border-radius-medium);
     overflow: auto;
     backdrop-filter: blur(50px);
     background: color-mix(in oklab, var(--color-3), transparent 30%);
@@ -880,7 +880,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     border: none !important;
     color: var(--color-5);
     border-radius: 0;
-    padding: var(--fjsc-input-padding-y) var(--fjsc-input-padding-x);
+    padding: var(--jessc-input-padding-y) var(--jessc-input-padding-x);
 }
 
 .tab:hover {
@@ -1197,7 +1197,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .benefit-item * {
-    color: var(--fjsc-interactive-background);
+    color: var(--jessc-interactive-background);
 }
 
 .marquee {

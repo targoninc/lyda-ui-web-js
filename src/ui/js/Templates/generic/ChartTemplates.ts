@@ -1,8 +1,7 @@
 import {Chart, registerables} from "chart.js";
 import {BoxPlotChart} from "@sgratzl/chartjs-chart-boxplot";
-import {create, HtmlPropertyValue} from "../../../fjsc/src/f2.ts";
+import {computeAsync, compute, signal, create, HtmlPropertyValue} from "@targoninc/jess";
 import {ChartOptions} from "../../Classes/ChartOptions.ts";
-import {asyncCompute, compute, signal} from "../../../fjsc/src/signals.ts";
 import {Statistic} from "../../Models/Statistic.ts";
 import {Api} from "../../Api/Api.ts";
 import {FJSC} from "../../../fjsc";
@@ -137,7 +136,7 @@ export class ChartTemplates {
     static async paginatedBarChart(options: PaginatedBarChartOptions) {
         const skip = signal(0);
         const take = signal(12);
-        const data = await asyncCompute(async (s, t) => {
+        const data = await computeAsync(async (s, t) => {
             const res = await Api.getAsync<Statistic[]>(options.endpoint, {
                 ...(options.params ?? {}),
                 offset: s,

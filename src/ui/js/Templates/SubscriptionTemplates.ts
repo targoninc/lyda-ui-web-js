@@ -152,7 +152,7 @@ export class SubscriptionTemplates {
                                     .classes("flex", "small-gap")
                                     .children(
                                         ifjs(active, create("button")
-                                            .classes("fjsc", "negative")
+                                            .classes("jess", "negative")
                                             .id(option.id)
                                             .text("Cancel")
                                             .onclick(async () => {
@@ -164,7 +164,7 @@ export class SubscriptionTemplates {
                                                 await SubscriptionActions.cancelSubscriptionWithConfirmationAsync(currentSub.id);
                                             }).build()),
                                         ifjs(enabled, create("button")
-                                            .classes("fjsc", "special", selectedClass)
+                                            .classes("jess", "special", selectedClass)
                                             .id(option.id)
                                             .text(buttonText)
                                             .onclick(async () => {
@@ -172,7 +172,7 @@ export class SubscriptionTemplates {
                                                 await SubscriptionActions.startSubscription(option.id, option.plan_id, optionMessage);
                                             }).build()),
                                         ifjs(isSelectedOption, create("button")
-                                            .classes("fjsc", selectedClass)
+                                            .classes("jess", selectedClass)
                                             .text("Cancel")
                                             .onclick(async () => {
                                                 selectedOption.value = null;

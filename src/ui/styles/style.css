@@ -71,19 +71,19 @@
     --button-bottom-border-size: 3px;
     --default-font-family: "Inter Tight", serif;
 
-    --fjsc-text-color: var(--color-5);
-    --fjsc-error-color: var(--red);
+    --jessc-text-color: var(--color-5);
+    --jessc-error-color: var(--red);
 
-    --fjsc-interactive-background: var(--color-6);
-    --fjsc-interactive-background-hover: var(--color-3);
-    --fjsc-interactive-background-active: var(--color-9);
-    --fjsc-interactive-color: var(--color-5);
-    --fjsc-interactive-color-active: var(--color-4);
-    --fjsc-interactive-border: var(--color-7);
-    --fjsc-interactive-border-focused: var(--blue);
-    --fjsc-interactive-border-active: var(--color-1);
+    --jessc-interactive-background: var(--color-6);
+    --jessc-interactive-background-hover: var(--color-3);
+    --jessc-interactive-background-active: var(--color-9);
+    --jessc-interactive-color: var(--color-5);
+    --jessc-interactive-color-active: var(--color-4);
+    --jessc-interactive-border: var(--color-7);
+    --jessc-interactive-border-focused: var(--blue);
+    --jessc-interactive-border-active: var(--color-1);
 
-    --fjsc-font: var(--default-font-family);
+    --jessc-font: var(--default-font-family);
 }
 
 .material-symbols-outlined {
@@ -376,19 +376,19 @@ form {
 }
 
 input, textarea, select {
-    background: var(--fjsc-interactive-background);
-    border: 1px solid var(--fjsc-interactive-border);
+    background: var(--jessc-interactive-background);
+    border: 1px solid var(--jessc-interactive-border);
     color: var(--color-5);
     box-sizing: border-box;
     border-radius: var(--border-radius);
-    padding: var(--fjsc-input-padding-y) var(--fjsc-input-padding-x);
-    font-size: var(--fjsc-base-font-size);
+    padding: var(--jessc-input-padding-y) var(--jessc-input-padding-x);
+    font-size: var(--jessc-base-font-size);
     height: max-content;
 }
 
 input:focus-visible, textarea:focus-visible, select:focus-visible {
-    border-color: var(--fjsc-interactive-border-focused);
-    background: var(--fjsc-interactive-background-hover);
+    border-color: var(--jessc-interactive-border-focused);
+    background: var(--jessc-interactive-background-hover);
     outline: none;
 }
 
