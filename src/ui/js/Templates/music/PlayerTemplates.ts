@@ -9,12 +9,10 @@ import {CommentTemplates} from "../CommentTemplates.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {Ui} from "../../Classes/Ui.ts";
 import {Util} from "../../Classes/Util.ts";
-import {AnyElement, create, ifjs} from "../../../fjsc/src/f2.ts";
+import {compute, Signal, signal, AnyElement, create, when} from "@targoninc/jess";
 import {Track} from "../../Models/DbModels/lyda/Track.ts";
 import {User} from "../../Models/DbModels/lyda/User.ts";
 import {navigate} from "../../Routing/Router.ts";
-import {FJSC} from "../../../fjsc";
-import {compute, Signal, signal} from "../../../fjsc/src/signals.ts";
 import {
     currentlyBuffered,
     currentTrackId,
@@ -31,6 +29,7 @@ import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
 import {LoopMode} from "../../Enums/LoopMode.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {ItemType} from "../../Enums/ItemType.ts";
+import { heading } from "@targoninc/jess-components";
 
 export class PlayerTemplates {
     static audioPlayer(track: Track) {
@@ -173,11 +172,11 @@ export class PlayerTemplates {
             .classes("flex-v")
             .id("permanent-player")
             .children(
-                ifjs(playingElsewhere, FJSC.heading({
+                when(playingElsewhere, heading({
                     text: "Playing on another instance of Lyda",
                     level: 2,
                 })),
-                ifjs(playingElsewhere, create("div")
+                when(playingElsewhere, create("div")
                     .classes("flex-v", "fullWidth")
                     .children(
                         create("div")
@@ -199,7 +198,7 @@ export class PlayerTemplates {
         const type = compute(pf => pf?.type, playingFrom);
         const name = compute(pf => `Playing from ${pf?.name}`, playingFrom);
 
-        return ifjs(playingFrom, create("div")
+        return when(playingFrom, create("div")
             .classes("playing-from", "flex")
             .children(
                 create("span")
@@ -291,7 +290,7 @@ export class PlayerTemplates {
                 }, async () => {
                     menuShown.value = !menuShown.value;
                 }, "Open menu", ["showOnMidBreakpoint", activeClass]),
-                ifjs(menuShown, create("div")
+                when(menuShown, create("div")
                     .classes("popout-above", "card", "flex-v")
                     .children(
                         StatisticsTemplates.likesIndicator(ItemType.track, track.id, track.likes!.length,

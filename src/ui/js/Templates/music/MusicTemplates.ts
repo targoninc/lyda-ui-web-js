@@ -2,7 +2,7 @@ import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {Track} from "../../Models/DbModels/lyda/Track.ts";
 import {Album} from "../../Models/DbModels/lyda/Album.ts";
 import {Playlist} from "../../Models/DbModels/lyda/Playlist.ts";
-import {create, ifjs} from "../../../fjsc/src/f2.ts";
+import {compute, signal, create, when} from "@targoninc/jess";
 import {currentTrackId, currentUser, playingFrom, playingHere} from "../../state.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
 import {Util} from "../../Classes/Util.ts";
@@ -11,7 +11,6 @@ import {Time} from "../../Classes/Helpers/Time.ts";
 import {StatisticsTemplates} from "../StatisticsTemplates.ts";
 import {ItemType} from "../../Enums/ItemType.ts";
 import {TrackTemplates} from "./TrackTemplates.ts";
-import {compute, signal} from "../../../fjsc/src/signals.ts";
 import {DefaultImages} from "../../Enums/DefaultImages.ts";
 import {MediaFileType} from "../../Enums/MediaFileType.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
@@ -149,14 +148,14 @@ export class MusicTemplates {
                     .onclick(() => {
                         Ui.showImageModal(imageState);
                     }).build(),
-                ifjs(isOwnItem, create("div")
+                when(isOwnItem, create("div")
                     .classes("hidden", coverContext === "cover" ? "showOnParentHover" : "_", "centeredInParent", "flex")
                     .children(
                         GenericTemplates.deleteIconButton("delete-image-button", () => MediaActions.deleteMedia(fileType, item.id, imageState, coverLoading)),
                         GenericTemplates.uploadIconButton("replace-image-button", () => TrackActions.replaceCover(item.id, true, imageState, coverLoading)),
-                        ifjs(coverLoading, GenericTemplates.loadingSpinner()),
+                        when(coverLoading, GenericTemplates.loadingSpinner()),
                     ).build()),
-                ifjs(coverContext !== "cover", create("div")
+                when(coverContext !== "cover", create("div")
                     .classes("centeredInParent", "hidden", coverContext !== "cover" ? "showOnParentHover" : "_")
                     .children(
                         MusicTemplates.playButton(type, item.id, start)
@@ -230,10 +229,10 @@ export class MusicTemplates {
         return create("div")
             .classes("fullHeight")
             .children(
-                ifjs(feedVisible, create("span")
+                when(feedVisible, create("span")
                     .text("Log in to see this feed")
                     .build(), true),
-                ifjs(feedVisible, TrackTemplates.trackList(tracksState, pageState, type, filterState))
+                when(feedVisible, TrackTemplates.trackList(tracksState, pageState, type, filterState))
             ).build();
     }
 }

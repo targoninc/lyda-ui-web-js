@@ -4,8 +4,8 @@ import {computeAsync, compute, signal, create, HtmlPropertyValue} from "@targoni
 import {ChartOptions} from "../../Classes/ChartOptions.ts";
 import {Statistic} from "../../Models/Statistic.ts";
 import {Api} from "../../Api/Api.ts";
-import {FJSC} from "../../../fjsc";
 import {chartColor} from "../../state.ts";
+import { button } from "@targoninc/jess-components";
 
 Chart.register(...registerables);
 
@@ -181,12 +181,12 @@ export class ChartTemplates {
                 create("div")
                     .classes("flex", "align-children")
                     .children(
-                        FJSC.button({
+                        button({
                             text: getPreviousByTimeType(options.timeType),
                             icon: { icon: "arrow_left" },
                             onclick: () => skip.value = skip.value + take.value,
                         }),
-                        FJSC.button({
+                        button({
                             text: getNextByTimeType(options.timeType),
                             icon: { icon: "arrow_right" },
                             onclick: () => skip.value = Math.max(0, skip.value - take.value),

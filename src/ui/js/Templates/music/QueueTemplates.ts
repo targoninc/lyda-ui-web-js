@@ -6,12 +6,10 @@ import {DragActions} from "../../Actions/DragActions.ts";
 import {Util} from "../../Classes/Util.ts";
 import {navigate} from "../../Routing/Router.ts";
 import {Track} from "../../Models/DbModels/lyda/Track.ts";
-import {create} from "../../../fjsc/src/f2.ts";
-import {FJSC} from "../../../fjsc";
-import {User} from "../../Models/DbModels/lyda/User.ts";
-import {compute, signal} from "../../../fjsc/src/signals.ts";
+import {compute, signal, create} from "@targoninc/jess";
 import {Images} from "../../Enums/Images.ts";
 import {RoutePath} from "../../Routing/routes.ts";
+import { icon } from "@targoninc/jess-components";
 
 export class QueueTemplates {
     static queueItem(track: Track, index: number, totalCount: number, attributes = [], classes = []) {
@@ -22,7 +20,7 @@ export class QueueTemplates {
                 QueueManager.moveInManualQueue(index, index - 1);
             })
             .children(
-                FJSC.icon({
+                icon({
                     icon: "move_up",
                     adaptive: true,
                 }),
@@ -34,7 +32,7 @@ export class QueueTemplates {
                 QueueManager.moveInManualQueue(index, index + 1);
             })
             .children(
-                FJSC.icon({
+                icon({
                     icon: "move_down",
                     adaptive: true,
                 }),
@@ -171,7 +169,7 @@ export class QueueTemplates {
                         queueListHidden.value = !queueListHidden.value;
                     })
                     .children(
-                        FJSC.icon({
+                        icon({
                             icon: "queue_music",
                             adaptive: true,
                         }),

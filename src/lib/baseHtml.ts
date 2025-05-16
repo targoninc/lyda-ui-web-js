@@ -64,6 +64,9 @@ export async function baseHtml(req: Request) {
     <!-- Preconnect to API -->
     <link rel="preconnect" href="${apiUrl}" crossorigin>
     
+    <!-- Preconnect to JS Delivr -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    
     <!-- Preconnect to Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -74,7 +77,6 @@ export async function baseHtml(req: Request) {
     <!-- Material Symbols Filled -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     
-    <link rel="stylesheet" type="text/css" href="/fjsc/src/fjs-components.css"/>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/targoninc/jess-components@0.0.8/src/src/jess-components.css"/>
     
     <link rel="stylesheet" type="text/css" href="/styles/style.css"/>

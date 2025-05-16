@@ -61,10 +61,13 @@ export class StatisticTemplates {
     }
 
     static async allStats() {
+        const stats = await StatisticsWrapper.getStatistics(permissions.value);
+        console.log(stats);
+
         return create("div")
             .classes("flex", "fullWidth")
             .children(
-                ...(await StatisticsWrapper.getStatistics(permissions.value))
+                ...stats
             ).build();
     }
 

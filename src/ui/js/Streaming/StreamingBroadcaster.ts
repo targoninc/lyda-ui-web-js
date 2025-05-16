@@ -1,6 +1,5 @@
 import {PlayManager} from "./PlayManager.ts";
 import {currentTrackId, playingElsewhere, playingHere} from "../state.ts";
-import {stack} from "../../fjsc/src/f2.ts";
 
 export enum StreamingEvent {
     trackStart = "track-start",

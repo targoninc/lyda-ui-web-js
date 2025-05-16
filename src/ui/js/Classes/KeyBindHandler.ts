@@ -2,7 +2,7 @@ import {PlayManager} from "../Streaming/PlayManager.ts";
 import {UiActions} from "../Actions/UiActions.ts";
 import {AuthActions} from "../Actions/AuthActions.ts";
 import {currentTrackId} from "../state.ts";
-import {signal} from "../../fjsc/src/signals.ts";
+import {signal} from "@targoninc/jess";
 import {target} from "./Util.ts";
 
 const keybindsInitialized = signal(false);

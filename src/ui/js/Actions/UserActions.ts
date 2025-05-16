@@ -15,7 +15,7 @@ import {UserSettings} from "../Enums/UserSettings.ts";
 import {MediaFileType} from "../Enums/MediaFileType.ts";
 import {MediaUploader} from "../Api/MediaUploader.ts";
 import {User} from "../Models/DbModels/lyda/User.ts";
-import {Signal} from "../../fjsc/src/signals.ts";
+import {Signal} from "@targoninc/jess";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {Notification} from "../Models/DbModels/lyda/Notification.ts";
 import {LydaApi} from "../Api/LydaApi.ts";

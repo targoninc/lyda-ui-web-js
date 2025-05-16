@@ -1,27 +1,22 @@
-import {create, ifjs, signalMap} from "../../../fjsc/src/f2.ts";
 import {UserActions} from "../../Actions/UserActions.ts";
 import {Theme} from "../../Enums/Theme.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {getUserSettingValue, Util} from "../../Classes/Util.ts";
 import {UserSettings} from "../../Enums/UserSettings.ts";
-import {FJSC} from "../../../fjsc";
-import {ButtonConfig, InputConfig, InputType, TextareaConfig} from "../../../fjsc/src/Types.ts";
 import {notify, Ui} from "../../Classes/Ui.ts";
 import {LydaApi} from "../../Api/LydaApi.ts";
 import {User} from "../../Models/DbModels/lyda/User.ts";
-import {compute, Signal, signal} from "../../../fjsc/src/signals.ts";
+import {create, when, signalMap, compute, Signal, signal, InputType} from "@targoninc/jess";
 import {navigate, reload} from "../../Routing/Router.ts";
-import {AuthActions} from "../../Actions/AuthActions.ts";
 import {NotificationType} from "../../Enums/NotificationType.ts";
 import {StreamingQuality} from "../../Enums/StreamingQuality.ts";
 import {UserTemplates} from "./UserTemplates.ts";
 import {currentUser, permissions} from "../../state.ts";
 import {AuthApi} from "../../Api/AuthApi.ts";
 import {UserEmail} from "../../Models/DbModels/lyda/UserEmail.ts";
-import {Api} from "../../Api/Api.ts";
 import {Permission} from "../../Models/DbModels/lyda/Permission.ts";
-import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {RoutePath} from "../../Routing/routes.ts";
+import { button, ButtonConfig, icon, input, InputConfig, textarea, TextareaConfig, toggle } from "@targoninc/jess-components";
 
 export class SettingsTemplates {
     static settingsPage() {
@@ -56,13 +51,13 @@ export class SettingsTemplates {
 
         return create("div")
             .children(
-                ifjs(hasAnyPermissions, create("div")
+                when(hasAnyPermissions, create("div")
                     .classes("card", "flex-v")
                     .children(
                         create("h2")
                             .text("My Permissions")
                             .build(),
-                        FJSC.button({
+                        button({
                             text: "Go to Administration",
                             icon: { icon: "terminal" },
                             onclick: () => navigate(RoutePath.admin)
@@ -98,13 +93,13 @@ export class SettingsTemplates {
                 create("p")
                     .text("Change your account settings here.")
                     .build(),
-                ifjs(user.subscription, FJSC.button({
+                when(user.subscription, button({
                     icon: {icon: "payments"},
                     text: "Manage subscription",
                     classes: ["positive"],
                     onclick: () => navigate(RoutePath.subscribe)
                 })),
-                ifjs(user.subscription, FJSC.button({
+                when(user.subscription, button({
                     icon: {icon: "payments"},
                     text: "Subscribe for more features",
                     classes: ["special"],
@@ -114,7 +109,7 @@ export class SettingsTemplates {
                 create("div")
                     .classes("flex-v", "small-card")
                     .children(
-                        FJSC.input(<InputConfig<string>>{
+                        input(<InputConfig<string>>{
                             type: InputType.text,
                             label: "Username",
                             name: "username",
@@ -124,7 +119,7 @@ export class SettingsTemplates {
                                 updatedUser.value = {...updatedUser.value, username: v};
                             }
                         }),
-                        FJSC.input(<InputConfig<string>>{
+                        input(<InputConfig<string>>{
                             type: InputType.text,
                             label: "Display name",
                             name: "displayname",
@@ -134,7 +129,7 @@ export class SettingsTemplates {
                                 updatedUser.value = {...updatedUser.value, displayname: v};
                             }
                         }),
-                        FJSC.textarea(<TextareaConfig>{
+                        textarea(<TextareaConfig>{
                             label: "Description",
                             name: "description",
                             value: user.description,
@@ -144,7 +139,7 @@ export class SettingsTemplates {
                         }),
                         SettingsTemplates.emailSettings(user.emails, updatedUser),
                     ).build(),
-                FJSC.button(<ButtonConfig>{
+                button(<ButtonConfig>{
                     disabled: saveDisabled,
                     classes: ["positive"],
                     text: "Save changes",
@@ -196,7 +191,7 @@ export class SettingsTemplates {
     static themeSelector(theme: Theme, currentTheme$: Signal<Theme>) {
         const active$ = compute(c => c === theme ? "active" : "_", currentTheme$);
 
-        return FJSC.button(<ButtonConfig>{
+        return button(<ButtonConfig>{
             classes: [active$],
             text: theme.toUpperCase(),
             onclick: async () => {
@@ -210,7 +205,7 @@ export class SettingsTemplates {
         const active$ = compute(c => c === value ? "active" : "_", actualValue$);
         const disabled$ = compute(u => value === StreamingQuality.high && (!u || !u.subscription), currentUser);
 
-        return FJSC.button(<ButtonConfig>{
+        return button(<ButtonConfig>{
             classes: [active$, `quality-selector-${value}`, value === StreamingQuality.high ? "special" : "_"],
             text: value.toUpperCase(),
             disabled: disabled$,
@@ -257,7 +252,7 @@ export class SettingsTemplates {
                 create("h2")
                     .text("Streaming quality")
                     .build(),
-                ifjs(noSubscription, create("div")
+                when(noSubscription, create("div")
                     .classes("text", "text-small", "color-dim")
                     .text("High quality is only available with a subscription.")
                     .build()),
@@ -291,7 +286,7 @@ export class SettingsTemplates {
                 create("div")
                     .classes("flex")
                     .children(
-                        FJSC.button({
+                        button({
                             text: "Delete account",
                             icon: {icon: "delete"},
                             classes: ["negative"],
@@ -311,7 +306,7 @@ export class SettingsTemplates {
                                     }, "delete").then();
                             }
                         }),
-                        FJSC.button({
+                        button({
                             text: "Download data",
                             icon: {icon: "download"},
                             onclick: () => {
@@ -405,7 +400,7 @@ export class SettingsTemplates {
                             .build(),
                     ).build(),
                 signalMap(emails$, create("div").classes("flex-v", "card", "secondary"), (email, index) => SettingsTemplates.emailSetting(email, signal(index), primaryEmailIndex, emails$)),
-                FJSC.button({
+                button({
                     text: "Add E-Mail",
                     icon: {icon: "add"},
                     classes: ["positive"],
@@ -431,7 +426,7 @@ export class SettingsTemplates {
         return create("div")
             .classes("flex-v")
             .children(
-                FJSC.input(<InputConfig<string>>{
+                input(<InputConfig<string>>{
                     type: InputType.email,
                     name: "email",
                     required: true,
@@ -448,7 +443,7 @@ export class SettingsTemplates {
                 create("div")
                     .classes("flex", "align-children")
                     .children(
-                        FJSC.toggle({
+                        toggle({
                             text: "Primary",
                             checked: isPrimary,
                             disabled: emails$.value.length === 1,
@@ -465,10 +460,10 @@ export class SettingsTemplates {
                                 }
                             }
                         }),
-                        ifjs(email.verified, create("div")
+                        when(email.verified, create("div")
                             .classes("flex", "noflexwrap", "small-gap")
                             .children(
-                                FJSC.icon({
+                                icon({
                                     icon: "new_releases",
                                     adaptive: true,
                                     classes: ["text-positive"],
@@ -478,7 +473,7 @@ export class SettingsTemplates {
                                     .text("Verified on " + Util.formatDate(email.verified_at ?? new Date()))
                                     .build()
                             ).build()),
-                        ifjs(email.verified || email.email === "", FJSC.button({
+                        when(email.verified || email.email === "", button({
                             icon: {icon: "verified_user"},
                             text: "Verify",
                             classes: ["positive"],
@@ -503,10 +498,10 @@ export class SettingsTemplates {
                                 }, 60 * 1000);
                             }
                         }), true),
-                        ifjs(email.verified, create("div")
+                        when(email.verified, create("div")
                             .classes("flex", "noflexwrap", "small-gap")
                             .children(
-                                FJSC.icon({
+                                icon({
                                     icon: "warning",
                                     adaptive: true,
                                     classes: ["warning"],
@@ -516,11 +511,11 @@ export class SettingsTemplates {
                                     .text("Not verified")
                                     .build()
                             ).build(), true),
-                        ifjs(activationTimedOut, create("span")
+                        when(activationTimedOut, create("span")
                             .classes("text-positive")
                             .text("E-Mail sent, check your inbox and click the link to verify this address.")
                             .build()),
-                        ifjs(email.primary, FJSC.button({
+                        when(email.primary, button({
                             text: "Delete",
                             icon: {icon: "delete"},
                             classes: ["negative"],

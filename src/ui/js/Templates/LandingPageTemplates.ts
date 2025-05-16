@@ -7,14 +7,12 @@ import {notify} from "../Classes/Ui.ts";
 import {User} from "../Models/DbModels/lyda/User.ts";
 import {Api, ApiResponse} from "../Api/Api.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {navigate} from "../Routing/Router.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {currentUser} from "../state.ts";
 import {RoutePath} from "../Routing/routes.ts";
-import {AnyNode, create, InputType, when } from "@targoninc/jess";
+import {compute, Signal, signal, HtmlPropertyValue, AnyNode, create, InputType, when } from "@targoninc/jess";
 import { button, error, errorList, input } from "@targoninc/jess-components";
-import {HtmlPropertyValue} from "../../fjsc/src/f2.ts";
 
 export interface AuthData {
     termsOfService: boolean;

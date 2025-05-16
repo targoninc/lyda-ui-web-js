@@ -1,15 +1,14 @@
-import {create, ifjs, signalMap} from "../../fjsc/src/f2.ts";
+import {compute, signal, Signal, create, when, signalMap} from "@targoninc/jess";
 import {currency} from "../Classes/Helpers/Num.ts";
 import {getSubscriptionLink, SubscriptionActions} from "../Actions/SubscriptionActions.ts";
 import {GenericTemplates} from "./generic/GenericTemplates.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
-import {compute, signal, Signal} from "../../fjsc/src/signals.ts";
 import {AvailableSubscription} from "../Models/DbModels/finance/AvailableSubscription.ts";
 import {Subscription} from "../Models/DbModels/finance/Subscription.ts";
 import {SubscriptionStatus} from "../Enums/SubscriptionStatus.ts";
-import {FJSC} from "../../fjsc";
 import {RoutePath} from "../Routing/routes.ts";
 import {navigate} from "../Routing/Router.ts";
+import { button } from "@targoninc/jess-components";
 
 export class SubscriptionTemplates {
     static page() {
@@ -32,7 +31,7 @@ export class SubscriptionTemplates {
                 create("h1")
                     .text("Lyda subscription")
                     .build(),
-                ifjs(currentSubscription, create("span")
+                when(currentSubscription, create("span")
                     .classes("color-dim")
                     .text("You do not have an active subscription. Choose any of the options below to start. All prices are in USD.")
                     .build(), true),
@@ -40,10 +39,10 @@ export class SubscriptionTemplates {
                     .text("Your benefits")
                     .build(),
                 SubscriptionTemplates.subscriptionBenefits(),
-                ifjs(optionsLoading, GenericTemplates.loadingSpinner()),
+                when(optionsLoading, GenericTemplates.loadingSpinner()),
                 signalMap(options, create("div").classes("flex"),
                     (option) => SubscriptionTemplates.option(currentSubscription, selectedOption, currency, option)),
-                FJSC.button({
+                button({
                     text: "Payment history",
                     icon: {icon: "receipt"},
                     onclick: () => navigate(RoutePath.payments)
@@ -89,7 +88,7 @@ export class SubscriptionTemplates {
         const pendingClass = compute((a): string => a ? "pending" : "_", pending);
         const isSelectedOption = compute(selected => selected === option.id, selectedOption);
         const selectedClass = compute((s): string => s === option.id ? "selected" : "_", selectedOption);
-        const gifted = compute(s => !!(s && s.gifted_by_user_id !== null && s.subscription_id === option.id), currentSubscription);
+        const gifted = compute(s => (s && s.gifted_by_user_id !== null && s.subscription_id === option.id), currentSubscription);
         const createdAt = compute(s => s && new Date(s.created_at), currentSubscription);
         const previousId = compute(s => s && s.previous_subscription, currentSubscription);
         const startSubClass = compute(p => "startSubscription_" + option.id + "_" + p, previousId);
@@ -100,7 +99,7 @@ export class SubscriptionTemplates {
         return create("div")
             .classes("flex-v", "card", "relative", "subscription-option", selectedClass, activeClass, pendingClass)
             .children(
-                ifjs(active, GenericTemplates.checkInCorner("This subscription is active")),
+                when(active, GenericTemplates.checkInCorner("This subscription is active")),
                 create("div")
                     .classes("flex-v", "space-outwards")
                     .children(
@@ -114,7 +113,7 @@ export class SubscriptionTemplates {
                                             .classes("limitToContentWidth", "flex")
                                             .text(option.name)
                                             .children(
-                                                ifjs(gifted, GenericTemplates.giftIcon("This subscription has been gifted to you"))
+                                                when(gifted, GenericTemplates.giftIcon("This subscription has been gifted to you"))
                                             ).build(),
                                     ).build(),
                                 create("span")
@@ -137,21 +136,21 @@ export class SubscriptionTemplates {
                                             .text("/" + option.term_type)
                                             .build(),
                                     ).build(),
-                                ifjs(pending, create("span")
+                                when(pending, create("span")
                                     .classes("text-small", "text-positive")
                                     .title("Waiting for confirmation from payment provider")
                                     .text("Pending")
                                     .build()),
-                                ifjs(active, SubscriptionTemplates.subscribedFor(createdAt))
+                                when(active, SubscriptionTemplates.subscribedFor(createdAt))
                             ).build(),
                         create("div")
                             .classes("flex-v", startSubClass)
                             .children(
-                                ifjs(active, GenericTemplates.inlineLink(link, "Manage on PayPal")),
+                                when(active, GenericTemplates.inlineLink(link, "Manage on PayPal")),
                                 create("div")
                                     .classes("flex", "small-gap")
                                     .children(
-                                        ifjs(active, create("button")
+                                        when(active, create("button")
                                             .classes("jess", "negative")
                                             .id(option.id)
                                             .text("Cancel")
@@ -163,7 +162,7 @@ export class SubscriptionTemplates {
                                                 }
                                                 await SubscriptionActions.cancelSubscriptionWithConfirmationAsync(currentSub.id);
                                             }).build()),
-                                        ifjs(enabled, create("button")
+                                        when(enabled, create("button")
                                             .classes("jess", "special", selectedClass)
                                             .id(option.id)
                                             .text(buttonText)
@@ -171,18 +170,18 @@ export class SubscriptionTemplates {
                                                 selectedOption.value = option.id;
                                                 await SubscriptionActions.startSubscription(option.id, option.plan_id, optionMessage);
                                             }).build()),
-                                        ifjs(isSelectedOption, create("button")
+                                        when(isSelectedOption, create("button")
                                             .classes("jess", selectedClass)
                                             .text("Cancel")
                                             .onclick(async () => {
                                                 selectedOption.value = null;
                                             }).build()),
                                     ).build(),
-                                ifjs(isSelectedOption, create("span")
+                                when(isSelectedOption, create("span")
                                     .classes("color-dim")
                                     .text(optionMessage)
                                     .build()),
-                                ifjs(isSelectedOption, SubscriptionTemplates.paypalButton("paypal-button-" + option.id))
+                                when(isSelectedOption, SubscriptionTemplates.paypalButton("paypal-button-" + option.id))
                             ).build()
                     ).build()
             ).build();

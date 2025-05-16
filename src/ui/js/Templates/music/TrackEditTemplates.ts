@@ -14,22 +14,22 @@ import {
     create,
     DomNode,
     HtmlPropertyValue,
-    ifjs,
+    when,
     signalMap, StringOrSignal,
-    TypeOrSignal
-} from "../../../fjsc/src/f2.ts";
+    TypeOrSignal,
+    compute, Signal, signal,
+    InputType
+} from "@targoninc/jess";
 import {Track} from "../../Models/DbModels/lyda/Track.ts";
-import {FJSC} from "../../../fjsc";
 import {User} from "../../Models/DbModels/lyda/User.ts";
-import {InputType, SelectOption} from "../../../fjsc/src/Types.ts";
 import {TrackCollaborator} from "../../Models/DbModels/lyda/TrackCollaborator.ts";
 import {UploadableTrack} from "../../Models/UploadableTrack.ts";
 import {UploadInfo} from "../../Models/UploadInfo.ts";
 import {ProgressPart} from "../../Models/ProgressPart.ts";
 import {AlbumActions} from "../../Actions/AlbumActions.ts";
-import {compute, Signal, signal} from "../../../fjsc/src/signals.ts";
 import {reload} from "../../Routing/Router.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
+import { button, checkbox, errorList, input, SelectOption, textarea, toggle } from "@targoninc/jess-components";
 
 export class TrackEditTemplates {
     static uploadForm(title: string, credits: string, releaseDate: Date, visibility: string, genre: Genre,
@@ -81,7 +81,7 @@ export class TrackEditTemplates {
     }
 
     static openEditPageButton(track: Track) {
-        return FJSC.button({
+        return button({
             text: "Edit",
             icon: { icon: "edit" },
             onclick: async () => {
@@ -91,7 +91,7 @@ export class TrackEditTemplates {
     }
 
     static addToAlbumsButton(track: Track) {
-        return FJSC.button({
+        return button({
             text: "Add to albums",
             icon: { icon: "forms_add_on" },
             onclick: async () => {
@@ -130,7 +130,7 @@ export class TrackEditTemplates {
                     create("div")
                         .classes("flex")
                         .children(
-                            FJSC.button({
+                            button({
                                 text: "Save",
                                 icon: { icon: "check" },
                                 classes: ["positive"],
@@ -138,7 +138,7 @@ export class TrackEditTemplates {
                                     confirmCallback(state.value);
                                 }
                             }),
-                            FJSC.button({
+                            button({
                                 text: "Cancel",
                                 icon: { icon: "close" },
                                 classes: ["negative"],
@@ -151,7 +151,7 @@ export class TrackEditTemplates {
 
     static upDownButtons(state: Signal<any>, uploadEnabled = false) {
         const buttons = [
-            FJSC.button({
+            button({
                 text: "Download Info",
                 icon: { icon: "file_save" },
                 onclick: () => {
@@ -162,7 +162,7 @@ export class TrackEditTemplates {
         ];
 
         if (uploadEnabled) {
-            buttons.push(FJSC.button({
+            buttons.push(button({
                 text: "Upload Info",
                 icon: { icon: "upload_file" },
                 onclick: () => {
@@ -237,7 +237,7 @@ export class TrackEditTemplates {
         return create("div")
             .classes("flex-v")
             .children(
-                FJSC.button({
+                button({
                     text: "Upload",
                     disabled,
                     classes: [buttonClass, "positive"],
@@ -246,7 +246,7 @@ export class TrackEditTemplates {
                     },
                     icon: { icon: "upload" },
                 }),
-                FJSC.errorList(errors),
+                errorList(errors),
                 GenericTemplates.progressSections(progressState)
             ).build();
     }
@@ -273,7 +273,7 @@ export class TrackEditTemplates {
                     create("div")
                         .classes("flex")
                         .children(
-                            FJSC.toggle({
+                            toggle({
                                 name: "visibility",
                                 label: "Private",
                                 text: "Private",
@@ -286,7 +286,7 @@ export class TrackEditTemplates {
                     TrackEditTemplates.titleInput(state),
                     TrackEditTemplates.creditsInput(state),
                     TrackEditTemplates.artistNameInput(state),
-                    ifjs(enableLinkedUsers, TrackEditTemplates.linkedUsers(state.value.collaborators, state)),
+                    when(enableLinkedUsers, TrackEditTemplates.linkedUsers(state.value.collaborators, state)),
                     GenericTemplates.releaseDateInput(state),
                     TrackEditTemplates.genreInput(state),
                     TrackEditTemplates.isrcInput(state),
@@ -304,7 +304,7 @@ export class TrackEditTemplates {
     private static monetizationSection(errorSections: Signal<string[]>, state: Signal<UploadableTrack>) {
         return TrackEditTemplates.sectionCard("Monetization", errorSections, "monetization", [
             TrackEditTemplates.monetizationInfo(),
-            FJSC.input<number>({
+            input<number>({
                 type: InputType.number,
                 name: "price",
                 label: "Minimum track price in USD",
@@ -325,7 +325,7 @@ export class TrackEditTemplates {
     }
 
     private static titleInput(state: Signal<UploadableTrack>) {
-        return FJSC.input<string>({
+        return input<string>({
             type: InputType.text,
             required: true,
             name: "title",
@@ -339,7 +339,7 @@ export class TrackEditTemplates {
     }
 
     private static creditsInput(state: Signal<UploadableTrack>) {
-        return FJSC.input<string>({
+        return input<string>({
             type: InputType.text,
             name: "credits",
             label: "Collaborators",
@@ -352,7 +352,7 @@ export class TrackEditTemplates {
     }
 
     private static descriptionInput(state: Signal<UploadableTrack>) {
-        return FJSC.textarea({
+        return textarea({
             name: "description",
             label: "Description",
             placeholder: "My cool track",
@@ -364,7 +364,7 @@ export class TrackEditTemplates {
     }
 
     private static upcInput(state: Signal<UploadableTrack>) {
-        return FJSC.input<string>({
+        return input<string>({
             type: InputType.text,
             name: "upc",
             label: "UPC",
@@ -395,7 +395,7 @@ export class TrackEditTemplates {
     }
 
     private static isrcInput(state: Signal<UploadableTrack>) {
-        return FJSC.input<string>({
+        return input<string>({
             type: InputType.text,
             name: "isrc",
             label: "ISRC",
@@ -408,7 +408,7 @@ export class TrackEditTemplates {
     }
 
     private static artistNameInput(state: Signal<UploadableTrack>) {
-        return FJSC.input<string>({
+        return input<string>({
             type: InputType.text,
             name: "artistname",
             label: "Artist display name",
@@ -430,7 +430,7 @@ export class TrackEditTemplates {
                     create("div")
                         .classes("flex")
                         .children(
-                            FJSC.toggle({
+                            toggle({
                                 name: "visibility",
                                 label: "Private",
                                 text: "Private",
@@ -443,7 +443,7 @@ export class TrackEditTemplates {
                     TrackEditTemplates.titleInput(state),
                     TrackEditTemplates.creditsInput(state),
                     TrackEditTemplates.artistNameInput(state),
-                    ifjs(enableLinkedUsers, TrackEditTemplates.linkedUsers(state.value.collaborators, state)),
+                    when(enableLinkedUsers, TrackEditTemplates.linkedUsers(state.value.collaborators, state)),
                     GenericTemplates.releaseDateInput(state),
                     TrackEditTemplates.genreInput(state),
                     TrackEditTemplates.isrcInput(state),
@@ -456,7 +456,7 @@ export class TrackEditTemplates {
                         TrackEditTemplates.filesSection(true, state, errorSections),
                         TrackEditTemplates.monetizationSection(errorSections, state),
                         enableTos ? TrackEditTemplates.sectionCard("Terms of Service", errorSections, "terms", [
-                            FJSC.checkbox({
+                            checkbox({
                                 name: "termsOfService",
                                 text: "I have read and agree to the Terms of Service and Privacy Policy*",
                                 checked: compute(s => s.termsOfService, state),
@@ -534,7 +534,7 @@ export class TrackEditTemplates {
     }
 
     static deleteTrackButton(trackId: number) {
-        return FJSC.button({
+        return button({
             text: "Delete",
             icon: { icon: "delete" },
             classes: ["negative"],
@@ -546,7 +546,7 @@ export class TrackEditTemplates {
     }
 
     static addLinkedUserButton(callback: Function, classes: string[] = []) {
-        return FJSC.button({
+        return button({
             text: "Add collaborator",
             id: "add_linked_user",
             icon: { icon: "person_add" },
@@ -621,7 +621,7 @@ export class TrackEditTemplates {
     static replaceAudioButton(track: Track) {
         const loading = signal(false);
 
-        return FJSC.button({
+        return button({
             text: "Replace Audio",
             icon: { icon: "upload" },
             disabled: loading,

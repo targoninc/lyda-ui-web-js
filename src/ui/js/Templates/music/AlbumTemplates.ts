@@ -11,13 +11,10 @@ import {StatisticsTemplates} from "../StatisticsTemplates.ts";
 import {Images} from "../../Enums/Images.ts";
 import {getErrorMessage, Util} from "../../Classes/Util.ts";
 import {notify, Ui} from "../../Classes/Ui.ts";
-import {FJSC} from "../../../fjsc";
-import {AnyNode, create, HtmlPropertyValue, ifjs, nullElement} from "../../../fjsc/src/f2.ts";
+import {compute, Signal, signal, AnyNode, create, HtmlPropertyValue, when, nullElement, InputType} from "@targoninc/jess";
 import {Album} from "../../Models/DbModels/lyda/Album.ts";
-import {InputType} from "../../../fjsc/src/Types.ts";
 import {Track} from "../../Models/DbModels/lyda/Track.ts";
 import {navigate, Route} from "../../Routing/Router.ts";
-import {compute, Signal, signal} from "../../../fjsc/src/signals.ts";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
 import {NotificationType} from "../../Enums/NotificationType.ts";
 import {currentUser, manualQueue, playingFrom} from "../../state.ts";
@@ -27,6 +24,7 @@ import {PageTemplates} from "../PageTemplates.ts";
 import {ListTrack} from "../../Models/ListTrack.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {ItemType} from "../../Enums/ItemType.ts";
+import { button, input, textarea, toggle } from "@targoninc/jess-components";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
@@ -77,7 +75,7 @@ export class AlbumTemplates {
                 create("div")
                     .classes("flex")
                     .children(
-                        FJSC.button({
+                        button({
                             text: buttonText,
                             classes: ["positive"],
                             icon: {icon: "forms_add_on"},
@@ -86,7 +84,7 @@ export class AlbumTemplates {
                                 await AlbumActions.addTrackToAlbums(track.id, checkedAlbums.value);
                             }
                         }),
-                        FJSC.button({
+                        button({
                             text: "Cancel",
                             classes: ["negative"],
                             icon: {icon: "close"},
@@ -149,7 +147,7 @@ export class AlbumTemplates {
                 create("div")
                     .classes("flex")
                     .children(
-                        FJSC.button({
+                        button({
                             text: "Create album",
                             disabled,
                             onclick: async () => {
@@ -188,7 +186,7 @@ export class AlbumTemplates {
                 create("div")
                     .classes("flex")
                     .children(
-                        FJSC.button({
+                        button({
                             text: "Update",
                             disabled: loading,
                             classes: ["positive"],
@@ -217,7 +215,7 @@ export class AlbumTemplates {
             .classes("flex-v")
             .id("newAlbumForm")
             .children(
-                FJSC.input<string>({
+                input<string>({
                     type: InputType.text,
                     required: true,
                     name: "name",
@@ -228,7 +226,7 @@ export class AlbumTemplates {
                         album.value = {...album.value, title: v};
                     }
                 }),
-                FJSC.input<string>({
+                input<string>({
                     type: InputType.text,
                     name: "upc",
                     label: "UPC",
@@ -238,7 +236,7 @@ export class AlbumTemplates {
                         album.value = {...album.value, upc: v};
                     }
                 }),
-                FJSC.textarea({
+                textarea({
                     name: "description",
                     label: "Description",
                     placeholder: "My cool album",
@@ -248,7 +246,7 @@ export class AlbumTemplates {
                     }
                 }),
                 GenericTemplates.releaseDateInput(album),
-                FJSC.toggle({
+                toggle({
                     name: "visibility",
                     label: "Private",
                     text: "Private",
@@ -429,7 +427,7 @@ export class AlbumTemplates {
                             .classes("cover-container", "relative", canEdit ? "pointer" : "_")
                             .onclick(e => AlbumActions.replaceCover(e, album.id, canEdit, coverLoading))
                             .children(
-                                ifjs(coverLoading, create("div")
+                                when(coverLoading, create("div")
                                     .classes("loader", "loader-small", "centeredInParent")
                                     .id("cover-loader")
                                     .build()),
@@ -512,10 +510,10 @@ export class AlbumTemplates {
         return create("div")
             .classes("audio-actions", "flex")
             .children(
-                ifjs(currentUser, create("div")
+                when(currentUser, create("div")
                     .classes("flex")
                     .children(
-                        ifjs(hasTracks, FJSC.button({
+                        when(hasTracks, button({
                             text: isPlaying ? "Pause" : "Play",
                             icon: {
                                 icon: isPlaying ? Icons.PAUSE : Icons.PLAY,
@@ -532,7 +530,7 @@ export class AlbumTemplates {
                             },
                         })),
                         AlbumTemplates.addToQueueButton(album),
-                        FJSC.button({
+                        button({
                             text: "Add to playlist",
                             icon: {
                                 icon: Icons.PLAYLIST_ADD,
@@ -546,7 +544,7 @@ export class AlbumTemplates {
                             },
                         }),
                     ).build()),
-                ifjs(canEdit, FJSC.button({
+                when(canEdit, button({
                     text: "Edit",
                     icon: {icon: "edit"},
                     classes: ["positive"],
@@ -555,7 +553,7 @@ export class AlbumTemplates {
                         Ui.addModal(modal);
                     }
                 })),
-                ifjs(canEdit, FJSC.button({
+                when(canEdit, button({
                     text: "Delete",
                     icon: {icon: "delete"},
                     classes: ["negative"],
@@ -573,7 +571,7 @@ export class AlbumTemplates {
         const icon = compute((q): string => q ? Icons.UNQUEUE : Icons.QUEUE, allTracksInQueue);
         const buttonClass = compute((q): string => q ? "audio-queueremove" : "audio-queueadd", allTracksInQueue);
 
-        return FJSC.button({
+        return button({
             text,
             icon: {
                 icon,
