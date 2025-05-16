@@ -22,7 +22,7 @@
     "@targoninc/jess-components": "^0.0.7",
     "@types/bun": "^1.2.13",
     "chart.js": "^4.4.6",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.5.0",
     "express": "^5.0.0",
     "typescript": "^5.5.3"
   },
