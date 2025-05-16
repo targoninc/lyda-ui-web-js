@@ -1,6 +1,5 @@
 import {ProgressState} from "../Enums/ProgressState.ts";
-import {Signal} from "../../fjsc/src/signals.ts";
-import {StringOrSignal} from "../../fjsc/src/f2.ts";
+import {Signal, StringOrSignal} from "@targoninc/jess";
 
 export interface ProgressPart {
     id: string;

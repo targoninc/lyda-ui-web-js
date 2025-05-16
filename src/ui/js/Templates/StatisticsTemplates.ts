@@ -4,13 +4,12 @@ import {UserTemplates} from "./account/UserTemplates.ts";
 import {AlbumActions} from "../Actions/AlbumActions.ts";
 import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {Images} from "../Enums/Images.ts";
-import {target, Util} from "../Classes/Util.ts";
-import {AnyElement, create, ifjs, nullElement, StringOrSignal, TypeOrSignal} from "../../fjsc/src/f2.ts";
-import {FJSC} from "../../fjsc";
-import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
+import {Util} from "../Classes/Util.ts";
+import {compute, Signal, signal, create, when, nullElement, StringOrSignal, isSignal, asSignal} from "@targoninc/jess";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 import {GenericTemplates} from "./generic/GenericTemplates.ts";
 import {ItemType} from "../Enums/ItemType.ts";
+import { icon } from "@targoninc/jess-components";
 
 export class StatisticsTemplates {
     static likesIndicator(type: ItemType, reference_id: number, like_count: number, liked: boolean|Signal<boolean>) {
@@ -47,7 +46,7 @@ export class StatisticsTemplates {
             }
         };
 
-        const iconIsUrl = (icon.subscribe && icon.value.startsWith("http")) || icon.startsWith("http");
+        const iconIsUrl = (isSignal(icon) && asSignal(icon).value.startsWith("http")) || (icon as string).startsWith("http");
         const stateClass = compute((s: boolean): string => s ? "active" : "_", toggleObservable);
         const stateClass2 = compute((s: boolean): string => s ? "positive" : "_", toggleObservable);
 
@@ -116,13 +115,13 @@ export class StatisticsTemplates {
                         create("span")
                             .text(items.length)
                             .build(),
-                        FJSC.icon({
+                        icon({
                             icon: "arrow_drop_down",
                             adaptive: true,
                             classes: ["inline-icon", "svg", "nopointer"],
                         }),
                     ).build(),
-                ifjs(open$, create("div")
+                when(open$, create("div")
                     .classes("listFromStatsIndicator", "popout-below", type, "flex-v", "padded", "rounded")
                     .children(
                         create("span")

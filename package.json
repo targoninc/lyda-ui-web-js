@@ -3,12 +3,9 @@
   "type": "module",
   "scripts": {
     "build-dev": "bun build src/ui/main.ts --outdir ./out --sourcemap=linked --minify --watch",
-    "start": "npm run build && node dist/server.js",
     "start-dev": "bun --watch ./src/server.ts",
     "build-prod": "bun build src/ui/main.ts --outdir ./out --sourcemap=linked --minify",
-    "start-bun-prod": "bun ./src/server.ts",
-    "fetch-submodules": "git submodule update --init",
-    "update-submodules": "git submodule update --remote --merge",
+    "start-prod": "bun ./src/server.ts",
     "copy-version-to-file": "node ./.scripts/copy-version.js",
     "bump-version": "npm version patch --no-git-tag-version && npm run copy-version-to-file && git add package.json package-lock.json src/ui/js/Classes/Helpers/version.txt",
     "prepare": "husky"
@@ -21,11 +18,13 @@
   "dependencies": {
     "@paypal/paypal-js": "^8.1.2",
     "@sgratzl/chartjs-chart-boxplot": "^4.4.3",
+    "@targoninc/jess": "^0.0.11",
+    "@targoninc/jess-components": "^0.0.7",
     "@types/bun": "^1.1.11",
     "chart.js": "^4.4.6",
     "dotenv": "^16.4.5",
     "express": "^5.0.0",
     "typescript": "^5.5.3"
   },
-  "version": "0.0.126"
+  "version": "0.0.130"
 }

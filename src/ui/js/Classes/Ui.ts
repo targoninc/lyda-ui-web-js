@@ -4,10 +4,9 @@ import {NavTemplates} from "../Templates/NavTemplates.ts";
 import {GenericTemplates} from "../Templates/generic/GenericTemplates.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {UserActions} from "../Actions/UserActions.ts";
-import {AnyElement, HtmlPropertyValue, StringOrSignal} from "../../fjsc/src/f2.ts";
+import {signal, AnyElement, HtmlPropertyValue, StringOrSignal} from "@targoninc/jess";
 import {Theme} from "../Enums/Theme.ts";
 import {navigate} from "../Routing/Router.ts";
-import {signal} from "../../fjsc/src/signals.ts";
 import {currentUser, navInitialized} from "../state.ts";
 import {CollaboratorType} from "../Models/DbModels/lyda/CollaboratorType.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
@@ -115,12 +114,12 @@ export class Ui {
 
     static fillClassWithValue(userId: number, className: string, value: string, newPage = "", params: string[] = []) {
         let elements = document.querySelectorAll("." + className + "[data-user-id='" + userId + "']") as NodeListOf<HTMLElement>;
-        for (let element of elements) {
+        elements.forEach(element => {
             element.innerHTML = value;
             element.onclick = async () => {
                 navigate(newPage, params);
             };
-        }
+        });
     }
 
     static showImageModal(imageUrl: StringOrSignal) {

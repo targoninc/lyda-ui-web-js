@@ -2,22 +2,17 @@ import {Time} from "../../Classes/Helpers/Time.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {copy, Util} from "../../Classes/Util.ts";
-import {AnyElement, create, ifjs, signalMap} from "../../../fjsc/src/f2.ts";
-import {User} from "../../Models/DbModels/lyda/User.ts";
-import {compute, signal, Signal} from "../../../fjsc/src/signals.ts";
+import {compute, signal, Signal, AnyElement, create, when, signalMap} from "@targoninc/jess";
 import {PillOption} from "../../Models/PillOption.ts";
 import {LogLevel} from "../../Enums/LogLevel.ts";
 import {Log} from "../../Models/DbModels/lyda/Log.ts";
-import {FJSC} from "../../../fjsc";
 import {LydaApi} from "../../Api/LydaApi.ts";
 import {truncateText} from "../../Classes/Helpers/CustomText.ts";
 import {DashboardTemplates} from "./DashboardTemplates.ts";
 import {Permissions} from "../../Enums/Permissions.ts";
-import {notify} from "../../Classes/Ui.ts";
-import {NotificationType} from "../../Enums/NotificationType.ts";
-import {permissions} from "../../state.ts";
 import {Api} from "../../Api/Api.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
+import { button, toggle } from "@targoninc/jess-components";
 
 export class LogTemplates {
     static actionLogsPage() {
@@ -143,7 +138,7 @@ export class LogTemplates {
                 create("td")
                     .classes("log-stack")
                     .children(
-                        FJSC.button({
+                        button({
                             text: "Copy stack",
                             icon: {icon: "content_copy"},
                             onclick: () => copy(l.stack)
@@ -165,14 +160,14 @@ export class LogTemplates {
             .classes("flex-v")
             .styles("position", "relative")
             .children(
-                FJSC.button({
+                button({
                     text: "Info",
                     icon: { icon: "info" },
                     onclick: () => {
                         shown.value = !shown.value;
                     }
                 }),
-                ifjs(shown, create("div")
+                when(shown, create("div")
                     .classes("flex-v", "card", "popout-below", "log-properties")
                     .children(
                         ...Object.keys(data).map(k => {
@@ -265,7 +260,7 @@ export class LogTemplates {
                     .classes("flex", "align-children", "fixed-bar")
                     .children(
                         LogTemplates.logFilters(filterState),
-                        FJSC.button({
+                        button({
                             text: "Refresh",
                             icon: { icon: "refresh" },
                             classes: ["positive"],
@@ -274,7 +269,7 @@ export class LogTemplates {
                                 refresh();
                             }
                         }),
-                        FJSC.toggle({
+                        toggle({
                             text: "Auto-refresh",
                             id: "auto-refresh",
                             checked: refreshOnInterval,

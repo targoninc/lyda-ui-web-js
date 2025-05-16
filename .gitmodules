@@ -1,4 +1,0 @@
-[submodule "src/ui/fjsc"]
-	path = src/ui/fjsc
-	branch = main
-	url = https://github.com/targoninc/fjsc.git

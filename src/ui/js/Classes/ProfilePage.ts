@@ -3,7 +3,7 @@ import {notify} from "./Ui.ts";
 import {UserTemplates} from "../Templates/account/UserTemplates.ts";
 import {GenericTemplates} from "../Templates/generic/GenericTemplates.ts";
 import {User} from "../Models/DbModels/lyda/User.ts";
-import {AnyElement} from "../../fjsc/src/f2.ts";
+import {AnyElement} from "@targoninc/jess";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {getErrorMessage} from "./Util.ts";
 import {Track} from "../Models/DbModels/lyda/Track.ts";

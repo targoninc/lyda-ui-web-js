@@ -3,15 +3,13 @@ import {Api} from "../Api/Api.ts";
 import {notify} from "./Ui.ts";
 import {Num} from "./Helpers/Num.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {compute, signal} from "../../fjsc/src/signals.ts";
+import {create, signalMap, signal} from "@targoninc/jess";
 import {getErrorMessage} from "./Util.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import { Statistic } from "../Models/Statistic.ts";
 import {Permission} from "../Models/DbModels/lyda/Permission.ts";
 import {Permissions} from "../Enums/Permissions.ts";
-import {create, signalMap} from "../../fjsc/src/f2.ts";
 import {TypedStatistic} from "../Models/TypedStatistic.ts";
-import {StatisticsTemplates} from "../Templates/StatisticsTemplates.ts";
 import {ActivityTableName} from "../Enums/ActivityTableName.ts";
 import {TimeResolution} from "../Enums/TimeResolution.ts";
 

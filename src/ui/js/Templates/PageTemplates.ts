@@ -1,11 +1,10 @@
-import {create, ifjs} from "../../fjsc/src/f2.ts";
 import {AuthActions} from "../Actions/AuthActions.ts";
 import {LandingPageTemplates} from "./LandingPageTemplates.ts";
 import {UserTemplates} from "./account/UserTemplates.ts";
 import {Api} from "../Api/Api.ts";
 import {Util} from "../Classes/Util.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {compute, signal} from "../../fjsc/src/signals.ts";
+import {create, when, compute, signal} from "@targoninc/jess";
 import {User} from "../Models/DbModels/lyda/User.ts";
 import {SearchTemplates} from "./SearchTemplates.ts";
 import {SettingsTemplates} from "./account/SettingsTemplates.ts";
@@ -195,7 +194,7 @@ export class PageTemplates {
                 create("span")
                     .text("If you were trying to find a user, here's a random one:")
                     .build(),
-                ifjs(user, create("div")
+                when(user, create("div")
                     .classes("flex")
                     .children(
                         UserTemplates.userWidget(user, following)

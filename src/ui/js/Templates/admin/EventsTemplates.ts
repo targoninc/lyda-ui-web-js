@@ -1,17 +1,15 @@
-import {compute, Signal, signal} from "../../../fjsc/src/signals.ts";
+import {create, when, compute, signal} from "@targoninc/jess";
 import {PaypalWebhook} from "../../Models/DbModels/finance/PaypalWebhook.ts";
-import {create, ifjs, signalMap} from "../../../fjsc/src/f2.ts";
 import {Api} from "../../Api/Api.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
-import {FJSC} from "../../../fjsc";
-import {copy, target} from "../../Classes/Util.ts";
+import {copy} from "../../Classes/Util.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
 import {notify} from "../../Classes/Ui.ts";
 import {NotificationType} from "../../Enums/NotificationType.ts";
-import {InputType} from "../../../fjsc/src/Types.ts";
 import {DashboardTemplates} from "./DashboardTemplates.ts";
 import {Permissions} from "../../Enums/Permissions.ts";
+import { button } from "@targoninc/jess-components";
 
 export class EventsTemplates {
     static eventsPage() {
@@ -75,11 +73,11 @@ export class EventsTemplates {
                                 GenericTemplates.roundIconButton({
                                     icon: "data_object"
                                 }, () => copy(JSON.stringify(JSON.parse(event.content), null, 2)), "Copy content"),
-                                ifjs(typeIconMap[event.type], GenericTemplates.icon(typeIconMap[event.type], true)),
+                                when(typeIconMap[event.type], GenericTemplates.icon(typeIconMap[event.type], true)),
                                 create("span")
                                     .text(event.type)
                                     .build(),
-                                FJSC.button({
+                                button({
                                     text: "Trigger",
                                     icon: {icon: "start"},
                                     classes: ["positive"],
@@ -112,7 +110,7 @@ export class EventsTemplates {
                                     .text("R | " + resourceId)
                                     .build(),
                             ).build(),
-                        ifjs(referenceId, create("div")
+                        when(referenceId, create("div")
                             .classes("flex", "align-children")
                             .children(
                                 GenericTemplates.roundIconButton({

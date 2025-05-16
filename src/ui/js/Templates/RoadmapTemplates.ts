@@ -1,4 +1,4 @@
-import {create} from "../../fjsc/src/f2.ts";
+import {create} from "@targoninc/jess";
 import {GenericTemplates} from "./generic/GenericTemplates.ts";
 import {roadMapItemIcons, RoadmapItemStatus} from "../Enums/RoadmapItemStatus.ts";
 

@@ -3,12 +3,11 @@ import {Images} from "../Enums/Images.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {Api, ApiResponse} from "../Api/Api.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
-import {AnyElement} from "../../fjsc/src/f2.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {MediaFileType} from "../Enums/MediaFileType.ts";
 import {User} from "../Models/DbModels/lyda/User.ts";
 import {chartColor, currentUser} from "../state.ts";
-import {compute, signal, Signal} from "../../fjsc/src/signals.ts";
+import {compute, signal, Signal, AnyElement} from "@targoninc/jess";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {Comment} from "../Models/DbModels/lyda/Comment.ts";
 import {Likable} from "../Models/Likable.ts";
@@ -333,11 +332,11 @@ export async function copy(text: string) {
 export function updateImagesWithSource(newSrc: string, oldSrc: string) {
     oldSrc = oldSrc.replace(/&t=\d+/, "");
     const imgs = document.querySelectorAll("img") as NodeListOf<HTMLImageElement>;
-    for (const img of imgs) {
+    imgs.forEach(img => {
         if (img.src.includes(oldSrc)) {
             img.src = newSrc;
         }
-    }
+    });
 }
 
 export function getAvatar(user: User | null | undefined) {

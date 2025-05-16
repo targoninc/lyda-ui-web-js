@@ -1,16 +1,14 @@
 import {Notification} from "../Models/DbModels/lyda/Notification.ts";
 import {NotificationParser} from "../Classes/Helpers/NotificationParser.ts";
-import {create, HtmlPropertyValue, ifjs, nullElement, signalMap, StringOrSignal} from "../../fjsc/src/f2.ts";
+import {create, when, nullElement, signalMap, StringOrSignal, compute, Signal, signal} from "@targoninc/jess";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {navigate} from "../Routing/Router.ts";
 import {copy, Util} from "../Classes/Util.ts";
-import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
 import {UserActions} from "../Actions/UserActions.ts";
-import {FJSC} from "../../fjsc";
 import { notifications } from "../state.ts";
-import {UserTemplates} from "./account/UserTemplates.ts";
 import {NotificationPart} from "../Models/NotifcationPart.ts";
 import {Images} from "../Enums/Images.ts";
+import { button } from "@targoninc/jess-components";
 
 export class NotificationTemplates {
     static notificationInList(notification: Notification) {
@@ -103,7 +101,7 @@ export class NotificationTemplates {
         return create("div")
             .classes("notification-container", "relative")
             .children(
-                FJSC.button({
+                button({
                     icon: { icon: "notifications" },
                     onclick: async () => {
                         notifsVisible.value = !notifsVisible.value;
@@ -119,11 +117,11 @@ export class NotificationTemplates {
     }
 
     private static notificationContainer(notifsVisible: Signal<boolean>, hasNotifs: Signal<boolean>) {
-        return ifjs(notifsVisible, create("div")
+        return when(notifsVisible, create("div")
             .classes("popout-below", "rounded", "absolute-align-right", "notification-list")
             .children(
                 signalMap(notifications, create("div").classes("flex-v", "nogap"), notif => NotificationTemplates.notificationInList(notif)),
-                ifjs(hasNotifs, create("div")
+                when(hasNotifs, create("div")
                     .classes("text-center", "padded")
                     .text("No notifications")
                     .build(), true)

@@ -2,13 +2,11 @@ import {DashboardTemplates} from "./DashboardTemplates.ts";
 import {Permissions} from "../../Enums/Permissions.ts";
 import {CommentTemplates} from "../CommentTemplates.ts";
 import {Comment} from "../../Models/DbModels/lyda/Comment.ts";
-import {compute, signal, Signal} from "../../../fjsc/src/signals.ts";
-import {AnyElement, create, ifjs} from "../../../fjsc/src/f2.ts";
-import {FJSC} from "../../../fjsc";
+import {AnyElement, create, when, compute, signal, Signal, InputType} from "@targoninc/jess";
 import {TrackActions} from "../../Actions/TrackActions.ts";
 import {CommentActions} from "../../Actions/CommentActions.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
-import {InputType} from "../../../fjsc/src/Types.ts";
+import {button, input, toggle } from "@targoninc/jess-components";
 
 export class ModerationCommentsTemplates {
     static commentModerationPage() {
@@ -44,7 +42,7 @@ export class ModerationCommentsTemplates {
                     .classes("flex", "align-children", "fixed-bar")
                     .children(
                         ModerationCommentsTemplates.commentFilters(filterState),
-                        FJSC.button({
+                        button({
                             text: "Refresh",
                             icon: { icon: "refresh" },
                             classes: ["positive"],
@@ -56,7 +54,7 @@ export class ModerationCommentsTemplates {
                             }
                         })
                     ).build(),
-                ifjs(loading, GenericTemplates.loadingSpinner()),
+                when(loading, GenericTemplates.loadingSpinner()),
                 commentsList
             ).build();
     }
@@ -70,7 +68,7 @@ export class ModerationCommentsTemplates {
         return create("div")
             .classes("flex", "align-children")
             .children(
-                FJSC.toggle({
+                toggle({
                     text: "Potentially harmful",
                     checked: potentiallyHarmful,
                     onchange: (v) => {
@@ -80,7 +78,7 @@ export class ModerationCommentsTemplates {
                 create("div")
                     .classes("flex")
                     .children(
-                        FJSC.input<number>({
+                        input<number>({
                             type: InputType.number,
                             name: "user_id",
                             placeholder: "Filter by user ID",
@@ -121,7 +119,7 @@ export class ModerationCommentsTemplates {
                 create("div")
                     .classes("flex", "align-children")
                     .children(
-                        FJSC.button({
+                        button({
                             text: "Open track",
                             icon: { icon: "open_in_new" },
                             classes: ["positive"],
@@ -129,7 +127,7 @@ export class ModerationCommentsTemplates {
                                 window.open(window.location.origin + "/track/" + comment.track_id);
                             }
                         }),
-                        FJSC.button({
+                        button({
                             text: "Delete comment",
                             icon: { icon: "delete" },
                             classes: ["negative"],
@@ -137,7 +135,7 @@ export class ModerationCommentsTemplates {
                                 await TrackActions.deleteComment(comment.id, comments);
                             }
                         }),
-                        FJSC.toggle({
+                        toggle({
                             text: "Potentially harmful",
                             checked: comment.potentially_harmful,
                             onchange: async (v) => {
@@ -150,7 +148,7 @@ export class ModerationCommentsTemplates {
                                 });
                             }
                         }),
-                        FJSC.toggle({
+                        toggle({
                             text: "Hidden",
                             checked: comment.hidden,
                             onchange: async (v) => {

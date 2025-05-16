@@ -1,7 +1,7 @@
 import {Api} from "../Api/Api.ts";
 import {notify} from "./Ui.ts";
 import {navigate} from "../Routing/Router.ts";
-import {signal, Signal} from "../../fjsc/src/signals.ts";
+import {signal, Signal} from "@targoninc/jess";
 import {UploadableTrack} from "../Models/UploadableTrack.ts";
 import {Track} from "../Models/DbModels/lyda/Track.ts";
 import {MediaUploader} from "../Api/MediaUploader.ts";

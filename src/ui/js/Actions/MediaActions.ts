@@ -5,7 +5,7 @@ import {MediaFileType} from "../Enums/MediaFileType.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {Images} from "../Enums/Images.ts";
 import {Icons} from "../Enums/Icons.ts";
-import {Signal} from "../../fjsc/src/signals.ts";
+import {Signal} from "@targoninc/jess";
 import {updateImagesWithSource} from "../Classes/Util.ts";
 
 export class MediaActions {

@@ -4,15 +4,14 @@ import {UserActions} from "../Actions/UserActions.ts";
 import {GenericTemplates} from "./generic/GenericTemplates.ts";
 import {SearchTemplates} from "./SearchTemplates.ts";
 import {navigate, reload} from "../Routing/Router.ts";
-import {create, ifjs, StringOrSignal} from "../../fjsc/src/f2.ts";
-import {compute, Signal, signal} from "../../fjsc/src/signals.ts";
-import {FJSC} from "../../fjsc";
+import {create, when, StringOrSignal, compute, Signal, signal} from "@targoninc/jess";
 import {router} from "../../main.ts";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 import {currentUser} from "../state.ts";
 import {SearchContext} from "../Enums/SearchContext.ts";
 import {RoutePath} from "../Routing/routes.ts";
 import {NotificationTemplates} from "./NotificationTemplates.ts";
+import { button } from "@targoninc/jess-components";
 
 export class NavTemplates {
     static navTop() {
@@ -26,7 +25,7 @@ export class NavTemplates {
             .children(
                 NavTemplates.navLogo(),
                 NavTemplates.burgerMenu(burgerMenuOpen),
-                ifjs(burgerMenuOpen, NavTemplates.burgerMenuContent(burgerMenuOpen)),
+                when(burgerMenuOpen, NavTemplates.burgerMenuContent(burgerMenuOpen)),
                 create("div")
                     .classes("flex", "flex-grow")
                     .children(
@@ -35,8 +34,8 @@ export class NavTemplates {
                         NavTemplates.navButton(RoutePath.library, "Library", "category"),
                         SearchTemplates.search(SearchContext.navBar),
                     ).build(),
-                ifjs(currentUser, NavTemplates.accountSection()),
-                ifjs(currentUser, NavTemplates.notSignedInNote(), true)
+                when(currentUser, NavTemplates.accountSection()),
+                when(currentUser, NavTemplates.notSignedInNote(), true)
             ).build();
     }
 
@@ -101,7 +100,7 @@ export class NavTemplates {
         const active = compute(r => r && r.path === pageRoute, router.currentRoute);
         const activeClass = compute((a): string => a ? "active" : "_", active);
 
-        return FJSC.button({
+        return button({
             text,
             icon: {
                 icon,
@@ -118,7 +117,7 @@ export class NavTemplates {
         const active = compute(r => r && r.path === id, router.currentRoute);
         const activeClass = compute((a): string => a ? "active" : "_", active);
 
-        return FJSC.button({
+        return button({
             text,
             icon: { icon, adaptive: true, classes: ["inline-icon", "svg", "nopointer"] },
             onclick: clickFunc,
@@ -131,7 +130,7 @@ export class NavTemplates {
         return create("div")
             .classes("widest-fill-right", "relative")
             .children(
-                FJSC.button({
+                button({
                     text: "Upload",
                     classes: ["hideOnMidBreakpoint", "positive"],
                     icon: { icon: "upload" },
@@ -149,7 +148,7 @@ export class NavTemplates {
         return create("div")
             .classes("widest-fill-right")
             .children(
-                FJSC.button({
+                button({
                     text: "Log in",
                     icon: { icon: "login" },
                     classes: ["special"],

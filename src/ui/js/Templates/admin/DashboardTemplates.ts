@@ -1,11 +1,10 @@
-import {AnyElement, create, ifjs} from "../../../fjsc/src/f2.ts";
+import {compute, AnyElement, create, when} from "@targoninc/jess";
 import {navigate} from "../../Routing/Router.ts";
 import {RoutePath} from "../../Routing/routes.ts";
-import {FJSC} from "../../../fjsc";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {permissions} from "../../state.ts";
-import {compute} from "../../../fjsc/src/signals.ts";
 import {Permissions} from "../../Enums/Permissions.ts";
+import { button } from "@targoninc/jess-components";
 
 export class DashboardTemplates {
     static dashboardPage() {
@@ -18,36 +17,36 @@ export class DashboardTemplates {
             .classes("flex-v")
             .children(
                 GenericTemplates.title("Dashboard"),
-                ifjs(hasAnyPermission, GenericTemplates.missingPermission(), true),
-                ifjs(hasAnyPermission, create("div")
+                when(hasAnyPermission, GenericTemplates.missingPermission(), true),
+                when(hasAnyPermission, create("div")
                     .classes("flex")
                     .children(
-                        ifjs(hasPermission(Permissions.canDeleteComments), FJSC.button({
+                        when(hasPermission(Permissions.canDeleteComments), button({
                             text: "Moderation",
                             onclick: () => navigate(RoutePath.moderation),
                             icon: { icon: "comments_disabled" },
                         })),
-                        ifjs(hasPermission(Permissions.canViewLogs), FJSC.button({
+                        when(hasPermission(Permissions.canViewLogs), button({
                             text: "Logs",
                             onclick: () => navigate(RoutePath.logs),
                             icon: { icon: "receipt_long" },
                         })),
-                        ifjs(hasPermission(Permissions.canViewLogs), FJSC.button({
+                        when(hasPermission(Permissions.canViewLogs), button({
                             text: "Events",
                             onclick: () => navigate(RoutePath.events),
                             icon: { icon: "manage_history" },
                         })),
-                        ifjs(hasPermission(Permissions.canViewPayments), FJSC.button({
+                        when(hasPermission(Permissions.canViewPayments), button({
                             text: "Payments",
                             onclick: () => navigate(RoutePath.payouts),
                             icon: { icon: "payments" },
                         })),
-                        ifjs(hasPermission(Permissions.canCalculateRoyalties), FJSC.button({
+                        when(hasPermission(Permissions.canCalculateRoyalties), button({
                             text: "Royalties",
                             onclick: () => navigate(RoutePath.royaltyManagement),
                             icon: { icon: "currency_exchange" },
                         })),
-                        ifjs(hasPermission(Permissions.canSetPermissions), FJSC.button({
+                        when(hasPermission(Permissions.canSetPermissions), button({
                             text: "Users",
                             onclick: () => navigate(RoutePath.users),
                             icon: { icon: "groups" },
@@ -62,13 +61,13 @@ export class DashboardTemplates {
         return create("div")
             .classes("flex-v")
             .children(
-                FJSC.button({
+                button({
                     text: "Dashboard",
                     onclick: () => navigate(RoutePath.admin),
                     icon: { icon: "terminal" },
                 }),
-                ifjs(hasPermission, GenericTemplates.missingPermission(), true),
-                ifjs(hasPermission, page),
+                when(hasPermission, GenericTemplates.missingPermission(), true),
+                when(hasPermission, page),
             ).build();
     }
 }

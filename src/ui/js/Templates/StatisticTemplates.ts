@@ -1,7 +1,6 @@
-import {create, ifjs} from "../../fjsc/src/f2.ts";
+import {compute, signal, create, when} from "@targoninc/jess";
 import {RoyaltyInfo} from "../Models/RoyaltyInfo.ts";
 import {currency} from "../Classes/Helpers/Num.ts";
-import {compute, signal} from "../../fjsc/src/signals.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {Api} from "../Api/Api.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
@@ -9,16 +8,14 @@ import {UserSettings} from "../Enums/UserSettings.ts";
 import {downloadFile, getErrorMessage} from "../Classes/Util.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {ChartTemplates} from "./generic/ChartTemplates.ts";
-import {FJSC} from "../../fjsc";
 import {anonymize} from "../Classes/Helpers/CustomText.ts";
 import {navigate, reload} from "../Routing/Router.ts";
 import {StatisticsWrapper} from "../Classes/StatisticsWrapper.ts";
 import {permissions} from "../state.ts";
 import {RoutePath} from "../Routing/routes.ts";
 import {yearAndMonthByOffset} from "../Classes/Helpers/Date.ts";
-import {Royalty} from "../Models/Royalty.ts";
-import { exportToFile, ExportType } from "@targoninc/data-exporter";
 import {GenericTemplates} from "./generic/GenericTemplates.ts";
+import { button } from "@targoninc/jess-components";
 
 export class StatisticTemplates {
     static playCountByMonthChart() {
@@ -64,10 +61,13 @@ export class StatisticTemplates {
     }
 
     static async allStats() {
+        const stats = await StatisticsWrapper.getStatistics(permissions.value);
+        console.log(stats);
+
         return create("div")
             .classes("flex", "fullWidth")
             .children(
-                ...(await StatisticsWrapper.getStatistics(permissions.value))
+                ...stats
             ).build();
     }
 
@@ -82,15 +82,15 @@ export class StatisticTemplates {
                 create("div")
                     .classes("flex")
                     .children(
-                        FJSC.button({
+                        button({
                             text: "Payout history",
                             icon: {icon: "account_balance"},
                             onclick: () => navigate(RoutePath.payouts)
                         }),
-                        ifjs(hasPayableRoyalties, create("div")
+                        when(hasPayableRoyalties, create("div")
                             .classes("flex")
                             .children(
-                                ifjs(paypalMailExists$, FJSC.button({
+                                when(paypalMailExists$, button({
                                     text: "Set PayPal mail",
                                     icon: {icon: "mail"},
                                     classes: ["positive"],
@@ -110,7 +110,7 @@ export class StatisticTemplates {
                                         }, "mail");
                                     }
                                 }), true),
-                                ifjs(paypalMailExists$, FJSC.button({
+                                when(paypalMailExists$, button({
                                     text: "Remove PayPal mail",
                                     title: "You won't be able to receive payments until you set a mail address again",
                                     icon: {icon: "unsubscribe"},
@@ -131,7 +131,7 @@ export class StatisticTemplates {
                                         }, "warning");
                                     }
                                 })),
-                                ifjs(paypalMailExists$, FJSC.button({
+                                when(paypalMailExists$, button({
                                     text: `Request payout to ${anonymize(royaltyInfo.paypalMail, 2, 8)}`,
                                     icon: {icon: "mintmark"},
                                     classes: ["positive"],
@@ -210,7 +210,7 @@ export class StatisticTemplates {
                             .classes("flex")
                             .children(
                                 GenericTemplates.tabSelector(types, (i: number) => selectedTypeIndex.value = i, 0),
-                                FJSC.button({
+                                button({
                                     text: "Download",
                                     icon: {icon: "download"},
                                     onclick: async () => {
@@ -235,17 +235,17 @@ export class StatisticTemplates {
                 create("div")
                     .classes("flex")
                     .children(
-                        FJSC.button({
+                        button({
                             text: "Previous",
                             icon: {icon: "skip_previous"},
                             onclick: () => offset.value += 1
                         }),
-                        FJSC.button({
+                        button({
                             text: "Next",
                             icon: {icon: "skip_next"},
                             onclick: () => offset.value -= 1
                         }),
-                        FJSC.button({
+                        button({
                             text: "Current",
                             icon: {icon: "today"},
                             onclick: () => offset.value = 0

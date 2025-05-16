@@ -2,7 +2,7 @@ import {Api} from "../Api/Api.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {getErrorMessage} from "../Classes/Util.ts";
-import {Signal} from "../../fjsc/src/signals.ts";
+import {Signal} from "@targoninc/jess";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {AvailableSubscription} from "../Models/DbModels/finance/AvailableSubscription.ts";
 import {Subscription} from "../Models/DbModels/finance/Subscription.ts";

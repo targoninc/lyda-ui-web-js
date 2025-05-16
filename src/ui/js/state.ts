@@ -1,4 +1,4 @@
-import {compute, signal} from "../fjsc/src/signals.ts";
+import {signal} from "@targoninc/jess";
 import {StreamClient} from "./Streaming/StreamClient.ts";
 import {PlayingFrom} from "./Models/PlayingFrom.ts";
 import {Track} from "./Models/DbModels/lyda/Track.ts";

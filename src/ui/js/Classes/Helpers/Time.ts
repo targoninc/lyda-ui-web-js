@@ -1,4 +1,4 @@
-import {signal} from "../../../fjsc/src/signals.ts";
+import {signal} from "@targoninc/jess";
 
 export class Time {
     static localDate(time: number|string|Date) {
