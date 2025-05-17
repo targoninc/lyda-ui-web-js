@@ -8,7 +8,7 @@ import {Util} from "../Classes/Util.ts";
 import {compute, Signal, signal, create, when, nullElement, StringOrSignal, isSignal, asSignal} from "@targoninc/jess";
 import {GenericTemplates} from "./generic/GenericTemplates.ts";
 import { icon } from "@targoninc/jess-components";
-import { EntityType } from "@targoninc/lyda-shared/dist/Enums/EntityType";
+import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 
 export class StatisticsTemplates {

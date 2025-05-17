@@ -6,7 +6,7 @@ import {Time} from "../../Classes/Helpers/Time.ts";
 import {currency} from "../../Classes/Helpers/Num.ts";
 import {permissions} from "../../state.ts";
 import {copy} from "../../Classes/Util.ts";
-import {PaymentHistory} from "@targoninc/lyda-shared/dist/Models/db/finance/PaymentHistory";
+import {PaymentHistory} from "@targoninc/lyda-shared/src/Models/db/finance/PaymentHistory";
 
 export class PaymentTemplates {
     static paymentsPage() {

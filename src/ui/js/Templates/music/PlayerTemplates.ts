@@ -23,11 +23,11 @@ import {
 } from "../../state.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {heading} from "@targoninc/jess-components";
-import {Track} from "@targoninc/lyda-shared/dist/Models/db/lyda/Track";
-import {User} from "@targoninc/lyda-shared/dist/Models/db/lyda/User";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
-import {EntityType} from "@targoninc/lyda-shared/dist/Enums/EntityType";
-import {LoopMode} from "@targoninc/lyda-shared/dist/Enums/LoopMode";
+import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
+import {LoopMode} from "@targoninc/lyda-shared/src/Enums/LoopMode";
 import {InteractionTemplates} from "../InteractionTemplates.ts";
 
 export class PlayerTemplates {

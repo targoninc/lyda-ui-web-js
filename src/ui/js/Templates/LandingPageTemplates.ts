@@ -12,7 +12,7 @@ import {RoutePath} from "../Routing/routes.ts";
 import {compute, Signal, signal, HtmlPropertyValue, AnyNode, create, InputType, when } from "@targoninc/jess";
 import { button, error, errorList, input } from "@targoninc/jess-components";
 import {NotificationType} from "../Enums/NotificationType.ts";
-import {User} from "@targoninc/lyda-shared/dist/Models/db/lyda/User";
+import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 
 export interface AuthData {
     termsOfService: boolean;

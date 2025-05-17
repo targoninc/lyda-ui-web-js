@@ -28,11 +28,11 @@ import {AuthActions} from "../../Actions/AuthActions.ts";
 import { Images } from "../../Enums/Images.ts";
 import { button, input, searchableSelect, icon, textarea, IconConfig, SearchableSelectConfig, SelectOption } from "@targoninc/jess-components";
 import {NotificationType} from "../../Enums/NotificationType.ts";
-import {SearchResult} from "@targoninc/lyda-shared/dist/Models/SearchResult";
-import {CollaboratorType} from "@targoninc/lyda-shared/dist/Models/db/lyda/CollaboratorType";
-import {Filter} from "@targoninc/lyda-shared/dist/Models/Filter";
-import {ProgressPart} from "@targoninc/lyda-shared/dist/Models/ProgressPart";
-import {ProgressState} from "@targoninc/lyda-shared/dist/Enums/ProgressState";
+import {SearchResult} from "@targoninc/lyda-shared/src/Models/SearchResult";
+import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
+import {Filter} from "@targoninc/lyda-shared/src/Models/Filter";
+import {ProgressPart} from "@targoninc/lyda-shared/src/Models/ProgressPart";
+import {ProgressState} from "@targoninc/lyda-shared/src/Enums/ProgressState";
 
 export class GenericTemplates {
     static icon(icon$: StringOrSignal, adaptive = false, classes: StringOrSignal[] = [], title = "", onclick: Function | undefined = undefined) {

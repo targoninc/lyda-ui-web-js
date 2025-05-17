@@ -8,8 +8,8 @@ import {signal, AnyElement, HtmlPropertyValue, StringOrSignal} from "@targoninc/
 import {navigate} from "../Routing/Router.ts";
 import {currentUser, navInitialized} from "../state.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
-import {Theme} from "@targoninc/lyda-shared/dist/Enums/Theme";
-import {CollaboratorType} from "@targoninc/lyda-shared/dist/Models/db/lyda/CollaboratorType";
+import {Theme} from "@targoninc/lyda-shared/src/Enums/Theme";
+import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
 
 export class Ui {
     static validUrlPaths = {

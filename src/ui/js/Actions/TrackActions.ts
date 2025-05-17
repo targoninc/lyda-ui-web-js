@@ -8,19 +8,19 @@ import {TrackEditTemplates} from "../Templates/music/TrackEditTemplates.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {navigate, reload} from "../Routing/Router.ts";
 import {Signal} from "@targoninc/jess";
-import {Comment} from "../Models/DbModels/lyda/Comment.ts";
-import {Track} from "../Models/DbModels/lyda/Track.ts";
-import {MediaFileType} from "../EnumsShared/MediaFileType.ts";
 import {MediaUploader} from "../Api/MediaUploader.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {Album} from "../Models/DbModels/lyda/Album.ts";
-import {Playlist} from "../Models/DbModels/lyda/Playlist.ts";
-import {NotificationType} from "../EnumsShared/NotificationType.ts";
 import {currentQuality, playingHere} from "../state.ts";
-import {TrackCollaborator} from "../Models/DbModels/lyda/TrackCollaborator.ts";
-import {ListTrack} from "../Models/ListTrack.ts";
 import {RoutePath} from "../Routing/routes.ts";
-import {CollaboratorType} from "../Models/DbModels/lyda/CollaboratorType.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
+import {Comment} from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
+import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
+import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
+import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
+import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import {TrackCollaborator} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 
 export class TrackActions {
     static async savePlay(id: number) {

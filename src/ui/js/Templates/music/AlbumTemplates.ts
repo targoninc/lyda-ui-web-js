@@ -28,12 +28,12 @@ import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {PageTemplates} from "../PageTemplates.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {button, input, textarea, toggle} from "@targoninc/jess-components";
-import {Track} from "@targoninc/lyda-shared/dist/Models/db/lyda/Track";
-import {Album} from "@targoninc/lyda-shared/dist/Models/db/lyda/Album";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import {NotificationType} from "../../Enums/NotificationType.ts";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
-import {EntityType} from "@targoninc/lyda-shared/dist/Enums/EntityType";
-import {ListTrack} from "@targoninc/lyda-shared/dist/Models/ListTrack";
+import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
+import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
 import {InteractionTemplates} from "../InteractionTemplates.ts";
 
 export class AlbumTemplates {

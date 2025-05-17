@@ -1,11 +1,8 @@
 import {Api} from "../Api/Api.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {notify} from "../Classes/Ui.ts";
-import {Album} from "../Models/DbModels/lyda/Album.ts";
-import {Playlist} from "../Models/DbModels/lyda/Playlist.ts";
-import {Track} from "../Models/DbModels/lyda/Track.ts";
-import {NotificationType} from "../EnumsShared/NotificationType.ts";
-import {Library} from "../Models/Library.ts";
+import {Library} from "@targoninc/lyda-shared/dist/Models/Library";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class LibraryActions {
     static async getLibrary(name: string) {

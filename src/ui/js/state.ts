@@ -2,12 +2,13 @@ import {signal} from "@targoninc/jess";
 import {StreamClient} from "./Streaming/StreamClient.ts";
 import {LydaCache} from "./Cache/LydaCache.ts";
 import {CacheItem} from "./Cache/CacheItem.ts";
-import {Track} from "@targoninc/lyda-shared/dist/Models/db/lyda/Track";
-import {PlayingFrom} from "@targoninc/lyda-shared/dist/Models/PlayingFrom";
-import {TrackPosition} from "@targoninc/lyda-shared/dist/Models/TrackPosition";
-import {User} from "@targoninc/lyda-shared/dist/Models/db/lyda/User";
-import {LoopMode} from "@targoninc/lyda-shared/dist/Enums/LoopMode";
-import {Permission} from "@targoninc/lyda-shared/dist/Models/db/lyda/Permission";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {PlayingFrom} from "@targoninc/lyda-shared/src/Models/PlayingFrom";
+import {TrackPosition} from "@targoninc/lyda-shared/src/Models/TrackPosition";
+import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import {LoopMode} from "@targoninc/lyda-shared/src/Enums/LoopMode";
+import {Permission} from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
+import {Notification} from "@targoninc/lyda-shared/src/Models/db/lyda/Notification";
 
 export const navInitialized = signal(false);
 

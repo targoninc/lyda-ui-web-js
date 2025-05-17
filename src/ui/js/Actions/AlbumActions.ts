@@ -7,14 +7,14 @@ import {PlayManager} from "../Streaming/PlayManager.ts";
 import {QueueManager} from "../Streaming/QueueManager.ts";
 import {navigate} from "../Routing/Router.ts";
 import {Signal} from "@targoninc/jess";
-import {Album} from "../Models/DbModels/lyda/Album.ts";
-import {Track} from "../Models/DbModels/lyda/Track.ts";
 import {MediaUploader} from "../Api/MediaUploader.ts";
-import {MediaFileType} from "../EnumsShared/MediaFileType.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {NotificationType} from "../EnumsShared/NotificationType.ts";
-import {ListTrack} from "../Models/ListTrack.ts";
 import {RoutePath} from "../Routing/routes.ts";
+import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {NotificationType} from "../Enums/NotificationType.ts";
+import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
+import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
 
 export class AlbumActions {
     static async openAddToAlbumModal(track: Track) {

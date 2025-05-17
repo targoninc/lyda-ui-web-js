@@ -7,8 +7,8 @@ import {UserActions} from "../Actions/UserActions.ts";
 import {notifications} from "../state.ts";
 import {Images} from "../Enums/Images.ts";
 import {button} from "@targoninc/jess-components";
-import {Notification} from "@targoninc/lyda-shared/dist/Models/db/lyda/Notification";
-import {NotificationPart} from "@targoninc/lyda-shared/dist/Models/NotifcationPart";
+import {Notification} from "@targoninc/lyda-shared/src/Models/db/lyda/Notification";
+import {NotificationPart} from "@targoninc/lyda-shared/src/Models/NotifcationPart";
 
 export class NotificationTemplates {
     static notificationInList(notification: Notification) {

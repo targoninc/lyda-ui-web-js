@@ -10,18 +10,18 @@ import {notify, Ui} from "../Classes/Ui.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {Icons} from "../Enums/Icons.ts";
-import {Theme} from "../EnumsShared/Theme.ts";
-import {UserSettings} from "../EnumsShared/UserSettings.ts";
-import {MediaFileType} from "../EnumsShared/MediaFileType.ts";
 import {MediaUploader} from "../Api/MediaUploader.ts";
-import {User} from "../Models/DbModels/lyda/User.ts";
 import {Signal} from "@targoninc/jess";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {Notification} from "../Models/DbModels/lyda/Notification.ts";
 import {LydaApi} from "../Api/LydaApi.ts";
-import {NotificationType} from "../EnumsShared/NotificationType.ts";
 import {currentQuality, notifications} from "../state.ts";
-import {StreamingQuality} from "../EnumsShared/StreamingQuality.ts";
+import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
+import {Notification} from "@targoninc/lyda-shared/src/Models/db/lyda/Notification";
+import {StreamingQuality} from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
+import {UserSettings} from "@targoninc/lyda-shared/src/Enums/UserSettings";
+import {Theme} from "@targoninc/lyda-shared/src/Enums/Theme";
 
 export class UserActions {
     static async replaceAvatar(user: User, avatar: Signal<string>, loading: Signal<boolean>) {

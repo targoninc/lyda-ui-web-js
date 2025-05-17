@@ -7,12 +7,10 @@ import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {chartColor, currentUser} from "../state.ts";
 import {compute, signal, Signal, AnyElement} from "@targoninc/jess";
 import {getUserPermissions} from "../../main.ts";
-import {MediaFileType} from "@targoninc/lyda-shared/dist/Enums/MediaFileType";
-import {User} from "@targoninc/lyda-shared/dist/Models/db/lyda/User";
+import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
+import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {NotificationType} from "../Enums/NotificationType.ts";
-import {Likable} from "@targoninc/lyda-shared/dist/Models/Likable";
-import {Track} from "@targoninc/lyda-shared/dist/Models/db/lyda/Track";
-import {Comment} from "@targoninc/lyda-shared/dist/Models/db/lyda/Comment";
+import {Comment} from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 
 export class Util {
     static capitalizeFirstLetter(string: string) {

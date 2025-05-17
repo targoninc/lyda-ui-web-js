@@ -1,6 +1,6 @@
 import {create} from "@targoninc/jess";
 import {GenericTemplates} from "./generic/GenericTemplates.ts";
-import {roadMapItemIcons, RoadmapItemStatus} from "@targoninc/lyda-shared/dist/Enums/RoadmapItemStatus";
+import {roadMapItemIcons, RoadmapItemStatus} from "@targoninc/lyda-shared/src/Enums/RoadmapItemStatus";
 
 let index = 0;
 

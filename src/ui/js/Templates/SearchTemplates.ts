@@ -9,8 +9,8 @@ import {Images} from "../Enums/Images.ts";
 import {router} from "../../main.ts";
 import {RoutePath} from "../Routing/routes.ts";
 import { button, icon } from "@targoninc/jess-components";
-import {SearchContext} from "@targoninc/lyda-shared/dist/Enums/SearchContext";
-import {SearchResult} from "@targoninc/lyda-shared/dist/Models/SearchResult";
+import {SearchContext} from "@targoninc/lyda-shared/src/Enums/SearchContext";
+import {SearchResult} from "@targoninc/lyda-shared/src/Models/SearchResult";
 import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class SearchTemplates {

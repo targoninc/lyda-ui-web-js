@@ -4,7 +4,6 @@ import {currentTrackId, currentUser, playingFrom, playingHere} from "../../state
 import {UserTemplates} from "../account/UserTemplates.ts";
 import {Util} from "../../Classes/Util.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
-import {StatisticsTemplates} from "../StatisticsTemplates.ts";
 import {TrackTemplates} from "./TrackTemplates.ts";
 import {DefaultImages} from "../../Enums/DefaultImages.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
@@ -15,12 +14,12 @@ import {startItem} from "../../Actions/MusicActions.ts";
 import {Icons} from "../../Enums/Icons.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {Api} from "../../Api/Api.ts";
-import {EntityType} from "@targoninc/lyda-shared/dist/Enums/EntityType";
-import {Track} from "@targoninc/lyda-shared/dist/Models/db/lyda/Track";
-import {Playlist} from "@targoninc/lyda-shared/dist/Models/db/lyda/Playlist";
-import {Album} from "@targoninc/lyda-shared/dist/Models/db/lyda/Album";
+import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
-import {MediaFileType} from "@targoninc/lyda-shared/dist/Enums/MediaFileType";
+import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import {NotificationType} from "../../Enums/NotificationType.ts";
 import {InteractionTemplates} from "../InteractionTemplates.ts";
 

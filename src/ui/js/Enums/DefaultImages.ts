@@ -1,4 +1,4 @@
-import {EntityType} from "../EnumsShared/EntityType.ts";
+import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
 
 export const DefaultImages: Record<EntityType, string> = {
     [EntityType.track]: window.location.origin + "/img/defaults/track.webp",

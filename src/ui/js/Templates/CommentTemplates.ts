@@ -7,7 +7,7 @@ import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
 import { compute, create, Signal, when, signalMap, signal, AnyElement, InputType } from "@targoninc/jess";
 import { textarea, button, input } from "@targoninc/jess-components";
-import {Comment} from "@targoninc/lyda-shared/dist/Models/db/lyda/Comment";
+import {Comment} from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 
 export class CommentTemplates {

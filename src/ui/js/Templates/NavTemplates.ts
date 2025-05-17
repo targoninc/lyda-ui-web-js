@@ -10,7 +10,7 @@ import {currentUser} from "../state.ts";
 import {RoutePath} from "../Routing/routes.ts";
 import {NotificationTemplates} from "./NotificationTemplates.ts";
 import { button } from "@targoninc/jess-components";
-import {SearchContext} from "@targoninc/lyda-shared/dist/Enums/SearchContext";
+import {SearchContext} from "@targoninc/lyda-shared/src/Enums/SearchContext";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 
 export class NavTemplates {

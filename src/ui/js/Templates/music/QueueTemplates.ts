@@ -9,7 +9,7 @@ import {compute, signal, create} from "@targoninc/jess";
 import {Images} from "../../Enums/Images.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import { icon } from "@targoninc/jess-components";
-import {Track} from "@targoninc/lyda-shared/dist/Models/db/lyda/Track";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 
 export class QueueTemplates {
     static queueItem(track: Track, index: number, totalCount: number, attributes = [], classes = []) {

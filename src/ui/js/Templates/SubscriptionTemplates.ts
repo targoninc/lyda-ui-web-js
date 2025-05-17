@@ -6,9 +6,9 @@ import {Time} from "../Classes/Helpers/Time.ts";
 import {RoutePath} from "../Routing/routes.ts";
 import {navigate} from "../Routing/Router.ts";
 import { button } from "@targoninc/jess-components";
-import {AvailableSubscription} from "@targoninc/lyda-shared/dist/Models/db/finance/AvailableSubscription";
-import {Subscription} from "@targoninc/lyda-shared/dist/Models/db/finance/Subscription";
-import {SubscriptionStatus} from "@targoninc/lyda-shared/dist/Enums/SubscriptionStatus";
+import {AvailableSubscription} from "@targoninc/lyda-shared/src/Models/db/finance/AvailableSubscription";
+import {Subscription} from "@targoninc/lyda-shared/src/Models/db/finance/Subscription";
+import {SubscriptionStatus} from "@targoninc/lyda-shared/src/Enums/SubscriptionStatus";
 
 export class SubscriptionTemplates {
     static page() {

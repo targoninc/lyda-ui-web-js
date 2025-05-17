@@ -1,4 +1,4 @@
-import {MediaFileType} from "../ui/js/EnumsShared/MediaFileType.ts";
+import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
 
 const knownEmbedServices = [
     "discord",

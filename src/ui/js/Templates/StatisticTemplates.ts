@@ -13,9 +13,9 @@ import {RoutePath} from "../Routing/routes.ts";
 import {yearAndMonthByOffset} from "../Classes/Helpers/Date.ts";
 import {GenericTemplates} from "./generic/GenericTemplates.ts";
 import { button } from "@targoninc/jess-components";
-import {UserSettings} from "@targoninc/lyda-shared/dist/Enums/UserSettings";
+import {UserSettings} from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import {NotificationType} from "../Enums/NotificationType.ts";
-import {RoyaltyInfo} from "@targoninc/lyda-shared/dist/Models/RoyaltyInfo";
+import {RoyaltyInfo} from "@targoninc/lyda-shared/src/Models/RoyaltyInfo";
 
 export class StatisticTemplates {
     static playCountByMonthChart() {

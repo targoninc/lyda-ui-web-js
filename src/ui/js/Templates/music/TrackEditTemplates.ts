@@ -23,13 +23,13 @@ import {AlbumActions} from "../../Actions/AlbumActions.ts";
 import {reload} from "../../Routing/Router.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
 import { button, checkbox, errorList, input, SelectOption, textarea, toggle } from "@targoninc/jess-components";
-import {Track} from "@targoninc/lyda-shared/dist/Models/db/lyda/Track";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { UploadInfo } from "../../Models/UploadInfo.ts";
 import {UploadableTrack} from "../../Models/UploadableTrack.ts";
-import {ProgressPart} from "@targoninc/lyda-shared/dist/Models/ProgressPart";
-import {TrackCollaborator} from "@targoninc/lyda-shared/dist/Models/db/lyda/TrackCollaborator";
-import {User} from "@targoninc/lyda-shared/dist/Models/db/lyda/User";
-import {Genre} from "@targoninc/lyda-shared/dist/Enums/Genre";
+import {ProgressPart} from "@targoninc/lyda-shared/src/Models/ProgressPart";
+import {TrackCollaborator} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
+import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import {Genre} from "@targoninc/lyda-shared/src/Enums/Genre";
 
 export class TrackEditTemplates {
     static uploadForm(title: string, credits: string, releaseDate: Date, visibility: string, genre: Genre,

@@ -10,13 +10,13 @@ import {currentUser, permissions} from "../../state.ts";
 import {AuthApi} from "../../Api/AuthApi.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import { button, ButtonConfig, icon, input, InputConfig, textarea, TextareaConfig, toggle } from "@targoninc/jess-components";
-import {Theme} from "@targoninc/lyda-shared/dist/Enums/Theme";
-import {UserSettings} from "@targoninc/lyda-shared/dist/Enums/UserSettings";
-import {StreamingQuality} from "@targoninc/lyda-shared/dist/Enums/StreamingQuality";
-import {Permission} from "@targoninc/lyda-shared/dist/Models/db/lyda/Permission";
-import {User} from "@targoninc/lyda-shared/dist/Models/db/lyda/User";
-import {NotificationType} from "@targoninc/lyda-shared/dist/Enums/NotificationType";
-import {UserEmail} from "@targoninc/lyda-shared/dist/Models/db/lyda/UserEmail";
+import {Theme} from "@targoninc/lyda-shared/src/Enums/Theme";
+import {UserSettings} from "@targoninc/lyda-shared/src/Enums/UserSettings";
+import {StreamingQuality} from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
+import {Permission} from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
+import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import {UserEmail} from "@targoninc/lyda-shared/src/Models/db/lyda/UserEmail";
+import {NotificationType} from "../../Enums/NotificationType.ts";
 
 export class SettingsTemplates {
     static settingsPage() {

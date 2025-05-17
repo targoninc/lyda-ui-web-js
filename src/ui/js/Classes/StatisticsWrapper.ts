@@ -5,12 +5,12 @@ import {Num} from "./Helpers/Num.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {create, signalMap, signal} from "@targoninc/jess";
 import {getErrorMessage} from "./Util.ts";
-import {Permissions} from "@targoninc/lyda-shared/dist/Enums/Permissions";
-import {Permission} from "@targoninc/lyda-shared/dist/Models/db/lyda/Permission";
-import {Statistic} from "@targoninc/lyda-shared/dist/Models/Statistic";
+import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
+import {Permission} from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
+import {Statistic} from "@targoninc/lyda-shared/src/Models/Statistic";
 import {NotificationType} from "../Enums/NotificationType.ts";
-import {TypedStatistic} from "@targoninc/lyda-shared/dist/Models/TypedStatistic";
-import {TimeResolution} from "@targoninc/lyda-shared/dist/Enums/TimeResolution";
+import {TypedStatistic} from "@targoninc/lyda-shared/src/Models/TypedStatistic";
+import {TimeResolution} from "@targoninc/lyda-shared/src/Enums/TimeResolution";
 
 export class StatisticsWrapper {
     static async getStatistics(permissions: Permission[]) {

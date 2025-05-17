@@ -4,9 +4,9 @@ import {Signal} from "@targoninc/jess";
 import {ApiRoutes} from "./ApiRoutes.ts";
 import {currentUser} from "../state.ts";
 import {getErrorMessage} from "../Classes/Util.ts";
-import {Log} from "@targoninc/lyda-shared/dist/Models/db/lyda/Log";
+import {Log} from "@targoninc/lyda-shared/src/Models/db/lyda/Log";
 import {NotificationType} from "../Enums/NotificationType.ts";
-import {User} from "@targoninc/lyda-shared/dist/Models/db/lyda/User";
+import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 
 export class LydaApi {
     static getLogs(filterState: Signal<any>, successCallback: Function) {

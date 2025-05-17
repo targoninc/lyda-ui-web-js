@@ -25,14 +25,14 @@ import {
 import {navigate} from "../../Routing/Router.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {button, icon, input, textarea, toggle} from "@targoninc/jess-components";
-import {Track} from "@targoninc/lyda-shared/dist/Models/db/lyda/Track";
-import {Playlist} from "@targoninc/lyda-shared/dist/Models/db/lyda/Playlist";
-import {Album} from "@targoninc/lyda-shared/dist/Models/db/lyda/Album";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
-import {EntityType} from "@targoninc/lyda-shared/dist/Enums/EntityType";
+import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
 import {NotificationType} from "../../Enums/NotificationType.ts";
-import {User} from "@targoninc/lyda-shared/dist/Models/db/lyda/User";
-import {ListTrack} from "@targoninc/lyda-shared/dist/Models/ListTrack";
+import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
 import {InteractionTemplates} from "../InteractionTemplates.ts";
 
 export class PlaylistTemplates {

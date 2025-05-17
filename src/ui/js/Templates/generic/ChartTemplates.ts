@@ -5,49 +5,11 @@ import {ChartOptions} from "../../Classes/ChartOptions.ts";
 import {Api} from "../../Api/Api.ts";
 import {chartColor} from "../../state.ts";
 import { button } from "@targoninc/jess-components";
-import {Statistic} from "@targoninc/lyda-shared/dist/Models/Statistic";
+import {Statistic} from "@targoninc/lyda-shared/src/Models/Statistic";
 
 Chart.register(...registerables);
 
 export class ChartTemplates {
-    static donutChart(labels: string[], values: number[], valueTitle: string, title: string, id: string) {
-        const ctx = create("canvas")
-            .classes("chart")
-            .id(id)
-            .build();
-
-        const data = {
-            labels: labels,
-            datasets: [{
-                label: valueTitle,
-                data: values,
-                backgroundColor: chartColor.value,
-                hoverOffset: 4
-            }]
-        };
-
-        const config = {
-            type: "doughnut",
-            data: data,
-            options: {
-                ...ChartOptions.defaultOptions,
-                ...ChartOptions.noGridOptions
-            }
-        };
-
-        new Chart(ctx, config);
-
-        return create("div")
-            .classes("chart-container", "card", "flex-v")
-            .children(
-                create("h4")
-                    .classes("chart-title")
-                    .text(title)
-                    .build(),
-                ctx,
-            ).build();
-    }
-
     static barChart(labels: string[], values: number[], valueTitle: string, title: string, id: string) {
         const ctx = create("canvas")
             .classes("chart")

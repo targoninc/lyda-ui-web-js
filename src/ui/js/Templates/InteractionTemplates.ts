@@ -3,15 +3,16 @@ import {GenericTemplates} from "./generic/GenericTemplates.ts";
 import {Api} from "../Api/Api.ts";
 import {notify} from "../Classes/Ui.ts";
 import {getErrorMessage} from "../Classes/Util.ts";
-import {InteractionMetadata} from "@targoninc/lyda-shared/dist/Models/InteractionMetadata";
-import {InteractionConfig} from "@targoninc/lyda-shared/dist/Models/InteractionConfig";
+import {InteractionMetadata} from "@targoninc/lyda-shared/src/Models/InteractionMetadata";
+import {InteractionConfig} from "@targoninc/lyda-shared/src/Models/InteractionConfig";
 import {NotificationType} from "../Enums/NotificationType.ts";
-import {EntityType} from "@targoninc/lyda-shared/dist/Enums/EntityType";
-import {Track} from "@targoninc/lyda-shared/dist/Models/db/lyda/Track";
-import {InteractionType} from "@targoninc/lyda-shared/dist/Enums/InteractionType";
+import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {InteractionType} from "@targoninc/lyda-shared/src/Enums/InteractionType";
 import {Icons} from "../Enums/Icons.ts";
-import {Album} from "@targoninc/lyda-shared/dist/Models/db/lyda/Album";
-import {Playlist} from "@targoninc/lyda-shared/dist/Models/db/lyda/Playlist";
+import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import {currentUser} from "../state.ts";
 
 const interactionConfigs: Record<InteractionType, InteractionConfig> = {
     [InteractionType.like]: {
@@ -45,8 +46,10 @@ export class InteractionTemplates {
 
         const icon$ = compute(i => i ? config.icons.interacted : config.icons.default, interacted$);
         const class$ = compute((i): string => i ? "positive" : "negative", interacted$);
+        const disabledClass$ = compute((u): string => !u ? "disabled" : "_", currentUser);
 
         return create("div")
+            .classes(disabledClass$)
             .children(
                 GenericTemplates.roundIconButton({icon: icon$}, () => interact(entityType, interactionType, config, id, interacted$, count$), interactionType, [class$]),
                 when(metadata.count, create("span")

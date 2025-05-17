@@ -20,10 +20,10 @@ import {
     muted, currentSecretCode
 } from "../state.ts";
 import {StreamingBroadcaster, StreamingEvent} from "./StreamingBroadcaster.ts";
-import {Track} from "@targoninc/lyda-shared/dist/Models/db/lyda/Track";
-import {PlayingFrom} from "@targoninc/lyda-shared/dist/Models/PlayingFrom";
-import {LoopMode} from "@targoninc/lyda-shared/dist/Enums/LoopMode";
-import {TrackPosition} from "@targoninc/lyda-shared/dist/Models/TrackPosition";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {PlayingFrom} from "@targoninc/lyda-shared/src/Models/PlayingFrom";
+import {LoopMode} from "@targoninc/lyda-shared/src/Enums/LoopMode";
+import {TrackPosition} from "@targoninc/lyda-shared/src/Models/TrackPosition";
 import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class PlayManager {

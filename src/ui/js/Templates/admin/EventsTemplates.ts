@@ -7,8 +7,8 @@ import {Time} from "../../Classes/Helpers/Time.ts";
 import {notify} from "../../Classes/Ui.ts";
 import {DashboardTemplates} from "./DashboardTemplates.ts";
 import { button } from "@targoninc/jess-components";
-import {Permissions} from "@targoninc/lyda-shared/dist/Enums/Permissions";
-import {PaypalWebhook} from "@targoninc/lyda-shared/dist/Models/db/finance/PaypalWebhook";
+import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
+import {PaypalWebhook} from "@targoninc/lyda-shared/src/Models/db/finance/PaypalWebhook";
 import { NotificationType } from "../../Enums/NotificationType.ts";
 
 export class EventsTemplates {

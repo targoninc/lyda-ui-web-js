@@ -6,12 +6,12 @@ import {compute, signal, Signal, AnyElement, create, when, signalMap} from "@tar
 import {LydaApi} from "../../Api/LydaApi.ts";
 import {truncateText} from "../../Classes/Helpers/CustomText.ts";
 import {DashboardTemplates} from "./DashboardTemplates.ts";
-import {Permissions} from "@targoninc/lyda-shared/dist/Enums/Permissions";
+import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
 import {Api} from "../../Api/Api.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import { button, toggle } from "@targoninc/jess-components";
-import {Log} from "@targoninc/lyda-shared/dist/Models/db/lyda/Log";
-import {LogLevel} from "@targoninc/lyda-shared/dist/Enums/LogLevel";
+import {Log} from "@targoninc/lyda-shared/src/Models/db/lyda/Log";
+import {LogLevel} from "@targoninc/lyda-shared/src/Enums/LogLevel";
 import {PillOption} from "../../Models/PillOption.ts";
 
 export class LogTemplates {

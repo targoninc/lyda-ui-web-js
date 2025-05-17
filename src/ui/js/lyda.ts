@@ -12,11 +12,11 @@ import {SubscriptionTemplates} from "./Templates/SubscriptionTemplates.ts";
 import {notify} from "./Classes/Ui.ts";
 import {navigate} from "./Routing/Router.ts";
 import {ApiRoutes} from "./Api/ApiRoutes.ts";
-import {NotificationType} from "./EnumsShared/NotificationType.ts";
 import {currentSecretCode, currentUser, permissions} from "./state.ts";
-import {RoyaltyInfo} from "./Models/RoyaltyInfo.ts";
 import {RoutePath} from "./Routing/routes.ts";
 import { AnyElement } from "@targoninc/jess";
+import {NotificationType} from "./Enums/NotificationType.ts";
+import {RoyaltyInfo} from "@targoninc/lyda-shared/src/Models/RoyaltyInfo";
 
 export class Lyda {
     static async getEndpointData(endpoint: string, params = "") {

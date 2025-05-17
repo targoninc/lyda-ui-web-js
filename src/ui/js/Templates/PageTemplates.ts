@@ -19,7 +19,7 @@ import {RoyaltyTemplates} from "./admin/RoyaltyTemplates.ts";
 import {PayoutTemplates} from "./money/PayoutTemplates.ts";
 import {MusicTemplates} from "./music/MusicTemplates.ts";
 import {PaymentTemplates} from "./money/PaymentTemplates.ts";
-import {User} from "@targoninc/lyda-shared/dist/Models/db/lyda/User";
+import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, Function> = {

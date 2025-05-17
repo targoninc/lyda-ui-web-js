@@ -29,17 +29,17 @@ import {MediaActions} from "../../Actions/MediaActions.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {MusicTemplates} from "../music/MusicTemplates.ts";
 import { button } from "@targoninc/jess-components";
-import { User } from "@targoninc/lyda-shared/dist/Models/db/lyda/User";
+import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
-import {Track} from "@targoninc/lyda-shared/dist/Models/db/lyda/Track";
-import {EntityType} from "@targoninc/lyda-shared/dist/Enums/EntityType";
-import {Permission} from "@targoninc/lyda-shared/dist/Models/db/lyda/Permission";
-import {Follow} from "@targoninc/lyda-shared/dist/Models/db/lyda/Follow";
-import {MediaFileType} from "@targoninc/lyda-shared/dist/Enums/MediaFileType";
-import {Permissions} from "@targoninc/lyda-shared/dist/Enums/Permissions";
-import {Badge} from "@targoninc/lyda-shared/dist/Models/db/lyda/Badge";
-import {Album} from "@targoninc/lyda-shared/dist/Models/db/lyda/Album";
-import {Playlist} from "@targoninc/lyda-shared/dist/Models/db/lyda/Playlist";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
+import {Permission} from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
+import {Follow} from "@targoninc/lyda-shared/src/Models/db/lyda/Follow";
+import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
+import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
+import {Badge} from "@targoninc/lyda-shared/src/Models/db/lyda/Badge";
+import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 
 export class UserTemplates {
     static userWidget(user: User|Signal<User|null>, following: boolean|Signal<boolean>, extraAttributes: HtmlPropertyValue[] = [], extraClasses: StringOrSignal[] = [], context: UserWidgetContext = UserWidgetContext.unknown) {

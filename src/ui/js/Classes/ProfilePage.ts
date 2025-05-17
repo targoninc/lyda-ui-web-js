@@ -6,11 +6,11 @@ import {AnyElement} from "@targoninc/jess";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {getErrorMessage} from "./Util.ts";
 import {MusicTemplates} from "../Templates/music/MusicTemplates.ts";
-import {User} from "@targoninc/lyda-shared/dist/Models/db/lyda/User";
+import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { NotificationType } from "../Enums/NotificationType.ts";
-import {Track} from "@targoninc/lyda-shared/dist/Models/db/lyda/Track";
-import {Album} from "@targoninc/lyda-shared/dist/Models/db/lyda/Album";
-import {Playlist} from "@targoninc/lyda-shared/dist/Models/db/lyda/Playlist";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 
 export class ProfilePage {
     static async addTabSectionAsync(element: AnyElement, user: User, isOwnProfile: boolean) {

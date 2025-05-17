@@ -1,4 +1,4 @@
-import {Track} from "@targoninc/lyda-shared/dist/Models/db/lyda/Track";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 
 export interface UploadableTrack extends Track, Record<string, any> {
     termsOfService: boolean;

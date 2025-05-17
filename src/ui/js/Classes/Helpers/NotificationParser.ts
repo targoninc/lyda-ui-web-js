@@ -1,8 +1,8 @@
 import {GenericTemplates} from "../../Templates/generic/GenericTemplates.ts";
 import {NotificationTemplates} from "../../Templates/NotificationTemplates.ts";
-import {Notification} from "@targoninc/lyda-shared/dist/Models/db/lyda/Notification";
-import {NotificationReference} from "@targoninc/lyda-shared/dist/Models/NotificationReference";
-import {NotificationPart} from "@targoninc/lyda-shared/dist/Models/NotifcationPart";
+import {Notification} from "@targoninc/lyda-shared/src/Models/db/lyda/Notification";
+import {NotificationReference} from "@targoninc/lyda-shared/src/Models/NotificationReference";
+import {NotificationPart} from "@targoninc/lyda-shared/src/Models/NotifcationPart";
 
 export class NotificationParser {
     static parse(notification: Notification) {
