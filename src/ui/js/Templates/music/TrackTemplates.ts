@@ -585,7 +585,7 @@ export class TrackTemplates {
                                                 when(trackData.canEdit, TrackEditTemplates.replaceAudioButton(track)),
                                             ).build(),
                                         create("div")
-                                            .classes("stats-container", "flex", "rounded")
+                                            .classes("interactions-container", "flex", "rounded")
                                             .children(
                                                 StatisticsTemplates.likesIndicator(EntityType.track, track.id, track.likes.length, liked),
                                                 StatisticsTemplates.likeListOpener(track.likes),

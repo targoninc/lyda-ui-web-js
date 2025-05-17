@@ -11,20 +11,31 @@ import {StatisticsTemplates} from "../StatisticsTemplates.ts";
 import {Images} from "../../Enums/Images.ts";
 import {getErrorMessage, Util} from "../../Classes/Util.ts";
 import {notify, Ui} from "../../Classes/Ui.ts";
-import {compute, Signal, signal, AnyNode, create, HtmlPropertyValue, when, nullElement, InputType} from "@targoninc/jess";
+import {
+    AnyNode,
+    compute,
+    create,
+    HtmlPropertyValue,
+    InputType,
+    nullElement,
+    signal,
+    Signal,
+    when
+} from "@targoninc/jess";
 import {navigate, Route} from "../../Routing/Router.ts";
 import {currentUser, manualQueue, playingFrom} from "../../state.ts";
 import {Api} from "../../Api/Api.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {PageTemplates} from "../PageTemplates.ts";
 import {RoutePath} from "../../Routing/routes.ts";
-import { button, input, textarea, toggle } from "@targoninc/jess-components";
+import {button, input, textarea, toggle} from "@targoninc/jess-components";
 import {Track} from "@targoninc/lyda-shared/dist/Models/db/lyda/Track";
 import {Album} from "@targoninc/lyda-shared/dist/Models/db/lyda/Album";
 import {NotificationType} from "../../Enums/NotificationType.ts";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
 import {EntityType} from "@targoninc/lyda-shared/dist/Enums/EntityType";
 import {ListTrack} from "@targoninc/lyda-shared/dist/Models/ListTrack";
+import {InteractionTemplates} from "../InteractionTemplates.ts";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
@@ -313,7 +324,7 @@ export class AlbumTemplates {
                             ).build(),
                     ).build(),
                 create("div")
-                    .classes("stats-container", "flex", "rounded")
+                    .classes("interactions-container", "flex", "rounded")
                     .children(
                         StatisticsTemplates.likesIndicator(EntityType.album, album.id, album.likes.length, Util.userHasLiked(album)),
                         StatisticsTemplates.likeListOpener(album.likes),
@@ -450,8 +461,9 @@ export class AlbumTemplates {
                                             .build()
                                     ).build(),
                                 create("div")
-                                    .classes("stats-container", "flex", "rounded")
+                                    .classes("interactions-container", "flex", "rounded")
                                     .children(
+                                        InteractionTemplates.interactions(EntityType.album, album),
                                         StatisticsTemplates.likesIndicator(EntityType.album, album.id, album.likes.length,
                                             Util.arrayPropertyMatchesUser(album.likes, "user_id")),
                                         StatisticsTemplates.likeListOpener(album.likes),

@@ -290,7 +290,7 @@ export class PlaylistTemplates {
                             ).build(),
                     ).build(),
                 create("div")
-                    .classes("stats-container", "flex", "rounded")
+                    .classes("interactions-container", "flex", "rounded")
                     .children(
                         StatisticsTemplates.likesIndicator(EntityType.playlist, playlist.id, playlist.likes.length,
                             Util.arrayPropertyMatchesUser(playlist.likes, "user_id")),
@@ -450,7 +450,7 @@ export class PlaylistTemplates {
                                             .build()
                                     ).build(),
                                 create("div")
-                                    .classes("stats-container", "flex", "rounded")
+                                    .classes("interactions-container", "flex", "rounded")
                                     .children(
                                         StatisticsTemplates.likesIndicator(EntityType.playlist, playlist.id, playlist.likes.length,
                                             Util.arrayPropertyMatchesUser(playlist.likes, "user_id")),

@@ -489,7 +489,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     left: 22px;
 }
 
-.stats-container {
+.interactions-container {
     width: max-content;
 }
 
