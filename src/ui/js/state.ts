@@ -1,16 +1,13 @@
 import {signal} from "@targoninc/jess";
 import {StreamClient} from "./Streaming/StreamClient.ts";
-import {PlayingFrom} from "./Models/PlayingFrom.ts";
-import {Track} from "./Models/DbModels/lyda/Track.ts";
 import {LydaCache} from "./Cache/LydaCache.ts";
 import {CacheItem} from "./Cache/CacheItem.ts";
-import {User} from "./Models/DbModels/lyda/User.ts";
-import {TrackPosition} from "./Models/TrackPosition.ts";
-import {LoopMode} from "./EnumsShared/LoopMode.ts";
-import {Notification} from "./Models/DbModels/lyda/Notification.ts";
-import {Permission} from "./Models/DbModels/lyda/Permission.ts";
-
-export const dragging = signal(false);
+import {Track} from "@targoninc/lyda-shared/dist/Models/db/lyda/Track";
+import {PlayingFrom} from "@targoninc/lyda-shared/dist/Models/PlayingFrom";
+import {TrackPosition} from "@targoninc/lyda-shared/dist/Models/TrackPosition";
+import {User} from "@targoninc/lyda-shared/dist/Models/db/lyda/User";
+import {LoopMode} from "@targoninc/lyda-shared/dist/Enums/LoopMode";
+import {Permission} from "@targoninc/lyda-shared/dist/Models/db/lyda/Permission";
 
 export const navInitialized = signal(false);
 

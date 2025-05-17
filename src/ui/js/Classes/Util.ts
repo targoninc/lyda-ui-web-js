@@ -4,15 +4,15 @@ import {LydaCache} from "../Cache/LydaCache.ts";
 import {Api, ApiResponse} from "../Api/Api.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {MediaFileType} from "../EnumsShared/MediaFileType.ts";
-import {User} from "../Models/DbModels/lyda/User.ts";
 import {chartColor, currentUser} from "../state.ts";
 import {compute, signal, Signal, AnyElement} from "@targoninc/jess";
-import {NotificationType} from "../EnumsShared/NotificationType.ts";
-import {Comment} from "../Models/DbModels/lyda/Comment.ts";
-import {Likable} from "../Models/Likable.ts";
-import {Track} from "../Models/DbModels/lyda/Track.ts";
 import {getUserPermissions} from "../../main.ts";
+import {MediaFileType} from "@targoninc/lyda-shared/dist/Enums/MediaFileType";
+import {User} from "@targoninc/lyda-shared/dist/Models/db/lyda/User";
+import {NotificationType} from "../Enums/NotificationType.ts";
+import {Likable} from "@targoninc/lyda-shared/dist/Models/Likable";
+import {Track} from "@targoninc/lyda-shared/dist/Models/db/lyda/Track";
+import {Comment} from "@targoninc/lyda-shared/dist/Models/db/lyda/Comment";
 
 export class Util {
     static capitalizeFirstLetter(string: string) {
@@ -113,14 +113,6 @@ export class Util {
             return false;
         }
         return array.some((e) => e[property] === currentUser.value!.id);
-    }
-
-    static userHasLiked(entity: Likable) {
-        return compute(u => !!(u && entity.likes?.some(l => l.user_id === u.id)), currentUser);
-    }
-
-    static userHasReposted(entity: Track) {
-        return compute(u => !!(u && entity.reposts?.some(r => r.user_id === u.id)), currentUser);
     }
 
     static userIsFollowing(user: User) {

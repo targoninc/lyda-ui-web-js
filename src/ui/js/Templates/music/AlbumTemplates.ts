@@ -7,7 +7,6 @@ import {PlayManager} from "../../Streaming/PlayManager.ts";
 import {TrackTemplates} from "./TrackTemplates.ts";
 import {QueueManager} from "../../Streaming/QueueManager.ts";
 import {PlaylistActions} from "../../Actions/PlaylistActions.ts";
-import {StatisticsTemplates} from "../StatisticsTemplates.ts";
 import {Images} from "../../Enums/Images.ts";
 import {getErrorMessage, Util} from "../../Classes/Util.ts";
 import {notify, Ui} from "../../Classes/Ui.ts";
@@ -323,12 +322,7 @@ export class AlbumTemplates {
                                     .build(),
                             ).build(),
                     ).build(),
-                create("div")
-                    .classes("interactions-container", "flex", "rounded")
-                    .children(
-                        StatisticsTemplates.likesIndicator(EntityType.album, album.id, album.likes.length, Util.userHasLiked(album)),
-                        StatisticsTemplates.likeListOpener(album.likes),
-                    ).build()
+                InteractionTemplates.interactions(EntityType.album, album),
             ).build();
     }
 
@@ -460,14 +454,7 @@ export class AlbumTemplates {
                                             .text("Released " + Util.formatDate(album.release_date))
                                             .build()
                                     ).build(),
-                                create("div")
-                                    .classes("interactions-container", "flex", "rounded")
-                                    .children(
-                                        InteractionTemplates.interactions(EntityType.album, album),
-                                        StatisticsTemplates.likesIndicator(EntityType.album, album.id, album.likes.length,
-                                            Util.arrayPropertyMatchesUser(album.likes, "user_id")),
-                                        StatisticsTemplates.likeListOpener(album.likes),
-                                    ).build(),
+                                InteractionTemplates.interactions(EntityType.album, album),
                             ).build()
                     ).build(),
                 TrackTemplates.tracksInList(noTracks, tracks, canEdit, album, "album", startCallback)

@@ -2,11 +2,11 @@ import {Api} from "./Api.ts";
 import {notify} from "../Classes/Ui.ts";
 import {Signal} from "@targoninc/jess";
 import {ApiRoutes} from "./ApiRoutes.ts";
-import {User} from "../Models/DbModels/lyda/User.ts";
-import {Log} from "../Models/DbModels/lyda/Log.ts";
 import {currentUser} from "../state.ts";
-import {NotificationType} from "../EnumsShared/NotificationType.ts";
 import {getErrorMessage} from "../Classes/Util.ts";
+import {Log} from "@targoninc/lyda-shared/dist/Models/db/lyda/Log";
+import {NotificationType} from "../Enums/NotificationType.ts";
+import {User} from "@targoninc/lyda-shared/dist/Models/db/lyda/User";
 
 export class LydaApi {
     static getLogs(filterState: Signal<any>, successCallback: Function) {

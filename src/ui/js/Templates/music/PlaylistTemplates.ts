@@ -10,18 +10,30 @@ import {StatisticsTemplates} from "../StatisticsTemplates.ts";
 import {Images} from "../../Enums/Images.ts";
 import {Util} from "../../Classes/Util.ts";
 import {notify, Ui} from "../../Classes/Ui.ts";
-import {compute, Signal, signal, AnyElement, AnyNode, create, HtmlPropertyValue, when, nullElement, InputType} from "@targoninc/jess";
+import {
+    AnyElement,
+    AnyNode,
+    compute,
+    create,
+    HtmlPropertyValue,
+    InputType,
+    nullElement,
+    Signal,
+    signal,
+    when
+} from "@targoninc/jess";
 import {navigate} from "../../Routing/Router.ts";
 import {RoutePath} from "../../Routing/routes.ts";
-import { button, icon, input, textarea, toggle } from "@targoninc/jess-components";
+import {button, icon, input, textarea, toggle} from "@targoninc/jess-components";
 import {Track} from "@targoninc/lyda-shared/dist/Models/db/lyda/Track";
 import {Playlist} from "@targoninc/lyda-shared/dist/Models/db/lyda/Playlist";
 import {Album} from "@targoninc/lyda-shared/dist/Models/db/lyda/Album";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
-import { EntityType } from "@targoninc/lyda-shared/dist/Enums/EntityType";
+import {EntityType} from "@targoninc/lyda-shared/dist/Enums/EntityType";
 import {NotificationType} from "../../Enums/NotificationType.ts";
 import {User} from "@targoninc/lyda-shared/dist/Models/db/lyda/User";
 import {ListTrack} from "@targoninc/lyda-shared/dist/Models/ListTrack";
+import {InteractionTemplates} from "../InteractionTemplates.ts";
 
 export class PlaylistTemplates {
     static addTrackToPlaylistModal(track: Track, playlists: Playlist[]) {
@@ -267,9 +279,6 @@ export class PlaylistTemplates {
         if (!playlist.user) {
             throw new Error(`Playlist ${playlist.id} has no user`);
         }
-        if (!playlist.likes) {
-            throw new Error(`Playlist ${playlist.id} has no likes`);
-        }
 
         return create("div")
             .classes("playlist-card", "padded", "flex-v", "small-gap", isSecondary ? "secondary" : "_")
@@ -289,13 +298,7 @@ export class PlaylistTemplates {
                                     .build(),
                             ).build(),
                     ).build(),
-                create("div")
-                    .classes("interactions-container", "flex", "rounded")
-                    .children(
-                        StatisticsTemplates.likesIndicator(EntityType.playlist, playlist.id, playlist.likes.length,
-                            Util.arrayPropertyMatchesUser(playlist.likes, "user_id")),
-                        StatisticsTemplates.likeListOpener(playlist.likes),
-                    ).build()
+                InteractionTemplates.interactions(EntityType.playlist, playlist),
             ).build();
     }
 
@@ -382,9 +385,6 @@ export class PlaylistTemplates {
         if (!a_user) {
             throw new Error(`Playlist ${playlist.id} has no user`);
         }
-        if (!playlist.likes) {
-            throw new Error(`Playlist ${playlist.id} has no likes array`);
-        }
 
         async function startCallback(trackId: number) {
             await PlaylistActions.startTrackInPlaylist(playlist, trackId);
@@ -449,13 +449,7 @@ export class PlaylistTemplates {
                                             .text("Created " + Util.formatDate(playlist.created_at))
                                             .build()
                                     ).build(),
-                                create("div")
-                                    .classes("interactions-container", "flex", "rounded")
-                                    .children(
-                                        StatisticsTemplates.likesIndicator(EntityType.playlist, playlist.id, playlist.likes.length,
-                                            Util.arrayPropertyMatchesUser(playlist.likes, "user_id")),
-                                        StatisticsTemplates.likeListOpener(playlist.likes),
-                                    ).build(),
+                                InteractionTemplates.interactions(EntityType.playlist, playlist),
                             ).build()
                     ).build(),
                 TrackTemplates.tracksInList(noTracks, tracks, data.canEdit, playlist, "playlist", startCallback)

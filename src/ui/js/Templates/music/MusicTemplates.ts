@@ -22,6 +22,7 @@ import {Album} from "@targoninc/lyda-shared/dist/Models/db/lyda/Album";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
 import {MediaFileType} from "@targoninc/lyda-shared/dist/Enums/MediaFileType";
 import {NotificationType} from "../../Enums/NotificationType.ts";
+import {InteractionTemplates} from "../InteractionTemplates.ts";
 
 export class MusicTemplates {
     static feedEntry(type: EntityType, item: Track | Playlist | Album) {
@@ -76,33 +77,11 @@ export class MusicTemplates {
                                             .children(
                                                 ...MusicTemplates.itemSpecificItems(type, item),
                                             ).build(),
-                                        create("div")
-                                            .classes("flex", "align-children")
-                                            .children(
-                                                StatisticsTemplates.likesIndicator(type, item.id, item.likeCount ?? 0,
-                                                    Util.arrayPropertyMatchesUser(item.likes ?? [], "user_id")),
-                                                ...MusicTemplates.itemSpecificActions(type, item),
-                                            ).build(),
+                                        InteractionTemplates.interactions(type, item),
                                     ).build(),
                             ).build()
                     ).build()
             ).build();
-    }
-
-    private static itemSpecificActions(type: EntityType, item: Track | Playlist | Album) {
-        const items = [];
-
-        switch (type) {
-            case EntityType.track:
-                item = item as Track;
-                const reposted = Util.arrayPropertyMatchesUser(item.reposts ?? [], "user_id");
-                const disabled = signal(item.visibility === "private");
-                items.push(StatisticsTemplates.repostIndicator(item.id, item.reposts?.length ?? 0, reposted, disabled));
-                items.push(StatisticsTemplates.repostListOpener(item.reposts ?? []));
-                items.push(TrackTemplates.addToQueueButton(item));
-        }
-
-        return items;
     }
 
     private static itemSpecificItems(type: EntityType, item: Track | Playlist | Album) {
@@ -111,9 +90,9 @@ export class MusicTemplates {
         switch (type) {
             case EntityType.track:
                 if ((item as Track).processed) {
-                    items.push(TrackTemplates.waveform(item, JSON.parse((item as Track).loudness_data)));
+                    items.push(TrackTemplates.waveform(item as Track, JSON.parse((item as Track).loudness_data)));
                 } else {
-                    items.push(TrackTemplates.waveform(item, []));
+                    items.push(TrackTemplates.waveform(item as Track, []));
                 }
                 items.push(create("span")
                     .classes("nopointer", "text-small", "align-center")

@@ -1,6 +1,5 @@
-import {NotificationType} from "../EnumsShared/NotificationType.ts";
 import {notify} from "../Classes/Ui.ts";
-import {ApiRoutes} from "./ApiRoutes.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export interface ApiResponse<T> {
     code: number;

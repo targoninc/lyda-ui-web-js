@@ -4,12 +4,10 @@ import {Time} from "../../Classes/Helpers/Time.ts";
 import {Images} from "../../Enums/Images.ts";
 import {QueueTemplates} from "./QueueTemplates.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
-import {StatisticsTemplates} from "../StatisticsTemplates.ts";
-import {CommentTemplates} from "../CommentTemplates.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {Ui} from "../../Classes/Ui.ts";
 import {Util} from "../../Classes/Util.ts";
-import {compute, Signal, signal, AnyElement, create, when} from "@targoninc/jess";
+import {AnyElement, compute, create, Signal, signal, when} from "@targoninc/jess";
 import {navigate} from "../../Routing/Router.ts";
 import {
     currentlyBuffered,
@@ -24,12 +22,13 @@ import {
     volume
 } from "../../state.ts";
 import {RoutePath} from "../../Routing/routes.ts";
-import { heading } from "@targoninc/jess-components";
+import {heading} from "@targoninc/jess-components";
 import {Track} from "@targoninc/lyda-shared/dist/Models/db/lyda/Track";
 import {User} from "@targoninc/lyda-shared/dist/Models/db/lyda/User";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
 import {EntityType} from "@targoninc/lyda-shared/dist/Enums/EntityType";
 import {LoopMode} from "@targoninc/lyda-shared/dist/Enums/LoopMode";
+import {InteractionTemplates} from "../InteractionTemplates.ts";
 
 export class PlayerTemplates {
     static audioPlayer(track: Track) {
@@ -223,10 +222,6 @@ export class PlayerTemplates {
             icons.push(GenericTemplates.lock());
         }
 
-        track.likes = track.likes ?? [];
-        track.comments = track.comments ?? [];
-        track.reposts = track.reposts ?? [];
-
         const cover = signal(Images.DEFAULT_COVER_TRACK);
         if (track.has_cover) {
             cover.value = Util.getTrackCover(track.id);
@@ -270,9 +265,7 @@ export class PlayerTemplates {
                 .classes("flex", "align-center", "hideOnMidBreakpoint")
                 .children(
                     queueComponent,
-                    StatisticsTemplates.likesIndicator(EntityType.track, track.id, track.likes.length,
-                        Util.arrayPropertyMatchesUser(track.likes, "user_id")),
-                    isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, Util.arrayPropertyMatchesUser(track.reposts, "user_id")),
+                    InteractionTemplates.interactions(EntityType.track, track),
                 ).build()
         ];
     }
@@ -293,10 +286,7 @@ export class PlayerTemplates {
                 when(menuShown, create("div")
                     .classes("popout-above", "card", "flex-v")
                     .children(
-                        StatisticsTemplates.likesIndicator(EntityType.track, track.id, track.likes!.length,
-                            Util.arrayPropertyMatchesUser(track.likes!, "user_id")),
-                        isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts!.length, Util.arrayPropertyMatchesUser(track.reposts!, "user_id")),
-                        CommentTemplates.commentButton(false, signal(track.comments!)),
+                        InteractionTemplates.interactions(EntityType.track, track),
                         queueComponent
                     ).build())
             ).build();

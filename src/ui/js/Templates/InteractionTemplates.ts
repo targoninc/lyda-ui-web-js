@@ -12,7 +12,6 @@ import {InteractionType} from "@targoninc/lyda-shared/dist/Enums/InteractionType
 import {Icons} from "../Enums/Icons.ts";
 import {Album} from "@targoninc/lyda-shared/dist/Models/db/lyda/Album";
 import {Playlist} from "@targoninc/lyda-shared/dist/Models/db/lyda/Playlist";
-import {icon} from "@targoninc/jess-components";
 
 const interactionConfigs: Record<InteractionType, InteractionConfig> = {
     [InteractionType.like]: {
@@ -34,7 +33,7 @@ const interactionConfigs: Record<InteractionType, InteractionConfig> = {
             default: "comment",
             interacted: "comment"
         },
-        toggleable: true,
+        toggleable: false,
     },
 }
 
@@ -87,7 +86,7 @@ export class InteractionTemplates {
         const elements = [];
         for (const interaction of interactions) {
             const config = interactionConfigs[interaction];
-            elements.push(InteractionTemplates.interactionButton(entityType, interaction, entity[interaction + "s" as keyof T] as InteractionMetadata<any>, config, entity.id));
+            elements.push(InteractionTemplates.interactionButton(entityType, interaction, entity[interaction + "s" as keyof T] ?? {} as InteractionMetadata<any>, config, entity.id));
         }
 
         return elements;

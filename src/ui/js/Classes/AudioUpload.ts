@@ -3,21 +3,20 @@ import {notify} from "./Ui.ts";
 import {navigate} from "../Routing/Router.ts";
 import {signal, Signal} from "@targoninc/jess";
 import {UploadableTrack} from "../Models/UploadableTrack.ts";
-import {Track} from "../Models/DbModels/lyda/Track.ts";
 import {MediaUploader} from "../Api/MediaUploader.ts";
-import {MediaFileType} from "../EnumsShared/MediaFileType.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {ProgressPart} from "../Models/ProgressPart.ts";
-import {ProgressState} from "../EnumsShared/ProgressState.ts";
-import {NotificationType} from "../EnumsShared/NotificationType.ts";
 import {RoutePath} from "../Routing/routes.ts";
+import {ProgressPart} from "@targoninc/lyda-shared/dist/Models/ProgressPart";
+import {ProgressState} from "@targoninc/lyda-shared/dist/Enums/ProgressState";
+import {NotificationType} from "../Enums/NotificationType.ts";
+import {MediaFileType} from "@targoninc/lyda-shared/dist/Enums/MediaFileType";
+import {Track} from "@targoninc/lyda-shared/dist/Models/db/lyda/Track";
 
 export class AudioUpload {
     triggerEvent: Event;
     state: Signal<UploadableTrack>;
     id: number | undefined;
-    ws: any;
-    api: Api|undefined;
+    api: Api | undefined;
     private progress: Signal<ProgressPart[]>;
 
     constructor(e: Event, state: Signal<UploadableTrack>, progress: Signal<ProgressPart[]>) {

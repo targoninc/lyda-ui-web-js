@@ -38,6 +38,8 @@ import {TrackLike} from "@targoninc/lyda-shared/dist/Models/db/lyda/TrackLike";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
 import {CollaboratorType} from "@targoninc/lyda-shared/dist/Models/db/lyda/CollaboratorType";
 import {User} from "@targoninc/lyda-shared/dist/Models/db/lyda/User";
+import {Comment} from "@targoninc/lyda-shared/dist/Models/db/lyda/Comment";
+import {InteractionTemplates} from "../InteractionTemplates.ts";
 
 export class TrackTemplates {
     static collabIndicator(collab: TrackCollaborator): any {
@@ -320,8 +322,7 @@ export class TrackTemplates {
                                             create("div")
                                                 .classes("flex", "align-children")
                                                 .children(
-                                                    StatisticsTemplates.likesIndicator(EntityType.track, track.id, track.likes.length ?? [],
-                                                        Util.arrayPropertyMatchesUser(track.likes, "user_id")),
+                                                    InteractionTemplates.interactions(EntityType.track, track),
                                                     TrackTemplates.title(track.title, track.id, icons),
                                                     create("span")
                                                         .classes("nopointer", "text-small", "align-center")
@@ -450,11 +451,6 @@ export class TrackTemplates {
             return null;
         }
         const track = trackData.track as Track;
-        if (!track.likes || !track.reposts || !track.comments) {
-            throw new Error(`Track ${track.id} is missing property likes, reposts or comments`);
-        }
-        const liked = compute(u => !!(track.likes?.some((like: TrackLike) => like.user_id === u?.id)), currentUser);
-        const reposted = compute(u => !!(track.reposts?.some(repost => repost.user_id === u?.id)), currentUser);
         const collaborators = track.collaborators ?? [];
         const toAppend = [];
         const linkedUserState = signal(collaborators);
@@ -584,15 +580,7 @@ export class TrackTemplates {
                                                 TrackTemplates.addToQueueButton(track),
                                                 when(trackData.canEdit, TrackEditTemplates.replaceAudioButton(track)),
                                             ).build(),
-                                        create("div")
-                                            .classes("interactions-container", "flex", "rounded")
-                                            .children(
-                                                StatisticsTemplates.likesIndicator(EntityType.track, track.id, track.likes.length, liked),
-                                                StatisticsTemplates.likeListOpener(track.likes),
-                                                when(isPrivate, StatisticsTemplates.repostIndicator(track.id, track.reposts.length, reposted), true),
-                                                when(isPrivate, StatisticsTemplates.repostListOpener(track.reposts), true),
-                                                CommentTemplates.commentButton(true, comments, showComments)
-                                            ).build(),
+                                        InteractionTemplates.interactions(EntityType.track, track),
                                     ).build()
                             ).build(),
                     ).build(),

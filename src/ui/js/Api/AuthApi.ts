@@ -1,8 +1,8 @@
 import {Api, ApiResponse} from "./Api.ts";
 import {notify} from "../Classes/Ui.ts";
 import {ApiRoutes} from "./ApiRoutes.ts";
-import {NotificationType} from "../EnumsShared/NotificationType.ts";
-import {User} from "../Models/DbModels/lyda/User.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
+import {User} from "@targoninc/lyda-shared/dist/Models/db/lyda/User";
 
 export class AuthApi {
     static userExists(email: string, successCallback: Function = () => {

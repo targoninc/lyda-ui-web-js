@@ -1,5 +1,5 @@
-import { MediaFileType } from "../EnumsShared/MediaFileType.ts";
 import { ApiRoutes } from "./ApiRoutes.ts";
+import {MediaFileType} from "@targoninc/lyda-shared/dist/Enums/MediaFileType";
 
 export class MediaUploader {
     static upload(
