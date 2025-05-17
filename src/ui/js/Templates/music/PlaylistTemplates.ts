@@ -10,18 +10,18 @@ import {StatisticsTemplates} from "../StatisticsTemplates.ts";
 import {Images} from "../../Enums/Images.ts";
 import {Util} from "../../Classes/Util.ts";
 import {notify, Ui} from "../../Classes/Ui.ts";
-import {User} from "../../Models/DbModels/lyda/User.ts";
-import {Playlist} from "../../Models/DbModels/lyda/Playlist.ts";
 import {compute, Signal, signal, AnyElement, AnyNode, create, HtmlPropertyValue, when, nullElement, InputType} from "@targoninc/jess";
-import {Track} from "../../Models/DbModels/lyda/Track.ts";
-import {Album} from "../../Models/DbModels/lyda/Album.ts";
 import {navigate} from "../../Routing/Router.ts";
-import {UserWidgetContext} from "../../EnumsShared/UserWidgetContext.ts";
-import {NotificationType} from "../../EnumsShared/NotificationType.ts";
-import {ListTrack} from "../../Models/ListTrack.ts";
 import {RoutePath} from "../../Routing/routes.ts";
-import {EntityType} from "../../EnumsShared/EntityType.ts";
 import { button, icon, input, textarea, toggle } from "@targoninc/jess-components";
+import {Track} from "@targoninc/lyda-shared/dist/Models/db/lyda/Track";
+import {Playlist} from "@targoninc/lyda-shared/dist/Models/db/lyda/Playlist";
+import {Album} from "@targoninc/lyda-shared/dist/Models/db/lyda/Album";
+import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
+import { EntityType } from "@targoninc/lyda-shared/dist/Enums/EntityType";
+import {NotificationType} from "../../Enums/NotificationType.ts";
+import {User} from "@targoninc/lyda-shared/dist/Models/db/lyda/User";
+import {ListTrack} from "@targoninc/lyda-shared/dist/Models/ListTrack";
 
 export class PlaylistTemplates {
     static addTrackToPlaylistModal(track: Track, playlists: Playlist[]) {

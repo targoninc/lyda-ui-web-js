@@ -2,10 +2,10 @@ import {Chart, registerables} from "chart.js";
 import {BoxPlotChart} from "@sgratzl/chartjs-chart-boxplot";
 import {computeAsync, compute, signal, create, HtmlPropertyValue} from "@targoninc/jess";
 import {ChartOptions} from "../../Classes/ChartOptions.ts";
-import {Statistic} from "../../Models/Statistic.ts";
 import {Api} from "../../Api/Api.ts";
 import {chartColor} from "../../state.ts";
 import { button } from "@targoninc/jess-components";
+import {Statistic} from "@targoninc/lyda-shared/dist/Models/Statistic";
 
 Chart.register(...registerables);
 

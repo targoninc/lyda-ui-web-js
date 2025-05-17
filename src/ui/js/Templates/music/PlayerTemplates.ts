@@ -10,8 +10,6 @@ import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {Ui} from "../../Classes/Ui.ts";
 import {Util} from "../../Classes/Util.ts";
 import {compute, Signal, signal, AnyElement, create, when} from "@targoninc/jess";
-import {Track} from "../../Models/DbModels/lyda/Track.ts";
-import {User} from "../../Models/DbModels/lyda/User.ts";
 import {navigate} from "../../Routing/Router.ts";
 import {
     currentlyBuffered,
@@ -25,11 +23,13 @@ import {
     playingHere,
     volume
 } from "../../state.ts";
-import {UserWidgetContext} from "../../EnumsShared/UserWidgetContext.ts";
-import {LoopMode} from "../../EnumsShared/LoopMode.ts";
 import {RoutePath} from "../../Routing/routes.ts";
-import {EntityType} from "../../EnumsShared/EntityType.ts";
 import { heading } from "@targoninc/jess-components";
+import {Track} from "@targoninc/lyda-shared/dist/Models/db/lyda/Track";
+import {User} from "@targoninc/lyda-shared/dist/Models/db/lyda/User";
+import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
+import {EntityType} from "@targoninc/lyda-shared/dist/Enums/EntityType";
+import {LoopMode} from "@targoninc/lyda-shared/dist/Enums/LoopMode";
 
 export class PlayerTemplates {
     static audioPlayer(track: Track) {
@@ -310,7 +310,7 @@ export class PlayerTemplates {
         };
 
         return GenericTemplates.roundIconButton({
-            icon: compute(mode => map[mode], loopMode),
+            icon: compute(mode => map[mode as LoopMode], loopMode),
             adaptive: true,
             isUrl: true,
         }, async () => {

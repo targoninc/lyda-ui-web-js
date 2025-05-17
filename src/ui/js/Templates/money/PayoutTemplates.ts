@@ -5,8 +5,8 @@ import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
 import {currency} from "../../Classes/Helpers/Num.ts";
 import {permissions} from "../../state.ts";
-import {Payout} from "../../Models/DbModels/finance/Payout.ts";
-import {PaymentStatus} from "../../EnumsShared/PaymentStatus.ts";
+import {Payout} from "@targoninc/lyda-shared/dist/Models/db/finance/Payout";
+import {PaymentStatus} from "@targoninc/lyda-shared/dist/Enums/PaymentStatus";
 
 export class PayoutTemplates {
     static payoutsPage() {

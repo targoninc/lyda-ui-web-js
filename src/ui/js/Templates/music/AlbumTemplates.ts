@@ -12,19 +12,19 @@ import {Images} from "../../Enums/Images.ts";
 import {getErrorMessage, Util} from "../../Classes/Util.ts";
 import {notify, Ui} from "../../Classes/Ui.ts";
 import {compute, Signal, signal, AnyNode, create, HtmlPropertyValue, when, nullElement, InputType} from "@targoninc/jess";
-import {Album} from "../../Models/DbModels/lyda/Album.ts";
-import {Track} from "../../Models/DbModels/lyda/Track.ts";
 import {navigate, Route} from "../../Routing/Router.ts";
-import {UserWidgetContext} from "../../EnumsShared/UserWidgetContext.ts";
-import {NotificationType} from "../../EnumsShared/NotificationType.ts";
 import {currentUser, manualQueue, playingFrom} from "../../state.ts";
 import {Api} from "../../Api/Api.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {PageTemplates} from "../PageTemplates.ts";
-import {ListTrack} from "../../Models/ListTrack.ts";
 import {RoutePath} from "../../Routing/routes.ts";
-import {EntityType} from "../../EnumsShared/EntityType.ts";
 import { button, input, textarea, toggle } from "@targoninc/jess-components";
+import {Track} from "@targoninc/lyda-shared/dist/Models/db/lyda/Track";
+import {Album} from "@targoninc/lyda-shared/dist/Models/db/lyda/Album";
+import {NotificationType} from "../../Enums/NotificationType.ts";
+import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
+import {EntityType} from "@targoninc/lyda-shared/dist/Enums/EntityType";
+import {ListTrack} from "@targoninc/lyda-shared/dist/Models/ListTrack";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {

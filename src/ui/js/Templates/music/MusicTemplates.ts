@@ -1,18 +1,12 @@
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
-import {Track} from "../../Models/DbModels/lyda/Track.ts";
-import {Album} from "../../Models/DbModels/lyda/Album.ts";
-import {Playlist} from "../../Models/DbModels/lyda/Playlist.ts";
 import {compute, signal, create, when} from "@targoninc/jess";
 import {currentTrackId, currentUser, playingFrom, playingHere} from "../../state.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
 import {Util} from "../../Classes/Util.ts";
-import {UserWidgetContext} from "../../EnumsShared/UserWidgetContext.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
 import {StatisticsTemplates} from "../StatisticsTemplates.ts";
-import {EntityType} from "../../EnumsShared/EntityType.ts";
 import {TrackTemplates} from "./TrackTemplates.ts";
 import {DefaultImages} from "../../Enums/DefaultImages.ts";
-import {MediaFileType} from "../../EnumsShared/MediaFileType.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
 import {notify, Ui} from "../../Classes/Ui.ts";
 import {MediaActions} from "../../Actions/MediaActions.ts";
@@ -21,9 +15,13 @@ import {startItem} from "../../Actions/MusicActions.ts";
 import {Icons} from "../../Enums/Icons.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {Api} from "../../Api/Api.ts";
-import {NotificationType} from "../../EnumsShared/NotificationType.ts";
-import {InteractionMetadata} from "../../Models/InteractionMetadata.ts";
-import {InteractionType} from "../../EnumsShared/InteractionType.ts";
+import {EntityType} from "@targoninc/lyda-shared/dist/Enums/EntityType";
+import {Track} from "@targoninc/lyda-shared/dist/Models/db/lyda/Track";
+import {Playlist} from "@targoninc/lyda-shared/dist/Models/db/lyda/Playlist";
+import {Album} from "@targoninc/lyda-shared/dist/Models/db/lyda/Album";
+import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
+import {MediaFileType} from "@targoninc/lyda-shared/dist/Enums/MediaFileType";
+import {NotificationType} from "../../Enums/NotificationType.ts";
 
 export class MusicTemplates {
     static feedEntry(type: EntityType, item: Track | Playlist | Album) {
@@ -112,15 +110,14 @@ export class MusicTemplates {
 
         switch (type) {
             case EntityType.track:
-                item = item as Track;
-                if (item.processed) {
-                    items.push(TrackTemplates.waveform(item, JSON.parse(item.loudness_data)));
+                if ((item as Track).processed) {
+                    items.push(TrackTemplates.waveform(item, JSON.parse((item as Track).loudness_data)));
                 } else {
                     items.push(TrackTemplates.waveform(item, []));
                 }
                 items.push(create("span")
                     .classes("nopointer", "text-small", "align-center")
-                    .text(Time.format(item.length))
+                    .text(Time.format((item as Track).length))
                     .build());
         }
 

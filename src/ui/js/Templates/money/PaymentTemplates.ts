@@ -2,11 +2,11 @@ import {create, compute, signal} from "@targoninc/jess";
 import {Api} from "../../Api/Api.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
-import {PaymentHistory} from "../../Models/DbModels/finance/PaymentHistory.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
 import {currency} from "../../Classes/Helpers/Num.ts";
 import {permissions} from "../../state.ts";
 import {copy} from "../../Classes/Util.ts";
+import {PaymentHistory} from "@targoninc/lyda-shared/dist/Models/db/finance/PaymentHistory";
 
 export class PaymentTemplates {
     static paymentsPage() {

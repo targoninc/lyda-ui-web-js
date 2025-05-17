@@ -19,20 +19,20 @@ import {
 import {Util} from "../../Classes/Util.ts";
 import {navigate} from "../../Routing/Router.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
-import {ProgressState} from "../../EnumsShared/ProgressState.ts";
-import {ProgressPart} from "../../Models/ProgressPart.ts";
-import {SearchResult} from "../../Models/SearchResult.ts";
 import {currentTrackId, openMenus, playingHere} from "../../state.ts";
 import {PillOption} from "../../Models/PillOption.ts";
-import {NotificationType} from "../../EnumsShared/NotificationType.ts";
 import {dayFromValue} from "../../Classes/Helpers/Date.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {AuthActions} from "../../Actions/AuthActions.ts";
-import {Filter} from "../../Models/Filter.ts";
 import { Images } from "../../Enums/Images.ts";
-import {CollaboratorType} from "../../Models/DbModels/lyda/CollaboratorType.ts";
 import { button, input, searchableSelect, icon, textarea, IconConfig, SearchableSelectConfig, SelectOption } from "@targoninc/jess-components";
+import {NotificationType} from "../../Enums/NotificationType.ts";
+import {SearchResult} from "@targoninc/lyda-shared/dist/Models/SearchResult";
+import {CollaboratorType} from "@targoninc/lyda-shared/dist/Models/db/lyda/CollaboratorType";
+import {Filter} from "@targoninc/lyda-shared/dist/Models/Filter";
+import {ProgressPart} from "@targoninc/lyda-shared/dist/Models/ProgressPart";
+import {ProgressState} from "@targoninc/lyda-shared/dist/Enums/ProgressState";
 
 export class GenericTemplates {
     static icon(icon$: StringOrSignal, adaptive = false, classes: StringOrSignal[] = [], title = "", onclick: Function | undefined = undefined) {
