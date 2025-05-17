@@ -46,19 +46,21 @@ export class InteractionTemplates {
 
         const icon$ = compute(i => i ? config.icons.interacted : config.icons.default, interacted$);
         const class$ = compute((i): string => i ? "positive" : "negative", interacted$);
+        const stateClass$ = compute((s: boolean): string => s ? "active" : "_", interacted$);
         const disabledClass$ = compute((u): string => !u ? "disabled" : "_", currentUser);
 
         return create("div")
-            .classes(disabledClass$)
+            .classes(disabledClass$, "flex", "align-children")
             .children(
-                GenericTemplates.roundIconButton({icon: icon$}, () => interact(entityType, interactionType, config, id, interacted$, count$), interactionType, [class$]),
+                GenericTemplates.roundIconButton({
+                    icon: icon$,
+                    isUrl: icon$.value.includes("http")
+                }, () => interact(entityType, interactionType, config, id, interacted$, count$), interactionType,
+                    [class$, stateClass$, "stats-indicator"]),
                 when(metadata.count, create("span")
-                        .classes("stats-indicator-opener", "rounded", "padded-inline")
-                        .children(
-                            create("span")
-                                .text(count$ as HtmlPropertyValue)
-                                .build(),
-                        ).build())
+                    .classes("stats-indicator-opener")
+                    .text(count$ as HtmlPropertyValue)
+                    .build()),
             ).build();
     }
 

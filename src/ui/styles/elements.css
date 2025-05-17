@@ -232,27 +232,6 @@
 .stats-indicator {
     z-index: 2;
     align-items: center;
-    border-radius: 999px;
-}
-
-.stats-indicator.likes {
-    border-color: var(--red);
-}
-
-.stats-indicator.likes.enabled {
-    background: var(--red);
-}
-
-.stats-indicator.reposts {
-    border-color: var(--green);
-}
-
-.stats-indicator.reposts.enabled {
-    background: var(--green);
-}
-
-.stats-indicator.clickable:hover, .stats-indicator-opener:hover {
-    background: var(--color-4);
 }
 
 .text-positive {
@@ -260,22 +239,14 @@
 }
 
 .stats-indicator-opener {
+    padding: .2em 1em;
     padding-left: 2.5em;
-    margin-left: -35px;
+    margin-left: -2.5em;
     border: 1px solid var(--color-9);
     border-radius: 50px;
     align-items: center;
     display: flex;
     box-sizing: border-box;
-}
-
-.stats-indicator-opener.comments {
-    padding-left: 32px;
-    margin-left: -35px;
-}
-
-.listFromStatsOpener {
-    margin-left: var(--anti-gap-margin);
 }
 
 .label {
