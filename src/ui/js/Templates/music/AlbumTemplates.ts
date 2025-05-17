@@ -15,15 +15,15 @@ import {compute, Signal, signal, AnyNode, create, HtmlPropertyValue, when, nullE
 import {Album} from "../../Models/DbModels/lyda/Album.ts";
 import {Track} from "../../Models/DbModels/lyda/Track.ts";
 import {navigate, Route} from "../../Routing/Router.ts";
-import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
-import {NotificationType} from "../../Enums/NotificationType.ts";
+import {UserWidgetContext} from "../../EnumsShared/UserWidgetContext.ts";
+import {NotificationType} from "../../EnumsShared/NotificationType.ts";
 import {currentUser, manualQueue, playingFrom} from "../../state.ts";
 import {Api} from "../../Api/Api.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {PageTemplates} from "../PageTemplates.ts";
 import {ListTrack} from "../../Models/ListTrack.ts";
 import {RoutePath} from "../../Routing/routes.ts";
-import {ItemType} from "../../Enums/ItemType.ts";
+import {EntityType} from "../../EnumsShared/EntityType.ts";
 import { button, input, textarea, toggle } from "@targoninc/jess-components";
 
 export class AlbumTemplates {
@@ -315,7 +315,7 @@ export class AlbumTemplates {
                 create("div")
                     .classes("stats-container", "flex", "rounded")
                     .children(
-                        StatisticsTemplates.likesIndicator(ItemType.album, album.id, album.likes.length, Util.userHasLiked(album)),
+                        StatisticsTemplates.likesIndicator(EntityType.album, album.id, album.likes.length, Util.userHasLiked(album)),
                         StatisticsTemplates.likeListOpener(album.likes),
                     ).build()
             ).build();
@@ -452,7 +452,7 @@ export class AlbumTemplates {
                                 create("div")
                                     .classes("stats-container", "flex", "rounded")
                                     .children(
-                                        StatisticsTemplates.likesIndicator(ItemType.album, album.id, album.likes.length,
+                                        StatisticsTemplates.likesIndicator(EntityType.album, album.id, album.likes.length,
                                             Util.arrayPropertyMatchesUser(album.likes, "user_id")),
                                         StatisticsTemplates.likeListOpener(album.likes),
                                     ).build(),

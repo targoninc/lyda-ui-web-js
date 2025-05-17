@@ -41,4 +41,5 @@ export interface Track extends Record<string, any> {
     price: number;
     has_cover: boolean;
     processed: boolean;
+    likeCount?: number;
 }

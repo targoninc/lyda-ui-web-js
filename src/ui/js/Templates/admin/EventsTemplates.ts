@@ -6,9 +6,9 @@ import {copy} from "../../Classes/Util.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
 import {notify} from "../../Classes/Ui.ts";
-import {NotificationType} from "../../Enums/NotificationType.ts";
+import {NotificationType} from "../../EnumsShared/NotificationType.ts";
 import {DashboardTemplates} from "./DashboardTemplates.ts";
-import {Permissions} from "../../Enums/Permissions.ts";
+import {Permissions} from "../../EnumsShared/Permissions.ts";
 import { button } from "@targoninc/jess-components";
 
 export class EventsTemplates {

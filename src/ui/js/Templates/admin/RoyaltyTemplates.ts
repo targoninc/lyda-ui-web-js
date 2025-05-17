@@ -3,11 +3,11 @@ import {compute, Signal, signal, create, when, nullElement} from "@targoninc/jes
 import {RoyaltyMonth} from "../../Models/RoyaltyMonth.ts";
 import {FormTemplates} from "../generic/FormTemplates.ts";
 import {notify} from "../../Classes/Ui.ts";
-import {NotificationType} from "../../Enums/NotificationType.ts";
+import {NotificationType} from "../../EnumsShared/NotificationType.ts";
 import {Api} from "../../Api/Api.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {getErrorMessage} from "../../Classes/Util.ts";
-import {Permissions} from "../../Enums/Permissions.ts";
+import {Permissions} from "../../EnumsShared/Permissions.ts";
 import {permissions} from "../../state.ts";
 import {currency} from "../../Classes/Helpers/Num.ts";
 import {LogTemplates} from "./LogTemplates.ts";

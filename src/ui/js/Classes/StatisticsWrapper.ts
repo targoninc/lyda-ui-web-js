@@ -5,13 +5,13 @@ import {Num} from "./Helpers/Num.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {create, signalMap, signal} from "@targoninc/jess";
 import {getErrorMessage} from "./Util.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
+import {NotificationType} from "../EnumsShared/NotificationType.ts";
 import { Statistic } from "../Models/Statistic.ts";
 import {Permission} from "../Models/DbModels/lyda/Permission.ts";
-import {Permissions} from "../Enums/Permissions.ts";
+import {Permissions} from "../EnumsShared/Permissions.ts";
 import {TypedStatistic} from "../Models/TypedStatistic.ts";
-import {ActivityTableName} from "../Enums/ActivityTableName.ts";
-import {TimeResolution} from "../Enums/TimeResolution.ts";
+import {ActivityTableName} from "../EnumsShared/ActivityTableName.ts";
+import {TimeResolution} from "../EnumsShared/TimeResolution.ts";
 
 export class StatisticsWrapper {
     static async getStatistics(permissions: Permission[]) {
@@ -93,7 +93,7 @@ export class StatisticsWrapper {
     }
 
     static getActivityByTime() {
-        const types = [ActivityTableName.tracks];
+        const types = ["tracks"];
         const params = new URLSearchParams();
         params.append("types", types.join(","));
         params.append("resolution", TimeResolution.hour);

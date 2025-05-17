@@ -5,11 +5,11 @@ import {signal, Signal} from "@targoninc/jess";
 import {UploadableTrack} from "../Models/UploadableTrack.ts";
 import {Track} from "../Models/DbModels/lyda/Track.ts";
 import {MediaUploader} from "../Api/MediaUploader.ts";
-import {MediaFileType} from "../Enums/MediaFileType.ts";
+import {MediaFileType} from "../EnumsShared/MediaFileType.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {ProgressPart} from "../Models/ProgressPart.ts";
-import {ProgressState} from "../Enums/ProgressState.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
+import {ProgressState} from "../EnumsShared/ProgressState.ts";
+import {NotificationType} from "../EnumsShared/NotificationType.ts";
 import {RoutePath} from "../Routing/routes.ts";
 
 export class AudioUpload {

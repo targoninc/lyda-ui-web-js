@@ -8,7 +8,7 @@ import {User} from "../Models/DbModels/lyda/User.ts";
 import {Api, ApiResponse} from "../Api/Api.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {navigate} from "../Routing/Router.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
+import {NotificationType} from "../EnumsShared/NotificationType.ts";
 import {currentUser} from "../state.ts";
 import {RoutePath} from "../Routing/routes.ts";
 import {compute, Signal, signal, HtmlPropertyValue, AnyNode, create, InputType, when } from "@targoninc/jess";

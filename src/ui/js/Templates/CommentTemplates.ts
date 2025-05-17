@@ -1,12 +1,12 @@
 import {GenericTemplates} from "./generic/GenericTemplates.ts";
-import {Icons} from "../Enums/Icons.js";
+import {Icons} from "../Enums/Icons.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
 import {UserTemplates} from "./account/UserTemplates.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
 import {Comment} from "../Models/DbModels/lyda/Comment.ts";
-import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
+import {UserWidgetContext} from "../EnumsShared/UserWidgetContext.ts";
 import { compute, create, Signal, when, signalMap, signal, AnyElement, InputType } from "@targoninc/jess";
 import { textarea, button, input } from "@targoninc/jess-components";
 

@@ -1,4 +1,4 @@
-import {NotificationReferenceType} from "../Enums/NotificationReferenceType.ts";
+import {NotificationReferenceType} from "../EnumsShared/NotificationReferenceType.ts";
 
 export interface NotificationReference {
     type: NotificationReferenceType;

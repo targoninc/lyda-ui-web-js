@@ -1,7 +1,7 @@
-import {ItemType} from "./ItemType.ts";
+import {EntityType} from "../EnumsShared/EntityType.ts";
 
-export const DefaultImages: Record<ItemType, string> = {
-    [ItemType.track]: window.location.origin + "/img/defaults/track.webp",
-    [ItemType.album]: window.location.origin + "/img/defaults/album.webp",
-    [ItemType.playlist]: window.location.origin + "/img/defaults/playlist.webp",
+export const DefaultImages: Record<EntityType, string> = {
+    [EntityType.track]: window.location.origin + "/img/defaults/track.webp",
+    [EntityType.album]: window.location.origin + "/img/defaults/album.webp",
+    [EntityType.playlist]: window.location.origin + "/img/defaults/playlist.webp",
 }

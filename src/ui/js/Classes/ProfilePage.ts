@@ -9,7 +9,7 @@ import {getErrorMessage} from "./Util.ts";
 import {Track} from "../Models/DbModels/lyda/Track.ts";
 import {Album} from "../Models/DbModels/lyda/Album.ts";
 import {Playlist} from "../Models/DbModels/lyda/Playlist.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
+import {NotificationType} from "../EnumsShared/NotificationType.ts";
 import {MusicTemplates} from "../Templates/music/MusicTemplates.ts";
 
 export class ProfilePage {

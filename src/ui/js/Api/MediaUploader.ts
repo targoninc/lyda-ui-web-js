@@ -1,4 +1,4 @@
-import { MediaFileType } from "../Enums/MediaFileType.ts";
+import { MediaFileType } from "../EnumsShared/MediaFileType.ts";
 import { ApiRoutes } from "./ApiRoutes.ts";
 
 export class MediaUploader {

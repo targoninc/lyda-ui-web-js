@@ -1,8 +1,8 @@
 import {notify, Ui} from "../Classes/Ui.ts";
 import {Api} from "../Api/Api.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {MediaFileType} from "../Enums/MediaFileType.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
+import {MediaFileType} from "../EnumsShared/MediaFileType.ts";
+import {NotificationType} from "../EnumsShared/NotificationType.ts";
 import {Images} from "../Enums/Images.ts";
 import {Icons} from "../Enums/Icons.ts";
 import {Signal} from "@targoninc/jess";

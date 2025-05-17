@@ -15,4 +15,5 @@ export interface Playlist {
     visibility: string;
     secretcode: string;
     has_cover: boolean;
+    likeCount?: number;
 }

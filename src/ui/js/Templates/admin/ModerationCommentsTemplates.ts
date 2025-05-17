@@ -1,5 +1,5 @@
 import {DashboardTemplates} from "./DashboardTemplates.ts";
-import {Permissions} from "../../Enums/Permissions.ts";
+import {Permissions} from "../../EnumsShared/Permissions.ts";
 import {CommentTemplates} from "../CommentTemplates.ts";
 import {Comment} from "../../Models/DbModels/lyda/Comment.ts";
 import {AnyElement, create, when, compute, signal, Signal, InputType} from "@targoninc/jess";

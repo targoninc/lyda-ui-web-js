@@ -1,4 +1,4 @@
-export enum ItemType {
+export enum EntityType {
     track = "track",
     album = "album",
     playlist = "playlist",

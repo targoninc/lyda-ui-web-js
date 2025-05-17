@@ -2,7 +2,7 @@ import {Api} from "../Api/Api.ts";
 import {notify} from "../Classes/Ui.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {getErrorMessage} from "../Classes/Util.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
+import {NotificationType} from "../EnumsShared/NotificationType.ts";
 import {Signal} from "@targoninc/jess";
 
 export class CommentActions {

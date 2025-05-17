@@ -1,4 +1,4 @@
-import {MediaFileType} from "../ui/js/Enums/MediaFileType.ts";
+import {MediaFileType} from "../ui/js/EnumsShared/MediaFileType.ts";
 
 const knownEmbedServices = [
     "discord",

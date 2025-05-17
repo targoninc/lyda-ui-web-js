@@ -5,11 +5,11 @@ import {UserActions} from "../../Actions/UserActions.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {AlbumTemplates} from "../music/AlbumTemplates.ts";
 import {Icons as Icons} from "../../Enums/Icons.ts";
-import {Badges} from "../../Enums/Badges.ts";
+import {Badges} from "../../EnumsShared/Badges.ts";
 import {Links} from "../../Enums/Links.ts";
 import {PlaylistTemplates} from "../music/PlaylistTemplates.ts";
 import {CustomText, truncateText} from "../../Classes/Helpers/CustomText.ts";
-import {Permissions} from "../../Enums/Permissions.ts";
+import {Permissions} from "../../EnumsShared/Permissions.ts";
 import {Images} from "../../Enums/Images.ts";
 import {navigate} from "../../Routing/Router.ts";
 import {
@@ -31,15 +31,15 @@ import {Album} from "../../Models/DbModels/lyda/Album.ts";
 import {Badge} from "../../Models/DbModels/lyda/Badge.ts";
 import {UiActions} from "../../Actions/UiActions.ts";
 import {router} from "../../../main.ts";
-import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
+import {UserWidgetContext} from "../../EnumsShared/UserWidgetContext.ts";
 import {currentUser} from "../../state.ts";
 import {Follow} from "../../Models/DbModels/lyda/Follow.ts";
 import {Ui} from "../../Classes/Ui.ts";
 import {MediaActions} from "../../Actions/MediaActions.ts";
-import {MediaFileType} from "../../Enums/MediaFileType.ts";
+import {MediaFileType} from "../../EnumsShared/MediaFileType.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {MusicTemplates} from "../music/MusicTemplates.ts";
-import {ItemType} from "../../Enums/ItemType.ts";
+import {EntityType} from "../../EnumsShared/EntityType.ts";
 import { button } from "@targoninc/jess-components";
 
 export class UserTemplates {
@@ -219,7 +219,7 @@ export class UserTemplates {
         if (tracks.length === 0) {
             return TrackTemplates.noTracksUploadedYet(isOwnProfile);
         } else {
-            children = tracks.map(track => MusicTemplates.feedEntry(ItemType.track, track));
+            children = tracks.map(track => MusicTemplates.feedEntry(EntityType.track, track));
         }
 
         return TrackTemplates.trackCardsContainer(children);
@@ -474,7 +474,7 @@ export class UserTemplates {
         }
 
         return create("img")
-            .attributes("src", Badges.BADGE(badge.name))
+            .attributes("src", Icons.ICON("badges/badge_" + badge.name))
             .attributes("alt", badge.name)
             .attributes("title", badge.description)
             .classes("icon", "badge", "svg", ...addClasses)
@@ -561,7 +561,7 @@ export class UserTemplates {
                         .build()
                 ];
             } else {
-                children = tracks.map((track: Track) => MusicTemplates.feedEntry(ItemType.track, track));
+                children = tracks.map((track: Track) => MusicTemplates.feedEntry(EntityType.track, track));
             }
 
             template.value = TrackTemplates.trackCardsContainer(children);

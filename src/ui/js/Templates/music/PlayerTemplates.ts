@@ -25,10 +25,10 @@ import {
     playingHere,
     volume
 } from "../../state.ts";
-import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
-import {LoopMode} from "../../Enums/LoopMode.ts";
+import {UserWidgetContext} from "../../EnumsShared/UserWidgetContext.ts";
+import {LoopMode} from "../../EnumsShared/LoopMode.ts";
 import {RoutePath} from "../../Routing/routes.ts";
-import {ItemType} from "../../Enums/ItemType.ts";
+import {EntityType} from "../../EnumsShared/EntityType.ts";
 import { heading } from "@targoninc/jess-components";
 
 export class PlayerTemplates {
@@ -270,7 +270,7 @@ export class PlayerTemplates {
                 .classes("flex", "align-center", "hideOnMidBreakpoint")
                 .children(
                     queueComponent,
-                    StatisticsTemplates.likesIndicator(ItemType.track, track.id, track.likes.length,
+                    StatisticsTemplates.likesIndicator(EntityType.track, track.id, track.likes.length,
                         Util.arrayPropertyMatchesUser(track.likes, "user_id")),
                     isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, Util.arrayPropertyMatchesUser(track.reposts, "user_id")),
                 ).build()
@@ -293,7 +293,7 @@ export class PlayerTemplates {
                 when(menuShown, create("div")
                     .classes("popout-above", "card", "flex-v")
                     .children(
-                        StatisticsTemplates.likesIndicator(ItemType.track, track.id, track.likes!.length,
+                        StatisticsTemplates.likesIndicator(EntityType.track, track.id, track.likes!.length,
                             Util.arrayPropertyMatchesUser(track.likes!, "user_id")),
                         isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts!.length, Util.arrayPropertyMatchesUser(track.reposts!, "user_id")),
                         CommentTemplates.commentButton(false, signal(track.comments!)),

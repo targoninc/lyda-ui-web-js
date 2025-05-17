@@ -3,7 +3,7 @@ import {notify, Ui} from "../Classes/Ui.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {getErrorMessage} from "../Classes/Util.ts";
 import {Signal} from "@targoninc/jess";
-import {NotificationType} from "../Enums/NotificationType.ts";
+import {NotificationType} from "../EnumsShared/NotificationType.ts";
 import {AvailableSubscription} from "../Models/DbModels/finance/AvailableSubscription.ts";
 import {Subscription} from "../Models/DbModels/finance/Subscription.ts";
 import {CreateSubscriptionActions, loadScript,

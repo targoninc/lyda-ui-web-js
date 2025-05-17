@@ -18,4 +18,5 @@ export interface Album {
     secretcode: string;
     price: number;
     has_cover: boolean;
+    likeCount?: number;
 }

@@ -6,7 +6,7 @@ import {Time} from "../../Classes/Helpers/Time.ts";
 import {currency} from "../../Classes/Helpers/Num.ts";
 import {permissions} from "../../state.ts";
 import {Payout} from "../../Models/DbModels/finance/Payout.ts";
-import {PaymentStatus} from "../../Enums/PaymentStatus.ts";
+import {PaymentStatus} from "../../EnumsShared/PaymentStatus.ts";
 
 export class PayoutTemplates {
     static payoutsPage() {

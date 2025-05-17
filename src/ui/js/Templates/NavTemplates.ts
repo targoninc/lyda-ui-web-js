@@ -1,4 +1,4 @@
-import {Icons} from "../Enums/Icons.js";
+import {Icons} from "../Enums/Icons.ts";
 import {UserTemplates} from "./account/UserTemplates.ts";
 import {UserActions} from "../Actions/UserActions.ts";
 import {GenericTemplates} from "./generic/GenericTemplates.ts";
@@ -6,9 +6,9 @@ import {SearchTemplates} from "./SearchTemplates.ts";
 import {navigate, reload} from "../Routing/Router.ts";
 import {create, when, StringOrSignal, compute, Signal, signal} from "@targoninc/jess";
 import {router} from "../../main.ts";
-import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
+import {UserWidgetContext} from "../EnumsShared/UserWidgetContext.ts";
 import {currentUser} from "../state.ts";
-import {SearchContext} from "../Enums/SearchContext.ts";
+import {SearchContext} from "../EnumsShared/SearchContext.ts";
 import {RoutePath} from "../Routing/routes.ts";
 import {NotificationTemplates} from "./NotificationTemplates.ts";
 import { button } from "@targoninc/jess-components";

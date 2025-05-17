@@ -19,12 +19,12 @@ import {
 import {Util} from "../../Classes/Util.ts";
 import {navigate} from "../../Routing/Router.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
-import {ProgressState} from "../../Enums/ProgressState.ts";
+import {ProgressState} from "../../EnumsShared/ProgressState.ts";
 import {ProgressPart} from "../../Models/ProgressPart.ts";
 import {SearchResult} from "../../Models/SearchResult.ts";
 import {currentTrackId, openMenus, playingHere} from "../../state.ts";
 import {PillOption} from "../../Models/PillOption.ts";
-import {NotificationType} from "../../Enums/NotificationType.ts";
+import {NotificationType} from "../../EnumsShared/NotificationType.ts";
 import {dayFromValue} from "../../Classes/Helpers/Date.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
 import {RoutePath} from "../../Routing/routes.ts";

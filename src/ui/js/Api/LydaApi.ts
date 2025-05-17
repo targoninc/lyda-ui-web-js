@@ -5,7 +5,7 @@ import {ApiRoutes} from "./ApiRoutes.ts";
 import {User} from "../Models/DbModels/lyda/User.ts";
 import {Log} from "../Models/DbModels/lyda/Log.ts";
 import {currentUser} from "../state.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
+import {NotificationType} from "../EnumsShared/NotificationType.ts";
 import {getErrorMessage} from "../Classes/Util.ts";
 
 export class LydaApi {

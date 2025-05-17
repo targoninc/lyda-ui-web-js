@@ -1,4 +1,4 @@
-import {NotificationType} from "../Enums/NotificationType.ts";
+import {NotificationType} from "../EnumsShared/NotificationType.ts";
 import {notify} from "../Classes/Ui.ts";
 import {ApiRoutes} from "./ApiRoutes.ts";
 

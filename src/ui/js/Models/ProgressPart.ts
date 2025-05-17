@@ -1,4 +1,4 @@
-import {ProgressState} from "../Enums/ProgressState.ts";
+import {ProgressState} from "../EnumsShared/ProgressState.ts";
 import {Signal, StringOrSignal} from "@targoninc/jess";
 
 export interface ProgressPart {

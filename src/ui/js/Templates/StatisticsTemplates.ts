@@ -1,4 +1,4 @@
-import {Icons} from "../Enums/Icons.js";
+import {Icons} from "../Enums/Icons.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
 import {UserTemplates} from "./account/UserTemplates.ts";
 import {AlbumActions} from "../Actions/AlbumActions.ts";
@@ -6,17 +6,17 @@ import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
 import {compute, Signal, signal, create, when, nullElement, StringOrSignal, isSignal, asSignal} from "@targoninc/jess";
-import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
+import {UserWidgetContext} from "../EnumsShared/UserWidgetContext.ts";
 import {GenericTemplates} from "./generic/GenericTemplates.ts";
-import {ItemType} from "../Enums/ItemType.ts";
+import {EntityType} from "../EnumsShared/EntityType.ts";
 import { icon } from "@targoninc/jess-components";
 
 export class StatisticsTemplates {
-    static likesIndicator(type: ItemType, reference_id: number, like_count: number, liked: boolean|Signal<boolean>) {
-        const functionMap: Record<ItemType, Function> = {
-            [ItemType.track]: TrackActions.toggleLike,
-            [ItemType.album]: AlbumActions.toggleLike,
-            [ItemType.playlist]: PlaylistActions.toggleLike,
+    static likesIndicator(type: EntityType, reference_id: number, like_count: number, liked: boolean|Signal<boolean>) {
+        const functionMap: Record<EntityType, Function> = {
+            [EntityType.track]: TrackActions.toggleLike,
+            [EntityType.album]: AlbumActions.toggleLike,
+            [EntityType.playlist]: PlaylistActions.toggleLike,
         };
         liked = liked.constructor === Signal ? liked : signal(liked as boolean);
         const toggleClass = compute((l): string => l ? "enabled" : "_", liked);

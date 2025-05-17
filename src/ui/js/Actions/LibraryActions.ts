@@ -4,7 +4,7 @@ import {notify} from "../Classes/Ui.ts";
 import {Album} from "../Models/DbModels/lyda/Album.ts";
 import {Playlist} from "../Models/DbModels/lyda/Playlist.ts";
 import {Track} from "../Models/DbModels/lyda/Track.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
+import {NotificationType} from "../EnumsShared/NotificationType.ts";
 import {Library} from "../Models/Library.ts";
 
 export class LibraryActions {

@@ -6,13 +6,13 @@ import {compute, signal, create, when} from "@targoninc/jess";
 import {currentTrackId, currentUser, playingFrom, playingHere} from "../../state.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
 import {Util} from "../../Classes/Util.ts";
-import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
+import {UserWidgetContext} from "../../EnumsShared/UserWidgetContext.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
 import {StatisticsTemplates} from "../StatisticsTemplates.ts";
-import {ItemType} from "../../Enums/ItemType.ts";
+import {EntityType} from "../../EnumsShared/EntityType.ts";
 import {TrackTemplates} from "./TrackTemplates.ts";
 import {DefaultImages} from "../../Enums/DefaultImages.ts";
-import {MediaFileType} from "../../Enums/MediaFileType.ts";
+import {MediaFileType} from "../../EnumsShared/MediaFileType.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
 import {notify, Ui} from "../../Classes/Ui.ts";
 import {MediaActions} from "../../Actions/MediaActions.ts";
@@ -21,10 +21,12 @@ import {startItem} from "../../Actions/MusicActions.ts";
 import {Icons} from "../../Enums/Icons.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {Api} from "../../Api/Api.ts";
-import {NotificationType} from "../../Enums/NotificationType.ts";
+import {NotificationType} from "../../EnumsShared/NotificationType.ts";
+import {InteractionMetadata} from "../../Models/InteractionMetadata.ts";
+import {InteractionType} from "../../EnumsShared/InteractionType.ts";
 
 export class MusicTemplates {
-    static feedEntry(type: ItemType, item: Track | Playlist | Album) {
+    static feedEntry(type: EntityType, item: Track | Playlist | Album) {
         const icons = [];
         const isPrivate = item.visibility === "private";
         if (isPrivate) {
@@ -79,9 +81,8 @@ export class MusicTemplates {
                                         create("div")
                                             .classes("flex", "align-children")
                                             .children(
-                                                StatisticsTemplates.likesIndicator(type, item.id, item.likes?.length ?? 0,
+                                                StatisticsTemplates.likesIndicator(type, item.id, item.likeCount ?? 0,
                                                     Util.arrayPropertyMatchesUser(item.likes ?? [], "user_id")),
-                                                StatisticsTemplates.likeListOpener(item.likes ?? []),
                                                 ...MusicTemplates.itemSpecificActions(type, item),
                                             ).build(),
                                     ).build(),
@@ -90,11 +91,11 @@ export class MusicTemplates {
             ).build();
     }
 
-    private static itemSpecificActions(type: ItemType, item: Track | Playlist | Album) {
+    private static itemSpecificActions(type: EntityType, item: Track | Playlist | Album) {
         const items = [];
 
         switch (type) {
-            case ItemType.track:
+            case EntityType.track:
                 item = item as Track;
                 const reposted = Util.arrayPropertyMatchesUser(item.reposts ?? [], "user_id");
                 const disabled = signal(item.visibility === "private");
@@ -106,11 +107,11 @@ export class MusicTemplates {
         return items;
     }
 
-    private static itemSpecificItems(type: ItemType, item: Track | Playlist | Album) {
+    private static itemSpecificItems(type: EntityType, item: Track | Playlist | Album) {
         const items = [];
 
         switch (type) {
-            case ItemType.track:
+            case EntityType.track:
                 item = item as Track;
                 if (item.processed) {
                     items.push(TrackTemplates.waveform(item, JSON.parse(item.loudness_data)));
@@ -126,7 +127,7 @@ export class MusicTemplates {
         return items;
     }
 
-    static cover(type: ItemType, item: Track | Playlist | Album, coverContext: string, startCallback: Function | null = null) {
+    static cover(type: EntityType, item: Track | Playlist | Album, coverContext: string, startCallback: Function | null = null) {
         const imageState = signal(DefaultImages[type]);
         const fileType = `${type}Cover` as MediaFileType;
         if (item.has_cover) {
@@ -163,9 +164,9 @@ export class MusicTemplates {
             ).build();
     }
 
-    static playButton(type: ItemType, itemId: number, start: Function) {
+    static playButton(type: EntityType, itemId: number, start: Function) {
         const isPlaying = compute((c, pf, p) => {
-            if (type !== ItemType.track) {
+            if (type !== EntityType.track) {
                 return pf?.id === itemId;
             }
 
@@ -173,7 +174,7 @@ export class MusicTemplates {
         }, currentTrackId, playingFrom, playingHere);
         const icon = compute(p => p ? Icons.PAUSE : Icons.PLAY, isPlaying);
         const onclick = async () => {
-            if (isPlaying.value && type !== ItemType.track) {
+            if (isPlaying.value && type !== EntityType.track) {
                 await PlayManager.pauseAsync(currentTrackId.value);
             } else {
                 start();

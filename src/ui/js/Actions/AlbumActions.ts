@@ -10,9 +10,9 @@ import {Signal} from "@targoninc/jess";
 import {Album} from "../Models/DbModels/lyda/Album.ts";
 import {Track} from "../Models/DbModels/lyda/Track.ts";
 import {MediaUploader} from "../Api/MediaUploader.ts";
-import {MediaFileType} from "../Enums/MediaFileType.ts";
+import {MediaFileType} from "../EnumsShared/MediaFileType.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
+import {NotificationType} from "../EnumsShared/NotificationType.ts";
 import {ListTrack} from "../Models/ListTrack.ts";
 import {RoutePath} from "../Routing/routes.ts";
 

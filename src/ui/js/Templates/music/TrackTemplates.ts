@@ -26,17 +26,17 @@ import {Playlist} from "../../Models/DbModels/lyda/Playlist.ts";
 import {compute, Signal, signal, AnyElement, AnyNode, create, HtmlPropertyValue, when, signalMap} from "@targoninc/jess";
 import {CollaboratorType} from "../../Models/DbModels/lyda/CollaboratorType.ts";
 import {currentTrackId, currentUser, manualQueue} from "../../state.ts";
-import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
+import {UserWidgetContext} from "../../EnumsShared/UserWidgetContext.ts";
 import {Ui} from "../../Classes/Ui.ts";
 import {Api} from "../../Api/Api.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {Comment} from "../../Models/DbModels/lyda/Comment.ts";
 import {ListTrack} from "../../Models/ListTrack.ts";
 import {MediaActions} from "../../Actions/MediaActions.ts";
-import {MediaFileType} from "../../Enums/MediaFileType.ts";
+import {MediaFileType} from "../../EnumsShared/MediaFileType.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {DefaultImages} from "../../Enums/DefaultImages.ts";
-import {ItemType} from "../../Enums/ItemType.ts";
+import {EntityType} from "../../EnumsShared/EntityType.ts";
 import {MusicTemplates} from "./MusicTemplates.ts";
 import { button } from "@targoninc/jess-components";
 
@@ -79,7 +79,7 @@ export class TrackTemplates {
     }
 
     static trackCover(track: Track, coverType: string, startCallback: Function|null = null) {
-        const imageState = signal(DefaultImages[ItemType.track]);
+        const imageState = signal(DefaultImages[EntityType.track]);
         if (track.has_cover) {
             imageState.value = Util.getCover(track.id, MediaFileType.trackCover);
         }
@@ -143,7 +143,7 @@ export class TrackTemplates {
                         TrackTemplates.paginationControls(pageState),
                         type === "following" ? TrackTemplates.feedFilters(filterState) : null,
                     ).build(),
-                compute(list => TrackTemplates.#trackList(list.reverse().map(track => MusicTemplates.feedEntry(ItemType.track, track))), tracksState),
+                compute(list => TrackTemplates.#trackList(list.reverse().map(track => MusicTemplates.feedEntry(EntityType.track, track))), tracksState),
                 TrackTemplates.paginationControls(pageState)
             ).build();
     }
@@ -321,7 +321,7 @@ export class TrackTemplates {
                                             create("div")
                                                 .classes("flex", "align-children")
                                                 .children(
-                                                    StatisticsTemplates.likesIndicator(ItemType.track, track.id, track.likes.length ?? [],
+                                                    StatisticsTemplates.likesIndicator(EntityType.track, track.id, track.likes.length ?? [],
                                                         Util.arrayPropertyMatchesUser(track.likes, "user_id")),
                                                     TrackTemplates.title(track.title, track.id, icons),
                                                     create("span")
@@ -588,7 +588,7 @@ export class TrackTemplates {
                                         create("div")
                                             .classes("stats-container", "flex", "rounded")
                                             .children(
-                                                StatisticsTemplates.likesIndicator(ItemType.track, track.id, track.likes.length, liked),
+                                                StatisticsTemplates.likesIndicator(EntityType.track, track.id, track.likes.length, liked),
                                                 StatisticsTemplates.likeListOpener(track.likes),
                                                 when(isPrivate, StatisticsTemplates.repostIndicator(track.id, track.reposts.length, reposted), true),
                                                 when(isPrivate, StatisticsTemplates.repostListOpener(track.reposts), true),

@@ -1,4 +1,4 @@
-import {PaymentStatus} from "../../../Enums/PaymentStatus.ts";
+import {PaymentStatus} from "../../../EnumsShared/PaymentStatus.ts";
 
 export interface Payout {
     id: number;

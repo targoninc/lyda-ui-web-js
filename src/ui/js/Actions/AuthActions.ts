@@ -1,12 +1,12 @@
 import {Api} from "../Api/Api.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
-import {Icons} from "../Enums/Icons.js";
+import {Icons} from "../Enums/Icons.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
 import {navigate, reload} from "../Routing/Router.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {currentUser, navInitialized} from "../state.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
+import {NotificationType} from "../EnumsShared/NotificationType.ts";
 import {RoutePath} from "../Routing/routes.ts";
 
 export class AuthActions {

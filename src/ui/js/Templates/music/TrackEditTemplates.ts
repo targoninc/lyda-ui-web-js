@@ -4,7 +4,7 @@ import {Icons} from "../../Enums/Icons.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
 import {Images} from "../../Enums/Images.ts";
 import {TrackActions} from "../../Actions/TrackActions.ts";
-import {Genre} from "../../Enums/Genre.ts";
+import {Genre} from "../../EnumsShared/Genre.ts";
 import {downloadFile, target, Util} from "../../Classes/Util.ts";
 import {AudioUpload} from "../../Classes/AudioUpload.ts";
 import {Ui} from "../../Classes/Ui.ts";
