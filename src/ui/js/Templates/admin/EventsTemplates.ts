@@ -1,15 +1,15 @@
 import {create, when, compute, signal} from "@targoninc/jess";
-import {PaypalWebhook} from "../../Models/DbModels/finance/PaypalWebhook.ts";
 import {Api} from "../../Api/Api.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {copy} from "../../Classes/Util.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
 import {notify} from "../../Classes/Ui.ts";
-import {NotificationType} from "../../EnumsShared/NotificationType.ts";
 import {DashboardTemplates} from "./DashboardTemplates.ts";
-import {Permissions} from "../../EnumsShared/Permissions.ts";
 import { button } from "@targoninc/jess-components";
+import {Permissions} from "@targoninc/lyda-shared/dist/Enums/Permissions";
+import {PaypalWebhook} from "@targoninc/lyda-shared/dist/Models/db/finance/PaypalWebhook";
+import { NotificationType } from "../../Enums/NotificationType.ts";
 
 export class EventsTemplates {
     static eventsPage() {

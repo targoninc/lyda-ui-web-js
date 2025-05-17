@@ -3,7 +3,7 @@ import {navigate} from "../../Routing/Router.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {permissions} from "../../state.ts";
-import {Permissions} from "../../EnumsShared/Permissions.ts";
+import {Permissions} from "@targoninc/lyda-shared/dist/Enums/Permissions";
 import { button } from "@targoninc/jess-components";
 
 export class DashboardTemplates {

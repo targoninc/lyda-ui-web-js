@@ -5,11 +5,9 @@ import {UserActions} from "../../Actions/UserActions.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {AlbumTemplates} from "../music/AlbumTemplates.ts";
 import {Icons as Icons} from "../../Enums/Icons.ts";
-import {Badges} from "../../EnumsShared/Badges.ts";
 import {Links} from "../../Enums/Links.ts";
 import {PlaylistTemplates} from "../music/PlaylistTemplates.ts";
 import {CustomText, truncateText} from "../../Classes/Helpers/CustomText.ts";
-import {Permissions} from "../../EnumsShared/Permissions.ts";
 import {Images} from "../../Enums/Images.ts";
 import {navigate} from "../../Routing/Router.ts";
 import {
@@ -23,24 +21,25 @@ import {
     StringOrSignal,
     compute, Signal, signal
 } from "@targoninc/jess";
-import {Track} from "../../Models/DbModels/lyda/Track.ts";
-import {User} from "../../Models/DbModels/lyda/User.ts";
-import {Permission} from "../../Models/DbModels/lyda/Permission.ts";
-import {Playlist} from "../../Models/DbModels/lyda/Playlist.ts";
-import {Album} from "../../Models/DbModels/lyda/Album.ts";
-import {Badge} from "../../Models/DbModels/lyda/Badge.ts";
 import {UiActions} from "../../Actions/UiActions.ts";
 import {router} from "../../../main.ts";
-import {UserWidgetContext} from "../../EnumsShared/UserWidgetContext.ts";
 import {currentUser} from "../../state.ts";
-import {Follow} from "../../Models/DbModels/lyda/Follow.ts";
 import {Ui} from "../../Classes/Ui.ts";
 import {MediaActions} from "../../Actions/MediaActions.ts";
-import {MediaFileType} from "../../EnumsShared/MediaFileType.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {MusicTemplates} from "../music/MusicTemplates.ts";
-import {EntityType} from "../../EnumsShared/EntityType.ts";
 import { button } from "@targoninc/jess-components";
+import { User } from "@targoninc/lyda-shared/dist/Models/db/lyda/User";
+import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
+import {Track} from "@targoninc/lyda-shared/dist/Models/db/lyda/Track";
+import {EntityType} from "@targoninc/lyda-shared/dist/Enums/EntityType";
+import {Permission} from "@targoninc/lyda-shared/dist/Models/db/lyda/Permission";
+import {Follow} from "@targoninc/lyda-shared/dist/Models/db/lyda/Follow";
+import {MediaFileType} from "@targoninc/lyda-shared/dist/Enums/MediaFileType";
+import {Permissions} from "@targoninc/lyda-shared/dist/Enums/Permissions";
+import {Badge} from "@targoninc/lyda-shared/dist/Models/db/lyda/Badge";
+import {Album} from "@targoninc/lyda-shared/dist/Models/db/lyda/Album";
+import {Playlist} from "@targoninc/lyda-shared/dist/Models/db/lyda/Playlist";
 
 export class UserTemplates {
     static userWidget(user: User|Signal<User|null>, following: boolean|Signal<boolean>, extraAttributes: HtmlPropertyValue[] = [], extraClasses: StringOrSignal[] = [], context: UserWidgetContext = UserWidgetContext.unknown) {

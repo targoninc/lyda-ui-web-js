@@ -1,12 +1,12 @@
 import {DashboardTemplates} from "./DashboardTemplates.ts";
-import {Permissions} from "../../EnumsShared/Permissions.ts";
 import {CommentTemplates} from "../CommentTemplates.ts";
-import {Comment} from "../../Models/DbModels/lyda/Comment.ts";
 import {AnyElement, create, when, compute, signal, Signal, InputType} from "@targoninc/jess";
 import {TrackActions} from "../../Actions/TrackActions.ts";
 import {CommentActions} from "../../Actions/CommentActions.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {button, input, toggle } from "@targoninc/jess-components";
+import {Permissions} from "@targoninc/lyda-shared/dist/Enums/Permissions";
+import {Comment} from "@targoninc/lyda-shared/dist/Models/db/lyda/Comment";
 
 export class ModerationCommentsTemplates {
     static commentModerationPage() {

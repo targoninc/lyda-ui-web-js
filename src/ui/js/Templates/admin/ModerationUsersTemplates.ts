@@ -3,7 +3,7 @@ import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {Api} from "../../Api/Api.ts";
 import {compute, Signal, signal, create, when} from "@targoninc/jess";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
-import {Permissions} from "../../EnumsShared/Permissions.ts";
+import {Permissions} from "@targoninc/lyda-shared/dist/Enums/Permissions";
 import {DashboardTemplates} from "./DashboardTemplates.ts";
 import {Permission} from "../../Models/DbModels/lyda/Permission.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";

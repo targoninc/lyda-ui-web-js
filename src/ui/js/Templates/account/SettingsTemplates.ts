@@ -1,22 +1,22 @@
 import {UserActions} from "../../Actions/UserActions.ts";
-import {Theme} from "../../EnumsShared/Theme.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {getUserSettingValue, Util} from "../../Classes/Util.ts";
-import {UserSettings} from "../../EnumsShared/UserSettings.ts";
 import {notify, Ui} from "../../Classes/Ui.ts";
 import {LydaApi} from "../../Api/LydaApi.ts";
-import {User} from "../../Models/DbModels/lyda/User.ts";
 import {create, when, signalMap, compute, Signal, signal, InputType} from "@targoninc/jess";
 import {navigate, reload} from "../../Routing/Router.ts";
-import {NotificationType} from "../../EnumsShared/NotificationType.ts";
-import {StreamingQuality} from "../../EnumsShared/StreamingQuality.ts";
 import {UserTemplates} from "./UserTemplates.ts";
 import {currentUser, permissions} from "../../state.ts";
 import {AuthApi} from "../../Api/AuthApi.ts";
-import {UserEmail} from "../../Models/DbModels/lyda/UserEmail.ts";
-import {Permission} from "../../Models/DbModels/lyda/Permission.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import { button, ButtonConfig, icon, input, InputConfig, textarea, TextareaConfig, toggle } from "@targoninc/jess-components";
+import {Theme} from "@targoninc/lyda-shared/dist/Enums/Theme";
+import {UserSettings} from "@targoninc/lyda-shared/dist/Enums/UserSettings";
+import {StreamingQuality} from "@targoninc/lyda-shared/dist/Enums/StreamingQuality";
+import {Permission} from "@targoninc/lyda-shared/dist/Models/db/lyda/Permission";
+import {User} from "@targoninc/lyda-shared/dist/Models/db/lyda/User";
+import {NotificationType} from "@targoninc/lyda-shared/dist/Enums/NotificationType";
+import {UserEmail} from "@targoninc/lyda-shared/dist/Models/db/lyda/UserEmail";
 
 export class SettingsTemplates {
     static settingsPage() {
@@ -80,7 +80,7 @@ export class SettingsTemplates {
         const updatedUser = signal<Partial<User>>({});
         const saveDisabled = compute((u: Record<string, any>) => {
             const keys = Object.keys(u);
-            return !keys.some(k => u[k] !== user[k]);
+            return !keys.some(k => u[k] !== user[k as keyof User]);
         }, updatedUser);
 
         return create("div")

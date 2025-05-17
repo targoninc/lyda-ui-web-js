@@ -4,7 +4,6 @@ import {Icons} from "../../Enums/Icons.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
 import {Images} from "../../Enums/Images.ts";
 import {TrackActions} from "../../Actions/TrackActions.ts";
-import {Genre} from "../../EnumsShared/Genre.ts";
 import {downloadFile, target, Util} from "../../Classes/Util.ts";
 import {AudioUpload} from "../../Classes/AudioUpload.ts";
 import {Ui} from "../../Classes/Ui.ts";
@@ -20,16 +19,17 @@ import {
     compute, Signal, signal,
     InputType
 } from "@targoninc/jess";
-import {Track} from "../../Models/DbModels/lyda/Track.ts";
-import {User} from "../../Models/DbModels/lyda/User.ts";
-import {TrackCollaborator} from "../../Models/DbModels/lyda/TrackCollaborator.ts";
-import {UploadableTrack} from "../../Models/UploadableTrack.ts";
-import {UploadInfo} from "../../Models/UploadInfo.ts";
-import {ProgressPart} from "../../Models/ProgressPart.ts";
 import {AlbumActions} from "../../Actions/AlbumActions.ts";
 import {reload} from "../../Routing/Router.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
 import { button, checkbox, errorList, input, SelectOption, textarea, toggle } from "@targoninc/jess-components";
+import {Track} from "@targoninc/lyda-shared/dist/Models/db/lyda/Track";
+import { UploadInfo } from "../../Models/UploadInfo.ts";
+import {UploadableTrack} from "../../Models/UploadableTrack.ts";
+import {ProgressPart} from "@targoninc/lyda-shared/dist/Models/ProgressPart";
+import {TrackCollaborator} from "@targoninc/lyda-shared/dist/Models/db/lyda/TrackCollaborator";
+import {User} from "@targoninc/lyda-shared/dist/Models/db/lyda/User";
+import {Genre} from "@targoninc/lyda-shared/dist/Enums/Genre";
 
 export class TrackEditTemplates {
     static uploadForm(title: string, credits: string, releaseDate: Date, visibility: string, genre: Genre,
