@@ -1,14 +1,14 @@
-import {Notification} from "../Models/DbModels/lyda/Notification.ts";
 import {NotificationParser} from "../Classes/Helpers/NotificationParser.ts";
 import {create, when, nullElement, signalMap, StringOrSignal, compute, Signal, signal} from "@targoninc/jess";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {navigate} from "../Routing/Router.ts";
 import {copy, Util} from "../Classes/Util.ts";
 import {UserActions} from "../Actions/UserActions.ts";
-import { notifications } from "../state.ts";
-import {NotificationPart} from "../Models/NotifcationPart.ts";
+import {notifications} from "../state.ts";
 import {Images} from "../Enums/Images.ts";
-import { button } from "@targoninc/jess-components";
+import {button} from "@targoninc/jess-components";
+import {Notification} from "@targoninc/lyda-shared/dist/Models/db/lyda/Notification";
+import {NotificationPart} from "@targoninc/lyda-shared/dist/Models/NotifcationPart";
 
 export class NotificationTemplates {
     static notificationInList(notification: Notification) {
@@ -102,7 +102,7 @@ export class NotificationTemplates {
             .classes("notification-container", "relative")
             .children(
                 button({
-                    icon: { icon: "notifications" },
+                    icon: {icon: "notifications"},
                     onclick: async () => {
                         notifsVisible.value = !notifsVisible.value;
                         if (notifsVisible.value) {

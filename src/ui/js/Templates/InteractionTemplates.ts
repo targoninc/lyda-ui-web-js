@@ -1,11 +1,11 @@
-import {InteractionMetadata} from "../Models/InteractionMetadata.ts";
 import {compute, Signal, signal} from "@targoninc/jess";
 import {GenericTemplates} from "./generic/GenericTemplates.ts";
 import {Api} from "../Api/Api.ts";
 import {notify} from "../Classes/Ui.ts";
 import {getErrorMessage} from "../Classes/Util.ts";
-import {NotificationType} from "../EnumsShared/NotificationType.ts";
-import {InteractionConfig} from "../Models/InteractionConfig.ts";
+import {InteractionMetadata} from "@targoninc/lyda-shared/dist/Models/InteractionMetadata";
+import {InteractionConfig} from "@targoninc/lyda-shared/dist/Models/InteractionConfig";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class InteractionTemplates {
     static interactionButton<T>(metadata: InteractionMetadata<T>, config: InteractionConfig, id: number) {

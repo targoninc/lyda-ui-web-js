@@ -5,10 +5,10 @@ import {UserTemplates} from "./account/UserTemplates.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
-import {Comment} from "../Models/DbModels/lyda/Comment.ts";
-import {UserWidgetContext} from "../EnumsShared/UserWidgetContext.ts";
 import { compute, create, Signal, when, signalMap, signal, AnyElement, InputType } from "@targoninc/jess";
 import { textarea, button, input } from "@targoninc/jess-components";
+import {Comment} from "@targoninc/lyda-shared/dist/Models/db/lyda/Comment";
+import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 
 export class CommentTemplates {
     static commentListFullWidth(track_id: number, comments: Signal<Comment[]>, showComments: Signal<boolean>) {

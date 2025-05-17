@@ -5,7 +5,6 @@ import {Api} from "../Api/Api.ts";
 import {Util} from "../Classes/Util.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {create, when, compute, signal} from "@targoninc/jess";
-import {User} from "../Models/DbModels/lyda/User.ts";
 import {SearchTemplates} from "./SearchTemplates.ts";
 import {SettingsTemplates} from "./account/SettingsTemplates.ts";
 import {RoadmapTemplates} from "./RoadmapTemplates.ts";
@@ -20,6 +19,7 @@ import {RoyaltyTemplates} from "./admin/RoyaltyTemplates.ts";
 import {PayoutTemplates} from "./money/PayoutTemplates.ts";
 import {MusicTemplates} from "./music/MusicTemplates.ts";
 import {PaymentTemplates} from "./money/PaymentTemplates.ts";
+import {User} from "@targoninc/lyda-shared/dist/Models/db/lyda/User";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, Function> = {

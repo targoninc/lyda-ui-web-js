@@ -4,14 +4,14 @@ import {notify} from "../Classes/Ui.ts";
 import {navigate} from "../Routing/Router.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {GenericTemplates} from "./generic/GenericTemplates.ts";
-import {NotificationType} from "../EnumsShared/NotificationType.ts";
-import {SearchResult} from "../Models/SearchResult.ts";
 import {Util} from "../Classes/Util.ts";
 import {Images} from "../Enums/Images.ts";
-import {SearchContext} from "../EnumsShared/SearchContext.ts";
 import {router} from "../../main.ts";
 import {RoutePath} from "../Routing/routes.ts";
 import { button, icon } from "@targoninc/jess-components";
+import {SearchContext} from "@targoninc/lyda-shared/dist/Enums/SearchContext";
+import {SearchResult} from "@targoninc/lyda-shared/dist/Models/SearchResult";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class SearchTemplates {
     static search(context: SearchContext) {

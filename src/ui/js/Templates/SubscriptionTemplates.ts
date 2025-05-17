@@ -3,12 +3,12 @@ import {currency} from "../Classes/Helpers/Num.ts";
 import {getSubscriptionLink, SubscriptionActions} from "../Actions/SubscriptionActions.ts";
 import {GenericTemplates} from "./generic/GenericTemplates.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
-import {AvailableSubscription} from "../Models/DbModels/finance/AvailableSubscription.ts";
-import {Subscription} from "../Models/DbModels/finance/Subscription.ts";
-import {SubscriptionStatus} from "../EnumsShared/SubscriptionStatus.ts";
 import {RoutePath} from "../Routing/routes.ts";
 import {navigate} from "../Routing/Router.ts";
 import { button } from "@targoninc/jess-components";
+import {AvailableSubscription} from "@targoninc/lyda-shared/dist/Models/db/finance/AvailableSubscription";
+import {Subscription} from "@targoninc/lyda-shared/dist/Models/db/finance/Subscription";
+import {SubscriptionStatus} from "@targoninc/lyda-shared/dist/Enums/SubscriptionStatus";
 
 export class SubscriptionTemplates {
     static page() {

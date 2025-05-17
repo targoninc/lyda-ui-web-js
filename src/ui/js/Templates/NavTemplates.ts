@@ -6,12 +6,12 @@ import {SearchTemplates} from "./SearchTemplates.ts";
 import {navigate, reload} from "../Routing/Router.ts";
 import {create, when, StringOrSignal, compute, Signal, signal} from "@targoninc/jess";
 import {router} from "../../main.ts";
-import {UserWidgetContext} from "../EnumsShared/UserWidgetContext.ts";
 import {currentUser} from "../state.ts";
-import {SearchContext} from "../EnumsShared/SearchContext.ts";
 import {RoutePath} from "../Routing/routes.ts";
 import {NotificationTemplates} from "./NotificationTemplates.ts";
 import { button } from "@targoninc/jess-components";
+import {SearchContext} from "@targoninc/lyda-shared/dist/Enums/SearchContext";
+import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 
 export class NavTemplates {
     static navTop() {

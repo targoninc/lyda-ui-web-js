@@ -6,10 +6,10 @@ import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
 import {compute, Signal, signal, create, when, nullElement, StringOrSignal, isSignal, asSignal} from "@targoninc/jess";
-import {UserWidgetContext} from "../EnumsShared/UserWidgetContext.ts";
 import {GenericTemplates} from "./generic/GenericTemplates.ts";
-import {EntityType} from "../EnumsShared/EntityType.ts";
 import { icon } from "@targoninc/jess-components";
+import { EntityType } from "@targoninc/lyda-shared/dist/Enums/EntityType";
+import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 
 export class StatisticsTemplates {
     static likesIndicator(type: EntityType, reference_id: number, like_count: number, liked: boolean|Signal<boolean>) {
