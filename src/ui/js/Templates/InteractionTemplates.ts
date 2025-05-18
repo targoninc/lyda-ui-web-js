@@ -14,6 +14,7 @@ import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import {currentUser} from "../state.ts";
 import { ApiRoutes } from "../Api/ApiRoutes.ts";
+import {Visibility} from "@targoninc/lyda-shared/dist/Enums/Visibility";
 
 const interactionConfigs: Record<InteractionType, InteractionConfig> = {
     [InteractionType.like]: {
@@ -40,15 +41,15 @@ const interactionConfigs: Record<InteractionType, InteractionConfig> = {
 }
 
 export class InteractionTemplates {
-    private static interactionButton<T>(entityType: EntityType, interactionType: InteractionType, metadata: InteractionMetadata<T>, config: InteractionConfig, id: number) {
+    private static interactionButton<T extends { id: number, visibility: Visibility }>(entityType: EntityType, interactionType: InteractionType, metadata: InteractionMetadata<T>, config: InteractionConfig, entity: T) {
         const count$ = signal(metadata.count ?? 0);
         const interacted$ = signal(metadata.interacted ?? false);
         //const list$ = signal(metadata.list); TODO: Not yet used...figure out if we want to display the list of interactions right where the count is or elsewhere (probably the second option)
 
         const icon$ = compute(i => i ? config.icons.interacted : config.icons.default, interacted$);
         const stateClass$ = compute((s: boolean): string => s ? "active" : "_", interacted$);
-        const disabledClass$ = compute((u): string => !u ? "disabled" : "_", currentUser);
         const inertClass = config.toggleable ? "_" : "inert";
+        const disabledClass$ = compute((u): string => (!u || (entity.visibility === "private" && inertClass !== "inert")) ? "disabled" : "_", currentUser);
 
         return create("div")
             .classes("flex", "align-children", disabledClass$)
@@ -56,7 +57,7 @@ export class InteractionTemplates {
                 GenericTemplates.roundIconButton({
                     icon: icon$,
                     isUrl: icon$.value.includes("http")
-                }, () => toggleInteraction(entityType, interactionType, config, id, interacted$, count$), interactionType,
+                }, () => toggleInteraction(entityType, interactionType, config, entity.id, interacted$, count$), interactionType,
                     ["positive", stateClass$, "stats-indicator", inertClass]),
                 when(metadata.count !== undefined && metadata.count !== null, create("span")
                     .classes("interaction-count")
@@ -92,7 +93,7 @@ export class InteractionTemplates {
         const elements = [];
         for (const interaction of interactions) {
             const config = interactionConfigs[interaction];
-            elements.push(InteractionTemplates.interactionButton(entityType, interaction, entity[interaction + "s" as keyof T] ?? {} as InteractionMetadata<any>, config, entity.id));
+            elements.push(InteractionTemplates.interactionButton(entityType, interaction, entity[interaction + "s" as keyof T] ?? {} as InteractionMetadata<any>, config, entity));
         }
 
         return elements;

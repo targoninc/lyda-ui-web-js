@@ -21,12 +21,13 @@ export class CommentTemplates {
                 when(showComments, create("div")
                     .classes("flex-v")
                     .children(
-                        CommentTemplates.commentBox(track_id, comments),
                         when(hasComments, create("span")
                             .classes("text", "no-comments")
                             .text("No comments yet")
                             .build(), true),
-                        when(hasComments, signalMap(nestedComments, create("div").classes("flex-v", "comment-list"), (comment: Comment) => CommentTemplates.commentInList(comment, comments)))
+                        when(hasComments, signalMap(nestedComments, create("div").classes("flex-v", "comment-list"),
+                            (comment: Comment) => CommentTemplates.commentInList(comment, comments))),
+                        CommentTemplates.commentBox(track_id, comments),
                     ).build()),
             ).build();
     }
@@ -59,17 +60,8 @@ export class CommentTemplates {
     }
 
     static commentInList(comment: Comment, comments: Signal<Comment[]>): AnyElement {
-        let actions = [];
         if (!comment.user) {
             throw new Error(`Comment ${comment.id} has no user`);
-        }
-        if (comment.canEdit) {
-            actions.push(button({
-                text: "Delete",
-                icon: { icon: "delete" },
-                classes: ["negative"],
-                onclick: () => TrackActions.deleteComment(comment.id, comments)
-            }));
         }
         const avatarState = signal(Images.DEFAULT_AVATAR);
         if (comment.user.has_avatar) {
@@ -93,45 +85,55 @@ export class CommentTemplates {
                             .build(),
                         create("div")
                             .classes("flex")
-                            .children(...actions)
-                            .build()
+                            .children(
+                                when(comment.canEdit, button({
+                                    text: "Delete",
+                                    icon: { icon: "delete" },
+                                    classes: ["negative"],
+                                    onclick: () => TrackActions.deleteComment(comment.id, comments)
+                                }))
+                            ).build()
                     ).build(),
                 create("div")
                     .classes("flex", "comment_body")
                     .children(
                         CommentTemplates.commentContent(comment),
-                        when(Util.isLoggedIn(), create("div")
-                            .classes("flex")
-                            .children(
-                                button({
-                                    text: "Reply",
-                                    icon: { icon: "reply" },
-                                    classes: ["positive"],
-                                    onclick: () => replyInputShown.value = !replyInputShown.value
-                                }),
-                                when(replyInputShown, input<string>({
-                                    type: InputType.text,
-                                    name: "reply-input",
-                                    label: "",
-                                    placeholder: "Reply to " + comment.user!.username + "...",
-                                    value: newComment,
-                                    attributes: ["track_id", comment.track_id.toString()],
-                                    onchange: v => {
-                                        newComment.value = v;
-                                    }
-                                })),
-                                when(replyInputShown, button({
-                                    text: "Post",
-                                    icon: { icon: "send" },
-                                    classes: ["positive"],
-                                    onclick: () => TrackActions.newComment(newComment, comments, comment.track_id, comment.id)
-                                }))
-                            ).build()),
+                        when(Util.isLoggedIn(), CommentTemplates.commentReplySection(replyInputShown, comment, newComment, comments)),
                     ).build(),
                 create("div")
                     .classes("comment-children")
                     .children(...(comment.comments?.map(c => CommentTemplates.commentInList(c, comments)) ?? []))
                     .build()
+            ).build();
+    }
+
+    private static commentReplySection(replyInputShown: Signal<boolean>, comment: Comment, newComment: Signal<string>, comments: Signal<Comment[]>) {
+        return create("div")
+            .classes("flex")
+            .children(
+                button({
+                    text: "Reply",
+                    icon: {icon: "reply"},
+                    classes: ["positive"],
+                    onclick: () => replyInputShown.value = !replyInputShown.value
+                }),
+                when(replyInputShown, input<string>({
+                    type: InputType.text,
+                    name: "reply-input",
+                    label: "",
+                    placeholder: "Reply to " + comment.user!.username + "...",
+                    value: newComment,
+                    attributes: ["track_id", comment.track_id.toString()],
+                    onchange: v => {
+                        newComment.value = v;
+                    }
+                })),
+                when(replyInputShown, button({
+                    text: "Post",
+                    icon: {icon: "send"},
+                    classes: ["positive"],
+                    onclick: () => TrackActions.newComment(newComment, comments, comment.track_id, comment.id)
+                }))
             ).build();
     }
 
