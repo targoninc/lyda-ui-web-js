@@ -13,6 +13,7 @@ import {Icons} from "../Enums/Icons.ts";
 import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import {currentUser} from "../state.ts";
+import { ApiRoutes } from "../Api/ApiRoutes.ts";
 
 const interactionConfigs: Record<InteractionType, InteractionConfig> = {
     [InteractionType.like]: {
@@ -55,7 +56,7 @@ export class InteractionTemplates {
                 GenericTemplates.roundIconButton({
                     icon: icon$,
                     isUrl: icon$.value.includes("http")
-                }, () => interact(entityType, interactionType, config, id, interacted$, count$), interactionType,
+                }, () => toggleInteraction(entityType, interactionType, config, id, interacted$, count$), interactionType,
                     ["positive", stateClass$, "stats-indicator", inertClass]),
                 when(metadata.count !== undefined && metadata.count !== null, create("span")
                     .classes("interaction-count")
@@ -113,12 +114,17 @@ export class InteractionTemplates {
     }
 }
 
-async function interact(entityType: EntityType, interactionType: InteractionType, config: InteractionConfig, id: number, interacted$: Signal<boolean>, count$: Signal<number>) {
+async function toggleInteraction(entityType: EntityType, interactionType: InteractionType, config: InteractionConfig, id: number, interacted$: Signal<boolean>, count$: Signal<number>) {
     if (!config.toggleable) {
         return;
     }
 
-    const res = await Api.postAsync(`/interact/${entityType}/${interactionType}`, {id});
+    const res = await Api.postAsync(ApiRoutes.toggleInteraction, {
+        entityType,
+        interactionType,
+        id,
+        toggle: !interacted$.value
+    });
     if (res.code === 200) {
         interacted$.value = !interacted$.value;
         if (interacted$.value) {

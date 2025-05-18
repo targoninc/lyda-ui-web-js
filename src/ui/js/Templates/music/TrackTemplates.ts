@@ -510,7 +510,7 @@ export class TrackTemplates {
         if (track.has_cover) {
             coverFile.value = Util.getTrackCover(track.id);
         }
-        const showComments = signal(false);
+        const showComments = signal(true);
         const comments = signal<Comment[]>([]);
         Api.getAsync<Comment[]>(ApiRoutes.getCommentsByTrackId, {track_id: track.id}).then((c) => {
             if (!c.data || c.data.error) {
@@ -584,11 +584,7 @@ export class TrackTemplates {
                             ).build(),
                     ).build(),
                 TrackTemplates.audioActions(track, editActions),
-                create("div")
-                    .classes("flex")
-                    .children(
-                        CommentTemplates.commentListFullWidth(track.id, comments, showComments)
-                    ).build(),
+                CommentTemplates.commentListFullWidth(track.id, comments, showComments),
                 TrackTemplates.inAlbumsList(track),
                 await TrackTemplates.inPlaylistsList(track)
             ).build();

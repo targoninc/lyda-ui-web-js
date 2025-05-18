@@ -293,24 +293,6 @@ export class TrackActions {
         fileInput.click();
     }
 
-    static replyToComment(e: any, trackId: number, commentId: number, username: string, parentCommentId: Signal<number>) {
-        const input = document.querySelector(".comment-box-input[track_id='" + trackId.toString() + "']") as HTMLInputElement;
-        if (e.target.innerText === "Reply") {
-            const replyButtons = document.querySelectorAll(".replyButton[track_id='" + trackId.toString() + "']") as NodeListOf<HTMLButtonElement>;
-            replyButtons.forEach((button) => {
-                button.innerText = "Reply";
-            });
-            parentCommentId.value = commentId;
-            input.placeholder = "Reply to " + username + "...";
-            input.focus();
-            e.target.innerText = "Cancel";
-        } else {
-            parentCommentId.value = 0;
-            input.placeholder = "New comment...";
-            e.target.innerText = "Reply";
-        }
-    }
-
     static moveTrackToPosition(idToMove: number, targetPosition: number, tracks: Signal<ListTrack[]>) {
         // Extract the current list of tracks
         const currentTracks = tracks.value;

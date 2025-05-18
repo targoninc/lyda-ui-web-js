@@ -35,10 +35,10 @@ export class CommentTemplates {
         const newComment = signal("");
 
         return create("div")
-            .classes("comment-box", "flex-v")
+            .classes("flex-v")
             .children(
                 when(Util.isLoggedIn(), create("div")
-                    .classes("comment-box-input-container", "flex-v", "fullWidth", "card", "secondary")
+                    .classes("comment-box-input-container", "flex-v", "fullWidth")
                     .children(
                         textarea({
                             classes: ["comment-box-input"],

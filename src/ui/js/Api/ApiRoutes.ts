@@ -38,6 +38,8 @@ export class ApiRoutes {
     static deleteUser = ApiRoutes.userActions + "/delete";
     static sendActivationEmail = ApiRoutes.userActions + "/send-activation-email";
     static setUserPermission = ApiRoutes.userActions + "/set-permission";
+
+    static toggleInteraction = ApiRoutes.base + "/toggleInteraction";
     // endregion
 
     // region Subscriptions
