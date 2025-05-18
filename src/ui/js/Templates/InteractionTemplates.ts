@@ -45,20 +45,20 @@ export class InteractionTemplates {
         //const list$ = signal(metadata.list); TODO: Not yet used...figure out if we want to display the list of interactions right where the count is or elsewhere (probably the second option)
 
         const icon$ = compute(i => i ? config.icons.interacted : config.icons.default, interacted$);
-        const class$ = compute((i): string => i ? "positive" : "negative", interacted$);
         const stateClass$ = compute((s: boolean): string => s ? "active" : "_", interacted$);
         const disabledClass$ = compute((u): string => !u ? "disabled" : "_", currentUser);
+        const inertClass = config.toggleable ? "_" : "inert";
 
         return create("div")
-            .classes(disabledClass$, "flex", "align-children")
+            .classes("flex", "align-children", disabledClass$)
             .children(
                 GenericTemplates.roundIconButton({
                     icon: icon$,
                     isUrl: icon$.value.includes("http")
                 }, () => interact(entityType, interactionType, config, id, interacted$, count$), interactionType,
-                    [class$, stateClass$, "stats-indicator"]),
-                when(metadata.count, create("span")
-                    .classes("stats-indicator-opener")
+                    ["positive", stateClass$, "stats-indicator", inertClass]),
+                when(metadata.count !== undefined && metadata.count !== null, create("span")
+                    .classes("interaction-count")
                     .text(count$ as HtmlPropertyValue)
                     .build()),
             ).build();
@@ -97,9 +97,9 @@ export class InteractionTemplates {
         return elements;
     }
 
-    private static trackInteractions(entity: Track) {
+    private static trackInteractions(entity: Track, overrideActions?: InteractionType[]) {
         const interactions = [InteractionType.like, InteractionType.repost, InteractionType.comment];
-        return this.interactionList(interactions, entity, EntityType.track);
+        return this.interactionList(overrideActions ?? interactions, entity, EntityType.track);
     }
 
     private static albumInteractions(entity: Album) {

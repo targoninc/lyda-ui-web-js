@@ -6,7 +6,6 @@ import {TrackTemplates} from "./TrackTemplates.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
 import {QueueManager} from "../../Streaming/QueueManager.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
-import {StatisticsTemplates} from "../StatisticsTemplates.ts";
 import {Images} from "../../Enums/Images.ts";
 import {Util} from "../../Classes/Util.ts";
 import {notify, Ui} from "../../Classes/Ui.ts";

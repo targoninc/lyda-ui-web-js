@@ -238,7 +238,7 @@
     color: var(--green) !important;
 }
 
-.stats-indicator-opener {
+.interaction-count {
     padding: .2em 1em;
     padding-left: 2.5em;
     margin-left: -2.5em;
@@ -247,6 +247,7 @@
     align-items: center;
     display: flex;
     box-sizing: border-box;
+    font-family: monospace;
 }
 
 .label {

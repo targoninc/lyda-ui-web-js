@@ -459,6 +459,12 @@ button.positive.active {
     background-color: var(--green-dark);
 }
 
+button.inert {
+    border-color: var(--color-7);
+    background-color: var(--color-7);
+    pointer-events: none;
+}
+
 button.special {
     border-color: var(--blue);
     background: var(--blue-dark);

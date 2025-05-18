@@ -6,7 +6,6 @@ import {PlayManager} from "../../Streaming/PlayManager.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
 import {QueueManager} from "../../Streaming/QueueManager.ts";
-import {StatisticsTemplates} from "../StatisticsTemplates.ts";
 import {AlbumTemplates} from "./AlbumTemplates.ts";
 import {PlaylistActions} from "../../Actions/PlaylistActions.ts";
 import {PlaylistTemplates} from "./PlaylistTemplates.ts";
