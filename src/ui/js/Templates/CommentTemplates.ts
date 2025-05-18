@@ -68,21 +68,27 @@ export class CommentTemplates {
             avatarState.value = Util.getUserAvatar(comment.user_id);
         }
         const replyInputShown = signal(false);
+        const repliesShown = signal(false);
         const newComment = signal("");
 
         return create("div")
-            .classes("comment-in-list", "flex-v")
+            .classes("comment-in-list", "flex-v", "small-gap")
             .id(comment.id)
             .attributes("parent_id", comment.parent_id)
             .children(
                 create("div")
+                    .classes("flex-v", "small-gap")
+                    .children(
+                        CommentTemplates.commentContent(comment),
+                        create("span")
+                            .classes("text", "text-small", "color-dim")
+                            .text(Time.agoUpdating(new Date(comment.created_at)))
+                            .build(),
+                    ).build(),
+                create("div")
                     .classes("flex")
                     .children(
                         UserTemplates.userWidget(comment.user, Util.userIsFollowing(comment.user), ["comment_id", comment.id], [], UserWidgetContext.comment),
-                        create("span")
-                            .classes("text", "text-small", "color-dim", "align-center")
-                            .text(Time.agoUpdating(new Date(comment.created_at)))
-                            .build(),
                         create("div")
                             .classes("flex")
                             .children(
@@ -92,28 +98,33 @@ export class CommentTemplates {
                                     classes: ["negative"],
                                     onclick: () => TrackActions.deleteComment(comment.id, comments)
                                 }))
-                            ).build()
+                            ).build(),
+                        when(Util.isLoggedIn(), CommentTemplates.commentReplySection(repliesShown, replyInputShown, comment, newComment, comments)),
                     ).build(),
-                create("div")
-                    .classes("flex", "comment_body")
-                    .children(
-                        CommentTemplates.commentContent(comment),
-                        when(Util.isLoggedIn(), CommentTemplates.commentReplySection(replyInputShown, comment, newComment, comments)),
-                    ).build(),
-                create("div")
+                when(repliesShown, create("div")
                     .classes("comment-children")
                     .children(...(comment.comments?.map(c => CommentTemplates.commentInList(c, comments)) ?? []))
-                    .build()
+                    .build())
             ).build();
     }
 
-    private static commentReplySection(replyInputShown: Signal<boolean>, comment: Comment, newComment: Signal<string>, comments: Signal<Comment[]>) {
+    private static commentReplySection(repliesShown: Signal<boolean>, replyInputShown: Signal<boolean>, comment: Comment, newComment: Signal<string>, comments: Signal<Comment[]>) {
+        const len = comment.comments?.length ?? 0;
+
         return create("div")
             .classes("flex")
             .children(
+                when(len > 0, button({
+                    text: compute((r): string => {
+                        return `${len} repl${len === 1 ? "y" : "ies"} ${r ? "shown" : "hidden"}`;
+                    }, repliesShown),
+                    disabled: len === 0,
+                    icon: {icon: compute((s): string => s ? "visibility" : "visibility_off", repliesShown)},
+                    onclick: () => repliesShown.value = !repliesShown.value
+                })),
                 button({
                     text: "Reply",
-                    icon: {icon: "reply"},
+                    icon: {icon: compute((r): string => r ? "close" : "reply", replyInputShown)},
                     classes: ["positive"],
                     onclick: () => replyInputShown.value = !replyInputShown.value
                 }),
