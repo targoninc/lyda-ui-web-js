@@ -102,7 +102,7 @@ export class CommentTemplates {
                         when(Util.isLoggedIn(), CommentTemplates.commentReplySection(repliesShown, replyInputShown, comment, newComment, comments)),
                     ).build(),
                 when(repliesShown, create("div")
-                    .classes("comment-children")
+                    .classes("comment-children", "flex-v")
                     .children(...(comment.comments?.map(c => CommentTemplates.commentInList(c, comments)) ?? []))
                     .build())
             ).build();
