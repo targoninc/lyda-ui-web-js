@@ -111,6 +111,7 @@ export class MusicTemplates {
         const coverLoading = signal(false);
         const start = async () => startItem(type, item, startCallback);
         const isOwnItem = compute(u => u?.id === item.user_id, currentUser);
+        const playButtonContexts = ["inline-cover"];
 
         return create("div")
             .classes("cover-container", "relative", "pointer", coverContext)
@@ -131,7 +132,7 @@ export class MusicTemplates {
                         GenericTemplates.uploadIconButton("replace-image-button", () => TrackActions.replaceCover(item.id, true, imageState, coverLoading)),
                         when(coverLoading, GenericTemplates.loadingSpinner()),
                     ).build()),
-                when(coverContext !== "cover", create("div")
+                when(playButtonContexts.includes(coverContext), create("div")
                     .classes("centeredInParent", "hidden", coverContext !== "cover" ? "showOnParentHover" : "_")
                     .children(
                         MusicTemplates.playButton(type, item.id, start)

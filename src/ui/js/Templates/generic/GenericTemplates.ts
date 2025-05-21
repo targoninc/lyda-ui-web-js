@@ -1146,3 +1146,15 @@ export class GenericTemplates {
             ).build();
     }
 }
+
+export function vertical(...children: (AnyNode|Signal<AnyNode>|Signal<AnyElement>)[]) {
+    return create("div")
+        .classes("flex-v")
+        .children(...children);
+}
+
+export function horizontal(...children: (AnyNode|Signal<AnyNode>|Signal<AnyElement>)[]) {
+    return create("div")
+        .classes("flex")
+        .children(...children);
+}

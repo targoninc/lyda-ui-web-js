@@ -201,7 +201,7 @@
     align-self: center;
 }
 
-.inline-cover {
+.inline-cover, .player-cover {
     --cover-size: 36px;
     height: var(--cover-size);
     width: var(--cover-size);
@@ -391,10 +391,6 @@ label {
     height: 100%;
 }
 
-.audio-player-time {
-    flex-wrap: nowrap;
-}
-
 .audio-player-loudnessbackground {
     position: absolute;
     height: calc(100% + 36px);
@@ -549,13 +545,14 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .cover-container, .cover-container .cover {
     width: var(--cover-size);
+    height: var(--cover-size);
 }
 
 .cover-container.card-cover {
     --cover-size: 120px;
 }
 
-.cover-container.inline-cover {
+.cover-container.inline-cover, .cover-container.player-cover {
     --cover-size: var(--inline-track-height);
 }
 

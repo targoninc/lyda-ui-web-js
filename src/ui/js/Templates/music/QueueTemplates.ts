@@ -147,7 +147,7 @@ export class QueueTemplates {
         const queueListVisClass = compute((h): string => h ? "hidden" : "_", queueListHidden);
 
         return create("div")
-            .classes("relative", "align-center")
+            .classes("relative")
             .children(
                 create("div")
                     .classes(queueListVisClass, "popout-above", "flex-v", "no-gap", "padded", "rounded")
@@ -164,7 +164,7 @@ export class QueueTemplates {
                         ...children
                     ).build(),
                 create("button")
-                    .classes("jess", "relative", "align-center")
+                    .classes("jess", "relative")
                     .onclick(() => {
                         queueListHidden.value = !queueListHidden.value;
                     })
