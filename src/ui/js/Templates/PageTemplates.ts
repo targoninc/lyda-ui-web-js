@@ -171,7 +171,6 @@ export class PageTemplates {
     static notFoundPage() {
         const randomUserWidget = signal(create("span").text("loading...").build());
         const user = signal<User|null>(null);
-        const following = compute(u => !!(u && Util.userIsFollowing(u)), user);
 
         Api.getAsync(ApiRoutes.randomUser).then(async data => {
             if (data.code !== 200) {
@@ -197,7 +196,7 @@ export class PageTemplates {
                 when(user, create("div")
                     .classes("flex")
                     .children(
-                        UserTemplates.userWidget(user, following)
+                        UserTemplates.userWidget(user)
                     ).build()),
             ).build();
     }

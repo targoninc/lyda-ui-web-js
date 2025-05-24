@@ -54,7 +54,7 @@ export class LogTemplates {
                 create("td")
                     .classes("log-user")
                     .children(
-                        UserTemplates.userWidget(l.user, Util.userIsFollowing(l.user)),
+                        UserTemplates.userWidget(l.user),
                     ).build(),
                 create("td")
                     .classes("log-action-name")
@@ -63,7 +63,7 @@ export class LogTemplates {
                 create("td")
                     .classes("log-user")
                     .children(
-                        UserTemplates.userWidget(l.actioned_user, Util.userIsFollowing(l.actioned_user)),
+                        UserTemplates.userWidget(l.actioned_user),
                     ).build(),
                 LogTemplates.properties(l.additional_info),
             ).build();

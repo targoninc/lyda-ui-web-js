@@ -5,7 +5,7 @@ import {Api, ApiResponse} from "../Api/Api.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {chartColor, currentUser} from "../state.ts";
-import {compute, signal, Signal, AnyElement} from "@targoninc/jess";
+import {compute, signal, Signal, AnyElement, isSignal, asSignal} from "@targoninc/jess";
 import {getUserPermissions} from "../../main.ts";
 import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
@@ -113,8 +113,11 @@ export class Util {
         return array.some((e) => e[property] === currentUser.value!.id);
     }
 
-    static userIsFollowing(user: User) {
-        return compute(u => !!(u && user.follows?.some(f => f.following_user_id === u.id)), currentUser);
+    static userIsFollowing(user$: User|Signal<User|null>) {
+        return compute(u => {
+            const user = asSignal(user$).value;
+            return !!(u && user?.follows?.some(f => f.following_user_id === u.id));
+        }, currentUser);
     }
 
     static userIsFollowedBy(user: User) {

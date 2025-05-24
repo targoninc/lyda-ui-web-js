@@ -537,7 +537,7 @@ export class TrackTemplates {
                         UserTemplates.userWidget({
                             ...trackUser,
                             displayname: (track.artistname && track.artistname.trim().length > 0) ? track.artistname.trim() : trackUser.displayname
-                        }, Util.userIsFollowing(trackUser), [], [], UserWidgetContext.singlePage),
+                        }, [], [], UserWidgetContext.singlePage),
                     ).build(),
                 ...toAppend,
                 create("div")
@@ -742,7 +742,7 @@ export class TrackTemplates {
                             .classes("text-small")
                             .text(Time.ago(track.created_at))
                             .build(),
-                        UserTemplates.userWidget(track.user, track.user.follows.some(follow => follow.following_user_id === user.id), [], [], UserWidgetContext.card),
+                        UserTemplates.userWidget(track.user, [], [], UserWidgetContext.card),
                         create("span")
                             .text("Requested you to be " + collabType.name)
                             .build(),

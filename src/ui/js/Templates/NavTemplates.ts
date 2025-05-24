@@ -140,7 +140,7 @@ export class NavTemplates {
                     }
                 }),
                 NotificationTemplates.notifications(),
-                UserTemplates.userWidget(currentUser, true, [], [], UserWidgetContext.nav),
+                UserTemplates.userWidget(currentUser, [], [], UserWidgetContext.nav),
             ).build();
     }
 

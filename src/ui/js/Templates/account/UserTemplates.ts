@@ -42,7 +42,7 @@ import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 
 export class UserTemplates {
-    static userWidget(user: User|Signal<User|null>, following: boolean|Signal<boolean>, extraAttributes: HtmlPropertyValue[] = [], extraClasses: StringOrSignal[] = [], context: UserWidgetContext = UserWidgetContext.unknown) {
+    static userWidget(user: User|Signal<User|null>, extraAttributes: HtmlPropertyValue[] = [], extraClasses: StringOrSignal[] = [], context: UserWidgetContext = UserWidgetContext.unknown) {
         const out = signal<AnyElement>(nullElement());
 
         const getWidget = (newUser: User|null) => {
@@ -57,7 +57,7 @@ export class UserTemplates {
             if (extraClasses) {
                 base.classes(...extraClasses);
             }
-            out.value = this.userWidgetInternal(context, newUser, base, following);
+            out.value = this.userWidgetInternal(context, newUser, base, Util.userIsFollowing(user));
         }
 
         if (user.constructor === Signal) {

@@ -315,7 +315,7 @@ export class AlbumTemplates {
                             .classes("flex-v", "small-gap")
                             .children(
                                 AlbumTemplates.title(album.title, album.id, icons),
-                                UserTemplates.userWidget(album.user, Util.userIsFollowing(album.user), [], [], UserWidgetContext.card),
+                                UserTemplates.userWidget(album.user, [], [], UserWidgetContext.card),
                                 create("span")
                                     .classes("date", "text-small", "nopointer", "color-dim")
                                     .text(Time.ago(album.release_date))
@@ -405,7 +405,6 @@ export class AlbumTemplates {
             coverState.value = Util.getAlbumCover(album.id);
         }
         const albumUser = album.user!;
-        const following = Util.userIsFollowing(albumUser);
         const noTracks = signal(album.tracks?.length === 0);
         const tracks = signal<ListTrack[]>(album.tracks ?? []);
 
@@ -423,7 +422,7 @@ export class AlbumTemplates {
                             .classes("title", "wordwrap")
                             .text(album.title)
                             .build(),
-                        UserTemplates.userWidget(albumUser, following, [], [], UserWidgetContext.singlePage)
+                        UserTemplates.userWidget(albumUser, [], [], UserWidgetContext.singlePage)
                     ).build(),
                 create("div")
                     .classes("album-info-container", "flex")

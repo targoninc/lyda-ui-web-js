@@ -88,7 +88,7 @@ export class CommentTemplates {
                 create("div")
                     .classes("flex")
                     .children(
-                        UserTemplates.userWidget(comment.user, Util.userIsFollowing(comment.user), ["comment_id", comment.id], [], UserWidgetContext.comment),
+                        UserTemplates.userWidget(comment.user, ["comment_id", comment.id], [], UserWidgetContext.comment),
                         create("div")
                             .classes("flex")
                             .children(
