@@ -687,6 +687,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 .image-preview {
     width: 100px;
     height: 100px;
+    border-radius: var(--border-radius);
 }
 
 .verification-badge {

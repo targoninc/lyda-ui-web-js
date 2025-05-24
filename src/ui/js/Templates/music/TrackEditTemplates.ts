@@ -30,6 +30,7 @@ import {ProgressPart} from "@targoninc/lyda-shared/src/Models/ProgressPart";
 import {TrackCollaborator} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {Genre} from "@targoninc/lyda-shared/src/Enums/Genre";
+import {TrackValidators} from "../../Classes/Validators/TrackValidators.ts";
 
 export class TrackEditTemplates {
     static uploadForm(title: string, credits: string, releaseDate: Date, visibility: string, genre: Genre,
@@ -332,6 +333,7 @@ export class TrackEditTemplates {
             label: "Title*",
             placeholder: "Track title",
             value: compute(s => s.title, state),
+            validators: TrackValidators.titleValidators,
             onchange: (v) => {
                 state.value = {...state.value, title: v};
             }
@@ -344,6 +346,7 @@ export class TrackEditTemplates {
             name: "credits",
             label: "Collaborators",
             placeholder: "John Music, Alice Frequency",
+            validators: TrackValidators.creditsValidators,
             value: compute(s => s.credits, state),
             onchange: (v) => {
                 state.value = {...state.value, credits: v};
@@ -356,6 +359,7 @@ export class TrackEditTemplates {
             name: "description",
             label: "Description",
             placeholder: "My cool track",
+            validators: TrackValidators.descriptionValidators,
             value: compute(s => s.description, state),
             onchange: (v) => {
                 state.value = {...state.value, description: v};
@@ -369,6 +373,7 @@ export class TrackEditTemplates {
             name: "upc",
             label: "UPC",
             placeholder: "00888072469600",
+            validators: TrackValidators.upcValidators,
             value: compute(s => s.upc, state),
             onchange: (v) => {
                 state.value = {...state.value, upc: v};
@@ -400,6 +405,7 @@ export class TrackEditTemplates {
             name: "isrc",
             label: "ISRC",
             placeholder: "QZNWX2227540",
+            validators: TrackValidators.isrcValidators,
             value: compute(s => s.isrc, state),
             onchange: (v) => {
                 state.value = {...state.value, isrc: v};
@@ -413,6 +419,7 @@ export class TrackEditTemplates {
             name: "artistname",
             label: "Artist display name",
             placeholder: "My other alias",
+            validators: TrackValidators.artistnameValidators,
             value: compute(s => s.artistname ?? "", state),
             onchange: (v) => {
                 state.value = {...state.value, artistname: v};
@@ -455,10 +462,10 @@ export class TrackEditTemplates {
                     .children(
                         TrackEditTemplates.filesSection(true, state, errorSections),
                         TrackEditTemplates.monetizationSection(errorSections, state),
-                        enableTos ? TrackEditTemplates.sectionCard("Terms of Service", errorSections, "terms", [
+                        enableTos ? TrackEditTemplates.sectionCard("Copyright", errorSections, "terms", [
                             checkbox({
                                 name: "termsOfService",
-                                text: "I have read and agree to the Terms of Service and Privacy Policy*",
+                                text: "I have all the necessary rights to distribute this content*",
                                 checked: compute(s => s.termsOfService, state),
                                 required: true,
                                 onchange: () => {
@@ -483,7 +490,7 @@ export class TrackEditTemplates {
     }
 
     static audioFile(canOverwriteTitle = false, parentState: Signal<UploadableTrack>) {
-        return FormTemplates.fileField("Audio File*", "Choose file", "audio-file", "audio/*", true, async (fileName: string, files) => {
+        return FormTemplates.fileField("Audio File*", "Choose audio file", "audio-file", "audio/*", true, async (fileName: string, files) => {
             if (canOverwriteTitle) {
                 if (fileName) {
                     const safeName = fileName.replace(/\.[^/.]+$/, "");
@@ -500,7 +507,7 @@ export class TrackEditTemplates {
     }
 
     static coverFile(parentState: Signal<UploadableTrack>) {
-        return FormTemplates.fileField("Cover File", "Choose file (.jpg,.jpeg,.png,.gif)", "cover-file", "jpg,jpeg,png,gif", false, async (fileName: string, files) => {
+        return FormTemplates.fileField("Cover File", "Choose image file", "cover-file", "image/*", false, async (fileName: string, files) => {
             if (fileName) {
                 if (parentState) {
                     const safeName = fileName.replace(/\.[^/.]+$/, "");
