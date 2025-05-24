@@ -59,10 +59,7 @@ export class TrackTemplates {
                 create("p")
                     .text("We would love to hear what you make.")
                     .build(),
-                create("div")
-                    .classes("button-container")
-                    .children(GenericTemplates.newTrackButton(["secondary"]))
-                    .build()
+                GenericTemplates.newTrackButton(["secondary"])
             ];
         } else {
             children = [

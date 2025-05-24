@@ -275,10 +275,7 @@ export class AlbumTemplates {
                 create("p")
                     .text("You have not created any albums yet.")
                     .build(),
-                create("div")
-                    .classes("button-container")
-                    .children(GenericTemplates.newAlbumButton(["secondary"]))
-                    .build(),
+                GenericTemplates.newAlbumButton(["secondary"])
             ];
         } else {
             children = [

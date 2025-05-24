@@ -402,12 +402,6 @@ input[type="button"]:hover {
     margin: auto 0;
 }
 
-.button-container-sideways {
-    display: flex;
-    justify-content: space-between;
-    gap: var(--layout-gap);
-}
-
 button {
     background: var(--color-7);
     color: var(--color-4);
@@ -599,17 +593,6 @@ button.unread:before {
     z-index: -1;
     position: absolute;
     left: calc(calc(var(--circle-size) / 3) - calc(var(--circle-size) / 2));
-}
-
-.button-container {
-    display: flex;
-    justify-content: space-between;
-    gap: var(--layout-gap);
-}
-
-.button-container button {
-    height: max-content;
-    margin: auto;
 }
 
 summary {

@@ -247,10 +247,7 @@ export class PlaylistTemplates {
                 create("p")
                     .text("You have not created any playlists yet.")
                     .build(),
-                create("div")
-                    .classes("button-container")
-                    .children(GenericTemplates.newPlaylistButton(["secondary"]))
-                    .build(),
+                GenericTemplates.newPlaylistButton(["secondary"])
             ];
         } else {
             children = [
