@@ -529,7 +529,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .listNotification.unread {
-    background: color-mix(in oklab, var(--green), transparent 85%);
+    border-left: 3px solid var(--green);
 }
 
 .notification-bubble {
@@ -539,7 +539,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: var(--color-1);
+    background: var(--green);
 }
 
 .queue-bubble {

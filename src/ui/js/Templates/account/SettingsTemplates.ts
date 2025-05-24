@@ -227,7 +227,7 @@ export class SettingsTemplates {
             .classes("card", "flex-v")
             .children(
                 create("h2")
-                    .text("Theme")
+                    .text("Interface theme")
                     .build(),
                 GenericTemplates.combinedSelector(themes, async (newIndex: number) => {
                     currentTheme$.value = themes[newIndex];

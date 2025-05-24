@@ -3,7 +3,7 @@ import {UserTemplates} from "../account/UserTemplates.ts";
 import {copy, Util} from "../../Classes/Util.ts";
 import {Icons} from "../../Enums/Icons.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
-import {GenericTemplates} from "../generic/GenericTemplates.ts";
+import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
 import {QueueManager} from "../../Streaming/QueueManager.ts";
 import {AlbumTemplates} from "./AlbumTemplates.ts";
@@ -307,40 +307,27 @@ export class TrackTemplates {
                     when(canEdit, GenericTemplates.verticalDragIndicator()),
                     TrackTemplates.smallListTrackCover(track, startCallback),
                     create("div")
-                        .classes("flex-v", "flex-grow")
+                        .classes("flex", "align-children", "flex-grow", "space-outwards")
                         .children(
-                            create("div")
-                                .classes("flex")
-                                .children(
-                                    create("div")
-                                        .classes("flex-v", "flex-grow", "small-gap")
-                                        .children(
-                                            create("div")
-                                                .classes("flex", "align-children")
-                                                .children(
-                                                    InteractionTemplates.interactions(EntityType.track, track),
-                                                    TrackTemplates.title(track.title, track.id, icons),
-                                                    create("span")
-                                                        .classes("nopointer", "text-small", "align-center")
-                                                        .text(Time.format(track.length))
-                                                        .build(),
-                                                    create("span")
-                                                        .classes("date", "text-small", "nopointer", "color-dim", "align-center")
-                                                        .text(Time.ago(track.created_at))
-                                                        .build(),
-                                                    create("div")
-                                                        .classes("flex-grow")
-                                                        .build(),
-                                                    when(canEdit, TrackTemplates.trackInListActions(track, list, listTrack, tracks, type)),
-                                                ).build(),
-                                        ).build(),
-                                ).build(),
-                            create("div")
-                                .classes("flex")
-                                .children(
-                                    ...graphics,
-                                ).build(),
-                        ).build()
+                            vertical(
+                                horizontal(
+                                    TrackTemplates.title(track.title, track.id, icons),
+                                    create("span")
+                                        .classes("nopointer", "text-small", "align-center")
+                                        .text(Time.format(track.length))
+                                        .build(),
+                                    create("span")
+                                        .classes("date", "text-small", "nopointer", "color-dim", "align-center")
+                                        .text(Time.ago(track.created_at))
+                                        .build(),
+                                ),
+                                ...graphics
+                            ),
+                            vertical(
+                                when(canEdit, TrackTemplates.trackInListActions(track, list, listTrack, tracks, type)),
+                                InteractionTemplates.interactions(EntityType.track, track),
+                            ).classes("align-children-end")
+                        ).build(),
                 ).build()
         ).build();
     }

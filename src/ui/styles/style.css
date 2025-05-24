@@ -868,6 +868,10 @@ td:last-child, th:last-child {
     right: 0;
 }
 
+.align-children-end {
+    align-items: flex-end;
+}
+
 .inlineLink {
     cursor: pointer;
     color: var(--link-color);
