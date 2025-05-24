@@ -285,14 +285,14 @@ export class SearchTemplates {
             "album": Util.getAlbumCover,
             "playlist": Util.getPlaylistCover,
         };
-        const image = signal(Images.DEFAULT_COVER_TRACK);
+        const image = signal(Util.defaultImage(searchResult.type));
         if (searchResult.hasImage) {
             image.value = imageGetterMap[searchResult.type](searchResult.id);
         }
         const contextClasses = context === SearchContext.searchPage ? ["jess", "fullWidth"] : ["_"]
 
         elementReference = create(context === SearchContext.navBar ? "div" : "button")
-            .classes("search-result", "space-outwards", "padded", "flex", addClass, ...contextClasses)
+            .classes("search-result", "space-outwards", "padded", "flex", searchResult.type, searchResult.exactMatch ? "exact-match" : "_", addClass, ...contextClasses)
             .onclick(async () => {
                 navigate(searchResult.url);
                 resultsShown.value = false;
@@ -314,10 +314,6 @@ export class SearchTemplates {
                                 create("div")
                                     .classes("flex")
                                     .children(
-                                        when(searchResult.exactMatch, icon({
-                                            icon: "star",
-                                            classes: ["nopointer", "svg", "inline-icon"]
-                                        })),
                                         create("span")
                                             .classes("search-result-display")
                                             .text(display)

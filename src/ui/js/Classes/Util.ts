@@ -23,6 +23,20 @@ export class Util {
         return urlParams.get(name);
     }
 
+    static defaultImage(type: string) {
+        switch (type) {
+            case "user":
+                return Images.DEFAULT_AVATAR;
+            case "track":
+                return Images.DEFAULT_COVER_TRACK;
+            case "album":
+                return Images.DEFAULT_COVER_ALBUM;
+            case "playlist":
+                return Images.DEFAULT_COVER_PLAYLIST;
+        }
+        return Images.DEFAULT_COVER_TRACK;
+    }
+
     static getUserAvatar(id: number | null | undefined) {
         if (id === null) {
             return Images.DEFAULT_AVATAR;

@@ -779,6 +779,11 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     background: var(--color-7);
 }
 
+.search-result.exact-match {
+    font-weight: bold;
+    border-left: 3px solid var(--blue);
+}
+
 .search-result-image {
     --search-result-image-size: 2em;
     width: var(--search-result-image-size);
@@ -789,6 +794,10 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     width: 100%;
     height: 100%;
     border-radius: var(--border-radius);
+}
+
+.search-result.user .search-result-image img {
+    border-radius: 50%;
 }
 
 .search-input-container {
