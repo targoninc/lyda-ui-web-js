@@ -104,17 +104,13 @@ export class SubscriptionTemplates {
                     .classes("flex-v", "space-outwards")
                     .children(
                         create("div")
-                            .classes("flex-v")
+                            .classes("flex-v", "no-gap")
                             .children(
-                                create("div")
-                                    .classes("flex")
+                                create("h2")
+                                    .classes("limitToContentWidth", "flex")
+                                    .text(option.name)
                                     .children(
-                                        create("h1")
-                                            .classes("limitToContentWidth", "flex")
-                                            .text(option.name)
-                                            .children(
-                                                when(gifted, GenericTemplates.giftIcon("This subscription has been gifted to you"))
-                                            ).build(),
+                                        when(gifted, GenericTemplates.giftIcon("This subscription has been gifted to you"))
                                     ).build(),
                                 create("span")
                                     .text(option.description)
@@ -150,32 +146,36 @@ export class SubscriptionTemplates {
                                 create("div")
                                     .classes("flex", "small-gap")
                                     .children(
-                                        when(active, create("button")
-                                            .classes("jess", "negative")
-                                            .id(option.id)
-                                            .text("Cancel")
-                                            .onclick(async () => {
+                                        when(active, button({
+                                            classes: ["negative"],
+                                            id: option.id,
+                                            text: "Cancel",
+                                            onclick: async () => {
                                                 const currentSub = currentSubscription.value;
                                                 if (!currentSub) {
                                                     console.warn("Can't cancel subscription, no current subscription. How did you get here?");
                                                     return;
                                                 }
                                                 await SubscriptionActions.cancelSubscriptionWithConfirmationAsync(currentSub.id);
-                                            }).build()),
-                                        when(enabled, create("button")
-                                            .classes("jess", "special", selectedClass)
-                                            .id(option.id)
-                                            .text(buttonText)
-                                            .onclick(async () => {
+                                            }
+                                        })),
+                                        when(enabled, button({
+                                            classes: ["special", selectedClass],
+                                            text: buttonText,
+                                            id: option.id,
+                                            onclick: async () => {
                                                 selectedOption.value = option.id;
                                                 await SubscriptionActions.startSubscription(option.id, option.plan_id, optionMessage);
-                                            }).build()),
-                                        when(isSelectedOption, create("button")
-                                            .classes("jess", selectedClass)
-                                            .text("Cancel")
-                                            .onclick(async () => {
+                                            }
+                                        })),
+                                        when(isSelectedOption, button({
+                                            classes: [selectedClass],
+                                            text: "Cancel",
+                                            id: option.id,
+                                            onclick: async () => {
                                                 selectedOption.value = null;
-                                            }).build()),
+                                            }
+                                        })),
                                     ).build(),
                                 when(isSelectedOption, create("span")
                                     .classes("color-dim")

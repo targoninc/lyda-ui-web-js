@@ -25,7 +25,7 @@ export class ProfilePage {
 
         const tabs = ["Tracks", "Albums", "Playlists", "Reposts", "Listening History"];
         const tabContents = [tracksContainer, albumsContainer, playlistsContainer, repostsContainer, historyContainer];
-        const tabSelector = GenericTemplates.tabSelector(tabs, (i: number) => {
+        const tabSelector = GenericTemplates.combinedSelector(tabs, (i: number) => {
             tabContents.forEach((c, j) => {
                 c.style.display = i === j ? "block" : "none";
             });

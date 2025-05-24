@@ -31,6 +31,7 @@
     --purple: #a855f7;
     --purple-dark: #8a4dd9;
     --verified: var(--blue);
+    --link-color: var(--blue);
     --glass-transparency: .75;
     --background-glass: linear-gradient(-45deg, rgba(var(--color-4-rgb), var(--glass-transparency)), rgba(var(--color-6-rgb), var(--glass-transparency)));
     --background-light-glass: rgba(var(--color-6-rgb), var(--glass-transparency));
@@ -68,7 +69,7 @@
     --jessc-interactive-color-active: var(--color-4);
     --jessc-interactive-border: var(--color-7);
     --jessc-interactive-border-focused: var(--blue);
-    --jessc-interactive-border-active: var(--color-1);
+    --jessc-interactive-border-active: var(--blue);
 
     --jessc-font: var(--default-font-family);
 }
@@ -451,6 +452,10 @@ button.special {
     border-color: var(--blue);
     background: var(--blue-dark);
     box-sizing: border-box;
+}
+
+button.special * {
+    color: var(--color-4);
 }
 
 button.special.active {
@@ -865,7 +870,11 @@ td:last-child, th:last-child {
 
 .inlineLink {
     cursor: pointer;
-    color: var(--color-1);
+    color: var(--link-color);
+}
+
+.inlineLink:hover {
+    text-decoration: underline;
 }
 
 .error {
@@ -874,10 +883,6 @@ td:last-child, th:last-child {
 
 .error input, .error button, .error select, .error textarea {
     border-color: var(--red);
-}
-
-.inlineLink:hover {
-    text-decoration: underline;
 }
 
 .text-left {

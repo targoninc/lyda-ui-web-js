@@ -209,7 +209,7 @@ export class StatisticTemplates {
                         create("div")
                             .classes("flex")
                             .children(
-                                GenericTemplates.tabSelector(types, (i: number) => selectedTypeIndex.value = i, 0),
+                                GenericTemplates.combinedSelector(types, (i: number) => selectedTypeIndex.value = i, 0),
                                 button({
                                     text: "Download",
                                     icon: {icon: "download"},

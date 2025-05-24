@@ -148,7 +148,7 @@ export class TrackTemplates {
     static feedFilters(filterState: Signal<string>) {
         const tabs = ["All", "Originals", "Reposts"];
 
-        return GenericTemplates.tabSelector(tabs, (i: number) => {
+        return GenericTemplates.combinedSelector(tabs, (i: number) => {
             filterState.value = tabs[i].toLowerCase();
         }, 0);
     }

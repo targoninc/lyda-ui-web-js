@@ -16,7 +16,7 @@
 }
 
 .material-symbols-outlined.has-title:hover {
-    background: var(--color-7);
+    background: var(--color-3);
     transform: scale(1.2);
 }
 

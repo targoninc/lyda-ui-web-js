@@ -165,7 +165,7 @@ export class TrackActions {
         return true;
     }
 
-    static async runFollowFunctionFromElement(userId: number, following: Signal<boolean>) {
+    static async toggleFollow(userId: number, following: Signal<boolean>) {
         if (following.value) {
             const res = await TrackActions.unfollowUser(userId);
             if (res.code !== 200) {

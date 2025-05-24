@@ -311,49 +311,6 @@ export class GenericTemplates {
         }, [], ["positive", "secondary"], Links.LINK(page));
     }
 
-    static actionWithSmallBreakpoint(icon: HtmlPropertyValue, text: HtmlPropertyValue, id: HtmlPropertyValue, onclick: Function, attributes = [], classes: string[] = [], link = null) {
-        return create(link ? "a" : "div")
-            .classes("flex", "small-gap", "clickable", "fakeButton", "padded-inline", "rounded")
-            .children(
-                create("img")
-                    .classes("inline-icon", "svg", "nopointer")
-                    .src(icon)
-                    .alt(text)
-                    .build(),
-                create("span")
-                    .classes("nopointer", "hideOnSmallBreakpoint")
-                    .text(text)
-                    .build()
-            ).id(id)
-            .attributes(...attributes)
-            .classes(...classes)
-            .href(link)
-            .onclick(onclick)
-            .build();
-    }
-
-    static actionWithMidBreakpoint(icon: HtmlPropertyValue, text: HtmlPropertyValue, id: HtmlPropertyValue, onclick: Function, attributes = [], classes: string[] = [], link: HtmlPropertyValue = null) {
-        return create(link ? "a" : "div")
-            .classes("flex", "small-gap", "clickable", "fakeButton", "padded-inline", "rounded")
-            .children(
-                create("img")
-                    .classes("inline-icon", "svg", "nopointer")
-                    .src(icon)
-                    .alt(text)
-                    .build(),
-                create("span")
-                    .classes("nopointer", "hideOnMidBreakpoint")
-                    .text(text)
-                    .build()
-            )
-            .id(id)
-            .attributes(...attributes)
-            .classes(...classes)
-            .href(link)
-            .onclick(onclick)
-            .build();
-    }
-
     static pill(p: PillOption, pillState: Signal<any>, extraClasses: string[] = []) {
         const selectedState = compute((s): string => s === p.value ? "active" : "_", pillState);
 
@@ -707,18 +664,18 @@ export class GenericTemplates {
             ], "text-area-input");
     }
 
-    static tabSelector(tabs: any[], callback: Function, selectedTab = 0) {
-        const selectedState = signal(selectedTab);
-        selectedState.onUpdate = (newSelected: number) => {
+    static combinedSelector(tabs: any[], callback: Function, selectedIndex = 0) {
+        const selectedState = signal(selectedIndex);
+        selectedState.subscribe((newSelected: number) => {
             callback(newSelected);
-        };
-        callback(selectedTab);
+        });
+        callback(selectedIndex);
 
         return create("div")
             .classes("tab-selector", "flex", "rounded", "limitToContentWidth")
             .children(
                 ...tabs.map((t, i) => {
-                    const innerSelectedState = signal(i === selectedTab ? "selected" : "_");
+                    const innerSelectedState = signal(i === selectedIndex ? "selected" : "_");
                     selectedState.onUpdate = (newSelected: number) => {
                         innerSelectedState.value = i === newSelected ? "selected" : "_";
                     };

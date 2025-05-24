@@ -75,16 +75,13 @@ export class UserTemplates {
         if (user.has_avatar) {
             avatarState.value = Util.getUserAvatar(user.id);
         }
-        const activeClass = compute((r, p): string => {
-            return r && r.path === "profile" && p.name === user.username ? "active" : "_";
-        }, router.currentRoute, router.currentParams);
         if (following.constructor !== Signal) {
             following = signal(following as boolean);
         }
         const showFollowButton = compute(u => u && u.id && u.id !== user.id && !following.value, currentUser);
 
         return base
-            .classes("user-widget", "jess", activeClass, "round-on-tiny-breakpoint")
+            .classes("user-widget", "jess", "round-on-tiny-breakpoint")
             .attributes("user_id", user.id, "username", user.username)
             .onclick((e: MouseEvent) => {
                 if (e.button === 0 && target(e).tagName.toLowerCase() === "button") {
@@ -189,21 +186,17 @@ export class UserTemplates {
             following = signal(following as boolean);
         }
 
-        return create("div")
-            .classes("follow-button", "fakeButton", "clickable", "rounded-max", "flex", "padded-inline")
-            .attributes("user_id", user_id)
-            .children(
-                create("img")
-                    .src(compute((f) => f ? Icons.UNFOLLOW : Icons.FOLLOW, following))
-                    .classes("inline-icon", "svg", "nopointer")
-                    .build(),
-                noText ? null : create("span")
-                    .classes("text-small", "nopointer")
-                    .text(compute((f): string => f ? "Unfollow" : "Follow", following))
-                    .build()
-            ).onclick(async () => {
-                await TrackActions.runFollowFunctionFromElement(user_id, following);
-            }).build();
+        return button({
+            icon: {
+                icon: compute((f) => f ? Icons.UNFOLLOW : Icons.FOLLOW, following),
+                isUrl: true,
+                adaptive: true
+            },
+            text: noText ? "" : compute((f): string => f ? "Unfollow" : "Follow", following),
+            onclick: async () => {
+                await TrackActions.toggleFollow(user_id, following)
+            }
+        });
     }
 
     static followsBackIndicator() {
@@ -511,7 +504,7 @@ export class UserTemplates {
 
         const tabs = ["Tracks", "Albums", "Playlists"];
         const tabContents = [tracksContainer, albumsContainer, playlistsContainer];
-        const tabSelector = GenericTemplates.tabSelector(tabs, (i: number) => {
+        const tabSelector = GenericTemplates.combinedSelector(tabs, (i: number) => {
             tabContents.forEach((c, j) => {
                 c.value.style.display = i === j ? "flex" : "none";
             });
