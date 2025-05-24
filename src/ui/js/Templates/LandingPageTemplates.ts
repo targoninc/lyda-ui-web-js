@@ -625,7 +625,7 @@ export class LandingPageTemplates {
                             };
                         }, false, () => {
                         }, ["flex-grow"]),
-                        FormTemplates.textField("Repeat password", "password-2", "Repeat password", "password", user.value.password2, true, (value: string) => {
+                        FormTemplates.textField("Repeat password", "password", "Repeat password", "password", user.value.password2, true, (value: string) => {
                             if (!touchedFields.has("password2") && value) {
                                 touchedFields.add("password2");
                                 checkAllFieldsTouched();

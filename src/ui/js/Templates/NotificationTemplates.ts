@@ -93,9 +93,7 @@ export class NotificationTemplates {
         const unreadNotifications = compute(notifs => notifs.filter(notification => !notification.is_read), notifications);
         const notifsClass = compute((u): string => u.length > 0 ? "unread" : "_", unreadNotifications);
         const newestTimestamp = compute(unreadNotifs => unreadNotifs.length > 0 ? new Date(unreadNotifs[0].created_at) : null, unreadNotifications);
-
         const notifsVisible = signal(false);
-        const notificationContainer = NotificationTemplates.notificationContainer(notifsVisible, hasNotifs);
 
         UserActions.getNotificationsPeriodically();
         return create("div")
@@ -112,7 +110,7 @@ export class NotificationTemplates {
                     text: "",
                     classes: ["fullHeight", "round-on-tiny-breakpoint", notifsClass]
                 }),
-                notificationContainer
+                NotificationTemplates.notificationContainer(notifsVisible, hasNotifs)
             ).build();
     }
 
