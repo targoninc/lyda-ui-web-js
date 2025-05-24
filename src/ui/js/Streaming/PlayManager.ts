@@ -347,8 +347,10 @@ export class PlayManager {
 
     static async setLoudness(value: number) {
         value = Math.min(Math.max(value, 0), 1);
-        const streamClient = PlayManager.getStreamClient(currentTrackId.value);
-        await streamClient.setVolume(value);
+        const streamClients = PlayManager.getAllStreamClients();
+        for (const client of streamClients) {
+            await client.setVolume(value);
+        }
 
         volume.value = value;
         muted.value = value === 0;
@@ -396,5 +398,9 @@ export class PlayManager {
         }
         await PlayManager.cacheTrackData(res.data);
         return res.data;
+    }
+
+    static getAllStreamClients() {
+        return Object.values(streamClients.value);
     }
 }
