@@ -87,17 +87,17 @@ export class GenericTemplates {
         const errorClass = compute((h): string => h ? "error" : "_", hasError);
 
         return create("div")
-            .classes("flex")
+            .classes("flex", "align-children", "small-gap")
             .children(
                 create("div")
-                    .classes("card-label", "flex", "small-gap", errorClass)
+                    .classes("card-label", "align-children", "flex", "small-gap", errorClass)
                     .children(
                         when(icon, GenericTemplates.icon(icon ?? "")),
                         create("span")
                             .text(text)
                             .build(),
                     ).build(),
-                when(hasError, GenericTemplates.icon("warning", true, ["error"], "This section has errors"))
+                when(hasError, GenericTemplates.icon("warning", true, ["error", "has-title"], "This section has errors"))
             ).build();
     }
 

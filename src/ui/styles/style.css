@@ -335,7 +335,8 @@ h3 {
     font-weight: normal;
     align-items: center;
     border: 1px solid var(--color-5);
-    border-width: 1px 1px 1px .5em;
+    border-width: 0 0 0 .5em;
+    background: var(--color-3);
 }
 
 .card-label.error {

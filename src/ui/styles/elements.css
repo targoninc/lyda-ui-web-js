@@ -9,6 +9,17 @@
     font-size: 1em !important;
 }
 
+.material-symbols-outlined.has-title {
+    border: 1px solid var(--color-7);
+    border-radius: 999px;
+    padding: 4px;
+}
+
+.material-symbols-outlined.has-title:hover {
+    background: var(--color-7);
+    transform: scale(1.2);
+}
+
 .nav-logo {
     width: 20px;
     height: 20px;
