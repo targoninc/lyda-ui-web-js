@@ -22,7 +22,7 @@ import {
     when
 } from "@targoninc/jess";
 import {navigate, Route} from "../../Routing/Router.ts";
-import {currentUser, manualQueue, playingFrom} from "../../state.ts";
+import {currentTrackId, currentUser, manualQueue, playingFrom, playingHere} from "../../state.ts";
 import {Api} from "../../Api/Api.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {PageTemplates} from "../PageTemplates.ts";
@@ -498,9 +498,11 @@ export class AlbumTemplates {
     }
 
     static audioActions(album: Album, canEdit: boolean) {
-        const isPlaying = compute(p => p && p.type === "album" && p.id === album.id, playingFrom);
+        const isPlaying = compute((p, pHere) => p && p.type === "album" && p.id === album.id && pHere, playingFrom, playingHere);
         const duration = album.tracks!.reduce((acc, t) => acc + (t.track?.length ?? 0), 0);
         const hasTracks = album.tracks!.length > 0;
+        const playIcon = compute(p => p ? Icons.PAUSE : Icons.PLAY, isPlaying);
+        const playText = compute((p): string => p ? "Pause" : "Play", isPlaying);
 
         return create("div")
             .classes("audio-actions", "flex")
@@ -509,19 +511,26 @@ export class AlbumTemplates {
                     .classes("flex")
                     .children(
                         when(hasTracks, button({
-                            text: isPlaying ? "Pause" : "Play",
+                            text: playText,
                             icon: {
-                                icon: isPlaying ? Icons.PAUSE : Icons.PLAY,
+                                icon: playIcon,
                                 classes: ["inline-icon", "svg", "nopointer"],
                                 adaptive: true,
                                 isUrl: true
                             },
-                            classes: [hasTracks ? "_" : "nonclickable", "secondary"],
+                            classes: ["secondary"],
                             attributes: ["duration", duration.toString()],
                             id: album.id,
+                            disabled: !hasTracks,
                             onclick: async () => {
-                                const firstTrack = album.tracks![0];
-                                await AlbumActions.startTrackInAlbum(album, firstTrack.track_id, true);
+                                const current = currentTrackId.value;
+                                const trackInAlbum = album.tracks!.find((track) => track.track_id === current);
+                                if (trackInAlbum) {
+                                    await AlbumActions.startTrackInAlbum(album, trackInAlbum.track_id, true);
+                                } else {
+                                    const firstTrack = album.tracks![0];
+                                    await AlbumActions.startTrackInAlbum(album, firstTrack.track_id, true);
+                                }
                             },
                         })),
                         AlbumTemplates.addToQueueButton(album),

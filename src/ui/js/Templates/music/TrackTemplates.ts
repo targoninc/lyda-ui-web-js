@@ -289,11 +289,11 @@ export class TrackTemplates {
                 });
         }
 
-        const playingClasses = currentTrackId.value === track.id ? ["playing"] : [];
+        const playingClass = compute((id): string => id === track.id ? "playing" : "_", currentTrackId);
 
         return item.children(
             create("div")
-                .classes("feed-track", "flex", "padded", "rounded", "fullWidth", "card", ...playingClasses)
+                .classes("feed-track", "flex", "padded", "rounded", "fullWidth", "card", playingClass)
                 .styles("max-width", "100%")
                 .ondblclick(async () => {
                     if (!startCallback) {
@@ -678,12 +678,14 @@ export class TrackTemplates {
     }
 
     static playButton(track: Track) {
-        const isPlaying = PlayManager.isPlaying(track.id);
+        const isPlaying = compute(id => id === track.id, currentTrackId);
+        const text = compute((p): string => p ? "Pause" : "Play", isPlaying);
+        const icon = compute((p): string => p ? Icons.PAUSE : Icons.PLAY, isPlaying);
 
         return button({
-            text: isPlaying ? "Pause": "Play",
+            text,
             icon: {
-                icon: isPlaying ? Icons.PAUSE : Icons.PLAY,
+                icon,
                 classes: ["inline-icon", "svg", "nopointer"],
                 isUrl: true
             },

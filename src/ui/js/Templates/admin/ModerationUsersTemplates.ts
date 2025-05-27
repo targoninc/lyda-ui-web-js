@@ -1,13 +1,13 @@
-import {User} from "../../Models/DbModels/lyda/User";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {Api} from "../../Api/Api.ts";
 import {compute, Signal, signal, create, when} from "@targoninc/jess";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
 import {DashboardTemplates} from "./DashboardTemplates.ts";
-import {Permission} from "../../Models/DbModels/lyda/Permission.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
 import { button, checkbox } from "@targoninc/jess-components";
+import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import {Permission} from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
 
 export class ModerationUsersTemplates {
     static usersPage() {

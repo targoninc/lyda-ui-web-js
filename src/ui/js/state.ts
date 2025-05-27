@@ -59,6 +59,12 @@ contextQueue.subscribe((newQueue, changed) => {
 export const autoQueue = signal<number[]>([]);
 
 export const playingFrom = signal<PlayingFrom|null>(null);
+playingFrom.subscribe((playingFrom: PlayingFrom|null, changed: boolean) => {
+    if (!changed) {
+        return;
+    }
+    LydaCache.set("playingFrom", new CacheItem(playingFrom));
+});
 
 export const currentTrackPosition = signal<TrackPosition>({ relative: 0, absolute: 0 });
 currentTrackPosition.subscribe((p, changed) => {

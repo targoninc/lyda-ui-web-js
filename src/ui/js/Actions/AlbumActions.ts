@@ -15,6 +15,7 @@ import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
+import {playingHere} from "../state.ts";
 
 export class AlbumActions {
     static async openAddToAlbumModal(track: Track) {
@@ -140,7 +141,7 @@ export class AlbumActions {
 
     static async startTrackInAlbum(album: Album, trackId: number, stopIfPlaying = false) {
         const playingFrom = PlayManager.getPlayingFrom();
-        const isPlaying = playingFrom && playingFrom.type === "album" && playingFrom.id === album.id;
+        const isPlaying = playingFrom && playingFrom.type === "album" && playingFrom.id === album.id && playingHere.value;
 
         if (isPlaying && stopIfPlaying) {
             await PlayManager.stopAllAsync();

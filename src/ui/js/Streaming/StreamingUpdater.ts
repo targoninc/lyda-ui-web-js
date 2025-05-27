@@ -15,25 +15,6 @@ import {signal} from "@targoninc/jess";
 const updatingPlayState = signal(false);
 
 export class StreamingUpdater {
-    static updatePlayingIndicators() {
-        const playingElements = document.querySelectorAll(".playing");
-        for (const playingElement of playingElements) {
-            playingElement.classList.remove("playing");
-        }
-        const listTracks = document.querySelectorAll(".feed-track[id='" + currentTrackId.value + "']");
-        for (const listTrack of listTracks) {
-            listTrack.classList.add("playing");
-        }
-        const inlineTracks = document.querySelectorAll(".inlineTrack[track_id='" + currentTrackId.value + "']");
-        for (const inlineTrack of inlineTracks) {
-            inlineTrack.classList.add("playing");
-        }
-        const trackCards = document.querySelectorAll(".track-card[track_id='" + currentTrackId.value + "']");
-        for (const trackCard of trackCards) {
-            trackCard.classList.add("playing");
-        }
-    }
-
     static async updatePermanentPlayer() {
         if (!currentTrackId.value) {
             console.log("no currentTrackId");
@@ -176,7 +157,6 @@ export class StreamingUpdater {
             img.classList.remove("spinner-animation");
         }
 
-        StreamingUpdater.updatePlayingIndicators();
         await StreamingUpdater.updatePermanentPlayer();
         updatingPlayState.value = false;
     }
