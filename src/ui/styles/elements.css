@@ -1051,66 +1051,44 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     z-index: 1;
 }
 
-.progress-section-part.notStarted {
-    border-color: var(--color-6);
-    color: var(--color-6);
-    opacity: .8;
-    pointer-events: none;
-}
-
 .progress-section-part i {
     color: inherit;
 }
 
-.progress-section-part.inProgress {
-    border-color: var(--blue);
-    color: var(--blue);
-    animation: progress 1s alternate infinite;
+.progress-section {
+    --progress-color: var(--blue);
+    color: var(--progress-color);
 }
 
-@keyframes progress {
-    0% {
-        border-color: var(--blue);
-    }
-    100% {
-        border-color: var(--color-6);
-    }
+.progress-section.complete {
+    --progress-color: var(--green);
 }
 
-.progress-section-part.complete {
-    border-color: var(--green);
-    background: var(--green);
-    color: var(--color-4);
-}
-
-.progress-section-part.error, .progress-section-part.cancelled {
-    border-color: var(--red);
-    color: var(--red);
+.progress-section.error, .progress-section.cancelled {
+    --progress-color: var(--red);
 }
 
 .progress-section-retry {
     color: var(--red);
 }
 
-.progress-section-part-container {
-    overflow: hidden;
+.progress-circle {
+    width: 1em;
+    height: 1em;
+    border-radius: 50%;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.15);
+    position: relative;
 }
 
-.progress-section-part-container:first-child .progress-section-part {
-    border-radius: 999px 0 0 999px;
-}
-
-.progress-section-part-container:last-child .progress-section-part {
-    border-radius: 0 999px 999px 0;
-}
-
-.progress-section-part-progress {
+.progress-circle-overlay {
+    width: 50%;
+    height: 50%;
+    background: var(--color-4);
+    border-radius: 50%;
     position: absolute;
-    top: 1px;
-    left: 1px;
-    width: calc(100% - 2px);
-    height: calc(100% - 2px);
-    background: var(--color-9);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .check-list {

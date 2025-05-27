@@ -1,30 +1,36 @@
 import {Api} from "../Api/Api.ts";
 import {notify} from "./Ui.ts";
 import {navigate} from "../Routing/Router.ts";
-import {signal, Signal} from "@targoninc/jess";
+import {Signal} from "@targoninc/jess";
 import {UploadableTrack} from "../Models/UploadableTrack.ts";
 import {MediaUploader} from "../Api/MediaUploader.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {RoutePath} from "../Routing/routes.ts";
-import {ProgressPart} from "@targoninc/lyda-shared/src/Models/ProgressPart";
 import {ProgressState} from "@targoninc/lyda-shared/src/Enums/ProgressState";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {ProgressPart} from "../Models/ProgressPart.ts";
 
 export class AudioUpload {
     triggerEvent: Event;
     state: Signal<UploadableTrack>;
     id: number | undefined;
     api: Api | undefined;
-    private progress: Signal<ProgressPart[]>;
+    private progress: Signal<ProgressPart|null>;
 
-    constructor(e: Event, state: Signal<UploadableTrack>, progress: Signal<ProgressPart[]>) {
+    constructor(e: Event, state: Signal<UploadableTrack>, progress: Signal<ProgressPart|null>) {
         this.triggerEvent = e;
         this.state = state;
         this.progress = progress;
 
-        this.progress.value = [
+        this.progress.value = <ProgressPart>{
+            icon: "info",
+            text: "Details",
+            state: ProgressState.notStarted,
+            retryFunction: () => this.createTrackThenNext()
+        };
+        /*this.progress.value = [
             {
                 id: "details",
                 icon: "info",
@@ -48,22 +54,16 @@ export class AudioUpload {
                 retryFunction: () => this.uploadCoverThenNext(),
                 progress: signal(0)
             }
-        ]
+        ]*/
 
         this.uploadTrack().then();
     }
 
-    setProgressPartState(id: string, state: ProgressState, title?: string, progress?: number) {
-        const item = this.progress.value.find(p => p.id === id);
-        if (item) {
-            item.state.value = state;
-            if (title) {
-                item.text.value = title;
-            }
-            if (item.progress) {
-                item.progress.value = progress ?? 0;
-            }
-        }
+    setProgressPartState(update: Partial<ProgressPart>) {
+        this.progress.value = <ProgressPart>{
+            ...this.progress.value,
+            ...update,
+        };
     }
 
     async uploadTrack() {
@@ -78,57 +78,115 @@ export class AudioUpload {
     }
 
     async uploadAudioThenNext() {
-        this.setProgressPartState("audio", ProgressState.inProgress, "Uploading audio");
+        this.setProgressPartState({
+            state: ProgressState.inProgress,
+            text: "Uploading audio",
+            icon: "music_note",
+            progress: 0
+        });
         if (!this.state.value.audioFiles) {
-            this.setProgressPartState("audio", ProgressState.error, "No audio file");
+            this.setProgressPartState({
+                state: ProgressState.error,
+                text: "No audio file",
+                icon: "error"
+            });
             return "No audio file";
         }
 
         if (!this.id) {
-            this.setProgressPartState("audio", ProgressState.error, "No track id");
+            this.setProgressPartState({
+                state: ProgressState.error,
+                text: "No track id",
+                icon: "error"
+            });
             return "No track id";
         }
 
         const error = await this.uploadMedia(MediaFileType.audio, this.id, this.state.value.audioFiles![0], (event: ProgressEvent) => {
-            this.setProgressPartState("audio", ProgressState.inProgress, "Uploading audio...", (event.loaded / event.total) * 100);
+            this.setProgressPartState({
+                state: ProgressState.inProgress,
+                text: "Uploading audio...",
+                progress: (event.loaded / event.total) * 100
+            });
         });
         if (error !== true) {
-            this.setProgressPartState("audio", ProgressState.error, `Failed to upload audio: ${error}`);
+            this.setProgressPartState({
+                state: ProgressState.error,
+                text: `Failed to upload audio: ${error}`,
+                icon: "error"
+            });
             return `Failed to upload audio: ${error}`;
         } else {
-            this.setProgressPartState("audio", ProgressState.complete);
+            this.setProgressPartState({
+                state: ProgressState.complete,
+                text: `Audio uploaded`,
+                progress: 100
+            });
             return await this.uploadCoverThenNext();
         }
     }
 
     async uploadCoverThenNext() {
-        this.setProgressPartState("cover", ProgressState.inProgress, "Uploading cover");
+        this.setProgressPartState({
+            state: ProgressState.inProgress,
+            text: "Uploading cover",
+            icon: "add_photo_alternate",
+            progress: 0
+        });
         if (this.state.value.coverArtFiles) {
             if (!this.id) {
-                this.setProgressPartState("cover", ProgressState.error, "No track id");
+                this.setProgressPartState({
+                    state: ProgressState.error,
+                    text: "No track id",
+                    icon: "error"
+                });
                 return "No track id";
             }
 
             if (!await this.uploadMedia(MediaFileType.trackCover, this.id, this.state.value.coverArtFiles![0], (event: ProgressEvent) => {
-                this.setProgressPartState("cover", ProgressState.inProgress, "Uploading cover...", (event.loaded / event.total) * 100);
+                this.setProgressPartState({
+                    state: ProgressState.inProgress,
+                    text: "Uploading cover...",
+                    progress: (event.loaded / event.total) * 100
+                });
             })) {
-                this.setProgressPartState("cover", ProgressState.error, "Failed to upload cover");
+                this.setProgressPartState({
+                    state: ProgressState.error,
+                    text: "Failed to upload cover",
+                    icon: "error"
+                });
                 return "Failed to upload cover";
             }
         }
 
-        this.setProgressPartState("cover", ProgressState.complete, "Cover uploaded");
+        this.setProgressPartState({
+            state: ProgressState.complete,
+            text: `Cover uploaded`,
+            progress: 100
+        });
     }
 
     async createTrackThenNext() {
-        this.setProgressPartState("details", ProgressState.inProgress, "Creating track...");
+        this.setProgressPartState({
+            state: ProgressState.inProgress,
+            text: `Creating track...`,
+            progress: 0
+        });
         const result = await this.createTrack();
         if (result && result.constructor === String) {
-            this.setProgressPartState("details", ProgressState.error);
+            this.setProgressPartState({
+                state: ProgressState.error,
+                text: result,
+                icon: "error"
+            });
             return result;
         } else if (result) {
             this.id = (result as Track).id;
-            this.setProgressPartState("details", ProgressState.complete);
+            this.setProgressPartState({
+                state: ProgressState.complete,
+                text: "Track created",
+                icon: "check"
+            });
             return await this.uploadAudioThenNext();
         }
     }

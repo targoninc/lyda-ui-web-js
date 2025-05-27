@@ -14,7 +14,7 @@ import {
     StringOrSignal,
     TypeOrSignal,
     compute, signal, Signal,
-    InputType
+    InputType, asSignal
 } from "@targoninc/jess";
 import {Util} from "../../Classes/Util.ts";
 import {navigate} from "../../Routing/Router.ts";
@@ -25,25 +25,35 @@ import {dayFromValue} from "../../Classes/Helpers/Date.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {AuthActions} from "../../Actions/AuthActions.ts";
-import { Images } from "../../Enums/Images.ts";
-import { button, input, searchableSelect, icon, textarea, IconConfig, SearchableSelectConfig, SelectOption } from "@targoninc/jess-components";
+import {Images} from "../../Enums/Images.ts";
+import {
+    button,
+    input,
+    searchableSelect,
+    icon,
+    textarea,
+    IconConfig,
+    SearchableSelectConfig,
+    SelectOption
+} from "@targoninc/jess-components";
 import {NotificationType} from "../../Enums/NotificationType.ts";
 import {SearchResult} from "@targoninc/lyda-shared/src/Models/SearchResult";
 import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
 import {Filter} from "@targoninc/lyda-shared/src/Models/Filter";
-import {ProgressPart} from "@targoninc/lyda-shared/src/Models/ProgressPart";
 import {ProgressState} from "@targoninc/lyda-shared/src/Enums/ProgressState";
+import {ProgressPart} from "../../Models/ProgressPart.ts";
 
 export class GenericTemplates {
     static icon(icon$: StringOrSignal, adaptive = false, classes: StringOrSignal[] = [], title = "", onclick: Function | undefined = undefined) {
         const urlIndicators = [window.location.origin, "http", "data:", "blob:"];
-        // @ts-ignore
-        const isMaterial = icon$ && (icon$ as string) && icon$.includes && !urlIndicators.some(i => icon$.includes(i));
         const iconClass = adaptive ? "adaptive-icon" : "inline-icon";
-        const svgClass = isMaterial ? "_" : "svg";
+        icon$ = asSignal(icon$) as Signal<string>;
+        const isMaterial = compute(icon => icon && (icon as string) && icon.includes && !urlIndicators.some(i => icon.includes(i)), icon$);
+        const svgClass = compute((m): string => m ? "_" : "svg", isMaterial);
+        const actual = compute((i, m) => (!i && isMaterial) ? "" : i, icon$, isMaterial);
 
         return icon({
-            icon: icon$,
+            icon: actual,
             adaptive,
             title,
             isUrl: !isMaterial,
@@ -52,7 +62,7 @@ export class GenericTemplates {
         });
     }
 
-    static gif8831(url: StringOrSignal, link: StringOrSignal|null = null) {
+    static gif8831(url: StringOrSignal, link: StringOrSignal | null = null) {
         let item;
         if (link) {
             item = create("a")
@@ -83,7 +93,7 @@ export class GenericTemplates {
             .build();
     }
 
-    static cardLabel(text: HtmlPropertyValue, icon: StringOrSignal|null = null, hasError: Signal<boolean> = signal(false)) {
+    static cardLabel(text: HtmlPropertyValue, icon: StringOrSignal | null = null, hasError: Signal<boolean> = signal(false)) {
         const errorClass = compute((h): string => h ? "error" : "_", hasError);
 
         return create("div")
@@ -132,7 +142,7 @@ export class GenericTemplates {
         return button({
             text: "Log out",
             classes: ["hideOnSmallBreakpoint", "negative"],
-            icon: { icon: "logout" },
+            icon: {icon: "logout"},
             onclick: async () => {
                 await AuthActions.logOut();
             }
@@ -169,7 +179,7 @@ export class GenericTemplates {
                 button({
                     text: "Go explore somewhere else",
                     onclick: () => navigate(RoutePath.explore),
-                    icon: { icon: "explore" }
+                    icon: {icon: "explore"}
                 }),
             ).build();
     }
@@ -256,7 +266,7 @@ export class GenericTemplates {
             ).build();
     }
 
-    static action(icon: StringOrSignal, text: HtmlPropertyValue, id: HtmlPropertyValue, onclick: Function, attributes: HtmlPropertyValue[] = [], classes: StringOrSignal[] = [], link: StringOrSignal|null = null) {
+    static action(icon: StringOrSignal, text: HtmlPropertyValue, id: HtmlPropertyValue, onclick: Function, attributes: HtmlPropertyValue[] = [], classes: StringOrSignal[] = [], link: StringOrSignal | null = null) {
         return create(link ? "a" : "div")
             .classes("flex", "small-gap", "clickable", "fakeButton", "padded-inline", "rounded")
             .children(
@@ -276,7 +286,7 @@ export class GenericTemplates {
     static newAlbumButton(classes: string[] = []) {
         return button({
             text: "New album",
-            icon: { icon: "forms_add_on" },
+            icon: {icon: "forms_add_on"},
             classes: ["positive", ...classes],
             onclick: async () => {
                 await AlbumActions.openNewAlbumModal();
@@ -287,7 +297,7 @@ export class GenericTemplates {
     static newPlaylistButton(classes: string[] = []) {
         return button({
             text: "New playlist",
-            icon: { icon: "playlist_add" },
+            icon: {icon: "playlist_add"},
             classes: ["positive", ...classes],
             onclick: async () => {
                 await PlaylistActions.openNewPlaylistModal();
@@ -298,7 +308,7 @@ export class GenericTemplates {
     static newTrackButton(classes: string[] = []) {
         return button({
             text: "Upload",
-            icon: { icon: "upload" },
+            icon: {icon: "upload"},
             classes: ["positive", ...classes],
             onclick: () => navigate(RoutePath.upload)
         });
@@ -370,7 +380,7 @@ export class GenericTemplates {
                 e.stopPropagation();
                 callback();
             },
-            icon: { icon: "delete" },
+            icon: {icon: "delete"},
             title: "Delete",
             text: ""
         });
@@ -384,7 +394,7 @@ export class GenericTemplates {
                 e.stopPropagation();
                 callback();
             },
-            icon: { icon: "upload" },
+            icon: {icon: "upload"},
             title: "Upload",
             text: ""
         });
@@ -509,38 +519,38 @@ export class GenericTemplates {
                              confirmText: StringOrSignal, cancelText: StringOrSignal, confirmCallback: Function,
                              cancelCallback: Function) {
         return GenericTemplates.modal([
-                create("div")
-                    .classes("flex")
-                    .children(
-                        create("h2")
-                            .classes("flex")
-                            .children(
-                                GenericTemplates.icon(icon, true),
-                                create("span")
-                                    .text(title)
-                                    .build()
-                            ).build()
-                    ).build(),
-                create("p")
-                    .text(text)
-                    .build(),
-                create("div")
-                    .classes("flex")
-                    .children(
-                        button({
-                            text: confirmText ?? "Confirm",
-                            onclick: confirmCallback,
-                            classes: ["positive"],
-                            icon: {icon: "check"}
-                        }),
-                        button({
-                            text: cancelText ?? "Cancel",
-                            onclick: cancelCallback,
-                            classes: ["negative"],
-                            icon: {icon: "close"}
-                        }),
-                    ).build()
-            ], "confirmation");
+            create("div")
+                .classes("flex")
+                .children(
+                    create("h2")
+                        .classes("flex")
+                        .children(
+                            GenericTemplates.icon(icon, true),
+                            create("span")
+                                .text(title)
+                                .build()
+                        ).build()
+                ).build(),
+            create("p")
+                .text(text)
+                .build(),
+            create("div")
+                .classes("flex")
+                .children(
+                    button({
+                        text: confirmText ?? "Confirm",
+                        onclick: confirmCallback,
+                        classes: ["positive"],
+                        icon: {icon: "check"}
+                    }),
+                    button({
+                        text: cancelText ?? "Cancel",
+                        onclick: cancelCallback,
+                        classes: ["negative"],
+                        icon: {icon: "close"}
+                    }),
+                ).build()
+        ], "confirmation");
     }
 
     static imageModal(imageUrl: StringOrSignal) {
@@ -565,103 +575,103 @@ export class GenericTemplates {
                           newValue: Signal<string>, icon: HtmlPropertyValue, confirmText: StringOrSignal, cancelText: StringOrSignal,
                           confirmCallback: Function, cancelCallback: Function) {
         return GenericTemplates.modal([
-                create("div")
-                    .classes("flex-v")
-                    .children(
-                        create("div")
-                            .classes("flex")
-                            .children(
-                                create("img")
-                                    .classes("icon", "svg")
-                                    .styles("width", "30px", "height", "auto")
-                                    .attributes("src", icon)
-                                    .build(),
-                                create("h2")
-                                    .text(title)
-                                    .build()
-                            ).build(),
-                        create("p")
-                            .text(text)
-                            .build(),
-                        input<string>({
-                            type: InputType.text,
-                            name: "textInputModalInput",
-                            label: "",
-                            placeholder: "",
-                            value: newValue,
-                            onchange: (v) => {
-                                newValue.value = v;
-                            }
-                        }),
-                        create("div")
-                            .classes("flex")
-                            .children(
-                                button({
-                                    text: confirmText ?? "Confirm",
-                                    onclick: confirmCallback,
-                                    classes: ["positive"],
-                                    icon: {icon: "check"}
-                                }),
-                                button({
-                                    text: cancelText ?? "Cancel",
-                                    onclick: cancelCallback,
-                                    classes: ["negative"],
-                                    icon: {icon: "close"}
-                                }),
-                            ).build()
-                    ).build(),
-            ], "text-input");
+            create("div")
+                .classes("flex-v")
+                .children(
+                    create("div")
+                        .classes("flex")
+                        .children(
+                            create("img")
+                                .classes("icon", "svg")
+                                .styles("width", "30px", "height", "auto")
+                                .attributes("src", icon)
+                                .build(),
+                            create("h2")
+                                .text(title)
+                                .build()
+                        ).build(),
+                    create("p")
+                        .text(text)
+                        .build(),
+                    input<string>({
+                        type: InputType.text,
+                        name: "textInputModalInput",
+                        label: "",
+                        placeholder: "",
+                        value: newValue,
+                        onchange: (v) => {
+                            newValue.value = v;
+                        }
+                    }),
+                    create("div")
+                        .classes("flex")
+                        .children(
+                            button({
+                                text: confirmText ?? "Confirm",
+                                onclick: confirmCallback,
+                                classes: ["positive"],
+                                icon: {icon: "check"}
+                            }),
+                            button({
+                                text: cancelText ?? "Cancel",
+                                onclick: cancelCallback,
+                                classes: ["negative"],
+                                icon: {icon: "close"}
+                            }),
+                        ).build()
+                ).build(),
+        ], "text-input");
     }
 
     static textAreaInputModal(title: HtmlPropertyValue, text: HtmlPropertyValue, currentValue: HtmlPropertyValue,
                               newValue: Signal<string>, icon: HtmlPropertyValue, confirmText: StringOrSignal, cancelText: StringOrSignal,
                               confirmCallback: Function, cancelCallback: Function) {
         return GenericTemplates.modal([
-                create("div")
-                    .classes("flex-v")
-                    .children(
-                        create("div")
-                            .classes("flex")
-                            .children(
-                                create("img")
-                                    .classes("icon", "svg")
-                                    .styles("width", "30px", "height", "auto")
-                                    .attributes("src", icon)
-                                    .build(),
-                                create("h2")
-                                    .text(title)
-                                    .build()
-                            ).build(),
-                        create("p")
-                            .text(text)
-                            .build(),
-                        textarea({
-                            name: "textInputModalInput",
-                            label: "",
-                            placeholder: "",
-                            value: newValue,
-                            onchange: (v) => {
-                                newValue.value = v;
-                            }
-                        }),
-                        create("div")
-                            .classes("flex")
-                            .children(
-                                button({
-                                    text: confirmText ?? "Confirm",
-                                    onclick: confirmCallback,
-                                    classes: ["positive"],
-                                    icon: {icon: "check"}
-                                }),
-                                button({
-                                    text: cancelText ?? "Cancel",
-                                    onclick: cancelCallback,
-                                    classes: ["negative"],
-                                    icon: {icon: "close"}
-                                }),
-                            ).build()
-                    ).build(),
-            ], "text-area-input");
+            create("div")
+                .classes("flex-v")
+                .children(
+                    create("div")
+                        .classes("flex")
+                        .children(
+                            create("img")
+                                .classes("icon", "svg")
+                                .styles("width", "30px", "height", "auto")
+                                .attributes("src", icon)
+                                .build(),
+                            create("h2")
+                                .text(title)
+                                .build()
+                        ).build(),
+                    create("p")
+                        .text(text)
+                        .build(),
+                    textarea({
+                        name: "textInputModalInput",
+                        label: "",
+                        placeholder: "",
+                        value: newValue,
+                        onchange: (v) => {
+                            newValue.value = v;
+                        }
+                    }),
+                    create("div")
+                        .classes("flex")
+                        .children(
+                            button({
+                                text: confirmText ?? "Confirm",
+                                onclick: confirmCallback,
+                                classes: ["positive"],
+                                icon: {icon: "check"}
+                            }),
+                            button({
+                                text: cancelText ?? "Cancel",
+                                onclick: cancelCallback,
+                                classes: ["negative"],
+                                icon: {icon: "close"}
+                            }),
+                        ).build()
+                ).build(),
+        ], "text-area-input");
     }
 
     static combinedSelector(tabs: any[], callback: Function, selectedIndex = 0) {
@@ -748,12 +758,12 @@ export class GenericTemplates {
             ).build();
     }
 
-    static modalCancelButton(modal: AnyElement|null = null) {
+    static modalCancelButton(modal: AnyElement | null = null) {
         return button({
             text: "Cancel",
             onclick: () => Util.removeModal(modal),
             classes: ["negative"],
-            icon: { icon: "close" }
+            icon: {icon: "close"}
         });
     }
 
@@ -804,71 +814,71 @@ export class GenericTemplates {
         const users = signal<SearchResult[]>([]);
 
         return GenericTemplates.modal([
-                create("div")
-                    .classes("flex-v")
-                    .children(
-                        create("div")
-                            .classes("flex")
-                            .children(
-                                create("h2")
-                                    .classes("flex")
-                                    .children(
-                                        GenericTemplates.icon(icon, true),
-                                        create("span")
-                                            .text(title)
-                                            .build(),
-                                    ).build()
-                            ).build(),
-                        create("p")
-                            .text(text)
-                            .build(),
-                        input({
-                            id: "addUserSearch",
-                            name: "addUserSearch",
-                            type: InputType.text,
-                            value: currentValue ?? "",
-                            onkeydown: async (e) => {
-                                const target = e.target as HTMLInputElement;
-                                const search = target.value;
-                                const res = await Api.getAsync<SearchResult[]>(ApiRoutes.searchUsers, {
-                                    search,
-                                    filters: JSON.stringify(["users"])
-                                });
-                                if (res.code === 200) {
-                                    users.value = res.data;
-                                }
-                            },
-                        }),
-                        create("div")
-                            .classes("flex-v")
-                            .styles("max-height", "200px", "overflow", "auto", "flex-wrap", "nowrap")
-                            .children(
-                                signalMap(users, create("div").classes("flex-v"),
-                                    user => GenericTemplates.addUserLinkSearchResult(user, selectedState))
-                            ).build(),
-                        collabTypeOptions,
-                        create("div")
-                            .classes("flex")
-                            .children(
-                                button({
-                                    text: confirmText ?? "Confirm",
-                                    onclick: async () => {
-                                        confirmCallback(selectedState.value, parseInt(collabType.value), collabTypes);
-                                    },
-                                    icon: {
-                                        icon: "person_add"
-                                    },
-                                    classes: ["positive"],
-                                }),
-                                button({
-                                    text: cancelText ?? "Cancel",
-                                    onclick: cancelCallback,
-                                    classes: ["negative"],
-                                    icon: {icon: "close"}
-                                }),
-                            ).build()
-                    ).build(),
-            ], "add-linked-user");
+            create("div")
+                .classes("flex-v")
+                .children(
+                    create("div")
+                        .classes("flex")
+                        .children(
+                            create("h2")
+                                .classes("flex")
+                                .children(
+                                    GenericTemplates.icon(icon, true),
+                                    create("span")
+                                        .text(title)
+                                        .build(),
+                                ).build()
+                        ).build(),
+                    create("p")
+                        .text(text)
+                        .build(),
+                    input({
+                        id: "addUserSearch",
+                        name: "addUserSearch",
+                        type: InputType.text,
+                        value: currentValue ?? "",
+                        onkeydown: async (e) => {
+                            const target = e.target as HTMLInputElement;
+                            const search = target.value;
+                            const res = await Api.getAsync<SearchResult[]>(ApiRoutes.searchUsers, {
+                                search,
+                                filters: JSON.stringify(["users"])
+                            });
+                            if (res.code === 200) {
+                                users.value = res.data;
+                            }
+                        },
+                    }),
+                    create("div")
+                        .classes("flex-v")
+                        .styles("max-height", "200px", "overflow", "auto", "flex-wrap", "nowrap")
+                        .children(
+                            signalMap(users, create("div").classes("flex-v"),
+                                user => GenericTemplates.addUserLinkSearchResult(user, selectedState))
+                        ).build(),
+                    collabTypeOptions,
+                    create("div")
+                        .classes("flex")
+                        .children(
+                            button({
+                                text: confirmText ?? "Confirm",
+                                onclick: async () => {
+                                    confirmCallback(selectedState.value, parseInt(collabType.value), collabTypes);
+                                },
+                                icon: {
+                                    icon: "person_add"
+                                },
+                                classes: ["positive"],
+                            }),
+                            button({
+                                text: cancelText ?? "Cancel",
+                                onclick: cancelCallback,
+                                classes: ["negative"],
+                                icon: {icon: "close"}
+                            }),
+                        ).build()
+                ).build(),
+        ], "add-linked-user");
     }
 
     static breadcrumbs(pageMap: any, history: Signal<any>, stepState: Signal<any>) {
@@ -987,7 +997,7 @@ export class GenericTemplates {
             ).build();
     }
 
-    static inlineLink(link: Function|StringOrSignal, text: HtmlPropertyValue, newTab = true) {
+    static inlineLink(link: Function | StringOrSignal, text: HtmlPropertyValue, newTab = true) {
         if (link.constructor === Function) {
             return create("a")
                 .classes("inlineLink")
@@ -1004,54 +1014,49 @@ export class GenericTemplates {
             .build()
     }
 
-    static progressSections(progressState: Signal<ProgressPart[]>) {
-        const parts = signal(progressState.value.map(part => part.id));
-        progressState.subscribe(p => {
-            const newList = p.map(part => part.id);
-            if (newList.length !== parts.value.length) {
-                parts.value = newList;
-            }
-        });
+    static progressSectionPart(part: Signal<ProgressPart | null>) {
+        const retryable = compute((p): boolean => {
+            return (p && p.state && p.state === ProgressState.error && (p.retryFunction !== undefined)) ?? false;
+        }, part);
+        const title = compute(p => p?.title, part) as StringOrSignal;
+        const state = compute(p => p?.state, part) as StringOrSignal;
+        const icon = compute(p => p?.icon, part) as StringOrSignal;
+        const text = compute(p => p?.text, part) as StringOrSignal;
+        const progress = compute(p => p?.progress ?? 0, part);
+        const retryFunction = compute(p => p?.retryFunction, part);
 
-        return create("div")
-            .classes("progress-sections")
+        return when(part, create("div")
+            .classes("flex", "relative", "progress-section", state, "align-children", "no-gap")
+            .title(title)
             .children(
-                signalMap(parts, create("div").classes("flex", "small-gap"), (id: string) => GenericTemplates.progressSectionPart(progressState.value.find(p => p.id === id)!))
-            ).build();
-    }
-
-    static progressSectionPart(part: ProgressPart) {
-        const retryable = compute((state): boolean => {
-            return state && state === ProgressState.error && (part.retryFunction !== undefined);
-        }, part.state);
-
-        return create("div")
-            .classes("flex-v", "progress-section-part-container", "relative")
-            .title(part.title ?? "")
-            .children(
-                when(part.progress, create("div").classes("progress-section-part-progress").css({
-                        width: compute(p => p + "%", part.progress ?? signal(0))
-                    }).build()),
-                create("div")
-                    .classes("progress-section-part", "small-gap", "flex", part.state as Signal<string>)
+                when(progress, create("div")
+                    .classes("progress-circle")
+                    .styles("background", compute(p => `conic-gradient(var(--progress-color) ${p + "%"}, transparent 0%)`, progress))
                     .children(
-                        GenericTemplates.icon(part.icon, true, [part.state as Signal<string>]),
+                        create("div")
+                            .classes("progress-circle-overlay")
+                    ).build()),
+                create("div")
+                    .classes("progress-section-part", "small-gap", "flex")
+                    .children(
                         create("span")
                             .classes("progress-section-part-text")
-                            .text(part.text)
+                            .text(text)
                             .build(),
+                        GenericTemplates.icon(icon, true, [state]),
                     ).build(),
                 when(retryable, create("div")
                     .classes("progress-section-retry", "flex", "small-gap")
                     .children(
-                        GenericTemplates.icon("refresh", true, [part.state as Signal<string>]),
+                        GenericTemplates.icon("refresh", true, [state]),
                         create("span")
                             .classes("progress-section-part-text")
                             .text("Retry")
-                            .onclick(() => part.retryFunction ? part.retryFunction() : () => {})
+                            .onclick(() => retryFunction.value ? retryFunction.value() : () => {
+                            })
                             .build()
                     ).build())
-            ).build();
+            ).build());
     }
 
     static verticalDragIndicator() {
@@ -1062,7 +1067,7 @@ export class GenericTemplates {
 
     static releaseDateInput(state: Signal<{
         release_date: Date;
-    }|any>) {
+    } | any>) {
         return input<string>({
             type: InputType.date,
             name: "release_date",
@@ -1104,13 +1109,13 @@ export class GenericTemplates {
     }
 }
 
-export function vertical(...children: (AnyNode|Signal<AnyNode>|Signal<AnyElement>)[]) {
+export function vertical(...children: (AnyNode | Signal<AnyNode> | Signal<AnyElement>)[]) {
     return create("div")
         .classes("flex-v")
         .children(...children);
 }
 
-export function horizontal(...children: (AnyNode|Signal<AnyNode>|Signal<AnyElement>)[]) {
+export function horizontal(...children: (AnyNode | Signal<AnyNode> | Signal<AnyElement>)[]) {
     return create("div")
         .classes("flex")
         .children(...children);
