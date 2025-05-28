@@ -7,24 +7,35 @@ import {PlayManager} from "../../Streaming/PlayManager.ts";
 import {TrackTemplates} from "./TrackTemplates.ts";
 import {QueueManager} from "../../Streaming/QueueManager.ts";
 import {PlaylistActions} from "../../Actions/PlaylistActions.ts";
-import {StatisticsTemplates} from "../StatisticsTemplates.ts";
 import {Images} from "../../Enums/Images.ts";
 import {getErrorMessage, Util} from "../../Classes/Util.ts";
 import {notify, Ui} from "../../Classes/Ui.ts";
-import {compute, Signal, signal, AnyNode, create, HtmlPropertyValue, when, nullElement, InputType} from "@targoninc/jess";
-import {Album} from "../../Models/DbModels/lyda/Album.ts";
-import {Track} from "../../Models/DbModels/lyda/Track.ts";
+import {
+    AnyNode,
+    compute,
+    create,
+    HtmlPropertyValue,
+    InputType,
+    nullElement,
+    signal,
+    Signal,
+    when
+} from "@targoninc/jess";
 import {navigate, Route} from "../../Routing/Router.ts";
-import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
-import {NotificationType} from "../../Enums/NotificationType.ts";
-import {currentUser, manualQueue, playingFrom} from "../../state.ts";
+import {currentTrackId, currentUser, manualQueue, playingFrom, playingHere} from "../../state.ts";
 import {Api} from "../../Api/Api.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {PageTemplates} from "../PageTemplates.ts";
-import {ListTrack} from "../../Models/ListTrack.ts";
 import {RoutePath} from "../../Routing/routes.ts";
-import {ItemType} from "../../Enums/ItemType.ts";
-import { button, input, textarea, toggle } from "@targoninc/jess-components";
+import {button, input, textarea, toggle} from "@targoninc/jess-components";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import {NotificationType} from "../../Enums/NotificationType.ts";
+import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
+import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
+import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
+import {InteractionTemplates} from "../InteractionTemplates.ts";
+import {MusicTemplates} from "./MusicTemplates.ts";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
@@ -265,10 +276,7 @@ export class AlbumTemplates {
                 create("p")
                     .text("You have not created any albums yet.")
                     .build(),
-                create("div")
-                    .classes("button-container")
-                    .children(GenericTemplates.newAlbumButton(["secondary"]))
-                    .build(),
+                GenericTemplates.newAlbumButton(["secondary"])
             ];
         } else {
             children = [
@@ -305,19 +313,14 @@ export class AlbumTemplates {
                             .classes("flex-v", "small-gap")
                             .children(
                                 AlbumTemplates.title(album.title, album.id, icons),
-                                UserTemplates.userWidget(album.user, Util.userIsFollowing(album.user), [], [], UserWidgetContext.card),
+                                UserTemplates.userWidget(album.user, [], [], UserWidgetContext.card),
                                 create("span")
                                     .classes("date", "text-small", "nopointer", "color-dim")
                                     .text(Time.ago(album.release_date))
                                     .build(),
                             ).build(),
                     ).build(),
-                create("div")
-                    .classes("stats-container", "flex", "rounded")
-                    .children(
-                        StatisticsTemplates.likesIndicator(ItemType.album, album.id, album.likes.length, Util.userHasLiked(album)),
-                        StatisticsTemplates.likeListOpener(album.likes),
-                    ).build()
+                InteractionTemplates.interactions(EntityType.album, album),
             ).build();
     }
 
@@ -400,7 +403,6 @@ export class AlbumTemplates {
             coverState.value = Util.getAlbumCover(album.id);
         }
         const albumUser = album.user!;
-        const following = Util.userIsFollowing(albumUser);
         const noTracks = signal(album.tracks?.length === 0);
         const tracks = signal<ListTrack[]>(album.tracks ?? []);
 
@@ -418,7 +420,7 @@ export class AlbumTemplates {
                             .classes("title", "wordwrap")
                             .text(album.title)
                             .build(),
-                        UserTemplates.userWidget(albumUser, following, [], [], UserWidgetContext.singlePage)
+                        UserTemplates.userWidget(albumUser, [], [], UserWidgetContext.singlePage)
                     ).build(),
                 create("div")
                     .classes("album-info-container", "flex")
@@ -449,13 +451,7 @@ export class AlbumTemplates {
                                             .text("Released " + Util.formatDate(album.release_date))
                                             .build()
                                     ).build(),
-                                create("div")
-                                    .classes("stats-container", "flex", "rounded")
-                                    .children(
-                                        StatisticsTemplates.likesIndicator(ItemType.album, album.id, album.likes.length,
-                                            Util.arrayPropertyMatchesUser(album.likes, "user_id")),
-                                        StatisticsTemplates.likeListOpener(album.likes),
-                                    ).build(),
+                                InteractionTemplates.interactions(EntityType.album, album),
                             ).build()
                     ).build(),
                 TrackTemplates.tracksInList(noTracks, tracks, canEdit, album, "album", startCallback)
@@ -503,9 +499,11 @@ export class AlbumTemplates {
     }
 
     static audioActions(album: Album, canEdit: boolean) {
-        const isPlaying = compute(p => p && p.type === "album" && p.id === album.id, playingFrom);
+        const isPlaying = compute((p, pHere) => p && p.type === "album" && p.id === album.id && pHere, playingFrom, playingHere);
         const duration = album.tracks!.reduce((acc, t) => acc + (t.track?.length ?? 0), 0);
         const hasTracks = album.tracks!.length > 0;
+        const playIcon = compute(p => p ? Icons.PAUSE : Icons.PLAY, isPlaying);
+        const playText = compute((p): string => p ? "Pause" : "Play", isPlaying);
 
         return create("div")
             .classes("audio-actions", "flex")
@@ -514,22 +512,29 @@ export class AlbumTemplates {
                     .classes("flex")
                     .children(
                         when(hasTracks, button({
-                            text: isPlaying ? "Pause" : "Play",
+                            text: playText,
                             icon: {
-                                icon: isPlaying ? Icons.PAUSE : Icons.PLAY,
+                                icon: playIcon,
                                 classes: ["inline-icon", "svg", "nopointer"],
                                 adaptive: true,
                                 isUrl: true
                             },
-                            classes: [hasTracks ? "_" : "nonclickable", "secondary"],
+                            classes: ["secondary"],
                             attributes: ["duration", duration.toString()],
                             id: album.id,
+                            disabled: !hasTracks,
                             onclick: async () => {
-                                const firstTrack = album.tracks![0];
-                                await AlbumActions.startTrackInAlbum(album, firstTrack.track_id, true);
+                                const current = currentTrackId.value;
+                                const trackInAlbum = album.tracks!.find((track) => track.track_id === current);
+                                if (trackInAlbum) {
+                                    await AlbumActions.startTrackInAlbum(album, trackInAlbum.track_id, true);
+                                } else {
+                                    const firstTrack = album.tracks![0];
+                                    await AlbumActions.startTrackInAlbum(album, firstTrack.track_id, true);
+                                }
                             },
                         })),
-                        AlbumTemplates.addToQueueButton(album),
+                        MusicTemplates.addListToQueueButton(album),
                         button({
                             text: "Add to playlist",
                             icon: {
@@ -563,30 +568,5 @@ export class AlbumTemplates {
                     }
                 }))
             ).build();
-    }
-
-    private static addToQueueButton(album: Album) {
-        const allTracksInQueue = compute(q => album.tracks && album.tracks.every((t) => q.includes(t.track_id)), manualQueue);
-        const text = compute((q): string => q ? "Unqueue" : "Queue", allTracksInQueue);
-        const icon = compute((q): string => q ? Icons.UNQUEUE : Icons.QUEUE, allTracksInQueue);
-        const buttonClass = compute((q): string => q ? "audio-queueremove" : "audio-queueadd", allTracksInQueue);
-
-        return button({
-            text,
-            icon: {
-                icon,
-                classes: ["inline-icon", "svg", "nopointer"],
-                adaptive: true,
-                isUrl: true
-            },
-            classes: [buttonClass, "secondary"],
-            onclick: async () => {
-                for (let track of album.tracks!) {
-                    if (!manualQueue.value.includes(track.track_id)) {
-                        QueueManager.addToManualQueue(track.track_id);
-                    }
-                }
-            },
-        });
     }
 }

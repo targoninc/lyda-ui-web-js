@@ -2,15 +2,15 @@ import {Api} from "../Api/Api.ts";
 import {notify} from "./Ui.ts";
 import {UserTemplates} from "../Templates/account/UserTemplates.ts";
 import {GenericTemplates} from "../Templates/generic/GenericTemplates.ts";
-import {User} from "../Models/DbModels/lyda/User.ts";
 import {AnyElement} from "@targoninc/jess";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {getErrorMessage} from "./Util.ts";
-import {Track} from "../Models/DbModels/lyda/Track.ts";
-import {Album} from "../Models/DbModels/lyda/Album.ts";
-import {Playlist} from "../Models/DbModels/lyda/Playlist.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
 import {MusicTemplates} from "../Templates/music/MusicTemplates.ts";
+import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import { NotificationType } from "../Enums/NotificationType.ts";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 
 export class ProfilePage {
     static async addTabSectionAsync(element: AnyElement, user: User, isOwnProfile: boolean) {
@@ -25,7 +25,7 @@ export class ProfilePage {
 
         const tabs = ["Tracks", "Albums", "Playlists", "Reposts", "Listening History"];
         const tabContents = [tracksContainer, albumsContainer, playlistsContainer, repostsContainer, historyContainer];
-        const tabSelector = GenericTemplates.tabSelector(tabs, (i: number) => {
+        const tabSelector = GenericTemplates.combinedSelector(tabs, (i: number) => {
             tabContents.forEach((c, j) => {
                 c.style.display = i === j ? "block" : "none";
             });

@@ -46,3 +46,8 @@ th {
 tr:hover {
     background: var(--color-9);
 }
+
+button.inert {
+    border-color: var(--color-9);
+    background-color: var(--color-9);
+}

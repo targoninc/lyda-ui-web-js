@@ -6,22 +6,35 @@ import {TrackTemplates} from "./TrackTemplates.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
 import {QueueManager} from "../../Streaming/QueueManager.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
-import {StatisticsTemplates} from "../StatisticsTemplates.ts";
 import {Images} from "../../Enums/Images.ts";
 import {Util} from "../../Classes/Util.ts";
 import {notify, Ui} from "../../Classes/Ui.ts";
-import {User} from "../../Models/DbModels/lyda/User.ts";
-import {Playlist} from "../../Models/DbModels/lyda/Playlist.ts";
-import {compute, Signal, signal, AnyElement, AnyNode, create, HtmlPropertyValue, when, nullElement, InputType} from "@targoninc/jess";
-import {Track} from "../../Models/DbModels/lyda/Track.ts";
-import {Album} from "../../Models/DbModels/lyda/Album.ts";
+import {
+    AnyElement,
+    AnyNode,
+    compute,
+    create,
+    HtmlPropertyValue,
+    InputType,
+    nullElement,
+    Signal,
+    signal,
+    when
+} from "@targoninc/jess";
 import {navigate} from "../../Routing/Router.ts";
-import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
-import {NotificationType} from "../../Enums/NotificationType.ts";
-import {ListTrack} from "../../Models/ListTrack.ts";
 import {RoutePath} from "../../Routing/routes.ts";
-import {ItemType} from "../../Enums/ItemType.ts";
-import { button, icon, input, textarea, toggle } from "@targoninc/jess-components";
+import {button, icon, input, textarea, toggle} from "@targoninc/jess-components";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
+import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
+import {NotificationType} from "../../Enums/NotificationType.ts";
+import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
+import {InteractionTemplates} from "../InteractionTemplates.ts";
+import {playingFrom, playingHere} from "../../state.ts";
+import {MusicTemplates} from "./MusicTemplates.ts";
 
 export class PlaylistTemplates {
     static addTrackToPlaylistModal(track: Track, playlists: Playlist[]) {
@@ -236,10 +249,7 @@ export class PlaylistTemplates {
                 create("p")
                     .text("You have not created any playlists yet.")
                     .build(),
-                create("div")
-                    .classes("button-container")
-                    .children(GenericTemplates.newPlaylistButton(["secondary"]))
-                    .build(),
+                GenericTemplates.newPlaylistButton(["secondary"])
             ];
         } else {
             children = [
@@ -267,9 +277,6 @@ export class PlaylistTemplates {
         if (!playlist.user) {
             throw new Error(`Playlist ${playlist.id} has no user`);
         }
-        if (!playlist.likes) {
-            throw new Error(`Playlist ${playlist.id} has no likes`);
-        }
 
         return create("div")
             .classes("playlist-card", "padded", "flex-v", "small-gap", isSecondary ? "secondary" : "_")
@@ -282,20 +289,14 @@ export class PlaylistTemplates {
                             .classes("flex-v", "small-gap")
                             .children(
                                 PlaylistTemplates.title(playlist.title, playlist.id, icons),
-                                UserTemplates.userWidget(playlist.user, Util.arrayPropertyMatchesUser(playlist.user.follows ?? [], "following_user_id"), [], [], UserWidgetContext.card),
+                                UserTemplates.userWidget(playlist.user, [], [], UserWidgetContext.card),
                                 create("span")
                                     .classes("date", "text-small", "nopointer", "color-dim")
                                     .text(Time.ago(playlist.created_at))
                                     .build(),
                             ).build(),
                     ).build(),
-                create("div")
-                    .classes("stats-container", "flex", "rounded")
-                    .children(
-                        StatisticsTemplates.likesIndicator(ItemType.playlist, playlist.id, playlist.likes.length,
-                            Util.arrayPropertyMatchesUser(playlist.likes, "user_id")),
-                        StatisticsTemplates.likeListOpener(playlist.likes),
-                    ).build()
+                InteractionTemplates.interactions(EntityType.playlist, playlist),
             ).build();
     }
 
@@ -382,26 +383,11 @@ export class PlaylistTemplates {
         if (!a_user) {
             throw new Error(`Playlist ${playlist.id} has no user`);
         }
-        if (!playlist.likes) {
-            throw new Error(`Playlist ${playlist.id} has no likes array`);
-        }
 
         async function startCallback(trackId: number) {
             await PlaylistActions.startTrackInPlaylist(playlist, trackId);
         }
 
-        const editActions = [];
-        if (data.canEdit) {
-            editActions.push(button({
-                text: "Delete",
-                icon: {icon: "delete"},
-                classes: ["negative"],
-                onclick: async () => {
-                    await Ui.getConfirmationModal("Delete playlist", "Are you sure you want to delete this playlist?", "Yes", "No", () => PlaylistActions.deletePlaylist(playlist.id), () => {
-                    }, Icons.WARNING);
-                }
-            }));
-        }
         const coverLoading = signal(false);
         const coverState = signal(Images.DEFAULT_COVER_PLAYLIST);
         if (playlist.has_cover) {
@@ -418,7 +404,7 @@ export class PlaylistTemplates {
                             .classes("title", "wordwrap")
                             .text(playlist.title)
                             .build(),
-                        UserTemplates.userWidget(a_user, Util.userIsFollowing(a_user), [], [], UserWidgetContext.singlePage)
+                        UserTemplates.userWidget(a_user, [], [], UserWidgetContext.singlePage)
                     ).build(),
                 create("div")
                     .classes("playlist-info-container", "flex")
@@ -440,7 +426,7 @@ export class PlaylistTemplates {
                         create("div")
                             .classes("flex-v")
                             .children(
-                                PlaylistTemplates.audioActions(playlist, user, editActions),
+                                PlaylistTemplates.audioActions(playlist, user, data.canEdit),
                                 create("div")
                                     .classes("playlist-title-container", "flex-v", "small-gap")
                                     .children(
@@ -449,66 +435,44 @@ export class PlaylistTemplates {
                                             .text("Created " + Util.formatDate(playlist.created_at))
                                             .build()
                                     ).build(),
-                                create("div")
-                                    .classes("stats-container", "flex", "rounded")
-                                    .children(
-                                        StatisticsTemplates.likesIndicator(ItemType.playlist, playlist.id, playlist.likes.length,
-                                            Util.arrayPropertyMatchesUser(playlist.likes, "user_id")),
-                                        StatisticsTemplates.likeListOpener(playlist.likes),
-                                    ).build(),
+                                InteractionTemplates.interactions(EntityType.playlist, playlist),
                             ).build()
                     ).build(),
                 TrackTemplates.tracksInList(noTracks, tracks, data.canEdit, playlist, "playlist", startCallback)
             ).build();
     }
 
-    static audioActions(playlist: Playlist, user: User, editActions: AnyNode[] = []) {
+    static audioActions(playlist: Playlist, user: User, canEdit: boolean) {
         if (!playlist.tracks) {
             throw new Error(`Playlist ${playlist.id} has no tracks`);
         }
 
-        const playingFrom = PlayManager.getPlayingFrom();
-        const isPlaying = playingFrom && playingFrom.type === "playlist" && playingFrom.id === playlist.id;
-        const manualQueue = QueueManager.getManualQueue();
-        const allTracksInQueue = playlist.tracks.every((t) => manualQueue.includes(t.track_id));
+        const isPlaying = compute((p, pHere) => p && p.type === "playlist" && p.id === playlist.id && pHere, playingFrom, playingHere);
         const duration = playlist.tracks.reduce((acc, t) => acc + (t.track?.length ?? 0), 0);
+        const playIcon = compute(p => p ? Icons.PAUSE : Icons.PLAY, isPlaying);
+        const playText = compute((p): string => p ? "Pause" : "Play", isPlaying);
 
         let actions: AnyNode[] = [];
         if (user) {
             actions = [
                 button({
-                    text: isPlaying ? "Pause" : "Play",
+                    text: playText,
                     icon: {
-                        icon: isPlaying ? Icons.PAUSE : Icons.PLAY,
+                        icon: playIcon,
                         classes: ["inline-icon", "svg", "nopointer"],
                         adaptive: true,
                         isUrl: true
                     },
                     attributes: ["duration", duration.toString()],
                     id: playlist.id,
-                    classes: [playlist.tracks.length === 0 ? "nonclickable" : "_", "secondary"],
+                    classes: ["secondary"],
+                    disabled: playlist.tracks?.length === 0,
                     onclick: async () => {
                         const firstTrack = playlist.tracks![0];
                         await PlaylistActions.startTrackInPlaylist(playlist, firstTrack.track_id, true);
                     }
                 }),
-                button({
-                    text: allTracksInQueue ? "Unqueue" : "Queue",
-                    icon: {
-                        icon: isPlaying ? Icons.UNQUEUE : Icons.QUEUE,
-                        classes: ["inline-icon", "svg", "nopointer"],
-                        adaptive: true,
-                        isUrl: true
-                    },
-                    classes: [allTracksInQueue ? "audio-queueremove" : "audio-queueadd", "secondary"],
-                    onclick: async () => {
-                        for (let track of playlist.tracks!) {
-                            if (!manualQueue.includes(track.track_id)) {
-                                QueueManager.addToManualQueue(track.track_id);
-                            }
-                        }
-                    },
-                }),
+                MusicTemplates.addListToQueueButton(playlist),
             ];
         }
 
@@ -516,7 +480,15 @@ export class PlaylistTemplates {
             .classes("audio-actions", "flex")
             .children(
                 ...actions,
-                ...editActions
+                when(canEdit, button({
+                    text: "Delete",
+                    icon: {icon: "delete"},
+                    classes: ["negative"],
+                    onclick: async () => {
+                        await Ui.getConfirmationModal("Delete playlist", "Are you sure you want to delete this playlist?", "Yes", "No", () => PlaylistActions.deletePlaylist(playlist.id), () => {
+                        }, Icons.WARNING);
+                    }
+                }))
             ).build();
     }
 }

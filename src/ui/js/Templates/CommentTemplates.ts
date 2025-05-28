@@ -1,14 +1,14 @@
 import {GenericTemplates} from "./generic/GenericTemplates.ts";
-import {Icons} from "../Enums/Icons.js";
+import {Icons} from "../Enums/Icons.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
 import {UserTemplates} from "./account/UserTemplates.ts";
 import {Time} from "../Classes/Helpers/Time.ts";
 import {Images} from "../Enums/Images.ts";
 import {Util} from "../Classes/Util.ts";
-import {Comment} from "../Models/DbModels/lyda/Comment.ts";
-import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 import { compute, create, Signal, when, signalMap, signal, AnyElement, InputType } from "@targoninc/jess";
 import { textarea, button, input } from "@targoninc/jess-components";
+import {Comment} from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
+import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 
 export class CommentTemplates {
     static commentListFullWidth(track_id: number, comments: Signal<Comment[]>, showComments: Signal<boolean>) {
@@ -21,12 +21,13 @@ export class CommentTemplates {
                 when(showComments, create("div")
                     .classes("flex-v")
                     .children(
-                        CommentTemplates.commentBox(track_id, comments),
                         when(hasComments, create("span")
                             .classes("text", "no-comments")
                             .text("No comments yet")
                             .build(), true),
-                        when(hasComments, signalMap(nestedComments, create("div").classes("flex-v", "comment-list"), (comment: Comment) => CommentTemplates.commentInList(comment, comments)))
+                        when(hasComments, signalMap(nestedComments, create("div").classes("flex-v", "comment-list"),
+                            (comment: Comment) => CommentTemplates.commentInList(comment, comments))),
+                        CommentTemplates.commentBox(track_id, comments),
                     ).build()),
             ).build();
     }
@@ -35,10 +36,10 @@ export class CommentTemplates {
         const newComment = signal("");
 
         return create("div")
-            .classes("comment-box", "flex-v")
+            .classes("flex-v")
             .children(
                 when(Util.isLoggedIn(), create("div")
-                    .classes("comment-box-input-container", "flex-v", "fullWidth", "card", "secondary")
+                    .classes("comment-box-input-container", "flex-v", "fullWidth")
                     .children(
                         textarea({
                             classes: ["comment-box-input"],
@@ -59,79 +60,91 @@ export class CommentTemplates {
     }
 
     static commentInList(comment: Comment, comments: Signal<Comment[]>): AnyElement {
-        let actions = [];
         if (!comment.user) {
             throw new Error(`Comment ${comment.id} has no user`);
-        }
-        if (comment.canEdit) {
-            actions.push(button({
-                text: "Delete",
-                icon: { icon: "delete" },
-                classes: ["negative"],
-                onclick: () => TrackActions.deleteComment(comment.id, comments)
-            }));
         }
         const avatarState = signal(Images.DEFAULT_AVATAR);
         if (comment.user.has_avatar) {
             avatarState.value = Util.getUserAvatar(comment.user_id);
         }
         const replyInputShown = signal(false);
+        const repliesShown = signal(false);
         const newComment = signal("");
 
         return create("div")
-            .classes("comment-in-list", "flex-v")
+            .classes("comment-in-list", "flex-v", "small-gap")
             .id(comment.id)
             .attributes("parent_id", comment.parent_id)
             .children(
                 create("div")
-                    .classes("flex")
-                    .children(
-                        UserTemplates.userWidget(comment.user, Util.userIsFollowing(comment.user), ["comment_id", comment.id], [], UserWidgetContext.comment),
-                        create("span")
-                            .classes("text", "text-small", "color-dim", "align-center")
-                            .text(Time.agoUpdating(new Date(comment.created_at)))
-                            .build(),
-                        create("div")
-                            .classes("flex")
-                            .children(...actions)
-                            .build()
-                    ).build(),
-                create("div")
-                    .classes("flex", "comment_body")
+                    .classes("flex-v", "small-gap")
                     .children(
                         CommentTemplates.commentContent(comment),
-                        when(Util.isLoggedIn(), create("div")
-                            .classes("flex")
-                            .children(
-                                button({
-                                    text: "Reply",
-                                    icon: { icon: "reply" },
-                                    classes: ["positive"],
-                                    onclick: () => replyInputShown.value = !replyInputShown.value
-                                }),
-                                when(replyInputShown, input<string>({
-                                    type: InputType.text,
-                                    name: "reply-input",
-                                    label: "",
-                                    placeholder: "Reply to " + comment.user!.username + "...",
-                                    value: newComment,
-                                    attributes: ["track_id", comment.track_id.toString()],
-                                    onchange: v => {
-                                        newComment.value = v;
-                                    }
-                                })),
-                                when(replyInputShown, button({
-                                    text: "Post",
-                                    icon: { icon: "send" },
-                                    classes: ["positive"],
-                                    onclick: () => TrackActions.newComment(newComment, comments, comment.track_id, comment.id)
-                                }))
-                            ).build()),
+                        create("span")
+                            .classes("text", "text-small", "color-dim")
+                            .text(Time.agoUpdating(new Date(comment.created_at)))
+                            .build(),
                     ).build(),
                 create("div")
-                    .classes("comment-children")
+                    .classes("flex")
+                    .children(
+                        UserTemplates.userWidget(comment.user, ["comment_id", comment.id], [], UserWidgetContext.comment),
+                        create("div")
+                            .classes("flex")
+                            .children(
+                                when(comment.canEdit, button({
+                                    text: "Delete",
+                                    icon: { icon: "delete" },
+                                    classes: ["negative"],
+                                    onclick: () => TrackActions.deleteComment(comment.id, comments)
+                                }))
+                            ).build(),
+                        when(Util.isLoggedIn(), CommentTemplates.commentReplySection(repliesShown, replyInputShown, comment, newComment, comments)),
+                    ).build(),
+                when(repliesShown, create("div")
+                    .classes("comment-children", "flex-v")
                     .children(...(comment.comments?.map(c => CommentTemplates.commentInList(c, comments)) ?? []))
-                    .build()
+                    .build())
+            ).build();
+    }
+
+    private static commentReplySection(repliesShown: Signal<boolean>, replyInputShown: Signal<boolean>, comment: Comment, newComment: Signal<string>, comments: Signal<Comment[]>) {
+        const len = comment.comments?.length ?? 0;
+
+        return create("div")
+            .classes("flex")
+            .children(
+                when(len > 0, button({
+                    text: compute((r): string => {
+                        return `${len} repl${len === 1 ? "y" : "ies"} ${r ? "shown" : "hidden"}`;
+                    }, repliesShown),
+                    disabled: len === 0,
+                    icon: {icon: compute((s): string => s ? "visibility" : "visibility_off", repliesShown)},
+                    onclick: () => repliesShown.value = !repliesShown.value
+                })),
+                button({
+                    text: "Reply",
+                    icon: {icon: compute((r): string => r ? "close" : "reply", replyInputShown)},
+                    classes: ["positive"],
+                    onclick: () => replyInputShown.value = !replyInputShown.value
+                }),
+                when(replyInputShown, input<string>({
+                    type: InputType.text,
+                    name: "reply-input",
+                    label: "",
+                    placeholder: "Reply to " + comment.user!.username + "...",
+                    value: newComment,
+                    attributes: ["track_id", comment.track_id.toString()],
+                    onchange: v => {
+                        newComment.value = v;
+                    }
+                })),
+                when(replyInputShown, button({
+                    text: "Post",
+                    icon: {icon: "send"},
+                    classes: ["positive"],
+                    onclick: () => TrackActions.newComment(newComment, comments, comment.track_id, comment.id)
+                }))
             ).build();
     }
 

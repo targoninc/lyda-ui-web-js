@@ -1,18 +1,11 @@
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
-import {Track} from "../../Models/DbModels/lyda/Track.ts";
-import {Album} from "../../Models/DbModels/lyda/Album.ts";
-import {Playlist} from "../../Models/DbModels/lyda/Playlist.ts";
 import {compute, signal, create, when} from "@targoninc/jess";
-import {currentTrackId, currentUser, playingFrom, playingHere} from "../../state.ts";
+import {currentTrackId, currentUser, manualQueue, playingFrom, playingHere} from "../../state.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
 import {Util} from "../../Classes/Util.ts";
-import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
-import {StatisticsTemplates} from "../StatisticsTemplates.ts";
-import {ItemType} from "../../Enums/ItemType.ts";
 import {TrackTemplates} from "./TrackTemplates.ts";
 import {DefaultImages} from "../../Enums/DefaultImages.ts";
-import {MediaFileType} from "../../Enums/MediaFileType.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
 import {notify, Ui} from "../../Classes/Ui.ts";
 import {MediaActions} from "../../Actions/MediaActions.ts";
@@ -21,10 +14,19 @@ import {startItem} from "../../Actions/MusicActions.ts";
 import {Icons} from "../../Enums/Icons.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {Api} from "../../Api/Api.ts";
+import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
+import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import {NotificationType} from "../../Enums/NotificationType.ts";
+import {InteractionTemplates} from "../InteractionTemplates.ts";
+import {button} from "@targoninc/jess-components";
+import {QueueManager} from "../../Streaming/QueueManager.ts";
 
 export class MusicTemplates {
-    static feedEntry(type: ItemType, item: Track | Playlist | Album) {
+    static feedEntry(type: EntityType, item: Track | Playlist | Album) {
         const icons = [];
         const isPrivate = item.visibility === "private";
         if (isPrivate) {
@@ -76,57 +78,33 @@ export class MusicTemplates {
                                             .children(
                                                 ...MusicTemplates.itemSpecificItems(type, item),
                                             ).build(),
-                                        create("div")
-                                            .classes("flex", "align-children")
-                                            .children(
-                                                StatisticsTemplates.likesIndicator(type, item.id, item.likes?.length ?? 0,
-                                                    Util.arrayPropertyMatchesUser(item.likes ?? [], "user_id")),
-                                                StatisticsTemplates.likeListOpener(item.likes ?? []),
-                                                ...MusicTemplates.itemSpecificActions(type, item),
-                                            ).build(),
+                                        InteractionTemplates.interactions(type, item),
                                     ).build(),
                             ).build()
                     ).build()
             ).build();
     }
 
-    private static itemSpecificActions(type: ItemType, item: Track | Playlist | Album) {
+    private static itemSpecificItems(type: EntityType, item: Track | Playlist | Album) {
         const items = [];
 
         switch (type) {
-            case ItemType.track:
-                item = item as Track;
-                const reposted = Util.arrayPropertyMatchesUser(item.reposts ?? [], "user_id");
-                const disabled = signal(item.visibility === "private");
-                items.push(StatisticsTemplates.repostIndicator(item.id, item.reposts?.length ?? 0, reposted, disabled));
-                items.push(StatisticsTemplates.repostListOpener(item.reposts ?? []));
-                items.push(TrackTemplates.addToQueueButton(item));
-        }
-
-        return items;
-    }
-
-    private static itemSpecificItems(type: ItemType, item: Track | Playlist | Album) {
-        const items = [];
-
-        switch (type) {
-            case ItemType.track:
-                item = item as Track;
-                if (item.processed) {
-                    items.push(TrackTemplates.waveform(item, JSON.parse(item.loudness_data)));
+            case EntityType.track:
+                if ((item as Track).processed) {
+                    items.push(TrackTemplates.waveform(item as Track, JSON.parse((item as Track).loudness_data)));
                 } else {
-                    items.push(TrackTemplates.waveform(item, []));
+                    items.push(TrackTemplates.waveform(item as Track, []));
                 }
                 items.push(create("span")
                     .classes("nopointer", "text-small", "align-center")
-                    .text(Time.format(item.length))
+                    .text(Time.format((item as Track).length))
                     .build());
         }
 
         return items;
     }
 
-    static cover(type: ItemType, item: Track | Playlist | Album, coverContext: string, startCallback: Function | null = null) {
+    static cover(type: EntityType, item: Track | Playlist | Album, coverContext: string, startCallback: Function | null = null) {
         const imageState = signal(DefaultImages[type]);
         const fileType = `${type}Cover` as MediaFileType;
         if (item.has_cover) {
@@ -135,6 +113,7 @@ export class MusicTemplates {
         const coverLoading = signal(false);
         const start = async () => startItem(type, item, startCallback);
         const isOwnItem = compute(u => u?.id === item.user_id, currentUser);
+        const playButtonContexts = ["inline-cover"];
 
         return create("div")
             .classes("cover-container", "relative", "pointer", coverContext)
@@ -155,7 +134,7 @@ export class MusicTemplates {
                         GenericTemplates.uploadIconButton("replace-image-button", () => TrackActions.replaceCover(item.id, true, imageState, coverLoading)),
                         when(coverLoading, GenericTemplates.loadingSpinner()),
                     ).build()),
-                when(coverContext !== "cover", create("div")
+                when(playButtonContexts.includes(coverContext), create("div")
                     .classes("centeredInParent", "hidden", coverContext !== "cover" ? "showOnParentHover" : "_")
                     .children(
                         MusicTemplates.playButton(type, item.id, start)
@@ -163,9 +142,9 @@ export class MusicTemplates {
             ).build();
     }
 
-    static playButton(type: ItemType, itemId: number, start: Function) {
+    static playButton(type: EntityType, itemId: number, start: Function) {
         const isPlaying = compute((c, pf, p) => {
-            if (type !== ItemType.track) {
+            if (type !== EntityType.track) {
                 return pf?.id === itemId;
             }
 
@@ -173,7 +152,7 @@ export class MusicTemplates {
         }, currentTrackId, playingFrom, playingHere);
         const icon = compute(p => p ? Icons.PAUSE : Icons.PLAY, isPlaying);
         const onclick = async () => {
-            if (isPlaying.value && type !== ItemType.track) {
+            if (isPlaying.value && type !== EntityType.track) {
                 await PlayManager.pauseAsync(currentTrackId.value);
             } else {
                 start();
@@ -232,7 +211,32 @@ export class MusicTemplates {
                 when(feedVisible, create("span")
                     .text("Log in to see this feed")
                     .build(), true),
-                when(feedVisible, TrackTemplates.trackList(tracksState, pageState, type, filterState))
+                when(feedVisible, TrackTemplates.trackListWithPagination(tracksState, pageState, type, filterState))
             ).build();
+    }
+
+    static addListToQueueButton(list: Playlist|Album) {
+        const allTracksInQueue = compute(q => list.tracks && list.tracks.every((t) => q.includes(t.track_id)), manualQueue);
+        const text = compute((q): string => q ? "Unqueue" : "Queue", allTracksInQueue);
+        const icon = compute((q): string => q ? Icons.UNQUEUE : Icons.QUEUE, allTracksInQueue);
+        const buttonClass = compute((q): string => q ? "audio-queueremove" : "audio-queueadd", allTracksInQueue);
+
+        return button({
+            text,
+            icon: {
+                icon,
+                classes: ["inline-icon", "svg", "nopointer"],
+                adaptive: true,
+                isUrl: true
+            },
+            classes: [buttonClass, "secondary"],
+            onclick: async () => {
+                for (let track of list.tracks!) {
+                    if (!manualQueue.value.includes(track.track_id)) {
+                        QueueManager.addToManualQueue(track.track_id);
+                    }
+                }
+            },
+        });
     }
 }

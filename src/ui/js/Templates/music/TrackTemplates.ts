@@ -3,10 +3,9 @@ import {UserTemplates} from "../account/UserTemplates.ts";
 import {copy, Util} from "../../Classes/Util.ts";
 import {Icons} from "../../Enums/Icons.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
-import {GenericTemplates} from "../generic/GenericTemplates.ts";
+import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
 import {QueueManager} from "../../Streaming/QueueManager.ts";
-import {StatisticsTemplates} from "../StatisticsTemplates.ts";
 import {AlbumTemplates} from "./AlbumTemplates.ts";
 import {PlaylistActions} from "../../Actions/PlaylistActions.ts";
 import {PlaylistTemplates} from "./PlaylistTemplates.ts";
@@ -16,29 +15,30 @@ import {TrackEditTemplates} from "./TrackEditTemplates.ts";
 import {CustomText} from "../../Classes/Helpers/CustomText.ts";
 import {CommentTemplates} from "../CommentTemplates.ts";
 import {navigate} from "../../Routing/Router.ts";
-import {Track} from "../../Models/DbModels/lyda/Track.ts";
-import {User} from "../../Models/DbModels/lyda/User.ts";
-import {TrackCollaborator} from "../../Models/DbModels/lyda/TrackCollaborator.ts";
-import {TrackLike} from "../../Models/DbModels/lyda/TrackLike.ts";
-import {Repost} from "../../Models/DbModels/lyda/Repost.ts";
-import {Album} from "../../Models/DbModels/lyda/Album.ts";
-import {Playlist} from "../../Models/DbModels/lyda/Playlist.ts";
 import {compute, Signal, signal, AnyElement, AnyNode, create, HtmlPropertyValue, when, signalMap} from "@targoninc/jess";
-import {CollaboratorType} from "../../Models/DbModels/lyda/CollaboratorType.ts";
 import {currentTrackId, currentUser, manualQueue} from "../../state.ts";
-import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
 import {Ui} from "../../Classes/Ui.ts";
 import {Api} from "../../Api/Api.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
-import {Comment} from "../../Models/DbModels/lyda/Comment.ts";
-import {ListTrack} from "../../Models/ListTrack.ts";
 import {MediaActions} from "../../Actions/MediaActions.ts";
-import {MediaFileType} from "../../Enums/MediaFileType.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {DefaultImages} from "../../Enums/DefaultImages.ts";
-import {ItemType} from "../../Enums/ItemType.ts";
 import {MusicTemplates} from "./MusicTemplates.ts";
 import { button } from "@targoninc/jess-components";
+import {TrackCollaborator} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
+import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
+import {Repost} from "@targoninc/lyda-shared/src/Models/db/lyda/Repost";
+import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
+import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import {TrackLike} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackLike";
+import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
+import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
+import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import {Comment} from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
+import {InteractionTemplates} from "../InteractionTemplates.ts";
 
 export class TrackTemplates {
     static collabIndicator(collab: TrackCollaborator): any {
@@ -59,10 +59,7 @@ export class TrackTemplates {
                 create("p")
                     .text("We would love to hear what you make.")
                     .build(),
-                create("div")
-                    .classes("button-container")
-                    .children(GenericTemplates.newTrackButton(["secondary"]))
-                    .build()
+                GenericTemplates.newTrackButton(["secondary"])
             ];
         } else {
             children = [
@@ -79,7 +76,7 @@ export class TrackTemplates {
     }
 
     static trackCover(track: Track, coverType: string, startCallback: Function|null = null) {
-        const imageState = signal(DefaultImages[ItemType.track]);
+        const imageState = signal(DefaultImages[EntityType.track]);
         if (track.has_cover) {
             imageState.value = Util.getCover(track.id, MediaFileType.trackCover);
         }
@@ -93,6 +90,7 @@ export class TrackTemplates {
             }
         }
         const isOwnTrack = compute(u => u?.id === track.user_id, currentUser);
+        const alwaysShowClass = compute((id): string => track.id === id ? "always-show" : "_", currentTrackId);
 
         return create("div")
             .classes("cover-container", "relative", "pointer", coverType)
@@ -115,7 +113,7 @@ export class TrackTemplates {
                         when(coverLoading, GenericTemplates.loadingSpinner()),
                     ).build()),
                 when(coverType !== "cover", create("div")
-                    .classes("centeredInParent", "hidden", coverType !== "cover" ? "showOnParentHover" : "_")
+                    .classes("centeredInParent", "hidden", coverType !== "cover" ? "showOnParentHover" : "_", alwaysShowClass)
                     .children(
                         GenericTemplates.playButton(track.id, start)
                     ).build()),
@@ -126,14 +124,7 @@ export class TrackTemplates {
         return TrackTemplates.trackCover(track, "small-cover", startCallback);
     }
 
-    static trackCardsContainer(children: AnyNode[]) {
-        return create("div")
-            .classes("profileContent", "tracks", "flex-v")
-            .children(...children)
-            .build();
-    }
-
-    static trackList(tracksState: Signal<Track[]>, pageState: Signal<number>, type: string, filterState: Signal<string>) {
+    static trackListWithPagination(tracksState: Signal<Track[]>, pageState: Signal<number>, type: string, filterState: Signal<string>) {
         return create("div")
             .classes("flex-v", "fullHeight")
             .children(
@@ -143,7 +134,7 @@ export class TrackTemplates {
                         TrackTemplates.paginationControls(pageState),
                         type === "following" ? TrackTemplates.feedFilters(filterState) : null,
                     ).build(),
-                compute(list => TrackTemplates.#trackList(list.reverse().map(track => MusicTemplates.feedEntry(ItemType.track, track))), tracksState),
+                compute(list => TrackTemplates.trackList(list.reverse().map(track => MusicTemplates.feedEntry(EntityType.track, track))), tracksState),
                 TrackTemplates.paginationControls(pageState)
             ).build();
     }
@@ -151,12 +142,12 @@ export class TrackTemplates {
     static feedFilters(filterState: Signal<string>) {
         const tabs = ["All", "Originals", "Reposts"];
 
-        return GenericTemplates.tabSelector(tabs, (i: number) => {
+        return GenericTemplates.combinedSelector(tabs, (i: number) => {
             filterState.value = tabs[i].toLowerCase();
         }, 0);
     }
 
-    static #trackList(trackList: any[]) {
+    static trackList(trackList: any[]) {
         return create("div")
             .classes("flex-v", "reverse", "track-list")
             .children(...trackList)
@@ -292,11 +283,11 @@ export class TrackTemplates {
                 });
         }
 
-        const playingClasses = currentTrackId.value === track.id ? ["playing"] : [];
+        const playingClass = compute((id): string => id === track.id ? "playing" : "_", currentTrackId);
 
         return item.children(
             create("div")
-                .classes("feed-track", "flex", "padded", "rounded", "fullWidth", "card", ...playingClasses)
+                .classes("feed-track", "flex", "padded", "rounded", "fullWidth", "card", playingClass)
                 .styles("max-width", "100%")
                 .ondblclick(async () => {
                     if (!startCallback) {
@@ -310,41 +301,27 @@ export class TrackTemplates {
                     when(canEdit, GenericTemplates.verticalDragIndicator()),
                     TrackTemplates.smallListTrackCover(track, startCallback),
                     create("div")
-                        .classes("flex-v", "flex-grow")
+                        .classes("flex", "align-children", "flex-grow", "space-outwards")
                         .children(
-                            create("div")
-                                .classes("flex")
-                                .children(
-                                    create("div")
-                                        .classes("flex-v", "flex-grow", "small-gap")
-                                        .children(
-                                            create("div")
-                                                .classes("flex", "align-children")
-                                                .children(
-                                                    StatisticsTemplates.likesIndicator(ItemType.track, track.id, track.likes.length ?? [],
-                                                        Util.arrayPropertyMatchesUser(track.likes, "user_id")),
-                                                    TrackTemplates.title(track.title, track.id, icons),
-                                                    create("span")
-                                                        .classes("nopointer", "text-small", "align-center")
-                                                        .text(Time.format(track.length))
-                                                        .build(),
-                                                    create("span")
-                                                        .classes("date", "text-small", "nopointer", "color-dim", "align-center")
-                                                        .text(Time.ago(track.created_at))
-                                                        .build(),
-                                                    create("div")
-                                                        .classes("flex-grow")
-                                                        .build(),
-                                                    when(canEdit, TrackTemplates.trackInListActions(track, list, listTrack, tracks, type)),
-                                                ).build(),
-                                        ).build(),
-                                ).build(),
-                            create("div")
-                                .classes("flex")
-                                .children(
-                                    ...graphics,
-                                ).build(),
-                        ).build()
+                            vertical(
+                                horizontal(
+                                    TrackTemplates.title(track.title, track.id, icons),
+                                    create("span")
+                                        .classes("nopointer", "text-small", "align-center")
+                                        .text(Time.format(track.length))
+                                        .build(),
+                                    create("span")
+                                        .classes("date", "text-small", "nopointer", "color-dim", "align-center")
+                                        .text(Time.ago(track.created_at))
+                                        .build(),
+                                ),
+                                ...graphics
+                            ),
+                            vertical(
+                                when(canEdit, TrackTemplates.trackInListActions(track, list, listTrack, tracks, type)),
+                                InteractionTemplates.interactions(EntityType.track, track),
+                            ).classes("align-children-end")
+                        ).build(),
                 ).build()
         ).build();
     }
@@ -355,27 +332,27 @@ export class TrackTemplates {
             .classes("flex")
             .children(
                 button({
-                    text: "Move up",
+                    text: "Up",
                     icon: { icon: "keyboard_arrow_up" },
-                    classes: ["positive"],
+                    classes: ["align-children"],
                     disabled: compute(p => p[0].track_id === track.id, tracks),
                     onclick: async () => {
                         await TrackActions.reorderTrack(type, list.id, track.id, tracks, listTrack.position - 1);
                     }
                 }),
                 button({
-                    text: "Move down",
+                    text: "Down",
                     icon: { icon: "keyboard_arrow_down" },
-                    classes: ["positive"],
+                    classes: ["align-children"],
                     disabled: compute(p => p[p.length - 1].track_id === track.id, tracks),
                     onclick: async () => {
                         await TrackActions.reorderTrack(type, list.id, track.id, tracks, listTrack.position + 1);
                     }
                 }),
                 button({
-                    text: "Remove from " + type,
+                    text: "Remove",
                     icon: { icon: "close" },
-                    classes: ["negative"],
+                    classes: ["negative", "align-children"],
                     onclick: async () => {
                         await TrackActions.removeTrackFromList(tracks, list, type, listTrack);
                     }
@@ -429,8 +406,17 @@ export class TrackTemplates {
         let actionButton = null, classes = [];
         const user = currentUser.value;
         if (user && user.id === track.user_id) {
-            actionButton = GenericTemplates.action(Icons.X, "Remove", track.id, async () => {
-                await TrackActions.removeCollaboratorFromTrack(track.id, collaborator.user_id);
+            actionButton = button({
+                icon: {
+                    icon: Icons.X,
+                    isUrl: true,
+                    adaptive: true
+                },
+                text: "Remove",
+                classes: ["negative", "align-children"],
+                onclick: async ()  => {
+                    await TrackActions.removeCollaboratorFromTrack(track.id, collaborator.user_id);
+                }
             });
             classes.push("no-redirect");
         }
@@ -451,11 +437,6 @@ export class TrackTemplates {
             return null;
         }
         const track = trackData.track as Track;
-        if (!track.likes || !track.reposts || !track.comments) {
-            throw new Error(`Track ${track.id} is missing property likes, reposts or comments`);
-        }
-        const liked = compute(u => !!(track.likes?.some((like: TrackLike) => like.user_id === u?.id)), currentUser);
-        const reposted = compute(u => !!(track.reposts?.some(repost => repost.user_id === u?.id)), currentUser);
         const collaborators = track.collaborators ?? [];
         const toAppend = [];
         const linkedUserState = signal(collaborators);
@@ -516,7 +497,7 @@ export class TrackTemplates {
         if (track.has_cover) {
             coverFile.value = Util.getTrackCover(track.id);
         }
-        const showComments = signal(false);
+        const showComments = signal(true);
         const comments = signal<Comment[]>([]);
         Api.getAsync<Comment[]>(ApiRoutes.getCommentsByTrackId, {track_id: track.id}).then((c) => {
             if (!c.data || c.data.error) {
@@ -543,7 +524,7 @@ export class TrackTemplates {
                         UserTemplates.userWidget({
                             ...trackUser,
                             displayname: (track.artistname && track.artistname.trim().length > 0) ? track.artistname.trim() : trackUser.displayname
-                        }, Util.userIsFollowing(trackUser), [], [], UserWidgetContext.singlePage),
+                        }, [], [], UserWidgetContext.singlePage),
                     ).build(),
                 ...toAppend,
                 create("div")
@@ -585,24 +566,12 @@ export class TrackTemplates {
                                                 TrackTemplates.addToQueueButton(track),
                                                 when(trackData.canEdit, TrackEditTemplates.replaceAudioButton(track)),
                                             ).build(),
-                                        create("div")
-                                            .classes("stats-container", "flex", "rounded")
-                                            .children(
-                                                StatisticsTemplates.likesIndicator(ItemType.track, track.id, track.likes.length, liked),
-                                                StatisticsTemplates.likeListOpener(track.likes),
-                                                when(isPrivate, StatisticsTemplates.repostIndicator(track.id, track.reposts.length, reposted), true),
-                                                when(isPrivate, StatisticsTemplates.repostListOpener(track.reposts), true),
-                                                CommentTemplates.commentButton(true, comments, showComments)
-                                            ).build(),
+                                        InteractionTemplates.interactions(EntityType.track, track),
                                     ).build()
                             ).build(),
                     ).build(),
                 TrackTemplates.audioActions(track, editActions),
-                create("div")
-                    .classes("flex")
-                    .children(
-                        CommentTemplates.commentListFullWidth(track.id, comments, showComments)
-                    ).build(),
+                CommentTemplates.commentListFullWidth(track.id, comments, showComments),
                 TrackTemplates.inAlbumsList(track),
                 await TrackTemplates.inPlaylistsList(track)
             ).build();
@@ -712,12 +681,14 @@ export class TrackTemplates {
     }
 
     static playButton(track: Track) {
-        const isPlaying = PlayManager.isPlaying(track.id);
+        const isPlaying = compute(id => id === track.id, currentTrackId);
+        const text = compute((p): string => p ? "Pause" : "Play", isPlaying);
+        const icon = compute((p): string => p ? Icons.PAUSE : Icons.PLAY, isPlaying);
 
         return button({
-            text: isPlaying ? "Pause": "Play",
+            text,
             icon: {
-                icon: isPlaying ? Icons.PAUSE : Icons.PLAY,
+                icon,
                 classes: ["inline-icon", "svg", "nopointer"],
                 isUrl: true
             },
@@ -760,7 +731,7 @@ export class TrackTemplates {
                             .classes("text-small")
                             .text(Time.ago(track.created_at))
                             .build(),
-                        UserTemplates.userWidget(track.user, track.user.follows.some(follow => follow.following_user_id === user.id), [], [], UserWidgetContext.card),
+                        UserTemplates.userWidget(track.user, [], [], UserWidgetContext.card),
                         create("span")
                             .text("Requested you to be " + collabType.name)
                             .build(),

@@ -7,14 +7,15 @@ import {PlayManager} from "../Streaming/PlayManager.ts";
 import {QueueManager} from "../Streaming/QueueManager.ts";
 import {navigate} from "../Routing/Router.ts";
 import {Signal} from "@targoninc/jess";
-import {Album} from "../Models/DbModels/lyda/Album.ts";
-import {Track} from "../Models/DbModels/lyda/Track.ts";
 import {MediaUploader} from "../Api/MediaUploader.ts";
-import {MediaFileType} from "../Enums/MediaFileType.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
-import {ListTrack} from "../Models/ListTrack.ts";
 import {RoutePath} from "../Routing/routes.ts";
+import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {NotificationType} from "../Enums/NotificationType.ts";
+import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
+import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
+import {playingHere} from "../state.ts";
 
 export class AlbumActions {
     static async openAddToAlbumModal(track: Track) {
@@ -140,7 +141,8 @@ export class AlbumActions {
 
     static async startTrackInAlbum(album: Album, trackId: number, stopIfPlaying = false) {
         const playingFrom = PlayManager.getPlayingFrom();
-        const isPlaying = playingFrom && playingFrom.type === "album" && playingFrom.id === album.id;
+        const isPlaying = playingFrom && playingFrom.type === "album" && playingFrom.id === album.id && playingHere.value;
+
         if (isPlaying && stopIfPlaying) {
             await PlayManager.stopAllAsync();
         } else {

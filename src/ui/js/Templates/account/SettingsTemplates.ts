@@ -1,22 +1,31 @@
 import {UserActions} from "../../Actions/UserActions.ts";
-import {Theme} from "../../Enums/Theme.ts";
-import {GenericTemplates} from "../generic/GenericTemplates.ts";
+import {GenericTemplates, horizontal} from "../generic/GenericTemplates.ts";
 import {getUserSettingValue, Util} from "../../Classes/Util.ts";
-import {UserSettings} from "../../Enums/UserSettings.ts";
 import {notify, Ui} from "../../Classes/Ui.ts";
 import {LydaApi} from "../../Api/LydaApi.ts";
-import {User} from "../../Models/DbModels/lyda/User.ts";
 import {create, when, signalMap, compute, Signal, signal, InputType} from "@targoninc/jess";
 import {navigate, reload} from "../../Routing/Router.ts";
-import {NotificationType} from "../../Enums/NotificationType.ts";
-import {StreamingQuality} from "../../Enums/StreamingQuality.ts";
 import {UserTemplates} from "./UserTemplates.ts";
 import {currentUser, permissions} from "../../state.ts";
 import {AuthApi} from "../../Api/AuthApi.ts";
-import {UserEmail} from "../../Models/DbModels/lyda/UserEmail.ts";
-import {Permission} from "../../Models/DbModels/lyda/Permission.ts";
 import {RoutePath} from "../../Routing/routes.ts";
-import { button, ButtonConfig, icon, input, InputConfig, textarea, TextareaConfig, toggle } from "@targoninc/jess-components";
+import {
+    button,
+    ButtonConfig,
+    icon,
+    input,
+    InputConfig,
+    textarea,
+    TextareaConfig,
+    toggle
+} from "@targoninc/jess-components";
+import {Theme} from "@targoninc/lyda-shared/src/Enums/Theme";
+import {UserSettings} from "@targoninc/lyda-shared/src/Enums/UserSettings";
+import {StreamingQuality} from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
+import {Permission} from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
+import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import {UserEmail} from "@targoninc/lyda-shared/src/Models/db/lyda/UserEmail";
+import {NotificationType} from "../../Enums/NotificationType.ts";
 
 export class SettingsTemplates {
     static settingsPage() {
@@ -59,7 +68,7 @@ export class SettingsTemplates {
                             .build(),
                         button({
                             text: "Go to Administration",
-                            icon: { icon: "terminal" },
+                            icon: {icon: "terminal"},
                             onclick: () => navigate(RoutePath.admin)
                         }),
                         signalMap(permissions, create("div").classes("flex-v"), (permission: Permission) => SettingsTemplates.permissionCard(permission))
@@ -80,7 +89,7 @@ export class SettingsTemplates {
         const updatedUser = signal<Partial<User>>({});
         const saveDisabled = compute((u: Record<string, any>) => {
             const keys = Object.keys(u);
-            return !keys.some(k => u[k] !== user[k]);
+            return !keys.some(k => u[k] !== user[k as keyof User]);
         }, updatedUser);
 
         return create("div")
@@ -188,32 +197,27 @@ export class SettingsTemplates {
             ).build();
     }
 
-    static themeSelector(theme: Theme, currentTheme$: Signal<Theme>) {
-        const active$ = compute(c => c === theme ? "active" : "_", currentTheme$);
-
-        return button(<ButtonConfig>{
-            classes: [active$],
-            text: theme.toUpperCase(),
-            onclick: async () => {
-                currentTheme$.value = theme;
-                await UserActions.setTheme(theme);
-            }
-        });
-    }
-
     static qualitySelector(value: StreamingQuality, currentValue$: Signal<StreamingQuality>, actualValue$: Signal<StreamingQuality>) {
         const active$ = compute(c => c === value ? "active" : "_", actualValue$);
         const disabled$ = compute(u => value === StreamingQuality.high && (!u || !u.subscription), currentUser);
+        const textMap: Record<StreamingQuality, string> = {
+            [StreamingQuality.low]: "low (92kbps)",
+            [StreamingQuality.medium]: "medium (128kbps)",
+            [StreamingQuality.high]: "high (320kbps)",
+        };
 
-        return button(<ButtonConfig>{
-            classes: [active$, `quality-selector-${value}`, value === StreamingQuality.high ? "special" : "_"],
-            text: value.toUpperCase(),
-            disabled: disabled$,
-            onclick: async () => {
-                currentValue$.value = value;
-                await UserActions.setStreamingQuality(value);
-            }
-        });
+        return horizontal(
+            button(<ButtonConfig>{
+                classes: [active$, `quality-selector-${value}`, value === StreamingQuality.high ? "special" : "_"],
+                text: textMap[value],
+                disabled: disabled$,
+                onclick: async () => {
+                    currentValue$.value = value;
+                    await UserActions.setStreamingQuality(value);
+                }
+            }),
+            when(disabled$, GenericTemplates.inlineLink(() => navigate(RoutePath.subscribe), "Subscribe for high quality"))
+        ).classes("align-children");
     }
 
     static themeSection(currentTheme: Theme) {
@@ -223,13 +227,12 @@ export class SettingsTemplates {
             .classes("card", "flex-v")
             .children(
                 create("h2")
-                    .text("Theme")
+                    .text("Interface theme")
                     .build(),
-                create("div")
-                    .classes("flex")
-                    .children(
-                        ...themes.map(theme => SettingsTemplates.themeSelector(theme, currentTheme$))
-                    ).build(),
+                GenericTemplates.combinedSelector(themes, async (newIndex: number) => {
+                    currentTheme$.value = themes[newIndex];
+                    await UserActions.setTheme(currentTheme$.value);
+                }, themes.indexOf(currentTheme$.value)),
             ).build();
     }
 
@@ -257,7 +260,7 @@ export class SettingsTemplates {
                     .text("High quality is only available with a subscription.")
                     .build()),
                 create("div")
-                    .classes("flex")
+                    .classes("flex", "small-gap")
                     .children(
                         ...values.map(value => SettingsTemplates.qualitySelector(value, currentValue$, actualValue))
                     ).build()
@@ -403,7 +406,6 @@ export class SettingsTemplates {
                 button({
                     text: "Add E-Mail",
                     icon: {icon: "add"},
-                    classes: ["positive"],
                     onclick: async () => {
                         emails$.value = [
                             ...emails$.value,

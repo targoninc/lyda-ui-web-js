@@ -4,14 +4,14 @@ import {notify} from "../Classes/Ui.ts";
 import {navigate} from "../Routing/Router.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {GenericTemplates} from "./generic/GenericTemplates.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
-import {SearchResult} from "../Models/SearchResult.ts";
 import {Util} from "../Classes/Util.ts";
 import {Images} from "../Enums/Images.ts";
-import {SearchContext} from "../Enums/SearchContext.ts";
 import {router} from "../../main.ts";
 import {RoutePath} from "../Routing/routes.ts";
 import { button, icon } from "@targoninc/jess-components";
+import {SearchContext} from "@targoninc/lyda-shared/src/Enums/SearchContext";
+import {SearchResult} from "@targoninc/lyda-shared/src/Models/SearchResult";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class SearchTemplates {
     static search(context: SearchContext) {
@@ -285,14 +285,14 @@ export class SearchTemplates {
             "album": Util.getAlbumCover,
             "playlist": Util.getPlaylistCover,
         };
-        const image = signal(Images.DEFAULT_COVER_TRACK);
+        const image = signal(Util.defaultImage(searchResult.type));
         if (searchResult.hasImage) {
             image.value = imageGetterMap[searchResult.type](searchResult.id);
         }
         const contextClasses = context === SearchContext.searchPage ? ["jess", "fullWidth"] : ["_"]
 
         elementReference = create(context === SearchContext.navBar ? "div" : "button")
-            .classes("search-result", "space-outwards", "padded", "flex", addClass, ...contextClasses)
+            .classes("search-result", "space-outwards", "padded", "flex", searchResult.type, searchResult.exactMatch ? "exact-match" : "_", addClass, ...contextClasses)
             .onclick(async () => {
                 navigate(searchResult.url);
                 resultsShown.value = false;
@@ -314,10 +314,6 @@ export class SearchTemplates {
                                 create("div")
                                     .classes("flex")
                                     .children(
-                                        when(searchResult.exactMatch, icon({
-                                            icon: "star",
-                                            classes: ["nopointer", "svg", "inline-icon"]
-                                        })),
                                         create("span")
                                             .classes("search-result-display")
                                             .text(display)

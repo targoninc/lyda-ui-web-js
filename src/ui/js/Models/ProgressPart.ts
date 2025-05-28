@@ -1,12 +1,11 @@
-import {ProgressState} from "../Enums/ProgressState.ts";
-import {Signal, StringOrSignal} from "@targoninc/jess";
+import {ProgressState} from "@targoninc/lyda-shared/src/Enums/ProgressState";
+import {StringOrSignal} from "@targoninc/jess";
 
 export interface ProgressPart {
-    id: string;
     icon: string;
-    text: Signal<string>;
-    state: Signal<ProgressState>;
+    text: string;
+    state: ProgressState;
     title?: StringOrSignal;
     retryFunction?: Function;
-    progress?: Signal<number>;
+    progress?: number;
 }

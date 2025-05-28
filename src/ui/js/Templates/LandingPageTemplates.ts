@@ -4,15 +4,15 @@ import {FormTemplates} from "./generic/FormTemplates.ts";
 import {UserValidator} from "../Classes/Validators/UserValidator.ts";
 import {finalizeLogin, target, Util} from "../Classes/Util.ts";
 import {notify} from "../Classes/Ui.ts";
-import {User} from "../Models/DbModels/lyda/User.ts";
 import {Api, ApiResponse} from "../Api/Api.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {navigate} from "../Routing/Router.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
 import {currentUser} from "../state.ts";
 import {RoutePath} from "../Routing/routes.ts";
 import {compute, Signal, signal, HtmlPropertyValue, AnyNode, create, InputType, when } from "@targoninc/jess";
 import { button, error, errorList, input } from "@targoninc/jess-components";
+import {NotificationType} from "../Enums/NotificationType.ts";
+import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 
 export interface AuthData {
     termsOfService: boolean;
@@ -625,7 +625,7 @@ export class LandingPageTemplates {
                             };
                         }, false, () => {
                         }, ["flex-grow"]),
-                        FormTemplates.textField("Repeat password", "password-2", "Repeat password", "password", user.value.password2, true, (value: string) => {
+                        FormTemplates.textField("Repeat password", "password", "Repeat password", "password", user.value.password2, true, (value: string) => {
                             if (!touchedFields.has("password2") && value) {
                                 touchedFields.add("password2");
                                 checkAllFieldsTouched();

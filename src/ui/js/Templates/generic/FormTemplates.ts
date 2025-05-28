@@ -52,6 +52,7 @@ export class FormTemplates {
             value,
             required,
             onchange: onchange as (v: string) => void,
+            attributes: ["autocomplete", name],
             autofocus,
             onkeydown,
             classes

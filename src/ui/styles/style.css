@@ -31,22 +31,14 @@
     --purple: #a855f7;
     --purple-dark: #8a4dd9;
     --verified: var(--blue);
+    --link-color: var(--blue);
     --glass-transparency: .75;
     --background-glass: linear-gradient(-45deg, rgba(var(--color-4-rgb), var(--glass-transparency)), rgba(var(--color-6-rgb), var(--glass-transparency)));
     --background-light-glass: rgba(var(--color-6-rgb), var(--glass-transparency));
 
-    --stats-1: var(--color-1);
-    --stats-2: color-mix(in oklab, var(--color-1) 75%, var(--red) 25%);
-    --stats-3: color-mix(in oklab, var(--color-1) 50%, var(--red) 50%);
-    --stats-4: color-mix(in oklab, var(--color-1) 25%, var(--red) 75%);
-    --stats-5: var(--red);
-    --stats-6: color-mix(in oklab, var(--red) 75%, var(--green) 25%);
-    --stats-7: color-mix(in oklab, var(--red) 50%, var(--green) 50%);
-    --stats-8: color-mix(in oklab, var(--red) 25%, var(--green) 75%);
-    --stats-9: var(--green);
-    --stats-10: color-mix(in oklab, var(--green) 75%, var(--color-1) 25%);
-    --stats-11: color-mix(in oklab, var(--green) 50%, var(--color-1) 50%);
-    --stats-12: color-mix(in oklab, var(--green) 25%, var(--color-1) 75%);
+    --tainted-bg-green: color-mix(in oklab, var(--color-4), var(--blue) 15%);
+    --tainted-bg-green-dark: color-mix(in oklab, var(--color-4), var(--blue) 10%);
+    --background-playing: linear-gradient(-45deg, var(--tainted-bg-green), var(--tainted-bg-green-dark));
 
     --breakpoint-big: 1301px;
     --breakpoint-mid: 1110px;
@@ -81,7 +73,7 @@
     --jessc-interactive-color-active: var(--color-4);
     --jessc-interactive-border: var(--color-7);
     --jessc-interactive-border-focused: var(--blue);
-    --jessc-interactive-border-active: var(--color-1);
+    --jessc-interactive-border-active: var(--blue);
 
     --jessc-font: var(--default-font-family);
 }
@@ -240,9 +232,9 @@ nav, footer {
     padding: var(--page-padding);
 }
 
-nav, footer, .fixed-bar, .modal-overlay, .modal, .card {
-    background: var(--background-glass);
-    backdrop-filter: saturate(180%) blur(10px);
+nav, footer, .fixed-bar, .modal-overlay, .modal, .card, .user-preview {
+    background: var(--background-glass) !important;
+    backdrop-filter: saturate(180%) blur(10px) !important;;
 }
 
 .card {
@@ -335,7 +327,8 @@ h3 {
     font-weight: normal;
     align-items: center;
     border: 1px solid var(--color-5);
-    border-width: 1px 1px 1px .5em;
+    border-width: 0 0 0 .5em;
+    background: var(--color-3);
 }
 
 .card-label.error {
@@ -414,12 +407,6 @@ input[type="button"]:hover {
     margin: auto 0;
 }
 
-.button-container-sideways {
-    display: flex;
-    justify-content: space-between;
-    gap: var(--layout-gap);
-}
-
 button {
     background: var(--color-7);
     color: var(--color-4);
@@ -459,10 +446,20 @@ button.positive.active {
     background-color: var(--green-dark);
 }
 
+button.inert {
+    border-color: var(--color-7);
+    background-color: var(--color-7);
+    pointer-events: none;
+}
+
 button.special {
     border-color: var(--blue);
     background: var(--blue-dark);
     box-sizing: border-box;
+}
+
+button.special * {
+    color: var(--color-4);
 }
 
 button.special.active {
@@ -605,17 +602,6 @@ button.unread:before {
     z-index: -1;
     position: absolute;
     left: calc(calc(var(--circle-size) / 3) - calc(var(--circle-size) / 2));
-}
-
-.button-container {
-    display: flex;
-    justify-content: space-between;
-    gap: var(--layout-gap);
-}
-
-.button-container button {
-    height: max-content;
-    margin: auto;
 }
 
 summary {
@@ -862,6 +848,14 @@ td:last-child, th:last-child {
     background: var(--color-3);
 }
 
+.hover-popout .popout-below, .hover-popout .popout-above {
+    display: none;
+}
+
+.hover-popout:hover .popout-below, .hover-popout:hover .popout-above {
+    display: flex;
+}
+
 .popout-below {
     position: absolute;
     z-index: 3;
@@ -886,9 +880,17 @@ td:last-child, th:last-child {
     right: 0;
 }
 
+.align-children-end {
+    align-items: flex-end;
+}
+
 .inlineLink {
     cursor: pointer;
-    color: var(--color-1);
+    color: var(--link-color);
+}
+
+.inlineLink:hover {
+    text-decoration: underline;
 }
 
 .error {
@@ -897,10 +899,6 @@ td:last-child, th:last-child {
 
 .error input, .error button, .error select, .error textarea {
     border-color: var(--red);
-}
-
-.inlineLink:hover {
-    text-decoration: underline;
 }
 
 .text-left {
@@ -940,8 +938,12 @@ td:last-child, th:last-child {
     display: flex;
 }
 
+.always-show {
+    display: flex !important;
+}
+
 *:hover > .blurOnParentHover {
-    filter: brightness(0.3);
+    filter: brightness(0.3) blur(1px);
 }
 
 .nogap {

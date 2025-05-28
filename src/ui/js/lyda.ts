@@ -12,11 +12,11 @@ import {SubscriptionTemplates} from "./Templates/SubscriptionTemplates.ts";
 import {notify} from "./Classes/Ui.ts";
 import {navigate} from "./Routing/Router.ts";
 import {ApiRoutes} from "./Api/ApiRoutes.ts";
-import {NotificationType} from "./Enums/NotificationType.ts";
 import {currentSecretCode, currentUser, permissions} from "./state.ts";
-import {RoyaltyInfo} from "./Models/RoyaltyInfo.ts";
 import {RoutePath} from "./Routing/routes.ts";
 import { AnyElement } from "@targoninc/jess";
+import {NotificationType} from "./Enums/NotificationType.ts";
+import {RoyaltyInfo} from "@targoninc/lyda-shared/src/Models/RoyaltyInfo";
 
 export class Lyda {
     static async getEndpointData(endpoint: string, params = "") {
@@ -71,7 +71,7 @@ export class Lyda {
                     notify("You need to be logged in to see your profile", NotificationType.error);
                     return;
                 }
-                element.append(...UserTemplates.profile(isOwnProfile, data, permissions.value));
+                element.append(...UserTemplates.profile(isOwnProfile, data));
                 ProfilePage.addTabSectionAsync(element, data, isOwnProfile).then();
                 break;
             case "track":

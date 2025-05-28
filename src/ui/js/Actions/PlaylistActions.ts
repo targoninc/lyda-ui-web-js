@@ -7,15 +7,16 @@ import {PlayManager} from "../Streaming/PlayManager.ts";
 import {QueueManager} from "../Streaming/QueueManager.ts";
 import {navigate} from "../Routing/Router.ts";
 import {Signal} from "@targoninc/jess";
-import {Playlist} from "../Models/DbModels/lyda/Playlist.ts";
-import {Track} from "../Models/DbModels/lyda/Track.ts";
-import {Album} from "../Models/DbModels/lyda/Album.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {MediaUploader} from "../Api/MediaUploader.ts";
-import {MediaFileType} from "../Enums/MediaFileType.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
-import {ListTrack} from "../Models/ListTrack.ts";
 import {RoutePath} from "../Routing/routes.ts";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import {NotificationType} from "../Enums/NotificationType.ts";
+import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
+import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
+import {playingHere} from "../state.ts";
 
 export class PlaylistActions {
     static async openAddToPlaylistModal(objectToBeAdded: Album|Track, type: "track"|"album") {
@@ -149,10 +150,14 @@ export class PlaylistActions {
 
     static async startTrackInPlaylist(playlist: Playlist, trackId: number, stopIfPlaying = false) {
         const playingFrom = PlayManager.getPlayingFrom();
-        const isPlaying = playingFrom && playingFrom.type === "playlist" && playingFrom.id === playlist.id;
+        const isPlaying = playingFrom && playingFrom.type === "playlist" && playingFrom.id === playlist.id && playingHere.value;
+
         if (isPlaying && stopIfPlaying) {
             await PlayManager.stopAllAsync();
         } else {
+            if (!playlist.tracks) {
+                throw new Error(`Invalid album (${playlist.id}), has no tracks.`);
+            }
             PlayManager.playFrom("playlist", playlist.title, playlist.id);
             QueueManager.setContextQueue(playlist.tracks!.map(t => t.track_id));
             const track = playlist.tracks!.find(t => t.track_id === trackId);

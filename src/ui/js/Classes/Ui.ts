@@ -5,11 +5,11 @@ import {GenericTemplates} from "../Templates/generic/GenericTemplates.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {UserActions} from "../Actions/UserActions.ts";
 import {signal, AnyElement, HtmlPropertyValue, StringOrSignal} from "@targoninc/jess";
-import {Theme} from "../Enums/Theme.ts";
 import {navigate} from "../Routing/Router.ts";
 import {currentUser, navInitialized} from "../state.ts";
-import {CollaboratorType} from "../Models/DbModels/lyda/CollaboratorType.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
+import {Theme} from "@targoninc/lyda-shared/src/Enums/Theme";
+import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
 
 export class Ui {
     static validUrlPaths = {

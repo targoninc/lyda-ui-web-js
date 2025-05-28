@@ -5,11 +5,11 @@ import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {DragActions} from "../../Actions/DragActions.ts";
 import {Util} from "../../Classes/Util.ts";
 import {navigate} from "../../Routing/Router.ts";
-import {Track} from "../../Models/DbModels/lyda/Track.ts";
 import {compute, signal, create} from "@targoninc/jess";
 import {Images} from "../../Enums/Images.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import { icon } from "@targoninc/jess-components";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 
 export class QueueTemplates {
     static queueItem(track: Track, index: number, totalCount: number, attributes = [], classes = []) {
@@ -147,7 +147,7 @@ export class QueueTemplates {
         const queueListVisClass = compute((h): string => h ? "hidden" : "_", queueListHidden);
 
         return create("div")
-            .classes("relative", "align-center")
+            .classes("relative")
             .children(
                 create("div")
                     .classes(queueListVisClass, "popout-above", "flex-v", "no-gap", "padded", "rounded")
@@ -164,7 +164,7 @@ export class QueueTemplates {
                         ...children
                     ).build(),
                 create("button")
-                    .classes("jess", "relative", "align-center")
+                    .classes("jess", "relative")
                     .onclick(() => {
                         queueListHidden.value = !queueListHidden.value;
                     })

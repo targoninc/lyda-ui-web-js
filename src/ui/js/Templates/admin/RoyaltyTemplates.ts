@@ -1,18 +1,18 @@
-import {RoyaltyInfo} from "../../Models/RoyaltyInfo.ts";
 import {compute, Signal, signal, create, when, nullElement} from "@targoninc/jess";
-import {RoyaltyMonth} from "../../Models/RoyaltyMonth.ts";
 import {FormTemplates} from "../generic/FormTemplates.ts";
 import {notify} from "../../Classes/Ui.ts";
-import {NotificationType} from "../../Enums/NotificationType.ts";
 import {Api} from "../../Api/Api.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {getErrorMessage} from "../../Classes/Util.ts";
-import {Permissions} from "../../Enums/Permissions.ts";
+import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
 import {permissions} from "../../state.ts";
 import {currency} from "../../Classes/Helpers/Num.ts";
 import {LogTemplates} from "./LogTemplates.ts";
 import {DashboardTemplates} from "./DashboardTemplates.ts";
 import {button, SelectOption, toggle } from "@targoninc/jess-components";
+import {RoyaltyInfo} from "@targoninc/lyda-shared/src/Models/RoyaltyInfo";
+import {RoyaltyMonth} from "@targoninc/lyda-shared/src/Models/RoyaltyMonth";
+import {NotificationType} from "../../Enums/NotificationType.ts";
 
 export class RoyaltyTemplates {
     static royaltyCalculator(royaltyInfo: RoyaltyInfo) {

@@ -1,16 +1,14 @@
 import {signal} from "@targoninc/jess";
 import {StreamClient} from "./Streaming/StreamClient.ts";
-import {PlayingFrom} from "./Models/PlayingFrom.ts";
-import {Track} from "./Models/DbModels/lyda/Track.ts";
 import {LydaCache} from "./Cache/LydaCache.ts";
 import {CacheItem} from "./Cache/CacheItem.ts";
-import {User} from "./Models/DbModels/lyda/User.ts";
-import {TrackPosition} from "./Models/TrackPosition.ts";
-import {LoopMode} from "./Enums/LoopMode.ts";
-import {Notification} from "./Models/DbModels/lyda/Notification.ts";
-import {Permission} from "./Models/DbModels/lyda/Permission.ts";
-
-export const dragging = signal(false);
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {PlayingFrom} from "@targoninc/lyda-shared/src/Models/PlayingFrom";
+import {TrackPosition} from "@targoninc/lyda-shared/src/Models/TrackPosition";
+import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import {LoopMode} from "@targoninc/lyda-shared/src/Enums/LoopMode";
+import {Permission} from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
+import {Notification} from "@targoninc/lyda-shared/src/Models/db/lyda/Notification";
 
 export const navInitialized = signal(false);
 
@@ -61,6 +59,12 @@ contextQueue.subscribe((newQueue, changed) => {
 export const autoQueue = signal<number[]>([]);
 
 export const playingFrom = signal<PlayingFrom|null>(null);
+playingFrom.subscribe((playingFrom: PlayingFrom|null, changed: boolean) => {
+    if (!changed) {
+        return;
+    }
+    LydaCache.set("playingFrom", new CacheItem(playingFrom));
+});
 
 export const currentTrackPosition = signal<TrackPosition>({ relative: 0, absolute: 0 });
 currentTrackPosition.subscribe((p, changed) => {

@@ -5,13 +5,12 @@ import {Num} from "./Helpers/Num.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {create, signalMap, signal} from "@targoninc/jess";
 import {getErrorMessage} from "./Util.ts";
+import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
+import {Permission} from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
+import {Statistic} from "@targoninc/lyda-shared/src/Models/Statistic";
 import {NotificationType} from "../Enums/NotificationType.ts";
-import { Statistic } from "../Models/Statistic.ts";
-import {Permission} from "../Models/DbModels/lyda/Permission.ts";
-import {Permissions} from "../Enums/Permissions.ts";
-import {TypedStatistic} from "../Models/TypedStatistic.ts";
-import {ActivityTableName} from "../Enums/ActivityTableName.ts";
-import {TimeResolution} from "../Enums/TimeResolution.ts";
+import {TypedStatistic} from "@targoninc/lyda-shared/src/Models/TypedStatistic";
+import {TimeResolution} from "@targoninc/lyda-shared/src/Enums/TimeResolution";
 
 export class StatisticsWrapper {
     static async getStatistics(permissions: Permission[]) {
@@ -93,7 +92,7 @@ export class StatisticsWrapper {
     }
 
     static getActivityByTime() {
-        const types = [ActivityTableName.tracks];
+        const types = ["tracks"];
         const params = new URLSearchParams();
         params.append("types", types.join(","));
         params.append("resolution", TimeResolution.hour);

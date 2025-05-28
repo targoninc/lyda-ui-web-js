@@ -3,16 +3,16 @@ import {UserTemplates} from "../account/UserTemplates.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {copy, Util} from "../../Classes/Util.ts";
 import {compute, signal, Signal, AnyElement, create, when, signalMap} from "@targoninc/jess";
-import {PillOption} from "../../Models/PillOption.ts";
-import {LogLevel} from "../../Enums/LogLevel.ts";
-import {Log} from "../../Models/DbModels/lyda/Log.ts";
 import {LydaApi} from "../../Api/LydaApi.ts";
 import {truncateText} from "../../Classes/Helpers/CustomText.ts";
 import {DashboardTemplates} from "./DashboardTemplates.ts";
-import {Permissions} from "../../Enums/Permissions.ts";
+import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
 import {Api} from "../../Api/Api.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import { button, toggle } from "@targoninc/jess-components";
+import {Log} from "@targoninc/lyda-shared/src/Models/db/lyda/Log";
+import {LogLevel} from "@targoninc/lyda-shared/src/Enums/LogLevel";
+import {PillOption} from "../../Models/PillOption.ts";
 
 export class LogTemplates {
     static actionLogsPage() {
@@ -54,7 +54,7 @@ export class LogTemplates {
                 create("td")
                     .classes("log-user")
                     .children(
-                        UserTemplates.userWidget(l.user, Util.userIsFollowing(l.user)),
+                        UserTemplates.userWidget(l.user),
                     ).build(),
                 create("td")
                     .classes("log-action-name")
@@ -63,7 +63,7 @@ export class LogTemplates {
                 create("td")
                     .classes("log-user")
                     .children(
-                        UserTemplates.userWidget(l.actioned_user, Util.userIsFollowing(l.actioned_user)),
+                        UserTemplates.userWidget(l.actioned_user),
                     ).build(),
                 LogTemplates.properties(l.additional_info),
             ).build();

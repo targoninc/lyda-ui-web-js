@@ -1,12 +1,9 @@
 import {compute, signal, create, when} from "@targoninc/jess";
-import {RoyaltyInfo} from "../Models/RoyaltyInfo.ts";
 import {currency} from "../Classes/Helpers/Num.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {Api} from "../Api/Api.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {UserSettings} from "../Enums/UserSettings.ts";
 import {downloadFile, getErrorMessage} from "../Classes/Util.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
 import {ChartTemplates} from "./generic/ChartTemplates.ts";
 import {anonymize} from "../Classes/Helpers/CustomText.ts";
 import {navigate, reload} from "../Routing/Router.ts";
@@ -16,6 +13,9 @@ import {RoutePath} from "../Routing/routes.ts";
 import {yearAndMonthByOffset} from "../Classes/Helpers/Date.ts";
 import {GenericTemplates} from "./generic/GenericTemplates.ts";
 import { button } from "@targoninc/jess-components";
+import {UserSettings} from "@targoninc/lyda-shared/src/Enums/UserSettings";
+import {NotificationType} from "../Enums/NotificationType.ts";
+import {RoyaltyInfo} from "@targoninc/lyda-shared/src/Models/RoyaltyInfo";
 
 export class StatisticTemplates {
     static playCountByMonthChart() {
@@ -209,7 +209,7 @@ export class StatisticTemplates {
                         create("div")
                             .classes("flex")
                             .children(
-                                GenericTemplates.tabSelector(types, (i: number) => selectedTypeIndex.value = i, 0),
+                                GenericTemplates.combinedSelector(types, (i: number) => selectedTypeIndex.value = i, 0),
                                 button({
                                     text: "Download",
                                     icon: {icon: "download"},

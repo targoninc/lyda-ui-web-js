@@ -8,19 +8,19 @@ import {TrackEditTemplates} from "../Templates/music/TrackEditTemplates.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {navigate, reload} from "../Routing/Router.ts";
 import {Signal} from "@targoninc/jess";
-import {Comment} from "../Models/DbModels/lyda/Comment.ts";
-import {Track} from "../Models/DbModels/lyda/Track.ts";
-import {MediaFileType} from "../Enums/MediaFileType.ts";
 import {MediaUploader} from "../Api/MediaUploader.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {Album} from "../Models/DbModels/lyda/Album.ts";
-import {Playlist} from "../Models/DbModels/lyda/Playlist.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
 import {currentQuality, playingHere} from "../state.ts";
-import {TrackCollaborator} from "../Models/DbModels/lyda/TrackCollaborator.ts";
-import {ListTrack} from "../Models/ListTrack.ts";
 import {RoutePath} from "../Routing/routes.ts";
-import {CollaboratorType} from "../Models/DbModels/lyda/CollaboratorType.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
+import {Comment} from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
+import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
+import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
+import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
+import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import {TrackCollaborator} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 
 export class TrackActions {
     static async savePlay(id: number) {
@@ -165,7 +165,7 @@ export class TrackActions {
         return true;
     }
 
-    static async runFollowFunctionFromElement(userId: number, following: Signal<boolean>) {
+    static async toggleFollow(userId: number, following: Signal<boolean>) {
         if (following.value) {
             const res = await TrackActions.unfollowUser(userId);
             if (res.code !== 200) {
@@ -293,24 +293,6 @@ export class TrackActions {
         fileInput.click();
     }
 
-    static replyToComment(e: any, trackId: number, commentId: number, username: string, parentCommentId: Signal<number>) {
-        const input = document.querySelector(".comment-box-input[track_id='" + trackId.toString() + "']") as HTMLInputElement;
-        if (e.target.innerText === "Reply") {
-            const replyButtons = document.querySelectorAll(".replyButton[track_id='" + trackId.toString() + "']") as NodeListOf<HTMLButtonElement>;
-            replyButtons.forEach((button) => {
-                button.innerText = "Reply";
-            });
-            parentCommentId.value = commentId;
-            input.placeholder = "Reply to " + username + "...";
-            input.focus();
-            e.target.innerText = "Cancel";
-        } else {
-            parentCommentId.value = 0;
-            input.placeholder = "New comment...";
-            e.target.innerText = "Reply";
-        }
-    }
-
     static moveTrackToPosition(idToMove: number, targetPosition: number, tracks: Signal<ListTrack[]>) {
         // Extract the current list of tracks
         const currentTracks = tracks.value;
@@ -338,7 +320,7 @@ export class TrackActions {
     }
 
     static async removeTrackFromList(tracks: Signal<ListTrack[]>, list: Playlist | Album, type: string, track: ListTrack) {
-        await Ui.getConfirmationModal("Remove track from " + type, "Are you sure you want to remove this track from " + list.title +"?", "Yes", "No", async () => {
+        await Ui.getConfirmationModal("Remove track from " + type, `Are you sure you want to remove this track from "${list.title}"?`, "Yes", "No", async () => {
             let success;
             if (type === "album") {
                 success = await AlbumActions.removeTrackFromAlbum(track.track_id, [list.id]);

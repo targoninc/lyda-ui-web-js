@@ -4,14 +4,10 @@ import {Time} from "../../Classes/Helpers/Time.ts";
 import {Images} from "../../Enums/Images.ts";
 import {QueueTemplates} from "./QueueTemplates.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
-import {StatisticsTemplates} from "../StatisticsTemplates.ts";
-import {CommentTemplates} from "../CommentTemplates.ts";
-import {GenericTemplates} from "../generic/GenericTemplates.ts";
+import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
 import {Ui} from "../../Classes/Ui.ts";
 import {Util} from "../../Classes/Util.ts";
-import {compute, Signal, signal, AnyElement, create, when} from "@targoninc/jess";
-import {Track} from "../../Models/DbModels/lyda/Track.ts";
-import {User} from "../../Models/DbModels/lyda/User.ts";
+import {AnyElement, compute, create, Signal, signal, when} from "@targoninc/jess";
 import {navigate} from "../../Routing/Router.ts";
 import {
     currentlyBuffered,
@@ -25,14 +21,19 @@ import {
     playingHere,
     volume
 } from "../../state.ts";
-import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
-import {LoopMode} from "../../Enums/LoopMode.ts";
 import {RoutePath} from "../../Routing/routes.ts";
-import {ItemType} from "../../Enums/ItemType.ts";
-import { heading } from "@targoninc/jess-components";
+import {heading} from "@targoninc/jess-components";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
+import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
+import {LoopMode} from "@targoninc/lyda-shared/src/Enums/LoopMode";
+import {InteractionTemplates} from "../InteractionTemplates.ts";
+import {MusicTemplates} from "./MusicTemplates.ts";
+import {TrackTemplates} from "./TrackTemplates.ts";
 
 export class PlayerTemplates {
-    static audioPlayer(track: Track) {
+    static async bigAudioPlayer(track: Track, queueComponentMore: Signal<HTMLElement | SVGElement>) {
         PlayManager.addStreamClientIfNotExists(track.id, track.length);
         setInterval(async () => {
             await PlayManager.playCheck(track);
@@ -42,11 +43,27 @@ export class PlayerTemplates {
         const bufferPercent = compute((p, isCurrent) => isCurrent ? `${p * 100}%` : "0%", currentlyBuffered, isCurrentTrack);
 
         return create("div")
-            .classes("audio-player", "flex-grow", "flex")
+            .classes("audio-player", "flex-grow", "flex-v")
             .id("player_" + track.id)
             .children(
                 create("div")
-                    .classes("audio-player-controls", "fullWidth", "flex", "rounded")
+                    .classes("flex", "align-center")
+                    .children(
+                        PlayerTemplates.roundPlayButton(track),
+                        GenericTemplates.roundIconButton({
+                            icon: "skip_next",
+                            adaptive: true,
+                        }, PlayManager.playNextFromQueues, "Next"),
+                        PlayerTemplates.loopModeButton(),
+                        create("div")
+                            .classes("flex", "align-center", "hideOnMidBreakpoint")
+                            .children(
+                                InteractionTemplates.interactions(EntityType.track, track),
+                            ).build(),
+                        await PlayerTemplates.moreMenu(track, queueComponentMore),
+                    ).build(),
+                create("div")
+                    .classes("audio-player-controls", "fullWidth", "flex", "rounded", "align-children")
                     .id(track.id)
                     .attributes("duration", track.length)
                     .children(
@@ -54,23 +71,36 @@ export class PlayerTemplates {
                             .id("audio_" + track.id)
                             .styles("display", "none")
                             .build(),
-                        GenericTemplates.roundIconButton({
-                            icon: compute(p => p ? Icons.PAUSE : Icons.PLAY, playingHere),
-                            adaptive: true,
-                            isUrl: true,
-                        }, async () => {
-                            PlayManager.togglePlayAsync(track.id).then();
-                        }, "Play/Pause"),
-                        GenericTemplates.roundIconButton({
-                            icon: "skip_next",
-                            adaptive: true,
-                        }, PlayManager.playNextFromQueues, "Next"),
-                        PlayerTemplates.loopModeButton(),
+                        PlayerTemplates.currentTrackTime(track),
                         PlayerTemplates.trackScrubbar(track, bufferPercent, positionPercent),
-                        PlayerTemplates.trackTime(track),
-                        PlayerTemplates.loudnessControl(track)
+                        PlayerTemplates.totalTrackTime(track),
                     ).build()
             ).build();
+    }
+
+    private static roundPlayButton(track: Track) {
+        return GenericTemplates.roundIconButton({
+            icon: compute(p => p ? Icons.PAUSE : Icons.PLAY, playingHere),
+            adaptive: true,
+            isUrl: true,
+        }, async () => {
+            PlayManager.togglePlayAsync(track.id).then();
+        }, "Play/Pause");
+    }
+
+    private static currentTrackTime(track: Track) {
+        return create("span")
+            .id(track.id)
+            .classes("audio-player-time-current", "nopointer", "align-center", "hideOnMidBreakpoint")
+            .text("0:00")
+            .build();
+    }
+
+    private static totalTrackTime(track: Track) {
+        return create("span")
+            .classes("audio-player-time-total", "nopointer", "align-center", "hideOnMidBreakpoint")
+            .text(Time.format(track.length))
+            .build();
     }
 
     private static trackScrubbar(track: Track, bufferPercent: Signal<string>, positionPercent: Signal<string>) {
@@ -100,26 +130,6 @@ export class PlayerTemplates {
                     .id(track.id)
                     .classes("audio-player-scrubhead", "rounded", "nopointer")
                     .styles("left", positionPercent)
-                    .build()
-            ).build();
-    }
-
-    private static trackTime(track: Track) {
-        return create("div")
-            .classes("audio-player-time", "flex", "rounded", "padded-inline", "hideOnSmallBreakpoint")
-            .children(
-                create("span")
-                    .id(track.id)
-                    .classes("audio-player-time-current", "nopointer", "align-center")
-                    .text("0:00")
-                    .build(),
-                create("span")
-                    .classes("audio-player-time-separator", "nopointer", "align-center")
-                    .text("/")
-                    .build(),
-                create("span")
-                    .classes("audio-player-time-total", "nopointer", "align-center")
-                    .text(Time.format(track.length))
                     .build()
             ).build();
     }
@@ -168,6 +178,22 @@ export class PlayerTemplates {
     }
 
     static async player(track: Track, trackUser: User) {
+        const cover = signal(Images.DEFAULT_COVER_TRACK);
+        if (track.has_cover) {
+            cover.value = Util.getTrackCover(track.id);
+        }
+
+        const trackList = signal<{ track: Track }[]>([]);
+        manualQueue.subscribe(async (queue) => {
+            const tasks = queue.map(id => PlayManager.getTrackData(id));
+            trackList.value = await Promise.all(tasks);
+        });
+        const tasks = manualQueue.value.map(id => PlayManager.getTrackData(id));
+        Promise.all(tasks).then(tracks => {
+            trackList.value = tracks;
+        });
+        const queueComponentMore = compute((q: any[]) => QueueTemplates.queue(q), trackList);
+
         return create("div")
             .classes("flex-v")
             .id("permanent-player")
@@ -176,20 +202,55 @@ export class PlayerTemplates {
                     text: "Playing on another instance of Lyda",
                     level: 2,
                 })),
-                when(playingElsewhere, create("div")
-                    .classes("flex-v", "fullWidth")
+                when(playingElsewhere, horizontal(
+                    horizontal(
+                        MusicTemplates.cover(EntityType.track, track, "player-cover", () => {
+                            const windowWidth = window.innerWidth;
+                            if (windowWidth < 600) {
+                                navigate(`${RoutePath.track}/` + track.id);
+                            } else {
+                                Ui.showImageModal(cover);
+                            }
+                        }),
+                    ).classes("hideOnSmallBreakpoint"),
+                    await PlayerTemplates.smallPlayerLayout(track),
+                    await PlayerTemplates.bigPlayerLayout(track, trackUser, queueComponentMore, trackList),
+                ).classes("fullWidth").build(), true)
+            ).build();
+    }
+
+    private static async bigPlayerLayout(track: Track, trackUser: User, queueComponentMore: Signal<HTMLElement | SVGElement>, trackList: Signal<{
+        track: Track
+    }[]>) {
+        return create("div")
+            .classes("flex", "flex-grow", "hideOnSmallBreakpoint")
+            .children(
+                await PlayerTemplates.trackInfo(track, trackUser),
+                await PlayerTemplates.bigAudioPlayer(track, queueComponentMore),
+                create("div")
+                    .classes("flex", "hideOnMidBreakpoint")
                     .children(
-                        create("div")
-                            .classes("flex")
-                            .children(
-                                ...await PlayerTemplates.bottomTrackInfo(track, trackUser)
-                            ).build(),
-                        create("div")
-                            .classes("flex")
-                            .children(
-                                PlayerTemplates.audioPlayer(track),
-                            ).build(),
-                    ).build(), true)
+                        PlayerTemplates.loudnessControl(track),
+                        compute((q: any[]) => QueueTemplates.queue(q), trackList),
+                    ).build()
+            ).build();
+    }
+
+    private static async smallPlayerLayout(track: Track) {
+        const isCurrentTrack = compute(id => id === track.id, currentTrackId);
+        const positionPercent = compute((p, isCurrent) => isCurrent ? `${p.relative * 100}%` : "0%", currentTrackPosition, isCurrentTrack);
+        const bufferPercent = compute((p, isCurrent) => isCurrent ? `${p * 100}%` : "0%", currentlyBuffered, isCurrentTrack);
+
+        return create("div")
+            .classes("flex", "flex-grow", "showOnSmallBreakpoint")
+            .children(
+                vertical(
+                    PlayerTemplates.roundPlayButton(track),
+                ).classes("align-center"),
+                vertical(
+                    TrackTemplates.title(track.title, track.id, PlayerTemplates.trackIcons(track)),
+                    PlayerTemplates.trackScrubbar(track, bufferPercent, positionPercent),
+                ).classes("flex-grow", "no-gap").build(),
             ).build();
     }
 
@@ -216,68 +277,19 @@ export class PlayerTemplates {
             .onclick(() => navigate(RoutePath.subscribe)).build();
     }
 
-    static async bottomTrackInfo(track: Track, trackUser: User) {
-        const icons = [];
-        const isPrivate = track.visibility !== "public";
-        if (isPrivate) {
-            icons.push(GenericTemplates.lock());
-        }
-
-        track.likes = track.likes ?? [];
-        track.comments = track.comments ?? [];
-        track.reposts = track.reposts ?? [];
-
-        const cover = signal(Images.DEFAULT_COVER_TRACK);
-        if (track.has_cover) {
-            cover.value = Util.getTrackCover(track.id);
-        }
-
-        const trackList = signal<{ track: Track }[]>([]);
-        manualQueue.subscribe(async (queue) => {
-            const tasks = queue.map(id => PlayManager.getTrackData(id));
-            trackList.value = await Promise.all(tasks);
-        });
-        const tasks = manualQueue.value.map(id => PlayManager.getTrackData(id));
-        Promise.all(tasks).then(tracks => {
-            trackList.value = tracks;
-        });
-        const queueComponentMore = compute((q: any[]) => QueueTemplates.queue(q), trackList);
-        const queueComponent = compute((q: any[]) => QueueTemplates.queue(q), trackList);
-
-        return [
-            create("img")
-                .classes("cover-image", "inline-cover", "align-center", "rounded", "clickable", "hover-image")
-                .src(cover)
-                .onclick(async () => {
-                    const windowWidth = window.innerWidth;
-                    if (windowWidth < 600) {
-                        navigate(`${RoutePath.track}/` + track.id);
-                    } else {
-                        Ui.showImageModal(cover);
-                    }
-                }).build(),
-            create("span")
-                .classes("title", "clickable", "padded-inline", "align-center")
-                .text(track.title)
-                .onclick(() => navigate(`${RoutePath.track}/` + track.id))
-                .build(),
-            ...icons,
-            UserTemplates.userWidget(trackUser, Util.userIsFollowing(trackUser),
-                [], ["hideOnSmallBreakpoint", "align-center"], UserWidgetContext.player),
-            PlayerTemplates.playingFrom(),
-            await PlayerTemplates.moreMenu(track, isPrivate, queueComponentMore),
-            create("div")
-                .classes("flex", "align-center", "hideOnMidBreakpoint")
-                .children(
-                    queueComponent,
-                    StatisticsTemplates.likesIndicator(ItemType.track, track.id, track.likes.length,
-                        Util.arrayPropertyMatchesUser(track.likes, "user_id")),
-                    isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts.length, Util.arrayPropertyMatchesUser(track.reposts, "user_id")),
-                ).build()
-        ];
+    static trackIcons(track: Track) {
+        return track.visibility === "private" ? [GenericTemplates.lock()] : [];
     }
 
-    private static async moreMenu(track: Track, isPrivate: boolean, queueComponent: Signal<AnyElement>) {
+    static async trackInfo(track: Track, trackUser: User) {
+        return vertical(
+            TrackTemplates.title(track.title, track.id, PlayerTemplates.trackIcons(track)),
+            UserTemplates.userLink(UserWidgetContext.player, trackUser),
+            PlayerTemplates.playingFrom(),
+        ).classes("align-center", "no-gap").build();
+    }
+
+    private static async moreMenu(track: Track, queueComponent: Signal<AnyElement>) {
         const menuShown = signal(false);
         const activeClass = compute((m: boolean): string => m ? "active" : "_", menuShown);
 
@@ -293,10 +305,7 @@ export class PlayerTemplates {
                 when(menuShown, create("div")
                     .classes("popout-above", "card", "flex-v")
                     .children(
-                        StatisticsTemplates.likesIndicator(ItemType.track, track.id, track.likes!.length,
-                            Util.arrayPropertyMatchesUser(track.likes!, "user_id")),
-                        isPrivate ? null : StatisticsTemplates.repostIndicator(track.id, track.reposts!.length, Util.arrayPropertyMatchesUser(track.reposts!, "user_id")),
-                        CommentTemplates.commentButton(false, signal(track.comments!)),
+                        InteractionTemplates.interactions(EntityType.track, track),
                         queueComponent
                     ).build())
             ).build();
@@ -310,7 +319,7 @@ export class PlayerTemplates {
         };
 
         return GenericTemplates.roundIconButton({
-            icon: compute(mode => map[mode], loopMode),
+            icon: compute(mode => map[mode as LoopMode], loopMode),
             adaptive: true,
             isUrl: true,
         }, async () => {

@@ -1,35 +1,40 @@
 import {FormTemplates} from "../generic/FormTemplates.ts";
-import {GenericTemplates} from "../generic/GenericTemplates.ts";
+import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
 import {Icons} from "../../Enums/Icons.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
 import {Images} from "../../Enums/Images.ts";
 import {TrackActions} from "../../Actions/TrackActions.ts";
-import {Genre} from "../../Enums/Genre.ts";
 import {downloadFile, target, Util} from "../../Classes/Util.ts";
 import {AudioUpload} from "../../Classes/AudioUpload.ts";
 import {Ui} from "../../Classes/Ui.ts";
 import {
     AnyElement,
     AnyNode,
+    compute,
     create,
     DomNode,
     HtmlPropertyValue,
-    when,
-    signalMap, StringOrSignal,
+    InputType,
+    Signal,
+    signal,
+    signalMap,
+    StringOrSignal,
     TypeOrSignal,
-    compute, Signal, signal,
-    InputType
+    when
 } from "@targoninc/jess";
-import {Track} from "../../Models/DbModels/lyda/Track.ts";
-import {User} from "../../Models/DbModels/lyda/User.ts";
-import {TrackCollaborator} from "../../Models/DbModels/lyda/TrackCollaborator.ts";
-import {UploadableTrack} from "../../Models/UploadableTrack.ts";
-import {UploadInfo} from "../../Models/UploadInfo.ts";
-import {ProgressPart} from "../../Models/ProgressPart.ts";
 import {AlbumActions} from "../../Actions/AlbumActions.ts";
 import {reload} from "../../Routing/Router.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
-import { button, checkbox, errorList, input, SelectOption, textarea, toggle } from "@targoninc/jess-components";
+import {button, checkbox, errorList, input, SelectOption, textarea, toggle} from "@targoninc/jess-components";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {UploadInfo} from "../../Models/UploadInfo.ts";
+import {UploadableTrack} from "../../Models/UploadableTrack.ts";
+import {TrackCollaborator} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
+import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import {Genre} from "@targoninc/lyda-shared/src/Enums/Genre";
+import {TrackValidators} from "../../Classes/Validators/TrackValidators.ts";
+import {ProgressPart} from "../../Models/ProgressPart.ts";
+import {ProgressState} from "@targoninc/lyda-shared/src/Enums/ProgressState.ts";
 
 export class TrackEditTemplates {
     static uploadForm(title: string, credits: string, releaseDate: Date, visibility: string, genre: Genre,
@@ -83,7 +88,7 @@ export class TrackEditTemplates {
     static openEditPageButton(track: Track) {
         return button({
             text: "Edit",
-            icon: { icon: "edit" },
+            icon: {icon: "edit"},
             onclick: async () => {
                 TrackActions.getTrackEditModal(track);
             }
@@ -93,7 +98,7 @@ export class TrackEditTemplates {
     static addToAlbumsButton(track: Track) {
         return button({
             text: "Add to albums",
-            icon: { icon: "forms_add_on" },
+            icon: {icon: "forms_add_on"},
             onclick: async () => {
                 await AlbumActions.openAddToAlbumModal(track);
             }
@@ -132,7 +137,7 @@ export class TrackEditTemplates {
                         .children(
                             button({
                                 text: "Save",
-                                icon: { icon: "check" },
+                                icon: {icon: "check"},
                                 classes: ["positive"],
                                 onclick: () => {
                                     confirmCallback(state.value);
@@ -140,7 +145,7 @@ export class TrackEditTemplates {
                             }),
                             button({
                                 text: "Cancel",
-                                icon: { icon: "close" },
+                                icon: {icon: "close"},
                                 classes: ["negative"],
                                 onclick: cancelCallback
                             }),
@@ -153,7 +158,7 @@ export class TrackEditTemplates {
         const buttons = [
             button({
                 text: "Download Info",
-                icon: { icon: "file_save" },
+                icon: {icon: "file_save"},
                 onclick: () => {
                     const json = JSON.stringify(state.value);
                     downloadFile(`${state.value.title}_${Date.now()}.json`, json);
@@ -164,7 +169,7 @@ export class TrackEditTemplates {
         if (uploadEnabled) {
             buttons.push(button({
                 text: "Upload Info",
-                icon: { icon: "upload_file" },
+                icon: {icon: "upload_file"},
                 onclick: () => {
                     const fileInput = document.createElement("input");
                     fileInput.type = "file";
@@ -213,10 +218,10 @@ export class TrackEditTemplates {
         const disabled = compute((s: UploadableTrack) => {
             const newErrors = [];
             const requiredProps = [
-                { section: "audio", field: "audioFileName" },
-                { section: "info", field: "title" },
-                { section: "info", field: "genre" },
-                { section: "terms", field: "termsOfService" },
+                {section: "audio", field: "audioFileName"},
+                {section: "info", field: "title"},
+                {section: "info", field: "genre"},
+                {section: "terms", field: "termsOfService"},
             ];
             if (requiredProps.some(p => !s[p.field])) {
                 newErrors.push("Missing required fields");
@@ -232,11 +237,10 @@ export class TrackEditTemplates {
             return newErrors.length > 0;
         }, state);
         const buttonClass = compute((d): string => d ? "disabled" : "positive", disabled);
-        const progressState = signal<ProgressPart[]>([]);
+        const progressState = signal<ProgressPart | null>(null);
 
-        return create("div")
-            .classes("flex-v")
-            .children(
+        return vertical(
+            horizontal(
                 button({
                     text: "Upload",
                     disabled,
@@ -244,11 +248,12 @@ export class TrackEditTemplates {
                     onclick: (e) => {
                         new AudioUpload(e, state, progressState);
                     },
-                    icon: { icon: "upload" },
+                    icon: {icon: "upload"},
                 }),
-                errorList(errors),
-                GenericTemplates.progressSections(progressState)
-            ).build();
+                GenericTemplates.progressSectionPart(progressState)
+            ),
+            errorList(errors),
+        );
     }
 
     static filesSection(isNewTrack = false, state: Signal<UploadableTrack>, errorSections: Signal<string[]>) {
@@ -279,7 +284,7 @@ export class TrackEditTemplates {
                                 text: "Private",
                                 checked: isPrivate,
                                 onchange: (v) => {
-                                    state.value = { ...state.value, visibility: v ? "private" : "public" };
+                                    state.value = {...state.value, visibility: v ? "private" : "public"};
                                 }
                             }),
                         ).build(),
@@ -332,6 +337,7 @@ export class TrackEditTemplates {
             label: "Title*",
             placeholder: "Track title",
             value: compute(s => s.title, state),
+            validators: TrackValidators.titleValidators,
             onchange: (v) => {
                 state.value = {...state.value, title: v};
             }
@@ -344,6 +350,7 @@ export class TrackEditTemplates {
             name: "credits",
             label: "Collaborators",
             placeholder: "John Music, Alice Frequency",
+            validators: TrackValidators.creditsValidators,
             value: compute(s => s.credits, state),
             onchange: (v) => {
                 state.value = {...state.value, credits: v};
@@ -356,6 +363,7 @@ export class TrackEditTemplates {
             name: "description",
             label: "Description",
             placeholder: "My cool track",
+            validators: TrackValidators.descriptionValidators,
             value: compute(s => s.description, state),
             onchange: (v) => {
                 state.value = {...state.value, description: v};
@@ -369,6 +377,7 @@ export class TrackEditTemplates {
             name: "upc",
             label: "UPC",
             placeholder: "00888072469600",
+            validators: TrackValidators.upcValidators,
             value: compute(s => s.upc, state),
             onchange: (v) => {
                 state.value = {...state.value, upc: v};
@@ -378,7 +387,7 @@ export class TrackEditTemplates {
 
     static genreInput(parentState: Signal<UploadableTrack>) {
         const genres = Object.values(Genre).map((genre: string) => {
-            return { name: genre, id: genre };
+            return {name: genre, id: genre};
         }) as SelectOption[];
         const value = compute(p => p.genre ?? "other", parentState);
         value.subscribe((v, changed) => {
@@ -400,6 +409,7 @@ export class TrackEditTemplates {
             name: "isrc",
             label: "ISRC",
             placeholder: "QZNWX2227540",
+            validators: TrackValidators.isrcValidators,
             value: compute(s => s.isrc, state),
             onchange: (v) => {
                 state.value = {...state.value, isrc: v};
@@ -413,6 +423,7 @@ export class TrackEditTemplates {
             name: "artistname",
             label: "Artist display name",
             placeholder: "My other alias",
+            validators: TrackValidators.artistnameValidators,
             value: compute(s => s.artistname ?? "", state),
             onchange: (v) => {
                 state.value = {...state.value, artistname: v};
@@ -436,7 +447,7 @@ export class TrackEditTemplates {
                                 text: "Private",
                                 checked: isPrivate,
                                 onchange: (v) => {
-                                    state.value = { ...state.value, visibility: v ? "private" : "public" };
+                                    state.value = {...state.value, visibility: v ? "private" : "public"};
                                 }
                             }),
                         ).build(),
@@ -455,15 +466,15 @@ export class TrackEditTemplates {
                     .children(
                         TrackEditTemplates.filesSection(true, state, errorSections),
                         TrackEditTemplates.monetizationSection(errorSections, state),
-                        enableTos ? TrackEditTemplates.sectionCard("Terms of Service", errorSections, "terms", [
+                        enableTos ? TrackEditTemplates.sectionCard("Copyright", errorSections, "terms", [
                             checkbox({
                                 name: "termsOfService",
-                                text: "I have read and agree to the Terms of Service and Privacy Policy*",
+                                text: "I have all the necessary rights to distribute this content*",
                                 checked: compute(s => s.termsOfService, state),
                                 required: true,
                                 onchange: () => {
                                     const old = state.value;
-                                    state.value = { ...old, termsOfService: !old.termsOfService };
+                                    state.value = {...old, termsOfService: !old.termsOfService};
                                 }
                             }),
                         ], "gavel") : null,
@@ -471,7 +482,7 @@ export class TrackEditTemplates {
             ).build();
     }
 
-    static sectionCard(title: HtmlPropertyValue, errorSections: Signal<string[]>, id: string, children: (TypeOrSignal<DomNode>|TypeOrSignal<AnyElement>|TypeOrSignal<AnyNode>|null)[], icon: string|null = null, classes: StringOrSignal[] = []) {
+    static sectionCard(title: HtmlPropertyValue, errorSections: Signal<string[]>, id: string, children: (TypeOrSignal<DomNode> | TypeOrSignal<AnyElement> | TypeOrSignal<AnyNode> | null)[], icon: string | null = null, classes: StringOrSignal[] = []) {
         const hasError = compute((e: string[]) => e.includes(id), errorSections);
 
         return create("div")
@@ -483,7 +494,7 @@ export class TrackEditTemplates {
     }
 
     static audioFile(canOverwriteTitle = false, parentState: Signal<UploadableTrack>) {
-        return FormTemplates.fileField("Audio File*", "Choose file", "audio-file", "audio/*", true, async (fileName: string, files) => {
+        return FormTemplates.fileField("Audio File*", "Choose audio file", "audio-file", "audio/*", true, async (fileName: string, files) => {
             if (canOverwriteTitle) {
                 if (fileName) {
                     const safeName = fileName.replace(/\.[^/.]+$/, "");
@@ -500,7 +511,7 @@ export class TrackEditTemplates {
     }
 
     static coverFile(parentState: Signal<UploadableTrack>) {
-        return FormTemplates.fileField("Cover File", "Choose file (.jpg,.jpeg,.png,.gif)", "cover-file", "jpg,jpeg,png,gif", false, async (fileName: string, files) => {
+        return FormTemplates.fileField("Cover File", "Choose image file", "cover-file", "image/*", false, async (fileName: string, files) => {
             if (fileName) {
                 if (parentState) {
                     const safeName = fileName.replace(/\.[^/.]+$/, "");
@@ -536,7 +547,7 @@ export class TrackEditTemplates {
     static deleteTrackButton(trackId: number) {
         return button({
             text: "Delete",
-            icon: { icon: "delete" },
+            icon: {icon: "delete"},
             classes: ["negative"],
             onclick: async () => {
                 await Ui.getConfirmationModal("Delete track", "Are you sure you want to delete this track?", "Yes", "No", () => TrackActions.deleteTrack(trackId), () => {
@@ -549,15 +560,16 @@ export class TrackEditTemplates {
         return button({
             text: "Add collaborator",
             id: "add_linked_user",
-            icon: { icon: "person_add" },
+            icon: {icon: "person_add"},
             classes,
             onclick: async () => {
-                await Ui.getAddLinkedUserModal("Link a user", "Enter the username of the user you want to link", "", "Link", "Cancel", callback, () => {}, "person_add");
+                await Ui.getAddLinkedUserModal("Link a user", "Enter the username of the user you want to link", "", "Link", "Cancel", callback, () => {
+                }, "person_add");
             },
         });
     }
 
-    static linkedUsers(linkedUsers: Partial<TrackCollaborator>[] = [], parentState: Signal<UploadableTrack>|null = null) {
+    static linkedUsers(linkedUsers: Partial<TrackCollaborator>[] = [], parentState: Signal<UploadableTrack> | null = null) {
         const linkedUserState = signal(linkedUsers);
         const sendJson = signal(JSON.stringify(linkedUsers));
         const userMap = new Map();
@@ -623,7 +635,7 @@ export class TrackEditTemplates {
 
         return button({
             text: "Replace Audio",
-            icon: { icon: "upload" },
+            icon: {icon: "upload"},
             disabled: loading,
             onclick: async () => {
                 await TrackActions.replaceAudio(track.id, true, loading, () => {

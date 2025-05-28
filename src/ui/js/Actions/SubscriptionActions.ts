@@ -3,12 +3,12 @@ import {notify, Ui} from "../Classes/Ui.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {getErrorMessage} from "../Classes/Util.ts";
 import {Signal} from "@targoninc/jess";
-import {NotificationType} from "../Enums/NotificationType.ts";
-import {AvailableSubscription} from "../Models/DbModels/finance/AvailableSubscription.ts";
-import {Subscription} from "../Models/DbModels/finance/Subscription.ts";
 import {CreateSubscriptionActions, loadScript,
     OnApproveActions, OnApproveData, PayPalButtonsComponentOptions, PayPalNamespace} from "@paypal/paypal-js";
 import {reload} from "../Routing/Router.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
+import {AvailableSubscription} from "@targoninc/lyda-shared/src/Models/db/finance/AvailableSubscription";
+import {Subscription} from "@targoninc/lyda-shared/src/Models/db/finance/Subscription";
 
 const clientId = "AUw6bB-HQTIfqy5fhk-s5wZOaEQdaCIjRnCyIC3WDCRxVKc9Qvz1c6xLw7etCit1CD1qSHY5Pv-3xgQN";
 // @ts-ignore

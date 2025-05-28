@@ -7,7 +7,6 @@ import {TrackActions} from "../Actions/TrackActions.ts";
 import {StreamClient} from "./StreamClient.ts";
 import {getErrorMessage, userHasSettingValue, Util} from "../Classes/Util.ts";
 import {notify} from "../Classes/Ui.ts";
-import {Track} from "../Models/DbModels/lyda/Track.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {
     trackInfo,
@@ -20,10 +19,11 @@ import {
     loopMode,
     muted, currentSecretCode
 } from "../state.ts";
-import {PlayingFrom} from "../Models/PlayingFrom.ts";
 import {StreamingBroadcaster, StreamingEvent} from "./StreamingBroadcaster.ts";
-import {TrackPosition} from "../Models/TrackPosition.ts";
-import {LoopMode} from "../Enums/LoopMode.ts";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {PlayingFrom} from "@targoninc/lyda-shared/src/Models/PlayingFrom";
+import {LoopMode} from "@targoninc/lyda-shared/src/Enums/LoopMode";
+import {TrackPosition} from "@targoninc/lyda-shared/src/Models/TrackPosition";
 import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class PlayManager {
@@ -347,8 +347,10 @@ export class PlayManager {
 
     static async setLoudness(value: number) {
         value = Math.min(Math.max(value, 0), 1);
-        const streamClient = PlayManager.getStreamClient(currentTrackId.value);
-        await streamClient.setVolume(value);
+        const streamClients = PlayManager.getAllStreamClients();
+        for (const client of streamClients) {
+            await client.setVolume(value);
+        }
 
         volume.value = value;
         muted.value = value === 0;
@@ -396,5 +398,9 @@ export class PlayManager {
         }
         await PlayManager.cacheTrackData(res.data);
         return res.data;
+    }
+
+    static getAllStreamClients() {
+        return Object.values(streamClients.value);
     }
 }
