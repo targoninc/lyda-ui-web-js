@@ -155,7 +155,7 @@
 }
 
 .display_name {
-    font-size: max(min(3vw, 3em), 2em);
+    font-size: max(min(3dvw, 3em), 2em);
     font-weight: 900;
     line-height: 1;
 }

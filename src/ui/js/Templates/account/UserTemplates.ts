@@ -406,8 +406,10 @@ export class UserTemplates {
         return create("div")
             .classes("name-container", "flex-v")
             .children(
-                UserTemplates.displayname(user),
-                UserTemplates.usernameAndIcons(user),
+                vertical(
+                    UserTemplates.displayname(user),
+                    UserTemplates.usernameAndIcons(user),
+                ).classes("no-gap"),
                 UserTemplates.userDescription(user, isOwnProfile),
                 when(hasUnverifiedPrimaryEmail, create("div")
                     .classes("card", "padded", "flex", "warning", "align-children")
@@ -699,11 +701,13 @@ export class UserTemplates {
 
     private static userPreview(user: User, context: UserWidgetContext) {
         return create("div")
-            .classes(context === UserWidgetContext.player ? "popout-above" : "popout-below", "user-preview", "flex-v")
+            .classes(context === UserWidgetContext.player ? "popout-above" : "popout-below", "user-preview", "flex-v", "small-gap")
             .children(
                 UserTemplates.profileHeader(user, user.id === currentUser.value?.id),
-                UserTemplates.displayname(user),
-                UserTemplates.usernameAndIcons(user),
+                vertical(
+                    UserTemplates.displayname(user),
+                    UserTemplates.usernameAndIcons(user),
+                ).classes("no-gap")
             ).build();
     }
 }
