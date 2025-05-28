@@ -33,6 +33,8 @@ import {NotificationType} from "../../Enums/NotificationType.ts";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
 import {InteractionTemplates} from "../InteractionTemplates.ts";
+import {playingFrom, playingHere} from "../../state.ts";
+import {MusicTemplates} from "./MusicTemplates.ts";
 
 export class PlaylistTemplates {
     static addTrackToPlaylistModal(track: Track, playlists: Playlist[]) {
@@ -386,18 +388,6 @@ export class PlaylistTemplates {
             await PlaylistActions.startTrackInPlaylist(playlist, trackId);
         }
 
-        const editActions = [];
-        if (data.canEdit) {
-            editActions.push(button({
-                text: "Delete",
-                icon: {icon: "delete"},
-                classes: ["negative"],
-                onclick: async () => {
-                    await Ui.getConfirmationModal("Delete playlist", "Are you sure you want to delete this playlist?", "Yes", "No", () => PlaylistActions.deletePlaylist(playlist.id), () => {
-                    }, Icons.WARNING);
-                }
-            }));
-        }
         const coverLoading = signal(false);
         const coverState = signal(Images.DEFAULT_COVER_PLAYLIST);
         if (playlist.has_cover) {
@@ -436,7 +426,7 @@ export class PlaylistTemplates {
                         create("div")
                             .classes("flex-v")
                             .children(
-                                PlaylistTemplates.audioActions(playlist, user, editActions),
+                                PlaylistTemplates.audioActions(playlist, user, data.canEdit),
                                 create("div")
                                     .classes("playlist-title-container", "flex-v", "small-gap")
                                     .children(
@@ -452,53 +442,37 @@ export class PlaylistTemplates {
             ).build();
     }
 
-    static audioActions(playlist: Playlist, user: User, editActions: AnyNode[] = []) {
+    static audioActions(playlist: Playlist, user: User, canEdit: boolean) {
         if (!playlist.tracks) {
             throw new Error(`Playlist ${playlist.id} has no tracks`);
         }
 
-        const playingFrom = PlayManager.getPlayingFrom();
-        const isPlaying = playingFrom && playingFrom.type === "playlist" && playingFrom.id === playlist.id;
-        const manualQueue = QueueManager.getManualQueue();
-        const allTracksInQueue = playlist.tracks.every((t) => manualQueue.includes(t.track_id));
+        const isPlaying = compute((p, pHere) => p && p.type === "playlist" && p.id === playlist.id && pHere, playingFrom, playingHere);
         const duration = playlist.tracks.reduce((acc, t) => acc + (t.track?.length ?? 0), 0);
+        const playIcon = compute(p => p ? Icons.PAUSE : Icons.PLAY, isPlaying);
+        const playText = compute((p): string => p ? "Pause" : "Play", isPlaying);
 
         let actions: AnyNode[] = [];
         if (user) {
             actions = [
                 button({
-                    text: isPlaying ? "Pause" : "Play",
+                    text: playText,
                     icon: {
-                        icon: isPlaying ? Icons.PAUSE : Icons.PLAY,
+                        icon: playIcon,
                         classes: ["inline-icon", "svg", "nopointer"],
                         adaptive: true,
                         isUrl: true
                     },
                     attributes: ["duration", duration.toString()],
                     id: playlist.id,
-                    classes: [playlist.tracks.length === 0 ? "nonclickable" : "_", "secondary"],
+                    classes: ["secondary"],
+                    disabled: playlist.tracks?.length === 0,
                     onclick: async () => {
                         const firstTrack = playlist.tracks![0];
                         await PlaylistActions.startTrackInPlaylist(playlist, firstTrack.track_id, true);
                     }
                 }),
-                button({
-                    text: allTracksInQueue ? "Unqueue" : "Queue",
-                    icon: {
-                        icon: isPlaying ? Icons.UNQUEUE : Icons.QUEUE,
-                        classes: ["inline-icon", "svg", "nopointer"],
-                        adaptive: true,
-                        isUrl: true
-                    },
-                    classes: [allTracksInQueue ? "audio-queueremove" : "audio-queueadd", "secondary"],
-                    onclick: async () => {
-                        for (let track of playlist.tracks!) {
-                            if (!manualQueue.includes(track.track_id)) {
-                                QueueManager.addToManualQueue(track.track_id);
-                            }
-                        }
-                    },
-                }),
+                MusicTemplates.addListToQueueButton(playlist),
             ];
         }
 
@@ -506,7 +480,15 @@ export class PlaylistTemplates {
             .classes("audio-actions", "flex")
             .children(
                 ...actions,
-                ...editActions
+                when(canEdit, button({
+                    text: "Delete",
+                    icon: {icon: "delete"},
+                    classes: ["negative"],
+                    onclick: async () => {
+                        await Ui.getConfirmationModal("Delete playlist", "Are you sure you want to delete this playlist?", "Yes", "No", () => PlaylistActions.deletePlaylist(playlist.id), () => {
+                        }, Icons.WARNING);
+                    }
+                }))
             ).build();
     }
 }

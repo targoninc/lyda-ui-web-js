@@ -1,6 +1,6 @@
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {compute, signal, create, when} from "@targoninc/jess";
-import {currentTrackId, currentUser, playingFrom, playingHere} from "../../state.ts";
+import {currentTrackId, currentUser, manualQueue, playingFrom, playingHere} from "../../state.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
 import {Util} from "../../Classes/Util.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
@@ -22,6 +22,8 @@ import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
 import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import {NotificationType} from "../../Enums/NotificationType.ts";
 import {InteractionTemplates} from "../InteractionTemplates.ts";
+import {button} from "@targoninc/jess-components";
+import {QueueManager} from "../../Streaming/QueueManager.ts";
 
 export class MusicTemplates {
     static feedEntry(type: EntityType, item: Track | Playlist | Album) {
@@ -211,5 +213,30 @@ export class MusicTemplates {
                     .build(), true),
                 when(feedVisible, TrackTemplates.trackList(tracksState, pageState, type, filterState))
             ).build();
+    }
+
+    static addListToQueueButton(list: Playlist|Album) {
+        const allTracksInQueue = compute(q => list.tracks && list.tracks.every((t) => q.includes(t.track_id)), manualQueue);
+        const text = compute((q): string => q ? "Unqueue" : "Queue", allTracksInQueue);
+        const icon = compute((q): string => q ? Icons.UNQUEUE : Icons.QUEUE, allTracksInQueue);
+        const buttonClass = compute((q): string => q ? "audio-queueremove" : "audio-queueadd", allTracksInQueue);
+
+        return button({
+            text,
+            icon: {
+                icon,
+                classes: ["inline-icon", "svg", "nopointer"],
+                adaptive: true,
+                isUrl: true
+            },
+            classes: [buttonClass, "secondary"],
+            onclick: async () => {
+                for (let track of list.tracks!) {
+                    if (!manualQueue.value.includes(track.track_id)) {
+                        QueueManager.addToManualQueue(track.track_id);
+                    }
+                }
+            },
+        });
     }
 }

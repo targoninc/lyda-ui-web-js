@@ -35,6 +35,7 @@ import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
 import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
 import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
 import {InteractionTemplates} from "../InteractionTemplates.ts";
+import {MusicTemplates} from "./MusicTemplates.ts";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
@@ -533,7 +534,7 @@ export class AlbumTemplates {
                                 }
                             },
                         })),
-                        AlbumTemplates.addToQueueButton(album),
+                        MusicTemplates.addListToQueueButton(album),
                         button({
                             text: "Add to playlist",
                             icon: {
@@ -567,30 +568,5 @@ export class AlbumTemplates {
                     }
                 }))
             ).build();
-    }
-
-    private static addToQueueButton(album: Album) {
-        const allTracksInQueue = compute(q => album.tracks && album.tracks.every((t) => q.includes(t.track_id)), manualQueue);
-        const text = compute((q): string => q ? "Unqueue" : "Queue", allTracksInQueue);
-        const icon = compute((q): string => q ? Icons.UNQUEUE : Icons.QUEUE, allTracksInQueue);
-        const buttonClass = compute((q): string => q ? "audio-queueremove" : "audio-queueadd", allTracksInQueue);
-
-        return button({
-            text,
-            icon: {
-                icon,
-                classes: ["inline-icon", "svg", "nopointer"],
-                adaptive: true,
-                isUrl: true
-            },
-            classes: [buttonClass, "secondary"],
-            onclick: async () => {
-                for (let track of album.tracks!) {
-                    if (!manualQueue.value.includes(track.track_id)) {
-                        QueueManager.addToManualQueue(track.track_id);
-                    }
-                }
-            },
-        });
     }
 }
