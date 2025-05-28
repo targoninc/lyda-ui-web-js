@@ -56,7 +56,7 @@ export class GenericTemplates {
             icon: actual,
             adaptive,
             title,
-            isUrl: !isMaterial,
+            isUrl: compute(m => !m, isMaterial),
             onclick,
             classes: [iconClass, svgClass, ...classes],
         });
