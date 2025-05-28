@@ -320,7 +320,7 @@ export class TrackActions {
     }
 
     static async removeTrackFromList(tracks: Signal<ListTrack[]>, list: Playlist | Album, type: string, track: ListTrack) {
-        await Ui.getConfirmationModal("Remove track from " + type, "Are you sure you want to remove this track from " + list.title +"?", "Yes", "No", async () => {
+        await Ui.getConfirmationModal("Remove track from " + type, `Are you sure you want to remove this track from "${list.title}"?`, "Yes", "No", async () => {
             let success;
             if (type === "album") {
                 success = await AlbumActions.removeTrackFromAlbum(track.track_id, [list.id]);

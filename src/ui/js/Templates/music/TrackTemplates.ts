@@ -338,27 +338,27 @@ export class TrackTemplates {
             .classes("flex")
             .children(
                 button({
-                    text: "Move up",
+                    text: "Up",
                     icon: { icon: "keyboard_arrow_up" },
-                    classes: ["positive"],
+                    classes: ["align-children"],
                     disabled: compute(p => p[0].track_id === track.id, tracks),
                     onclick: async () => {
                         await TrackActions.reorderTrack(type, list.id, track.id, tracks, listTrack.position - 1);
                     }
                 }),
                 button({
-                    text: "Move down",
+                    text: "Down",
                     icon: { icon: "keyboard_arrow_down" },
-                    classes: ["positive"],
+                    classes: ["align-children"],
                     disabled: compute(p => p[p.length - 1].track_id === track.id, tracks),
                     onclick: async () => {
                         await TrackActions.reorderTrack(type, list.id, track.id, tracks, listTrack.position + 1);
                     }
                 }),
                 button({
-                    text: "Remove from " + type,
+                    text: "Remove",
                     icon: { icon: "close" },
-                    classes: ["negative"],
+                    classes: ["negative", "align-children"],
                     onclick: async () => {
                         await TrackActions.removeTrackFromList(tracks, list, type, listTrack);
                     }

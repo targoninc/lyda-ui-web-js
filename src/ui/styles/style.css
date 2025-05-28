@@ -36,6 +36,10 @@
     --background-glass: linear-gradient(-45deg, rgba(var(--color-4-rgb), var(--glass-transparency)), rgba(var(--color-6-rgb), var(--glass-transparency)));
     --background-light-glass: rgba(var(--color-6-rgb), var(--glass-transparency));
 
+    --tainted-bg-green: color-mix(in oklab, var(--color-4), var(--blue) 15%);
+    --tainted-bg-green-dark: color-mix(in oklab, var(--color-4), var(--blue) 10%);
+    --background-playing: linear-gradient(-45deg, var(--tainted-bg-green), var(--tainted-bg-green-dark));
+
     --breakpoint-big: 1301px;
     --breakpoint-mid: 1110px;
     --breakpoint-small: 300px;
