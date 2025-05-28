@@ -930,8 +930,12 @@ td:last-child, th:last-child {
     display: flex;
 }
 
+.always-show {
+    display: flex !important;
+}
+
 *:hover > .blurOnParentHover {
-    filter: brightness(0.3);
+    filter: brightness(0.3) blur(1px);
 }
 
 .nogap {

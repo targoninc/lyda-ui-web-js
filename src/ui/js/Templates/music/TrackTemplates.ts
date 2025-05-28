@@ -90,6 +90,7 @@ export class TrackTemplates {
             }
         }
         const isOwnTrack = compute(u => u?.id === track.user_id, currentUser);
+        const alwaysShowClass = compute((id): string => track.id === id ? "always-show" : "_", currentTrackId);
 
         return create("div")
             .classes("cover-container", "relative", "pointer", coverType)
@@ -112,7 +113,7 @@ export class TrackTemplates {
                         when(coverLoading, GenericTemplates.loadingSpinner()),
                     ).build()),
                 when(coverType !== "cover", create("div")
-                    .classes("centeredInParent", "hidden", coverType !== "cover" ? "showOnParentHover" : "_")
+                    .classes("centeredInParent", "hidden", coverType !== "cover" ? "showOnParentHover" : "_", alwaysShowClass)
                     .children(
                         GenericTemplates.playButton(track.id, start)
                     ).build()),
