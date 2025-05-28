@@ -1192,6 +1192,11 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     z-index: 1000;
 }
 
+.user-preview {
+    padding: var(--large-padding);
+    border-radius: var(--border-radius);
+}
+
 @keyframes scroll-left {
     0% {
         transform: translateX(0%);

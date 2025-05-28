@@ -2,7 +2,7 @@ import {target, Util} from "../../Classes/Util.ts";
 import {TrackActions} from "../../Actions/TrackActions.ts";
 import {TrackTemplates} from "../music/TrackTemplates.ts";
 import {UserActions} from "../../Actions/UserActions.ts";
-import {GenericTemplates} from "../generic/GenericTemplates.ts";
+import {GenericTemplates, vertical} from "../generic/GenericTemplates.ts";
 import {AlbumTemplates} from "../music/AlbumTemplates.ts";
 import {Icons as Icons} from "../../Enums/Icons.ts";
 import {Links} from "../../Enums/Links.ts";
@@ -13,24 +13,25 @@ import {navigate} from "../../Routing/Router.ts";
 import {
     AnyElement,
     AnyNode,
+    compute,
     create,
     DomNode,
     HtmlPropertyValue,
-    when,
     nullElement,
+    Signal,
+    signal,
     StringOrSignal,
-    compute, Signal, signal
+    when
 } from "@targoninc/jess";
 import {UiActions} from "../../Actions/UiActions.ts";
-import {router} from "../../../main.ts";
-import {currentUser} from "../../state.ts";
+import {currentUser, permissions} from "../../state.ts";
 import {Ui} from "../../Classes/Ui.ts";
 import {MediaActions} from "../../Actions/MediaActions.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {MusicTemplates} from "../music/MusicTemplates.ts";
-import { button } from "@targoninc/jess-components";
-import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
-import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
+import {button} from "@targoninc/jess-components";
+import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
 import {Permission} from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
@@ -42,10 +43,10 @@ import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 
 export class UserTemplates {
-    static userWidget(user: User|Signal<User|null>, extraAttributes: HtmlPropertyValue[] = [], extraClasses: StringOrSignal[] = [], context: UserWidgetContext = UserWidgetContext.unknown) {
+    static userWidget(user: User | Signal<User | null>, extraAttributes: HtmlPropertyValue[] = [], extraClasses: StringOrSignal[] = [], context: UserWidgetContext = UserWidgetContext.unknown) {
         const out = signal<AnyElement>(nullElement());
 
-        const getWidget = (newUser: User|null) => {
+        const getWidget = (newUser: User | null) => {
             if (!newUser) {
                 return nullElement();
             }
@@ -61,15 +62,15 @@ export class UserTemplates {
         }
 
         if (user.constructor === Signal) {
-            (user as Signal<User|null>).subscribe(getWidget);
-            getWidget((user as Signal<User|null>).value);
+            (user as Signal<User | null>).subscribe(getWidget);
+            getWidget((user as Signal<User | null>).value);
         } else {
             getWidget(user as User);
         }
         return out;
     }
 
-    private static userWidgetInternal(context: UserWidgetContext, user: User, base: DomNode, following: boolean|Signal<boolean>) {
+    private static userWidgetInternal(context: UserWidgetContext, user: User, base: DomNode, following: boolean | Signal<boolean>) {
         const maxDisplaynameLength = [UserWidgetContext.singlePage, UserWidgetContext.list].includes(context) ? 100 : 15;
         const avatarState = signal(Images.DEFAULT_AVATAR);
         if (user.has_avatar) {
@@ -109,28 +110,43 @@ export class UserTemplates {
 
     public static userLink(context: UserWidgetContext, user: User) {
         const maxDisplaynameLength = [UserWidgetContext.singlePage, UserWidgetContext.list].includes(context) ? 100 : 15;
+        const previewShown = signal(false);
+        let timeout: any | null = null;
 
-        return create("a")
-            .classes("user-link", "color-dim")
-            .attributes("user_id", user.id, "username", user.username)
-            .onclick((e: MouseEvent) => {
-                if (e.button === 0) {
-                    e.preventDefault();
-                    navigate(`${RoutePath.profile}/` + user.username);
-                }
-            })
-            .href(Links.PROFILE(user.username))
-            .title(user.displayname + " (@" + user.username + ")")
-            .children(
-                create("span")
-                    .classes("text", "align-center", "nopointer", "user-displayname")
-                    .text(truncateText(user.displayname, maxDisplaynameLength))
-                    .attributes("data-user-id", user.id)
-                    .build(),
-            ).build();
+        return vertical(
+            create("a")
+                .classes("user-link", "color-dim")
+                .attributes("user_id", user.id, "username", user.username)
+                .onclick((e: MouseEvent) => {
+                    if (e.button === 0) {
+                        e.preventDefault();
+                        navigate(`${RoutePath.profile}/` + user.username);
+                    }
+                })
+                .href(Links.PROFILE(user.username))
+                .title(user.displayname + " (@" + user.username + ")")
+                .children(
+                    create("span")
+                        .classes("text", "align-center", "nopointer", "user-displayname")
+                        .text(truncateText(user.displayname, maxDisplaynameLength))
+                        .attributes("data-user-id", user.id)
+                        .build(),
+                ).build(),
+            when(previewShown, UserTemplates.userPreview(user, context))
+        ).onmouseover(() => {
+            if (timeout) clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                previewShown.value = true;
+            }, 500);
+        }).onmouseleave(() => {
+            if (timeout) clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                previewShown.value = false;
+            }, 100);
+        }).classes("relative");
     }
 
-    static linkedUser(user_id: number, username: string, displayname: string, avatar: StringOrSignal, collab_type: HtmlPropertyValue, actionButton: AnyNode|null = null, extraAttributes: HtmlPropertyValue[] | undefined = undefined, extraClasses: StringOrSignal[] = []) {
+    static linkedUser(user_id: number, username: string, displayname: string, avatar: StringOrSignal, collab_type: HtmlPropertyValue, actionButton: AnyNode | null = null, extraAttributes: HtmlPropertyValue[] | undefined = undefined, extraClasses: StringOrSignal[] = []) {
         const noredirect = extraClasses.includes("no-redirect");
         const base = noredirect ? create("div") : create("a");
         if (extraAttributes) {
@@ -181,7 +197,7 @@ export class UserTemplates {
             .build();
     }
 
-    static followButton(following: boolean|Signal<boolean>, user_id: number, noText = false) {
+    static followButton(following: boolean | Signal<boolean>, user_id: number, noText = false) {
         if (following.constructor !== Signal) {
             following = signal(following as boolean);
         }
@@ -214,7 +230,7 @@ export class UserTemplates {
             children = tracks.map(track => MusicTemplates.feedEntry(EntityType.track, track));
         }
 
-        return TrackTemplates.trackCardsContainer(children);
+        return TrackTemplates.trackList(children);
     }
 
     static unapprovedTracksLink() {
@@ -233,21 +249,11 @@ export class UserTemplates {
         return link;
     }
 
-    static profile(isOwnProfile: boolean, user: User, permissions: Permission[]) {
-        const selfUser = currentUser.value ?? {
-            id: 0,
-        };
-        const following = user.follows?.some((f: Follow) => {
-            return user ? f.following_user_id === selfUser.id : false;
-        }) ?? false;
-        const followsBack = user.following?.some((f: Follow) => {
-            return user ? f.user_id === selfUser.id : false;
-        }) ?? false;
-
+    static profile(isOwnProfile: boolean, user: User) {
         return [
             UserTemplates.userActionsContainer(isOwnProfile),
             UserTemplates.profileHeader(user, isOwnProfile),
-            UserTemplates.profileInfo(user, isOwnProfile, permissions, following, followsBack)
+            UserTemplates.profileInfo(user, isOwnProfile)
         ];
     }
 
@@ -268,12 +274,12 @@ export class UserTemplates {
                         button({
                             classes: ["showOnSmallBreakpoint", "positive"],
                             text: "New",
-                            icon: { icon: "add" },
+                            icon: {icon: "add"},
                             onclick: UiActions.openCreateMenu
                         }),
                         button({
                             text: "Statistics",
-                            icon: { icon: "finance" },
+                            icon: {icon: "finance"},
                             onclick: () => navigate(RoutePath.statistics)
                         }),
                         UserTemplates.unapprovedTracksLink(),
@@ -283,7 +289,7 @@ export class UserTemplates {
                     .children(
                         button({
                             text: "Settings",
-                            icon: { icon: "settings" },
+                            icon: {icon: "settings"},
                             onclick: () => navigate(RoutePath.settings)
                         }),
                         GenericTemplates.logoutButton(),
@@ -315,16 +321,16 @@ export class UserTemplates {
             userAvatar.value = Util.getUserAvatar(user.id);
         }
         const bannerContainer = create("div")
-                .classes("banner-container", "relative", isOwnProfile ? "clickable" : "_", isOwnProfile ? "blurOnParentHover" : "_")
-                .onclick(() => Ui.showImageModal(userBanner))
-                .children(
-                    create("img")
-                        .classes("nopointer", "user-banner", "banner-image")
-                        .attributes("data-user-id", user.id)
-                        .src(userBanner)
-                        .alt(user.username)
-                        .build()
-                ).build();
+            .classes("banner-container", "relative", isOwnProfile ? "clickable" : "_", isOwnProfile ? "blurOnParentHover" : "_")
+            .onclick(() => Ui.showImageModal(userBanner))
+            .children(
+                create("img")
+                    .classes("nopointer", "user-banner", "banner-image")
+                    .attributes("data-user-id", user.id)
+                    .src(userBanner)
+                    .alt(user.username)
+                    .build()
+            ).build();
 
         return create("div")
             .classes("profile-header")
@@ -394,44 +400,14 @@ export class UserTemplates {
         return GenericTemplates.deleteIconButton("banner-delete-button", () => MediaActions.deleteMedia(MediaFileType.userBanner, user.id, userBanner, bannerLoading));
     }
 
-    static profileInfo(user: User, isOwnProfile: boolean, permissions: Permission[], following: boolean, followsBack: boolean) {
-        const verified = signal(user.verified);
-        const canVerify = compute(v => !v && permissions.some(p => p.name === Permissions.canVerifyUsers), verified);
-        const canUnverify = compute(v => v && permissions.some(p => p.name === Permissions.canVerifyUsers), verified);
+    static profileInfo(user: User, isOwnProfile: boolean) {
         const hasUnverifiedPrimaryEmail = isOwnProfile && user.emails && user.emails.some(e => e.primary && !e.verified);
-        const hasBadges = user.badges && user.badges.length > 0;
 
         return create("div")
             .classes("name-container", "flex-v")
             .children(
-                UserTemplates.displayname(user, isOwnProfile),
-                create("div")
-                    .classes("flex", "align-children")
-                    .children(
-                        UserTemplates.username(user, isOwnProfile),
-                        when(hasBadges, UserTemplates.badges(user.badges ?? [])),
-                        when(verified, UserTemplates.verificationBadge()),
-                        when(canVerify, button({
-                            text: "Verify",
-                            icon: { icon: "verified" },
-                            classes: ["positive"],
-                            onclick: async () => {
-                                await UserActions.verifyUser(user.id);
-                                verified.value = true;
-                            }
-                        })),
-                        when(canUnverify, button({
-                            text: "Unverify",
-                            icon: { icon: "close" },
-                            classes: ["negative"],
-                            onclick: async () => {
-                                await UserActions.unverifyUser(user.id);
-                                verified.value = false;
-                            }
-                        })),
-                        !isOwnProfile && currentUser.value ? UserTemplates.followButton(following, user.id) : null,
-                        !isOwnProfile && followsBack ? UserTemplates.followsBackIndicator() : null,
-                    ).build(),
+                UserTemplates.displayname(user),
+                UserTemplates.usernameAndIcons(user),
                 UserTemplates.userDescription(user, isOwnProfile),
                 when(hasUnverifiedPrimaryEmail, create("div")
                     .classes("card", "padded", "flex", "warning", "align-children")
@@ -442,11 +418,47 @@ export class UserTemplates {
                             .build(),
                         button({
                             text: "Go to settings",
-                            icon: { icon: "settings" },
+                            icon: {icon: "settings"},
                             classes: ["positive"],
                             onclick: () => navigate(RoutePath.settings)
                         })
                     ).build())
+            ).build();
+    }
+
+    private static usernameAndIcons(user: User) {
+        const verified = signal(user.verified);
+        const canVerify = compute((v, p) => !v && p.some(p => p.name === Permissions.canVerifyUsers), verified, permissions);
+        const canUnverify = compute((v, p) => v && p.some(p => p.name === Permissions.canVerifyUsers), verified, permissions);
+        const hasBadges = user.badges && user.badges.length > 0;
+        const isOwnProfile = currentUser.value?.id === user.id;
+
+        return create("div")
+            .classes("flex", "align-children")
+            .children(
+                UserTemplates.username(user, isOwnProfile),
+                when(hasBadges, UserTemplates.badges(user.badges ?? [])),
+                when(verified, UserTemplates.verificationBadge()),
+                when(canVerify, button({
+                    text: "Verify",
+                    icon: {icon: "verified"},
+                    classes: ["positive"],
+                    onclick: async () => {
+                        await UserActions.verifyUser(user.id);
+                        verified.value = true;
+                    }
+                })),
+                when(canUnverify, button({
+                    text: "Unverify",
+                    icon: {icon: "close"},
+                    classes: ["negative"],
+                    onclick: async () => {
+                        await UserActions.unverifyUser(user.id);
+                        verified.value = false;
+                    }
+                })),
+                !isOwnProfile && currentUser.value ? UserTemplates.followButton(Util.userIsFollowing(user), user.id) : null,
+                !isOwnProfile && Util.userIsFollowedBy(user) ? UserTemplates.followsBackIndicator() : null,
             ).build();
     }
 
@@ -556,7 +568,7 @@ export class UserTemplates {
                 children = tracks.map((track: Track) => MusicTemplates.feedEntry(EntityType.track, track));
             }
 
-            template.value = TrackTemplates.trackCardsContainer(children);
+            template.value = TrackTemplates.trackList(children);
         };
         update(tracks);
 
@@ -606,7 +618,7 @@ export class UserTemplates {
         return base.build();
     }
 
-    static displayname(user: User, isOwnProfile: boolean) {
+    static displayname(user: User) {
         const nameState = signal(user.displayname);
 
         const base = create("h1")
@@ -614,7 +626,7 @@ export class UserTemplates {
             .attributes("data-user-id", user.id)
             .text(nameState);
 
-        if (isOwnProfile) {
+        if (currentUser.value?.id === user.id) {
             base.onclick(async () => {
                 UserActions.editDisplayname(user.displayname, (newDisplayname: string) => {
                     nameState.value = newDisplayname;
@@ -658,7 +670,7 @@ export class UserTemplates {
         const descState = signal(currentDescription);
 
         return button({
-            icon: { icon: "edit_note" },
+            icon: {icon: "edit_note"},
             text: "Edit description",
             onclick: async (e: Event) => {
                 e.preventDefault();
@@ -682,6 +694,16 @@ export class UserTemplates {
                     .classes("text")
                     .text(`Liked content from user "${name}" is not public`)
                     .build()
+            ).build();
+    }
+
+    private static userPreview(user: User, context: UserWidgetContext) {
+        return create("div")
+            .classes(context === UserWidgetContext.player ? "popout-above" : "popout-below", "user-preview", "flex-v")
+            .children(
+                UserTemplates.profileHeader(user, user.id === currentUser.value?.id),
+                UserTemplates.displayname(user),
+                UserTemplates.usernameAndIcons(user),
             ).build();
     }
 }

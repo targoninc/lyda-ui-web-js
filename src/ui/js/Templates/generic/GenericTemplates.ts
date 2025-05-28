@@ -314,13 +314,6 @@ export class GenericTemplates {
         });
     }
 
-    static openPageButton(text: HtmlPropertyValue, page: string) {
-        return GenericTemplates.action(Icons.STARS, text, page, async (e: MouseEvent) => {
-            e.preventDefault();
-            navigate(page);
-        }, [], ["positive", "secondary"], Links.LINK(page));
-    }
-
     static pill(p: PillOption, pillState: Signal<any>, extraClasses: string[] = []) {
         const selectedState = compute((s): string => s === p.value ? "active" : "_", pillState);
 

@@ -211,7 +211,7 @@ export class MusicTemplates {
                 when(feedVisible, create("span")
                     .text("Log in to see this feed")
                     .build(), true),
-                when(feedVisible, TrackTemplates.trackList(tracksState, pageState, type, filterState))
+                when(feedVisible, TrackTemplates.trackListWithPagination(tracksState, pageState, type, filterState))
             ).build();
     }
 

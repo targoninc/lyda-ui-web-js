@@ -232,9 +232,9 @@ nav, footer {
     padding: var(--page-padding);
 }
 
-nav, footer, .fixed-bar, .modal-overlay, .modal, .card {
-    background: var(--background-glass);
-    backdrop-filter: saturate(180%) blur(10px);
+nav, footer, .fixed-bar, .modal-overlay, .modal, .card, .user-preview {
+    background: var(--background-glass) !important;
+    backdrop-filter: saturate(180%) blur(10px) !important;;
 }
 
 .card {
@@ -846,6 +846,14 @@ td:last-child, th:last-child {
 
 .hoverable:hover {
     background: var(--color-3);
+}
+
+.hover-popout .popout-below, .hover-popout .popout-above {
+    display: none;
+}
+
+.hover-popout:hover .popout-below, .hover-popout:hover .popout-above {
+    display: flex;
 }
 
 .popout-below {

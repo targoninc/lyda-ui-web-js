@@ -124,14 +124,7 @@ export class TrackTemplates {
         return TrackTemplates.trackCover(track, "small-cover", startCallback);
     }
 
-    static trackCardsContainer(children: AnyNode[]) {
-        return create("div")
-            .classes("profileContent", "tracks", "flex-v")
-            .children(...children)
-            .build();
-    }
-
-    static trackList(tracksState: Signal<Track[]>, pageState: Signal<number>, type: string, filterState: Signal<string>) {
+    static trackListWithPagination(tracksState: Signal<Track[]>, pageState: Signal<number>, type: string, filterState: Signal<string>) {
         return create("div")
             .classes("flex-v", "fullHeight")
             .children(
@@ -141,7 +134,7 @@ export class TrackTemplates {
                         TrackTemplates.paginationControls(pageState),
                         type === "following" ? TrackTemplates.feedFilters(filterState) : null,
                     ).build(),
-                compute(list => TrackTemplates.#trackList(list.reverse().map(track => MusicTemplates.feedEntry(EntityType.track, track))), tracksState),
+                compute(list => TrackTemplates.trackList(list.reverse().map(track => MusicTemplates.feedEntry(EntityType.track, track))), tracksState),
                 TrackTemplates.paginationControls(pageState)
             ).build();
     }
@@ -154,7 +147,7 @@ export class TrackTemplates {
         }, 0);
     }
 
-    static #trackList(trackList: any[]) {
+    static trackList(trackList: any[]) {
         return create("div")
             .classes("flex-v", "reverse", "track-list")
             .children(...trackList)
@@ -413,8 +406,17 @@ export class TrackTemplates {
         let actionButton = null, classes = [];
         const user = currentUser.value;
         if (user && user.id === track.user_id) {
-            actionButton = GenericTemplates.action(Icons.X, "Remove", track.id, async () => {
-                await TrackActions.removeCollaboratorFromTrack(track.id, collaborator.user_id);
+            actionButton = button({
+                icon: {
+                    icon: Icons.X,
+                    isUrl: true,
+                    adaptive: true
+                },
+                text: "Remove",
+                classes: ["negative", "align-children"],
+                onclick: async ()  => {
+                    await TrackActions.removeCollaboratorFromTrack(track.id, collaborator.user_id);
+                }
             });
             classes.push("no-redirect");
         }
