@@ -233,8 +233,8 @@ nav, footer {
 }
 
 nav, footer, .fixed-bar, .modal-overlay, .modal, .card, .user-preview {
-    background: var(--background-glass) !important;
-    backdrop-filter: saturate(180%) blur(10px) !important;;
+    background: var(--background-glass);
+    backdrop-filter: saturate(180%) blur(10px);
 }
 
 .card {
