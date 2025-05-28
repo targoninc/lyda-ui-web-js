@@ -206,7 +206,8 @@ export class UserTemplates {
             icon: {
                 icon: compute((f) => f ? Icons.UNFOLLOW : Icons.FOLLOW, following),
                 isUrl: true,
-                adaptive: true
+                adaptive: true,
+                classes: ["svg"]
             },
             text: noText ? "" : compute((f): string => f ? "Unfollow" : "Follow", following),
             onclick: async () => {
