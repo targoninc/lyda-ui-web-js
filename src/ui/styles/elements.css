@@ -581,7 +581,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     position: absolute;
     top: 0;
     left: 0;
-    width: calc(100% - 60px);
+    width: calc(100% - 40px);
     height: calc(100% - 40px);
     background: var(--color-4);
     z-index: 3;

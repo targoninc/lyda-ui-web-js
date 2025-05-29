@@ -1,10 +1,10 @@
 import {Util} from "./Util.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {NavTemplates} from "../Templates/NavTemplates.ts";
-import {GenericTemplates} from "../Templates/generic/GenericTemplates.ts";
+import {GenericTemplates, vertical} from "../Templates/generic/GenericTemplates.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {UserActions} from "../Actions/UserActions.ts";
-import {signal, AnyElement, HtmlPropertyValue, StringOrSignal} from "@targoninc/jess";
+import {signal, AnyElement, HtmlPropertyValue, StringOrSignal, when} from "@targoninc/jess";
 import {navigate} from "../Routing/Router.ts";
 import {currentUser, navInitialized} from "../state.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
@@ -34,7 +34,9 @@ export class Ui {
     static async initializeNavBar() {
         await Util.getUser();
         if (document.getElementById("navTop") === null) {
-            document.body.prepend(NavTemplates.navTop());
+            const burgerMenuOpen = signal(false);
+            document.body.prepend(NavTemplates.navTop(burgerMenuOpen));
+            document.body.prepend(vertical(when(burgerMenuOpen, NavTemplates.burgerMenuContent(burgerMenuOpen))).build())
 
             setTimeout(() => {
                 window.onresize = async () => {

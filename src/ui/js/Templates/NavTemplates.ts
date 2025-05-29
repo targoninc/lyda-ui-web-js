@@ -14,18 +14,16 @@ import {SearchContext} from "@targoninc/lyda-shared/src/Enums/SearchContext";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
 
 export class NavTemplates {
-    static navTop() {
+    static navTop(burgerMenuOpen: Signal<boolean>) {
         currentUser.subscribe(async () => {
             await UserActions.getNotifications();
         });
-        const burgerMenuOpen = signal(false);
 
         return create("nav")
             .id("navTop")
             .children(
                 NavTemplates.navLogo(),
                 NavTemplates.burgerMenu(burgerMenuOpen),
-                when(burgerMenuOpen, NavTemplates.burgerMenuContent(burgerMenuOpen)),
                 create("div")
                     .classes("flex", "flex-grow")
                     .children(
@@ -65,13 +63,6 @@ export class NavTemplates {
                     .classes("flex", "clickable", "burger-menu-topbar")
                     .onclick(() => open.value = false)
                     .children(
-                        create("div")
-                            .children(
-                                create("img")
-                                    .classes("icon", "svg")
-                                    .attributes("src", Icons.LYDA, "alt", "Lyda")
-                                    .build()
-                            ).build(),
                         create("div")
                             .classes("mobile-menu-close")
                             .children(
