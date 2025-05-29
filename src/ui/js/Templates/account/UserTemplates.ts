@@ -522,8 +522,6 @@ export class UserTemplates {
     }
 
     static libraryPage(albums: Album[], playlists: Playlist[], tracks: Track[]) {
-        const container = create("div").build();
-
         const tracksContainer = UserTemplates.libraryTracks(tracks);
         const albumsContainer = UserTemplates.libraryAlbums(albums);
         const playlistsContainer = UserTemplates.libraryPlaylists(playlists);
@@ -539,7 +537,7 @@ export class UserTemplates {
         return create("div")
             .classes("flex-v")
             .children(
-                container,
+                GenericTemplates.title("Your liked music"),
                 tabSelector,
                 tracksContainer,
                 albumsContainer,

@@ -29,9 +29,9 @@ export class NavTemplates {
                 create("div")
                     .classes("flex", "flex-grow")
                     .children(
+                        NavTemplates.navButton(RoutePath.library, "Library", "category"),
                         NavTemplates.navButton(RoutePath.following, "Feed", "rss_feed"),
                         NavTemplates.navButton(RoutePath.explore, "Explore", "explore"),
-                        NavTemplates.navButton(RoutePath.library, "Library", "category"),
                         SearchTemplates.search(SearchContext.navBar),
                     ).build(),
                 when(currentUser, NavTemplates.accountSection()),
@@ -81,6 +81,10 @@ export class NavTemplates {
                                     .build(),
                             ).build(),
                     ).build(),
+                NavTemplates.navButtonInBurger(RoutePath.following, "Library", "category", async () => {
+                    open.value = false;
+                    navigate(RoutePath.library);
+                }),
                 NavTemplates.navButtonInBurger(RoutePath.following, "Feed", "rss_feed", async () => {
                     open.value = false;
                     navigate(RoutePath.following);
@@ -88,10 +92,6 @@ export class NavTemplates {
                 NavTemplates.navButtonInBurger(RoutePath.following, "Explore", "explore", async () => {
                     open.value = false;
                     navigate(RoutePath.explore);
-                }),
-                NavTemplates.navButtonInBurger(RoutePath.following, "Library", "category", async () => {
-                    open.value = false;
-                    navigate(RoutePath.library);
                 }),
             ).build();
     }

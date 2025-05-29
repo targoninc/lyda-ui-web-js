@@ -155,6 +155,8 @@ export class TrackTemplates {
     }
 
     static trackListWithPagination(tracksState: Signal<Track[]>, pageState: Signal<number>, type: string, filterState: Signal<string>) {
+        const empty = compute(t => t.length === 0, tracksState);
+
         return create("div")
             .classes("flex-v", "fullHeight")
             .children(
@@ -165,6 +167,7 @@ export class TrackTemplates {
                         type === "following" ? TrackTemplates.feedFilters(filterState) : null,
                     ).build(),
                 compute(list => TrackTemplates.trackList(list.reverse().map(track => MusicTemplates.feedEntry(EntityType.track, track))), tracksState),
+                when(empty, create("p").text("No tracks found").build()),
                 TrackTemplates.paginationControls(pageState)
             ).build();
     }
