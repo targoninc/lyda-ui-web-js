@@ -1,6 +1,6 @@
 export function maxLengthValidator(length: number) {
     return (val: string) => {
-        if (val.trim().length > length) {
+        if (val && val.trim().length > length) {
             return [`Must be shorter than ${length} characters`];
         }
         return null;
@@ -9,7 +9,7 @@ export function maxLengthValidator(length: number) {
 
 export function minLengthValidator(length: number) {
     return (val: string) => {
-        if (val.trim().length < length) {
+        if (val && val.trim().length < length) {
             return [`Must be longer than ${length} characters`];
         }
         return null;

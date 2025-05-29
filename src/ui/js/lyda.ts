@@ -33,7 +33,7 @@ export class Lyda {
 
     static async initPage(params: any) {
         let elements = document.querySelectorAll("[lyda]") as NodeListOf<AnyElement>;
-        for (let element of elements) {
+        for (const element of elements) {
             await Lyda.loadPagePart(element, params);
         }
     }
@@ -56,10 +56,6 @@ export class Lyda {
         const user = currentUser.value;
 
         switch (element.getAttribute("datatype")) {
-            case "uploadForm":
-                // @ts-ignore
-                element.appendChild(TrackEditTemplates.uploadForm());
-                break;
             case "profile":
                 if (!data || data.error) {
                     navigate(RoutePath.notFound);

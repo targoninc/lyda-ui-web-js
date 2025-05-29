@@ -20,6 +20,7 @@ import {PayoutTemplates} from "./money/PayoutTemplates.ts";
 import {MusicTemplates} from "./music/MusicTemplates.ts";
 import {PaymentTemplates} from "./money/PaymentTemplates.ts";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import {TrackEditTemplates} from "./music/TrackEditTemplates.ts";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, Function> = {
@@ -32,7 +33,7 @@ export class PageTemplates {
         [RoutePath.settings]: SettingsTemplates.settingsPage,
         [RoutePath.statistics]: this.statisticsPage,
         [RoutePath.track]: this.trackPage,
-        [RoutePath.upload]: this.uploadPage,
+        [RoutePath.upload]: TrackEditTemplates.uploadPage,
         [RoutePath.library]: this.libraryPage,
         [RoutePath.logout]: this.logoutPage,
         [RoutePath.login]: LandingPageTemplates.newLandingPage,
@@ -118,14 +119,6 @@ export class PageTemplates {
             .attributes("endpoint", ApiRoutes.getTrackById)
             .attributes("params", "id,code")
             .attributes("datatype", "track")
-            .build();
-    }
-
-    static uploadPage() {
-        return create("div")
-            .classes("form")
-            .attributes("lyda", "")
-            .attributes("datatype", "uploadForm")
             .build();
     }
 

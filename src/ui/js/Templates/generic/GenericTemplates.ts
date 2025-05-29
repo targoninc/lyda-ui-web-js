@@ -1,7 +1,6 @@
 import {Icons} from "../../Enums/Icons.ts";
 import {AlbumActions} from "../../Actions/AlbumActions.ts";
 import {PlaylistActions} from "../../Actions/PlaylistActions.ts";
-import {Links} from "../../Enums/Links.ts";
 import {Api} from "../../Api/Api.ts";
 import {TrackActions} from "../../Actions/TrackActions.ts";
 import {
@@ -93,7 +92,7 @@ export class GenericTemplates {
             .build();
     }
 
-    static cardLabel(text: HtmlPropertyValue, icon: StringOrSignal | null = null, hasError: Signal<boolean> = signal(false)) {
+    static cardLabel(text: HtmlPropertyValue, icon$: StringOrSignal | null = null, hasError: Signal<boolean> = signal(false)) {
         const errorClass = compute((h): string => h ? "error" : "_", hasError);
 
         return create("div")
@@ -102,12 +101,18 @@ export class GenericTemplates {
                 create("div")
                     .classes("card-label", "align-children", "flex", "small-gap", errorClass)
                     .children(
-                        when(icon, GenericTemplates.icon(icon ?? "")),
+                        when(icon$, horizontal(icon({
+                            icon: icon$ as StringOrSignal,
+                        })).build()),
                         create("span")
                             .text(text)
                             .build(),
                     ).build(),
-                when(hasError, GenericTemplates.icon("warning", true, ["error", "has-title"], "This section has errors"))
+                when(hasError, horizontal(icon({
+                    icon: "warning",
+                    classes: ["error", "has-title"],
+                    title: "This section has errors"
+                })).build())
             ).build();
     }
 

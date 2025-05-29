@@ -34,26 +34,24 @@ import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {Genre} from "@targoninc/lyda-shared/src/Enums/Genre";
 import {TrackValidators} from "../../Classes/Validators/TrackValidators.ts";
 import {ProgressPart} from "../../Models/ProgressPart.ts";
-import {ProgressState} from "@targoninc/lyda-shared/src/Enums/ProgressState.ts";
 
 export class TrackEditTemplates {
-    static uploadForm(title: string, credits: string, releaseDate: Date, visibility: string, genre: Genre,
-                      isrc: string, upc: string, description: string, monetization: boolean, price: number,
-                      linkedUsers: TrackCollaborator[]) {
-        const state = signal(<UploadableTrack>{
-            title: title ?? "",
-            credits: credits ?? "",
-            release_date: releaseDate ? new Date(releaseDate) : new Date(),
-            visibility: visibility ?? "public",
-            genre: genre ?? Genre.OTHER,
-            isrc: isrc ?? "",
-            upc: upc ?? "",
-            description: description ?? "",
-            monetization: monetization ?? true,
-            price: price ?? "1",
-            collaborators: linkedUsers ?? [],
-            termsOfService: false
-        });
+    static uploadPage() {
+        const state = signal({
+            title: "",
+            credits: "",
+            artistname: "",
+            release_date: new Date(),
+            visibility: "public",
+            genre: Genre.OTHER,
+            isrc: "",
+            upc: "",
+            description: "",
+            monetization: true,
+            price: 1,
+            collaborators: [],
+            termsOfService: false,
+        } satisfies UploadableTrack);
         const errorSections = signal<string[]>([]);
         const errorFields = signal<string[]>([]);
         const uploadInfo = signal<UploadInfo[]>([]);
@@ -314,7 +312,7 @@ export class TrackEditTemplates {
                 name: "price",
                 label: "Minimum track price in USD",
                 placeholder: "1$",
-                value: compute(s => s.price, state),
+                value: compute(s => s.price ?? 0, state),
                 validators: [
                     (v) => {
                         if (v < 0) {
