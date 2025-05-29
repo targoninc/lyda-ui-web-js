@@ -57,14 +57,44 @@ export class TrackTemplates {
         if (isOwnProfile) {
             children = [
                 create("p")
-                    .text("We would love to hear what you make.")
+                    .text("Share what you make:")
                     .build(),
                 GenericTemplates.newTrackButton(["secondary"])
             ];
         } else {
             children = [
                 create("p")
-                    .text("Nothing here.")
+                    .text("No tracks on this profile.")
+                    .build()
+            ];
+        }
+
+        return create("div")
+            .classes("card", "flex-v")
+            .children(...children)
+            .build();
+    }
+
+    static noRepostsYet(isOwnProfile: boolean) {
+        let children;
+        if (isOwnProfile) {
+            children = [
+                create("p")
+                    .text("Find some good stuff to share:")
+                    .build(),
+                button({
+                    text: "Explore",
+                    icon: {
+                        icon: "explore"
+                    },
+                    classes: ["positive"],
+                    onclick: () => navigate(RoutePath.explore)
+                })
+            ];
+        } else {
+            children = [
+                create("p")
+                    .text("No reposts on this profile.")
                     .build()
             ];
         }

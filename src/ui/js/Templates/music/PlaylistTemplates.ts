@@ -247,14 +247,14 @@ export class PlaylistTemplates {
         if (isOwnProfile) {
             children = [
                 create("p")
-                    .text("You have not created any playlists yet.")
+                    .text("Put your favorite tunes into a playlist:")
                     .build(),
                 GenericTemplates.newPlaylistButton(["secondary"])
             ];
         } else {
             children = [
                 create("p")
-                    .text("This user has not created any playlists yet.")
+                    .text("No playlists on this profile.")
                     .build()
             ];
         }

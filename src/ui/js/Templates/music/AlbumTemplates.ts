@@ -274,14 +274,14 @@ export class AlbumTemplates {
         if (isOwnProfile) {
             children = [
                 create("p")
-                    .text("You have not created any albums yet.")
+                    .text("Share an album you made:")
                     .build(),
                 GenericTemplates.newAlbumButton(["secondary"])
             ];
         } else {
             children = [
                 create("p")
-                    .text("This user has not created any albums yet.")
+                    .text("No albums on this profile.")
                     .build()
             ];
         }
