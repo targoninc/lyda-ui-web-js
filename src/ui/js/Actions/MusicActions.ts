@@ -18,6 +18,7 @@ export async function startItem(type: EntityType, item: Track | Album | Playlist
             item = item as Playlist;
             break;
         case EntityType.track:
+            PlayManager.clearPlayFrom();
             PlayManager.addStreamClientIfNotExists(item.id, (item as Track).length);
             await PlayManager.startAsync(item.id);
             break;

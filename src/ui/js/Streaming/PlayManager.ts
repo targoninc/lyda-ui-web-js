@@ -103,6 +103,11 @@ export class PlayManager {
         LydaCache.set("playingFrom", new CacheItem(playingFrom.value));
     }
 
+    static clearPlayFrom() {
+        playingFrom.value = null;
+        LydaCache.set("playingFrom", new CacheItem(playingFrom.value));
+    }
+
     static getPlayingFrom() {
         let playingFromTmp = playingFrom.value;
         if (!playingFromTmp || Object.keys(playingFromTmp as any).length === 0) {
