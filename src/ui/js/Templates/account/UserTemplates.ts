@@ -228,7 +228,7 @@ export class UserTemplates {
         if (tracks.length === 0) {
             return TrackTemplates.noTracksUploadedYet(isOwnProfile);
         } else {
-            children = tracks.map(track => MusicTemplates.feedEntry(EntityType.track, track));
+            children = tracks.reverse().map(track => MusicTemplates.feedEntry(EntityType.track, track));
         }
 
         return TrackTemplates.trackList(children);
@@ -239,7 +239,7 @@ export class UserTemplates {
         if (tracks.length === 0) {
             return TrackTemplates.noRepostsYet(isOwnProfile);
         } else {
-            children = tracks.map(track => MusicTemplates.feedEntry(EntityType.track, track));
+            children = tracks.reverse().map(track => MusicTemplates.feedEntry(EntityType.track, track));
         }
 
         return TrackTemplates.trackList(children);

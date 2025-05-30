@@ -74,8 +74,7 @@ export class ProfilePage {
             notify("Error while getting playlists: " + getErrorMessage(res), NotificationType.error);
             return;
         }
-        const playlists = res.data;
-        const playlistCards = UserTemplates.playlistCards(playlists, isOwnProfile);
+        const playlistCards = UserTemplates.playlistCards(res.data, isOwnProfile);
         element.innerHTML = "";
         element.appendChild(playlistCards);
     }
@@ -88,8 +87,7 @@ export class ProfilePage {
             notify("Error while getting reposts: " + getErrorMessage(res), NotificationType.error);
             return;
         }
-        const reposts = res.data;
-        const repostCards = UserTemplates.profileRepostList(reposts, isOwnProfile);
+        const repostCards = UserTemplates.profileRepostList(res.data, isOwnProfile);
         element.innerHTML = "";
         element.appendChild(repostCards);
     }
