@@ -19,7 +19,7 @@ import {
     muted,
     playingElsewhere,
     playingFrom,
-    playingHere,
+    playingHere, queueVisible,
     volume
 } from "../../state.ts";
 import {RoutePath} from "../../Routing/routes.ts";

@@ -9,6 +9,7 @@ import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {LoopMode} from "@targoninc/lyda-shared/src/Enums/LoopMode";
 import {Permission} from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
 import {Notification} from "@targoninc/lyda-shared/src/Models/db/lyda/Notification";
+import {ListeningHistory} from "@targoninc/lyda-shared/dist/Models/db/lyda/ListeningHistory";
 
 export const navInitialized = signal(false);
 
@@ -100,3 +101,13 @@ export const notifications = signal<Notification[]>([]);
 export const permissions = signal<Permission[]>([]);
 
 export const chartColor = signal("black");
+
+export const history = signal<ListeningHistory[]>([]);
+history.subscribe((h, changed) => {
+    if (!changed) {
+        return;
+    }
+    LydaCache.set("history", new CacheItem(h));
+});
+
+export const queueVisible = signal(false);

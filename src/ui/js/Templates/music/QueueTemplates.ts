@@ -5,11 +5,12 @@ import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {DragActions} from "../../Actions/DragActions.ts";
 import {Util} from "../../Classes/Util.ts";
 import {navigate} from "../../Routing/Router.ts";
-import {compute, signal, create} from "@targoninc/jess";
+import {compute, signal, create, Signal, when} from "@targoninc/jess";
 import {Images} from "../../Enums/Images.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import { icon } from "@targoninc/jess-components";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {queueVisible} from "../../state.ts";
 
 export class QueueTemplates {
     static queueItem(track: Track, index: number, totalCount: number, attributes = [], classes = []) {
@@ -118,19 +119,6 @@ export class QueueTemplates {
     }
 
     static queue(queue: { track: Track }[]) {
-        let children = [];
-        let i = 0;
-        for (let item of queue) {
-            children.push(GenericTemplates.dragTargetInList((data: any) => {
-                QueueManager.moveInManualQueue(data.from, data.to);
-            }, i.toString()));
-            if (!item.track.user) {
-                throw new Error(`Track ${item.track.id} has no user`);
-            }
-            children.push(QueueTemplates.queueItem(item.track, i, queue.length));
-            i++;
-        }
-
         let queueText;
         if (queue.length > 0) {
             let queueTrackLength = 0;
@@ -143,14 +131,12 @@ export class QueueTemplates {
         } else {
             queueText = "Queue is empty";
         }
-        const queueListHidden = signal(true);
-        const queueListVisClass = compute((h): string => h ? "hidden" : "_", queueListHidden);
 
         return create("div")
             .classes("relative")
             .children(
-                create("div")
-                    .classes(queueListVisClass, "popout-above", "flex-v", "no-gap", "padded", "rounded")
+                when(queueVisible, create("div")
+                    .classes("popout-above", "absolute-align-right", "flex-v", "no-gap", "padded", "rounded")
                     .styles("width", "max-content")
                     .children(
                         create("div")
@@ -161,12 +147,19 @@ export class QueueTemplates {
                                     .text(queueText)
                                     .build(),
                             ).build(),
-                        ...children
-                    ).build(),
+                        ...queue.flatMap((item, i) => {
+                            return [
+                                GenericTemplates.dragTargetInList((data: any) => {
+                                    QueueManager.moveInManualQueue(data.from, data.to);
+                                }, i.toString()),
+                                QueueTemplates.queueItem(item.track, i, queue.length)
+                            ];
+                        })
+                    ).build()),
                 create("button")
                     .classes("jess", "relative")
                     .onclick(() => {
-                        queueListHidden.value = !queueListHidden.value;
+                        queueVisible.value = !queueVisible.value;
                     })
                     .children(
                         icon({

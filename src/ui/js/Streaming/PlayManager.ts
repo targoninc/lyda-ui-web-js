@@ -17,7 +17,7 @@ import {
     playingHere,
     currentTrackPosition,
     loopMode,
-    muted, currentSecretCode
+    muted, currentSecretCode, history, currentUser, currentQuality
 } from "../state.ts";
 import {StreamingBroadcaster, StreamingEvent} from "./StreamingBroadcaster.ts";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
@@ -194,6 +194,18 @@ export class PlayManager {
     static async startAsync(id: number) {
         await PlayManager.stopAllAsync();
 
+        if (id !== currentTrackId.value) {
+            history.value = [
+                ...history.value,
+                {
+                    id: -1,
+                    user_id: -1,
+                    track_id: id,
+                    created_at: new Date(),
+                    quality: currentQuality.value
+                }
+            ];
+        }
         const track = await PlayManager.getTrackData(id);
         const streamClient = PlayManager.addStreamClientIfNotExists(id, track.track.length);
 
