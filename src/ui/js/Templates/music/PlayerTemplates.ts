@@ -310,7 +310,7 @@ export class PlayerTemplates {
         }, currentQuality);
 
         return create("a")
-            .classes("page-link", "color-dim")
+            .classes("page-link", "color-dim", "text-small")
             .text(text)
             .href(RoutePath.settings)
             .onclick((e) => {
