@@ -113,7 +113,7 @@ export class MusicTemplates {
         const coverLoading = signal(false);
         const start = async () => startItem(type, item, startCallback);
         const isOwnItem = compute(u => u?.id === item.user_id, currentUser);
-        const playButtonContexts = ["inline-cover"];
+        const playButtonContexts = ["inline-cover", "card-cover"];
 
         return create("div")
             .classes("cover-container", "relative", "pointer", coverContext)
@@ -145,14 +145,14 @@ export class MusicTemplates {
     static playButton(type: EntityType, itemId: number, start: Function) {
         const isPlaying = compute((c, pf, p) => {
             if (type !== EntityType.track) {
-                return pf?.id === itemId;
+                return pf?.id === itemId && p;
             }
 
             return c === itemId && p;
         }, currentTrackId, playingFrom, playingHere);
         const icon = compute(p => p ? Icons.PAUSE : Icons.PLAY, isPlaying);
         const onclick = async () => {
-            if (isPlaying.value && type !== EntityType.track) {
+            if (playingHere.value) {
                 await PlayManager.pauseAsync(currentTrackId.value);
             } else {
                 start();

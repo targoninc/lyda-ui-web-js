@@ -284,7 +284,7 @@ export class PlaylistTemplates {
                 create("div")
                     .classes("flex")
                     .children(
-                        PlaylistTemplates.playlistCover(playlist, "card-cover"),
+                        MusicTemplates.cover(EntityType.playlist, playlist, "card-cover"),
                         create("div")
                             .classes("flex-v", "small-gap")
                             .children(
@@ -310,44 +310,6 @@ export class PlaylistTemplates {
                     .onclick(() => navigate(`${RoutePath.playlist}/` + id))
                     .build(),
                 ...icons,
-            ).build();
-    }
-
-    static playlistCover(playlist: Playlist, coverType: string) {
-        const coverState = signal(Images.DEFAULT_COVER_PLAYLIST);
-        if (playlist.has_cover) {
-            coverState.value = Util.getPlaylistCover(playlist.id);
-        }
-        if (!playlist.tracks) {
-            throw new Error(`Playlist ${playlist.id} has no tracks`);
-        }
-
-        return create("div")
-            .classes("cover-container", "relative", "pointer", coverType)
-            .attributes("playlist_id", playlist.id)
-            .id(playlist.id)
-            .onclick(async () => {
-                notify("Starting playlist " + playlist.id, NotificationType.info);
-                PlayManager.playFrom("playlist", playlist.title, playlist.id, playlist);
-                QueueManager.setContextQueue(playlist.tracks!.map(t => t.track_id));
-                const firstTrack = playlist.tracks![0];
-                if (!firstTrack) {
-                    notify("This playlist has no tracks", NotificationType.error);
-                    return;
-                }
-                PlayManager.addStreamClientIfNotExists(firstTrack.track_id, firstTrack.track?.length ?? 0);
-                await PlayManager.startAsync(firstTrack.track_id);
-            })
-            .children(
-                create("img")
-                    .classes("cover", "nopointer", "blurOnParentHover")
-                    .src(coverState)
-                    .alt(playlist.title)
-                    .build(),
-                create("img")
-                    .classes("play-button-icon", "centeredInParent", "showOnParentHover", "inline-icon", "svgInverted", "nopointer")
-                    .src(Icons.PLAY)
-                    .build(),
             ).build();
     }
 

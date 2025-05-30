@@ -22,7 +22,7 @@ import {
     when
 } from "@targoninc/jess";
 import {navigate, Route} from "../../Routing/Router.ts";
-import {currentTrackId, currentUser, manualQueue, playingFrom, playingHere} from "../../state.ts";
+import {currentTrackId, currentUser, playingFrom, playingHere} from "../../state.ts";
 import {Api} from "../../Api/Api.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {PageTemplates} from "../PageTemplates.ts";
@@ -308,7 +308,7 @@ export class AlbumTemplates {
                 create("div")
                     .classes("flex")
                     .children(
-                        AlbumTemplates.albumCover(album, "card-cover"),
+                        MusicTemplates.cover(EntityType.album, album, "card-cover"),
                         create("div")
                             .classes("flex-v", "small-gap")
                             .children(
@@ -335,44 +335,6 @@ export class AlbumTemplates {
                     .build(),
                 ...icons,
             ).build();
-    }
-
-    static albumCover(album: Album, coverType: string) {
-        if (!album.tracks) {
-            throw new Error(`Album ${album.id} has no tracks`);
-        }
-
-        const srcState = signal(Images.DEFAULT_COVER_ALBUM);
-        if (album.has_cover) {
-            srcState.value = Util.getAlbumCover(album.id);
-        }
-
-        return create("div")
-            .classes("cover-container", "relative", "pointer", coverType)
-            .id(album.id)
-            .onclick(async () => {
-                PlayManager.playFrom("album", album.title, album.id, album);
-                QueueManager.setContextQueue(album.tracks!.map(t => t.track_id));
-                const firstTrack = album.tracks![0];
-                if (!firstTrack) {
-                    notify("This album has no tracks", NotificationType.error);
-                    return;
-                }
-                PlayManager.addStreamClientIfNotExists(firstTrack.track_id, firstTrack.track?.length ?? 0);
-                await PlayManager.startAsync(firstTrack.track_id);
-            })
-            .children(
-                create("img")
-                    .classes("cover", "nopointer", "blurOnParentHover")
-                    .src(srcState)
-                    .alt(album.title)
-                    .build(),
-                create("img")
-                    .classes("play-button-icon", "centeredInParent", "showOnParentHover", "inline-icon", "svgInverted", "nopointer")
-                    .src(Icons.PLAY)
-                    .build(),
-            )
-            .build();
     }
 
     static async smallAlbumCover(album: Album) {
