@@ -25,6 +25,8 @@ import {PlayingFrom} from "@targoninc/lyda-shared/src/Models/PlayingFrom";
 import {LoopMode} from "@targoninc/lyda-shared/src/Enums/LoopMode";
 import {TrackPosition} from "@targoninc/lyda-shared/src/Models/TrackPosition";
 import {NotificationType} from "../Enums/NotificationType.ts";
+import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 
 export class PlayManager {
     static async playCheck(track: Track) {
@@ -91,8 +93,13 @@ export class PlayManager {
         return streamClients.value[id];
     }
 
-    static playFrom(type: string, name: string, id: number) {
-        playingFrom.value = {type, name, id};
+    static playFrom(type: string, name: string, id: number, entity?: Album | Playlist) {
+        playingFrom.value = {
+            type,
+            name,
+            id,
+            entity
+        };
         LydaCache.set("playingFrom", new CacheItem(playingFrom.value));
     }
 

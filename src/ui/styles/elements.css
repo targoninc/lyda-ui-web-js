@@ -477,11 +477,11 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     overflow: auto;
 }
 
-.user-link {
+.page-link {
     color: var(--color-5);
 }
 
-.user-link:hover {
+.page-link:hover {
     text-decoration: underline;
 }
 
@@ -495,7 +495,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     border-radius: 50%;
 }
 
-.user-icon {
+.user-icon, .tiny-cover {
     width: var(--font-size-medium);
     height: var(--font-size-medium);
 }
@@ -745,7 +745,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     min-width: 300px;
     border: 1px solid var(--color-7);
     z-index: 9999;
-    border-radius: var(--jessc-border-radius-medium);
+    border-radius: var(--border-radius);
     overflow: auto;
     backdrop-filter: blur(50px);
     background: color-mix(in oklab, var(--color-3), transparent 30%);

@@ -5,12 +5,14 @@ import {Api, ApiResponse} from "../Api/Api.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {chartColor, currentUser} from "../state.ts";
-import {compute, signal, Signal, AnyElement, isSignal, asSignal} from "@targoninc/jess";
+import {AnyElement, asSignal, compute, signal, Signal} from "@targoninc/jess";
 import {getUserPermissions} from "../../main.ts";
 import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {Comment} from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
+import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 
 export class Util {
     static capitalizeFirstLetter(string: string) {
@@ -38,33 +40,33 @@ export class Util {
     }
 
     static getUserAvatar(id: number | null | undefined) {
-        if (id === null) {
+        if (id === null || id === undefined) {
             return Images.DEFAULT_AVATAR;
         }
-        return ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.userAvatar}&t=${Date.now()}`;
+        return Util.getImage(id, MediaFileType.userAvatar);
     }
 
     static getUserBanner(id: number | null) {
         if (id === null) {
             return Images.DEFAULT_BANNER;
         }
-        return ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.userBanner}&t=${Date.now()}`;
+        return Util.getImage(id, MediaFileType.userBanner);
     }
 
-    static getCover(id: number, type: MediaFileType) {
+    static getImage(id: number, type: MediaFileType) {
         return ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${type}&t=${Date.now()}`;
     }
 
     static getTrackCover(id: number) {
-        return ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.trackCover}&t=${Date.now()}`;
+        return Util.getImage(id, MediaFileType.trackCover);
     }
 
     static getAlbumCover(id: number) {
-        return ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.albumCover}&t=${Date.now()}`;
+        return Util.getImage(id, MediaFileType.albumCover);
     }
 
     static getPlaylistCover(id: number) {
-        return ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${MediaFileType.playlistCover}&t=${Date.now()}`;
+        return Util.getImage(id, MediaFileType.playlistCover);
     }
 
     static async fileExists(url: string) {
@@ -347,11 +349,27 @@ export function updateImagesWithSource(newSrc: string, oldSrc: string) {
 }
 
 export function getAvatar(user: User | null | undefined) {
-    const avatarState = signal(Images.DEFAULT_AVATAR);
+    const imgState = signal(Images.DEFAULT_AVATAR);
     if (user?.has_avatar) {
-        avatarState.value = Util.getUserAvatar(user.id);
+        imgState.value = Util.getUserAvatar(user.id);
     }
-    return avatarState;
+    return imgState;
+}
+
+export function getAlbumCover(album: Album | null | undefined) {
+    const imgState = signal(Images.DEFAULT_COVER_ALBUM);
+    if (album?.has_cover) {
+        imgState.value = Util.getAlbumCover(album.id);
+    }
+    return imgState;
+}
+
+export function getPlaylistCover(playlist: Playlist | null | undefined) {
+    const imgState = signal(Images.DEFAULT_COVER_PLAYLIST);
+    if (playlist?.has_cover) {
+        imgState.value = Util.getPlaylistCover(playlist.id);
+    }
+    return imgState;
 }
 
 export function downloadFile(fileName: string, content: string) {

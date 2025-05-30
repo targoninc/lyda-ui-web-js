@@ -16,7 +16,7 @@ import {CustomText} from "../../Classes/Helpers/CustomText.ts";
 import {CommentTemplates} from "../CommentTemplates.ts";
 import {navigate} from "../../Routing/Router.ts";
 import {compute, Signal, signal, AnyElement, AnyNode, create, HtmlPropertyValue, when, signalMap} from "@targoninc/jess";
-import {currentTrackId, currentUser, manualQueue} from "../../state.ts";
+import {currentTrackId, currentUser, manualQueue, playingHere} from "../../state.ts";
 import {Ui} from "../../Classes/Ui.ts";
 import {Api} from "../../Api/Api.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
@@ -108,7 +108,7 @@ export class TrackTemplates {
     static trackCover(track: Track, coverType: string, startCallback: Function|null = null) {
         const imageState = signal(DefaultImages[EntityType.track]);
         if (track.has_cover) {
-            imageState.value = Util.getCover(track.id, MediaFileType.trackCover);
+            imageState.value = Util.getImage(track.id, MediaFileType.trackCover);
         }
         const coverLoading = signal(false);
         const start = async () => {
@@ -422,10 +422,16 @@ export class TrackTemplates {
         return create("div")
             .classes("flex")
             .children(
-                create("span")
+                create("a")
                     .classes("clickable", "text-large", "pointer")
+                    .href(`/${RoutePath.track}/${id}`)
                     .text(title)
-                    .onclick(() => navigate(`${RoutePath.track}/` + id))
+                    .onclick((e) => {
+                        if (e.button === 0) {
+                            e.preventDefault();
+                            navigate(`${RoutePath.track}/${id}`);
+                        }
+                    })
                     .build(),
                 ...icons,
             ).build();
@@ -714,7 +720,7 @@ export class TrackTemplates {
     }
 
     static playButton(track: Track) {
-        const isPlaying = compute(id => id === track.id, currentTrackId);
+        const isPlaying = compute((id, ph) => id === track.id && ph, currentTrackId, playingHere);
         const text = compute((p): string => p ? "Pause" : "Play", isPlaying);
         const icon = compute((p): string => p ? Icons.PAUSE : Icons.PLAY, isPlaying);
 

@@ -199,7 +199,7 @@ export class SettingsTemplates {
 
     static qualitySelector(value: StreamingQuality, currentValue$: Signal<StreamingQuality>, actualValue$: Signal<StreamingQuality>) {
         const active$ = compute(c => c === value ? "active" : "_", actualValue$);
-        const disabled$ = compute(u => value === StreamingQuality.high && (!u || !u.subscription), currentUser);
+        const disabled$ = compute(u => value !== StreamingQuality.low && (!u || !u.subscription), currentUser);
         const textMap: Record<StreamingQuality, string> = {
             [StreamingQuality.low]: "low (92kbps)",
             [StreamingQuality.medium]: "medium (128kbps)",
@@ -208,7 +208,7 @@ export class SettingsTemplates {
 
         return horizontal(
             button(<ButtonConfig>{
-                classes: [active$, `quality-selector-${value}`, value === StreamingQuality.high ? "special" : "_"],
+                classes: [active$, `quality-selector-${value}`, value !== StreamingQuality.low ? "special" : "_"],
                 text: textMap[value],
                 disabled: disabled$,
                 onclick: async () => {
@@ -216,7 +216,6 @@ export class SettingsTemplates {
                     await UserActions.setStreamingQuality(value);
                 }
             }),
-            when(disabled$, GenericTemplates.inlineLink(() => navigate(RoutePath.subscribe), "Subscribe for high quality"))
         ).classes("align-children");
     }
 
@@ -241,8 +240,8 @@ export class SettingsTemplates {
         const currentValue$ = signal(currentValue);
         const actualValue = compute((u, v) => {
             if (!u || !u.subscription) {
-                if (v === StreamingQuality.high) {
-                    return StreamingQuality.medium;
+                if (v !== StreamingQuality.low) {
+                    return StreamingQuality.low;
                 }
             }
             return v;
@@ -257,8 +256,9 @@ export class SettingsTemplates {
                     .build(),
                 when(noSubscription, create("div")
                     .classes("text", "text-small", "color-dim")
-                    .text("High quality is only available with a subscription.")
+                    .text("Medium and high qualities are only available with a subscription.")
                     .build()),
+                when(noSubscription, GenericTemplates.inlineLink(() => navigate(RoutePath.subscribe), "Subscribe for higher quality")),
                 create("div")
                     .classes("flex", "small-gap")
                     .children(

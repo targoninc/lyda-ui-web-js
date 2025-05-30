@@ -11,6 +11,7 @@ import {AnyElement, compute, create, Signal, signal, when} from "@targoninc/jess
 import {navigate} from "../../Routing/Router.ts";
 import {
     currentlyBuffered,
+    currentQuality,
     currentTrackId,
     currentTrackPosition,
     loopMode,
@@ -31,6 +32,8 @@ import {LoopMode} from "@targoninc/lyda-shared/src/Enums/LoopMode";
 import {InteractionTemplates} from "../InteractionTemplates.ts";
 import {MusicTemplates} from "./MusicTemplates.ts";
 import {TrackTemplates} from "./TrackTemplates.ts";
+import {StreamingQuality} from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
+import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
 
 export class PlayerTemplates {
     static async bigAudioPlayer(track: Track, queueComponentMore: Signal<HTMLElement | SVGElement>) {
@@ -257,24 +260,66 @@ export class PlayerTemplates {
     static playingFrom() {
         const id = compute(pf => pf?.id, playingFrom);
         const type = compute(pf => pf?.type, playingFrom);
-        const name = compute(pf => `Playing from ${pf?.name}`, playingFrom);
+        const name = compute(pf => pf?.name ?? "", playingFrom);
+        const img$ = signal(Images.DEFAULT_COVER_ALBUM);
+        const typeMap: Record<string, MediaFileType> = {
+            "album": MediaFileType.albumCover,
+            "playlist": MediaFileType.playlistCover
+        };
+        playingFrom.subscribe(pf => {
+            if (pf && pf.entity && pf.entity.has_cover) {
+                img$.value = Util.getImage(pf.id, typeMap[pf.type]);
+            }
+        });
 
         return when(playingFrom, create("div")
             .classes("playing-from", "flex")
             .children(
-                create("span")
-                    .classes("text-small", "padded-inline", "align-center", "clickable", "rounded")
-                    .onclick(() => navigate(`${type.value}/${id.value}`))
-                    .text(name)
-                    .build(),
+                create("a")
+                    .classes("page-link", "color-dim", "flex", "align-children", "small-gap")
+                    .href(compute(pf => `/${pf?.type}/${pf?.id}`, playingFrom))
+                    .onclick((e) => {
+                        if (e.button === 0) {
+                            e.preventDefault();
+                            navigate(`${type.value}/${id.value}`);
+                        }
+                    })
+                    .children(
+                        create("img")
+                            .classes("tiny-cover")
+                            .src(img$),
+                        create("span")
+                            .classes("text-small")
+                            .text(name)
+                    ).build(),
             ).build());
     }
 
     static noSubscriptionInfo() {
-        return create("span")
-            .classes("no-sub-info", "rounded", "clickable", "text-small", "padded-inline", "align-center")
-            .text("Listening in 96kbps. Subscribe for up to 320kbps.")
-            .onclick(() => navigate(RoutePath.subscribe)).build();
+        const text = compute((q): string => {
+            switch (q) {
+                case StreamingQuality.low:
+                    return "96kbps";
+                case StreamingQuality.medium:
+                    return "128kbps";
+                case StreamingQuality.high:
+                    return "320kbps";
+                default:
+                    return "???kbps"
+            }
+        }, currentQuality);
+
+        return create("a")
+            .classes("page-link", "color-dim")
+            .text(text)
+            .href(RoutePath.settings)
+            .onclick((e) => {
+                if (e.button === 0) {
+                    e.preventDefault();
+                    navigate(RoutePath.settings);
+                }
+            })
+            .build();
     }
 
     static trackIcons(track: Track) {
@@ -285,7 +330,10 @@ export class PlayerTemplates {
         return vertical(
             TrackTemplates.title(track.title, track.id, PlayerTemplates.trackIcons(track)),
             UserTemplates.userLink(UserWidgetContext.player, trackUser),
-            PlayerTemplates.playingFrom(),
+            horizontal(
+                PlayerTemplates.noSubscriptionInfo(),
+                PlayerTemplates.playingFrom(),
+            )
         ).classes("align-center", "no-gap").build();
     }
 

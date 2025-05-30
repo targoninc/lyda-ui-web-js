@@ -108,7 +108,7 @@ export class MusicTemplates {
         const imageState = signal(DefaultImages[type]);
         const fileType = `${type}Cover` as MediaFileType;
         if (item.has_cover) {
-            imageState.value = Util.getCover(item.id, fileType);
+            imageState.value = Util.getImage(item.id, fileType);
         }
         const coverLoading = signal(false);
         const start = async () => startItem(type, item, startCallback);

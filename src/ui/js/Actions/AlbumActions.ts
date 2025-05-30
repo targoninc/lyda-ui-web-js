@@ -149,7 +149,7 @@ export class AlbumActions {
             if (!album.tracks) {
                 throw new Error(`Invalid album (${album.id}), has no tracks.`);
             }
-            PlayManager.playFrom("album", album.title, album.id);
+            PlayManager.playFrom("album", album.title, album.id, album);
             QueueManager.setContextQueue(album.tracks.map(t => t.track_id));
             const track = album.tracks.find(t => t.track_id === trackId);
             if (!track) {

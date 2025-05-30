@@ -1,8 +1,8 @@
-import {target, Util} from "../../Classes/Util.ts";
+import {getAvatar, target, Util} from "../../Classes/Util.ts";
 import {TrackActions} from "../../Actions/TrackActions.ts";
 import {TrackTemplates} from "../music/TrackTemplates.ts";
 import {UserActions} from "../../Actions/UserActions.ts";
-import {GenericTemplates, vertical} from "../generic/GenericTemplates.ts";
+import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
 import {AlbumTemplates} from "../music/AlbumTemplates.ts";
 import {Icons as Icons} from "../../Enums/Icons.ts";
 import {Links} from "../../Enums/Links.ts";
@@ -34,8 +34,6 @@ import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
-import {Permission} from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
-import {Follow} from "@targoninc/lyda-shared/src/Models/db/lyda/Follow";
 import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
 import {Badge} from "@targoninc/lyda-shared/src/Models/db/lyda/Badge";
@@ -112,20 +110,22 @@ export class UserTemplates {
         const maxDisplaynameLength = [UserWidgetContext.singlePage, UserWidgetContext.list].includes(context) ? 100 : 15;
         const previewShown = signal(false);
         let timeout: any | null = null;
+        const avatarState = getAvatar(user);
 
-        return vertical(
+        return horizontal(
             create("a")
-                .classes("user-link", "color-dim")
+                .classes("page-link", "color-dim", "flex", "align-children", "small-gap")
                 .attributes("user_id", user.id, "username", user.username)
                 .onclick((e: MouseEvent) => {
                     if (e.button === 0) {
                         e.preventDefault();
-                        navigate(`${RoutePath.profile}/` + user.username);
+                        navigate(`${RoutePath.profile}/${user.username}`);
                     }
                 })
-                .href(Links.PROFILE(user.username))
+                .href(`${RoutePath.profile}/${user.username}`)
                 .title(user.displayname + " (@" + user.username + ")")
                 .children(
+                    UserTemplates.userIcon(user.id, avatarState),
                     create("span")
                         .classes("text", "align-center", "nopointer", "user-displayname")
                         .text(truncateText(user.displayname, maxDisplaynameLength))
@@ -191,7 +191,7 @@ export class UserTemplates {
 
     static userIcon(user_id: HtmlPropertyValue, avatar: StringOrSignal) {
         return create("img")
-            .classes("user-icon", "user-avatar", "align-center", "nopointer")
+            .classes("user-icon", "align-center", "nopointer")
             .attributes("data-user-id", user_id)
             .attributes("src", avatar)
             .build();
@@ -376,7 +376,7 @@ export class UserTemplates {
                             })
                             .children(
                                 create("img")
-                                    .classes("nopointer", "user-avatar", "avatar-image", isOwnProfile ? "blurOnParentHover" : "_")
+                                    .classes("nopointer", "avatar-image", isOwnProfile ? "blurOnParentHover" : "_")
                                     .attributes("data-user-id", user.id)
                                     .attributes("src", userAvatar)
                                     .attributes("alt", user.username)

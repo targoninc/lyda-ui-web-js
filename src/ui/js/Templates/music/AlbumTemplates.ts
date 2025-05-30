@@ -351,7 +351,7 @@ export class AlbumTemplates {
             .classes("cover-container", "relative", "pointer", coverType)
             .id(album.id)
             .onclick(async () => {
-                PlayManager.playFrom("album", album.title, album.id);
+                PlayManager.playFrom("album", album.title, album.id, album);
                 QueueManager.setContextQueue(album.tracks!.map(t => t.track_id));
                 const firstTrack = album.tracks![0];
                 if (!firstTrack) {

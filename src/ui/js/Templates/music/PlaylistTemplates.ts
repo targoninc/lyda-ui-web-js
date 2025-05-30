@@ -328,7 +328,7 @@ export class PlaylistTemplates {
             .id(playlist.id)
             .onclick(async () => {
                 notify("Starting playlist " + playlist.id, NotificationType.info);
-                PlayManager.playFrom("playlist", playlist.title, playlist.id);
+                PlayManager.playFrom("playlist", playlist.title, playlist.id, playlist);
                 QueueManager.setContextQueue(playlist.tracks!.map(t => t.track_id));
                 const firstTrack = playlist.tracks![0];
                 if (!firstTrack) {
