@@ -48,7 +48,7 @@ export class QueueManager {
         let firstItem = autoQueueTmp[0];
 
         if (firstItem === undefined || autoQueueTmp.length < 10) {
-            await QueueManager.fillAutoQueue();
+            autoQueueTmp = await QueueManager.fillAutoQueue();
             firstItem = autoQueueTmp[0];
             if (firstItem === undefined) {
                 return undefined;
@@ -64,13 +64,14 @@ export class QueueManager {
 
     static async fillAutoQueue() {
         if (autoQueue.value.length > 10) {
-            return;
+            return autoQueue.value;
         }
         const queueToAdd = await QueueActions.getNewAutoQueueTracks();
         const ids = queueToAdd.map((item) => item.id);
         autoQueue.value = autoQueue.value.concat(ids);
 
         StreamingUpdater.updateQueue().then();
+        return autoQueue.value;
     }
 
     static getNextTrackInContextQueue(currentId: number) {
