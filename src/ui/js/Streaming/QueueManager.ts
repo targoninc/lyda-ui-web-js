@@ -47,7 +47,7 @@ export class QueueManager {
         let autoQueueTmp = QueueManager.getAutoQueue();
         let firstItem = autoQueueTmp[0];
 
-        if (firstItem === undefined) {
+        if (firstItem === undefined || autoQueueTmp.length < 10) {
             await QueueManager.fillAutoQueue();
             firstItem = autoQueueTmp[0];
             if (firstItem === undefined) {
@@ -63,6 +63,9 @@ export class QueueManager {
     }
 
     static async fillAutoQueue() {
+        if (autoQueue.value.length > 10) {
+            return;
+        }
         const queueToAdd = await QueueActions.getNewAutoQueueTracks();
         autoQueue.value = autoQueue.value.concat(queueToAdd);
 

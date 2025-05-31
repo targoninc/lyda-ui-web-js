@@ -17,6 +17,7 @@ import {PlayingFrom} from "@targoninc/lyda-shared/src/Models/PlayingFrom";
 import {ListeningHistory} from "@targoninc/lyda-shared/dist/Models/db/lyda/ListeningHistory";
 import {Permission} from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
 import {TrackPosition} from "@targoninc/lyda-shared/src/Models/TrackPosition";
+import {QueueManager} from "./js/Streaming/QueueManager.ts";
 
 let pageContainer = document.querySelector(".page-container");
 if (!pageContainer) {
@@ -63,6 +64,7 @@ export function getUserPermissions() {
 
 if (currentUser.value) {
     getUserPermissions();
+    QueueManager.fillAutoQueue().then();
 
     const currentTrackPositionTmp = LydaCache.get<TrackPosition>("currentTrackPosition").content;
     if (currentTrackPositionTmp) {

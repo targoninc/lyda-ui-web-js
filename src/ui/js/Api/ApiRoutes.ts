@@ -93,7 +93,7 @@ export class ApiRoutes {
     static followingFeed = ApiRoutes.feeds + "/following";
     static exploreFeed = ApiRoutes.feeds + "/explore";
     static historyFeed = ApiRoutes.feeds + "/history";
-    static autoQueueFeed = ApiRoutes.feeds + "/autoQueue";
+    static autoQueueFeed = ApiRoutes.feeds + "/explore";
     // endregion
 
     // region Albums

@@ -1,16 +1,16 @@
 import {Icons} from "../../Enums/Icons.ts";
-import {Time} from "../../Classes/Helpers/Time.ts";
 import {QueueManager} from "../../Streaming/QueueManager.ts";
-import {GenericTemplates} from "../generic/GenericTemplates.ts";
+import {GenericTemplates, vertical} from "../generic/GenericTemplates.ts";
 import {DragActions} from "../../Actions/DragActions.ts";
 import {Util} from "../../Classes/Util.ts";
 import {navigate} from "../../Routing/Router.ts";
-import {signal, create, when} from "@targoninc/jess";
+import {signal, create, compute, computeAsync, nullElement} from "@targoninc/jess";
 import {Images} from "../../Enums/Images.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import { icon } from "@targoninc/jess-components";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import {queueVisible} from "../../state.ts";
+import {autoQueue, contextQueue, manualQueue, queueVisible} from "../../state.ts";
+import {PlayManager} from "../../Streaming/PlayManager.ts";
 
 export class QueueTemplates {
     static queueItem(track: Track, index: number, totalCount: number, attributes = [], classes = []) {
@@ -118,44 +118,10 @@ export class QueueTemplates {
             ).build();
     }
 
-    static queue(queue: { track: Track }[]) {
-        let queueText;
-        if (queue.length > 0) {
-            let queueTrackLength = 0;
-            for (let track of queue) {
-                queueTrackLength += track.track.length;
-            }
-            const queueTrackLengthText = Time.format(queueTrackLength);
-            queueText = queue.length === 1 ? "1 track" : `${queue.length} tracks`;
-            queueText += ` (${queueTrackLengthText})`;
-        } else {
-            queueText = "Queue is empty";
-        }
-
+    static queue() {
         return create("div")
             .classes("relative")
             .children(
-                when(queueVisible, create("div")
-                    .classes("popout-above", "absolute-align-right", "flex-v", "no-gap", "padded", "rounded")
-                    .styles("width", "max-content")
-                    .children(
-                        create("div")
-                            .classes("flex", "align-center", "justify-center", "text-small")
-                            .children(
-                                create("span")
-                                    .classes("flex-grow")
-                                    .text(queueText)
-                                    .build(),
-                            ).build(),
-                        ...queue.flatMap((item, i) => {
-                            return [
-                                GenericTemplates.dragTargetInList((data: any) => {
-                                    QueueManager.moveInManualQueue(data.from, data.to);
-                                }, i.toString()),
-                                QueueTemplates.queueItem(item.track, i, queue.length)
-                            ];
-                        })
-                    ).build()),
                 create("button")
                     .classes("jess", "relative")
                     .onclick(() => {
@@ -170,11 +136,39 @@ export class QueueTemplates {
                             .classes("align-center", "nopointer")
                             .text("Queue")
                             .build(),
-                        create("div")
-                            .classes("queue-bubble", "nopointer")
-                            .text(queue.length)
-                            .build()
                     ).build()
             ).build();
+    }
+
+    static queuePopout() {
+        return create("div")
+            .classes("queue-popout", "flex-v", "no-gap", "padded", "rounded")
+            .children(
+                compute((q) => QueueTemplates.queueList(q, true), manualQueue),
+                compute((q) => QueueTemplates.queueList(q), contextQueue),
+                compute((q) => QueueTemplates.queueList(q), autoQueue),
+            ).build();
+    }
+
+    static queueList(q: number[], isManual: boolean = false) {
+        return vertical(
+            ...q.flatMap((id, i) => {
+                let specifics = [];
+                if (isManual) {
+                    specifics.push(GenericTemplates.dragTargetInList((data: any) => {
+                        QueueManager.moveInManualQueue(data.from, data.to);
+                    }, i.toString()));
+                }
+                const track = signal<{ track: Track } | null>(null);
+                PlayManager.getTrackData(id).then((data: any) => {
+                    track.value = data;
+                });
+
+                return vertical(
+                    ...specifics,
+                    compute(t => t ? QueueTemplates.queueItem(t.track, i, q.length) : nullElement(), track)
+                );
+            })
+        ).build();
     }
 }

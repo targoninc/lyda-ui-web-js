@@ -36,7 +36,7 @@ import {StreamingQuality} from "@targoninc/lyda-shared/src/Enums/StreamingQualit
 import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
 
 export class PlayerTemplates {
-    static async bigAudioPlayer(track: Track, queueComponentMore: Signal<HTMLElement | SVGElement>) {
+    static async bigAudioPlayer(track: Track) {
         PlayManager.addStreamClientIfNotExists(track.id, track.length);
         setInterval(async () => {
             await PlayManager.playCheck(track);
@@ -63,7 +63,7 @@ export class PlayerTemplates {
                             .children(
                                 InteractionTemplates.interactions(EntityType.track, track),
                             ).build(),
-                        await PlayerTemplates.moreMenu(track, queueComponentMore),
+                        await PlayerTemplates.moreMenu(track),
                     ).build(),
                 create("div")
                     .classes("audio-player-controls", "fullWidth", "flex", "rounded", "align-children")
@@ -185,19 +185,8 @@ export class PlayerTemplates {
             cover.value = Util.getTrackCover(track.id);
         }
 
-        const trackList = signal<{ track: Track }[]>([]);
-        manualQueue.subscribe(async (queue) => {
-            const tasks = queue.map(id => PlayManager.getTrackData(id));
-            trackList.value = await Promise.all(tasks);
-        });
-        const tasks = manualQueue.value.map(id => PlayManager.getTrackData(id));
-        Promise.all(tasks).then(tracks => {
-            trackList.value = tracks;
-        });
-        const queueComponentMore = compute((q: any[]) => QueueTemplates.queue(q), trackList);
-
         return create("div")
-            .classes("flex-v")
+            .classes("flex-v", "relative")
             .id("permanent-player")
             .children(
                 when(playingElsewhere, heading({
@@ -216,24 +205,23 @@ export class PlayerTemplates {
                         }),
                     ).classes("hideOnSmallBreakpoint"),
                     await PlayerTemplates.smallPlayerLayout(track),
-                    await PlayerTemplates.bigPlayerLayout(track, trackUser, queueComponentMore, trackList),
-                ).classes("fullWidth").build(), true)
+                    await PlayerTemplates.bigPlayerLayout(track, trackUser),
+                ).classes("fullWidth").build(), true),
+                when(queueVisible, QueueTemplates.queuePopout())
             ).build();
     }
 
-    private static async bigPlayerLayout(track: Track, trackUser: User, queueComponentMore: Signal<HTMLElement | SVGElement>, trackList: Signal<{
-        track: Track
-    }[]>) {
+    private static async bigPlayerLayout(track: Track, trackUser: User) {
         return create("div")
             .classes("flex", "flex-grow", "hideOnSmallBreakpoint")
             .children(
                 await PlayerTemplates.trackInfo(track, trackUser),
-                await PlayerTemplates.bigAudioPlayer(track, queueComponentMore),
+                await PlayerTemplates.bigAudioPlayer(track),
                 create("div")
                     .classes("flex", "hideOnMidBreakpoint")
                     .children(
                         PlayerTemplates.loudnessControl(track),
-                        compute((q: any[]) => QueueTemplates.queue(q), trackList),
+                        QueueTemplates.queue(),
                     ).build()
             ).build();
     }
@@ -336,7 +324,7 @@ export class PlayerTemplates {
         ).classes("align-center", "no-gap").build();
     }
 
-    private static async moreMenu(track: Track, queueComponent: Signal<AnyElement>) {
+    private static async moreMenu(track: Track) {
         const menuShown = signal(false);
         const activeClass = compute((m: boolean): string => m ? "active" : "_", menuShown);
 
@@ -353,7 +341,6 @@ export class PlayerTemplates {
                     .classes("popout-above", "card", "flex-v")
                     .children(
                         InteractionTemplates.interactions(EntityType.track, track),
-                        queueComponent
                     ).build())
             ).build();
     }
