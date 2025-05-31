@@ -424,6 +424,11 @@ export class PlayManager {
         if (trackInfo.value[id] && allowCache) {
             return trackInfo.value[id];
         }
+
+        if (!id) {
+            throw new Error("id is missing");
+        }
+
         const res = await Api.getAsync<{ track: Track }>(ApiRoutes.getTrackById, {id});
         if (res.code !== 200) {
             await PlayManager.removeTrackFromAllStates(id);
