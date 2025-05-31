@@ -104,7 +104,7 @@ export class QueueManager {
         if (autoQueueTmp.length === 0) {
             let cache = LydaCache.get<number[] | number>("queue").content;
             if (cache) {
-                autoQueueTmp = (cache.length ? cache : [cache]) as number[];
+                autoQueueTmp = ((cache as any[]).length ? cache : [cache]) as number[];
                 autoQueue.value = autoQueueTmp;
             }
         }
@@ -116,7 +116,7 @@ export class QueueManager {
         if (contextQueueTmp.length === 0) {
             let cache = LydaCache.get<number[] | number>("contextQueue").content;
             if (cache) {
-                contextQueueTmp = (cache.length ? cache : [cache]) as number[];
+                contextQueueTmp = ((cache as any[]).length ? cache : [cache]) as number[];
                 contextQueue.value = contextQueueTmp;
             }
         }

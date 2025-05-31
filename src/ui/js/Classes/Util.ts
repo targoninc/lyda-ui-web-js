@@ -11,8 +11,6 @@ import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {Comment} from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
-import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
-import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 
 export class Util {
     static capitalizeFirstLetter(string: string) {
@@ -131,7 +129,7 @@ export class Util {
 
     static userIsFollowing(user$: User|Signal<User|null>) {
         return compute(u => {
-            const user = asSignal(user$).value;
+            const user = asSignal(user$).value as User;
             return !!(u && user?.follows?.some(f => f.following_user_id === u.id));
         }, currentUser);
     }
@@ -337,7 +335,6 @@ export async function copy(text: string) {
     notify("Copied to clipboard", NotificationType.success);
 }
 
-
 export function updateImagesWithSource(newSrc: string, oldSrc: string) {
     oldSrc = oldSrc.replace(/&t=\d+/, "");
     const imgs = document.querySelectorAll("img") as NodeListOf<HTMLImageElement>;
@@ -352,22 +349,6 @@ export function getAvatar(user: User | null | undefined) {
     const imgState = signal(Images.DEFAULT_AVATAR);
     if (user?.has_avatar) {
         imgState.value = Util.getUserAvatar(user.id);
-    }
-    return imgState;
-}
-
-export function getAlbumCover(album: Album | null | undefined) {
-    const imgState = signal(Images.DEFAULT_COVER_ALBUM);
-    if (album?.has_cover) {
-        imgState.value = Util.getAlbumCover(album.id);
-    }
-    return imgState;
-}
-
-export function getPlaylistCover(playlist: Playlist | null | undefined) {
-    const imgState = signal(Images.DEFAULT_COVER_PLAYLIST);
-    if (playlist?.has_cover) {
-        imgState.value = Util.getPlaylistCover(playlist.id);
     }
     return imgState;
 }

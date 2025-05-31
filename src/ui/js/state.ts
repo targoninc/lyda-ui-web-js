@@ -107,7 +107,7 @@ history.subscribe((h, changed) => {
     if (!changed) {
         return;
     }
-    LydaCache.set("history", new CacheItem(h));
+    LydaCache.set("listeningHistory", new CacheItem(h.slice(h.length - 100, h.length)));
 });
 
 export const queueVisible = signal(false);

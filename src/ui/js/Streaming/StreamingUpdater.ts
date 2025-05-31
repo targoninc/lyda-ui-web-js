@@ -53,30 +53,6 @@ export class StreamingUpdater {
         if (streamClient && streamClient.playing) {
             currentTrackPosition.value = currentTime;
         }
-        const scrubTimesCurrent = document.querySelectorAll(".audio-player-time-current") as NodeListOf<HTMLSpanElement>;
-        for (const scrubTimeCurrent of scrubTimesCurrent) {
-            if (scrubTimeCurrent.id !== id.toString()) {
-                continue;
-            }
-            scrubTimeCurrent.innerText = Time.format(currentTime.absolute);
-        }
-
-        const waveforms = document.querySelectorAll(".waveform");
-        const barCount = 150;
-        for (const waveform of waveforms) {
-            if (waveform.id !== id.toString()) {
-                continue;
-            }
-            const waveformBars = waveform.querySelectorAll(".waveform-bar");
-            const barsBefore = Math.floor(currentTime.relative * barCount);
-            const barsAfter = barCount - barsBefore;
-            for (let i = 0; i < barsBefore; i++) {
-                waveformBars[i]?.classList.add("active");
-            }
-            for (let i = barsBefore; i < barsBefore + barsAfter; i++) {
-                waveformBars[i]?.classList.remove("active");
-            }
-        }
 
         StreamingUpdater.updateBuffers(streamClient.getBufferedLength(), streamClient.duration);
     }

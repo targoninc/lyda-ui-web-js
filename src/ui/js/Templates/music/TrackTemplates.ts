@@ -16,7 +16,7 @@ import {CustomText} from "../../Classes/Helpers/CustomText.ts";
 import {CommentTemplates} from "../CommentTemplates.ts";
 import {navigate} from "../../Routing/Router.ts";
 import {compute, Signal, signal, AnyElement, AnyNode, create, HtmlPropertyValue, when, signalMap} from "@targoninc/jess";
-import {currentTrackId, currentUser, manualQueue, playingHere} from "../../state.ts";
+import {currentTrackId, currentTrackPosition, currentUser, manualQueue, playingHere} from "../../state.ts";
 import {Ui} from "../../Classes/Ui.ts";
 import {Api} from "../../Api/Api.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
@@ -245,8 +245,16 @@ export class TrackTemplates {
             })
             .children(
                 ...loudnessData.map((loudness, index) => {
+                    const barClass = compute((p, id): string => {
+                        const barsBefore = Math.floor(p.relative * loudnessData.length);
+                        if (index < barsBefore && id === track.id) {
+                            return "active";
+                        }
+                        return "_";
+                    }, currentTrackPosition, currentTrackId);
+
                     return create("div")
-                        .classes("waveform-bar", "nopointer", index % 2 === 0 ? "even" : "odd")
+                        .classes("waveform-bar", "nopointer", index % 2 === 0 ? "even" : "odd", barClass)
                         .styles("height", (loudness * 100) + "%")
                         .build();
                 })

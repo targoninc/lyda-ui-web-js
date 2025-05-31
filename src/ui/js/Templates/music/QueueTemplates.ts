@@ -5,7 +5,7 @@ import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {DragActions} from "../../Actions/DragActions.ts";
 import {Util} from "../../Classes/Util.ts";
 import {navigate} from "../../Routing/Router.ts";
-import {compute, signal, create, Signal, when} from "@targoninc/jess";
+import {signal, create, when} from "@targoninc/jess";
 import {Images} from "../../Enums/Images.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import { icon } from "@targoninc/jess-components";

@@ -74,7 +74,7 @@ export class PlayerTemplates {
                             .id("audio_" + track.id)
                             .styles("display", "none")
                             .build(),
-                        PlayerTemplates.currentTrackTime(track),
+                        PlayerTemplates.currentTrackTime(),
                         PlayerTemplates.trackScrubbar(track, bufferPercent, positionPercent),
                         PlayerTemplates.totalTrackTime(track),
                     ).build()
@@ -91,11 +91,10 @@ export class PlayerTemplates {
         }, "Play/Pause");
     }
 
-    private static currentTrackTime(track: Track) {
+    private static currentTrackTime() {
         return create("span")
-            .id(track.id)
-            .classes("audio-player-time-current", "nopointer", "align-center", "hideOnMidBreakpoint")
-            .text("0:00")
+            .classes("nopointer", "align-center", "hideOnMidBreakpoint")
+            .text(compute(t => Time.format(t.absolute), currentTrackPosition))
             .build();
     }
 
