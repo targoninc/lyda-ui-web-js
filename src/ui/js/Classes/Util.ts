@@ -292,7 +292,7 @@ export function getUserSettingValue<T>(user: User, key: string) {
     return val as T;
 }
 
-export function userHasSettingValue(user: User, key: string, value: string) {
+export function userHasSettingValue(user: User, key: string, value: string|boolean) {
     return getUserSettingValue(user, key) === value;
 }
 

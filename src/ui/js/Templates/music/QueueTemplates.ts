@@ -1,11 +1,11 @@
 import {QueueManager} from "../../Streaming/QueueManager.ts";
 import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
-import {Util} from "../../Classes/Util.ts";
+import {userHasSettingValue, Util} from "../../Classes/Util.ts";
 import {compute, create, nullElement, signal, when} from "@targoninc/jess";
 import {Images} from "../../Enums/Images.ts";
 import {button, icon} from "@targoninc/jess-components";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import {autoQueue, contextQueue, currentTrackId, manualQueue, queueVisible} from "../../state.ts";
+import {autoQueue, contextQueue, currentTrackId, currentUser, manualQueue, queueVisible} from "../../state.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
 import {MusicTemplates} from "./MusicTemplates.ts";
 import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
@@ -130,6 +130,7 @@ export class QueueTemplates {
 
     static queuePopout() {
         const qClass = compute((v): string => v ? "visible" : "hide", queueVisible);
+        const playFromAutoEnabled = compute(u => u && userHasSettingValue(u, "playFromAutoQueue", true), currentUser);
 
         return create("div")
             .classes("queue-popout", qClass)
@@ -138,7 +139,9 @@ export class QueueTemplates {
                     compute(id => QueueTemplates.trackAsQueueItem(id, 0, false), currentTrackId),
                     compute((q) => QueueTemplates.queueList(q, "Manual queue", true), manualQueue),
                     compute((q) => QueueTemplates.queueList(q, "Context queue"), contextQueue),
-                    compute((q) => QueueTemplates.queueList(q, "Auto queue"), autoQueue),
+                    when(playFromAutoEnabled, vertical(
+                        compute((q) => QueueTemplates.queueList(q, "Auto queue"), autoQueue)
+                    ).build()),
                 ).classes("padded", "rounded", "fullWidth").build()
             ).build();
     }
