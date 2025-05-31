@@ -9,7 +9,15 @@ import {Ui} from "./js/Classes/Ui.ts";
 import {Util} from "./js/Classes/Util.ts";
 import {RoutePath, routes} from "./js/Routing/routes.js";
 import {GenericTemplates} from "./js/Templates/generic/GenericTemplates.ts";
-import {currentTrackId, currentTrackPosition, currentUser, history, permissions, playingFrom} from "./js/state.ts";
+import {
+    contextQueue,
+    currentTrackId,
+    currentTrackPosition,
+    currentUser,
+    history,
+    permissions,
+    playingFrom
+} from "./js/state.ts";
 import {StreamingBroadcaster} from "./js/Streaming/StreamingBroadcaster.ts";
 import {Api} from "./js/Api/Api.ts";
 import {ApiRoutes} from "./js/Api/ApiRoutes.ts";
@@ -18,6 +26,7 @@ import {ListeningHistory} from "@targoninc/lyda-shared/dist/Models/db/lyda/Liste
 import {Permission} from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
 import {TrackPosition} from "@targoninc/lyda-shared/src/Models/TrackPosition";
 import {QueueManager} from "./js/Streaming/QueueManager.ts";
+import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
 
 let pageContainer = document.querySelector(".page-container");
 if (!pageContainer) {
@@ -81,6 +90,7 @@ if (currentUser.value) {
     const playingFromTmp = LydaCache.get<PlayingFrom|null>("playingFrom").content;
     if (playingFromTmp) {
         playingFrom.value = playingFromTmp;
+        contextQueue.value = playingFromTmp.entity?.tracks?.map(t => t.track_id) ?? [];
     }
 
     const tmpHistory = LydaCache.get<ListeningHistory[]|null>("listeningHistory").content;
