@@ -360,7 +360,10 @@ export class TrackTemplates {
                             ),
                             vertical(
                                 when(canEdit, TrackTemplates.trackInListActions(track, list, listTrack, tracks, type)),
-                                InteractionTemplates.interactions(EntityType.track, track),
+                                horizontal(
+                                    TrackTemplates.addToQueueButton(track),
+                                    InteractionTemplates.interactions(EntityType.track, track),
+                                )
                             ).classes("align-children-end")
                         ).build(),
                 ).build()

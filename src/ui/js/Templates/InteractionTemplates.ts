@@ -71,10 +71,7 @@ export class InteractionTemplates {
         let elements: AnyNode[];
         switch (entityType) {
             case EntityType.track:
-                elements = [
-                    TrackTemplates.addToQueueButton(entity as Track),
-                    ...InteractionTemplates.trackInteractions(entity as Track),
-                ];
+                elements = InteractionTemplates.trackInteractions(entity as Track);
                 break;
             case EntityType.album:
                 elements = InteractionTemplates.albumInteractions(entity as Album);

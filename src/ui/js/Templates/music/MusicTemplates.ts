@@ -1,5 +1,5 @@
-import {GenericTemplates} from "../generic/GenericTemplates.ts";
-import {compute, signal, create, when} from "@targoninc/jess";
+import {GenericTemplates, horizontal} from "../generic/GenericTemplates.ts";
+import {compute, create, signal, when} from "@targoninc/jess";
 import {currentTrackId, currentUser, manualQueue, playingFrom, playingHere} from "../../state.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
 import {Util} from "../../Classes/Util.ts";
@@ -78,7 +78,10 @@ export class MusicTemplates {
                                             .children(
                                                 ...MusicTemplates.itemSpecificItems(type, item),
                                             ).build(),
-                                        InteractionTemplates.interactions(type, item),
+                                        horizontal(
+                                            when(type === EntityType.track, TrackTemplates.addToQueueButton(item as Track)),
+                                            InteractionTemplates.interactions(type, item),
+                                        ).classes("align-children")
                                     ).build(),
                             ).build()
                     ).build()
