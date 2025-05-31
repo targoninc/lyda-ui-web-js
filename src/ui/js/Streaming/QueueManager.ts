@@ -67,7 +67,8 @@ export class QueueManager {
             return;
         }
         const queueToAdd = await QueueActions.getNewAutoQueueTracks();
-        autoQueue.value = autoQueue.value.concat(queueToAdd);
+        const ids = queueToAdd.map((item) => item.id);
+        autoQueue.value = autoQueue.value.concat(ids);
 
         StreamingUpdater.updateQueue().then();
     }
