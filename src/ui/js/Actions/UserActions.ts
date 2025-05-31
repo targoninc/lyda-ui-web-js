@@ -14,7 +14,7 @@ import {MediaUploader} from "../Api/MediaUploader.ts";
 import {Signal} from "@targoninc/jess";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {LydaApi} from "../Api/LydaApi.ts";
-import {currentQuality, notifications} from "../state.ts";
+import {currentQuality, currentUser, notifications} from "../state.ts";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
@@ -156,6 +156,7 @@ export class UserActions {
         if (await UserActions.setBooleanUserSetting(key, newValue)) {
             user.settings = updateUserSetting(user, key, newValue.toString());
             LydaCache.set("user", new CacheItem(user));
+            currentUser.value = user;
             return true;
         }
         return false;
