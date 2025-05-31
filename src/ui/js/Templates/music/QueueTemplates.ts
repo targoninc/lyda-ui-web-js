@@ -1,5 +1,5 @@
 import {QueueManager} from "../../Streaming/QueueManager.ts";
-import {horizontal, vertical} from "../generic/GenericTemplates.ts";
+import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
 import {Util} from "../../Classes/Util.ts";
 import {compute, create, nullElement, signal, when} from "@targoninc/jess";
 import {Images} from "../../Enums/Images.ts";
@@ -14,6 +14,7 @@ import {TrackTemplates} from "./TrackTemplates.ts";
 import {PlayerTemplates} from "./PlayerTemplates.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
+import {DragActions} from "../../Actions/DragActions.ts";
 
 export class QueueTemplates {
     static queueItem(track: Track, index: number, isManual: boolean) {
@@ -27,13 +28,37 @@ export class QueueTemplates {
         const playing = compute(id => id === track.id, currentTrackId);
         const playingClass = compute((p): string => p ? "playing" : "_", playing);
 
-        return create("div")
-            .classes("queue-item", "flex", "small-gap", "rounded", "padded-small", "space-outwards", playingClass)
+        const dragData = {
+            type: "track",
+            id: track.id,
+            index
+        };
+
+        const base = create("div")
+            .classes("queue-item", "flex", "small-gap", "rounded", "padded-small", "space-outwards", playingClass);
+
+        if (isManual) {
+            base.attributes("draggable", "true")
+                .ondragstart(async (e: DragEvent) => {
+                    DragActions.showDragTargets();
+                    e.dataTransfer!.setData("text/plain", JSON.stringify(dragData));
+                    e.dataTransfer!.effectAllowed = "move";
+                    e.stopPropagation();
+                })
+                .ondragend(async (e) => {
+                    DragActions.hideDragTargets();
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+        }
+
+        return base
             .on("dblclick", async () => {
                 await startItem(EntityType.track, track, null, false)
             })
             .children(
                 horizontal(
+                    when(isManual, GenericTemplates.verticalDragIndicator()),
                     MusicTemplates.cover(EntityType.track, track, "queue-cover", () =>
                         startItem(EntityType.track, track, null, false)),
                     vertical(
@@ -133,6 +158,9 @@ export class QueueTemplates {
         });
 
         return vertical(
+            when(isManual, GenericTemplates.dragTargetInList(async (data: any) => {
+                QueueManager.moveInManualQueue(data.index, i);
+            }, i.toString())),
             compute(t => t ? QueueTemplates.queueItem(t.track, i, isManual) : nullElement(), track)
         ).classes("relative")
             .build();
