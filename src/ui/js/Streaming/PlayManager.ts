@@ -39,7 +39,7 @@ export class PlayManager {
                     await PlayManager.togglePlayAsync(track.id);
                     await PlayManager.scrubTo(track.id, 0);
                 } else {
-                    await this.playNextFromQueues();
+                    await PlayManager.playNextFromQueues();
                 }
                 TrackActions.savePlayAfterTimeIf(track.id, 5, () => track.id === currentTrackId.value && PlayManager.isPlaying(track.id));
             }
@@ -72,7 +72,7 @@ export class PlayManager {
             } else {
                 const user = await Util.getUserAsync();
                 const autoQueue = QueueManager.getAutoQueue();
-                if (autoQueue.length > 0 && user && userHasSettingValue(user, "playFromAutoQueue", "true")) {
+                if (autoQueue.length > 0 && user && userHasSettingValue(user, "playFromAutoQueue", true)) {
                     await PlayManager.playNextInAutoQueue();
                 } else {
                     await PlayManager.stopAllAsync();
