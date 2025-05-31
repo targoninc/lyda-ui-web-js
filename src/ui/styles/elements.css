@@ -392,6 +392,7 @@ label {
     bottom: 100%;
     left: 0;
     box-sizing: border-box;
+    z-index: 1;
 }
 
 .audio-player-loudnesstracker {
@@ -413,7 +414,7 @@ label {
 }
 
 .loudness-button {
-    z-index: 1;
+    z-index: 2;
     position: relative;
 }
 
@@ -564,7 +565,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .cover-container.queue-cover {
-    --cover-size: 3em;
+    --cover-size: 2.75em;
 }
 
 .cover-container.inline-cover, .cover-container.player-cover {

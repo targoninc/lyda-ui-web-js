@@ -689,6 +689,10 @@ details > *:not(summary) {
     padding: var(--base-padding);
 }
 
+.padded-small {
+    padding: calc(var(--base-padding) * .5);
+}
+
 .padded-large {
     padding: var(--large-padding);
 }

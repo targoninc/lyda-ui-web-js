@@ -1,12 +1,11 @@
 import {QueueManager} from "../../Streaming/QueueManager.ts";
-import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
-import {DragActions} from "../../Actions/DragActions.ts";
+import {horizontal, vertical} from "../generic/GenericTemplates.ts";
 import {Util} from "../../Classes/Util.ts";
 import {compute, create, nullElement, signal, when} from "@targoninc/jess";
 import {Images} from "../../Enums/Images.ts";
 import {button, icon} from "@targoninc/jess-components";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import {autoQueue, contextQueue, manualQueue, queueVisible} from "../../state.ts";
+import {autoQueue, contextQueue, currentTrackId, manualQueue, queueVisible} from "../../state.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
 import {MusicTemplates} from "./MusicTemplates.ts";
 import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
@@ -25,24 +24,26 @@ export class QueueTemplates {
         if (track.has_cover) {
             coverState.value = Util.getTrackCover(track.id);
         }
+        const playing = compute(id => id === track.id, currentTrackId);
+        const playingClass = compute((p): string => p ? "playing" : "_", playing);
 
         return create("div")
+            .classes("queue-draggable", "flex", "small-gap", "rounded", "padded-small", "space-outwards", playingClass)
+            .on("dblclick", async () => {
+                await startItem(EntityType.track, track, null, false)
+            })
             .children(
-                create("div")
-                    .classes("queue-draggable", "flex", "small-gap", "rounded", "space-outwards")
-                    .children(
-                        horizontal(
-                            MusicTemplates.cover(EntityType.track, track, "queue-cover", () =>
-                                startItem(EntityType.track, track, null, false)),
-                            vertical(
-                                TrackTemplates.title(track.title, track.id, PlayerTemplates.trackIcons(track), "text-medium"),
-                                UserTemplates.userLink(UserWidgetContext.player, track.user!),
-                            ).classes("no-gap"),
-                        ),
-                        when(isManual, QueueTemplates.manualQueueItemActions(track, index, totalCount))
-                    ).id(track.id)
-                    .build()
-            ).build();
+                horizontal(
+                    MusicTemplates.cover(EntityType.track, track, "queue-cover", () =>
+                        startItem(EntityType.track, track, null, false)),
+                    vertical(
+                        TrackTemplates.title(track.title, track.id, PlayerTemplates.trackIcons(track), "text-medium"),
+                        UserTemplates.userLink(UserWidgetContext.player, track.user!),
+                    ).classes("no-gap"),
+                ),
+                when(isManual, QueueTemplates.manualQueueItemActions(track, index, totalCount))
+            ).id(track.id)
+            .build();
     }
 
     static manualQueueItemActions(track: Track, index: number, totalCount: number) {
@@ -62,7 +63,7 @@ export class QueueTemplates {
                     text: "Down",
                     icon: { icon: "keyboard_arrow_down" },
                     classes: ["align-children"],
-                    disabled: index === totalCount,
+                    disabled: index === (totalCount - 1),
                     onclick: async () => {
                         QueueManager.moveInManualQueue(index, index + 1);
                     }
@@ -124,7 +125,7 @@ export class QueueTemplates {
 
                 return vertical(
                     compute(t => t ? QueueTemplates.queueItem(t.track, i, q.length, isManual) : nullElement(), track)
-                ).classes("relative");
+                ).classes("relative", "no-gap");
             })
         ).build();
     }
