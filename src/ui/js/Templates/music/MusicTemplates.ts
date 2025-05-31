@@ -114,6 +114,9 @@ export class MusicTemplates {
         const start = async () => startItem(type, item, startCallback);
         const isOwnItem = compute(u => u?.id === item.user_id, currentUser);
         const playButtonContexts = ["inline-cover", "card-cover", "queue-cover"];
+        const onlyShowOnHover = compute(id => coverContext !== "cover" && id !== item.id, currentTrackId);
+        const buttonClass = compute((s): string => s ? "showOnParentHover" : "_", onlyShowOnHover);
+        const hiddenClass = compute((s): string => s ? "hidden" : "_", onlyShowOnHover);
 
         return create("div")
             .classes("cover-container", "relative", "pointer", coverContext)
@@ -135,7 +138,7 @@ export class MusicTemplates {
                         when(coverLoading, GenericTemplates.loadingSpinner()),
                     ).build()),
                 when(playButtonContexts.includes(coverContext), create("div")
-                    .classes("centeredInParent", "hidden", coverContext !== "cover" ? "showOnParentHover" : "_")
+                    .classes("centeredInParent", hiddenClass, buttonClass)
                     .children(
                         MusicTemplates.playButton(type, item.id, start)
                     ).build()),
@@ -152,7 +155,7 @@ export class MusicTemplates {
         }, currentTrackId, playingFrom, playingHere);
         const icon = compute(p => p ? Icons.PAUSE : Icons.PLAY, isPlaying);
         const onclick = async () => {
-            if (playingHere.value) {
+            if (playingHere.value && currentTrackId.value === itemId) {
                 await PlayManager.pauseAsync(currentTrackId.value);
             } else {
                 start();

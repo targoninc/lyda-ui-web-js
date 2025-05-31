@@ -51,3 +51,7 @@ button.inert {
     border-color: var(--color-9);
     background-color: var(--color-9);
 }
+
+.queue-item:hover {
+    background: var(--color-9);
+}

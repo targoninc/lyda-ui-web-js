@@ -130,12 +130,11 @@ export class PlayManager {
     }
 
     static addStreamClientIfNotExists(id: number, duration: number) {
-        let streamClient;
-        if (PlayManager.getStreamClient(id) === undefined) {
+        let streamClient = PlayManager.getStreamClient(id);
+        if (streamClient === undefined) {
             streamClient = new StreamClient(id, currentSecretCode.value);
             PlayManager.addStreamClient(id, streamClient);
         } else {
-            streamClient = PlayManager.getStreamClient(id);
             if (streamClient.duration === 0) {
                 streamClient.duration = duration;
                 StreamingUpdater.updateBuffers(streamClient.getBufferedLength(), streamClient.duration);

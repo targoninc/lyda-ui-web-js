@@ -16,7 +16,7 @@ import {UserTemplates} from "../account/UserTemplates.ts";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
 
 export class QueueTemplates {
-    static queueItem(track: Track, index: number, totalCount: number, isManual: boolean) {
+    static queueItem(track: Track, index: number, isManual: boolean) {
         if (!track.user) {
             throw new Error(`Track ${track.id} has no user`);
         }
@@ -28,7 +28,7 @@ export class QueueTemplates {
         const playingClass = compute((p): string => p ? "playing" : "_", playing);
 
         return create("div")
-            .classes("queue-draggable", "flex", "small-gap", "rounded", "padded-small", "space-outwards", playingClass)
+            .classes("queue-item", "flex", "small-gap", "rounded", "padded-small", "space-outwards", playingClass)
             .on("dblclick", async () => {
                 await startItem(EntityType.track, track, null, false)
             })
@@ -41,12 +41,12 @@ export class QueueTemplates {
                         UserTemplates.userLink(UserWidgetContext.player, track.user!),
                     ).classes("no-gap"),
                 ),
-                when(isManual, QueueTemplates.manualQueueItemActions(track, index, totalCount))
+                when(isManual, QueueTemplates.manualQueueItemActions(track, index))
             ).id(track.id)
             .build();
     }
 
-    static manualQueueItemActions(track: Track, index: number, totalCount: number) {
+    static manualQueueItemActions(track: Track, index: number) {
         return create("div")
             .classes("flex")
             .children(
@@ -63,7 +63,7 @@ export class QueueTemplates {
                     text: "Down",
                     icon: { icon: "keyboard_arrow_down" },
                     classes: ["align-children"],
-                    disabled: index === (totalCount - 1),
+                    disabled: compute(q => index === (q.length - 1), manualQueue),
                     onclick: async () => {
                         QueueManager.moveInManualQueue(index, index + 1);
                     }
@@ -105,6 +105,7 @@ export class QueueTemplates {
         return create("div")
             .classes("queue-popout", "flex-v", "padded", "rounded")
             .children(
+                compute(id => QueueTemplates.trackAsQueueItem(id, 0, false), currentTrackId),
                 compute((q) => QueueTemplates.queueList(q, "Manual queue", true), manualQueue),
                 compute((q) => QueueTemplates.queueList(q, "Context queue"), contextQueue),
                 compute((q) => QueueTemplates.queueList(q, "Auto queue"), autoQueue),
@@ -117,16 +118,19 @@ export class QueueTemplates {
                 .classes("color-dim", "text-small")
                 .text(text)
                 .build(),
-            ...q.flatMap((id, i) => {
-                const track = signal<{ track: Track } | null>(null);
-                PlayManager.getTrackData(id).then((data: any) => {
-                    track.value = data;
-                });
+            ...q.map((id, i) => QueueTemplates.trackAsQueueItem(id, i, isManual)),
+        ).classes("no-gap").build();
+    }
 
-                return vertical(
-                    compute(t => t ? QueueTemplates.queueItem(t.track, i, q.length, isManual) : nullElement(), track)
-                ).classes("relative", "no-gap");
-            })
-        ).build();
+    static trackAsQueueItem(id: number, i: number, isManual: boolean) {
+        const track = signal<{ track: Track } | null>(null);
+        PlayManager.getTrackData(id).then((data: any) => {
+            track.value = data;
+        });
+
+        return vertical(
+            compute(t => t ? QueueTemplates.queueItem(t.track, i, isManual) : nullElement(), track)
+        ).classes("relative")
+        .build();
     }
 }
