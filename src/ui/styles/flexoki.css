@@ -91,3 +91,7 @@ button.inert {
 .queue-item:hover {
     background: var(--color-9);
 }
+
+.mobile-menu-close {
+    background: var(--jessc-interactive-background);
+}
