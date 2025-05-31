@@ -27,6 +27,7 @@ import {TrackPosition} from "@targoninc/lyda-shared/src/Models/TrackPosition";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import {UserSettings} from "@targoninc/lyda-shared/src/Enums/UserSettings";
 
 export class PlayManager {
     static async playCheck(track: Track) {
@@ -72,7 +73,7 @@ export class PlayManager {
             } else {
                 const user = await Util.getUserAsync();
                 const autoQueue = QueueManager.getAutoQueue();
-                if (autoQueue.length > 0 && user && userHasSettingValue(user, "playFromAutoQueue", true)) {
+                if (autoQueue.length > 0 && user && userHasSettingValue(user, UserSettings.playFromAutoQueue, true)) {
                     await PlayManager.playNextInAutoQueue();
                 } else {
                     await PlayManager.stopAllAsync();

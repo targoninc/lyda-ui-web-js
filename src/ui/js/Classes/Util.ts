@@ -98,7 +98,7 @@ export class Util {
     static async getUserAsync(id: number | null = null, allowCache = true) {
         if (!id) {
             if (allowCache) {
-                const userData = currentUser.value;
+                const userData = structuredClone(currentUser.value);
                 if (userData !== null) {
                     return userData;
                 }

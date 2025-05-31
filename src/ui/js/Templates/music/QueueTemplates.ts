@@ -15,6 +15,7 @@ import {PlayerTemplates} from "./PlayerTemplates.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
 import {DragActions} from "../../Actions/DragActions.ts";
+import {UserSettings} from "@targoninc/lyda-shared/src/Enums/UserSettings";
 
 export class QueueTemplates {
     static queueItem(track: Track, index: number, isManual: boolean) {
@@ -130,7 +131,9 @@ export class QueueTemplates {
 
     static queuePopout() {
         const qClass = compute((v): string => v ? "visible" : "hide", queueVisible);
-        const playFromAutoEnabled = compute(u => u && userHasSettingValue(u, "playFromAutoQueue", true), currentUser);
+        const playFromAutoEnabled = compute(u => {
+            return u && userHasSettingValue(u, UserSettings.playFromAutoQueue, true);
+        }, currentUser);
 
         return create("div")
             .classes("queue-popout", qClass)
