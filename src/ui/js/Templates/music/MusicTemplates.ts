@@ -113,7 +113,7 @@ export class MusicTemplates {
         const coverLoading = signal(false);
         const start = async () => startItem(type, item, startCallback);
         const isOwnItem = compute(u => u?.id === item.user_id, currentUser);
-        const playButtonContexts = ["inline-cover", "card-cover"];
+        const playButtonContexts = ["inline-cover", "card-cover", "queue-cover"];
 
         return create("div")
             .classes("cover-container", "relative", "pointer", coverContext)

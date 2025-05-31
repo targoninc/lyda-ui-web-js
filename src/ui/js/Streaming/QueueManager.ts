@@ -127,7 +127,7 @@ export class QueueManager {
     }
 
     static getManualQueue(): number[] {
-        return manualQueue.value;
+        return [...manualQueue.value];
     }
 
     static isInManualQueue(id: number) {
@@ -140,6 +140,7 @@ export class QueueManager {
         const item = queue[index];
         queue.splice(index, 1);
         queue.splice(newIndex, 0, item);
+        manualQueue.value = queue;
         StreamingUpdater.updateQueue().then();
     }
 }

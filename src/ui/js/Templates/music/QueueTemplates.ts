@@ -1,58 +1,23 @@
-import {Icons} from "../../Enums/Icons.ts";
 import {QueueManager} from "../../Streaming/QueueManager.ts";
-import {GenericTemplates, vertical} from "../generic/GenericTemplates.ts";
+import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
 import {DragActions} from "../../Actions/DragActions.ts";
 import {Util} from "../../Classes/Util.ts";
-import {navigate} from "../../Routing/Router.ts";
-import {signal, create, compute, computeAsync, nullElement} from "@targoninc/jess";
+import {compute, create, nullElement, signal, when} from "@targoninc/jess";
 import {Images} from "../../Enums/Images.ts";
-import {RoutePath} from "../../Routing/routes.ts";
-import { icon } from "@targoninc/jess-components";
+import {button, icon} from "@targoninc/jess-components";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import {autoQueue, contextQueue, manualQueue, queueVisible} from "../../state.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
+import {MusicTemplates} from "./MusicTemplates.ts";
+import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
+import {startItem} from "../../Actions/MusicActions.ts";
+import {TrackTemplates} from "./TrackTemplates.ts";
+import {PlayerTemplates} from "./PlayerTemplates.ts";
+import {UserTemplates} from "../account/UserTemplates.ts";
+import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
 
 export class QueueTemplates {
-    static queueItem(track: Track, index: number, totalCount: number, attributes = [], classes = []) {
-        const upButton = create("div")
-            .classes("align-center", "fakeButton", "rounded", "padded-inline", "clickablePreserveWidth")
-            .alt("Move up in queue")
-            .onclick(() => {
-                QueueManager.moveInManualQueue(index, index - 1);
-            })
-            .children(
-                icon({
-                    icon: "move_up",
-                    adaptive: true,
-                }),
-            ).build();
-        const downButton = create("div")
-            .classes("align-center", "fakeButton", "rounded", "padded-inline", "clickablePreserveWidth")
-            .alt("Move down in queue")
-            .onclick(() => {
-                QueueManager.moveInManualQueue(index, index + 1);
-            })
-            .children(
-                icon({
-                    icon: "move_down",
-                    adaptive: true,
-                }),
-            ).build();
-        const buttons = [];
-        if (index === 0) {
-            upButton.classList.add("nonclickable");
-        }
-        if (index === totalCount - 1) {
-            downButton.classList.add("nonclickable");
-        }
-        buttons.push(upButton);
-        buttons.push(downButton);
-
-        const dragData = {
-            type: "queue",
-            from: index
-        };
-
+    static queueItem(track: Track, index: number, totalCount: number, isManual: boolean) {
         if (!track.user) {
             throw new Error(`Track ${track.id} has no user`);
         }
@@ -62,60 +27,55 @@ export class QueueTemplates {
         }
 
         return create("div")
-            .styles("height", "34px")
-            .attributes("draggable", "true")
-            .ondragstart(async (e: DragEvent) => {
-                DragActions.showDragTargets();
-                e.dataTransfer!.setData("text/plain", JSON.stringify(dragData));
-                e.dataTransfer!.effectAllowed = "move";
-                e.stopPropagation();
-            })
-            .ondragend(async (e: Event) => {
-                DragActions.hideDragTargets();
-                e.preventDefault();
-                e.stopPropagation();
-            })
             .children(
                 create("div")
-                    .classes("queue-draggable", "flex", "small-gap", "padded-inline", "rounded")
+                    .classes("queue-draggable", "flex", "small-gap", "rounded", "space-outwards")
                     .children(
-                        create("img")
-                            .classes("align-center", "inline-icon", "nopointer")
-                            .src(coverState)
-                            .alt(track.title)
-                            .build(),
-                        create("span")
-                            .classes("align-center", "clickable")
-                            .text(track.user.displayname)
-                            .onclick(() => navigate(`${RoutePath.profile}/` + track.user!.username))
-                            .build(),
-                        create("span")
-                            .classes("align-center")
-                            .text(" - ")
-                            .build(),
-                        create("span")
-                            .classes("align-center", "clickable", "flex-grow")
-                            .text(track.title)
-                            .onclick(() => navigate(`${RoutePath.track}/` + track.id))
-                            .build(),
-                        create("div")
-                            .classes("align-center", "fakeButton", "rounded", "padded-inline", "clickablePreserveWidth")
-                            .alt("Remove from queue")
-                            .onclick(() => {
-                                QueueManager.removeFromManualQueue(track.id);
-                            })
-                            .children(
-                                create("img")
-                                    .classes("inline-icon", "svg")
-                                    .src(Icons.DELETE)
-                                    .build()
-                            ).build(),
-                        ...buttons
+                        horizontal(
+                            MusicTemplates.cover(EntityType.track, track, "queue-cover", () =>
+                                startItem(EntityType.track, track, null, false)),
+                            vertical(
+                                TrackTemplates.title(track.title, track.id, PlayerTemplates.trackIcons(track), "text-medium"),
+                                UserTemplates.userLink(UserWidgetContext.player, track.user!),
+                            ).classes("no-gap"),
+                        ),
+                        when(isManual, QueueTemplates.manualQueueItemActions(track, index, totalCount))
                     ).id(track.id)
-                    .attributes(...attributes)
-                    .classes(...classes)
                     .build()
             ).build();
+    }
+
+    static manualQueueItemActions(track: Track, index: number, totalCount: number) {
+        return create("div")
+            .classes("flex")
+            .children(
+                button({
+                    text: "Up",
+                    icon: { icon: "keyboard_arrow_up" },
+                    classes: ["align-children"],
+                    disabled: index === 0,
+                    onclick: async () => {
+                        QueueManager.moveInManualQueue(index, index - 1);
+                    }
+                }),
+                button({
+                    text: "Down",
+                    icon: { icon: "keyboard_arrow_down" },
+                    classes: ["align-children"],
+                    disabled: index === totalCount,
+                    onclick: async () => {
+                        QueueManager.moveInManualQueue(index, index + 1);
+                    }
+                }),
+                button({
+                    text: "Remove",
+                    icon: { icon: "close" },
+                    classes: ["negative", "align-children"],
+                    onclick: async () => {
+                        QueueManager.removeFromManualQueue(track.id);
+                    }
+                })
+            ).build()
     }
 
     static queue() {
@@ -142,32 +102,29 @@ export class QueueTemplates {
 
     static queuePopout() {
         return create("div")
-            .classes("queue-popout", "flex-v", "no-gap", "padded", "rounded")
+            .classes("queue-popout", "flex-v", "padded", "rounded")
             .children(
-                compute((q) => QueueTemplates.queueList(q, true), manualQueue),
-                compute((q) => QueueTemplates.queueList(q), contextQueue),
-                compute((q) => QueueTemplates.queueList(q), autoQueue),
+                compute((q) => QueueTemplates.queueList(q, "Manual queue", true), manualQueue),
+                compute((q) => QueueTemplates.queueList(q, "Context queue"), contextQueue),
+                compute((q) => QueueTemplates.queueList(q, "Auto queue"), autoQueue),
             ).build();
     }
 
-    static queueList(q: number[], isManual: boolean = false) {
+    static queueList(q: number[], text: string, isManual: boolean = false) {
         return vertical(
+            create("span")
+                .classes("color-dim", "text-small")
+                .text(text)
+                .build(),
             ...q.flatMap((id, i) => {
-                let specifics = [];
-                if (isManual) {
-                    specifics.push(GenericTemplates.dragTargetInList((data: any) => {
-                        QueueManager.moveInManualQueue(data.from, data.to);
-                    }, i.toString()));
-                }
                 const track = signal<{ track: Track } | null>(null);
                 PlayManager.getTrackData(id).then((data: any) => {
                     track.value = data;
                 });
 
                 return vertical(
-                    ...specifics,
-                    compute(t => t ? QueueTemplates.queueItem(t.track, i, q.length) : nullElement(), track)
-                );
+                    compute(t => t ? QueueTemplates.queueItem(t.track, i, q.length, isManual) : nullElement(), track)
+                ).classes("relative");
             })
         ).build();
     }

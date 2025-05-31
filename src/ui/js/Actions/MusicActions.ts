@@ -7,7 +7,7 @@ import {QueueManager} from "../Streaming/QueueManager.ts";
 import {notify} from "../Classes/Ui.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 
-export async function startItem(type: EntityType, item: Track | Album | Playlist, startCallback: Function | null) {
+export async function startItem(type: EntityType, item: Track | Album | Playlist, startCallback: Function | null, clearPlayFrom: boolean = true) {
     if (startCallback) {
         startCallback(item.id);
         return;
@@ -21,7 +21,9 @@ export async function startItem(type: EntityType, item: Track | Album | Playlist
             item = item as Playlist;
             break;
         case EntityType.track:
-            PlayManager.clearPlayFrom();
+            if (clearPlayFrom) {
+                PlayManager.clearPlayFrom();
+            }
             PlayManager.addStreamClientIfNotExists(item.id, (item as Track).length);
             await PlayManager.startAsync(item.id);
             return;

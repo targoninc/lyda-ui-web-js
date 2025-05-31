@@ -426,12 +426,12 @@ export class TrackTemplates {
             ).build();
     }
 
-    static title(title: HtmlPropertyValue, id: number, icons: any[]) {
+    static title(title: HtmlPropertyValue, id: number, icons: any[], textSize: string = "text-large") {
         return create("div")
             .classes("flex")
             .children(
                 create("a")
-                    .classes("clickable", "text-large", "pointer")
+                    .classes("clickable", textSize, "pointer")
                     .href(`/${RoutePath.track}/${id}`)
                     .text(title)
                     .onclick((e) => {

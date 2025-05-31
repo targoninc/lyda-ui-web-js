@@ -563,6 +563,10 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     --cover-size: 120px;
 }
 
+.cover-container.queue-cover {
+    --cover-size: 3em;
+}
+
 .cover-container.inline-cover, .cover-container.player-cover {
     --cover-size: var(--inline-track-height);
 }
