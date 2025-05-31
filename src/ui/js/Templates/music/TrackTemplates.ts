@@ -414,13 +414,19 @@ export class TrackTemplates {
                             .build()
                     ).build()),
                 signalMap(tracks, create("div").classes("flex-v"), (track, i) => {
+                    let parent = horizontal().classes("fullWidth");
+                    if (canEdit) {
+                        parent = GenericTemplates.dragTargetInList(async (data: any) => {
+                            await TrackActions.reorderTrack(type, list.id, data.id, tracks, i);
+                        }, i.toString()).classes("fullWidth");
+                    }
+
                     return create("div")
                         .classes("flex-v", "relative")
                         .children(
-                            when(canEdit, GenericTemplates.dragTargetInList(async (data: any) => {
-                                await TrackActions.reorderTrack(type, list.id, data.id, tracks, i);
-                            }, i.toString())),
-                            TrackTemplates.trackInList(track, canEdit, list, tracks, type, startCallback)
+                            parent.children(
+                                TrackTemplates.trackInList(track, canEdit, list, tracks, type, startCallback)
+                            ).build()
                         ).build();
                 })
             ).build();

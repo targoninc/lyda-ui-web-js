@@ -35,7 +35,7 @@ export class QueueTemplates {
         };
 
         const base = create("div")
-            .classes("queue-item", "flex", "small-gap", "rounded", "padded-small", "space-outwards", playingClass);
+            .classes("queue-item", "flex", "fullWidth", "small-gap", "rounded", "padded-small", "space-outwards", playingClass);
 
         if (isManual) {
             base.attributes("draggable", "true")
@@ -59,19 +59,21 @@ export class QueueTemplates {
             .children(
                 horizontal(
                     when(isManual, GenericTemplates.verticalDragIndicator()),
-                    MusicTemplates.cover(EntityType.track, track, "queue-cover", () =>
-                        startItem(EntityType.track, track, null, false)),
+                    MusicTemplates.cover(EntityType.track, track, "queue-cover", async () => {
+                        await startItem(EntityType.track, track, null, false);
+                        QueueManager.removeIndexFromManualQueue(index);
+                    }),
                     vertical(
                         TrackTemplates.title(track.title, track.id, PlayerTemplates.trackIcons(track), "text-medium"),
                         UserTemplates.userLink(UserWidgetContext.player, track.user!),
                     ).classes("no-gap"),
                 ),
-                when(isManual, QueueTemplates.manualQueueItemActions(track, index))
+                when(isManual, QueueTemplates.manualQueueItemActions(index))
             ).id(track.id)
             .build();
     }
 
-    static manualQueueItemActions(track: Track, index: number) {
+    static manualQueueItemActions(index: number) {
         return create("div")
             .classes("flex")
             .children(
@@ -98,7 +100,7 @@ export class QueueTemplates {
                     icon: {icon: "close"},
                     classes: ["negative", "align-children"],
                     onclick: async () => {
-                        QueueManager.removeFromManualQueue(track.id);
+                        QueueManager.removeIndexFromManualQueue(index);
                     }
                 })
             ).build()
@@ -157,11 +159,17 @@ export class QueueTemplates {
             track.value = data;
         });
 
-        return vertical(
-            when(isManual, GenericTemplates.dragTargetInList(async (data: any) => {
+        let parent = horizontal().classes("fullWidth");
+        if (isManual) {
+            parent = GenericTemplates.dragTargetInList(async (data: any) => {
                 QueueManager.moveInManualQueue(data.index, i);
-            }, i.toString())),
-            compute(t => t ? QueueTemplates.queueItem(t.track, i, isManual) : nullElement(), track)
+            }, i.toString()).classes("fullWidth");
+        }
+
+        return vertical(
+            parent.children(
+                compute(t => t ? QueueTemplates.queueItem(t.track, i, isManual) : nullElement(), track)
+            ).build()
         ).classes("relative")
             .build();
     }

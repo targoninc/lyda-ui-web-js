@@ -47,14 +47,6 @@
     opacity: 0;
 }
 
-.dropzone {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
-
 .vertical-drag-indicator {
     height: 100%;
     width: 1em;
@@ -565,7 +557,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .cover-container.queue-cover {
-    --cover-size: 2.75em;
+    --cover-size: 3em;
 }
 
 .cover-container.inline-cover, .cover-container.player-cover {

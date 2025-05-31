@@ -86,6 +86,12 @@ export class QueueManager {
         StreamingUpdater.updateQueue().then();
     }
 
+    static removeIndexFromManualQueue(index: number) {
+        manualQueue.value = manualQueue.value.filter((_, i) => index !== i);
+
+        StreamingUpdater.updateQueue().then();
+    }
+
     static removeFromAllQueues(id: number) {
         manualQueue.value = manualQueue.value.filter((queueId) => queueId !== id);
         contextQueue.value = contextQueue.value.filter((queueId) => queueId !== id);

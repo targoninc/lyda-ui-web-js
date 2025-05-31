@@ -268,7 +268,7 @@ export class GenericTemplates {
                         const data = e.dataTransfer!.getData("text/plain");
                         dragStopCallback(JSON.parse(data));
                     }).build()
-            ).build();
+            );
     }
 
     static action(icon: StringOrSignal, text: HtmlPropertyValue, id: HtmlPropertyValue, onclick: Function, attributes: HtmlPropertyValue[] = [], classes: StringOrSignal[] = [], link: StringOrSignal | null = null) {

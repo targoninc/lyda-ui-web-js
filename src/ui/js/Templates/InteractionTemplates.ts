@@ -15,6 +15,7 @@ import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import {currentUser} from "../state.ts";
 import { ApiRoutes } from "../Api/ApiRoutes.ts";
 import {Visibility} from "@targoninc/lyda-shared/dist/Enums/Visibility";
+import {TrackTemplates} from "./music/TrackTemplates.ts";
 
 const interactionConfigs: Record<InteractionType, InteractionConfig> = {
     [InteractionType.like]: {
@@ -70,7 +71,10 @@ export class InteractionTemplates {
         let elements: AnyNode[];
         switch (entityType) {
             case EntityType.track:
-                elements = InteractionTemplates.trackInteractions(entity as Track);
+                elements = [
+                    TrackTemplates.addToQueueButton(entity as Track),
+                    ...InteractionTemplates.trackInteractions(entity as Track),
+                ];
                 break;
             case EntityType.album:
                 elements = InteractionTemplates.albumInteractions(entity as Album);
@@ -82,7 +86,7 @@ export class InteractionTemplates {
                 elements = [nullElement()];
         }
         return create("div")
-            .classes("interactions-container", "flex")
+            .classes("interactions-container", "flex", "align-children")
             .children(...elements)
             .build();
     }
