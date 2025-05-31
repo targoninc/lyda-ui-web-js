@@ -306,7 +306,7 @@ export class TrackTemplates {
         };
 
         let item = create("div")
-            .classes("flex", "fadeIn", "track-in-list");
+            .classes("flex", "fadeIn", "track-in-list", "fullWidth");
 
         if (canEdit) {
             item = item
