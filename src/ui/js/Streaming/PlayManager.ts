@@ -81,6 +81,17 @@ export class PlayManager {
         }
     }
 
+    static async playPreviousFromQueues() {
+        const hist = history.value;
+        hist.pop();
+        const lastTrack = hist.pop();
+        if (!lastTrack) {
+            return;
+        }
+        history.value = hist;
+        await PlayManager.safeStartAsync(lastTrack.track_id);
+    }
+
     static addStreamClient(id: number, streamClient: StreamClient) {
         streamClients.value[id] = streamClient;
     }

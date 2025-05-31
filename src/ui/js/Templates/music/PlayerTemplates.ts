@@ -52,6 +52,10 @@ export class PlayerTemplates {
                 create("div")
                     .classes("flex", "align-center")
                     .children(
+                        GenericTemplates.roundIconButton({
+                            icon: "skip_previous",
+                            adaptive: true,
+                        }, PlayManager.playPreviousFromQueues, "Previous"),
                         PlayerTemplates.roundPlayButton(track),
                         GenericTemplates.roundIconButton({
                             icon: "skip_next",
