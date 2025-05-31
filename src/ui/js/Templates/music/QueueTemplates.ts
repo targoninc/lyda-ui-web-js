@@ -52,7 +52,7 @@ export class QueueTemplates {
             .children(
                 button({
                     text: "Up",
-                    icon: { icon: "keyboard_arrow_up" },
+                    icon: {icon: "keyboard_arrow_up"},
                     classes: ["align-children"],
                     disabled: index === 0,
                     onclick: async () => {
@@ -61,7 +61,7 @@ export class QueueTemplates {
                 }),
                 button({
                     text: "Down",
-                    icon: { icon: "keyboard_arrow_down" },
+                    icon: {icon: "keyboard_arrow_down"},
                     classes: ["align-children"],
                     disabled: compute(q => index === (q.length - 1), manualQueue),
                     onclick: async () => {
@@ -70,7 +70,7 @@ export class QueueTemplates {
                 }),
                 button({
                     text: "Remove",
-                    icon: { icon: "close" },
+                    icon: {icon: "close"},
                     classes: ["negative", "align-children"],
                     onclick: async () => {
                         QueueManager.removeFromManualQueue(track.id);
@@ -79,12 +79,12 @@ export class QueueTemplates {
             ).build()
     }
 
-    static queue() {
+    static queueButton() {
         return create("div")
             .classes("relative")
             .children(
                 create("button")
-                    .classes("jess", "relative")
+                    .classes("jess", "relative", compute((v): string => v ? "special" : "_", queueVisible))
                     .onclick(() => {
                         queueVisible.value = !queueVisible.value;
                     })
@@ -102,13 +102,17 @@ export class QueueTemplates {
     }
 
     static queuePopout() {
+        const qClass = compute((v): string => v ? "visible" : "hide", queueVisible);
+
         return create("div")
-            .classes("queue-popout", "flex-v", "padded", "rounded")
+            .classes("queue-popout", qClass)
             .children(
-                compute(id => QueueTemplates.trackAsQueueItem(id, 0, false), currentTrackId),
-                compute((q) => QueueTemplates.queueList(q, "Manual queue", true), manualQueue),
-                compute((q) => QueueTemplates.queueList(q, "Context queue"), contextQueue),
-                compute((q) => QueueTemplates.queueList(q, "Auto queue"), autoQueue),
+                vertical(
+                    compute(id => QueueTemplates.trackAsQueueItem(id, 0, false), currentTrackId),
+                    compute((q) => QueueTemplates.queueList(q, "Manual queue", true), manualQueue),
+                    compute((q) => QueueTemplates.queueList(q, "Context queue"), contextQueue),
+                    compute((q) => QueueTemplates.queueList(q, "Auto queue"), autoQueue),
+                ).classes("padded", "rounded", "fullWidth").build()
             ).build();
     }
 
@@ -131,6 +135,6 @@ export class QueueTemplates {
         return vertical(
             compute(t => t ? QueueTemplates.queueItem(t.track, i, isManual) : nullElement(), track)
         ).classes("relative")
-        .build();
+            .build();
     }
 }

@@ -207,7 +207,7 @@ export class PlayerTemplates {
                     await PlayerTemplates.smallPlayerLayout(track),
                     await PlayerTemplates.bigPlayerLayout(track, trackUser),
                 ).classes("fullWidth").build(), true),
-                when(queueVisible, QueueTemplates.queuePopout())
+                QueueTemplates.queuePopout()
             ).build();
     }
 
@@ -221,7 +221,7 @@ export class PlayerTemplates {
                     .classes("flex", "hideOnMidBreakpoint")
                     .children(
                         PlayerTemplates.loudnessControl(track),
-                        QueueTemplates.queue(),
+                        QueueTemplates.queueButton(),
                     ).build()
             ).build();
     }
@@ -338,9 +338,10 @@ export class PlayerTemplates {
                     menuShown.value = !menuShown.value;
                 }, "Open menu", ["showOnMidBreakpoint", activeClass]),
                 when(menuShown, create("div")
-                    .classes("popout-above", "card", "flex-v")
+                    .classes("flex", "popout-above", "absolute-align-right", "card")
                     .children(
                         InteractionTemplates.interactions(EntityType.track, track),
+                        QueueTemplates.queueButton(),
                     ).build())
             ).build();
     }
