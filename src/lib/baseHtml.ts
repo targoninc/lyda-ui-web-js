@@ -6,34 +6,18 @@ export async function baseHtml(req: Request) {
     const title = "Lyda";
     const description = "Stream the music you love.";
     let image = "https://lyda.app/img/lyda_banner.png";
-
-    async function getImageOrDefault(url: string, defaultImage: string) {
-        try {
-            const res = await fetch(url);
-            if (res.status === 200) {
-                return url;
-            } else {
-                return defaultImage;
-            }
-        } catch {
-            return defaultImage;
-        }
-    }
     const apiUrl = process.env.API_URL ?? "https://api.lyda.app";
 
     let id, newimage;
     if (url.includes("/track/")) {
         id = url.split("/").at(-1);
         newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.trackCover}&quality=100`;
-        image = await getImageOrDefault(newimage, image);
     } else if (url.includes("/album/")) {
         id = url.split("/").at(-1);
         newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.albumCover}&quality=100`;
-        image = await getImageOrDefault(newimage, image);
     } else if (url.includes("/playlist/")) {
         id = url.split("/").at(-1);
         newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.playlistCover}&quality=100`;
-        image = await getImageOrDefault(newimage, image);
     }
 
     const uniqid = Math.random().toString(36).substring(7);
@@ -87,7 +71,8 @@ export async function baseHtml(req: Request) {
     <meta property="og:type" content="website"/>
     <meta property="og:title" content="${title}"/>
     <meta property="og:description" content="${description}"/>
-    <meta property="og:image" content="${image}"/>
+    <meta property="og:image" content="${newimage}" />
+    <meta property="og:image" content="${image}" />
     <script src="/main.js" type="module"></script>
 </head>
 <body>
