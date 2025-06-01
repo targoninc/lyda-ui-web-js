@@ -8,25 +8,27 @@ export async function baseHtml(req: Request) {
     let image = "https://lyda.app/img/lyda_banner.png";
     const apiUrl = process.env.API_URL ?? "https://api.lyda.app";
 
-    let id, newimage, entity, res;
+    let id, newimage, res, type;
     if (url.includes("/track/")) {
         id = url.split("/").at(-1);
         newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.trackCover}&quality=100`;
-        res = await fetch(`${apiUrl}/tracks/byId?id=${id}`);
+        type = "track";
     } else if (url.includes("/album/")) {
         id = url.split("/").at(-1);
         newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.albumCover}&quality=100`;
-        res = await fetch(`${apiUrl}/albums/byId?id=${id}`);
+        type = "album";
     } else if (url.includes("/playlist/")) {
         id = url.split("/").at(-1);
         newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.playlistCover}&quality=100`;
-        res = await fetch(`${apiUrl}/playlists/byId?id=${id}`);
+        type = "playlist";
     }
 
     if (newimage) {
         newimage = encodeURI(newimage);
-        if (res?.ok) {
-            entity = await res.json();
+        res = await fetch(`${apiUrl}/${type}s/byId?id=${id}`);
+        if (res?.ok && type) {
+            const body: Record<string, any> = await res.json();
+            const entity = body[type];
             title = entity?.user?.displayname + " - " + entity?.title;
             description = entity?.description ?? description;
         }
