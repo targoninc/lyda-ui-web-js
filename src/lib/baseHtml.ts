@@ -21,7 +21,12 @@ export async function baseHtml(req: Request) {
     }
 
     const uniqid = Math.random().toString(36).substring(7);
-    image = `${image}?_=${uniqid}`;
+    image += `?_=${uniqid}`;
+    newimage += `?_=${uniqid}`;
+
+    const baseImage = `<meta property="og:image" content="${image}" />
+    <meta property="og:image:width" content="1080" />
+    <meta property="og:image:height" content="720" />`;
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -72,7 +77,9 @@ export async function baseHtml(req: Request) {
     <meta property="og:title" content="${title}"/>
     <meta property="og:description" content="${description}"/>
     <meta property="og:image" content="${newimage}" />
-    <meta property="og:image" content="${image}" />
+    <meta property="og:image:width" content="100" />
+    <meta property="og:image:height" content="100" />
+    ${newimage ? "" : baseImage}
     <script src="/main.js" type="module"></script>
 </head>
 <body>
