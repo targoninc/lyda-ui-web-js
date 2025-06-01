@@ -25,8 +25,11 @@ export async function baseHtml(req: Request) {
 
     if (newimage) {
         newimage = encodeURI(newimage);
-        title = entity?.user?.displayname + " - " + entity?.title;
-        description = entity?.description ?? description;
+        if (res?.ok) {
+            entity = await res.json();
+            title = entity?.user?.displayname + " - " + entity?.title;
+            description = entity?.description ?? description;
+        }
     }
 
     const uniqid = Math.random().toString(36).substring(7);
