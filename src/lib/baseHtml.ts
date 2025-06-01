@@ -1,12 +1,5 @@
 import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
 
-const knownEmbedServices = [
-    "discord",
-    "twitter",
-    "slack",
-    "teams"
-];
-
 export async function baseHtml(req: Request) {
     const url = req.url;
 
@@ -28,23 +21,19 @@ export async function baseHtml(req: Request) {
     }
     const apiUrl = process.env.API_URL ?? "https://api.lyda.app";
 
-    const userAgent = navigator.userAgent;
-    const isService = knownEmbedServices.some(service => userAgent.includes(service));
-    if (isService) {
-        let id, newimage;
-        if (url.includes("/track/")) {
-            id = url.split("/")[4];
-            newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.trackCover}&quality=100`;
-            image = await getImageOrDefault(newimage, image);
-        } else if (url.includes("/album/")) {
-            id = url.split("/")[4];
-            newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.albumCover}&quality=100`;
-            image = await getImageOrDefault(newimage, image);
-        } else if (url.includes("/playlist/")) {
-            id = url.split("/")[4];
-            newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.playlistCover}&quality=100`;
-            image = await getImageOrDefault(newimage, image);
-        }
+    let id, newimage;
+    if (url.includes("/track/")) {
+        id = url.split("/")[4];
+        newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.trackCover}&quality=100`;
+        image = await getImageOrDefault(newimage, image);
+    } else if (url.includes("/album/")) {
+        id = url.split("/")[4];
+        newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.albumCover}&quality=100`;
+        image = await getImageOrDefault(newimage, image);
+    } else if (url.includes("/playlist/")) {
+        id = url.split("/")[4];
+        newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.playlistCover}&quality=100`;
+        image = await getImageOrDefault(newimage, image);
     }
 
     const uniqid = Math.random().toString(36).substring(7);
