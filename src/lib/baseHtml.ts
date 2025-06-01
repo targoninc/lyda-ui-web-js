@@ -1,7 +1,6 @@
 import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
-import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 
 export async function baseHtml(req: Request) {
     const url = req.url;
@@ -15,17 +14,17 @@ export async function baseHtml(req: Request) {
     let id, newimage, res, type, optionalTags;
     if (url.includes("/track/")) {
         id = url.split("/").at(-1);
-        newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.trackCover}&quality=100`;
+        newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.trackCover}&quality=500`;
         type = "track";
         ogType = "music.song";
     } else if (url.includes("/album/")) {
         id = url.split("/").at(-1);
-        newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.albumCover}&quality=100`;
+        newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.albumCover}&quality=500`;
         type = "album";
         ogType = "music.album";
     } else if (url.includes("/playlist/")) {
         id = url.split("/").at(-1);
-        newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.playlistCover}&quality=100`;
+        newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.playlistCover}&quality=500`;
         type = "playlist";
         ogType = "music.playlist";
     }
@@ -109,8 +108,8 @@ export async function baseHtml(req: Request) {
     <meta property="og:description" content="${description}"/>
     ${optionalTags ?? ""}
     <meta property="og:image" content="${newimage}" />
-    <meta property="og:image:width" content="100" />
-    <meta property="og:image:height" content="100" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="500" />
     ${newimage ? "" : baseImage}
     <script src="/main.js" type="module"></script>
 </head>
