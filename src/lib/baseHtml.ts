@@ -17,14 +17,17 @@ export async function baseHtml(req: Request) {
         id = url.split("/").at(-1);
         newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.trackCover}&quality=100`;
         type = "track";
+        ogType = "music.song";
     } else if (url.includes("/album/")) {
         id = url.split("/").at(-1);
         newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.albumCover}&quality=100`;
         type = "album";
+        ogType = "music.album";
     } else if (url.includes("/playlist/")) {
         id = url.split("/").at(-1);
         newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.playlistCover}&quality=100`;
         type = "playlist";
+        ogType = "music.playlist";
     }
 
     if (newimage) {
