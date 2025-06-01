@@ -26,7 +26,7 @@ export async function baseHtml(req: Request) {
 
     const uniqid = Math.random().toString(36).substring(7);
     image += `?_=${uniqid}`;
-    newimage += `?_=${uniqid}`;
+    newimage += `&_=${uniqid}`;
 
     const baseImage = `<meta property="og:image" content="${image}" />
     <meta property="og:image:width" content="1080" />
