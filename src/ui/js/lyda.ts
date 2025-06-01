@@ -56,20 +56,6 @@ export class Lyda {
         const user = currentUser.value;
 
         switch (element.getAttribute("datatype")) {
-            case "profile":
-                if (!data || data.error) {
-                    navigate(RoutePath.notFound);
-                    return;
-                }
-                document.title = data.displayname;
-                const isOwnProfile = user ? data.id === user.id : false;
-                if (!user && isOwnProfile) {
-                    notify("You need to be logged in to see your profile", NotificationType.error);
-                    return;
-                }
-                element.append(...UserTemplates.profile(isOwnProfile, data));
-                ProfilePage.addTabSectionAsync(element, data, isOwnProfile).then();
-                break;
             case "track":
                 if (data.error) {
                     notify(data.error, NotificationType.error);

@@ -1,4 +1,4 @@
-import {getAvatar, target, Util} from "../../Classes/Util.ts";
+import {getAvatar, getErrorMessage, target, Util} from "../../Classes/Util.ts";
 import {TrackActions} from "../../Actions/TrackActions.ts";
 import {TrackTemplates} from "../music/TrackTemplates.ts";
 import {UserActions} from "../../Actions/UserActions.ts";
@@ -9,7 +9,7 @@ import {Links} from "../../Enums/Links.ts";
 import {PlaylistTemplates} from "../music/PlaylistTemplates.ts";
 import {CustomText, truncateText} from "../../Classes/Helpers/CustomText.ts";
 import {Images} from "../../Enums/Images.ts";
-import {navigate} from "../../Routing/Router.ts";
+import {navigate, Route} from "../../Routing/Router.ts";
 import {
     AnyElement,
     AnyNode,
@@ -25,7 +25,7 @@ import {
 } from "@targoninc/jess";
 import {UiActions} from "../../Actions/UiActions.ts";
 import {currentUser, permissions} from "../../state.ts";
-import {Ui} from "../../Classes/Ui.ts";
+import {notify, Ui} from "../../Classes/Ui.ts";
 import {MediaActions} from "../../Actions/MediaActions.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {MusicTemplates} from "../music/MusicTemplates.ts";
@@ -39,6 +39,9 @@ import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
 import {Badge} from "@targoninc/lyda-shared/src/Models/db/lyda/Badge";
 import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import {NotificationType} from "../../Enums/NotificationType.ts";
+import {Api} from "../../Api/Api.ts";
+import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 
 export class UserTemplates {
     static userWidget(user: User | Signal<User | null>, extraAttributes: HtmlPropertyValue[] = [], extraClasses: StringOrSignal[] = [], context: UserWidgetContext = UserWidgetContext.unknown) {
@@ -261,52 +264,110 @@ export class UserTemplates {
         return link;
     }
 
-    static profile(isOwnProfile: boolean, user: User) {
-        return [
-            UserTemplates.userActionsContainer(isOwnProfile),
-            UserTemplates.profileHeader(user, isOwnProfile),
-            UserTemplates.profileInfo(user, isOwnProfile)
-        ];
+    static profile(route: Route, params: Record<string, string>) {
+        const user = signal<User|null>(null);
+        const isOwnProfile = compute((u1, u2) => u1?.id === u2?.id, currentUser, user);
+        const loading = signal(false);
+        const notFound = compute((l, u) => l && !u, loading, user);
+
+        const base = vertical();
+
+        Api.getAsync<User>(ApiRoutes.getUser, {
+            name: params["name"]
+        }).then(u => {
+            user.value = u.data;
+            document.title = u.data.displayname;
+            if (!user && isOwnProfile) {
+                notify("You need to be logged in to see your profile", NotificationType.error);
+                return;
+            }
+        }).finally(() => loading.value = false);
+
+        return base.children(
+            when(loading, GenericTemplates.loadingSpinner()),
+            when(notFound, vertical(
+                UserTemplates.userActionsContainer(isOwnProfile),
+                compute(u => u ? UserTemplates.profileHeader(u, isOwnProfile) : nullElement(), user),
+                compute((u, i) => u ? UserTemplates.profileInfo(u, i) : nullElement(), user, isOwnProfile),
+                compute((u, i) => u ? UserTemplates.profileTabs(u, i) : nullElement(), user, isOwnProfile),
+            ).classes("noflexwrap").build(), true),
+            when(notFound, vertical(
+                create("span")
+                    .text("User not found")
+            ).build())
+        ).build();
     }
 
-    static userActionsContainer(isOwnProfile: boolean) {
-        if (!isOwnProfile) {
-            return create("div").build();
+    static profileTab(endpoint: string, user: User, isOwnProfile: boolean, dataTemplate: Function) {
+        const data = signal(null);
+        const loading = signal(false);
+        Api.getAsync<any>(endpoint, {id: user.id, name: user.username}).then(d => {
+            if (d.code !== 200) {
+                notify("Error while getting profile content: " + getErrorMessage(d));
+                return;
+            }
+            data.value = d.data;
+        }).finally(() => loading.value = false);
+
+        return vertical(
+            when(loading, GenericTemplates.loadingSpinner()),
+            when(data, () => data.value ? dataTemplate(data.value, isOwnProfile) : nullElement(), false)
+        ).build();
+    }
+
+    static profileTabs(user: User, isOwnProfile: boolean) {
+        const currentIndex = signal(0);
+        const tabSelected = (i: number) => {
+            return compute((c) => c === i, currentIndex);
         }
 
-        return create("div")
-            .classes("flex", "fullWidth", "space-outwards")
-            .children(
-                create("div")
-                    .classes("flex")
-                    .children(
-                        GenericTemplates.newTrackButton(["hideOnSmallBreakpoint"]),
-                        GenericTemplates.newAlbumButton(["hideOnSmallBreakpoint"]),
-                        GenericTemplates.newPlaylistButton(["hideOnSmallBreakpoint"]),
-                        button({
-                            classes: ["showOnSmallBreakpoint", "positive"],
-                            text: "New",
-                            icon: {icon: "add"},
-                            onclick: UiActions.openCreateMenu
-                        }),
-                        button({
-                            text: "Statistics",
-                            icon: {icon: "finance"},
-                            onclick: () => navigate(RoutePath.statistics)
-                        }),
-                        UserTemplates.unapprovedTracksLink(),
-                    ).build(),
-                create("div")
-                    .classes("flex")
-                    .children(
-                        button({
-                            text: "Settings",
-                            icon: {icon: "settings"},
-                            onclick: () => navigate(RoutePath.settings)
-                        }),
-                        GenericTemplates.logoutButton(),
-                    ).build(),
-            ).build();
+        return vertical(
+            GenericTemplates.combinedSelector(["Tracks", "Albums", "Playlists", "Reposts", "Listening History"], (i: number) => currentIndex.value = i, currentIndex.value),
+            when(tabSelected(0), UserTemplates.profileTab(ApiRoutes.getTracksByUserId, user, isOwnProfile, UserTemplates.profileTrackList)),
+            when(tabSelected(1), UserTemplates.profileTab(ApiRoutes.getAlbumsByUserId, user, isOwnProfile, UserTemplates.albumCards)),
+            when(tabSelected(2), UserTemplates.profileTab(ApiRoutes.getPlaylistsByUserId, user, isOwnProfile, UserTemplates.playlistCards)),
+            when(tabSelected(3), UserTemplates.profileTab(ApiRoutes.getRepostsByUserId, user, isOwnProfile, UserTemplates.profileRepostList)),
+            when(tabSelected(4), MusicTemplates.feed("history", {
+                userId: user.id
+            }))).build();
+    }
+
+    static userActionsContainer(isOwnProfile: Signal<boolean>) {
+        return vertical(
+            when(isOwnProfile, create("div")
+                .classes("flex", "fullWidth", "space-outwards")
+                .children(
+                    create("div")
+                        .classes("flex")
+                        .children(
+                            GenericTemplates.newTrackButton(["hideOnSmallBreakpoint"]),
+                            GenericTemplates.newAlbumButton(["hideOnSmallBreakpoint"]),
+                            GenericTemplates.newPlaylistButton(["hideOnSmallBreakpoint"]),
+                            button({
+                                classes: ["showOnSmallBreakpoint", "positive"],
+                                text: "New",
+                                icon: {icon: "add"},
+                                onclick: UiActions.openCreateMenu
+                            }),
+                            button({
+                                text: "Statistics",
+                                icon: {icon: "finance"},
+                                onclick: () => navigate(RoutePath.statistics)
+                            }),
+                            UserTemplates.unapprovedTracksLink(),
+                        ).build(),
+                    create("div")
+                        .classes("flex")
+                        .children(
+                            button({
+                                text: "Settings",
+                                icon: {icon: "settings"},
+                                onclick: () => navigate(RoutePath.settings)
+                            }),
+                            GenericTemplates.logoutButton(),
+                        ).build(),
+                ).build())
+        );
     }
 
     static verificationBadge() {
@@ -321,7 +382,7 @@ export class UserTemplates {
             ).build();
     }
 
-    static profileHeader(user: User, isOwnProfile: boolean) {
+    static profileHeader(user: User, isOwnProfile: Signal<boolean>) {
         const avatarLoading = signal(false);
         const bannerLoading = signal(false);
         const userBanner = signal(Images.DEFAULT_BANNER);
@@ -332,8 +393,10 @@ export class UserTemplates {
         if (user.has_avatar) {
             userAvatar.value = Util.getUserAvatar(user.id);
         }
+
         const bannerContainer = create("div")
-            .classes("banner-container", "relative", isOwnProfile ? "clickable" : "_", isOwnProfile ? "blurOnParentHover" : "_")
+            .classes("banner-container", "relative", compute((i): string => i ? "clickable" : "_", isOwnProfile),
+                compute((i): string => i ? "blurOnParentHover" : "_", isOwnProfile))
             .onclick(() => Ui.showImageModal(userBanner))
             .children(
                 create("img")
@@ -673,7 +736,7 @@ export class UserTemplates {
                     .classes("flex-v")
                     .children(
                         description,
-                        isOwnProfile ? UserTemplates.editDescriptionButton(user.description) : null
+                        when(isOwnProfile, UserTemplates.editDescriptionButton(user.description))
                     ).build()
             ).build();
     }
@@ -713,7 +776,7 @@ export class UserTemplates {
         return create("div")
             .classes(context === UserWidgetContext.player ? "popout-above" : "popout-below", "user-preview", "flex-v", "small-gap")
             .children(
-                UserTemplates.profileHeader(user, user.id === currentUser.value?.id),
+                UserTemplates.profileHeader(user, compute((u) => u?.id === user.id, currentUser)),
                 vertical(
                     UserTemplates.displayname(user),
                     UserTemplates.usernameAndIcons(user),

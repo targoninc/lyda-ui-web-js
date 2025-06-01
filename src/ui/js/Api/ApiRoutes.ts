@@ -68,7 +68,7 @@ export class ApiRoutes {
     // region Tracks
     private static tracks = ApiRoutes.base + "/tracks";
     static getTrackById = ApiRoutes.tracks + "/byId";
-    static getTrackByUserId = ApiRoutes.tracks + "/byUserId";
+    static getTracksByUserId = ApiRoutes.tracks + "/byUserId";
     static getTrackAudio = ApiRoutes.tracks + "/audio";
     static getTrackCollabTypes = ApiRoutes.tracks + "/collabTypes";
     static getUnapprovedCollabs = ApiRoutes.tracks + "/unapprovedCollabs";

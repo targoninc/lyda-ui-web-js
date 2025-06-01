@@ -29,7 +29,7 @@ export class PageTemplates {
         [RoutePath.history]: () => MusicTemplates.feed("history"),
         [RoutePath.album]: AlbumTemplates.albumPage,
         [RoutePath.playlist]: this.playlistPage,
-        [RoutePath.profile]: this.profilePage,
+        [RoutePath.profile]: UserTemplates.profile,
         [RoutePath.settings]: SettingsTemplates.settingsPage,
         [RoutePath.statistics]: this.statisticsPage,
         [RoutePath.track]: this.trackPage,
