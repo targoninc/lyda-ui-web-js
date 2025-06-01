@@ -20,6 +20,10 @@ export async function baseHtml(req: Request) {
         newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.playlistCover}&quality=100`;
     }
 
+    if (newimage) {
+        newimage = encodeURI(newimage);
+    }
+
     const uniqid = Math.random().toString(36).substring(7);
     image += `?_=${uniqid}`;
     newimage += `?_=${uniqid}`;
