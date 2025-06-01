@@ -23,15 +23,15 @@ export async function baseHtml(req: Request) {
 
     let id, newimage;
     if (url.includes("/track/")) {
-        id = url.split("/")[4];
+        id = url.split("/").at(-1);
         newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.trackCover}&quality=100`;
         image = await getImageOrDefault(newimage, image);
     } else if (url.includes("/album/")) {
-        id = url.split("/")[4];
+        id = url.split("/").at(-1);
         newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.albumCover}&quality=100`;
         image = await getImageOrDefault(newimage, image);
     } else if (url.includes("/playlist/")) {
-        id = url.split("/")[4];
+        id = url.split("/").at(-1);
         newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.playlistCover}&quality=100`;
         image = await getImageOrDefault(newimage, image);
     }
