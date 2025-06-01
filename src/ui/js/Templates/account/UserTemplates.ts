@@ -316,13 +316,25 @@ export class UserTemplates {
     }
 
     static profileTabs(user: User, isOwnProfile: boolean) {
-        const currentIndex = signal(0);
+        const tabs = ["Tracks", "Albums", "Playlists", "Reposts", "Listening History"];
+        const urlTabs = tabs.map(t => t.toLowerCase().replace(/\s/g, "-"));
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const index = urlTabs.indexOf(urlParams.get("tab") ?? "");
+        const currentIndex = signal(index === -1 ? 0 : index);
+
+        currentIndex.subscribe((i) => {
+            const tabName = urlTabs[i];
+            const url = new URL(window.location.href);
+            url.searchParams.set("tab", tabName);
+            window.history.replaceState(null, "", url.toString());
+        });
         const tabSelected = (i: number) => {
             return compute((c) => c === i, currentIndex);
         }
 
         return vertical(
-            GenericTemplates.combinedSelector(["Tracks", "Albums", "Playlists", "Reposts", "Listening History"], (i: number) => currentIndex.value = i, currentIndex.value),
+            GenericTemplates.combinedSelector(tabs, (i: number) => currentIndex.value = i, currentIndex.value),
             when(tabSelected(0), UserTemplates.profileTab(ApiRoutes.getTracksByUserId, user, isOwnProfile, UserTemplates.profileTrackList)),
             when(tabSelected(1), UserTemplates.profileTab(ApiRoutes.getAlbumsByUserId, user, isOwnProfile, UserTemplates.albumCards)),
             when(tabSelected(2), UserTemplates.profileTab(ApiRoutes.getPlaylistsByUserId, user, isOwnProfile, UserTemplates.playlistCards)),
