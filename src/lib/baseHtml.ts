@@ -1,6 +1,4 @@
 import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
-import {Api} from "../ui/js/Api/Api.ts";
-import {ApiRoutes} from "../ui/js/Api/ApiRoutes.ts";
 
 export async function baseHtml(req: Request) {
     const url = req.url;
@@ -14,15 +12,15 @@ export async function baseHtml(req: Request) {
     if (url.includes("/track/")) {
         id = url.split("/").at(-1);
         newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.trackCover}&quality=100`;
-        res = await Api.getAsync(ApiRoutes.getTrackById, { id });
+        res = await fetch(`${apiUrl}/tracks/byId?id=${id}`);
     } else if (url.includes("/album/")) {
         id = url.split("/").at(-1);
         newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.albumCover}&quality=100`;
-        res = await Api.getAsync(ApiRoutes.getAlbumById, { id });
+        res = await fetch(`${apiUrl}/albums/byId?id=${id}`);
     } else if (url.includes("/playlist/")) {
         id = url.split("/").at(-1);
         newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.playlistCover}&quality=100`;
-        res = await Api.getAsync(ApiRoutes.getPlaylistById, { id });
+        res = await fetch(`${apiUrl}/playlists/byId?id=${id}`);
     }
 
     if (newimage) {
