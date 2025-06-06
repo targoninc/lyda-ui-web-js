@@ -222,10 +222,12 @@ export class PlayManager {
         navigator.mediaSession.metadata = {
             album: playingFrom.value?.name ?? "",
             title: d.track.title,
-            artist: d.track.artistname ?? d.track.user?.displayname,
+            artist: d.track.artistname ?? d.track.user?.displayname ?? "",
             artwork: [
                 {
                     src: d.track.has_cover ? Util.getTrackCover(id) : Util.defaultImage("track"),
+                    type: "image/webp",
+                    sizes: "500x500"
                 }
             ]
         }
