@@ -27,6 +27,7 @@ import {Permission} from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
 import {TrackPosition} from "@targoninc/lyda-shared/src/Models/TrackPosition";
 import {QueueManager} from "./js/Streaming/QueueManager.ts";
 import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
+import {initializeMediaSessionCallbacks} from "./js/Classes/Helpers/MediaSession.ts";
 
 let pageContainer = document.querySelector(".page-container");
 if (!pageContainer) {
@@ -102,5 +103,6 @@ if (currentUser.value) {
 KeyBinds.initiate();
 UiActions.runMobileCheck();
 StreamingBroadcaster.initializeReceiver();
+initializeMediaSessionCallbacks();
 
 //startUpdateCheck();

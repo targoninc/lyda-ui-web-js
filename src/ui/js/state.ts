@@ -11,6 +11,7 @@ import {Permission} from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
 import {Notification} from "@targoninc/lyda-shared/src/Models/db/lyda/Notification";
 import {ListeningHistory} from "@targoninc/lyda-shared/dist/Models/db/lyda/ListeningHistory";
 import {PlayManager} from "./Streaming/PlayManager.ts";
+import {initializeMediaSessionCallbacks} from "./Classes/Helpers/MediaSession.ts";
 
 export const navInitialized = signal(false);
 
@@ -74,6 +75,14 @@ currentTrackPosition.subscribe((p, changed) => {
         return;
     }
     LydaCache.set("currentTrackPosition", new CacheItem(p));
+
+    PlayManager.getTrackData(currentTrackId.value).then(d => {
+        navigator.mediaSession.setPositionState({
+            position: currentTrackPosition.value.absolute,
+            duration: d.track.length,
+            playbackRate: 1,
+        })
+    })
 });
 
 export const currentlyBuffered = signal(0);
@@ -81,6 +90,13 @@ export const currentlyBuffered = signal(0);
 export const playingElsewhere = signal(false);
 
 export const playingHere = signal(false);
+playingHere.subscribe((p, changed) => {
+    if (!changed) {
+        return;
+    }
+
+    navigator.mediaSession.playbackState = p ? "playing" : (currentTrackId.value ? "paused" : "none");
+});
 
 export const openMenus = signal<string[]>([]);
 

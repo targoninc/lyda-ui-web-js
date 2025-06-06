@@ -8,7 +8,7 @@ import {QueueManager} from "../../Streaming/QueueManager.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
 import {Images} from "../../Enums/Images.ts";
 import {Util} from "../../Classes/Util.ts";
-import {notify, Ui} from "../../Classes/Ui.ts";
+import {Ui} from "../../Classes/Ui.ts";
 import {
     AnyElement,
     AnyNode,
@@ -29,7 +29,6 @@ import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
 import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
-import {NotificationType} from "../../Enums/NotificationType.ts";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
 import {InteractionTemplates} from "../InteractionTemplates.ts";

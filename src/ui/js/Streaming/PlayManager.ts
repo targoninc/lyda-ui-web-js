@@ -216,6 +216,17 @@ export class PlayManager {
                     quality: currentQuality.value
                 }
             ];
+            const track = await PlayManager.getTrackData(id);
+            navigator.mediaSession.metadata = {
+                album: playingFrom.value?.name ?? "",
+                title: track.track.title,
+                artist: track.track.artistname ?? track.track.user?.displayname,
+                artwork: [
+                    {
+                        src: track.track.has_cover ? Util.getTrackCover(id) : Util.defaultImage("track"),
+                    }
+                ]
+            }
         }
         const track = await PlayManager.getTrackData(id);
         const streamClient = PlayManager.addStreamClientIfNotExists(id, track.track.length);
