@@ -6,7 +6,7 @@ export function initializeMediaSessionCallbacks() {
         if (!currentTrackId.value) {
             return;
         }
-        await PlayManager.safeStartAsync(currentTrackId.value);
+        await PlayManager.startAsync(currentTrackId.value);
     });
 
     navigator.mediaSession.setActionHandler("pause", async () => {
