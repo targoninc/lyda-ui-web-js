@@ -219,7 +219,7 @@ export class PlayManager {
         }
 
         const d = await PlayManager.getTrackData(id);
-        navigator.mediaSession.metadata = {
+        navigator.mediaSession.metadata = new MediaMetadata({
             album: playingFrom.value?.name ?? "",
             title: d.track.title,
             artist: d.track.artistname ?? d.track.user?.displayname ?? "",
@@ -230,7 +230,7 @@ export class PlayManager {
                     sizes: "500x500"
                 }
             ]
-        }
+        });
         const track = await PlayManager.getTrackData(id);
         const streamClient = PlayManager.addStreamClientIfNotExists(id, track.track.length);
 
