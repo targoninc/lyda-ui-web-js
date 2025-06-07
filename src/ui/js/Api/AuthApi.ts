@@ -1,4 +1,4 @@
-import {Api, ApiResponse} from "./Api.ts";
+import {HttpClient, ApiResponse} from "./HttpClient.ts";
 import {notify} from "../Classes/Ui.ts";
 import {ApiRoutes} from "./ApiRoutes.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
@@ -8,7 +8,7 @@ export class AuthApi {
     static userExists(email: string, successCallback: Function = () => {
     }, errorCallback: Function = () => {
     }) {
-        Api.getAsync(ApiRoutes.userExists, {email: encodeURIComponent(email)}).then((response) => {
+        HttpClient.getAsync(ApiRoutes.userExists, {email: encodeURIComponent(email)}).then((response) => {
             if (response.code === 200) {
                 successCallback(response.data);
             } else {
@@ -18,7 +18,7 @@ export class AuthApi {
     }
 
     static login(email: string, password: string, mfaCode: string, successCallback: Function, errorCallback: Function = () => {}) {
-        Api.postAsync(ApiRoutes.login, {
+        HttpClient.postAsync(ApiRoutes.login, {
             email,
             password,
             mfaCode
@@ -33,7 +33,7 @@ export class AuthApi {
     }
 
     static user(id: number|null, successCallback: (user: User) => void) {
-        Api.getAsync(ApiRoutes.getUser, {id}).then((response) => {
+        HttpClient.getAsync(ApiRoutes.getUser, {id}).then((response) => {
             if (response.code === 200) {
                 successCallback(response.data as User);
             }
@@ -41,7 +41,7 @@ export class AuthApi {
     }
 
     static register(username: string, displayname: string, email: string, password: string, successCallback: Function, errorCallback: Function = () => {}) {
-        Api.postAsync(ApiRoutes.register, {
+        HttpClient.postAsync(ApiRoutes.register, {
             username,
             displayname,
             email,
@@ -57,7 +57,7 @@ export class AuthApi {
     }
 
     static mfaRequest(email: string, password: string, successCallback: Function, errorCallback: Function = () => {}) {
-        Api.postAsync(ApiRoutes.requestMfaCode, {
+        HttpClient.postAsync(ApiRoutes.requestMfaCode, {
             email,
             password
         }).then((response) => {
@@ -71,13 +71,13 @@ export class AuthApi {
     }
 
     static async requestPasswordReset(email: string): Promise<ApiResponse<any>> {
-        return Api.postAsync(ApiRoutes.requestPasswordReset, {
+        return HttpClient.postAsync(ApiRoutes.requestPasswordReset, {
             email
         });
     }
 
     static async resetPassword(token: string, newPassword: string, newPasswordConfirm: string): Promise<ApiResponse<any>> {
-        return Api.postAsync(ApiRoutes.resetPassword, {
+        return HttpClient.postAsync(ApiRoutes.resetPassword, {
             token,
             newPassword,
             newPasswordConfirm
@@ -85,6 +85,6 @@ export class AuthApi {
     }
 
     static async sendActivationEmail() {
-        return Api.postAsync(ApiRoutes.sendActivationEmail);
+        return HttpClient.postAsync(ApiRoutes.sendActivationEmail);
     }
 }

@@ -1,6 +1,6 @@
 import {AnyNode, compute, create, HtmlPropertyValue, nullElement, Signal, signal, when} from "@targoninc/jess";
 import {GenericTemplates} from "./generic/GenericTemplates.ts";
-import {Api} from "../Api/Api.ts";
+import {HttpClient} from "../Api/HttpClient.ts";
 import {notify} from "../Classes/Ui.ts";
 import {getErrorMessage} from "../Classes/Util.ts";
 import {InteractionMetadata} from "@targoninc/lyda-shared/src/Models/InteractionMetadata";
@@ -121,7 +121,7 @@ async function toggleInteraction(entityType: EntityType, interactionType: Intera
         return;
     }
 
-    const res = await Api.postAsync(ApiRoutes.toggleInteraction, {
+    const res = await HttpClient.postAsync(ApiRoutes.toggleInteraction, {
         entityType,
         interactionType,
         id,

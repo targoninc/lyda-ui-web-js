@@ -1,4 +1,4 @@
-import {Api} from "../Api/Api.ts";
+import {HttpClient} from "../Api/HttpClient.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {getErrorMessage} from "../Classes/Util.ts";
@@ -76,7 +76,7 @@ export class SubscriptionActions {
     }
 
     static async subscriptionSuccess(data: any, parameters: any) {
-        const res = await Api.postAsync(ApiRoutes.subscribe, {...parameters});
+        const res = await HttpClient.postAsync(ApiRoutes.subscribe, {...parameters});
         if (res.code === 200) {
             notify("Subscription started", NotificationType.success);
             reload();
@@ -97,7 +97,7 @@ export class SubscriptionActions {
     }
 
     static async cancelSubscriptionAsync(id: number) {
-        const res = await Api.postAsync(ApiRoutes.unsubscribe, {id});
+        const res = await HttpClient.postAsync(ApiRoutes.unsubscribe, {id});
         if (res.code !== 200) {
             notify("Error while cancelling subscription: " + getErrorMessage(res), NotificationType.error);
             return false;
@@ -109,7 +109,7 @@ export class SubscriptionActions {
     }
 
     static async loadSubscriptionOptions() {
-        const res = await Api.getAsync<{
+        const res = await HttpClient.getAsync<{
             options: AvailableSubscription[],
             currentSubscription: Subscription|null
         }>(ApiRoutes.getSubscriptionOptions);

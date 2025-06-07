@@ -1,4 +1,4 @@
-import {Api} from "../Api/Api.ts";
+import {HttpClient} from "../Api/HttpClient.ts";
 import {
     getErrorMessage,
     getUserSettingValue,
@@ -86,12 +86,12 @@ export class UserActions {
         const newestId = notifications.value.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]?.id;
         let res;
         if (!newestId) {
-            res = await Api.getAsync<Notification[]>(ApiRoutes.getAllNotifications);
+            res = await HttpClient.getAsync<Notification[]>(ApiRoutes.getAllNotifications);
             if (res.code === 200) {
                 notifications.value = res.data;
             }
         } else {
-            res = await Api.getAsync<Notification[]>(ApiRoutes.getAllNotifications, {after: newestId});
+            res = await HttpClient.getAsync<Notification[]>(ApiRoutes.getAllNotifications, {after: newestId});
             if (res.code === 200) {
                 notifications.value = notifications.value.concat(res.data).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
             }
@@ -99,7 +99,7 @@ export class UserActions {
     }
 
     static async markNotificationsAsRead(newestTimestamp: Signal<Date | null>) {
-        await Api.postAsync(ApiRoutes.markAllNotificationsAsRead, {newest: newestTimestamp.value});
+        await HttpClient.postAsync(ApiRoutes.markAllNotificationsAsRead, {newest: newestTimestamp.value});
     }
 
     static async setTheme(theme: Theme) {
@@ -132,14 +132,14 @@ export class UserActions {
             return;
         }
 
-        const res = await Api.postAsync(ApiRoutes.updateUserSetting, {setting: UserSettings.theme, value: themeName});
+        const res = await HttpClient.postAsync(ApiRoutes.updateUserSetting, {setting: UserSettings.theme, value: themeName});
         if (res.code !== 200) {
             notify(`Failed to update theme: ${getErrorMessage(res)}`, NotificationType.error);
         }
     }
 
     static async setBooleanUserSetting(key: string, value: boolean) {
-        const res = await Api.postAsync(ApiRoutes.updateUserSetting, {
+        const res = await HttpClient.postAsync(ApiRoutes.updateUserSetting, {
             setting: key,
             value
         });
@@ -176,7 +176,7 @@ export class UserActions {
     }
 
     static async unverifyUser(id: number) {
-        const res = await Api.postAsync(ApiRoutes.unverifyUser, {id});
+        const res = await HttpClient.postAsync(ApiRoutes.unverifyUser, {id});
         if (res.code !== 200) {
             notify("Failed to unverify user", NotificationType.error);
             return false;
@@ -185,7 +185,7 @@ export class UserActions {
     }
 
     static async verifyUser(id: number) {
-        const res = await Api.postAsync(ApiRoutes.verifyUser, {id});
+        const res = await HttpClient.postAsync(ApiRoutes.verifyUser, {id});
         if (res.code !== 200) {
             notify("Failed to verify user", NotificationType.error);
             return false;
@@ -221,6 +221,6 @@ export class UserActions {
     }
 
     private static setStringSetting(settingKey: string, value: string) {
-        return Api.postAsync(ApiRoutes.updateUserSetting, {setting: settingKey, value});
+        return HttpClient.postAsync(ApiRoutes.updateUserSetting, {setting: settingKey, value});
     }
 }

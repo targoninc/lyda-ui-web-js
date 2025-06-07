@@ -19,7 +19,7 @@ import {
     playingFrom
 } from "./js/state.ts";
 import {StreamingBroadcaster} from "./js/Streaming/StreamingBroadcaster.ts";
-import {Api} from "./js/Api/Api.ts";
+import {HttpClient} from "./js/Api/HttpClient.ts";
 import {ApiRoutes} from "./js/Api/ApiRoutes.ts";
 import {PlayingFrom} from "@targoninc/lyda-shared/src/Models/PlayingFrom";
 import {ListeningHistory} from "@targoninc/lyda-shared/dist/Models/db/lyda/ListeningHistory";
@@ -62,7 +62,7 @@ export const router = new Router(routes, async (route: Route, params: any) => {
 });
 
 export function getUserPermissions() {
-    Api.getAsync<Permission[]>(ApiRoutes.userPermissions).then(res => {
+    HttpClient.getAsync<Permission[]>(ApiRoutes.userPermissions).then(res => {
         if (res.code !== 200) {
             console.error("Failed to get permissions: ", res.data);
             return;

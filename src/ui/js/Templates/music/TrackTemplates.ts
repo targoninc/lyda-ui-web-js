@@ -18,7 +18,7 @@ import {navigate} from "../../Routing/Router.ts";
 import {compute, Signal, signal, AnyElement, AnyNode, create, HtmlPropertyValue, when, signalMap} from "@targoninc/jess";
 import {currentTrackId, currentTrackPosition, currentUser, manualQueue, playingHere} from "../../state.ts";
 import {Ui} from "../../Classes/Ui.ts";
-import {Api} from "../../Api/Api.ts";
+import {HttpClient} from "../../Api/HttpClient.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {MediaActions} from "../../Actions/MediaActions.ts";
 import {RoutePath} from "../../Routing/routes.ts";
@@ -555,7 +555,7 @@ export class TrackTemplates {
         }
         const showComments = signal(true);
         const comments = signal<Comment[]>([]);
-        Api.getAsync<Comment[]>(ApiRoutes.getCommentsByTrackId, {track_id: track.id}).then((c) => {
+        HttpClient.getAsync<Comment[]>(ApiRoutes.getCommentsByTrackId, {track_id: track.id}).then((c) => {
             if (!c.data || c.data.error) {
                 return;
             }

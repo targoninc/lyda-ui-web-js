@@ -40,7 +40,7 @@ import {Badge} from "@targoninc/lyda-shared/src/Models/db/lyda/Badge";
 import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import {NotificationType} from "../../Enums/NotificationType.ts";
-import {Api} from "../../Api/Api.ts";
+import {HttpClient} from "../../Api/HttpClient.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 
 export class UserTemplates {
@@ -272,7 +272,7 @@ export class UserTemplates {
 
         const base = vertical();
 
-        Api.getAsync<User>(ApiRoutes.getUser, {
+        HttpClient.getAsync<User>(ApiRoutes.getUser, {
             name: params["name"]
         }).then(u => {
             user.value = u.data;
@@ -301,7 +301,7 @@ export class UserTemplates {
     static profileTab(endpoint: string, user: User, isOwnProfile: boolean, dataTemplate: Function) {
         const data = signal(null);
         const loading = signal(false);
-        Api.getAsync<any>(endpoint, {id: user.id, name: user.username}).then(d => {
+        HttpClient.getAsync<any>(endpoint, {id: user.id, name: user.username}).then(d => {
             if (d.code !== 200) {
                 notify("Error while getting profile content: " + getErrorMessage(d));
                 return;

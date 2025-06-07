@@ -1,5 +1,5 @@
 import {create, when, compute, signal} from "@targoninc/jess";
-import {Api} from "../../Api/Api.ts";
+import {HttpClient} from "../../Api/HttpClient.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {copy} from "../../Classes/Util.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
@@ -24,7 +24,7 @@ export class EventsTemplates {
         const skip = signal(0);
         const load = (filter?: any) => {
             loading.value = true;
-            Api.getAsync<PaypalWebhook[]>(ApiRoutes.getEvents, {
+            HttpClient.getAsync<PaypalWebhook[]>(ApiRoutes.getEvents, {
                 skip: skip.value,
                 ...(filter ?? {})
             }).then(e => events.value = e.data)
@@ -82,7 +82,7 @@ export class EventsTemplates {
                                     icon: {icon: "start"},
                                     classes: ["positive"],
                                     onclick: () => {
-                                        Api.postAsync(ApiRoutes.triggerEventHandling, {
+                                        HttpClient.postAsync(ApiRoutes.triggerEventHandling, {
                                             id: event.id,
                                         }).then(() => {
                                             notify("Event triggered", NotificationType.success);

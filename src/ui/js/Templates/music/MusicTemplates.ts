@@ -13,7 +13,7 @@ import {TrackActions} from "../../Actions/TrackActions.ts";
 import {startItem} from "../../Actions/MusicActions.ts";
 import {Icons} from "../../Enums/Icons.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
-import {Api} from "../../Api/Api.ts";
+import {HttpClient} from "../../Api/HttpClient.ts";
 import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
@@ -191,7 +191,7 @@ export class MusicTemplates {
             const offset = (pageNumber - 1) * pageSize;
             const params = type === "following" ? {offset, filter} : {offset};
             loadingState.value = true;
-            const res = await Api.getAsync<Track[]>(endpoint, Object.assign(params, options));
+            const res = await HttpClient.getAsync<Track[]>(endpoint, Object.assign(params, options));
             if (res.code !== 200) {
                 notify(`Failed to get tracks: ${res.data.error}`, NotificationType.error);
                 loadingState.value = false;

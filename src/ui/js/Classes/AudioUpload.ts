@@ -1,4 +1,4 @@
-import {Api} from "../Api/Api.ts";
+import {HttpClient} from "../Api/HttpClient.ts";
 import {notify} from "./Ui.ts";
 import {navigate} from "../Routing/Router.ts";
 import {Signal} from "@targoninc/jess";
@@ -16,7 +16,7 @@ export class AudioUpload {
     triggerEvent: Event;
     state: Signal<UploadableTrack>;
     id: number | undefined;
-    api: Api | undefined;
+    api: HttpClient | undefined;
     private progress: Signal<ProgressPart|null>;
 
     constructor(e: Event, state: Signal<UploadableTrack>, progress: Signal<ProgressPart|null>) {
@@ -194,7 +194,7 @@ export class AudioUpload {
     async createTrack() {
         const state = this.state.value;
 
-        const res = await Api.postAsync<Track>(ApiRoutes.createTrack, <Partial<Track>>{
+        const res = await HttpClient.postAsync<Track>(ApiRoutes.createTrack, <Partial<Track>>{
             title: state.title,
             isrc: state.isrc,
             upc: state.upc,

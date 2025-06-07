@@ -6,7 +6,7 @@ export interface ApiResponse<T> {
     data: T & { error?: string };
 }
 
-export class Api {
+export class HttpClient {
     static buildParams(params: any): string {
         if (Object.keys(params).length === 0) {
             return "";
@@ -32,7 +32,7 @@ export class Api {
         if (!url) {
             throw new Error("url is required");
         }
-        const res = await fetch(url + Api.buildParams(params), {
+        const res = await fetch(url + HttpClient.buildParams(params), {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -53,12 +53,12 @@ export class Api {
 
         return {
             code: res.status,
-            data: await Api.getDataFromHttpResponse(res)
+            data: await HttpClient.getDataFromHttpResponse(res)
         };
     }
 
     static async postAsync<T = string>(url: string, body: any = {}, authorizationHeaders: any = {}): Promise<ApiResponse<T>> {
-        return await Api.postRawAsync(url, JSON.stringify(body), authorizationHeaders);
+        return await HttpClient.postRawAsync(url, JSON.stringify(body), authorizationHeaders);
     }
 
     static async postRawAsync(url: string, body: any = {}, authorizationHeaders = {}) {
@@ -92,7 +92,7 @@ export class Api {
 
         return {
             code: res.status,
-            data: await Api.getDataFromHttpResponse(res)
+            data: await HttpClient.getDataFromHttpResponse(res)
         };
     }
 }

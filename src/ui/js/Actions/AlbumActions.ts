@@ -1,6 +1,6 @@
 import {GenericTemplates} from "../Templates/generic/GenericTemplates.ts";
 import {AlbumTemplates} from "../Templates/music/AlbumTemplates.ts";
-import {Api} from "../Api/Api.ts";
+import {HttpClient} from "../Api/HttpClient.ts";
 import {getErrorMessage, Util} from "../Classes/Util.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
@@ -19,7 +19,7 @@ import {playingHere} from "../state.ts";
 
 export class AlbumActions {
     static async openAddToAlbumModal(track: Track) {
-        const res = await Api.getAsync<Album[]>(ApiRoutes.getAlbumsByUserId, {id: track.user_id});
+        const res = await HttpClient.getAsync<Album[]>(ApiRoutes.getAlbumsByUserId, {id: track.user_id});
         if (res.code !== 200) {
             console.error("Failed to get albums: ", res.data);
             return;
@@ -34,7 +34,7 @@ export class AlbumActions {
     }
 
     static async createNewAlbum(album: Partial<Album>) {
-        const res = await Api.postAsync(ApiRoutes.newAlbum, album);
+        const res = await HttpClient.postAsync(ApiRoutes.newAlbum, album);
         if (res.code !== 200) {
             notify("Failed to create album: " + getErrorMessage(res), NotificationType.error);
             return;
@@ -43,7 +43,7 @@ export class AlbumActions {
     }
 
     static async deleteAlbum(id: number) {
-        const res = await Api.postAsync(ApiRoutes.deleteAlbum, {id});
+        const res = await HttpClient.postAsync(ApiRoutes.deleteAlbum, {id});
         if (res.code === 200) {
             PlayManager.removeStreamClient(id);
             QueueManager.removeFromManualQueue(id);
@@ -55,7 +55,7 @@ export class AlbumActions {
     }
 
     static async addTrackToAlbums(track_id: number, album_ids: number[]) {
-        const res = await Api.postAsync(ApiRoutes.addTrackToAlbums, {album_ids, track_id});
+        const res = await HttpClient.postAsync(ApiRoutes.addTrackToAlbums, {album_ids, track_id});
         Util.removeModal();
         if (res.code !== 200) {
             notify("Failed to add track to albums: " + getErrorMessage(res), NotificationType.error);
@@ -65,7 +65,7 @@ export class AlbumActions {
     }
 
     static async removeTrackFromAlbum(track_id: number, album_ids: number[]) {
-        const res = await Api.postAsync(ApiRoutes.removeTrackFromAlbums, {album_ids, track_id});
+        const res = await HttpClient.postAsync(ApiRoutes.removeTrackFromAlbums, {album_ids, track_id});
         if (res.code !== 200) {
             notify("Failed to remove track from album: " + getErrorMessage(res), NotificationType.error);
             return false;
@@ -101,7 +101,7 @@ export class AlbumActions {
     }
 
     static async moveTrackInAlbum(albumId: number, tracks: ListTrack[]) {
-        const res = await Api.postAsync(ApiRoutes.reorderAlbumTracks, {
+        const res = await HttpClient.postAsync(ApiRoutes.reorderAlbumTracks, {
             album_id: albumId,
             tracks
         });
@@ -113,11 +113,11 @@ export class AlbumActions {
     }
 
     static async likeAlbum(id: number) {
-        return await Api.postAsync(ApiRoutes.likeAlbum, { id });
+        return await HttpClient.postAsync(ApiRoutes.likeAlbum, { id });
     }
 
     static async unlikeAlbum(id: number) {
-        return await Api.postAsync(ApiRoutes.unlikeAlbum, { id });
+        return await HttpClient.postAsync(ApiRoutes.unlikeAlbum, { id });
     }
 
     static async toggleLike(id: number, isEnabled: boolean) {

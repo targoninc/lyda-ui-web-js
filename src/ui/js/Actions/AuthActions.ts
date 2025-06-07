@@ -1,4 +1,4 @@
-import {Api} from "../Api/Api.ts";
+import {HttpClient} from "../Api/HttpClient.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {Icons} from "../Enums/Icons.ts";
@@ -26,7 +26,7 @@ export class AuthActions {
 
     static async logOut() {
         AuthActions.resetUiState();
-        const res = await Api.postAsync(ApiRoutes.logout);
+        const res = await HttpClient.postAsync(ApiRoutes.logout);
         if (res.code === 200) {
             notify("Logged out!", NotificationType.success);
             navigate(RoutePath.login);

@@ -4,7 +4,7 @@ import {FormTemplates} from "./generic/FormTemplates.ts";
 import {UserValidator} from "../Classes/Validators/UserValidator.ts";
 import {finalizeLogin, target, Util} from "../Classes/Util.ts";
 import {notify} from "../Classes/Ui.ts";
-import {Api, ApiResponse} from "../Api/Api.ts";
+import {HttpClient, ApiResponse} from "../Api/HttpClient.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {navigate} from "../Routing/Router.ts";
 import {currentUser} from "../state.ts";
@@ -148,7 +148,7 @@ export class LandingPageTemplates {
         const done = signal(false);
         const activating = signal(true);
 
-        Api.postAsync(ApiRoutes.verifyEmail, {
+        HttpClient.postAsync(ApiRoutes.verifyEmail, {
             activationCode: code
         }).then(res => {
             activating.value = false;

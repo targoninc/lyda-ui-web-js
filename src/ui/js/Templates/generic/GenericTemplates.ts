@@ -1,7 +1,7 @@
 import {Icons} from "../../Enums/Icons.ts";
 import {AlbumActions} from "../../Actions/AlbumActions.ts";
 import {PlaylistActions} from "../../Actions/PlaylistActions.ts";
-import {Api} from "../../Api/Api.ts";
+import {HttpClient} from "../../Api/HttpClient.ts";
 import {TrackActions} from "../../Actions/TrackActions.ts";
 import {
     AnyElement,
@@ -838,7 +838,7 @@ export class GenericTemplates {
                         onkeydown: async (e) => {
                             const target = e.target as HTMLInputElement;
                             const search = target.value;
-                            const res = await Api.getAsync<SearchResult[]>(ApiRoutes.searchUsers, {
+                            const res = await HttpClient.getAsync<SearchResult[]>(ApiRoutes.searchUsers, {
                                 search,
                                 filters: JSON.stringify(["users"])
                             });

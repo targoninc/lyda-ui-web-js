@@ -1,7 +1,7 @@
 import {notify} from "./Ui.ts";
 import {Images} from "../Enums/Images.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
-import {Api, ApiResponse} from "../Api/Api.ts";
+import {HttpClient, ApiResponse} from "../Api/HttpClient.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {chartColor, currentUser} from "../state.ts";
@@ -108,7 +108,7 @@ export class Util {
             if (allowCache) {
                 // TODO: Implement caching for user by id
             }
-            const res = await Api.getAsync<User>(ApiRoutes.getUser, {id: nullIfEmpty(id)});
+            const res = await HttpClient.getAsync<User>(ApiRoutes.getUser, {id: nullIfEmpty(id)});
             if (res.code === 401) {
                 return null;
             }
@@ -139,7 +139,7 @@ export class Util {
     }
 
     static async getUserByNameAsync(name: string) {
-        const res = await Api.getAsync(ApiRoutes.getUser, {name: nullIfEmpty(name)});
+        const res = await HttpClient.getAsync(ApiRoutes.getUser, {name: nullIfEmpty(name)});
         if (res.code === 401) {
             return null;
         }
@@ -191,7 +191,7 @@ export class Util {
 
     static async getUser() {
         let userData;
-        const res = await Api.getAsync<User>(ApiRoutes.getUser);
+        const res = await HttpClient.getAsync<User>(ApiRoutes.getUser);
         if (res.code === 401) {
             return null;
         }

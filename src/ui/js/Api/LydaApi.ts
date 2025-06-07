@@ -1,4 +1,4 @@
-import {Api} from "./Api.ts";
+import {HttpClient} from "./HttpClient.ts";
 import {notify} from "../Classes/Ui.ts";
 import {Signal} from "@targoninc/jess";
 import {ApiRoutes} from "./ApiRoutes.ts";
@@ -11,7 +11,7 @@ import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 export class LydaApi {
     static getLogs(filterState: Signal<any>, successCallback: Function) {
         const errorText = "Failed to get logs";
-        Api.getAsync<Log[]>(ApiRoutes.getLogs, {
+        HttpClient.getAsync<Log[]>(ApiRoutes.getLogs, {
             logLevel: filterState.value,
             offset: 0,
             limit: 50
@@ -20,7 +20,7 @@ export class LydaApi {
         });
 
         filterState.subscribe(async (newValue) => {
-            Api.getAsync<Log[]>(ApiRoutes.getLogs, {
+            HttpClient.getAsync<Log[]>(ApiRoutes.getLogs, {
                 logLevel: newValue,
                 offset: 0,
                 limit: 100
@@ -39,11 +39,11 @@ export class LydaApi {
     }
 
     static async deleteUser() {
-        return await Api.postAsync(ApiRoutes.deleteUser);
+        return await HttpClient.postAsync(ApiRoutes.deleteUser);
     }
 
     static async updateUser(user: Partial<User>) {
-        const res = await Api.postAsync(ApiRoutes.updateUser, { user });
+        const res = await HttpClient.postAsync(ApiRoutes.updateUser, { user });
         if (res.code !== 200) {
             notify("Failed to update account: " + getErrorMessage(res), NotificationType.error);
             return false;
@@ -57,6 +57,6 @@ export class LydaApi {
     }
 
     static async exportUser() {
-        return await Api.getAsync(ApiRoutes.exportUser);
+        return await HttpClient.getAsync(ApiRoutes.exportUser);
     }
 }

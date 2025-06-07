@@ -1,5 +1,5 @@
 import {notify, Ui} from "../Classes/Ui.ts";
-import {Api} from "../Api/Api.ts";
+import {HttpClient} from "../Api/HttpClient.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {Images} from "../Enums/Images.ts";
 import {Icons} from "../Enums/Icons.ts";
@@ -22,7 +22,7 @@ export class MediaActions {
 
         await Ui.getConfirmationModal("Remove image", "Are you sure you want to remove this image?", "Yes", "No", async () => {
             loading.value = true;
-            let response = await Api.postAsync(ApiRoutes.deleteMedia, {
+            let response = await HttpClient.postAsync(ApiRoutes.deleteMedia, {
                 type,
                 referenceId
             });

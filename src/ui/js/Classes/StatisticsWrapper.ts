@@ -1,5 +1,5 @@
 import {StatisticTemplates} from "../Templates/StatisticTemplates.ts";
-import {Api} from "../Api/Api.ts";
+import {HttpClient} from "../Api/HttpClient.ts";
 import {notify} from "./Ui.ts";
 import {Num} from "./Helpers/Num.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
@@ -31,7 +31,7 @@ export class StatisticsWrapper {
 
     static async getSingleStat(template: Function, endpoint: string, reverse: boolean = false) {
         const chart = signal(template([], []));
-        Api.getAsync<Statistic[]>(endpoint).then((res) => {
+        HttpClient.getAsync<Statistic[]>(endpoint).then((res) => {
             if (res.code !== 200) {
                 notify(getErrorMessage(res), NotificationType.error);
                 return;
@@ -49,7 +49,7 @@ export class StatisticsWrapper {
     static getMultipleStats(template: Function, endpoint: string, reverse: boolean = false) {
         const charts = signal<any[]>([]);
 
-        Api.getAsync<TypedStatistic[]>(endpoint).then((res) => {
+        HttpClient.getAsync<TypedStatistic[]>(endpoint).then((res) => {
             if (res.code !== 200) {
                 notify(getErrorMessage(res), NotificationType.error);
                 return;

@@ -7,7 +7,7 @@ import {LydaApi} from "../../Api/LydaApi.ts";
 import {truncateText} from "../../Classes/Helpers/CustomText.ts";
 import {DashboardTemplates} from "./DashboardTemplates.ts";
 import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
-import {Api} from "../../Api/Api.ts";
+import {HttpClient} from "../../Api/HttpClient.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import { button, toggle } from "@targoninc/jess-components";
 import {Log} from "@targoninc/lyda-shared/src/Models/db/lyda/Log";
@@ -24,7 +24,7 @@ export class LogTemplates {
 
     static actionLogsView() {
         const actionLogs = signal<any[]>([]);
-        Api.getAsync<any[]>(ApiRoutes.getActionLogs).then(res => {
+        HttpClient.getAsync<any[]>(ApiRoutes.getActionLogs).then(res => {
             if (res.code === 200) {
                 actionLogs.value = res.data;
             }

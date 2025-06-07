@@ -1,6 +1,6 @@
 import {GenericTemplates} from "../Templates/generic/GenericTemplates.ts";
 import {PlaylistTemplates} from "../Templates/music/PlaylistTemplates.ts";
-import {Api} from "../Api/Api.ts";
+import {HttpClient} from "../Api/HttpClient.ts";
 import {getErrorMessage, Util} from "../Classes/Util.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
@@ -20,7 +20,7 @@ import {playingHere} from "../state.ts";
 
 export class PlaylistActions {
     static async openAddToPlaylistModal(objectToBeAdded: Album|Track, type: "track"|"album") {
-        const res = await Api.getAsync<Playlist[]>(ApiRoutes.getPlaylistsByUserId, {id: objectToBeAdded.user_id});
+        const res = await HttpClient.getAsync<Playlist[]>(ApiRoutes.getPlaylistsByUserId, {id: objectToBeAdded.user_id});
         if (res.code !== 200) {
             console.error("Failed to get playlists: ", res.data);
             return;
@@ -40,7 +40,7 @@ export class PlaylistActions {
     }
 
     static async createNewPlaylist(playlist: Partial<Playlist>) {
-        const res = await Api.postAsync(ApiRoutes.newPlaylist, playlist);
+        const res = await HttpClient.postAsync(ApiRoutes.newPlaylist, playlist);
         if (res.code !== 200) {
             notify("Failed to create playlist: " + getErrorMessage(res), NotificationType.error);
             return;
@@ -49,7 +49,7 @@ export class PlaylistActions {
     }
 
     static async deletePlaylist(id: number) {
-        const res = await Api.postAsync(ApiRoutes.deletePlaylist, {id});
+        const res = await HttpClient.postAsync(ApiRoutes.deletePlaylist, {id});
         if (res.code === 200) {
             PlayManager.removeStreamClient(id);
             QueueManager.removeFromManualQueue(id);
@@ -61,7 +61,7 @@ export class PlaylistActions {
     }
 
     static async addTrackToPlaylists(track_id: number, playlist_ids: number[]) {
-        const res = await Api.postAsync(ApiRoutes.addTrackToPlaylists, {
+        const res = await HttpClient.postAsync(ApiRoutes.addTrackToPlaylists, {
             playlist_ids,
             track_id
         });
@@ -74,7 +74,7 @@ export class PlaylistActions {
     }
 
     static async removeTrackFromPlaylist(track_id: number, playlist_ids: number[]) {
-        const res = await Api.postAsync(ApiRoutes.removeTrackFromPlaylists, {playlist_ids, track_id});
+        const res = await HttpClient.postAsync(ApiRoutes.removeTrackFromPlaylists, {playlist_ids, track_id});
         if (res.code !== 200) {
             notify("Failed to remove track from playlist: " + getErrorMessage(res), NotificationType.error);
             return false;
@@ -110,7 +110,7 @@ export class PlaylistActions {
     }
 
     static async moveTrackInPlaylist(playlistId: number, tracks: ListTrack[]) {
-        const res = await Api.postAsync(ApiRoutes.reorderPlaylistTracks, {
+        const res = await HttpClient.postAsync(ApiRoutes.reorderPlaylistTracks, {
             playlist_id: playlistId,
             tracks
         });
@@ -122,11 +122,11 @@ export class PlaylistActions {
     }
 
     static async likePlaylist(id: number) {
-        return await Api.postAsync(ApiRoutes.likePlaylist, { id });
+        return await HttpClient.postAsync(ApiRoutes.likePlaylist, { id });
     }
 
     static async unlikePlaylist(id: number) {
-        return await Api.postAsync(ApiRoutes.unlikePlaylist, { id });
+        return await HttpClient.postAsync(ApiRoutes.unlikePlaylist, { id });
     }
 
     static async toggleLike(id: number, isEnabled: boolean) {
@@ -171,7 +171,7 @@ export class PlaylistActions {
     }
 
     static async addAlbumToPlaylists(album_id: number, playlist_ids: number[]) {
-        const res = await Api.postAsync(ApiRoutes.addAlbumToPlaylists, {
+        const res = await HttpClient.postAsync(ApiRoutes.addAlbumToPlaylists, {
             playlist_ids,
             album_id
         });

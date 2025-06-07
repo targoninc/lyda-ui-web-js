@@ -1,5 +1,5 @@
 import {compute, Signal, signal, AnyElement, create, when} from "@targoninc/jess";
-import {Api} from "../Api/Api.ts";
+import {HttpClient} from "../Api/HttpClient.ts";
 import {notify} from "../Classes/Ui.ts";
 import {navigate} from "../Routing/Router.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
@@ -55,7 +55,7 @@ export class SearchTemplates {
             const currentSearchCount = searchCount;
             const endpoints = [ApiRoutes.searchTracks, ApiRoutes.searchAlbums, ApiRoutes.searchPlaylists, ApiRoutes.searchUsers];
             const promises = endpoints.map(async (endpoint) => {
-                const res = await Api.getAsync<SearchResult[]>(endpoint, {
+                const res = await HttpClient.getAsync<SearchResult[]>(endpoint, {
                     search: currentSearch.value
                 });
 

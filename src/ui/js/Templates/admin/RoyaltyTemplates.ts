@@ -1,7 +1,7 @@
 import {compute, Signal, signal, create, when, nullElement} from "@targoninc/jess";
 import {FormTemplates} from "../generic/FormTemplates.ts";
 import {notify} from "../../Classes/Ui.ts";
-import {Api} from "../../Api/Api.ts";
+import {HttpClient} from "../../Api/HttpClient.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {getErrorMessage} from "../../Classes/Util.ts";
 import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
@@ -66,7 +66,7 @@ export class RoyaltyTemplates {
                                     notify("Please select a month", NotificationType.error);
                                     return;
                                 }
-                                const res = await Api.postAsync(ApiRoutes.calculateEarnings, {
+                                const res = await HttpClient.postAsync(ApiRoutes.calculateEarnings, {
                                     month: month.month,
                                     year: month.year,
                                 });
@@ -88,7 +88,7 @@ export class RoyaltyTemplates {
                                     notify("Please select a month", NotificationType.error);
                                     return;
                                 }
-                                const res = await Api.postAsync(ApiRoutes.calculateRoyalties, {
+                                const res = await HttpClient.postAsync(ApiRoutes.calculateRoyalties, {
                                     month: month.month,
                                     year: month.year,
                                 });
@@ -108,7 +108,7 @@ export class RoyaltyTemplates {
                                     notify("Please select a month", NotificationType.error);
                                     return;
                                 }
-                                await Api.postAsync(ApiRoutes.setRoyaltyActivation, {
+                                await HttpClient.postAsync(ApiRoutes.setRoyaltyActivation, {
                                     month: month.month,
                                     year: month.year,
                                     approved: v,
@@ -122,7 +122,7 @@ export class RoyaltyTemplates {
 
     static royaltyManagement() {
         const royaltyInfo = signal<any>(null);
-        Api.getAsync<RoyaltyInfo>(ApiRoutes.getRoyaltyInfo).then(res => {
+        HttpClient.getAsync<RoyaltyInfo>(ApiRoutes.getRoyaltyInfo).then(res => {
             if (res.data) {
                 royaltyInfo.value = res.data;
             }

@@ -1,4 +1,4 @@
-import {Api} from "../Api/Api.ts";
+import {HttpClient} from "../Api/HttpClient.ts";
 import {getErrorMessage, Util} from "../Classes/Util.ts";
 import {Icons} from "../Enums/Icons.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
@@ -28,7 +28,7 @@ export class TrackActions {
             console.log("Not saving play because not playing in this tab.");
             return;
         }
-        return await Api.postAsync(ApiRoutes.saveTrackPlay, { id, quality: currentQuality.value });
+        return await HttpClient.postAsync(ApiRoutes.saveTrackPlay, { id, quality: currentQuality.value });
     }
 
     static savePlayAfterTimeIf(id: number, seconds: number, condition: () => boolean) {
@@ -40,7 +40,7 @@ export class TrackActions {
     }
 
     static async unfollowUser(userId: number) {
-        const res = await Api.postAsync(ApiRoutes.unfollowUser, {
+        const res = await HttpClient.postAsync(ApiRoutes.unfollowUser, {
             id: userId
         });
 
@@ -55,7 +55,7 @@ export class TrackActions {
         if (!confirm) {
             return;
         }
-        const res = await Api.postAsync(ApiRoutes.deleteTrack, { id });
+        const res = await HttpClient.postAsync(ApiRoutes.deleteTrack, { id });
         if (res.code === 200) {
             await PlayManager.removeTrackFromAllStates(id);
             notify(res.data, NotificationType.success);
@@ -67,7 +67,7 @@ export class TrackActions {
 
     static async deleteComment(commentId: number, comments: Signal<Comment[]>) {
         await Ui.getConfirmationModal("Delete comment", "Are you sure you want to delete this comment?", "Yes", "No", async () => {
-            const res = await Api.postAsync(ApiRoutes.deleteComment, {
+            const res = await HttpClient.postAsync(ApiRoutes.deleteComment, {
                 id: commentId,
             });
 
@@ -105,7 +105,7 @@ export class TrackActions {
             return;
         }
 
-        const res = await Api.postAsync(ApiRoutes.newComment, {
+        const res = await HttpClient.postAsync(ApiRoutes.newComment, {
             id: track_id,
             content: content.value,
             parentId: parentCommentId ? parentCommentId : null,
@@ -140,15 +140,15 @@ export class TrackActions {
     }
 
     static async likeTrack(id: number) {
-        return await Api.postAsync(ApiRoutes.likeTrack, { id });
+        return await HttpClient.postAsync(ApiRoutes.likeTrack, { id });
     }
 
     static async unlikeTrack(id: number) {
-        return await Api.postAsync(ApiRoutes.unlikeTrack, { id });
+        return await HttpClient.postAsync(ApiRoutes.unlikeTrack, { id });
     }
 
     static async repostTrack(id: number) {
-        const res = await Api.postAsync(ApiRoutes.repostTrack, { id });
+        const res = await HttpClient.postAsync(ApiRoutes.repostTrack, { id });
         if (res.code !== 200) {
             notify("Failed to repost track: " + getErrorMessage(res), NotificationType.error);
             return false;
@@ -157,7 +157,7 @@ export class TrackActions {
     }
 
     static async unrepostTrack(id: number) {
-        const res = await Api.postAsync(ApiRoutes.unrepostTrack, { id });
+        const res = await HttpClient.postAsync(ApiRoutes.unrepostTrack, { id });
         if (res.code !== 200) {
             notify("Failed to unrepost track: " + getErrorMessage(res), NotificationType.error);
             return false;
@@ -183,7 +183,7 @@ export class TrackActions {
     }
 
     static async followUser(userId: number) {
-        const res = await Api.postAsync(ApiRoutes.followUser, {
+        const res = await HttpClient.postAsync(ApiRoutes.followUser, {
             id: userId,
         });
 
@@ -195,7 +195,7 @@ export class TrackActions {
     }
 
     static async getCollabTypes() {
-        const res = await Api.getAsync<CollaboratorType[]>(ApiRoutes.getTrackCollabTypes);
+        const res = await HttpClient.getAsync<CollaboratorType[]>(ApiRoutes.getTrackCollabTypes);
         if (res.code !== 200) {
             notify("Error while trying to get collab types: " + getErrorMessage(res), NotificationType.error);
             return [];
@@ -352,7 +352,7 @@ export class TrackActions {
     }
 
     static async removeCollaboratorFromTrack(trackId: number, userId: number) {
-        const res = await Api.postAsync(ApiRoutes.removeCollaborator, {
+        const res = await HttpClient.postAsync(ApiRoutes.removeCollaborator, {
             id: trackId,
             userId: userId,
         });
@@ -367,7 +367,7 @@ export class TrackActions {
     }
 
     static async addCollaboratorToTrack(trackId: number, userId: number, collabType: number) {
-        const res = await Api.postAsync<TrackCollaborator>(ApiRoutes.addCollaborator, {
+        const res = await HttpClient.postAsync<TrackCollaborator>(ApiRoutes.addCollaborator, {
             id: trackId,
             userId: userId,
             collabType: collabType,
@@ -383,7 +383,7 @@ export class TrackActions {
 
     static async updateTrackProperty(trackId: number, property: string, initialValue: string, callback: Function|null = null) {
         Ui.getTextAreaInputModal("Edit " + property, "Enter new track " + property, initialValue, "Save", "Cancel", async (value: string) => {
-            const res = await Api.postAsync(ApiRoutes.updateTrack, {
+            const res = await HttpClient.postAsync(ApiRoutes.updateTrack, {
                 id: trackId,
                 field: property,
                 value
@@ -401,7 +401,7 @@ export class TrackActions {
     }
 
     static async getUnapprovedTracks() {
-        const res = await Api.getAsync<any[]>(ApiRoutes.getUnapprovedCollabs);
+        const res = await HttpClient.getAsync<any[]>(ApiRoutes.getUnapprovedCollabs);
         if (res.code !== 200) {
             notify("Error while trying to get unapproved tracks: " + getErrorMessage(res), NotificationType.error);
             return [];
@@ -410,7 +410,7 @@ export class TrackActions {
     }
 
     static async approveCollab(id: number, name = "track") {
-        const res = await Api.postAsync(ApiRoutes.approveCollab, {
+        const res = await HttpClient.postAsync(ApiRoutes.approveCollab, {
             id: id,
         });
         if (res.code !== 200) {
@@ -426,7 +426,7 @@ export class TrackActions {
     }
 
     static async denyCollab(id: number, name = "track") {
-        const res = await Api.postAsync(ApiRoutes.denyCollab, {
+        const res = await HttpClient.postAsync(ApiRoutes.denyCollab, {
             id: id,
         });
         if (res.code !== 200) {
@@ -442,7 +442,7 @@ export class TrackActions {
     }
 
     static async updateTrackFull(track: Partial<Track>) {
-        const res = await Api.postAsync(ApiRoutes.updateTrackFull, {
+        const res = await HttpClient.postAsync(ApiRoutes.updateTrackFull, {
             id: track.id,
             title: track.title,
             collaborators: track.collaborators,

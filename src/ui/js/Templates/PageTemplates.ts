@@ -1,7 +1,7 @@
 import {AuthActions} from "../Actions/AuthActions.ts";
 import {LandingPageTemplates} from "./LandingPageTemplates.ts";
 import {UserTemplates} from "./account/UserTemplates.ts";
-import {Api} from "../Api/Api.ts";
+import {HttpClient} from "../Api/HttpClient.ts";
 import {Util} from "../Classes/Util.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {create, when, compute, signal} from "@targoninc/jess";
@@ -165,7 +165,7 @@ export class PageTemplates {
         const randomUserWidget = signal(create("span").text("loading...").build());
         const user = signal<User|null>(null);
 
-        Api.getAsync(ApiRoutes.randomUser).then(async data => {
+        HttpClient.getAsync(ApiRoutes.randomUser).then(async data => {
             if (data.code !== 200) {
                 randomUserWidget.value = create("span").text("Failed to load random user").build();
                 return;

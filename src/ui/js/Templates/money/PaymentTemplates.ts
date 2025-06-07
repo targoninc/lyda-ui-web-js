@@ -1,5 +1,5 @@
 import {create, compute, signal} from "@targoninc/jess";
-import {Api} from "../../Api/Api.ts";
+import {HttpClient} from "../../Api/HttpClient.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
@@ -14,7 +14,7 @@ export class PaymentTemplates {
         const skip = signal(0);
         const load = (filter?: any) => {
             loading.value = true;
-            Api.getAsync<PaymentHistory[]>(ApiRoutes.getPaymentHistory, {
+            HttpClient.getAsync<PaymentHistory[]>(ApiRoutes.getPaymentHistory, {
                 skip: skip.value,
                 ...(filter ?? {})
             }).then(e => payments.value = e.data)

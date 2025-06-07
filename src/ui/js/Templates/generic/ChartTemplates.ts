@@ -2,7 +2,7 @@ import {Chart, registerables} from "chart.js";
 import {BoxPlotChart} from "@sgratzl/chartjs-chart-boxplot";
 import {computeAsync, compute, signal, create, HtmlPropertyValue} from "@targoninc/jess";
 import {ChartOptions} from "../../Classes/ChartOptions.ts";
-import {Api} from "../../Api/Api.ts";
+import {HttpClient} from "../../Api/HttpClient.ts";
 import {chartColor} from "../../state.ts";
 import { button } from "@targoninc/jess-components";
 import {Statistic} from "@targoninc/lyda-shared/src/Models/Statistic";
@@ -99,7 +99,7 @@ export class ChartTemplates {
         const skip = signal(0);
         const take = signal(12);
         const data = await computeAsync(async (s, t) => {
-            const res = await Api.getAsync<Statistic[]>(options.endpoint, {
+            const res = await HttpClient.getAsync<Statistic[]>(options.endpoint, {
                 ...(options.params ?? {}),
                 offset: s,
                 limit: t,

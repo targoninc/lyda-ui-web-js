@@ -5,7 +5,7 @@ import {TrackTemplates} from "./Templates/music/TrackTemplates.ts";
 import {ProfilePage} from "./Classes/ProfilePage.ts";
 import {PlaylistTemplates} from "./Templates/music/PlaylistTemplates.ts";
 import {LibraryActions} from "./Actions/LibraryActions.ts";
-import {Api} from "./Api/Api.ts";
+import {HttpClient} from "./Api/HttpClient.ts";
 import {StatisticTemplates} from "./Templates/StatisticTemplates.ts";
 import {TrackActions} from "./Actions/TrackActions.ts";
 import {SubscriptionTemplates} from "./Templates/SubscriptionTemplates.ts";
@@ -20,7 +20,7 @@ import {RoyaltyInfo} from "@targoninc/lyda-shared/src/Models/RoyaltyInfo";
 
 export class Lyda {
     static async getEndpointData(endpoint: string, params = "") {
-        let r = await Api.getAsync<any>(endpoint + params);
+        let r = await HttpClient.getAsync<any>(endpoint + params);
         if (r.code !== 200) {
             console.error("Failed to fetch from endpoint " + endpoint + ", status: " + r.code);
             return {
@@ -91,7 +91,7 @@ export class Lyda {
                     navigate(RoutePath.explore);
                     return;
                 }
-                const royaltyInfo = await Api.getAsync<RoyaltyInfo>(ApiRoutes.getRoyaltyInfo);
+                const royaltyInfo = await HttpClient.getAsync<RoyaltyInfo>(ApiRoutes.getRoyaltyInfo);
                 element.append(StatisticTemplates.artistRoyaltyActions(royaltyInfo.data));
                 element.append(await StatisticTemplates.allStats());
                 element.append(StatisticTemplates.dataExport());

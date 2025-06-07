@@ -1,5 +1,5 @@
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
-import {Api} from "../../Api/Api.ts";
+import {HttpClient} from "../../Api/HttpClient.ts";
 import {compute, Signal, signal, create, when} from "@targoninc/jess";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
@@ -23,7 +23,7 @@ export class ModerationUsersTemplates {
         const offset = signal<number>(0);
 
         const refresh = async () => {
-            const res = await Api.getAsync<User[]>(ApiRoutes.getUsers, {
+            const res = await HttpClient.getAsync<User[]>(ApiRoutes.getUsers, {
                 query: query.value ?? "%",
                 offset: offset.value,
                 limit: 100
@@ -119,7 +119,7 @@ export class ModerationUsersTemplates {
             checked: hasPermission,
             onchange: () => {
                 const val = !hasPermission.value;
-                Api.postAsync(ApiRoutes.setUserPermission, {
+                HttpClient.postAsync(ApiRoutes.setUserPermission, {
                     permissionName: p,
                     user_id: u.id,
                     userHasPermission: val

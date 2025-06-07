@@ -1,5 +1,5 @@
 import {create, compute, signal} from "@targoninc/jess";
-import {Api} from "../../Api/Api.ts";
+import {HttpClient} from "../../Api/HttpClient.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
@@ -14,7 +14,7 @@ export class PayoutTemplates {
         const skip = signal(0);
         const load = (filter?: any) => {
             loading.value = true;
-            Api.getAsync<Payout[]>(ApiRoutes.getPayouts, {
+            HttpClient.getAsync<Payout[]>(ApiRoutes.getPayouts, {
                 skip: skip.value,
                 ...(filter ?? {})
             }).then(e => payouts.value = e.data)

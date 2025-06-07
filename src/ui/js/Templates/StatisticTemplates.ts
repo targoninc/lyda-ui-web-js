@@ -1,7 +1,7 @@
 import {compute, signal, create, when} from "@targoninc/jess";
 import {currency} from "../Classes/Helpers/Num.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
-import {Api} from "../Api/Api.ts";
+import {HttpClient} from "../Api/HttpClient.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {downloadFile, getErrorMessage} from "../Classes/Util.ts";
 import {ChartTemplates} from "./generic/ChartTemplates.ts";
@@ -96,7 +96,7 @@ export class StatisticTemplates {
                                     classes: ["positive"],
                                     onclick: async () => {
                                         await Ui.getTextInputModal("Set PayPal mail", "The account you will receive payments with", "", "Save", "Cancel", async (address: string) => {
-                                            const res = await Api.postAsync(ApiRoutes.updateUserSetting, {
+                                            const res = await HttpClient.postAsync(ApiRoutes.updateUserSetting, {
                                                 setting: UserSettings.paypalMail,
                                                 value: address
                                             });
@@ -117,7 +117,7 @@ export class StatisticTemplates {
                                     classes: ["negative"],
                                     onclick: async () => {
                                         await Ui.getConfirmationModal("Remove PayPal mail", "Are you sure you want to remove your paypal mail? You'll have to add it again manually.", "Yes", "No", async () => {
-                                            const res = await Api.postAsync(ApiRoutes.updateUserSetting, {
+                                            const res = await HttpClient.postAsync(ApiRoutes.updateUserSetting, {
                                                 setting: "paypalMail",
                                                 value: ""
                                             });
@@ -137,7 +137,7 @@ export class StatisticTemplates {
                                     classes: ["positive"],
                                     onclick: async () => {
                                         await Ui.getConfirmationModal("Request payment", "Are you sure you want to request a payment?", "Yes", "No", async () => {
-                                            const res = await Api.postAsync(ApiRoutes.requestPayout);
+                                            const res = await HttpClient.postAsync(ApiRoutes.requestPayout);
                                             if (res.code !== 200) {
                                                 notify(getErrorMessage(res), NotificationType.error);
                                                 return;
@@ -214,7 +214,7 @@ export class StatisticTemplates {
                                     text: "Download",
                                     icon: {icon: "download"},
                                     onclick: async () => {
-                                        const res = await Api.getAsync<string>(ApiRoutes.royaltiesForExport, {
+                                        const res = await HttpClient.getAsync<string>(ApiRoutes.royaltiesForExport, {
                                             ...month.value,
                                             type: types[selectedTypeIndex.value]
                                         });

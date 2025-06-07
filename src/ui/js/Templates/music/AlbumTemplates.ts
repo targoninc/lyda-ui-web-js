@@ -23,7 +23,7 @@ import {
 } from "@targoninc/jess";
 import {navigate, Route} from "../../Routing/Router.ts";
 import {currentTrackId, currentUser, playingFrom, playingHere} from "../../state.ts";
-import {Api} from "../../Api/Api.ts";
+import {HttpClient} from "../../Api/HttpClient.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {PageTemplates} from "../PageTemplates.ts";
 import {RoutePath} from "../../Routing/routes.ts";
@@ -204,7 +204,7 @@ export class AlbumTemplates {
                             icon: {icon: "save"},
                             onclick: async () => {
                                 loading.value = true;
-                                Api.postAsync(ApiRoutes.updateAlbum, state.value).then(() => {
+                                HttpClient.postAsync(ApiRoutes.updateAlbum, state.value).then(() => {
                                     Util.removeModal();
                                 }).catch(e => {
                                     notify("Failed to update album: " + getErrorMessage(e), NotificationType.error);
@@ -431,7 +431,7 @@ export class AlbumTemplates {
             canEdit: false
         });
         const loading = signal(true);
-        Api.getAsync<{ album: Album, canEdit: boolean }>(ApiRoutes.getAlbumById, {id: params.id}).then(async res => {
+        HttpClient.getAsync<{ album: Album, canEdit: boolean }>(ApiRoutes.getAlbumById, {id: params.id}).then(async res => {
             if (res.code === 200) {
                 data.value = res.data;
                 return;

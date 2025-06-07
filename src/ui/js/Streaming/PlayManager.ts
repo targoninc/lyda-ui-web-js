@@ -1,5 +1,5 @@
 import {LydaCache} from "../Cache/LydaCache.ts";
-import {Api} from "../Api/Api.ts";
+import {HttpClient} from "../Api/HttpClient.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {StreamingUpdater} from "./StreamingUpdater.ts";
 import {QueueManager} from "./QueueManager.ts";
@@ -430,7 +430,7 @@ export class PlayManager {
             throw new Error("id is missing");
         }
 
-        const res = await Api.getAsync<{ track: Track }>(ApiRoutes.getTrackById, {id});
+        const res = await HttpClient.getAsync<{ track: Track }>(ApiRoutes.getTrackById, {id});
         if (res.code !== 200) {
             await PlayManager.removeTrackFromAllStates(id);
             notify(`Failed to get track data for ${id}: ${getErrorMessage(res)}`, NotificationType.error);
