@@ -46,6 +46,7 @@ export class LandingPageTemplates {
             "checking-mfa": LandingPageTemplates.checkForMfaBox,
             "logging-in": LandingPageTemplates.loggingInBox,
             "registering": LandingPageTemplates.registeringBox,
+            "mfa-select": LandingPageTemplates.mfaSelection,
             "mfa": LandingPageTemplates.mfaBox,
             "complete": LandingPageTemplates.completeBox,
             "reset-password": LandingPageTemplates.resetPasswordBox,
@@ -108,6 +109,32 @@ export class LandingPageTemplates {
         navigate(RoutePath.profile);
 
         return LandingPageTemplates.waitingBox("Complete", "Redirecting...");
+    }
+
+    static mfaSelection(step: Signal<string>, user: Signal<AuthData>) {
+        return create("div")
+            .classes("flex-v", "align-center")
+            .children(
+                create("h1")
+                    .text("Select MFA method")
+                    .build(),
+                create("div")
+                    .classes("flex-v")
+                    .children(
+                        create("p")
+                            .text("Please select the MFA method you want to use.")
+                            .build(),
+                        ...methods.map(method => ({ method })),
+                        button({
+                            text: "Submit",
+                            icon: { icon: "login" },
+                            classes: ["positive"],
+                            onclick: () => {
+                                step.value = "logging-in";
+                            }
+                        }),
+                    ).build(),
+            ).build();
     }
 
     static mfaBox(step: Signal<string>, user: Signal<AuthData>) {
@@ -199,11 +226,13 @@ export class LandingPageTemplates {
     }
 
     static checkForMfaBox(step: Signal<string>, user: Signal<AuthData>) {
+        AuthApi.getMfaOptions(user.value.email, user.value.password)
+
         AuthApi.mfaRequest(user.value.email, user.value.password, (res: ApiResponse<any>) => {
             if (res.data && res.data.user) {
                 finalizeLogin(step, res.data.user);
             } else if (res.data && res.data.mfa_needed) {
-                step.value = "mfa";
+                step.value = "mfa-select";
             } else {
                 step.value = "logging-in";
             }

@@ -29,7 +29,6 @@ export class ApiRoutes {
     static login = ApiRoutes.userActions + "/login";
     static logout = ApiRoutes.userActions + "/logout";
     static register = ApiRoutes.userActions + "/register";
-    static requestMfaCode = ApiRoutes.userActions + "/mfa-request";
     static updateUserSetting = ApiRoutes.userActions + "/update-setting";
     static requestPasswordReset = ApiRoutes.userActions + "/request-password-reset";
     static resetPassword = ApiRoutes.userActions + "/reset-password";
@@ -173,5 +172,22 @@ export class ApiRoutes {
     private static webhooks = ApiRoutes.base + "/webhooks";
     static getEvents = ApiRoutes.webhooks + "/events";
     static triggerEventHandling = ApiRoutes.webhooks + "/triggerEventHandling";
+    // endregion
+
+    // region MFA
+    private static totp = ApiRoutes.base + "/totp";
+    static verifyTotp = ApiRoutes.totp + "/verify";
+    static deleteTotp = ApiRoutes.totp + "/delete";
+    static addTotp = ApiRoutes.totp + "/add";
+
+    private static webauthn = ApiRoutes.base + "/webauthn";
+    static challengeWebauthn = ApiRoutes.webauthn + "/challenge";
+    static registerWebauthn = ApiRoutes.webauthn + "/register";
+    static verifyWebauthn = ApiRoutes.webauthn + "/verify";
+    static deleteWebauthn = ApiRoutes.webauthn + "/delete";
+
+    private static mfa = ApiRoutes.base + "/mfa";
+    static requestMfaCode = ApiRoutes.mfa + "/request";
+    static mfaOptions = ApiRoutes.mfa + "/options";
     // endregion
 }
