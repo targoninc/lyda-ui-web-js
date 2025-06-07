@@ -217,6 +217,20 @@ export class PlayManager {
                 }
             ];
         }
+
+        const d = await PlayManager.getTrackData(id);
+        navigator.mediaSession.metadata = new MediaMetadata({
+            album: playingFrom.value?.name ?? "",
+            title: d.track.title,
+            artist: d.track.artistname ?? d.track.user?.displayname ?? "",
+            artwork: [
+                {
+                    src: d.track.has_cover ? Util.getTrackCover(id) : Util.defaultImage("track"),
+                    type: "image/webp",
+                    sizes: "500x500"
+                }
+            ]
+        });
         const track = await PlayManager.getTrackData(id);
         const streamClient = PlayManager.addStreamClientIfNotExists(id, track.track.length);
 
