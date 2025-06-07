@@ -1,27 +1,34 @@
 import {AuthApi} from "../Api/AuthApi.ts";
-import {GenericTemplates} from "./generic/GenericTemplates.ts";
+import {GenericTemplates, horizontal, vertical} from "./generic/GenericTemplates.ts";
 import {FormTemplates} from "./generic/FormTemplates.ts";
 import {UserValidator} from "../Classes/Validators/UserValidator.ts";
-import {finalizeLogin, target, Util} from "../Classes/Util.ts";
+import {finalizeLogin, getErrorMessage, target, Util} from "../Classes/Util.ts";
 import {notify} from "../Classes/Ui.ts";
-import {HttpClient, ApiResponse} from "../Api/HttpClient.ts";
+import {ApiResponse, HttpClient} from "../Api/HttpClient.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {navigate} from "../Routing/Router.ts";
 import {currentUser} from "../state.ts";
 import {RoutePath} from "../Routing/routes.ts";
-import {compute, Signal, signal, HtmlPropertyValue, AnyNode, create, InputType, when } from "@targoninc/jess";
-import { button, error, errorList, input } from "@targoninc/jess-components";
+import {AnyNode, compute, create, HtmlPropertyValue, InputType, Signal, signal, signalMap, when} from "@targoninc/jess";
+import {button, error, errorList, input} from "@targoninc/jess-components";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import {MfaOption} from "@targoninc/lyda-shared/src/Enums/MfaOption.ts";
+import {sendMfaRequest} from "../Classes/Helpers/Mfa.ts";
+import {AuthenticationResponseJSON} from "@passwordless-id/webauthn/dist/esm/types";
 
 export interface AuthData {
     termsOfService: boolean;
+    id?: number;
     username: string;
     displayname: string;
     email: string;
     password: string;
     password2: string;
-    mfaCode: string;
+    mfaCode?: string;
+    mfaMethod?: MfaOption;
+    verification?: AuthenticationResponseJSON,
+    challenge?: string;
 }
 
 export class LandingPageTemplates {
@@ -42,12 +49,13 @@ export class LandingPageTemplates {
             "email": LandingPageTemplates.emailBox,
             "check-email": LandingPageTemplates.checkEmailBox,
             "register": LandingPageTemplates.registerBox,
-            "login": LandingPageTemplates.loginBox,
-            "checking-mfa": LandingPageTemplates.checkForMfaBox,
-            "logging-in": LandingPageTemplates.loggingInBox,
             "registering": LandingPageTemplates.registeringBox,
+            "login": LandingPageTemplates.loginBox,
+            "check-mfa": LandingPageTemplates.checkForMfaBox,
+            "logging-in": LandingPageTemplates.loggingInBox,
             "mfa-select": LandingPageTemplates.mfaSelection,
-            "mfa": LandingPageTemplates.mfaBox,
+            "mfa-request": LandingPageTemplates.mfaRequest,
+            "verify-mfa": LandingPageTemplates.mfaVerify,
             "complete": LandingPageTemplates.completeBox,
             "reset-password": LandingPageTemplates.resetPasswordBox,
             "password-reset": LandingPageTemplates.enterNewPasswordBox,
@@ -60,13 +68,13 @@ export class LandingPageTemplates {
             firstStep = altEntryPoints.find(entryPoint => window.location.pathname.includes(entryPoint)) as keyof typeof templateMap;
         }
         const step = signal<keyof typeof templateMap>(firstStep ?? "email");
+        step.subscribe(s => console.log(`step ${s}`));
         const user = signal<AuthData>({
             email: "",
             username: "",
             displayname: "",
             password: "",
             password2: "",
-            mfaCode: "",
             termsOfService: false
         });
         const history = signal(["email"]);
@@ -74,7 +82,8 @@ export class LandingPageTemplates {
             "email": "E-Mail",
             "register": "Register",
             "login": "Login",
-            "mfa": "2FA",
+            "mfa-select": "Select MFA",
+            "mfa-request": "Verify MFA",
             "complete": "Complete"
         };
 
@@ -112,6 +121,24 @@ export class LandingPageTemplates {
     }
 
     static mfaSelection(step: Signal<string>, user: Signal<AuthData>) {
+        const options = signal<{ type: MfaOption }[]>([]);
+        const selected = signal<MfaOption | undefined>(user.value.mfaMethod);
+        AuthApi.getMfaOptions(user.value.email, user.value.password).then(r => {
+            if (r.code === 200) {
+                options.value = r.data.options;
+                if (options.value.length === 1) {
+                    selected.value = options.value[0].type;
+                }
+            }
+        });
+        selected.subscribe(s => {
+            user.value = {
+                ...user.value,
+                mfaMethod: s
+            };
+            step.value = "mfa-request";
+        });
+
         return create("div")
             .classes("flex-v", "align-center")
             .children(
@@ -124,25 +151,42 @@ export class LandingPageTemplates {
                         create("p")
                             .text("Please select the MFA method you want to use.")
                             .build(),
-                        ...methods.map(method => ({ method })),
-                        button({
-                            text: "Submit",
-                            icon: { icon: "login" },
-                            classes: ["positive"],
-                            onclick: () => {
-                                step.value = "logging-in";
-                            }
-                        }),
+                        signalMap(options, vertical(), o => LandingPageTemplates.mfaOption(o.type, selected)),
                     ).build(),
             ).build();
     }
 
-    static mfaBox(step: Signal<string>, user: Signal<AuthData>) {
+    static mfaOption(opt: MfaOption, selected: Signal<MfaOption | undefined>) {
+        const icon: Record<MfaOption, string> = {
+            [MfaOption.email]: "forward_to_inbox",
+            [MfaOption.totp]: "qr_code",
+            [MfaOption.webauthn]: "passkey",
+        };
+        const text: Record<MfaOption, string> = {
+            [MfaOption.email]: "E-Mail",
+            [MfaOption.totp]: "TOTP",
+            [MfaOption.webauthn]: "Passkey",
+        };
+
+        return button({
+            icon: {icon: icon[opt]},
+            text: text[opt],
+            onclick: () => selected.value = opt,
+        });
+    }
+
+    static mfaRequest(step: Signal<string>, user: Signal<AuthData>) {
+        const isSubmittable = [MfaOption.email, MfaOption.totp].includes(user.value.mfaMethod!);
+        const codeNotSet = compute(u => !u.mfaCode || u.mfaCode.trim().length === 0, user);
+        const loading = signal(false);
+
+        sendMfaRequest(loading, step, user, user.value.mfaMethod!);
+
         return create("div")
             .classes("flex-v", "align-center")
             .children(
                 create("h1")
-                    .text("Two-factor authentication")
+                    .text("MFA verification")
                     .build(),
                 create("div")
                     .classes("flex-v")
@@ -150,23 +194,53 @@ export class LandingPageTemplates {
                         create("p")
                             .text("You have two-factor authentication enabled. Please enter the code from the e-mail you just got sent to continue.")
                             .build(),
-                        FormTemplates.textField("Code", "mfa-code", "Code", "text", "", true, (value: string) => {
+                        when(isSubmittable, FormTemplates.textField("Code", "mfa-code", "Code", "text", "", true, (value: string) => {
                             user.value = {
                                 ...user.value,
-                                mfaCode: value
+                                mfaCode: value.trim()
                             };
-                        }, true, () => {
-                        }),
-                        button({
-                            text: "Submit",
-                            icon: { icon: "login" },
-                            classes: ["positive"],
-                            onclick: () => {
-                                step.value = "logging-in";
+                            if (value.trim().length === 6) {
+                                step.value = "verify-mfa";
                             }
-                        }),
+                        }, true)),
+                        horizontal(
+                            when(isSubmittable, button({
+                                text: "Submit",
+                                icon: {icon: "login"},
+                                classes: ["positive"],
+                                disabled: compute((c, l) => c || l, codeNotSet, loading),
+                                onclick: () => {
+                                    step.value = "verify-mfa";
+                                }
+                            })),
+                            when(loading, GenericTemplates.loadingSpinner())
+                        ).classes("align-children"),
                     ).build(),
             ).build();
+    }
+
+    static mfaVerify(step: Signal<string>, user: Signal<AuthData>) {
+        if (user.value.mfaMethod! === MfaOption.webauthn) {
+            AuthApi.verifyWebauthn(user.value.verification!, user.value.challenge!).then(r => {
+                if (r.code === 200) {
+                    step.value = "logging-in";
+                } else {
+                    notify(getErrorMessage(r), NotificationType.error);
+                    step.value = "mfa-request";
+                }
+            });
+        } else {
+            AuthApi.verifyTotp(user.value.id!, user.value.mfaCode!, user.value.mfaMethod!).then(r => {
+                if (r.code === 200) {
+                    step.value = "logging-in";
+                } else {
+                    notify(getErrorMessage(r), NotificationType.error);
+                    step.value = "mfa-request";
+                }
+            });
+        }
+
+        return horizontal();
     }
 
     static verifyEmailBox(step: Signal<string>, user: Signal<AuthData>) {
@@ -203,7 +277,7 @@ export class LandingPageTemplates {
                             .build()),
                         when(done, button({
                             text: "Go to profile",
-                            icon: { icon: "person" },
+                            icon: {icon: "person"},
                             classes: ["positive"],
                             onclick: () => navigate(RoutePath.profile)
                         })),
@@ -218,7 +292,7 @@ export class LandingPageTemplates {
                 step.value = "complete";
             } else {
                 notify(`Failed to register: ${res.data.error}`, NotificationType.error);
-                step.value = "email";
+                step.value = "register";
             }
         });
 
@@ -226,25 +300,26 @@ export class LandingPageTemplates {
     }
 
     static checkForMfaBox(step: Signal<string>, user: Signal<AuthData>) {
-        AuthApi.getMfaOptions(user.value.email, user.value.password)
-
-        AuthApi.mfaRequest(user.value.email, user.value.password, (res: ApiResponse<any>) => {
-            if (res.data && res.data.user) {
-                finalizeLogin(step, res.data.user);
-            } else if (res.data && res.data.mfa_needed) {
-                step.value = "mfa-select";
-            } else {
-                step.value = "logging-in";
+        AuthApi.getMfaOptions(user.value.email, user.value.password).then(r => {
+            if (r.code === 200) {
+                const options = r.data.options;
+                user.value = {
+                    ...user.value,
+                    id: r.data.userId
+                };
+                if (options.length === 0) {
+                    step.value = "logging-in";
+                } else {
+                    step.value = "mfa-select";
+                }
             }
-        }, () => {
-            step.value = "login";
         });
 
         return LandingPageTemplates.waitingBox("Checking for MFA...", "Please wait");
     }
 
     static loggingInBox(step: Signal<string>, user: Signal<AuthData>) {
-        AuthApi.login(user.value.email, user.value.password, user.value.mfaCode, (data: { user: User }) => {
+        AuthApi.login(user.value.email, user.value.password, user.value.challenge, (data: { user: User }) => {
             notify("Logged in as " + data.user.username, NotificationType.success);
             AuthApi.user(data.user.id, (user: User) => {
                 finalizeLogin(step, user);
@@ -282,7 +357,7 @@ export class LandingPageTemplates {
         const continueLogin = () => {
             errors.value = UserValidator.validateLogin(user.value);
             if (errors.value.length === 0) {
-                step.value = "checking-mfa";
+                step.value = "check-mfa";
             }
         };
         const email = compute((u: AuthData) => u.email, user);
@@ -318,7 +393,7 @@ export class LandingPageTemplates {
                                 });
                             },
                         }),
-                        LandingPageTemplates.passwordInput(password, user, () => step.value = "checking-mfa", true),
+                        LandingPageTemplates.passwordInput(password, user, () => step.value = "check-mfa", true),
                         button({
                             text: "Login",
                             id: "mfaCheckTrigger",
@@ -470,7 +545,8 @@ export class LandingPageTemplates {
             ).build();
     }
 
-    private static passwordInput(password: Signal<string>, user: Signal<AuthData>, onEnter: Function = () => {}, focusImmediately = false) {
+    private static passwordInput(password: Signal<string>, user: Signal<AuthData>, onEnter: Function = () => {
+    }, focusImmediately = false) {
         setTimeout(() => {
             if (focusImmediately) {
                 const input = document.querySelector("[name='password']") as HTMLInputElement;
@@ -574,6 +650,7 @@ export class LandingPageTemplates {
             });
         }
         const allFieldsTouched = signal(false);
+
         function checkAllFieldsTouched() {
             allFieldsTouched.value = touchedFields.size === 6;
         }

@@ -20,11 +20,11 @@ export class AuthApi {
         });
     }
 
-    static login(email: string, password: string, mfaCode: string, successCallback: Function, errorCallback: Function = () => {}) {
+    static login(email: string, password: string, challenge: string|undefined, successCallback: Function, errorCallback: Function = () => {}) {
         HttpClient.postAsync(ApiRoutes.login, {
             email,
             password,
-            mfaCode
+            challenge
         }).then((response) => {
             if (response.code === 200) {
                 successCallback(response.data);
@@ -128,13 +128,16 @@ export class AuthApi {
     }
 
     static async getMfaOptions(email: string, password: string) {
-        return await HttpClient.postAsync<{ type: MfaOption }[]>(ApiRoutes.mfaOptions, {
+        return await HttpClient.postAsync<{
+            userId: number,
+            options: { type: MfaOption }[]
+        }>(ApiRoutes.mfaOptions, {
             email,
             password
         });
     }
 
-    static mfaRequest(username: string, password: string, method: MfaOption) {
+    static mfaRequest(email: string, password: string, method: MfaOption) {
         return HttpClient.postAsync<{
             mfa_needed: boolean;
             type?: MfaOption;
@@ -142,7 +145,7 @@ export class AuthApi {
             userId?: number;
             user?: User;
         }>(ApiRoutes.requestMfaCode, {
-            username,
+            email,
             password,
             method
         });
