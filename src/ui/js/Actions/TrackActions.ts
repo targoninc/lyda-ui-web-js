@@ -5,7 +5,7 @@ import {PlayManager} from "../Streaming/PlayManager.ts";
 import {AlbumActions} from "./AlbumActions.ts";
 import {PlaylistActions} from "./PlaylistActions.ts";
 import {TrackEditTemplates} from "../Templates/music/TrackEditTemplates.ts";
-import {notify, Ui} from "../Classes/Ui.ts";
+import {createModal, notify, Ui} from "../Classes/Ui.ts";
 import {navigate, reload} from "../Routing/Router.ts";
 import {Signal} from "@targoninc/jess";
 import {MediaUploader} from "../Api/MediaUploader.ts";
@@ -139,32 +139,6 @@ export class TrackActions {
         content.value = "";
     }
 
-    static async likeTrack(id: number) {
-        return await HttpClient.postAsync(ApiRoutes.likeTrack, { id });
-    }
-
-    static async unlikeTrack(id: number) {
-        return await HttpClient.postAsync(ApiRoutes.unlikeTrack, { id });
-    }
-
-    static async repostTrack(id: number) {
-        const res = await HttpClient.postAsync(ApiRoutes.repostTrack, { id });
-        if (res.code !== 200) {
-            notify("Failed to repost track: " + getErrorMessage(res), NotificationType.error);
-            return false;
-        }
-        return true;
-    }
-
-    static async unrepostTrack(id: number) {
-        const res = await HttpClient.postAsync(ApiRoutes.unrepostTrack, { id });
-        if (res.code !== 200) {
-            notify("Failed to unrepost track: " + getErrorMessage(res), NotificationType.error);
-            return false;
-        }
-        return true;
-    }
-
     static async toggleFollow(userId: number, following: Signal<boolean>) {
         if (following.value) {
             const res = await TrackActions.unfollowUser(userId);
@@ -201,37 +175,6 @@ export class TrackActions {
             return [];
         }
         return res.data as CollaboratorType[];
-    }
-
-    static async toggleLike(id: number, isEnabled: boolean) {
-        if (!Util.isLoggedIn()) {
-            notify("You must be logged in to like tracks", NotificationType.error);
-            return false;
-        }
-        if (isEnabled) {
-            const res = await TrackActions.unlikeTrack(id);
-            if (res.code !== 200) {
-                return false;
-            }
-        } else {
-            const res = await TrackActions.likeTrack(id);
-            if (res.code !== 200) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    static async toggleRepost(id: number, isEnabled: boolean) {
-        if (!Util.isLoggedIn()) {
-            notify("You must be logged in to repost tracks", NotificationType.error);
-            return false;
-        }
-        if (isEnabled) {
-            return await TrackActions.unrepostTrack(id);
-        } else {
-            return await TrackActions.repostTrack(id);
-        }
     }
 
     static async replaceCover(id: number, canEdit: boolean, oldSrc: Signal<string>, loading: Signal<boolean>) {
@@ -381,25 +324,6 @@ export class TrackActions {
         return res.data;
     }
 
-    static async updateTrackProperty(trackId: number, property: string, initialValue: string, callback: Function|null = null) {
-        Ui.getTextAreaInputModal("Edit " + property, "Enter new track " + property, initialValue, "Save", "Cancel", async (value: string) => {
-            const res = await HttpClient.postAsync(ApiRoutes.updateTrack, {
-                id: trackId,
-                field: property,
-                value
-            });
-            if (res.code !== 200) {
-                notify("Failed to update " + property, NotificationType.error);
-                return;
-            }
-            notify(property + " updated", NotificationType.success);
-            if (callback) {
-                callback(value);
-            }
-        }, () => {
-        }, Icons.PEN).then();
-    }
-
     static async getUnapprovedTracks() {
         const res = await HttpClient.getAsync<any[]>(ApiRoutes.getUnapprovedCollabs);
         if (res.code !== 200) {
@@ -473,7 +397,6 @@ export class TrackActions {
         const cancelCallback2 = () => {
             Util.removeModal();
         };
-        const modal = TrackEditTemplates.editTrackModal(track, confirmCallback2, cancelCallback2);
-        Ui.addModal(modal);
+        createModal([TrackEditTemplates.editTrackModal(track, confirmCallback2, cancelCallback2)], "track-edit");
     }
 }

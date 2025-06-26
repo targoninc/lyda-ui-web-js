@@ -3,7 +3,7 @@ import {GenericTemplates, horizontal} from "../generic/GenericTemplates.ts";
 import {getUserSettingValue, Util} from "../../Classes/Util.ts";
 import {notify, Ui} from "../../Classes/Ui.ts";
 import {LydaApi} from "../../Api/LydaApi.ts";
-import {create, when, signalMap, compute, Signal, signal, InputType} from "@targoninc/jess";
+import {create, when, signalMap, compute, Signal, signal, InputType, nullElement} from "@targoninc/jess";
 import {navigate, reload} from "../../Routing/Router.ts";
 import {UserTemplates} from "./UserTemplates.ts";
 import {currentUser, permissions} from "../../state.ts";
@@ -42,6 +42,7 @@ export class SettingsTemplates {
                     .text("Settings")
                     .build(),
                 SettingsTemplates.accountSection(user),
+                SettingsTemplates.mfaSection(user),
                 SettingsTemplates.themeSection(getUserSettingValue<Theme>(user, UserSettings.theme)),
                 SettingsTemplates.qualitySection(getUserSettingValue<StreamingQuality>(user, UserSettings.streamingQuality) ?? "m"),
                 SettingsTemplates.permissionsSection(),
@@ -284,7 +285,7 @@ export class SettingsTemplates {
             .classes("card", "flex-v")
             .children(
                 create("h2")
-                    .text("Danger Zone")
+                    .text("Other")
                     .build(),
                 create("div")
                     .classes("flex")
@@ -530,5 +531,9 @@ export class SettingsTemplates {
                         }), true),
                     ).build(),
             ).build();
+    }
+
+    private static mfaSection(user: User) {
+        return nullElement();
     }
 }

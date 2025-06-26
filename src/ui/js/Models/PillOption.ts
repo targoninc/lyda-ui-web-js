@@ -1,6 +1,6 @@
 export interface PillOption {
     text: string;
-    value: any;
+    value?: any;
     icon?: string;
-    onclick: Function;
+    onclick?: Function;
 }

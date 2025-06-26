@@ -1,8 +1,7 @@
-import {GenericTemplates} from "../Templates/generic/GenericTemplates.ts";
 import {PlaylistTemplates} from "../Templates/music/PlaylistTemplates.ts";
 import {HttpClient} from "../Api/HttpClient.ts";
 import {getErrorMessage, Util} from "../Classes/Util.ts";
-import {notify, Ui} from "../Classes/Ui.ts";
+import {createModal, notify, Ui} from "../Classes/Ui.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
 import {QueueManager} from "../Streaming/QueueManager.ts";
 import {navigate} from "../Routing/Router.ts";
@@ -12,31 +11,29 @@ import {MediaUploader} from "../Api/MediaUploader.ts";
 import {RoutePath} from "../Routing/routes.ts";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
-import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
 import {playingHere} from "../state.ts";
 
 export class PlaylistActions {
-    static async openAddToPlaylistModal(objectToBeAdded: Album|Track, type: "track"|"album") {
+    static async openAddToPlaylistModal(objectToBeAdded: Album | Track, type: "track" | "album") {
         const res = await HttpClient.getAsync<Playlist[]>(ApiRoutes.getPlaylistsByUserId, {id: objectToBeAdded.user_id});
         if (res.code !== 200) {
             console.error("Failed to get playlists: ", res.data);
             return;
         }
-        let modal;
+
         if (type === "track") {
-            modal = GenericTemplates.modal([PlaylistTemplates.addTrackToPlaylistModal(objectToBeAdded as Track, res.data)], "add-to-playlist");
+            createModal([PlaylistTemplates.addTrackToPlaylistModal(objectToBeAdded as Track, res.data)], "add-to-playlist");
         } else {
-            modal = GenericTemplates.modal([PlaylistTemplates.addAlbumToPlaylistModal(objectToBeAdded as Album, res.data)], "add-to-playlist");
+            createModal([PlaylistTemplates.addAlbumToPlaylistModal(objectToBeAdded as Album, res.data)], "add-to-playlist");
         }
-        Ui.addModal(modal);
     }
 
     static async openNewPlaylistModal() {
-        let modal = GenericTemplates.modal([PlaylistTemplates.newPlaylistModal()], "new-playlist");
-        Ui.addModal(modal);
+        createModal([PlaylistTemplates.newPlaylistModal()], "new-playlist");
     }
 
     static async createNewPlaylist(playlist: Partial<Playlist>) {
@@ -117,33 +114,6 @@ export class PlaylistActions {
         if (res.code !== 200) {
             notify("Failed to move tracks: " + getErrorMessage(res), NotificationType.error);
             return false;
-        }
-        return true;
-    }
-
-    static async likePlaylist(id: number) {
-        return await HttpClient.postAsync(ApiRoutes.likePlaylist, { id });
-    }
-
-    static async unlikePlaylist(id: number) {
-        return await HttpClient.postAsync(ApiRoutes.unlikePlaylist, { id });
-    }
-
-    static async toggleLike(id: number, isEnabled: boolean) {
-        if (!Util.isLoggedIn()) {
-            notify("You must be logged in to like playlists", NotificationType.error);
-            return false;
-        }
-        if (isEnabled) {
-            const res = await PlaylistActions.unlikePlaylist(id);
-            if (res.code !== 200) {
-                return false;
-            }
-        } else {
-            const res = await PlaylistActions.likePlaylist(id);
-            if (res.code !== 200) {
-                return false;
-            }
         }
         return true;
     }

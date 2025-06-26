@@ -9,7 +9,7 @@ import {QueueManager} from "../../Streaming/QueueManager.ts";
 import {PlaylistActions} from "../../Actions/PlaylistActions.ts";
 import {Images} from "../../Enums/Images.ts";
 import {getErrorMessage, Util} from "../../Classes/Util.ts";
-import {notify, Ui} from "../../Classes/Ui.ts";
+import {createModal, notify, Ui} from "../../Classes/Ui.ts";
 import {
     AnyNode,
     compute,
@@ -516,8 +516,7 @@ export class AlbumTemplates {
                     icon: {icon: "edit"},
                     classes: ["positive"],
                     onclick: async () => {
-                        let modal = GenericTemplates.modal([AlbumTemplates.editAlbumModal(album)], "edit-album");
-                        Ui.addModal(modal);
+                        createModal([AlbumTemplates.editAlbumModal(album)], "edit-album");
                     }
                 })),
                 when(canEdit, button({

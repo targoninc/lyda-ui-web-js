@@ -18,7 +18,7 @@ import {
 import {Util} from "../../Classes/Util.ts";
 import {navigate} from "../../Routing/Router.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
-import {currentTrackId, openMenus, playingHere} from "../../state.ts";
+import {currentTrackId, playingHere} from "../../state.ts";
 import {PillOption} from "../../Models/PillOption.ts";
 import {dayFromValue} from "../../Classes/Helpers/Date.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
@@ -49,7 +49,7 @@ export class GenericTemplates {
         icon$ = asSignal(icon$) as Signal<string>;
         const isMaterial = compute(icon => icon && (icon as string) && icon.includes && !urlIndicators.some(i => icon.includes(i)), icon$);
         const svgClass = compute((m): string => m ? "_" : "svg", isMaterial);
-        const actual = compute((i, m) => (!i && isMaterial) ? "" : i, icon$, isMaterial);
+        const actual = compute((i, m) => (!i && m) ? "" : i, icon$, isMaterial);
 
         return icon({
             icon: actual,
@@ -411,7 +411,7 @@ export class GenericTemplates {
             .build();
     }
 
-    static fileInput(id: HtmlPropertyValue, name: HtmlPropertyValue, accept: string, initialText: string, required = false, changeCallback = (v: string, files: FileList | null) => {
+    static fileInput(id: HtmlPropertyValue, name: HtmlPropertyValue, accept: string, initialText: string, required = false, changeCallback = (_: string, _2: FileList | null) => {
     }) {
         const text = signal(initialText);
         const fileButton = button({
@@ -428,7 +428,7 @@ export class GenericTemplates {
             .name(name)
             .required(required)
             .attributes("accept", accept)
-            .onchange(e => {
+            .onchange(_ => {
                 let fileName = input.value;
                 if (accept && !accept.includes("*")) {
                     const accepts = accept.split(",");
@@ -462,7 +462,7 @@ export class GenericTemplates {
             ).build();
     };
 
-    static checkbox(name: HtmlPropertyValue, checked: TypeOrSignal<boolean> = false, text: HtmlPropertyValue = "", required = false, onchange = (v: boolean) => {
+    static checkbox(name: HtmlPropertyValue, checked: TypeOrSignal<boolean> = false, text: HtmlPropertyValue = "", required = false, onchange = (_: boolean) => {
     }) {
         return create("label")
             .classes("checkbox-container")
@@ -488,17 +488,6 @@ export class GenericTemplates {
     }
 
     static modal(children: AnyNode[], modalId: string) {
-        if (openMenus.value.includes(modalId)) {
-            return null;
-        }
-        openMenus.value.push(modalId);
-        const interval = setInterval(() => {
-            if (!document.getElementById("modal-" + modalId)) {
-                clearInterval(interval);
-                openMenus.value = openMenus.value.filter(id => id !== modalId);
-            }
-        }, 500);
-
         return create("div")
             .classes("modal-container")
             .id("modal-" + modalId)

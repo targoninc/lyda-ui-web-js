@@ -1,8 +1,7 @@
-import {GenericTemplates} from "../Templates/generic/GenericTemplates.ts";
 import {AlbumTemplates} from "../Templates/music/AlbumTemplates.ts";
 import {HttpClient} from "../Api/HttpClient.ts";
 import {getErrorMessage, Util} from "../Classes/Util.ts";
-import {notify, Ui} from "../Classes/Ui.ts";
+import {createModal, notify, Ui} from "../Classes/Ui.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
 import {QueueManager} from "../Streaming/QueueManager.ts";
 import {navigate} from "../Routing/Router.ts";
@@ -24,13 +23,11 @@ export class AlbumActions {
             console.error("Failed to get albums: ", res.data);
             return;
         }
-        let modal = GenericTemplates.modal([await AlbumTemplates.addToAlbumModal(track, res.data)], "add-to-album");
-        Ui.addModal(modal);
+        createModal([await AlbumTemplates.addToAlbumModal(track, res.data)], "add-to-album");
     }
 
     static async openNewAlbumModal() {
-        let modal = GenericTemplates.modal([AlbumTemplates.newAlbumModal()], "new-album");
-        Ui.addModal(modal);
+        createModal([AlbumTemplates.newAlbumModal()], "new-album");
     }
 
     static async createNewAlbum(album: Partial<Album>) {
@@ -108,33 +105,6 @@ export class AlbumActions {
         if (res.code !== 200) {
             notify("Failed to move tracks: " + getErrorMessage(res), NotificationType.error);
             return false;
-        }
-        return true;
-    }
-
-    static async likeAlbum(id: number) {
-        return await HttpClient.postAsync(ApiRoutes.likeAlbum, { id });
-    }
-
-    static async unlikeAlbum(id: number) {
-        return await HttpClient.postAsync(ApiRoutes.unlikeAlbum, { id });
-    }
-
-    static async toggleLike(id: number, isEnabled: boolean) {
-        if (!Util.isLoggedIn()) {
-            notify("You must be logged in to like albums", NotificationType.error);
-            return false;
-        }
-        if (isEnabled) {
-            const res = await AlbumActions.unlikeAlbum(id);
-            if (res.code !== 200) {
-                return false;
-            }
-        } else {
-            const res = await AlbumActions.likeAlbum(id);
-            if (res.code !== 200) {
-                return false;
-            }
         }
         return true;
     }
