@@ -63,6 +63,7 @@
     --button-bottom-border-size: 3px;
     --default-font-family: "Inter Tight", serif;
 
+    /* Jess Component overrides */
     --jessc-text-color: var(--color-5);
     --jessc-error-color: var(--red);
 
@@ -74,6 +75,7 @@
     --jessc-interactive-border: var(--color-7);
     --jessc-interactive-border-focused: var(--blue);
     --jessc-interactive-border-active: var(--blue);
+    --jessc-input-padding-x: 0.6em;
 
     --jessc-font: var(--default-font-family);
 }

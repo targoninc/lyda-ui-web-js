@@ -109,8 +109,7 @@ export class TrackEditTemplates {
             release_date: new Date(track.release_date)
         });
 
-        return GenericTemplates.modal([
-            create("div")
+        return create("div")
                 .classes("flex-v")
                 .children(
                     create("div")
@@ -148,8 +147,7 @@ export class TrackEditTemplates {
                                 onclick: cancelCallback
                             }),
                         ).build()
-                ).build(),
-        ], "edit-track");
+                ).build();
     }
 
     static upDownButtons(state: Signal<any>, uploadEnabled = false) {
