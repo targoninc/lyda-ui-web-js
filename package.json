@@ -19,8 +19,8 @@
   "dependencies": {
     "@paypal/paypal-js": "^8.2.0",
     "@sgratzl/chartjs-chart-boxplot": "^4.4.4",
-    "@targoninc/jess": "^0.0.18",
-    "@targoninc/jess-components": "^0.0.17",
+    "@targoninc/jess": "^0.0.19",
+    "@targoninc/jess-components": "^0.0.18",
     "@targoninc/lyda-shared": "^0.0.19",
     "@types/bun": "^1.2.17",
     "chart.js": "^4.5.0",
@@ -28,5 +28,5 @@
     "express": "^5.1.0",
     "typescript": "^5.8.3"
   },
-  "version": "0.0.235"
+  "version": "0.0.236"
 }
