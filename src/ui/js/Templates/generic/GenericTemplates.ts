@@ -41,6 +41,7 @@ import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/Collab
 import {Filter} from "@targoninc/lyda-shared/src/Models/Filter";
 import {ProgressState} from "@targoninc/lyda-shared/src/Enums/ProgressState";
 import {ProgressPart} from "../../Models/ProgressPart.ts";
+import {LydaApi} from "../../Api/LydaApi.ts";
 
 export class GenericTemplates {
     static icon(icon$: StringOrSignal, adaptive = false, classes: StringOrSignal[] = [], title = "", onclick: Function | undefined = undefined) {
@@ -788,7 +789,7 @@ export class GenericTemplates {
         const collabTypeOptions = signal(create("span").text("Loading collab types...").build());
         const collabType = signal("1");
         let collabTypes: CollaboratorType[] = [];
-        TrackActions.getCollabTypes().then((types) => {
+        LydaApi.getCollabTypes().then((types) => {
             collabTypes = types;
             collabTypeOptions.value = searchableSelect(<SearchableSelectConfig>{
                 options: signal(types as SelectOption[]),

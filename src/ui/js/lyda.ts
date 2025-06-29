@@ -1,22 +1,20 @@
 import {PlayManager} from "./Streaming/PlayManager.ts";
 import {UserTemplates} from "./Templates/account/UserTemplates.ts";
-import {TrackEditTemplates} from "./Templates/music/TrackEditTemplates.ts";
 import {TrackTemplates} from "./Templates/music/TrackTemplates.ts";
-import {ProfilePage} from "./Classes/ProfilePage.ts";
 import {PlaylistTemplates} from "./Templates/music/PlaylistTemplates.ts";
 import {LibraryActions} from "./Actions/LibraryActions.ts";
 import {HttpClient} from "./Api/HttpClient.ts";
 import {StatisticTemplates} from "./Templates/StatisticTemplates.ts";
-import {TrackActions} from "./Actions/TrackActions.ts";
 import {SubscriptionTemplates} from "./Templates/SubscriptionTemplates.ts";
 import {notify} from "./Classes/Ui.ts";
 import {navigate} from "./Routing/Router.ts";
 import {ApiRoutes} from "./Api/ApiRoutes.ts";
-import {currentSecretCode, currentUser, permissions} from "./state.ts";
+import {currentSecretCode, currentUser} from "./state.ts";
 import {RoutePath} from "./Routing/routes.ts";
 import { AnyElement } from "@targoninc/jess";
 import {NotificationType} from "./Enums/NotificationType.ts";
 import {RoyaltyInfo} from "@targoninc/lyda-shared/src/Models/RoyaltyInfo";
+import {LydaApi} from "./Api/LydaApi.ts";
 
 export class Lyda {
     static async getEndpointData(endpoint: string, params = "") {
@@ -118,7 +116,7 @@ export class Lyda {
                     navigate(RoutePath.login);
                     return;
                 }
-                TrackActions.getUnapprovedTracks().then(tracks => {
+                LydaApi.getUnapprovedTracks().then(tracks => {
                     element.appendChild(TrackTemplates.unapprovedTracks(tracks, user));
                 });
                 break;

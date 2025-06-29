@@ -34,6 +34,7 @@ import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
 import {InteractionTemplates} from "../InteractionTemplates.ts";
 import {playingFrom, playingHere} from "../../state.ts";
 import {MusicTemplates} from "./MusicTemplates.ts";
+import {LydaApi} from "../../Api/LydaApi.ts";
 
 export class PlaylistTemplates {
     static addTrackToPlaylistModal(track: Track, playlists: Playlist[]) {
@@ -228,7 +229,7 @@ export class PlaylistTemplates {
                             text: "Create playlist",
                             disabled,
                             onclick: async () => {
-                                await PlaylistActions.createNewPlaylist(playlist.value);
+                                await LydaApi.createNewPlaylist(playlist.value);
                                 Util.removeModal();
                             },
                             icon: {
