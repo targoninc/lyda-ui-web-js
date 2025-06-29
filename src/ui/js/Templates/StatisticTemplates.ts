@@ -1,4 +1,4 @@
-import {compute, signal, create, when} from "@targoninc/jess";
+import {compute, signal, create, when, nullElement} from "@targoninc/jess";
 import {currency} from "../Classes/Helpers/Num.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
 import {HttpClient} from "../Api/HttpClient.ts";
@@ -16,6 +16,7 @@ import { button } from "@targoninc/jess-components";
 import {UserSettings} from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {RoyaltyInfo} from "@targoninc/lyda-shared/src/Models/RoyaltyInfo";
+import {Api} from "../Api/Api.ts";
 
 export class StatisticTemplates {
     static playCountByMonthChart() {
@@ -70,14 +71,16 @@ export class StatisticTemplates {
             ).build();
     }
 
-    static artistRoyaltyActions(royaltyInfo: any) {
-        const hasPayableRoyalties = royaltyInfo.available && parseFloat(royaltyInfo.available) >= 0.5;
-        const paypalMailExists$ = signal(royaltyInfo.paypalMail !== null);
+    static artistRoyaltyActions() {
+        const royaltyInfo = signal<RoyaltyInfo|null>(null);
+        Api.getRoyaltyInfo().then(ri => royaltyInfo.value = ri);
+        const hasPayableRoyalties = compute(ri => ri && ri.available && parseFloat(ri.available) >= 0.5, royaltyInfo);
+        const paypalMailExists$ = compute(ri => ri && ri.paypalMail !== null, royaltyInfo);
 
         return create("div")
             .classes("flex-v", "card")
             .children(
-                StatisticTemplates.royaltyInfo(royaltyInfo),
+                compute(ri => ri ? StatisticTemplates.royaltyInfo(ri) : nullElement(), royaltyInfo),
                 create("div")
                     .classes("flex")
                     .children(
@@ -131,7 +134,7 @@ export class StatisticTemplates {
                                     }
                                 })),
                                 when(paypalMailExists$, button({
-                                    text: `Request payout to ${anonymize(royaltyInfo.paypalMail, 2, 8)}`,
+                                    text: compute(ri => ri ? `Request payout to ${anonymize(ri.paypalMail, 2, 8)}` : '', royaltyInfo),
                                     icon: {icon: "mintmark"},
                                     classes: ["positive"],
                                     onclick: async () => {

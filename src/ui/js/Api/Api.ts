@@ -14,6 +14,7 @@ import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
 import {TrackCollaborator} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
 import {Library} from "@targoninc/lyda-shared/dist/Models/Library";
+import {RoyaltyInfo} from "@targoninc/lyda-shared/src/Models/RoyaltyInfo";
 
 export class Api {
     static getLogs(filterState: Signal<any>, successCallback: Function) {
@@ -74,6 +75,15 @@ export class Api {
             return null;
         }
         return res.data as Library;
+    }
+
+    static async getRoyaltyInfo(): Promise<RoyaltyInfo|null> {
+        const res = await HttpClient.getAsync<RoyaltyInfo>(ApiRoutes.getRoyaltyInfo);
+        if (res.code !== 200) {
+            notify("Failed to get library", NotificationType.error);
+            return null;
+        }
+        return res.data;
     }
 
     //region Albums

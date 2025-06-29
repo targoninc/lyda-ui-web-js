@@ -3,7 +3,7 @@ import {LandingPageTemplates} from "./LandingPageTemplates.ts";
 import {UserTemplates} from "./account/UserTemplates.ts";
 import {HttpClient} from "../Api/HttpClient.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {create, when, compute, signal} from "@targoninc/jess";
+import {create, when, signal} from "@targoninc/jess";
 import {SearchTemplates} from "./SearchTemplates.ts";
 import {SettingsTemplates} from "./account/SettingsTemplates.ts";
 import {RoadmapTemplates} from "./RoadmapTemplates.ts";
@@ -132,7 +132,7 @@ export class PageTemplates {
         return create("div")
             .classes("statistics", "flex-v")
             .children(
-                StatisticTemplates.artistRoyaltyActions(null),
+                StatisticTemplates.artistRoyaltyActions(),
                 await StatisticTemplates.allStats(),
                 StatisticTemplates.dataExport()
             )
