@@ -152,6 +152,11 @@ export class Api {
     //endregion
 
     //region Tracks
+    static async getNewAutoQueueTracks() {
+        const response = await HttpClient.getAsync<any[]>(ApiRoutes.autoQueueFeed);
+        return response.data;
+    }
+
     static async savePlay(id: number, quality: string): Promise<any> {
         return await HttpClient.postAsync(ApiRoutes.saveTrackPlay, { id, quality });
     }

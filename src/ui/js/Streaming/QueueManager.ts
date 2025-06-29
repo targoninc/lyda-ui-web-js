@@ -1,7 +1,7 @@
 import {StreamingUpdater} from "./StreamingUpdater.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
-import {QueueActions} from "../Actions/QueueActions.ts";
 import {autoQueue, contextQueue, manualQueue} from "../state.ts";
+import {Api} from "../Api/Api.ts";
 
 export class QueueManager {
     static addToAutoQueue(id: number) {
@@ -66,7 +66,7 @@ export class QueueManager {
         if (autoQueue.value.length > 10) {
             return autoQueue.value;
         }
-        const queueToAdd = await QueueActions.getNewAutoQueueTracks();
+        const queueToAdd = await Api.getNewAutoQueueTracks();
         const ids = queueToAdd.map((item) => item.id);
         autoQueue.value = autoQueue.value.concat(ids);
 
