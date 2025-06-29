@@ -39,6 +39,7 @@ import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/Collab
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {Comment} from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import {InteractionTemplates} from "../InteractionTemplates.ts";
+import {Api} from "../../Api/Api.ts";
 
 export class TrackTemplates {
     static collabIndicator(collab: TrackCollaborator): any {
@@ -503,7 +504,7 @@ export class TrackTemplates {
                 .children(
                     ...collaborators.map(collaborator => TrackTemplates.collaborator(track, collaborator)),
                     trackData.canEdit ? TrackEditTemplates.addLinkedUserButton(async (newUsername: string, newUser: TrackCollaborator) => {
-                        const newCollab = await TrackActions.addCollaboratorToTrack(track.id, newUser.user_id, newUser.type);
+                        const newCollab = await Api.addCollaboratorToTrack(track.id, newUser.user_id, newUser.type);
                         if (!newCollab) {
                             return;
                         }

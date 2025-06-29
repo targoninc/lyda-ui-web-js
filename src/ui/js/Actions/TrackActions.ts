@@ -1,26 +1,21 @@
-import {HttpClient} from "../Api/HttpClient.ts";
-import {getErrorMessage, Util} from "../Classes/Util.ts";
+import {Util} from "../Classes/Util.ts";
 import {Icons} from "../Enums/Icons.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
-import {AlbumActions} from "./AlbumActions.ts";
-import {PlaylistActions} from "./PlaylistActions.ts";
 import {TrackEditTemplates} from "../Templates/music/TrackEditTemplates.ts";
-import {notify, Ui} from "../Classes/Ui.ts";
+import {createModal, notify, Ui} from "../Classes/Ui.ts";
 import {navigate, reload} from "../Routing/Router.ts";
 import {Signal} from "@targoninc/jess";
 import {MediaUploader} from "../Api/MediaUploader.ts";
-import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {currentQuality, playingHere} from "../state.ts";
 import {RoutePath} from "../Routing/routes.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {Comment} from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
-import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
 import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
 import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
-import {TrackCollaborator} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {Api} from "../Api/Api.ts";
 
 export class TrackActions {
     static async savePlay(id: number) {
@@ -28,7 +23,7 @@ export class TrackActions {
             console.log("Not saving play because not playing in this tab.");
             return;
         }
-        return await HttpClient.postAsync(ApiRoutes.saveTrackPlay, { id, quality: currentQuality.value });
+        return await Api.savePlay(id, currentQuality.value);
     }
 
     static savePlayAfterTimeIf(id: number, seconds: number, condition: () => boolean) {
@@ -39,40 +34,22 @@ export class TrackActions {
         }, seconds * 1000);
     }
 
-    static async unfollowUser(userId: number) {
-        const res = await HttpClient.postAsync(ApiRoutes.unfollowUser, {
-            id: userId
-        });
-
-        if (res.code !== 200) {
-            notify("Error while trying to unfollow user: " + getErrorMessage(res), NotificationType.error);
-        }
-
-        return res;
-    }
-
     static async deleteTrack(id: number) {
         if (!confirm) {
             return;
         }
-        const res = await HttpClient.postAsync(ApiRoutes.deleteTrack, { id });
-        if (res.code === 200) {
+        const success = await Api.deleteTrack(id);
+        if (success) {
             await PlayManager.removeTrackFromAllStates(id);
-            notify(res.data, NotificationType.success);
             navigate(RoutePath.profile);
-        } else {
-            notify("Error trying to delete track: " + getErrorMessage(res), NotificationType.error);
         }
     }
 
     static async deleteComment(commentId: number, comments: Signal<Comment[]>) {
         await Ui.getConfirmationModal("Delete comment", "Are you sure you want to delete this comment?", "Yes", "No", async () => {
-            const res = await HttpClient.postAsync(ApiRoutes.deleteComment, {
-                id: commentId,
-            });
+            const success = await Api.deleteComment(commentId);
 
-            if (res.code !== 200) {
-                notify(getErrorMessage(res), NotificationType.error);
+            if (!success) {
                 return;
             }
 
@@ -91,7 +68,6 @@ export class TrackActions {
                     noComments.classList.remove("hidden");
                 }
             }
-            notify("Comment deleted", NotificationType.success);
         }, () => {
         }, Icons.WARNING);
     }
@@ -105,14 +81,9 @@ export class TrackActions {
             return;
         }
 
-        const res = await HttpClient.postAsync(ApiRoutes.newComment, {
-            id: track_id,
-            content: content.value,
-            parentId: parentCommentId ? parentCommentId : null,
-        });
+        const createdId = await Api.newComment(track_id, content.value, parentCommentId);
 
-        if (res.code !== 200) {
-            notify(getErrorMessage(res), NotificationType.error);
+        if (createdId === null) {
             return;
         }
 
@@ -121,7 +92,6 @@ export class TrackActions {
         let nowUtc = new Date();
         const offset = nowUtc.getTimezoneOffset() * 60000;
         nowUtc = new Date(nowUtc.getTime() + offset);
-        const createdId = parseInt(res.data);
 
         const comment = <Comment>{
             id: createdId,
@@ -139,99 +109,21 @@ export class TrackActions {
         content.value = "";
     }
 
-    static async likeTrack(id: number) {
-        return await HttpClient.postAsync(ApiRoutes.likeTrack, { id });
-    }
-
-    static async unlikeTrack(id: number) {
-        return await HttpClient.postAsync(ApiRoutes.unlikeTrack, { id });
-    }
-
-    static async repostTrack(id: number) {
-        const res = await HttpClient.postAsync(ApiRoutes.repostTrack, { id });
-        if (res.code !== 200) {
-            notify("Failed to repost track: " + getErrorMessage(res), NotificationType.error);
-            return false;
-        }
-        return true;
-    }
-
-    static async unrepostTrack(id: number) {
-        const res = await HttpClient.postAsync(ApiRoutes.unrepostTrack, { id });
-        if (res.code !== 200) {
-            notify("Failed to unrepost track: " + getErrorMessage(res), NotificationType.error);
-            return false;
-        }
-        return true;
-    }
-
     static async toggleFollow(userId: number, following: Signal<boolean>) {
         if (following.value) {
-            const res = await TrackActions.unfollowUser(userId);
+            const res = await Api.unfollowUser(userId);
             if (res.code !== 200) {
                 return false;
             }
             notify(`Successfully unfollowed user`, NotificationType.success);
         } else {
-            const res = await TrackActions.followUser(userId);
+            const res = await Api.followUser(userId);
             if (res.code !== 200) {
                 return;
             }
             notify(`Successfully followed user`, NotificationType.success);
         }
         following.value = !following.value;
-    }
-
-    static async followUser(userId: number) {
-        const res = await HttpClient.postAsync(ApiRoutes.followUser, {
-            id: userId,
-        });
-
-        if (res.code !== 200) {
-            notify("Error while trying to follow user: " + getErrorMessage(res), NotificationType.error);
-        }
-
-        return res;
-    }
-
-    static async getCollabTypes() {
-        const res = await HttpClient.getAsync<CollaboratorType[]>(ApiRoutes.getTrackCollabTypes);
-        if (res.code !== 200) {
-            notify("Error while trying to get collab types: " + getErrorMessage(res), NotificationType.error);
-            return [];
-        }
-        return res.data as CollaboratorType[];
-    }
-
-    static async toggleLike(id: number, isEnabled: boolean) {
-        if (!Util.isLoggedIn()) {
-            notify("You must be logged in to like tracks", NotificationType.error);
-            return false;
-        }
-        if (isEnabled) {
-            const res = await TrackActions.unlikeTrack(id);
-            if (res.code !== 200) {
-                return false;
-            }
-        } else {
-            const res = await TrackActions.likeTrack(id);
-            if (res.code !== 200) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    static async toggleRepost(id: number, isEnabled: boolean) {
-        if (!Util.isLoggedIn()) {
-            notify("You must be logged in to repost tracks", NotificationType.error);
-            return false;
-        }
-        if (isEnabled) {
-            return await TrackActions.unrepostTrack(id);
-        } else {
-            return await TrackActions.repostTrack(id);
-        }
     }
 
     static async replaceCover(id: number, canEdit: boolean, oldSrc: Signal<string>, loading: Signal<boolean>) {
@@ -323,9 +215,9 @@ export class TrackActions {
         await Ui.getConfirmationModal("Remove track from " + type, `Are you sure you want to remove this track from "${list.title}"?`, "Yes", "No", async () => {
             let success;
             if (type === "album") {
-                success = await AlbumActions.removeTrackFromAlbum(track.track_id, [list.id]);
+                success = await Api.removeTrackFromAlbums(track.track_id, [list.id]);
             } else {
-                success = await PlaylistActions.removeTrackFromPlaylist(track.track_id, [list.id]);
+                success = await Api.removeTrackFromPlaylists(track.track_id, [list.id]);
             }
             if (success) {
                 tracks.value = tracks.value.filter(t => t.track_id !== track.track_id);
@@ -342,9 +234,9 @@ export class TrackActions {
         }
         this.moveTrackToPosition(trackId, newPosition, tracks);
         if (type === "album") {
-            success = AlbumActions.moveTrackInAlbum(listId, tracks.value);
+            success = Api.moveTrackInAlbum(listId, tracks.value);
         } else {
-            success = PlaylistActions.moveTrackInPlaylist(listId, tracks.value);
+            success = Api.moveTrackInPlaylist(listId, tracks.value);
         }
         if (!(await success)) {
             this.moveTrackToPosition(trackId, oldPosition, tracks);
@@ -352,128 +244,46 @@ export class TrackActions {
     }
 
     static async removeCollaboratorFromTrack(trackId: number, userId: number) {
-        const res = await HttpClient.postAsync(ApiRoutes.removeCollaborator, {
-            id: trackId,
-            userId: userId,
-        });
+        const success = await Api.removeCollaboratorFromTrack(trackId, userId);
 
-        if (res.code !== 200) {
-            notify("Error while trying to remove collaborator: " + getErrorMessage(res), NotificationType.error);
-            return;
+        if (success) {
+            const collaborator = document.querySelector(".collaborator[user_id='" + userId + "']");
+            if (collaborator) collaborator.remove();
         }
-
-        const collaborator = document.querySelector(".collaborator[user_id='" + userId + "']");
-        if (collaborator) collaborator.remove();
-    }
-
-    static async addCollaboratorToTrack(trackId: number, userId: number, collabType: number) {
-        const res = await HttpClient.postAsync<TrackCollaborator>(ApiRoutes.addCollaborator, {
-            id: trackId,
-            userId: userId,
-            collabType: collabType,
-        });
-
-        if (res.code !== 200) {
-            notify("Error while trying to add collaborator: " + getErrorMessage(res), NotificationType.error);
-            return;
-        }
-
-        return res.data;
-    }
-
-    static async updateTrackProperty(trackId: number, property: string, initialValue: string, callback: Function|null = null) {
-        Ui.getTextAreaInputModal("Edit " + property, "Enter new track " + property, initialValue, "Save", "Cancel", async (value: string) => {
-            const res = await HttpClient.postAsync(ApiRoutes.updateTrack, {
-                id: trackId,
-                field: property,
-                value
-            });
-            if (res.code !== 200) {
-                notify("Failed to update " + property, NotificationType.error);
-                return;
-            }
-            notify(property + " updated", NotificationType.success);
-            if (callback) {
-                callback(value);
-            }
-        }, () => {
-        }, Icons.PEN).then();
-    }
-
-    static async getUnapprovedTracks() {
-        const res = await HttpClient.getAsync<any[]>(ApiRoutes.getUnapprovedCollabs);
-        if (res.code !== 200) {
-            notify("Error while trying to get unapproved tracks: " + getErrorMessage(res), NotificationType.error);
-            return [];
-        }
-        return res.data;
     }
 
     static async approveCollab(id: number, name = "track") {
-        const res = await HttpClient.postAsync(ApiRoutes.approveCollab, {
-            id: id,
-        });
-        if (res.code !== 200) {
-            notify("Error while trying to approve collab: " + getErrorMessage(res), NotificationType.error);
-            return;
-        }
+        const success = await Api.approveCollab(id, name);
 
-        notify(`Collab on ${name} approved`, NotificationType.success);
-        const collab = document.querySelector(".collab[id='" + id + "']");
-        if (collab) {
-            collab.remove();
+        if (success) {
+            const collab = document.querySelector(".collab[id='" + id + "']");
+            if (collab) {
+                collab.remove();
+            }
         }
     }
 
     static async denyCollab(id: number, name = "track") {
-        const res = await HttpClient.postAsync(ApiRoutes.denyCollab, {
-            id: id,
-        });
-        if (res.code !== 200) {
-            notify("Error while trying to deny collab: " + getErrorMessage(res), NotificationType.error);
-            return;
-        }
+        const success = await Api.denyCollab(id, name);
 
-        notify(`Collab on ${name} denied`, NotificationType.success);
-        const collab = document.querySelector(".collab[id='" + id + "']");
-        if (collab) {
-            collab.remove();
+        if (success) {
+            const collab = document.querySelector(".collab[id='" + id + "']");
+            if (collab) {
+                collab.remove();
+            }
         }
-    }
-
-    static async updateTrackFull(track: Partial<Track>) {
-        const res = await HttpClient.postAsync(ApiRoutes.updateTrackFull, {
-            id: track.id,
-            title: track.title,
-            collaborators: track.collaborators,
-            artistname: track.artistname,
-            description: track.description,
-            genre: track.genre,
-            release_date: track.release_date,
-            visibility: track.visibility,
-            isrc: track.isrc,
-            upc: track.upc,
-            price: track.price,
-        });
-        if (res.code !== 200) {
-            notify("Error while trying to update track: " + getErrorMessage(res), NotificationType.error);
-            return;
-        }
-
-        return res.data;
     }
 
     static getTrackEditModal(track: Track) {
         const confirmCallback2 = async (newTrack: Track) => {
             Util.removeModal();
-            await TrackActions.updateTrackFull(newTrack);
+            await Api.updateTrackFull(newTrack);
             notify("Track updated", NotificationType.success);
             reload();
         };
         const cancelCallback2 = () => {
             Util.removeModal();
         };
-        const modal = TrackEditTemplates.editTrackModal(track, confirmCallback2, cancelCallback2);
-        Ui.addModal(modal);
+        createModal([TrackEditTemplates.editTrackModal(track, confirmCallback2, cancelCallback2)], "track-edit");
     }
 }

@@ -4,33 +4,14 @@ import {NavTemplates} from "../Templates/NavTemplates.ts";
 import {GenericTemplates, vertical} from "../Templates/generic/GenericTemplates.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {UserActions} from "../Actions/UserActions.ts";
-import {signal, AnyElement, HtmlPropertyValue, StringOrSignal, when} from "@targoninc/jess";
+import {signal, HtmlPropertyValue, StringOrSignal, when, AnyNode} from "@targoninc/jess";
 import {navigate} from "../Routing/Router.ts";
-import {currentUser, navInitialized} from "../state.ts";
+import {currentUser, navInitialized, openMenus} from "../state.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {Theme} from "@targoninc/lyda-shared/src/Enums/Theme";
 import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
 
 export class Ui {
-    static validUrlPaths = {
-        home: "home",
-        search: "search",
-        settings: "settings",
-        playlist: "playlist",
-        album: "album",
-        explore: "explore",
-        following: "following",
-        profile: "profile",
-    };
-
-    static addModal(modal: AnyElement|null) {
-        if (!modal) {
-            return;
-        }
-        document.body.appendChild(modal);
-        Util.initializeModalRemove(modal);
-    }
-
     static async initializeNavBar() {
         await Util.getUser();
         if (document.getElementById("navTop") === null) {
@@ -125,8 +106,7 @@ export class Ui {
     }
 
     static showImageModal(imageUrl: StringOrSignal) {
-        const modal = GenericTemplates.imageModal(imageUrl);
-        Ui.addModal(modal);
+        createModal([GenericTemplates.imageModal(imageUrl)], "image-modal");
     }
 
     static async getConfirmationModal(title: StringOrSignal, text: StringOrSignal, confirmText: StringOrSignal,
@@ -140,8 +120,7 @@ export class Ui {
             cancelCallback();
             Util.removeModal();
         };
-        const modal = GenericTemplates.confirmationModal(title, text, icon, confirmText, cancelText, confirmCallback2, cancelCallback2);
-        Ui.addModal(modal);
+        createModal([GenericTemplates.confirmationModal(title, text, icon, confirmText, cancelText, confirmCallback2, cancelCallback2)], "confirmation-modal");
     }
 
     static async getTextInputModal(title: HtmlPropertyValue, text: HtmlPropertyValue, currentValue: string, confirmText: StringOrSignal, cancelText: StringOrSignal, confirmCallback: Function, cancelCallback: Function = () => {
@@ -156,7 +135,7 @@ export class Ui {
             Util.removeModal();
         };
         const modal = GenericTemplates.textInputModal(title, text, currentValue, value, icon, confirmText, cancelText, confirmCallback2, cancelCallback2);
-        Ui.addModal(modal);
+        createModal([modal], "text-input");
     }
 
     static async getTextAreaInputModal(title: HtmlPropertyValue, text: HtmlPropertyValue, currentValue: string, confirmText: StringOrSignal, cancelText: StringOrSignal, confirmCallback: Function = () => {}, cancelCallback: Function = () => {
@@ -171,7 +150,7 @@ export class Ui {
             Util.removeModal();
         };
         const modal = GenericTemplates.textAreaInputModal(title, text, currentValue, value, icon, confirmText, cancelText, confirmCallback2, cancelCallback2);
-        Ui.addModal(modal);
+        createModal([modal], "text-area-input");
     }
 
     static async getAddLinkedUserModal(title: StringOrSignal, text: StringOrSignal, currentValue: string,
@@ -189,7 +168,7 @@ export class Ui {
             Util.removeModal();
         };
         const modal = GenericTemplates.addLinkedUserModal(title, text, currentValue, icon, confirmText, cancelText, confirmCallback2, cancelCallback2);
-        Ui.addModal(modal);
+        createModal([modal], "add-linked-user");
     }
 }
 
@@ -214,4 +193,23 @@ export function notify(text: string, type = NotificationType.info, time = 7000) 
         notification.remove();
         currentNotifications.value = currentNotifications.value.filter(n => n !== text);
     }, time);
+}
+
+export function createModal(children: AnyNode[], modalId: string) {
+    const modal = GenericTemplates.modal(children, modalId);
+
+    if (openMenus.value.includes(modalId)) {
+        return null;
+    }
+
+    openMenus.value.push(modalId);
+    const interval = setInterval(() => {
+        if (!document.getElementById("modal-" + modalId)) {
+            clearInterval(interval);
+            openMenus.value = openMenus.value.filter(id => id !== modalId);
+        }
+    }, 500);
+
+    document.body.appendChild(modal);
+    Util.initializeModalRemove(modal);
 }

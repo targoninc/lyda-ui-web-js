@@ -3,7 +3,6 @@ import {PageTemplates} from "./js/Templates/PageTemplates.ts";
 import {KeyBinds} from "./js/Classes/KeyBindHandler.ts";
 import {LydaCache} from "./js/Cache/LydaCache.ts";
 import {PlayManager} from "./js/Streaming/PlayManager.ts";
-import {Lyda} from "./js/lyda.ts";
 import {UiActions} from "./js/Actions/UiActions.ts";
 import {Ui} from "./js/Classes/Ui.ts";
 import {Util} from "./js/Classes/Util.ts";
@@ -26,7 +25,6 @@ import {ListeningHistory} from "@targoninc/lyda-shared/dist/Models/db/lyda/Liste
 import {Permission} from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
 import {TrackPosition} from "@targoninc/lyda-shared/src/Models/TrackPosition";
 import {QueueManager} from "./js/Streaming/QueueManager.ts";
-import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
 import {initializeMediaSessionCallbacks} from "./js/Classes/Helpers/MediaSession.ts";
 
 let pageContainer = document.querySelector(".page-container");
@@ -44,7 +42,7 @@ export const router = new Router(routes, async (route: Route, params: any) => {
 
     currentUser.value = await Util.getUserAsync(null, false);
     pageContainer.innerHTML = "";
-    let template = PageTemplates.mapping[page](route, params);
+    let template = await PageTemplates.mapping[page](route, params);
     if (!currentUser.value && PageTemplates.needLoginPages.includes(page)) {
         navigate(RoutePath.login);
     }
@@ -52,7 +50,6 @@ export const router = new Router(routes, async (route: Route, params: any) => {
     pageContainer.scrollIntoView();
 
     Ui.loadTheme().then();
-    await Lyda.initPage(params);
 }, () => {}, () => {
     console.log(window.location.pathname);
     setTimeout(() => {

@@ -1,86 +1,51 @@
-import {GenericTemplates} from "../Templates/generic/GenericTemplates.ts";
 import {PlaylistTemplates} from "../Templates/music/PlaylistTemplates.ts";
-import {HttpClient} from "../Api/HttpClient.ts";
-import {getErrorMessage, Util} from "../Classes/Util.ts";
-import {notify, Ui} from "../Classes/Ui.ts";
+import {Util} from "../Classes/Util.ts";
+import {createModal, notify} from "../Classes/Ui.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
 import {QueueManager} from "../Streaming/QueueManager.ts";
 import {navigate} from "../Routing/Router.ts";
 import {Signal} from "@targoninc/jess";
-import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {MediaUploader} from "../Api/MediaUploader.ts";
 import {RoutePath} from "../Routing/routes.ts";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
-import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
-import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
 import {playingHere} from "../state.ts";
+import {Api} from "../Api/Api.ts";
 
 export class PlaylistActions {
-    static async openAddToPlaylistModal(objectToBeAdded: Album|Track, type: "track"|"album") {
-        const res = await HttpClient.getAsync<Playlist[]>(ApiRoutes.getPlaylistsByUserId, {id: objectToBeAdded.user_id});
-        if (res.code !== 200) {
-            console.error("Failed to get playlists: ", res.data);
+    static async openAddToPlaylistModal(objectToBeAdded: Album | Track, type: "track" | "album") {
+        const playlists = await Api.getPlaylistsByUserId(objectToBeAdded.user_id);
+        if (playlists.length === 0) {
             return;
         }
-        let modal;
+
         if (type === "track") {
-            modal = GenericTemplates.modal([PlaylistTemplates.addTrackToPlaylistModal(objectToBeAdded as Track, res.data)], "add-to-playlist");
+            createModal([PlaylistTemplates.addTrackToPlaylistModal(objectToBeAdded as Track, playlists)], "add-to-playlist");
         } else {
-            modal = GenericTemplates.modal([PlaylistTemplates.addAlbumToPlaylistModal(objectToBeAdded as Album, res.data)], "add-to-playlist");
+            createModal([PlaylistTemplates.addAlbumToPlaylistModal(objectToBeAdded as Album, playlists)], "add-to-playlist");
         }
-        Ui.addModal(modal);
     }
 
     static async openNewPlaylistModal() {
-        let modal = GenericTemplates.modal([PlaylistTemplates.newPlaylistModal()], "new-playlist");
-        Ui.addModal(modal);
-    }
-
-    static async createNewPlaylist(playlist: Partial<Playlist>) {
-        const res = await HttpClient.postAsync(ApiRoutes.newPlaylist, playlist);
-        if (res.code !== 200) {
-            notify("Failed to create playlist: " + getErrorMessage(res), NotificationType.error);
-            return;
-        }
-        notify("Created playlist", NotificationType.success);
+        createModal([PlaylistTemplates.newPlaylistModal()], "new-playlist");
     }
 
     static async deletePlaylist(id: number) {
-        const res = await HttpClient.postAsync(ApiRoutes.deletePlaylist, {id});
-        if (res.code === 200) {
+        const success = await Api.deletePlaylist(id);
+        if (success) {
             PlayManager.removeStreamClient(id);
             QueueManager.removeFromManualQueue(id);
-            notify("Successfully deleted playlist", NotificationType.success);
             navigate(RoutePath.profile);
-        } else {
-            notify("Error trying to delete playlist: " + getErrorMessage(res), NotificationType.error);
         }
     }
 
     static async addTrackToPlaylists(track_id: number, playlist_ids: number[]) {
-        const res = await HttpClient.postAsync(ApiRoutes.addTrackToPlaylists, {
-            playlist_ids,
-            track_id
-        });
+        const success = await Api.addTrackToPlaylists(track_id, playlist_ids);
         Util.removeModal();
-        if (res.code !== 200) {
-            notify("Failed to add track to playlists: " + getErrorMessage(res), NotificationType.error);
-            return;
-        }
-        notify("Added track to playlist(s)", NotificationType.success);
-    }
-
-    static async removeTrackFromPlaylist(track_id: number, playlist_ids: number[]) {
-        const res = await HttpClient.postAsync(ApiRoutes.removeTrackFromPlaylists, {playlist_ids, track_id});
-        if (res.code !== 200) {
-            notify("Failed to remove track from playlist: " + getErrorMessage(res), NotificationType.error);
-            return false;
-        }
-        notify("Removed track from playlist", NotificationType.success);
-        return true;
+        return success;
     }
 
     static async replaceCover(e: MouseEvent, id: number, canEdit: boolean, loading: Signal<boolean>) {
@@ -109,45 +74,6 @@ export class PlaylistActions {
         fileInput.click();
     }
 
-    static async moveTrackInPlaylist(playlistId: number, tracks: ListTrack[]) {
-        const res = await HttpClient.postAsync(ApiRoutes.reorderPlaylistTracks, {
-            playlist_id: playlistId,
-            tracks
-        });
-        if (res.code !== 200) {
-            notify("Failed to move tracks: " + getErrorMessage(res), NotificationType.error);
-            return false;
-        }
-        return true;
-    }
-
-    static async likePlaylist(id: number) {
-        return await HttpClient.postAsync(ApiRoutes.likePlaylist, { id });
-    }
-
-    static async unlikePlaylist(id: number) {
-        return await HttpClient.postAsync(ApiRoutes.unlikePlaylist, { id });
-    }
-
-    static async toggleLike(id: number, isEnabled: boolean) {
-        if (!Util.isLoggedIn()) {
-            notify("You must be logged in to like playlists", NotificationType.error);
-            return false;
-        }
-        if (isEnabled) {
-            const res = await PlaylistActions.unlikePlaylist(id);
-            if (res.code !== 200) {
-                return false;
-            }
-        } else {
-            const res = await PlaylistActions.likePlaylist(id);
-            if (res.code !== 200) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     static async startTrackInPlaylist(playlist: Playlist, trackId: number, stopIfPlaying = false) {
         const playingFrom = PlayManager.getPlayingFrom();
         const isPlaying = playingFrom && playingFrom.type === "playlist" && playingFrom.id === playlist.id && playingHere.value;
@@ -171,15 +97,8 @@ export class PlaylistActions {
     }
 
     static async addAlbumToPlaylists(album_id: number, playlist_ids: number[]) {
-        const res = await HttpClient.postAsync(ApiRoutes.addAlbumToPlaylists, {
-            playlist_ids,
-            album_id
-        });
+        const success = await Api.addAlbumToPlaylists(album_id, playlist_ids);
         Util.removeModal();
-        if (res.code !== 200) {
-            notify(getErrorMessage(res), NotificationType.error);
-            return;
-        }
-        notify("Added album to playlist(s)", NotificationType.success);
+        return success;
     }
 }
