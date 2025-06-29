@@ -15,7 +15,7 @@ import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
 import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import {LydaApi} from "../Api/LydaApi.ts";
+import {Api} from "../Api/Api.ts";
 
 export class TrackActions {
     static async savePlay(id: number) {
@@ -23,7 +23,7 @@ export class TrackActions {
             console.log("Not saving play because not playing in this tab.");
             return;
         }
-        return await LydaApi.savePlay(id, currentQuality.value);
+        return await Api.savePlay(id, currentQuality.value);
     }
 
     static savePlayAfterTimeIf(id: number, seconds: number, condition: () => boolean) {
@@ -38,7 +38,7 @@ export class TrackActions {
         if (!confirm) {
             return;
         }
-        const success = await LydaApi.deleteTrack(id);
+        const success = await Api.deleteTrack(id);
         if (success) {
             await PlayManager.removeTrackFromAllStates(id);
             navigate(RoutePath.profile);
@@ -47,7 +47,7 @@ export class TrackActions {
 
     static async deleteComment(commentId: number, comments: Signal<Comment[]>) {
         await Ui.getConfirmationModal("Delete comment", "Are you sure you want to delete this comment?", "Yes", "No", async () => {
-            const success = await LydaApi.deleteComment(commentId);
+            const success = await Api.deleteComment(commentId);
 
             if (!success) {
                 return;
@@ -81,7 +81,7 @@ export class TrackActions {
             return;
         }
 
-        const createdId = await LydaApi.newComment(track_id, content.value, parentCommentId);
+        const createdId = await Api.newComment(track_id, content.value, parentCommentId);
 
         if (createdId === null) {
             return;
@@ -111,13 +111,13 @@ export class TrackActions {
 
     static async toggleFollow(userId: number, following: Signal<boolean>) {
         if (following.value) {
-            const res = await LydaApi.unfollowUser(userId);
+            const res = await Api.unfollowUser(userId);
             if (res.code !== 200) {
                 return false;
             }
             notify(`Successfully unfollowed user`, NotificationType.success);
         } else {
-            const res = await LydaApi.followUser(userId);
+            const res = await Api.followUser(userId);
             if (res.code !== 200) {
                 return;
             }
@@ -215,9 +215,9 @@ export class TrackActions {
         await Ui.getConfirmationModal("Remove track from " + type, `Are you sure you want to remove this track from "${list.title}"?`, "Yes", "No", async () => {
             let success;
             if (type === "album") {
-                success = await LydaApi.removeTrackFromAlbums(track.track_id, [list.id]);
+                success = await Api.removeTrackFromAlbums(track.track_id, [list.id]);
             } else {
-                success = await LydaApi.removeTrackFromPlaylists(track.track_id, [list.id]);
+                success = await Api.removeTrackFromPlaylists(track.track_id, [list.id]);
             }
             if (success) {
                 tracks.value = tracks.value.filter(t => t.track_id !== track.track_id);
@@ -234,9 +234,9 @@ export class TrackActions {
         }
         this.moveTrackToPosition(trackId, newPosition, tracks);
         if (type === "album") {
-            success = LydaApi.moveTrackInAlbum(listId, tracks.value);
+            success = Api.moveTrackInAlbum(listId, tracks.value);
         } else {
-            success = LydaApi.moveTrackInPlaylist(listId, tracks.value);
+            success = Api.moveTrackInPlaylist(listId, tracks.value);
         }
         if (!(await success)) {
             this.moveTrackToPosition(trackId, oldPosition, tracks);
@@ -244,7 +244,7 @@ export class TrackActions {
     }
 
     static async removeCollaboratorFromTrack(trackId: number, userId: number) {
-        const success = await LydaApi.removeCollaboratorFromTrack(trackId, userId);
+        const success = await Api.removeCollaboratorFromTrack(trackId, userId);
 
         if (success) {
             const collaborator = document.querySelector(".collaborator[user_id='" + userId + "']");
@@ -253,7 +253,7 @@ export class TrackActions {
     }
 
     static async approveCollab(id: number, name = "track") {
-        const success = await LydaApi.approveCollab(id, name);
+        const success = await Api.approveCollab(id, name);
 
         if (success) {
             const collab = document.querySelector(".collab[id='" + id + "']");
@@ -264,7 +264,7 @@ export class TrackActions {
     }
 
     static async denyCollab(id: number, name = "track") {
-        const success = await LydaApi.denyCollab(id, name);
+        const success = await Api.denyCollab(id, name);
 
         if (success) {
             const collab = document.querySelector(".collab[id='" + id + "']");
@@ -277,7 +277,7 @@ export class TrackActions {
     static getTrackEditModal(track: Track) {
         const confirmCallback2 = async (newTrack: Track) => {
             Util.removeModal();
-            await LydaApi.updateTrackFull(newTrack);
+            await Api.updateTrackFull(newTrack);
             notify("Track updated", NotificationType.success);
             reload();
         };

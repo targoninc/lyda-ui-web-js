@@ -42,7 +42,7 @@ import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import {NotificationType} from "../../Enums/NotificationType.ts";
 import {HttpClient} from "../../Api/HttpClient.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
-import {LydaApi} from "../../Api/LydaApi.ts";
+import {Api} from "../../Api/Api.ts";
 
 export class UserTemplates {
     static userWidget(user: User | Signal<User | null>, extraAttributes: HtmlPropertyValue[] = [], extraClasses: StringOrSignal[] = [], context: UserWidgetContext = UserWidgetContext.unknown) {
@@ -251,7 +251,7 @@ export class UserTemplates {
 
     static unapprovedTracksLink() {
         const unapprovedTracks = signal<any[]>([]);
-        LydaApi.getUnapprovedTracks().then(tracks => {
+        Api.getUnapprovedTracks().then(tracks => {
             unapprovedTracks.value = tracks;
         });
         const link = signal(create("div").build());

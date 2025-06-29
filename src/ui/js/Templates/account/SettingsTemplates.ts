@@ -2,7 +2,7 @@ import {UserActions} from "../../Actions/UserActions.ts";
 import {GenericTemplates, horizontal} from "../generic/GenericTemplates.ts";
 import {getUserSettingValue, Util} from "../../Classes/Util.ts";
 import {notify, Ui} from "../../Classes/Ui.ts";
-import {LydaApi} from "../../Api/LydaApi.ts";
+import {Api} from "../../Api/Api.ts";
 import {create, when, signalMap, compute, Signal, signal, InputType, nullElement} from "@targoninc/jess";
 import {navigate, reload} from "../../Routing/Router.ts";
 import {UserTemplates} from "./UserTemplates.ts";
@@ -155,7 +155,7 @@ export class SettingsTemplates {
                     text: "Save changes",
                     icon: {icon: "save"},
                     onclick: async () => {
-                        if (await LydaApi.updateUser(updatedUser.value)) {
+                        if (await Api.updateUser(updatedUser.value)) {
                             user = {...user, ...updatedUser.value};
                             currentUser.value = await Util.getUserAsync(null, false);
                             reload();
@@ -297,7 +297,7 @@ export class SettingsTemplates {
                             onclick: () => {
                                 Ui.getConfirmationModal("Delete account", "Are you sure you want to delete your account? This action cannot be undone.",
                                     "Yes, delete my account", "No, keep account", async () => {
-                                        LydaApi.deleteUser().then(res => {
+                                        Api.deleteUser().then(res => {
                                             if (res.code === 200) {
                                                 notify("Account deleted", NotificationType.success);
                                                 navigate(RoutePath.login);
@@ -314,7 +314,7 @@ export class SettingsTemplates {
                             text: "Download data",
                             icon: {icon: "download"},
                             onclick: () => {
-                                LydaApi.exportUser().then(res => {
+                                Api.exportUser().then(res => {
                                     if (res.code === 200) {
                                         const blob = new Blob([JSON.stringify(res.data)], {type: 'application/octet-stream'});
                                         const url = URL.createObjectURL(blob);

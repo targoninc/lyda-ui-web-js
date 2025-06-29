@@ -13,7 +13,7 @@ import {Icons} from "../Enums/Icons.ts";
 import {MediaUploader} from "../Api/MediaUploader.ts";
 import {Signal} from "@targoninc/jess";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {LydaApi} from "../Api/LydaApi.ts";
+import {Api} from "../Api/Api.ts";
 import {currentQuality, currentUser, notifications} from "../state.ts";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
@@ -195,7 +195,7 @@ export class UserActions {
 
     static editDescription(currentDescription: string, successCallback: Function) {
         Ui.getTextAreaInputModal("Edit description", "Enter your new description", currentDescription, "Save", "Cancel", async (description: string) => {
-            if (await LydaApi.updateUser({description})) {
+            if (await Api.updateUser({description})) {
                 successCallback(description);
             }
         }, () => {
@@ -204,7 +204,7 @@ export class UserActions {
 
     static editDisplayname(currentDisplayname: string, successCallback: Function) {
         Ui.getTextInputModal("Edit displayname", "Enter your new displayname", currentDisplayname, "Save", "Cancel", async (displayname: string) => {
-            if (await LydaApi.updateUser({displayname})) {
+            if (await Api.updateUser({displayname})) {
                 successCallback(displayname);
             }
         }, () => {
@@ -213,7 +213,7 @@ export class UserActions {
 
     static editUsername(currentUsername: string, successCallback: Function) {
         Ui.getTextInputModal("Edit username", "Enter your new username", currentUsername, "Save", "Cancel", async (username: string) => {
-            if (await LydaApi.updateUser({username})) {
+            if (await Api.updateUser({username})) {
                 successCallback(username);
             }
         }, () => {

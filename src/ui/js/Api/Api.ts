@@ -13,8 +13,9 @@ import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
 import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
 import {TrackCollaborator} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
+import {Library} from "@targoninc/lyda-shared/dist/Models/Library";
 
-export class LydaApi {
+export class Api {
     static getLogs(filterState: Signal<any>, successCallback: Function) {
         const errorText = "Failed to get logs";
         HttpClient.getAsync<Log[]>(ApiRoutes.getLogs, {
@@ -22,7 +23,7 @@ export class LydaApi {
             offset: 0,
             limit: 50
         }).then(logs => {
-            LydaApi.handleResponse(logs, errorText, successCallback);
+            Api.handleResponse(logs, errorText, successCallback);
         });
 
         filterState.subscribe(async (newValue) => {
@@ -31,7 +32,7 @@ export class LydaApi {
                 offset: 0,
                 limit: 100
             }).then(logs => {
-                LydaApi.handleResponse(logs, errorText, successCallback);
+                Api.handleResponse(logs, errorText, successCallback);
             });
         });
     }
@@ -64,6 +65,15 @@ export class LydaApi {
 
     static async exportUser() {
         return await HttpClient.getAsync(ApiRoutes.exportUser);
+    }
+
+    static async getLibrary(name: string) {
+        const res = await HttpClient.getAsync<Library>(ApiRoutes.getLibrary, { name });
+        if (res.code !== 200) {
+            notify("Failed to get library", NotificationType.error);
+            return null;
+        }
+        return res.data as Library;
     }
 
     //region Albums
@@ -277,6 +287,21 @@ export class LydaApi {
         return true;
     }
 
+    static async getTrackById(id: number, code: string = ""): Promise<{
+        track: Track,
+        canEdit: boolean,
+    }|null> {
+        const res = await HttpClient.getAsync<{
+            track: Track,
+            canEdit: boolean,
+        }>(ApiRoutes.getTrackById + `?id=${id}&code=${code}`);
+        if (res.code !== 200) {
+            notify("Error getting track: " + getErrorMessage(res), NotificationType.error);
+            return null;
+        }
+        return res.data;
+    }
+
     static async updateTrackFull(track: Partial<Track>): Promise<any> {
         const res = await HttpClient.postAsync(ApiRoutes.updateTrackFull, {
             id: track.id,
@@ -301,6 +326,21 @@ export class LydaApi {
     //endregion
 
     //region Playlists
+    static async getPlaylistById(id: number): Promise<{
+        playlist: Playlist,
+        canEdit: boolean,
+    }|null> {
+        const res = await HttpClient.getAsync<{
+            playlist: Playlist,
+            canEdit: boolean,
+        }>(ApiRoutes.getPlaylistById + `?id=${id}`);
+        if (res.code !== 200) {
+            console.error("Failed to get playlist: ", res.data);
+            return null;
+        }
+        return res.data;
+    }
+
     static async getPlaylistsByUserId(userId: number): Promise<Playlist[]> {
         const res = await HttpClient.getAsync<Playlist[]>(ApiRoutes.getPlaylistsByUserId, {id: userId});
         if (res.code !== 200) {

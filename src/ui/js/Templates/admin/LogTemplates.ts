@@ -3,7 +3,7 @@ import {UserTemplates} from "../account/UserTemplates.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {copy, Util} from "../../Classes/Util.ts";
 import {compute, signal, Signal, AnyElement, create, when, signalMap} from "@targoninc/jess";
-import {LydaApi} from "../../Api/LydaApi.ts";
+import {Api} from "../../Api/Api.ts";
 import {truncateText} from "../../Classes/Helpers/CustomText.ts";
 import {DashboardTemplates} from "./DashboardTemplates.ts";
 import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
@@ -242,7 +242,7 @@ export class LogTemplates {
         const refreshOnInterval = signal(false);
         const logs = signal<Log[]>([]);
         const refresh = () => {
-            LydaApi.getLogs(filterState, async (newLogs: Log[]) => {
+            Api.getLogs(filterState, async (newLogs: Log[]) => {
                 logs.value = newLogs;
             });
         };

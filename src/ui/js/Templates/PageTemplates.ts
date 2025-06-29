@@ -2,7 +2,6 @@ import {AuthActions} from "../Actions/AuthActions.ts";
 import {LandingPageTemplates} from "./LandingPageTemplates.ts";
 import {UserTemplates} from "./account/UserTemplates.ts";
 import {HttpClient} from "../Api/HttpClient.ts";
-import {Util} from "../Classes/Util.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {create, when, compute, signal} from "@targoninc/jess";
 import {SearchTemplates} from "./SearchTemplates.ts";
@@ -21,6 +20,16 @@ import {MusicTemplates} from "./music/MusicTemplates.ts";
 import {PaymentTemplates} from "./money/PaymentTemplates.ts";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {TrackEditTemplates} from "./music/TrackEditTemplates.ts";
+import {Route} from "../Routing/Router.ts";
+import {PlayManager} from "../Streaming/PlayManager.ts";
+import {currentSecretCode, currentUser} from "../state.ts";
+import {TrackTemplates} from "./music/TrackTemplates.ts";
+import {PlaylistTemplates} from "./music/PlaylistTemplates.ts";
+import {StatisticTemplates} from "./StatisticTemplates.ts";
+import {SubscriptionTemplates} from "./SubscriptionTemplates.ts";
+import {notify} from "../Classes/Ui.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
+import {Api} from "../Api/Api.ts";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, Function> = {
@@ -76,50 +85,86 @@ export class PageTemplates {
         RoutePath.events,
     ];
 
-    static libraryPage() {
-        return create("div")
-            .classes("flex-v")
-            .attributes("lyda", "")
-            .attributes("datatype", "library")
-            .build();
+    static async libraryPage(route: Route, params: Record<string, string>) {
+        const user = currentUser.value;
+        const name = params["name"] ?? "";
+
+        if (!user) {
+            notify("You need to be logged in to view your library", NotificationType.error);
+            return create("div")
+                .text("You need to be logged in to view your library")
+                .build();
+        }
+
+        document.title = "Library - " + name;
+        const library = await Api.getLibrary(name);
+
+        if (!library) {
+            return UserTemplates.notPublicLibrary(name);
+        }
+
+        return UserTemplates.libraryPage(library.albums, library.playlists, library.tracks);
     }
 
-    static playlistPage() {
-        return create("div")
-            .classes("playlistPage")
-            .attributes("lyda", "")
-            .attributes("endpoint", ApiRoutes.getPlaylistById)
-            .attributes("params", "id")
-            .attributes("datatype", "playlist")
-            .build();
+    static async playlistPage(route: Route, params: Record<string, string>) {
+        const playlistId = parseInt(params["id"]);
+        const user = currentUser.value;
+
+        if (!user) {
+            notify("You need to be logged in to view playlists", NotificationType.error);
+            return create("div")
+                .text("You need to be logged in to view playlists")
+                .build();
+        }
+
+        const playlist = await Api.getPlaylistById(playlistId);
+        if (!playlist) {
+            return create("div")
+                .text("Playlist not found")
+                .build();
+        }
+
+        document.title = playlist.playlist.title;
+        return await PlaylistTemplates.playlistPage(playlist, user);
     }
 
-    static profilePage() {
-        return create("div")
-            .classes("profile", "flex-v")
-            .attributes("lyda", "")
-            .attributes("endpoint", ApiRoutes.getUser)
-            .attributes("params", "name")
-            .attributes("datatype", "profile")
-            .build();
-    }
-
-    static statisticsPage() {
+    static async statisticsPage() {
         return create("div")
             .classes("statistics", "flex-v")
-            .attributes("lyda", "")
-            .attributes("datatype", "statistics")
+            .children(
+                StatisticTemplates.artistRoyaltyActions(null),
+                await StatisticTemplates.allStats(),
+                StatisticTemplates.dataExport()
+            )
             .build();
     }
 
-    static trackPage() {
-        return create("div")
-            .classes("trackPage")
-            .attributes("lyda", "")
-            .attributes("endpoint", ApiRoutes.getTrackById)
-            .attributes("params", "id,code")
-            .attributes("datatype", "track")
-            .build();
+    static async trackPage(route: Route, params: Record<string, string>) {
+        const trackId = parseInt(params["id"]);
+        const code = params["code"] || "";
+
+        const track = await Api.getTrackById(trackId, code);
+        if (!track) {
+            return create("div")
+                .text("Track not found")
+                .build();
+        }
+
+        document.title = track.track.title;
+        if (code) {
+            currentSecretCode.value = code;
+        }
+
+        await PlayManager.cacheTrackData(track);
+        const trackPage = await TrackTemplates.trackPage(track);
+
+        if (!trackPage) {
+            return create("div")
+                .text("Failed to load track")
+                .build();
+        }
+
+        return trackPage;
     }
 
     static logoutPage() {
@@ -194,19 +239,35 @@ export class PageTemplates {
             ).build();
     }
 
-    static unapprovedTracksPage() {
+    static async unapprovedTracksPage() {
+        const user = currentUser.value;
+
+        if (!user) {
+            notify("You need to be logged in to see unapproved tracks", NotificationType.error);
+            return create("div")
+                .text("You need to be logged in to see unapproved tracks")
+                .build();
+        }
+
+        const tracks = await Api.getUnapprovedTracks();
         return create("div")
             .classes("unapprovedTracks")
-            .attributes("lyda", "")
-            .attributes("datatype", "unapprovedTracks")
+            .children(
+                TrackTemplates.unapprovedTracks(tracks, user)
+            )
             .build();
     }
 
     static subscribePage() {
-        return create("div")
-            .classes("subscribe")
-            .attributes("lyda", "")
-            .attributes("datatype", "subscribe")
-            .build();
+        const user = currentUser.value;
+
+        if (!user) {
+            notify("You can only subscribe if you have an account already", NotificationType.warning);
+            return create("div")
+                .text("You need to be logged in to subscribe")
+                .build();
+        }
+
+        return SubscriptionTemplates.page();
     }
 }

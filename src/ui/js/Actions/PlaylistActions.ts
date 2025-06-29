@@ -13,11 +13,11 @@ import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import {playingHere} from "../state.ts";
-import {LydaApi} from "../Api/LydaApi.ts";
+import {Api} from "../Api/Api.ts";
 
 export class PlaylistActions {
     static async openAddToPlaylistModal(objectToBeAdded: Album | Track, type: "track" | "album") {
-        const playlists = await LydaApi.getPlaylistsByUserId(objectToBeAdded.user_id);
+        const playlists = await Api.getPlaylistsByUserId(objectToBeAdded.user_id);
         if (playlists.length === 0) {
             return;
         }
@@ -34,7 +34,7 @@ export class PlaylistActions {
     }
 
     static async deletePlaylist(id: number) {
-        const success = await LydaApi.deletePlaylist(id);
+        const success = await Api.deletePlaylist(id);
         if (success) {
             PlayManager.removeStreamClient(id);
             QueueManager.removeFromManualQueue(id);
@@ -43,7 +43,7 @@ export class PlaylistActions {
     }
 
     static async addTrackToPlaylists(track_id: number, playlist_ids: number[]) {
-        const success = await LydaApi.addTrackToPlaylists(track_id, playlist_ids);
+        const success = await Api.addTrackToPlaylists(track_id, playlist_ids);
         Util.removeModal();
         return success;
     }
@@ -97,7 +97,7 @@ export class PlaylistActions {
     }
 
     static async addAlbumToPlaylists(album_id: number, playlist_ids: number[]) {
-        const success = await LydaApi.addAlbumToPlaylists(album_id, playlist_ids);
+        const success = await Api.addAlbumToPlaylists(album_id, playlist_ids);
         Util.removeModal();
         return success;
     }

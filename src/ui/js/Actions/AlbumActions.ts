@@ -13,11 +13,11 @@ import {NotificationType} from "../Enums/NotificationType.ts";
 import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
 import {playingHere} from "../state.ts";
-import {LydaApi} from "../Api/LydaApi.ts";
+import {Api} from "../Api/Api.ts";
 
 export class AlbumActions {
     static async openAddToAlbumModal(track: Track) {
-        const albums = await LydaApi.getAlbumsByUserId(track.user_id);
+        const albums = await Api.getAlbumsByUserId(track.user_id);
         if (albums.length === 0) {
             return;
         }
@@ -29,7 +29,7 @@ export class AlbumActions {
     }
 
     static async deleteAlbum(id: number) {
-        const success = await LydaApi.deleteAlbum(id);
+        const success = await Api.deleteAlbum(id);
         if (success) {
             PlayManager.removeStreamClient(id);
             QueueManager.removeFromManualQueue(id);
@@ -38,7 +38,7 @@ export class AlbumActions {
     }
 
     static async addTrackToAlbums(track_id: number, album_ids: number[]) {
-        const success = await LydaApi.addTrackToAlbums(track_id, album_ids);
+        const success = await Api.addTrackToAlbums(track_id, album_ids);
         Util.removeModal();
         return success;
     }

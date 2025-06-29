@@ -36,7 +36,7 @@ import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
 import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
 import {InteractionTemplates} from "../InteractionTemplates.ts";
 import {MusicTemplates} from "./MusicTemplates.ts";
-import {LydaApi} from "../../Api/LydaApi.ts";
+import {Api} from "../../Api/Api.ts";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
@@ -163,7 +163,7 @@ export class AlbumTemplates {
                             text: "Create album",
                             disabled,
                             onclick: async () => {
-                                await LydaApi.createNewAlbum(album.value);
+                                await Api.createNewAlbum(album.value);
                                 Util.removeModal();
                             },
                             icon: {icon: "playlist_add"},
