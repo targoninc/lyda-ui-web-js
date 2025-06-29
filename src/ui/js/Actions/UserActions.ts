@@ -24,34 +24,12 @@ import {UserSettings} from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import {Theme} from "@targoninc/lyda-shared/src/Enums/Theme";
 
 export class UserActions {
-    static async replaceAvatar(user: User, avatar: Signal<string>, loading: Signal<boolean>) {
-        let fileInput = document.createElement("input");
-        fileInput.type = "file";
-        fileInput.accept = "image/*";
-        fileInput.onchange = async (e) => {
-            loading.value = true;
-            if (!fileInput.files) {
-                return;
-            }
-
-            const file = fileInput.files![0];
-            try {
-                await MediaUploader.upload(MediaFileType.userAvatar, user.id, file)
-                notify("Avatar updated", NotificationType.success);
-                const newSrc = Util.getUserAvatar(user.id);
-                updateImagesWithSource(newSrc, avatar.value);
-                avatar.value = newSrc;
-            } catch (e: any) {
-                notify(`Failed to upload avatar: ${e}`, NotificationType.error);
-                return;
-            } finally {
-                loading.value = false;
-            }
-        };
-        fileInput.click();
-    }
-
-    static async replaceBanner(e: Event, user: User, banner: Signal<string>, loading: Signal<boolean>) {
+    static async replaceUserImage(
+        type: 'avatar' | 'banner',
+        user: User,
+        imageSignal: Signal<string>,
+        loading: Signal<boolean>
+    ) {
         let fileInput = document.createElement("input");
         fileInput.type = "file";
         fileInput.accept = "image/*";
@@ -60,22 +38,30 @@ export class UserActions {
             if (!fileInput.files) {
                 return;
             }
-            let file = fileInput.files![0];
-
+            const file = fileInput.files[0];
             try {
-                await MediaUploader.upload(MediaFileType.userBanner, user.id, file);
-                notify("Banner updated", NotificationType.success);
-                const newSrc = Util.getUserBanner(user.id);
-                updateImagesWithSource(newSrc, banner.value);
-                banner.value = newSrc;
+                const mediaType = type === 'avatar' ? MediaFileType.userAvatar : MediaFileType.userBanner;
+                await MediaUploader.upload(mediaType, user.id, file);
+                notify(`${type.charAt(0).toUpperCase() + type.slice(1)} updated`, NotificationType.success);
+                const newSrc = type === 'avatar' ? Util.getUserAvatar(user.id) : Util.getUserBanner(user.id);
+                updateImagesWithSource(newSrc, imageSignal.value);
+                imageSignal.value = newSrc;
             } catch (e: any) {
-                notify(`Failed to upload banner: ${e}`, NotificationType.error);
+                notify(`Failed to upload ${type}: ${e}`, NotificationType.error);
                 return;
             } finally {
                 loading.value = false;
             }
         };
         fileInput.click();
+    }
+
+    static async replaceAvatar(user: User, avatar: Signal<string>, loading: Signal<boolean>) {
+        return UserActions.replaceUserImage('avatar', user, avatar, loading);
+    }
+
+    static async replaceBanner(e: Event, user: User, banner: Signal<string>, loading: Signal<boolean>) {
+        return UserActions.replaceUserImage('banner', user, banner, loading);
     }
 
     static getNotificationsPeriodically() {
