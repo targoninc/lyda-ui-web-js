@@ -2,11 +2,11 @@ import {DashboardTemplates} from "./DashboardTemplates.ts";
 import {CommentTemplates} from "../CommentTemplates.ts";
 import {AnyElement, create, when, compute, signal, Signal, InputType} from "@targoninc/jess";
 import {TrackActions} from "../../Actions/TrackActions.ts";
-import {CommentActions} from "../../Actions/CommentActions.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {button, input, toggle } from "@targoninc/jess-components";
 import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
 import {Comment} from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
+import {Api} from "../../Api/Api.ts";
 
 export class ModerationCommentsTemplates {
     static commentModerationPage() {
@@ -27,11 +27,11 @@ export class ModerationCommentsTemplates {
         const loading = signal(false);
         filterState.subscribe(async (newFilter) => {
             commentsList.value = create("div").build();
-            CommentActions.getModerationComments(newFilter, loading, async (comments: Comment[]) => {
+            Api.getModerationComments(newFilter, loading, async (comments: Comment[]) => {
                 commentsList.value = ModerationCommentsTemplates.moderatableCommentsList(comments);
             });
         });
-        CommentActions.getModerationComments(filterState.value, loading, async (comments: Comment[]) => {
+        Api.getModerationComments(filterState.value, loading, async (comments: Comment[]) => {
             commentsList.value = ModerationCommentsTemplates.moderatableCommentsList(comments);
         });
 
@@ -48,7 +48,7 @@ export class ModerationCommentsTemplates {
                             classes: ["positive"],
                             onclick: async () => {
                                 commentsList.value = create("div").build();
-                                CommentActions.getModerationComments(filterState.value, loading, async (comments: Comment[]) => {
+                                Api.getModerationComments(filterState.value, loading, async (comments: Comment[]) => {
                                     commentsList.value = ModerationCommentsTemplates.moderatableCommentsList(comments);
                                 });
                             }
