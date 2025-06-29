@@ -17,16 +17,16 @@
     "three": "^0.156.1"
   },
   "dependencies": {
-    "@paypal/paypal-js": "^8.1.2",
-    "@sgratzl/chartjs-chart-boxplot": "^4.4.3",
-    "@targoninc/jess": "^0.0.15",
-    "@targoninc/jess-components": "^0.0.15",
+    "@paypal/paypal-js": "^8.2.0",
+    "@sgratzl/chartjs-chart-boxplot": "^4.4.4",
+    "@targoninc/jess": "^0.0.18",
+    "@targoninc/jess-components": "^0.0.17",
     "@targoninc/lyda-shared": "^0.0.19",
-    "@types/bun": "^1.2.13",
-    "chart.js": "^4.4.6",
-    "dotenv": "^16.4.5",
-    "express": "^5.0.0",
-    "typescript": "^5.5.3"
+    "@types/bun": "^1.2.17",
+    "chart.js": "^4.5.0",
+    "dotenv": "^17.0.0",
+    "express": "^5.1.0",
+    "typescript": "^5.8.3"
   },
-  "version": "0.0.228"
+  "version": "0.0.229"
 }

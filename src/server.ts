@@ -4,7 +4,9 @@ import {config} from "dotenv";
 import * as path from "path";
 import {MIME_TYPES} from "./MIME_TYPES.ts";
 
-config();
+config({
+    quiet: true,
+});
 
 console.log(process.cwd());
 
