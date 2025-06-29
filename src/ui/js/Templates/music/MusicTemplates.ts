@@ -206,8 +206,8 @@ export class MusicTemplates {
             tracksState.value = newTracks;
             loadingState.value = false;
         };
-        pageState.onUpdate = update;
-        filterState.onUpdate = update;
+        pageState.subscribe(update);
+        filterState.subscribe(update);
         pageState.value = 1;
         const feedVisible = compute(u => u || type === "explore", currentUser);
 

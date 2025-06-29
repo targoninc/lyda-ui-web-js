@@ -197,9 +197,9 @@ export class TrackTemplates {
         };
 
         const controls = signal(TrackTemplates.#paginationControls(pageState.value, previousCallback, nextCallback));
-        pageState.onUpdate = (newPage) => {
+        pageState.subscribe(newPage => {
             controls.value = TrackTemplates.#paginationControls(newPage, previousCallback, nextCallback);
-        };
+        });
 
         return controls;
     }
@@ -514,9 +514,9 @@ export class TrackTemplates {
         }
 
         const collaboratorChildren = signal(collabList(collaborators));
-        linkedUserState.onUpdate = (newCollaborators: TrackCollaborator[]) => {
+        linkedUserState.subscribe((newCollaborators: TrackCollaborator[]) => {
             collaboratorChildren.value = collabList(newCollaborators);
-        };
+        });
 
         toAppend.push(TrackTemplates.collaboratorSection(collaboratorChildren, linkedUserState));
         const icons = [];

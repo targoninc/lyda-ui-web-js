@@ -553,7 +553,7 @@ export class TrackEditTemplates {
         const container = create("div")
             .classes("flex")
             .build();
-        linkedUserState.onUpdate = (newValue: any[]) => {
+        linkedUserState.subscribe((newValue: any[]) => {
             container.innerHTML = "";
             for (const id of newValue) {
                 const user = userMap.get(id);
@@ -571,7 +571,7 @@ export class TrackEditTemplates {
                     collaborators: sendValue
                 };
             }
-        };
+        });
 
         return create("div")
             .classes("flex-v", "small-gap")

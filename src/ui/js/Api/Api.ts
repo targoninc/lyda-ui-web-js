@@ -46,6 +46,7 @@ export class Api {
         successCallback(response.data);
     }
 
+    //region User
     static async deleteUser() {
         return await HttpClient.postAsync(ApiRoutes.deleteUser);
     }
@@ -85,6 +86,7 @@ export class Api {
         }
         return res.data;
     }
+    //endregion
 
     //region Albums
     static async getAlbumsByUserId(userId: number): Promise<Album[]> {

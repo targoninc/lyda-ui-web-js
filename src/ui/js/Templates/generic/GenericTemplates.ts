@@ -2,7 +2,6 @@ import {Icons} from "../../Enums/Icons.ts";
 import {AlbumActions} from "../../Actions/AlbumActions.ts";
 import {PlaylistActions} from "../../Actions/PlaylistActions.ts";
 import {HttpClient} from "../../Api/HttpClient.ts";
-import {TrackActions} from "../../Actions/TrackActions.ts";
 import {
     AnyElement,
     AnyNode,
@@ -674,9 +673,9 @@ export class GenericTemplates {
             .children(
                 ...tabs.map((t, i) => {
                     const innerSelectedState = signal(i === selectedIndex ? "selected" : "_");
-                    selectedState.onUpdate = (newSelected: number) => {
+                    selectedState.subscribe((newSelected: number) => {
                         innerSelectedState.value = i === newSelected ? "selected" : "_";
-                    };
+                    });
                     return create("button")
                         .classes("tab", innerSelectedState)
                         .onclick(() => {
@@ -757,9 +756,10 @@ export class GenericTemplates {
 
     static addUserLinkSearchResult(entry: SearchResult, selectedState: Signal<number>) {
         const selectedClassState = signal(selectedState.value === entry.id ? "active" : "_");
-        selectedState.onUpdate = (newSelected: number) => {
+        selectedState.subscribe((newSelected: number) => {
             selectedClassState.value = newSelected === entry.id ? "active" : "_";
-        };
+        });
+
         const avatar = signal(Images.DEFAULT_AVATAR);
         if (entry.hasImage) {
             avatar.value = Util.getUserAvatar(entry.id);

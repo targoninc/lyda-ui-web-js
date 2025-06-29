@@ -255,12 +255,12 @@ export class UserTemplates {
             unapprovedTracks.value = tracks;
         });
         const link = signal(create("div").build());
-        unapprovedTracks.onUpdate = (tracks: Track[]) => {
+        unapprovedTracks.subscribe((tracks: Track[]) => {
             link.value = tracks.length === 0 ? nullElement() : GenericTemplates.action(Icons.APPROVAL, "Unapproved tracks", "unapproved-tracks", async (e: Event) => {
                 e.preventDefault();
                 navigate(RoutePath.unapprovedTracks);
             }, [], [], Links.LINK(RoutePath.unapprovedTracks));
-        };
+        });
 
         return link;
     }
