@@ -84,10 +84,6 @@ export class UserActions {
         }
     }
 
-    static async markNotificationsAsRead(newestTimestamp: Signal<Date | null>) {
-        await HttpClient.postAsync(ApiRoutes.markAllNotificationsAsRead, {newest: newestTimestamp.value});
-    }
-
     static async setTheme(theme: Theme) {
         let user = await Util.getUserAsync();
         user.settings = updateUserSetting(user, UserSettings.theme, theme);

@@ -9,6 +9,7 @@ import {Images} from "../Enums/Images.ts";
 import {button} from "@targoninc/jess-components";
 import {Notification} from "@targoninc/lyda-shared/src/Models/db/lyda/Notification";
 import {NotificationPart} from "@targoninc/lyda-shared/src/Models/NotifcationPart";
+import {Api} from "../Api/Api.ts";
 
 export class NotificationTemplates {
     static notificationInList(notification: Notification) {
@@ -104,7 +105,7 @@ export class NotificationTemplates {
                     onclick: async () => {
                         notifsVisible.value = !notifsVisible.value;
                         if (notifsVisible.value) {
-                            await UserActions.markNotificationsAsRead(newestTimestamp);
+                            await Api.markNotificationsAsRead(newestTimestamp);
                         }
                     },
                     text: "",

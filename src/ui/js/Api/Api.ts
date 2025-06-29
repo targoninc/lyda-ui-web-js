@@ -3,7 +3,7 @@ import {notify} from "../Classes/Ui.ts";
 import {Signal} from "@targoninc/jess";
 import {ApiRoutes} from "./ApiRoutes.ts";
 import {currentUser} from "../state.ts";
-import {getErrorMessage} from "../Classes/Util.ts";
+import {getErrorMessage, updateUserSetting, Util} from "../Classes/Util.ts";
 import {Log} from "@targoninc/lyda-shared/src/Models/db/lyda/Log";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
@@ -15,6 +15,9 @@ import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/Collab
 import {TrackCollaborator} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
 import {Library} from "@targoninc/lyda-shared/dist/Models/Library";
 import {RoyaltyInfo} from "@targoninc/lyda-shared/src/Models/RoyaltyInfo";
+import {Theme} from "@targoninc/lyda-shared/src/Enums/Theme.ts";
+import {UserSettings} from "@targoninc/lyda-shared/src/Enums/UserSettings.ts";
+import {LydaCache} from "../Cache/LydaCache.ts";
 
 export class Api {
     static getLogs(filterState: Signal<any>, successCallback: Function) {
@@ -47,6 +50,10 @@ export class Api {
     }
 
     //region User
+    static async markNotificationsAsRead(newestTimestamp: Signal<Date | null>) {
+        await HttpClient.postAsync(ApiRoutes.markAllNotificationsAsRead, {newest: newestTimestamp.value});
+    }
+
     static async deleteUser() {
         return await HttpClient.postAsync(ApiRoutes.deleteUser);
     }
