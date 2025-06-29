@@ -292,7 +292,7 @@ export class GenericTemplates {
         return button({
             text: "New album",
             icon: {icon: "forms_add_on"},
-            classes: ["positive", ...classes],
+            classes,
             onclick: async () => {
                 await AlbumActions.openNewAlbumModal();
             }
@@ -303,7 +303,7 @@ export class GenericTemplates {
         return button({
             text: "New playlist",
             icon: {icon: "playlist_add"},
-            classes: ["positive", ...classes],
+            classes,
             onclick: async () => {
                 await PlaylistActions.openNewPlaylistModal();
             }
@@ -314,7 +314,7 @@ export class GenericTemplates {
         return button({
             text: "Upload",
             icon: {icon: "upload"},
-            classes: ["positive", ...classes],
+            classes,
             onclick: () => navigate(RoutePath.upload)
         });
     }

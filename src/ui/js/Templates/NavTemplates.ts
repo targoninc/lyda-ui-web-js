@@ -122,8 +122,7 @@ export class NavTemplates {
             .classes("widest-fill-right", "relative")
             .children(
                 button({
-                    text: "Upload",
-                    classes: ["hideOnMidBreakpoint", "positive"],
+                    classes: ["hideOnMidBreakpoint", "fullHeight"],
                     icon: { icon: "upload" },
                     onclick: async (e: MouseEvent) => {
                         e.preventDefault();

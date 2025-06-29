@@ -724,7 +724,7 @@ export class TrackTemplates {
         const inQueue = compute(q => q.includes(track.id), manualQueue);
         const text = compute((q: boolean): string => q ? "Unqueue" : "Queue", inQueue);
         const icon = compute((q: boolean): string => q ? "remove" : "switch_access_shortcut_add", inQueue);
-        const queueClass = compute((q: boolean): string => q ? "negative" : "positive", inQueue);
+        const queueClass = compute((q: boolean): string => q ? "negative" : "_", inQueue);
 
         return button({
             text,

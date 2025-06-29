@@ -353,12 +353,9 @@ export class UserTemplates {
                     create("div")
                         .classes("flex")
                         .children(
-                            GenericTemplates.newTrackButton(["hideOnSmallBreakpoint"]),
-                            GenericTemplates.newAlbumButton(["hideOnSmallBreakpoint"]),
-                            GenericTemplates.newPlaylistButton(["hideOnSmallBreakpoint"]),
                             button({
-                                classes: ["showOnSmallBreakpoint", "positive"],
-                                text: "New",
+                                classes: ["positive"],
+                                text: "Create",
                                 icon: {icon: "add"},
                                 onclick: UiActions.openCreateMenu
                             }),
