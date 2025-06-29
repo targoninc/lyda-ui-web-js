@@ -1,17 +1,16 @@
-import {compute, Signal, signal, AnyElement, create, when} from "@targoninc/jess";
-import {HttpClient} from "../Api/HttpClient.ts";
-import {notify} from "../Classes/Ui.ts";
-import {navigate} from "../Routing/Router.ts";
-import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {GenericTemplates} from "./generic/GenericTemplates.ts";
-import {Util} from "../Classes/Util.ts";
-import {Images} from "../Enums/Images.ts";
-import {router} from "../../main.ts";
-import {RoutePath} from "../Routing/routes.ts";
-import { button, icon } from "@targoninc/jess-components";
-import {SearchContext} from "@targoninc/lyda-shared/src/Enums/SearchContext";
-import {SearchResult} from "@targoninc/lyda-shared/src/Models/SearchResult";
-import {NotificationType} from "../Enums/NotificationType.ts";
+import { compute, Signal, signal, AnyElement, create, when } from "@targoninc/jess";
+import { HttpClient } from "../Api/HttpClient.ts";
+import { notify } from "../Classes/Ui.ts";
+import { navigate } from "../Routing/Router.ts";
+import { ApiRoutes } from "../Api/ApiRoutes.ts";
+import { GenericTemplates } from "./generic/GenericTemplates.ts";
+import { Util } from "../Classes/Util.ts";
+import { router } from "../../main.ts";
+import { RoutePath } from "../Routing/routes.ts";
+import { button } from "@targoninc/jess-components";
+import { SearchContext } from "@targoninc/lyda-shared/src/Enums/SearchContext";
+import { SearchResult } from "@targoninc/lyda-shared/src/Models/SearchResult";
+import { NotificationType } from "../Enums/NotificationType.ts";
 
 export class SearchTemplates {
     static search(context: SearchContext) {
@@ -36,12 +35,31 @@ export class SearchTemplates {
         return create("div")
             .classes("search", "relative", "flex-v", "align-center")
             .children(
-                SearchTemplates.searchInput(results, selectedResult, currentSearch, resultsShown, context),
-                SearchTemplates.searchResults(results, selectedResult, resultsShown, currentSearch, context)
-            ).build();
+                SearchTemplates.searchInput(
+                    results,
+                    selectedResult,
+                    currentSearch,
+                    resultsShown,
+                    context
+                ),
+                SearchTemplates.searchResults(
+                    results,
+                    selectedResult,
+                    resultsShown,
+                    currentSearch,
+                    context
+                )
+            )
+            .build();
     }
 
-    static searchInput(results: Signal<SearchResult[]>, selectedResult: Signal<number | null>, currentSearch: Signal<string>, resultsShown: Signal<boolean>, context: SearchContext) {
+    static searchInput(
+        results: Signal<SearchResult[]>,
+        selectedResult: Signal<number | null>,
+        currentSearch: Signal<string>,
+        resultsShown: Signal<boolean>,
+        context: SearchContext
+    ) {
         const debounce = 200;
         let timeout: Timer | undefined;
         let searchCount = 0;
@@ -53,10 +71,15 @@ export class SearchTemplates {
             searchCount++;
             results.value = [];
             const currentSearchCount = searchCount;
-            const endpoints = [ApiRoutes.searchTracks, ApiRoutes.searchAlbums, ApiRoutes.searchPlaylists, ApiRoutes.searchUsers];
-            const promises = endpoints.map(async (endpoint) => {
+            const endpoints = [
+                ApiRoutes.searchTracks,
+                ApiRoutes.searchAlbums,
+                ApiRoutes.searchPlaylists,
+                ApiRoutes.searchUsers,
+            ];
+            const promises = endpoints.map(async endpoint => {
                 const res = await HttpClient.getAsync<SearchResult[]>(endpoint, {
-                    search: currentSearch.value
+                    search: currentSearch.value,
                 });
 
                 if (res.code !== 200) {
@@ -71,17 +94,23 @@ export class SearchTemplates {
             });
             await Promise.all(promises);
         }
-        const contextClasses = context === SearchContext.searchPage ? ["fullWidth"] : []
+        const contextClasses = context === SearchContext.searchPage ? ["fullWidth"] : [];
         getResults().then();
 
         return create("div")
             .classes("search-input-container", "relative", ...contextClasses)
             .children(
                 GenericTemplates.icon("search", true, ["inline-icon", "svg", "search-icon"]),
-                GenericTemplates.icon("close", true, ["inline-icon", "svg", "clear-icon", "clickable"], "Clear search", () => {
-                    currentSearch.value = "";
-                    resultsShown.value = false;
-                }),
+                GenericTemplates.icon(
+                    "close",
+                    true,
+                    ["inline-icon", "svg", "clear-icon", "clickable"],
+                    "Clear search",
+                    () => {
+                        currentSearch.value = "";
+                        resultsShown.value = false;
+                    }
+                ),
                 create("input")
                     .classes("jess", "search-input")
                     .placeholder("Search")
@@ -120,8 +149,12 @@ export class SearchTemplates {
                         }
 
                         const target = e.target as HTMLInputElement;
-                        let search = target.value;
-                        if (pressedKey !== "Backspace" && pressedKey !== "Delete" && pressedKey.length > 1) {
+                        const search = target.value;
+                        if (
+                            pressedKey !== "Backspace" &&
+                            pressedKey !== "Delete" &&
+                            pressedKey.length > 1
+                        ) {
                             return;
                         }
 
@@ -138,8 +171,10 @@ export class SearchTemplates {
                         }
 
                         timeout = setTimeout(() => getResults(), debounce);
-                    }).build()
-            ).build();
+                    })
+                    .build()
+            )
+            .build();
     }
 
     private static selectNextResult(selectedResult: Signal<number | null>, list: SearchResult[]) {
@@ -155,7 +190,10 @@ export class SearchTemplates {
         selectedResult.value = list[index + 1].id;
     }
 
-    private static selectPreviousResult(selectedResult: Signal<number | null>, list: SearchResult[]) {
+    private static selectPreviousResult(
+        selectedResult: Signal<number | null>,
+        list: SearchResult[]
+    ) {
         if (selectedResult.value === null) {
             selectedResult.value = list[list.length - 1].id;
             return;
@@ -168,18 +206,41 @@ export class SearchTemplates {
         selectedResult.value = list[index - 1].id;
     }
 
-    static searchResults(results: Signal<SearchResult[]>, selectedResult: Signal<number | null>, resultsShown: Signal<boolean>, currentSearch: Signal<string>, context: SearchContext): Signal<AnyElement> {
+    static searchResults(
+        results: Signal<SearchResult[]>,
+        selectedResult: Signal<number | null>,
+        resultsShown: Signal<boolean>,
+        currentSearch: Signal<string>,
+        context: SearchContext
+    ): Signal<AnyElement> {
         if (context === SearchContext.navBar) {
-            return compute((r) => SearchTemplates.searchResultsList(r, selectedResult, resultsShown, currentSearch), results);
+            return compute(
+                r =>
+                    SearchTemplates.searchResultsList(
+                        r,
+                        selectedResult,
+                        resultsShown,
+                        currentSearch
+                    ),
+                results
+            );
         } else {
-            return compute((r) => SearchTemplates.searchResultsCards(r, selectedResult, resultsShown), results);
+            return compute(
+                r => SearchTemplates.searchResultsCards(r, selectedResult, resultsShown),
+                results
+            );
         }
     }
 
-    static searchResultsList(searchResults: SearchResult[], selectedResult: Signal<number | null>, resultsShown: Signal<boolean>, currentSearch: Signal<string>) {
+    static searchResultsList(
+        searchResults: SearchResult[],
+        selectedResult: Signal<number | null>,
+        resultsShown: Signal<boolean>,
+        currentSearch: Signal<string>
+    ) {
         const exactMatches = searchResults.filter(r => r.exactMatch);
         const partialMatches = searchResults.filter(r => !r.exactMatch);
-        const showClass = compute((s: boolean): string => s ? "_" : "hidden", resultsShown);
+        const showClass = compute((s: boolean): string => (s ? "_" : "hidden"), resultsShown);
 
         return create("div")
             .classes("search-results-popout", showClass)
@@ -197,35 +258,56 @@ export class SearchTemplates {
                                     onclick: () => {
                                         resultsShown.value = false;
                                         navigate(`${RoutePath.search}?q=` + currentSearch.value);
-                                    }
-                                }),
-                            ).build(),
-                        when(exactMatches.length > 0,
+                                    },
+                                })
+                            )
+                            .build(),
+                        when(
+                            exactMatches.length > 0,
                             create("span")
                                 .classes("search-result-header")
                                 .text("Exact Matches")
-                                .build()),
+                                .build()
+                        ),
                         ...exactMatches.map(result => {
-                            return this.searchResult(result, selectedResult, resultsShown, SearchContext.navBar);
+                            return this.searchResult(
+                                result,
+                                selectedResult,
+                                resultsShown,
+                                SearchContext.navBar
+                            );
                         }),
-                        when(partialMatches.length > 0,
+                        when(
+                            partialMatches.length > 0,
                             create("span")
                                 .classes("search-result-header")
                                 .text("Partial Matches")
-                                .build()),
+                                .build()
+                        ),
                         ...partialMatches.map(result => {
-                            return this.searchResult(result, selectedResult, resultsShown, SearchContext.navBar);
+                            return this.searchResult(
+                                result,
+                                selectedResult,
+                                resultsShown,
+                                SearchContext.navBar
+                            );
                         })
-                    ).build()
-            ).build();
+                    )
+                    .build()
+            )
+            .build();
     }
 
-    static searchResultsCards(searchResults: SearchResult[], selectedResult: Signal<number | null>, resultsShown: Signal<boolean>) {
+    static searchResultsCards(
+        searchResults: SearchResult[],
+        selectedResult: Signal<number | null>,
+        resultsShown: Signal<boolean>
+    ) {
         const groups: Record<string, SearchResult[]> = {
-            "Albums": searchResults.filter(r => r.type === "album"),
-            "Tracks": searchResults.filter(r => r.type === "track"),
-            "Users": searchResults.filter(r => r.type === "user"),
-            "Playlists": searchResults.filter(r => r.type === "playlist")
+            Albums: searchResults.filter(r => r.type === "album"),
+            Tracks: searchResults.filter(r => r.type === "track"),
+            Users: searchResults.filter(r => r.type === "user"),
+            Playlists: searchResults.filter(r => r.type === "playlist"),
         };
         Object.keys(groups).forEach(group => {
             if (groups[group].length === 0) {
@@ -238,36 +320,62 @@ export class SearchTemplates {
                 create("div")
                     .classes("flex")
                     .children(
-                        when(searchResults.length === 0, create("div")
-                            .classes("flex-v")
-                            .children(
-                                create("span")
-                                    .classes("color-dim")
-                                    .text("Nothing here. Try a different search?")
-                                    .build()
-                            ).build()),
+                        when(
+                            searchResults.length === 0,
+                            create("div")
+                                .classes("flex-v")
+                                .children(
+                                    create("span")
+                                        .classes("color-dim")
+                                        .text("Nothing here. Try a different search?")
+                                        .build()
+                                )
+                                .build()
+                        ),
                         ...Object.keys(groups).map(group => {
                             return create("div")
                                 .classes("flex-v", "small-gap", "card", "search-results-card")
                                 .children(
-                                    create("h2")
-                                        .text(group)
-                                        .build(),
-                                    ...groups[group].sort((a, b) => a.exactMatch && !b.exactMatch ? 1 : b.exactMatch && !a.exactMatch ? -1 : 0).map(result => {
-                                        return this.searchResult(result, selectedResult, resultsShown, SearchContext.searchPage);
-                                    })
-                                ).build();
+                                    create("h2").text(group).build(),
+                                    ...groups[group]
+                                        .sort((a, b) =>
+                                            a.exactMatch && !b.exactMatch
+                                                ? 1
+                                                : b.exactMatch && !a.exactMatch
+                                                  ? -1
+                                                  : 0
+                                        )
+                                        .map(result => {
+                                            return this.searchResult(
+                                                result,
+                                                selectedResult,
+                                                resultsShown,
+                                                SearchContext.searchPage
+                                            );
+                                        })
+                                )
+                                .build();
                         })
-                    ).build()
-            ).build();
+                    )
+                    .build()
+            )
+            .build();
     }
 
-    static searchResult(searchResult: SearchResult, selectedResult: Signal<number | null>, resultsShown: Signal<boolean>, context: SearchContext) {
-        const addClass = compute((sr): string => sr === searchResult.id ? "selected" : "_", selectedResult);
-        let elementReference: AnyElement;
-        selectedResult.subscribe((newId) => {
+    static searchResult(
+        searchResult: SearchResult,
+        selectedResult: Signal<number | null>,
+        resultsShown: Signal<boolean>,
+        context: SearchContext
+    ) {
+        const addClass = compute(
+            (sr): string => (sr === searchResult.id ? "selected" : "_"),
+            selectedResult
+        );
+        let elementReference: AnyElement | null = null;
+        selectedResult.subscribe(newId => {
             if (newId === searchResult.id) {
-                elementReference.scrollIntoView({behavior: "smooth", block: "nearest"});
+                elementReference?.scrollIntoView({ behavior: "smooth", block: "nearest" });
             }
         });
         let display = searchResult.display;
@@ -279,20 +387,29 @@ export class SearchTemplates {
             subtitle = subtitle.substring(0, 50) + "...";
         }
 
-        const imageGetterMap: Record<string, Function> = {
-            "user": Util.getUserAvatar,
-            "track": Util.getTrackCover,
-            "album": Util.getAlbumCover,
-            "playlist": Util.getPlaylistCover,
+        const imageGetterMap: Record<string, (id: number) => string> = {
+            user: Util.getUserAvatar,
+            track: Util.getTrackCover,
+            album: Util.getAlbumCover,
+            playlist: Util.getPlaylistCover,
         };
         const image = signal(Util.defaultImage(searchResult.type));
         if (searchResult.hasImage) {
             image.value = imageGetterMap[searchResult.type](searchResult.id);
         }
-        const contextClasses = context === SearchContext.searchPage ? ["jess", "fullWidth"] : ["_"]
+        const contextClasses = context === SearchContext.searchPage ? ["jess", "fullWidth"] : ["_"];
 
         elementReference = create(context === SearchContext.navBar ? "div" : "button")
-            .classes("search-result", "space-outwards", "padded", "flex", searchResult.type, searchResult.exactMatch ? "exact-match" : "_", addClass, ...contextClasses)
+            .classes(
+                "search-result",
+                "space-outwards",
+                "padded",
+                "flex",
+                searchResult.type,
+                searchResult.exactMatch ? "exact-match" : "_",
+                addClass,
+                ...contextClasses
+            )
             .onclick(async () => {
                 navigate(searchResult.url);
                 resultsShown.value = false;
@@ -303,11 +420,8 @@ export class SearchTemplates {
                     .children(
                         create("span")
                             .classes("search-result-image")
-                            .children(
-                                create("img")
-                                    .src(image)
-                                    .build()
-                            ).build(),
+                            .children(create("img").src(image).build())
+                            .build(),
                         create("div")
                             .classes("flex-v", "nogap", "search-result-text")
                             .children(
@@ -317,19 +431,28 @@ export class SearchTemplates {
                                         create("span")
                                             .classes("search-result-display")
                                             .text(display)
-                                            .build(),
-                                    ).build(),
+                                            .build()
+                                    )
+                                    .build(),
                                 create("span")
                                     .classes("search-result-subtitle", "text-xsmall")
                                     .text(subtitle)
-                                    .build(),
-                            ).build(),
-                    ).build(),
+                                    .build()
+                            )
+                            .build()
+                    )
+                    .build(),
                 create("span")
-                    .classes("search-result-type", "hideOnSmallBreakpoint", "padded-inline", searchResult.type)
+                    .classes(
+                        "search-result-type",
+                        "hideOnSmallBreakpoint",
+                        "padded-inline",
+                        searchResult.type
+                    )
                     .text(searchResult.type)
                     .build()
-            ).build();
+            )
+            .build();
         return elementReference;
     }
 

@@ -6,3 +6,6 @@
 .env
 /out/
 *.DS_STORE
+.eslintcache
+.prettierrc.cache
+*.log
