@@ -76,7 +76,7 @@ export class TrackEditTemplates {
                             .text("Upload")
                             .build(),
                         TrackEditTemplates.upDownButtons(state, true),
-                        TrackEditTemplates.trackUpload(state, errorSections, errorFields),
+                        TrackEditTemplates.trackUpload(state, errorSections),
                         TrackEditTemplates.uploadButton(state, errorSections, errorFields),
                         TrackEditTemplates.uploadInfo(uploadInfo),
                     ).build(),
@@ -270,36 +270,40 @@ export class TrackEditTemplates {
         return create("div")
             .classes("flex-v")
             .children(
-                TrackEditTemplates.sectionCard("Track Details", errorSections, "info", [
-                    create("div")
-                        .classes("flex")
-                        .children(
-                            toggle({
-                                name: "visibility",
-                                label: "Private",
-                                text: "Private",
-                                checked: isPrivate,
-                                onchange: (v) => {
-                                    state.value = {...state.value, visibility: v ? "private" : "public"};
-                                }
-                            }),
-                        ).build(),
-                    TrackEditTemplates.titleInput(state),
-                    TrackEditTemplates.creditsInput(state),
-                    TrackEditTemplates.artistNameInput(state),
-                    when(enableLinkedUsers, TrackEditTemplates.linkedUsers(state.value.collaborators, state)),
-                    GenericTemplates.releaseDateInput(state),
-                    TrackEditTemplates.genreInput(state),
-                    TrackEditTemplates.isrcInput(state),
-                    TrackEditTemplates.upcInput(state),
-                    TrackEditTemplates.descriptionInput(state),
-                ], "info", ["flex-grow"]),
+                TrackEditTemplates.trackDetails(errorSections, isPrivate, state, enableLinkedUsers),
                 create("div")
                     .classes("flex-v")
                     .children(
                         TrackEditTemplates.monetizationSection(errorSections, state),
                     ).build()
             ).build();
+    }
+
+    private static trackDetails(errorSections: Signal<string[]>, isPrivate: Signal<boolean>, state: Signal<UploadableTrack>, enableLinkedUsers: boolean) {
+        return TrackEditTemplates.sectionCard("Track Details", errorSections, "info", [
+            create("div")
+                .classes("flex")
+                .children(
+                    toggle({
+                        name: "visibility",
+                        label: "Private",
+                        text: "Private",
+                        checked: isPrivate,
+                        onchange: (v) => {
+                            state.value = {...state.value, visibility: v ? "private" : "public"};
+                        }
+                    }),
+                ).build(),
+            TrackEditTemplates.titleInput(state),
+            TrackEditTemplates.creditsInput(state),
+            TrackEditTemplates.artistNameInput(state),
+            when(enableLinkedUsers, TrackEditTemplates.linkedUsers(state.value.collaborators, state)),
+            GenericTemplates.releaseDateInput(state),
+            TrackEditTemplates.genreInput(state),
+            TrackEditTemplates.isrcInput(state),
+            TrackEditTemplates.upcInput(state),
+            TrackEditTemplates.descriptionInput(state),
+        ], "info", ["flex-grow"]);
     }
 
     private static monetizationSection(errorSections: Signal<string[]>, state: Signal<UploadableTrack>) {
@@ -332,7 +336,7 @@ export class TrackEditTemplates {
             name: "title",
             label: "Title*",
             placeholder: "Track title",
-            value: compute(s => s.title, state),
+            value: compute(s => s.title ?? "", state),
             validators: TrackValidators.titleValidators,
             onchange: (v) => {
                 state.value = {...state.value, title: v};
@@ -347,7 +351,7 @@ export class TrackEditTemplates {
             label: "Collaborators",
             placeholder: "John Music, Alice Frequency",
             validators: TrackValidators.creditsValidators,
-            value: compute(s => s.credits, state),
+            value: compute(s => s.credits ?? "", state),
             onchange: (v) => {
                 state.value = {...state.value, credits: v};
             }
@@ -360,7 +364,7 @@ export class TrackEditTemplates {
             label: "Description",
             placeholder: "My cool track",
             validators: TrackValidators.descriptionValidators,
-            value: compute(s => s.description, state),
+            value: compute(s => s.description ?? "", state),
             onchange: (v) => {
                 state.value = {...state.value, description: v};
             }
@@ -374,7 +378,7 @@ export class TrackEditTemplates {
             label: "UPC",
             placeholder: "00888072469600",
             validators: TrackValidators.upcValidators,
-            value: compute(s => s.upc, state),
+            value: compute(s => s.upc ?? "", state),
             onchange: (v) => {
                 state.value = {...state.value, upc: v};
             }
@@ -406,7 +410,7 @@ export class TrackEditTemplates {
             label: "ISRC",
             placeholder: "QZNWX2227540",
             validators: TrackValidators.isrcValidators,
-            value: compute(s => s.isrc, state),
+            value: compute(s => s.isrc ?? "", state),
             onchange: (v) => {
                 state.value = {...state.value, isrc: v};
             }
@@ -427,36 +431,13 @@ export class TrackEditTemplates {
         });
     }
 
-    static trackUpload(state: Signal<UploadableTrack>, errorSections: Signal<string[]>, errorFields: Signal<string[]>, enableTos = true, enableLinkedUsers = true) {
+    static trackUpload(state: Signal<UploadableTrack>, errorSections: Signal<string[]>, enableTos = true, enableLinkedUsers = true) {
         const isPrivate = compute((s) => s.visibility === "private", state);
 
         return create("div")
             .classes("flex")
             .children(
-                TrackEditTemplates.sectionCard("Track Details", errorSections, "info", [
-                    create("div")
-                        .classes("flex")
-                        .children(
-                            toggle({
-                                name: "visibility",
-                                label: "Private",
-                                text: "Private",
-                                checked: isPrivate,
-                                onchange: (v) => {
-                                    state.value = {...state.value, visibility: v ? "private" : "public"};
-                                }
-                            }),
-                        ).build(),
-                    TrackEditTemplates.titleInput(state),
-                    TrackEditTemplates.creditsInput(state),
-                    TrackEditTemplates.artistNameInput(state),
-                    when(enableLinkedUsers, TrackEditTemplates.linkedUsers(state.value.collaborators, state)),
-                    GenericTemplates.releaseDateInput(state),
-                    TrackEditTemplates.genreInput(state),
-                    TrackEditTemplates.isrcInput(state),
-                    TrackEditTemplates.upcInput(state),
-                    TrackEditTemplates.descriptionInput(state),
-                ], "info", ["flex-grow"]),
+                TrackEditTemplates.trackDetails(errorSections, isPrivate, state, enableLinkedUsers),
                 create("div")
                     .classes("flex-v")
                     .children(
