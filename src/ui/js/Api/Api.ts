@@ -50,13 +50,17 @@ export class Api {
 
     //region User
     static async markNotificationsAsRead(newestTimestamp: Signal<Date | null>) {
-        post(ApiRoutes.markAllNotificationsAsRead, {
-            newest: newestTimestamp.value
+        await post(ApiRoutes.markAllNotificationsAsRead, {
+            newest: newestTimestamp.value,
         });
     }
 
-    static async getNotifications(after?: number) {
-        get<Notification[]>(ApiRoutes.getAllNotifications + `?after=${after}`);
+    static async getNotifications(afterNotifId?: number) {
+        if (afterNotifId) {
+            return get<Notification[]>(ApiRoutes.getAllNotifications, { after: afterNotifId });
+        } else {
+            return get<Notification[]>(ApiRoutes.getAllNotifications);
+        }
     }
 
     static async deleteUser() {
@@ -64,11 +68,7 @@ export class Api {
     }
 
     static async updateUser(user: Partial<User>) {
-        const res = await HttpClient.postAsync(ApiRoutes.updateUser, { user });
-        if (res.code !== 200) {
-            notify("Failed to update account: " + getErrorMessage(res), NotificationType.error);
-            return false;
-        }
+        await post(ApiRoutes.updateUser, { user });
         currentUser.value = <User>{
             ...currentUser.value,
             ...user,
@@ -82,42 +82,22 @@ export class Api {
     }
 
     static async getLibrary(name: string) {
-        const res = await HttpClient.getAsync<Library>(ApiRoutes.getLibrary, { name });
-        if (res.code !== 200) {
-            notify("Failed to get library", NotificationType.error);
-            return null;
-        }
-        return res.data as Library;
+        return await get<Library>(ApiRoutes.getLibrary, { name });
     }
 
     static async getRoyaltyInfo(): Promise<RoyaltyInfo | null> {
-        const res = await HttpClient.getAsync<RoyaltyInfo>(ApiRoutes.getRoyaltyInfo);
-        if (res.code !== 200) {
-            notify("Failed to get library", NotificationType.error);
-            return null;
-        }
-        return res.data;
+        return await get<RoyaltyInfo>(ApiRoutes.getRoyaltyInfo);
     }
+
     //endregion
 
     //region Albums
-    static async getAlbumsByUserId(userId: number): Promise<Album[]> {
-        const res = await HttpClient.getAsync<Album[]>(ApiRoutes.getAlbumsByUserId, { id: userId });
-        if (res.code !== 200) {
-            console.error("Failed to get albums: ", res.data);
-            return [];
-        }
-        return res.data;
+    static async getAlbumsByUserId(userId: number): Promise<Album[] | null> {
+        return await get<Album[]>(ApiRoutes.getAlbumsByUserId, { id: userId });
     }
 
     static async createNewAlbum(album: Partial<Album>): Promise<boolean> {
-        const res = await HttpClient.postAsync(ApiRoutes.newAlbum, album);
-        if (res.code !== 200) {
-            notify("Failed to create album: " + getErrorMessage(res), NotificationType.error);
-            return false;
-        }
-        notify("Created album", NotificationType.success);
-        return true;
+        return !!(await post(ApiRoutes.newAlbum, album));
     }
 
     static async deleteAlbum(id: number): Promise<boolean> {
@@ -170,6 +150,7 @@ export class Api {
         }
         return true;
     }
+
     //endregion
 
     //region Tracks
@@ -234,18 +215,11 @@ export class Api {
             return null;
         }
 
-        const res = await HttpClient.postAsync(ApiRoutes.newComment, {
+        return await post<number>(ApiRoutes.newComment, {
             id: track_id,
             content: content,
             parentId: parentCommentId ? parentCommentId : null,
         });
-
-        if (res.code !== 200) {
-            notify(getErrorMessage(res), NotificationType.error);
-            return null;
-        }
-
-        return parseInt(res.data);
     }
 
     static async followUser(userId: number): Promise<any> {
@@ -296,49 +270,19 @@ export class Api {
         userId: number,
         collabType: number
     ): Promise<TrackCollaborator | null> {
-        const res = await HttpClient.postAsync<TrackCollaborator>(ApiRoutes.addCollaborator, {
+        return await post<TrackCollaborator>(ApiRoutes.addCollaborator, {
             id: trackId,
             userId: userId,
             collabType: collabType,
         });
-
-        if (res.code !== 200) {
-            notify(
-                "Error while trying to add collaborator: " + getErrorMessage(res),
-                NotificationType.error
-            );
-            return null;
-        }
-
-        return res.data;
     }
 
-    static async getUnapprovedTracks(): Promise<any[]> {
-        const res = await HttpClient.getAsync<any[]>(ApiRoutes.getUnapprovedCollabs);
-        if (res.code !== 200) {
-            notify(
-                "Error while trying to get unapproved tracks: " + getErrorMessage(res),
-                NotificationType.error
-            );
-            return [];
-        }
-        return res.data;
+    static async getUnapprovedTracks(): Promise<any[] | null> {
+        return await get<any[]>(ApiRoutes.getUnapprovedCollabs);
     }
 
-    static async approveCollab(id: number, name = "track"): Promise<boolean> {
-        const res = await HttpClient.postAsync(ApiRoutes.approveCollab, {
-            id: id,
-        });
-        if (res.code !== 200) {
-            notify(
-                "Error while trying to approve collab: " + getErrorMessage(res),
-                NotificationType.error
-            );
-            return false;
-        }
-
-        notify(`Collab on ${name} approved`, NotificationType.success);
-        return true;
+    static async approveCollab(id: number): Promise<boolean> {
+        return !!(await post(ApiRoutes.approveCollab, { id }));
     }
 
     static async denyCollab(id: number, name = "track"): Promise<boolean> {
@@ -364,15 +308,10 @@ export class Api {
         track: Track;
         canEdit: boolean;
     } | null> {
-        const res = await HttpClient.getAsync<{
+        return await get<{
             track: Track;
             canEdit: boolean;
-        }>(ApiRoutes.getTrackById + `?id=${id}&code=${code}`);
-        if (res.code !== 200) {
-            notify("Error getting track: " + getErrorMessage(res), NotificationType.error);
-            return null;
-        }
-        return res.data;
+        }>(ApiRoutes.getTrackById, { id: id.toString(), code });
     }
 
     static async updateTrackFull(track: Partial<Track>): Promise<any> {
@@ -399,6 +338,7 @@ export class Api {
 
         return res.data;
     }
+
     //endregion
 
     //region Playlists
@@ -406,26 +346,16 @@ export class Api {
         playlist: Playlist;
         canEdit: boolean;
     } | null> {
-        const res = await HttpClient.getAsync<{
+        return await get<{
             playlist: Playlist;
             canEdit: boolean;
-        }>(ApiRoutes.getPlaylistById + `?id=${id}`);
-        if (res.code !== 200) {
-            console.error("Failed to get playlist: ", res.data);
-            return null;
-        }
-        return res.data;
+        }>(ApiRoutes.getPlaylistById, { id });
     }
 
-    static async getPlaylistsByUserId(userId: number): Promise<Playlist[]> {
-        const res = await HttpClient.getAsync<Playlist[]>(ApiRoutes.getPlaylistsByUserId, {
+    static async getPlaylistsByUserId(userId: number): Promise<Playlist[] | null> {
+        return await get<Playlist[]>(ApiRoutes.getPlaylistsByUserId, {
             id: userId,
         });
-        if (res.code !== 200) {
-            console.error("Failed to get playlists: ", res.data);
-            return [];
-        }
-        return res.data;
     }
 
     static async createNewPlaylist(playlist: Partial<Playlist>): Promise<boolean> {
@@ -471,45 +401,30 @@ export class Api {
         track_id: number,
         playlist_ids: number[]
     ): Promise<boolean> {
-        const res = await HttpClient.postAsync(ApiRoutes.removeTrackFromPlaylists, {
+        await post(ApiRoutes.removeTrackFromPlaylists, {
             playlist_ids,
             track_id,
         });
-        if (res.code !== 200) {
-            notify(
-                "Failed to remove track from playlist: " + getErrorMessage(res),
-                NotificationType.error
-            );
-            return false;
-        }
         notify("Removed track from playlist", NotificationType.success);
         return true;
     }
 
     static async moveTrackInPlaylist(playlistId: number, tracks: ListTrack[]): Promise<boolean> {
-        const res = await HttpClient.postAsync(ApiRoutes.reorderPlaylistTracks, {
+        return !!(await post(ApiRoutes.reorderPlaylistTracks, {
             playlist_id: playlistId,
             tracks,
-        });
-        if (res.code !== 200) {
-            notify("Failed to move tracks: " + getErrorMessage(res), NotificationType.error);
-            return false;
-        }
-        return true;
+        }));
     }
 
     static async addAlbumToPlaylists(album_id: number, playlist_ids: number[]): Promise<boolean> {
-        const res = await HttpClient.postAsync(ApiRoutes.addAlbumToPlaylists, {
+        await post(ApiRoutes.addAlbumToPlaylists, {
             playlist_ids,
             album_id,
         });
-        if (res.code !== 200) {
-            notify(getErrorMessage(res), NotificationType.error);
-            return false;
-        }
         notify("Added album to playlist(s)", NotificationType.success);
         return true;
     }
+
     //endregion
 
     //region Comments
@@ -521,46 +436,27 @@ export class Api {
             limit: number;
         },
         loading: Signal<boolean>,
-        callback: (data: Comment[]) => void
+        callback: (data: Comment[]) => Promise<void> | void
     ) {
         loading.value = true;
-        HttpClient.getAsync<Comment[]>(ApiRoutes.getModerationComments, filter).then(res => {
+        get<Comment[]>(ApiRoutes.getModerationComments, filter).then(async res => {
             loading.value = false;
-            if (res.code !== 200) {
-                notify(
-                    "Error while trying to get comments: " + getErrorMessage(res),
-                    NotificationType.error
-                );
-                return [];
+            if (res) {
+                await callback(res);
             }
-            callback(res.data);
         });
     }
 
     static async setPotentiallyHarmful(id: number, v: boolean) {
-        const res = await HttpClient.postAsync(ApiRoutes.setCommentPotentiallyHarmful, {
+        await post(ApiRoutes.setCommentPotentiallyHarmful, {
             id,
             potentiallyHarmful: v,
         });
-        if (res.code !== 200) {
-            notify(
-                "Error while trying to set potentially harmful for comment: " +
-                    getErrorMessage(res),
-                NotificationType.error
-            );
-            return false;
-        }
     }
 
     static async setHidden(id: number, v: boolean) {
-        const res = await HttpClient.postAsync(ApiRoutes.setCommentHidden, { id, hidden: v });
-        if (res.code !== 200) {
-            notify(
-                "Error while trying to set hidden for comment: " + getErrorMessage(res),
-                NotificationType.error
-            );
-            return false;
-        }
+        await post(ApiRoutes.setCommentHidden, { id, hidden: v });
     }
+
     //endregion
 }

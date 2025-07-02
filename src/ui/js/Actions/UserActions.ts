@@ -18,7 +18,6 @@ import {currentQuality, currentUser, notifications} from "../state.ts";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
-import {Notification} from "@targoninc/lyda-shared/src/Models/db/lyda/Notification";
 import {StreamingQuality} from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
 import {UserSettings} from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import {Theme} from "@targoninc/lyda-shared/src/Enums/Theme";
@@ -70,14 +69,13 @@ export class UserActions {
 
     static async getNotifications() {
         const newestId = notifications.value.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]?.id;
-        let res;
         if (!newestId) {
             notifications.value = await Api.getNotifications();
         } else {
-            res = await HttpClient.getAsync<Notification[]>(ApiRoutes.getAllNotifications, {after: newestId});
-            if (res.code === 200) {
-                notifications.value = notifications.value.concat(res.data).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-            }
+            const newNotifs = await Api.getNotifications(newestId);
+            const oldNotifs = notifications.value;
+            notifications.value = oldNotifs.concat(newNotifs.filter(n => !oldNotifs.find(on => on.id === n.id)))
+                .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         }
     }
 

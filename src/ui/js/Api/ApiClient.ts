@@ -1,45 +1,54 @@
-import { Console, Effect } from "effect";
+import { notify } from "../Classes/Ui.ts";
+import { NotificationType } from "../Enums/NotificationType.ts";
 
-const refetch = (
+const refetch = async <T>(
     method: "POST" | "GET",
     url: string,
     headers: Record<string, string>,
-    body: any
-): Effect.Effect<string, Error> =>
-    Effect.tryPromise({
-        try: () =>
-            fetch(url, {
-                method,
-                mode: "cors",
-                headers: body.constructor === FormData ? headers : {
-                    "Content-Type": "application/json",
-                    ...headers,
-                },
-                credentials: "include",
-                body,
-            }).then(res => {
-                if (res.ok) {
-                    return res.text() as Promise<string>;
-                }
+    body?: any
+): Promise<T | null> => {
+    const res = await fetch(url, {
+        method,
+        mode: "cors",
+        credentials: "include",
+        headers:
+            body instanceof FormData ? headers : { "Content-Type": "application/json", ...headers },
+        body: body instanceof FormData ? body : JSON.stringify(body),
+    });
 
-                throw new Error(String(res.status));
-            }),
-        catch: e => new Error(String(e)),
-    })
+    const text = await res.text();
+    if (!res.ok) {
+        console.error(text);
+        notify(
+            `API call failed: ${text.substring(0, 100) + (text.length > 100) ? "..." : ""}`,
+            NotificationType.error
+        );
+        throw new Error(text);
+    }
 
-const fetchJson = <T>(
-    method: "POST" | "GET",
-    url: string,
-    headers: Record<string, string>,
-    body: any
-) => refetch(method, url, headers, body)
-    .pipe(Effect.catchAll(err => Console.error(err)))
+    try {
+        return JSON.parse(text) as T;
+    } catch (e: any) {
+        // ignore
+        return null;
+    }
+};
 
-export const post = (url: string, body: any, headers: Record<string, string> = {}) =>
-    refetch("POST", url, headers, JSON.stringify(body));
+function getGetUrl(urlIn: string, params: Record<string, string>) {
+    const url = new URL(urlIn);
 
-export const postRaw = (url: string, body: any, headers: Record<string, string> = {}) =>
-    refetch("POST", url, headers, body);
+    for (const key in params) {
+        url.searchParams.set(key, params[key].toString());
+    }
 
-export const get = <T>(url: string, headers: Record<string, string> = {}) =>
-    fetchJson<T>("GET", url, headers, undefined);
+    return url.href;
+}
+
+export const get = <T>(url: string, params: Record<string, any> = {}, headers: Record<string, string> = {}) =>
+    refetch<T>("GET", getGetUrl(url, params), headers);
+
+export const post = <T>(url: string, body: any, headers: Record<string, string> = {}) =>
+    refetch<T>("POST", url, headers, body);
+
+export const postRaw = <T>(url: string, body: any, headers: Record<string, string> = {}) =>
+    refetch<T>("POST", url, headers, body);
