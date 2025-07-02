@@ -1,47 +1,44 @@
-import {HttpClient} from "./HttpClient.ts";
-import {notify} from "../Classes/Ui.ts";
-import {Signal} from "@targoninc/jess";
-import {ApiRoutes} from "./ApiRoutes.ts";
-import {currentUser} from "../state.ts";
-import {getErrorMessage, updateUserSetting, Util} from "../Classes/Util.ts";
-import {Log} from "@targoninc/lyda-shared/src/Models/db/lyda/Log";
-import {NotificationType} from "../Enums/NotificationType.ts";
-import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
-import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
-import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
-import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
-import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
-import {TrackCollaborator} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
-import {Library} from "@targoninc/lyda-shared/dist/Models/Library";
-import {RoyaltyInfo} from "@targoninc/lyda-shared/src/Models/RoyaltyInfo";
-import {Theme} from "@targoninc/lyda-shared/src/Enums/Theme.ts";
-import {UserSettings} from "@targoninc/lyda-shared/src/Enums/UserSettings.ts";
-import {LydaCache} from "../Cache/LydaCache.ts";
+import { HttpClient } from "./HttpClient.ts";
+import { notify } from "../Classes/Ui.ts";
+import { Signal } from "@targoninc/jess";
+import { ApiRoutes } from "./ApiRoutes.ts";
+import { currentUser } from "../state.ts";
+import { getErrorMessage } from "../Classes/Util.ts";
+import { Log } from "@targoninc/lyda-shared/src/Models/db/lyda/Log";
+import { NotificationType } from "../Enums/NotificationType.ts";
+import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import { ListTrack } from "@targoninc/lyda-shared/src/Models/ListTrack";
+import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import { CollaboratorType } from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
+import { TrackCollaborator } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
+import { Library } from "@targoninc/lyda-shared/dist/Models/Library";
+import { RoyaltyInfo } from "@targoninc/lyda-shared/src/Models/RoyaltyInfo";
 
 export class Api {
-    static getLogs(filterState: Signal<any>, successCallback: Function) {
+    static getLogs(filterState: Signal<any>, successCallback: (data: Log[]) => void) {
         const errorText = "Failed to get logs";
         HttpClient.getAsync<Log[]>(ApiRoutes.getLogs, {
             logLevel: filterState.value,
             offset: 0,
-            limit: 50
+            limit: 50,
         }).then(logs => {
             Api.handleResponse(logs, errorText, successCallback);
         });
 
-        filterState.subscribe(async (newValue) => {
+        filterState.subscribe(async newValue => {
             HttpClient.getAsync<Log[]>(ApiRoutes.getLogs, {
                 logLevel: newValue,
                 offset: 0,
-                limit: 100
+                limit: 100,
             }).then(logs => {
                 Api.handleResponse(logs, errorText, successCallback);
             });
         });
     }
 
-    static handleResponse(response: any, errorText: string, successCallback: Function) {
+    static handleResponse(response: any, errorText: string, successCallback: (data: any) => void) {
         if (response.code !== 200) {
             notify(errorText, NotificationType.error);
             return;
@@ -51,7 +48,9 @@ export class Api {
 
     //region User
     static async markNotificationsAsRead(newestTimestamp: Signal<Date | null>) {
-        await HttpClient.postAsync(ApiRoutes.markAllNotificationsAsRead, {newest: newestTimestamp.value});
+        await HttpClient.postAsync(ApiRoutes.markAllNotificationsAsRead, {
+            newest: newestTimestamp.value,
+        });
     }
 
     static async deleteUser() {
@@ -66,7 +65,7 @@ export class Api {
         }
         currentUser.value = <User>{
             ...currentUser.value,
-            ...user
+            ...user,
         };
         notify("Account updated", NotificationType.success);
         return true;
@@ -85,7 +84,7 @@ export class Api {
         return res.data as Library;
     }
 
-    static async getRoyaltyInfo(): Promise<RoyaltyInfo|null> {
+    static async getRoyaltyInfo(): Promise<RoyaltyInfo | null> {
         const res = await HttpClient.getAsync<RoyaltyInfo>(ApiRoutes.getRoyaltyInfo);
         if (res.code !== 200) {
             notify("Failed to get library", NotificationType.error);
@@ -97,7 +96,7 @@ export class Api {
 
     //region Albums
     static async getAlbumsByUserId(userId: number): Promise<Album[]> {
-        const res = await HttpClient.getAsync<Album[]>(ApiRoutes.getAlbumsByUserId, {id: userId});
+        const res = await HttpClient.getAsync<Album[]>(ApiRoutes.getAlbumsByUserId, { id: userId });
         if (res.code !== 200) {
             console.error("Failed to get albums: ", res.data);
             return [];
@@ -116,7 +115,7 @@ export class Api {
     }
 
     static async deleteAlbum(id: number): Promise<boolean> {
-        const res = await HttpClient.postAsync(ApiRoutes.deleteAlbum, {id});
+        const res = await HttpClient.postAsync(ApiRoutes.deleteAlbum, { id });
         if (res.code !== 200) {
             notify("Error trying to delete album: " + getErrorMessage(res), NotificationType.error);
             return false;
@@ -126,9 +125,12 @@ export class Api {
     }
 
     static async addTrackToAlbums(track_id: number, album_ids: number[]): Promise<boolean> {
-        const res = await HttpClient.postAsync(ApiRoutes.addTrackToAlbums, {album_ids, track_id});
+        const res = await HttpClient.postAsync(ApiRoutes.addTrackToAlbums, { album_ids, track_id });
         if (res.code !== 200) {
-            notify("Failed to add track to albums: " + getErrorMessage(res), NotificationType.error);
+            notify(
+                "Failed to add track to albums: " + getErrorMessage(res),
+                NotificationType.error
+            );
             return false;
         }
         notify("Added track to albums", NotificationType.success);
@@ -136,9 +138,15 @@ export class Api {
     }
 
     static async removeTrackFromAlbums(track_id: number, album_ids: number[]): Promise<boolean> {
-        const res = await HttpClient.postAsync(ApiRoutes.removeTrackFromAlbums, {album_ids, track_id});
+        const res = await HttpClient.postAsync(ApiRoutes.removeTrackFromAlbums, {
+            album_ids,
+            track_id,
+        });
         if (res.code !== 200) {
-            notify("Failed to remove track from album: " + getErrorMessage(res), NotificationType.error);
+            notify(
+                "Failed to remove track from album: " + getErrorMessage(res),
+                NotificationType.error
+            );
             return false;
         }
         notify("Removed track from album", NotificationType.success);
@@ -148,7 +156,7 @@ export class Api {
     static async moveTrackInAlbum(albumId: number, tracks: ListTrack[]): Promise<boolean> {
         const res = await HttpClient.postAsync(ApiRoutes.reorderAlbumTracks, {
             album_id: albumId,
-            tracks
+            tracks,
         });
         if (res.code !== 200) {
             notify("Failed to move tracks: " + getErrorMessage(res), NotificationType.error);
@@ -170,11 +178,14 @@ export class Api {
 
     static async unfollowUser(userId: number): Promise<any> {
         const res = await HttpClient.postAsync(ApiRoutes.unfollowUser, {
-            id: userId
+            id: userId,
         });
 
         if (res.code !== 200) {
-            notify("Error while trying to unfollow user: " + getErrorMessage(res), NotificationType.error);
+            notify(
+                "Error while trying to unfollow user: " + getErrorMessage(res),
+                NotificationType.error
+            );
         }
 
         return res;
@@ -186,7 +197,7 @@ export class Api {
             notify("Error trying to delete track: " + getErrorMessage(res), NotificationType.error);
             return false;
         }
-        notify(res.data, NotificationType.success);
+        notify("Track deleted", NotificationType.success);
         return true;
     }
 
@@ -204,7 +215,11 @@ export class Api {
         return true;
     }
 
-    static async newComment(track_id: number, content: string, parentCommentId: number|null = null): Promise<number|null> {
+    static async newComment(
+        track_id: number,
+        content: string,
+        parentCommentId: number | null = null
+    ): Promise<number | null> {
         if (!content || content === "") {
             return null;
         }
@@ -233,7 +248,10 @@ export class Api {
         });
 
         if (res.code !== 200) {
-            notify("Error while trying to follow user: " + getErrorMessage(res), NotificationType.error);
+            notify(
+                "Error while trying to follow user: " + getErrorMessage(res),
+                NotificationType.error
+            );
         }
 
         return res;
@@ -242,7 +260,10 @@ export class Api {
     static async getCollabTypes(): Promise<CollaboratorType[]> {
         const res = await HttpClient.getAsync<CollaboratorType[]>(ApiRoutes.getTrackCollabTypes);
         if (res.code !== 200) {
-            notify("Error while trying to get collab types: " + getErrorMessage(res), NotificationType.error);
+            notify(
+                "Error while trying to get collab types: " + getErrorMessage(res),
+                NotificationType.error
+            );
             return [];
         }
         return res.data as CollaboratorType[];
@@ -255,13 +276,20 @@ export class Api {
         });
 
         if (res.code !== 200) {
-            notify("Error while trying to remove collaborator: " + getErrorMessage(res), NotificationType.error);
+            notify(
+                "Error while trying to remove collaborator: " + getErrorMessage(res),
+                NotificationType.error
+            );
             return false;
         }
         return true;
     }
 
-    static async addCollaboratorToTrack(trackId: number, userId: number, collabType: number): Promise<TrackCollaborator|null> {
+    static async addCollaboratorToTrack(
+        trackId: number,
+        userId: number,
+        collabType: number
+    ): Promise<TrackCollaborator | null> {
         const res = await HttpClient.postAsync<TrackCollaborator>(ApiRoutes.addCollaborator, {
             id: trackId,
             userId: userId,
@@ -269,7 +297,10 @@ export class Api {
         });
 
         if (res.code !== 200) {
-            notify("Error while trying to add collaborator: " + getErrorMessage(res), NotificationType.error);
+            notify(
+                "Error while trying to add collaborator: " + getErrorMessage(res),
+                NotificationType.error
+            );
             return null;
         }
 
@@ -279,7 +310,10 @@ export class Api {
     static async getUnapprovedTracks(): Promise<any[]> {
         const res = await HttpClient.getAsync<any[]>(ApiRoutes.getUnapprovedCollabs);
         if (res.code !== 200) {
-            notify("Error while trying to get unapproved tracks: " + getErrorMessage(res), NotificationType.error);
+            notify(
+                "Error while trying to get unapproved tracks: " + getErrorMessage(res),
+                NotificationType.error
+            );
             return [];
         }
         return res.data;
@@ -290,7 +324,10 @@ export class Api {
             id: id,
         });
         if (res.code !== 200) {
-            notify("Error while trying to approve collab: " + getErrorMessage(res), NotificationType.error);
+            notify(
+                "Error while trying to approve collab: " + getErrorMessage(res),
+                NotificationType.error
+            );
             return false;
         }
 
@@ -303,7 +340,10 @@ export class Api {
             id: id,
         });
         if (res.code !== 200) {
-            notify("Error while trying to deny collab: " + getErrorMessage(res), NotificationType.error);
+            notify(
+                "Error while trying to deny collab: " + getErrorMessage(res),
+                NotificationType.error
+            );
             return false;
         }
 
@@ -311,13 +351,16 @@ export class Api {
         return true;
     }
 
-    static async getTrackById(id: number, code: string = ""): Promise<{
-        track: Track,
-        canEdit: boolean,
-    }|null> {
+    static async getTrackById(
+        id: number,
+        code: string = ""
+    ): Promise<{
+        track: Track;
+        canEdit: boolean;
+    } | null> {
         const res = await HttpClient.getAsync<{
-            track: Track,
-            canEdit: boolean,
+            track: Track;
+            canEdit: boolean;
         }>(ApiRoutes.getTrackById + `?id=${id}&code=${code}`);
         if (res.code !== 200) {
             notify("Error getting track: " + getErrorMessage(res), NotificationType.error);
@@ -341,7 +384,10 @@ export class Api {
             price: track.price,
         });
         if (res.code !== 200) {
-            notify("Error while trying to update track: " + getErrorMessage(res), NotificationType.error);
+            notify(
+                "Error while trying to update track: " + getErrorMessage(res),
+                NotificationType.error
+            );
             return null;
         }
 
@@ -351,12 +397,12 @@ export class Api {
 
     //region Playlists
     static async getPlaylistById(id: number): Promise<{
-        playlist: Playlist,
-        canEdit: boolean,
-    }|null> {
+        playlist: Playlist;
+        canEdit: boolean;
+    } | null> {
         const res = await HttpClient.getAsync<{
-            playlist: Playlist,
-            canEdit: boolean,
+            playlist: Playlist;
+            canEdit: boolean;
         }>(ApiRoutes.getPlaylistById + `?id=${id}`);
         if (res.code !== 200) {
             console.error("Failed to get playlist: ", res.data);
@@ -366,7 +412,9 @@ export class Api {
     }
 
     static async getPlaylistsByUserId(userId: number): Promise<Playlist[]> {
-        const res = await HttpClient.getAsync<Playlist[]>(ApiRoutes.getPlaylistsByUserId, {id: userId});
+        const res = await HttpClient.getAsync<Playlist[]>(ApiRoutes.getPlaylistsByUserId, {
+            id: userId,
+        });
         if (res.code !== 200) {
             console.error("Failed to get playlists: ", res.data);
             return [];
@@ -385,9 +433,12 @@ export class Api {
     }
 
     static async deletePlaylist(id: number): Promise<boolean> {
-        const res = await HttpClient.postAsync(ApiRoutes.deletePlaylist, {id});
+        const res = await HttpClient.postAsync(ApiRoutes.deletePlaylist, { id });
         if (res.code !== 200) {
-            notify("Error trying to delete playlist: " + getErrorMessage(res), NotificationType.error);
+            notify(
+                "Error trying to delete playlist: " + getErrorMessage(res),
+                NotificationType.error
+            );
             return false;
         }
         notify("Successfully deleted playlist", NotificationType.success);
@@ -397,20 +448,32 @@ export class Api {
     static async addTrackToPlaylists(track_id: number, playlist_ids: number[]): Promise<boolean> {
         const res = await HttpClient.postAsync(ApiRoutes.addTrackToPlaylists, {
             playlist_ids,
-            track_id
+            track_id,
         });
         if (res.code !== 200) {
-            notify("Failed to add track to playlists: " + getErrorMessage(res), NotificationType.error);
+            notify(
+                "Failed to add track to playlists: " + getErrorMessage(res),
+                NotificationType.error
+            );
             return false;
         }
         notify("Added track to playlist(s)", NotificationType.success);
         return true;
     }
 
-    static async removeTrackFromPlaylists(track_id: number, playlist_ids: number[]): Promise<boolean> {
-        const res = await HttpClient.postAsync(ApiRoutes.removeTrackFromPlaylists, {playlist_ids, track_id});
+    static async removeTrackFromPlaylists(
+        track_id: number,
+        playlist_ids: number[]
+    ): Promise<boolean> {
+        const res = await HttpClient.postAsync(ApiRoutes.removeTrackFromPlaylists, {
+            playlist_ids,
+            track_id,
+        });
         if (res.code !== 200) {
-            notify("Failed to remove track from playlist: " + getErrorMessage(res), NotificationType.error);
+            notify(
+                "Failed to remove track from playlist: " + getErrorMessage(res),
+                NotificationType.error
+            );
             return false;
         }
         notify("Removed track from playlist", NotificationType.success);
@@ -420,7 +483,7 @@ export class Api {
     static async moveTrackInPlaylist(playlistId: number, tracks: ListTrack[]): Promise<boolean> {
         const res = await HttpClient.postAsync(ApiRoutes.reorderPlaylistTracks, {
             playlist_id: playlistId,
-            tracks
+            tracks,
         });
         if (res.code !== 200) {
             notify("Failed to move tracks: " + getErrorMessage(res), NotificationType.error);
@@ -432,7 +495,7 @@ export class Api {
     static async addAlbumToPlaylists(album_id: number, playlist_ids: number[]): Promise<boolean> {
         const res = await HttpClient.postAsync(ApiRoutes.addAlbumToPlaylists, {
             playlist_ids,
-            album_id
+            album_id,
         });
         if (res.code !== 200) {
             notify(getErrorMessage(res), NotificationType.error);
@@ -444,12 +507,24 @@ export class Api {
     //endregion
 
     //region Comments
-    static getModerationComments(filter: { potentiallyHarmful: boolean, user_id: number | null, offset: number, limit: number }, loading: Signal<boolean>, callback: Function) {
+    static getModerationComments(
+        filter: {
+            potentiallyHarmful: boolean;
+            user_id: number | null;
+            offset: number;
+            limit: number;
+        },
+        loading: Signal<boolean>,
+        callback: (data: Comment[]) => void
+    ) {
         loading.value = true;
         HttpClient.getAsync<Comment[]>(ApiRoutes.getModerationComments, filter).then(res => {
             loading.value = false;
             if (res.code !== 200) {
-                notify("Error while trying to get comments: " + getErrorMessage(res), NotificationType.error);
+                notify(
+                    "Error while trying to get comments: " + getErrorMessage(res),
+                    NotificationType.error
+                );
                 return [];
             }
             callback(res.data);
@@ -457,17 +532,27 @@ export class Api {
     }
 
     static async setPotentiallyHarmful(id: number, v: boolean) {
-        const res = await HttpClient.postAsync(ApiRoutes.setCommentPotentiallyHarmful, {id, potentiallyHarmful: v});
+        const res = await HttpClient.postAsync(ApiRoutes.setCommentPotentiallyHarmful, {
+            id,
+            potentiallyHarmful: v,
+        });
         if (res.code !== 200) {
-            notify("Error while trying to set potentially harmful for comment: " + getErrorMessage(res), NotificationType.error);
+            notify(
+                "Error while trying to set potentially harmful for comment: " +
+                    getErrorMessage(res),
+                NotificationType.error
+            );
             return false;
         }
     }
 
     static async setHidden(id: number, v: boolean) {
-        const res = await HttpClient.postAsync(ApiRoutes.setCommentHidden, {id, hidden: v});
+        const res = await HttpClient.postAsync(ApiRoutes.setCommentHidden, { id, hidden: v });
         if (res.code !== 200) {
-            notify("Error while trying to set hidden for comment: " + getErrorMessage(res), NotificationType.error);
+            notify(
+                "Error while trying to set hidden for comment: " + getErrorMessage(res),
+                NotificationType.error
+            );
             return false;
         }
     }

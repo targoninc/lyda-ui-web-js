@@ -1,9 +1,9 @@
-import {notify} from "../Classes/Ui.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
+import { notify } from "../Classes/Ui.ts";
+import { NotificationType } from "../Enums/NotificationType.ts";
 
 export interface ApiResponse<T> {
     code: number;
-    data: T & { error?: string };
+    data: T | { error?: string };
 }
 
 export class HttpClient {
@@ -12,7 +12,7 @@ export class HttpClient {
             return "";
         }
         let paramStr = "?";
-        for (let key of Object.keys(params)) {
+        for (const key of Object.keys(params)) {
             paramStr += key + "=" + params[key] + "&";
         }
         return paramStr.substring(0, paramStr.length - 1);
@@ -20,15 +20,22 @@ export class HttpClient {
 
     static async getDataFromHttpResponse<T = any>(res: Response): Promise<T> {
         let data = await res.text();
-        try {
-            data = JSON.parse(data);
-        } catch (e) {
-            // Ignore
+        if (data.startsWith("{") || data.startsWith("[")) {
+            try {
+                data = JSON.parse(data);
+            } catch (e: any) {
+                console.warn("Error while parsing JSON", e);
+            }
         }
+
         return data as T;
     }
 
-    static async getAsync<T>(url: string, params: object = {}, authorizationHeaders = {}): Promise<ApiResponse<T>> {
+    static async getAsync<T>(
+        url: string,
+        params: object = {},
+        authorizationHeaders = {}
+    ): Promise<ApiResponse<T>> {
         if (!url) {
             throw new Error("url is required");
         }
@@ -36,7 +43,7 @@ export class HttpClient {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
-                ...authorizationHeaders
+                ...authorizationHeaders,
             },
             credentials: "include",
         });
@@ -46,38 +53,41 @@ export class HttpClient {
             return {
                 code: 429,
                 data: {
-                    error: "Too many requests, please try again in 15 minutes."
-                }
+                    error: "Too many requests, please try again in 15 minutes.",
+                },
             };
         }
 
         return {
             code: res.status,
-            data: await HttpClient.getDataFromHttpResponse(res)
+            data: await HttpClient.getDataFromHttpResponse(res),
         };
     }
 
-    static async postAsync<T = string>(url: string, body: any = {}, authorizationHeaders: any = {}): Promise<ApiResponse<T>> {
+    static async postAsync<T = string>(
+        url: string,
+        body: any = {},
+        authorizationHeaders: any = {}
+    ): Promise<ApiResponse<T>> {
         return await HttpClient.postRawAsync(url, JSON.stringify(body), authorizationHeaders);
     }
 
     static async postRawAsync(url: string, body: any = {}, authorizationHeaders = {}) {
-        const headers = {
-            "Content-Type": "application/json",
-        };
-        if (body.constructor === FormData) {
-            // @ts-ignore
-            delete headers["Content-Type"];
-        }
+        const headers: Record<string, string> =
+            body.constructor === FormData
+                ? {}
+                : {
+                      "Content-Type": "application/json",
+                  };
         const res = await fetch(url, {
             method: "POST",
             mode: "cors",
             headers: {
                 ...headers,
-                ...authorizationHeaders
+                ...authorizationHeaders,
             },
             credentials: "include",
-            body
+            body,
         });
 
         if (res.status === 429) {
@@ -85,14 +95,14 @@ export class HttpClient {
             return {
                 code: 429,
                 data: {
-                    error: "Too many requests, please try again in 15 minutes."
-                }
+                    error: "Too many requests, please try again in 15 minutes.",
+                },
             };
         }
 
         return {
             code: res.status,
-            data: await HttpClient.getDataFromHttpResponse(res)
+            data: await HttpClient.getDataFromHttpResponse(res),
         };
     }
 }

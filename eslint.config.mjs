@@ -25,7 +25,7 @@ export default defineConfig([globalIgnores(["**/node_modules/", "**/dist/", "**/
 
     languageOptions: {
         parser: tsParser,
-        ecmaVersion: 2020,
+        ecmaVersion: "latest",
         sourceType: "module",
 
         parserOptions: {
@@ -37,6 +37,7 @@ export default defineConfig([globalIgnores(["**/node_modules/", "**/dist/", "**/
         "no-unused-vars": "off",
         "@typescript-eslint/no-unused-vars": "off",
         "unused-imports/no-unused-imports": "error",
+        "@typescript-eslint/no-explicit-any": "off",
 
         "unused-imports/no-unused-vars": ["warn", {
             vars: "all",
