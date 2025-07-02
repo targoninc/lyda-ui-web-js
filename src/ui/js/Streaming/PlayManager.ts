@@ -1,12 +1,10 @@
 import {LydaCache} from "../Cache/LydaCache.ts";
-import {HttpClient} from "../Api/HttpClient.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {StreamingUpdater} from "./StreamingUpdater.ts";
 import {QueueManager} from "./QueueManager.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
 import {StreamClient} from "./StreamClient.ts";
-import {getErrorMessage, userHasSettingValue, Util} from "../Classes/Util.ts";
-import {notify} from "../Classes/Ui.ts";
+import { userHasSettingValue, Util} from "../Classes/Util.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {
     trackInfo,
@@ -17,17 +15,17 @@ import {
     playingHere,
     currentTrackPosition,
     loopMode,
-    muted, currentSecretCode, history, currentUser, currentQuality
+    muted, currentSecretCode, history, currentQuality
 } from "../state.ts";
 import {StreamingBroadcaster, StreamingEvent} from "./StreamingBroadcaster.ts";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import {PlayingFrom} from "@targoninc/lyda-shared/src/Models/PlayingFrom";
 import {LoopMode} from "@targoninc/lyda-shared/src/Enums/LoopMode";
 import {TrackPosition} from "@targoninc/lyda-shared/src/Models/TrackPosition";
-import {NotificationType} from "../Enums/NotificationType.ts";
 import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import {UserSettings} from "@targoninc/lyda-shared/src/Enums/UserSettings";
+import { get } from "../Api/ApiClient.ts";
 
 export class PlayManager {
     static async playCheck(track: Track) {
@@ -219,6 +217,10 @@ export class PlayManager {
         }
 
         const d = await PlayManager.getTrackData(id);
+        if (!d) {
+            return;
+        }
+
         navigator.mediaSession.metadata = new MediaMetadata({
             album: playingFrom.value?.name ?? "",
             title: d.track.title,
@@ -231,8 +233,7 @@ export class PlayManager {
                 }
             ]
         });
-        const track = await PlayManager.getTrackData(id);
-        const streamClient = PlayManager.addStreamClientIfNotExists(id, track.track.length);
+        const streamClient = PlayManager.addStreamClientIfNotExists(id, d.track.length);
 
         await streamClient.startAsync();
         await StreamingUpdater.updatePlayState();
@@ -258,6 +259,9 @@ export class PlayManager {
     static async initializeTrackAsync(id: number) {
         let streamClient = PlayManager.getStreamClient(id);
         const track = await PlayManager.getTrackData(id);
+        if (!track) {
+            return;
+        }
         if (streamClient === undefined) {
             streamClient = PlayManager.addStreamClientIfNotExists(id, track.track.length);
         }
@@ -375,7 +379,7 @@ export class PlayManager {
     }
 
     static async setLoudnessFromElement(e: any) {
-        let value = 1 - (e.offsetY / e.target.offsetHeight);
+        const value = 1 - (e.offsetY / e.target.offsetHeight);
         await PlayManager.setLoudness(value);
     }
 
@@ -444,14 +448,11 @@ export class PlayManager {
             throw new Error("id is missing");
         }
 
-        const res = await HttpClient.getAsync<{ track: Track }>(ApiRoutes.getTrackById, {id});
-        if (res.code !== 200) {
-            await PlayManager.removeTrackFromAllStates(id);
-            notify(`Failed to get track data for ${id}: ${getErrorMessage(res)}`, NotificationType.error);
-            throw new Error(`Failed to get track data for ${id}: ${res.data.error}`);
+        const data = await get<{ track: Track }>(ApiRoutes.getTrackById, {id});
+        if (data) {
+            await PlayManager.cacheTrackData(data);
         }
-        await PlayManager.cacheTrackData(res.data);
-        return res.data;
+        return data;
     }
 
     static getAllStreamClients() {
