@@ -111,17 +111,9 @@ export class TrackActions {
 
     static async toggleFollow(userId: number, following: Signal<boolean>) {
         if (following.value) {
-            const res = await Api.unfollowUser(userId);
-            if (res.code !== 200) {
-                return false;
-            }
-            notify(`Successfully unfollowed user`, NotificationType.success);
+            await Api.unfollowUser(userId);
         } else {
-            const res = await Api.followUser(userId);
-            if (res.code !== 200) {
-                return;
-            }
-            notify(`Successfully followed user`, NotificationType.success);
+            await Api.followUser(userId);
         }
         following.value = !following.value;
     }
@@ -131,12 +123,12 @@ export class TrackActions {
             return;
         }
         loading.value = true;
-        let fileInput = document.createElement("input");
+        const fileInput = document.createElement("input");
         fileInput.type = "file";
         fileInput.accept = "image/*";
         fileInput.onchange = async (e) => {
             const fileTarget = e.target as HTMLInputElement;
-            let file = fileTarget.files![0];
+            const file = fileTarget.files![0];
             if (!file) {
                 loading.value = false;
                 return;
@@ -155,17 +147,17 @@ export class TrackActions {
         fileInput.click();
     }
 
-    static async replaceAudio(id: number, canEdit: boolean, loading: Signal<boolean>, onSuccess: Function = () => {}) {
+    static async replaceAudio(id: number, canEdit: boolean, loading: Signal<boolean>, onSuccess: () => void = () => {}) {
         if (!canEdit) {
             return;
         }
         loading.value = true;
-        let fileInput = document.createElement("input");
+        const fileInput = document.createElement("input");
         fileInput.type = "file";
         fileInput.accept = "audio/*";
         fileInput.onchange = async (e) => {
             const fileTarget = e.target as HTMLInputElement;
-            let file = fileTarget.files![0];
+            const file = fileTarget.files![0];
             if (!file) {
                 loading.value = false;
                 return;
@@ -252,8 +244,8 @@ export class TrackActions {
         }
     }
 
-    static async approveCollab(id: number, name = "track") {
-        const success = await Api.approveCollab(id, name);
+    static async approveCollab(id: number) {
+        const success = await Api.approveCollab(id);
 
         if (success) {
             const collab = document.querySelector(".collab[id='" + id + "']");

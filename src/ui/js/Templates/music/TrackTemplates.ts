@@ -33,7 +33,6 @@ import {Repost} from "@targoninc/lyda-shared/src/Models/db/lyda/Repost";
 import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
 import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
-import {TrackLike} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackLike";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
 import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
@@ -800,7 +799,7 @@ export class TrackTemplates {
                             .classes("flex")
                             .children(
                                 GenericTemplates.action(Icons.CHECK, "Approve", track.track_id, async () => {
-                                    await TrackActions.approveCollab(track.track_id, track.track!.title);
+                                    await TrackActions.approveCollab(track.track_id);
                                 }, [], ["secondary", "positive"]),
                                 GenericTemplates.action(Icons.X, "Deny", track.track_id, async () => {
                                     await TrackActions.denyCollab(track.track_id, track.track!.title);

@@ -164,18 +164,11 @@ export class Api {
     }
 
     static async unfollowUser(userId: number): Promise<any> {
-        const res = await HttpClient.postAsync(ApiRoutes.unfollowUser, {
+        await post(ApiRoutes.unfollowUser, {
             id: userId,
         });
-
-        if (res.code !== 200) {
-            notify(
-                "Error while trying to unfollow user: " + getErrorMessage(res),
-                NotificationType.error
-            );
-        }
-
-        return res;
+        notify("Unfollowed user", NotificationType.success);
+        return true;
     }
 
     static async deleteTrack(id: number): Promise<boolean> {
@@ -223,45 +216,23 @@ export class Api {
     }
 
     static async followUser(userId: number): Promise<any> {
-        const res = await HttpClient.postAsync(ApiRoutes.followUser, {
+        await post(ApiRoutes.followUser, {
             id: userId,
         });
-
-        if (res.code !== 200) {
-            notify(
-                "Error while trying to follow user: " + getErrorMessage(res),
-                NotificationType.error
-            );
-        }
-
-        return res;
+        notify(`Successfully followed user`, NotificationType.success);
+        return true;
     }
 
-    static async getCollabTypes(): Promise<CollaboratorType[]> {
-        const res = await HttpClient.getAsync<CollaboratorType[]>(ApiRoutes.getTrackCollabTypes);
-        if (res.code !== 200) {
-            notify(
-                "Error while trying to get collab types: " + getErrorMessage(res),
-                NotificationType.error
-            );
-            return [];
-        }
-        return res.data as CollaboratorType[];
+    static async getCollabTypes(): Promise<CollaboratorType[] | null> {
+        return await get<CollaboratorType[]>(ApiRoutes.getTrackCollabTypes);
     }
 
     static async removeCollaboratorFromTrack(trackId: number, userId: number): Promise<boolean> {
-        const res = await HttpClient.postAsync(ApiRoutes.removeCollaborator, {
+        await post(ApiRoutes.removeCollaborator, {
             id: trackId,
             userId: userId,
         });
-
-        if (res.code !== 200) {
-            notify(
-                "Error while trying to remove collaborator: " + getErrorMessage(res),
-                NotificationType.error
-            );
-            return false;
-        }
+        notify("Removed collaborator from track", NotificationType.success);
         return true;
     }
 
@@ -286,17 +257,9 @@ export class Api {
     }
 
     static async denyCollab(id: number, name = "track"): Promise<boolean> {
-        const res = await HttpClient.postAsync(ApiRoutes.denyCollab, {
+        await post(ApiRoutes.denyCollab, {
             id: id,
         });
-        if (res.code !== 200) {
-            notify(
-                "Error while trying to deny collab: " + getErrorMessage(res),
-                NotificationType.error
-            );
-            return false;
-        }
-
         notify(`Collab on ${name} denied`, NotificationType.success);
         return true;
     }
@@ -315,7 +278,7 @@ export class Api {
     }
 
     static async updateTrackFull(track: Partial<Track>): Promise<any> {
-        const res = await HttpClient.postAsync(ApiRoutes.updateTrackFull, {
+        await post(ApiRoutes.updateTrackFull, {
             id: track.id,
             title: track.title,
             collaborators: track.collaborators,
@@ -328,15 +291,6 @@ export class Api {
             upc: track.upc,
             price: track.price,
         });
-        if (res.code !== 200) {
-            notify(
-                "Error while trying to update track: " + getErrorMessage(res),
-                NotificationType.error
-            );
-            return null;
-        }
-
-        return res.data;
     }
 
     //endregion
@@ -359,40 +313,22 @@ export class Api {
     }
 
     static async createNewPlaylist(playlist: Partial<Playlist>): Promise<boolean> {
-        const res = await HttpClient.postAsync(ApiRoutes.newPlaylist, playlist);
-        if (res.code !== 200) {
-            notify("Failed to create playlist: " + getErrorMessage(res), NotificationType.error);
-            return false;
-        }
+        await post(ApiRoutes.newPlaylist, playlist);
         notify("Created playlist", NotificationType.success);
         return true;
     }
 
     static async deletePlaylist(id: number): Promise<boolean> {
-        const res = await HttpClient.postAsync(ApiRoutes.deletePlaylist, { id });
-        if (res.code !== 200) {
-            notify(
-                "Error trying to delete playlist: " + getErrorMessage(res),
-                NotificationType.error
-            );
-            return false;
-        }
+        await post(ApiRoutes.deletePlaylist, { id });
         notify("Successfully deleted playlist", NotificationType.success);
         return true;
     }
 
     static async addTrackToPlaylists(track_id: number, playlist_ids: number[]): Promise<boolean> {
-        const res = await HttpClient.postAsync(ApiRoutes.addTrackToPlaylists, {
+        await post(ApiRoutes.addTrackToPlaylists, {
             playlist_ids,
             track_id,
         });
-        if (res.code !== 200) {
-            notify(
-                "Failed to add track to playlists: " + getErrorMessage(res),
-                NotificationType.error
-            );
-            return false;
-        }
         notify("Added track to playlist(s)", NotificationType.success);
         return true;
     }

@@ -429,7 +429,7 @@ export class GenericTemplates {
             .required(required)
             .attributes("accept", accept)
             .onchange(_ => {
-                let fileName = input.value;
+                const fileName = input.value;
                 if (accept && !accept.includes("*")) {
                     const accepts = accept.split(",");
                     const extension = fileName.substring(fileName.lastIndexOf(".") + 1);
@@ -790,7 +790,7 @@ export class GenericTemplates {
         const collabType = signal("1");
         let collabTypes: CollaboratorType[] = [];
         Api.getCollabTypes().then((types) => {
-            collabTypes = types;
+            collabTypes = types ?? [];
             collabTypeOptions.value = searchableSelect(<SearchableSelectConfig>{
                 options: signal(types as SelectOption[]),
                 value: collabType,
