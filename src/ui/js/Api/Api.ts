@@ -15,6 +15,8 @@ import { CollaboratorType } from "@targoninc/lyda-shared/src/Models/db/lyda/Coll
 import { TrackCollaborator } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
 import { Library } from "@targoninc/lyda-shared/dist/Models/Library";
 import { RoyaltyInfo } from "@targoninc/lyda-shared/src/Models/RoyaltyInfo";
+import { get, post } from "./ApiClient.ts";
+import { Notification } from "@targoninc/lyda-shared/src/Models/db/lyda/Notification.ts";
 
 export class Api {
     static getLogs(filterState: Signal<any>, successCallback: (data: Log[]) => void) {
@@ -48,9 +50,13 @@ export class Api {
 
     //region User
     static async markNotificationsAsRead(newestTimestamp: Signal<Date | null>) {
-        await HttpClient.postAsync(ApiRoutes.markAllNotificationsAsRead, {
-            newest: newestTimestamp.value,
+        post(ApiRoutes.markAllNotificationsAsRead, {
+            newest: newestTimestamp.value
         });
+    }
+
+    static async getNotifications(after?: number) {
+        get<Notification[]>(ApiRoutes.getAllNotifications + `?after=${after}`);
     }
 
     static async deleteUser() {

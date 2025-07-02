@@ -30,7 +30,7 @@ export class UserActions {
         imageSignal: Signal<string>,
         loading: Signal<boolean>
     ) {
-        let fileInput = document.createElement("input");
+        const fileInput = document.createElement("input");
         fileInput.type = "file";
         fileInput.accept = "image/*";
         fileInput.onchange = async () => {
@@ -72,10 +72,7 @@ export class UserActions {
         const newestId = notifications.value.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]?.id;
         let res;
         if (!newestId) {
-            res = await HttpClient.getAsync<Notification[]>(ApiRoutes.getAllNotifications);
-            if (res.code === 200) {
-                notifications.value = res.data;
-            }
+            notifications.value = await Api.getNotifications();
         } else {
             res = await HttpClient.getAsync<Notification[]>(ApiRoutes.getAllNotifications, {after: newestId});
             if (res.code === 200) {
@@ -85,7 +82,7 @@ export class UserActions {
     }
 
     static async setTheme(theme: Theme) {
-        let user = await Util.getUserAsync();
+        const user = await Util.getUserAsync();
         user.settings = updateUserSetting(user, UserSettings.theme, theme);
         LydaCache.set("user", new CacheItem(user));
         await UserActions.setUiTheme(theme);
