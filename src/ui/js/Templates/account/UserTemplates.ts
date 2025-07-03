@@ -251,9 +251,7 @@ export class UserTemplates {
 
     static unapprovedTracksLink() {
         const unapprovedTracks = signal<any[]>([]);
-        Api.getUnapprovedTracks().then(tracks => {
-            unapprovedTracks.value = tracks;
-        });
+        Api.getUnapprovedTracks().then(tracks => unapprovedTracks.value = tracks ?? []);
         const link = signal(create("div").build());
         unapprovedTracks.subscribe((tracks: Track[]) => {
             link.value = tracks.length === 0 ? nullElement() : GenericTemplates.action(Icons.APPROVAL, "Unapproved tracks", "unapproved-tracks", async (e: Event) => {
@@ -273,11 +271,9 @@ export class UserTemplates {
 
         const base = vertical();
 
-        HttpClient.getAsync<User>(ApiRoutes.getUser, {
-            name: params["name"]
-        }).then(u => {
-            user.value = u.data;
-            document.title = u.data.displayname;
+        Api.getUser(params["name"]).then(u => {
+            user.value = u;
+            document.title = u?.displayname ?? "";
             if (!user && isOwnProfile) {
                 notify("You need to be logged in to see your profile", NotificationType.error);
                 return;
@@ -531,7 +527,7 @@ export class UserTemplates {
                     icon: {icon: "verified"},
                     classes: ["positive"],
                     onclick: async () => {
-                        await UserActions.verifyUser(user.id);
+                        await Api.verifyUser(user.id);
                         verified.value = true;
                     }
                 })),
@@ -540,7 +536,7 @@ export class UserTemplates {
                     icon: {icon: "close"},
                     classes: ["negative"],
                     onclick: async () => {
-                        await UserActions.unverifyUser(user.id);
+                        await Api.unverifyUser(user.id);
                         verified.value = false;
                     }
                 })),
@@ -558,7 +554,7 @@ export class UserTemplates {
     }
 
     static badge(badge: Badge) {
-        let addClasses = [];
+        const addClasses = [];
         const colorBadges = ["staff", "cute", "vip"];
         if (colorBadges.includes(badge.name)) {
             addClasses.push("no-filter");

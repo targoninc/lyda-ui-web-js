@@ -57,8 +57,30 @@ export class Api {
         await post(ApiRoutes.subscribe, parameters);
     }
 
+    static async unsubscribe(id: number) {
+        await post(ApiRoutes.unsubscribe, { id });
+    }
+
+    static async updateUserSetting(setting: string, value: any) {
+        await post(ApiRoutes.updateUserSetting, {
+            setting, value
+        })
+    }
+
+    static async verifyUser(id: number) {
+        await post(ApiRoutes.verifyUser, { id })
+    }
+
+    static async unverifyUser(id: number) {
+        await post(ApiRoutes.unverifyUser, { id })
+    }
+
     static async getUsers(search: string) {
         return get<SearchResult[]>(ApiRoutes.searchUsers, { search });
+    }
+
+    static async getUser(name: string) {
+        return get<User>(ApiRoutes.getUser, { name });
     }
 
     static async logout() {

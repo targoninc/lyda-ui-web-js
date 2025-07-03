@@ -1,30 +1,29 @@
-import {HttpClient} from "../Api/HttpClient.ts";
+import { HttpClient } from "../Api/HttpClient.ts";
 import {
-    getErrorMessage,
     getUserSettingValue,
     updateImagesWithSource,
     updateUserSetting,
-    Util
+    Util,
 } from "../Classes/Util.ts";
-import {notify, Ui} from "../Classes/Ui.ts";
-import {LydaCache} from "../Cache/LydaCache.ts";
-import {CacheItem} from "../Cache/CacheItem.ts";
-import {Icons} from "../Enums/Icons.ts";
-import {MediaUploader} from "../Api/MediaUploader.ts";
-import {Signal} from "@targoninc/jess";
-import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {Api} from "../Api/Api.ts";
-import {currentQuality, currentUser, notifications} from "../state.ts";
-import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
-import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
-import {StreamingQuality} from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
-import {UserSettings} from "@targoninc/lyda-shared/src/Enums/UserSettings";
-import {Theme} from "@targoninc/lyda-shared/src/Enums/Theme";
+import { notify, Ui } from "../Classes/Ui.ts";
+import { LydaCache } from "../Cache/LydaCache.ts";
+import { CacheItem } from "../Cache/CacheItem.ts";
+import { Icons } from "../Enums/Icons.ts";
+import { MediaUploader } from "../Api/MediaUploader.ts";
+import { Signal } from "@targoninc/jess";
+import { ApiRoutes } from "../Api/ApiRoutes.ts";
+import { Api } from "../Api/Api.ts";
+import { currentQuality, currentUser, notifications } from "../state.ts";
+import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
+import { NotificationType } from "../Enums/NotificationType.ts";
+import { StreamingQuality } from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
+import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
+import { Theme } from "@targoninc/lyda-shared/src/Enums/Theme";
 
 export class UserActions {
     static async replaceUserImage(
-        type: 'avatar' | 'banner',
+        type: "avatar" | "banner",
         user: User,
         imageSignal: Signal<string>,
         loading: Signal<boolean>
@@ -39,10 +38,15 @@ export class UserActions {
             }
             const file = fileInput.files[0];
             try {
-                const mediaType = type === 'avatar' ? MediaFileType.userAvatar : MediaFileType.userBanner;
+                const mediaType =
+                    type === "avatar" ? MediaFileType.userAvatar : MediaFileType.userBanner;
                 await MediaUploader.upload(mediaType, user.id, file);
-                notify(`${type.charAt(0).toUpperCase() + type.slice(1)} updated`, NotificationType.success);
-                const newSrc = type === 'avatar' ? Util.getUserAvatar(user.id) : Util.getUserBanner(user.id);
+                notify(
+                    `${type.charAt(0).toUpperCase() + type.slice(1)} updated`,
+                    NotificationType.success
+                );
+                const newSrc =
+                    type === "avatar" ? Util.getUserAvatar(user.id) : Util.getUserBanner(user.id);
                 updateImagesWithSource(newSrc, imageSignal.value);
                 imageSignal.value = newSrc;
             } catch (e: any) {
@@ -56,11 +60,16 @@ export class UserActions {
     }
 
     static async replaceAvatar(user: User, avatar: Signal<string>, loading: Signal<boolean>) {
-        return UserActions.replaceUserImage('avatar', user, avatar, loading);
+        return UserActions.replaceUserImage("avatar", user, avatar, loading);
     }
 
-    static async replaceBanner(e: Event, user: User, banner: Signal<string>, loading: Signal<boolean>) {
-        return UserActions.replaceUserImage('banner', user, banner, loading);
+    static async replaceBanner(
+        e: Event,
+        user: User,
+        banner: Signal<string>,
+        loading: Signal<boolean>
+    ) {
+        return UserActions.replaceUserImage("banner", user, banner, loading);
     }
 
     static getNotificationsPeriodically() {
@@ -68,14 +77,19 @@ export class UserActions {
     }
 
     static async getNotifications() {
-        const newestId = notifications.value.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]?.id;
+        const newestId = notifications.value.sort(
+            (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        )[0]?.id;
         if (!newestId) {
-            notifications.value = await Api.getNotifications();
+            notifications.value = (await Api.getNotifications()) ?? [];
         } else {
-            const newNotifs = await Api.getNotifications(newestId);
+            const newNotifs = (await Api.getNotifications(newestId)) ?? [];
             const oldNotifs = notifications.value;
-            notifications.value = oldNotifs.concat(newNotifs.filter(n => !oldNotifs.find(on => on.id === n.id)))
-                .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+            notifications.value = oldNotifs
+                .concat(newNotifs.filter(n => !oldNotifs.find(on => on.id === n.id)))
+                .sort(
+                    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                );
         }
     }
 
@@ -97,7 +111,7 @@ export class UserActions {
             console.warn("Unknown theme: ", themeName);
             return;
         }
-        themes.map((t) => {
+        themes.map(t => {
             if (t === themeName) {
                 return;
             }
@@ -109,34 +123,17 @@ export class UserActions {
             return;
         }
 
-        const res = await HttpClient.postAsync(ApiRoutes.updateUserSetting, {setting: UserSettings.theme, value: themeName});
-        if (res.code !== 200) {
-            notify(`Failed to update theme: ${getErrorMessage(res)}`, NotificationType.error);
-        }
-    }
-
-    static async setBooleanUserSetting(key: string, value: boolean) {
-        const res = await HttpClient.postAsync(ApiRoutes.updateUserSetting, {
-            setting: key,
-            value
-        });
-        if (res.code !== 200) {
-            notify("Failed to update user setting", NotificationType.error);
-            return false;
-        }
-        return true;
+        await Api.updateUserSetting(UserSettings.theme, themeName);
     }
 
     static async toggleBooleanUserSetting(key: string) {
         const user = await Util.getUserAsync();
         const newValue = !getUserSettingValue(user, key);
-        if (await UserActions.setBooleanUserSetting(key, newValue)) {
-            user.settings = updateUserSetting(user, key, newValue.toString());
-            LydaCache.set("user", new CacheItem(user));
-            currentUser.value = user;
-            return true;
-        }
-        return false;
+        await Api.updateUserSetting(key, newValue);
+        user.settings = updateUserSetting(user, key, newValue.toString());
+        LydaCache.set("user", new CacheItem(user));
+        currentUser.value = user;
+        return true;
     }
 
     static async togglePlayFromAutoQueue() {
@@ -152,52 +149,58 @@ export class UserActions {
         return await UserActions.toggleBooleanUserSetting(settingKey);
     }
 
-    static async unverifyUser(id: number) {
-        const res = await HttpClient.postAsync(ApiRoutes.unverifyUser, {id});
-        if (res.code !== 200) {
-            notify("Failed to unverify user", NotificationType.error);
-            return false;
-        }
-        return true;
-    }
-
-    static async verifyUser(id: number) {
-        const res = await HttpClient.postAsync(ApiRoutes.verifyUser, {id});
-        if (res.code !== 200) {
-            notify("Failed to verify user", NotificationType.error);
-            return false;
-        }
-        return true;
-    }
-
     static editDescription(currentDescription: string, successCallback: Function) {
-        Ui.getTextAreaInputModal("Edit description", "Enter your new description", currentDescription, "Save", "Cancel", async (description: string) => {
-            if (await Api.updateUser({description})) {
-                successCallback(description);
-            }
-        }, () => {
-        }, Icons.PEN).then();
+        Ui.getTextAreaInputModal(
+            "Edit description",
+            "Enter your new description",
+            currentDescription,
+            "Save",
+            "Cancel",
+            async (description: string) => {
+                if (await Api.updateUser({ description })) {
+                    successCallback(description);
+                }
+            },
+            () => {},
+            Icons.PEN
+        ).then();
     }
 
     static editDisplayname(currentDisplayname: string, successCallback: Function) {
-        Ui.getTextInputModal("Edit displayname", "Enter your new displayname", currentDisplayname, "Save", "Cancel", async (displayname: string) => {
-            if (await Api.updateUser({displayname})) {
-                successCallback(displayname);
-            }
-        }, () => {
-        }, Icons.PEN).then();
+        Ui.getTextInputModal(
+            "Edit displayname",
+            "Enter your new displayname",
+            currentDisplayname,
+            "Save",
+            "Cancel",
+            async (displayname: string) => {
+                if (await Api.updateUser({ displayname })) {
+                    successCallback(displayname);
+                }
+            },
+            () => {},
+            Icons.PEN
+        ).then();
     }
 
     static editUsername(currentUsername: string, successCallback: Function) {
-        Ui.getTextInputModal("Edit username", "Enter your new username", currentUsername, "Save", "Cancel", async (username: string) => {
-            if (await Api.updateUser({username})) {
-                successCallback(username);
-            }
-        }, () => {
-        }, Icons.PEN).then();
+        Ui.getTextInputModal(
+            "Edit username",
+            "Enter your new username",
+            currentUsername,
+            "Save",
+            "Cancel",
+            async (username: string) => {
+                if (await Api.updateUser({ username })) {
+                    successCallback(username);
+                }
+            },
+            () => {},
+            Icons.PEN
+        ).then();
     }
 
     private static setStringSetting(settingKey: string, value: string) {
-        return HttpClient.postAsync(ApiRoutes.updateUserSetting, {setting: settingKey, value});
+        return HttpClient.postAsync(ApiRoutes.updateUserSetting, { setting: settingKey, value });
     }
 }
