@@ -540,22 +540,11 @@ export class GenericTemplates {
         ], "confirmation");
     }
 
-    static imageModal(imageUrl: StringOrSignal) {
-        return create("div")
-            .classes("modal-container")
-            .children(
-                create("div")
-                    .classes("modal-overlay")
-                    .build(),
-                create("div")
-                    .classes("modal", "padded-large", "rounded")
-                    .children(
-                        create("img")
-                            .classes("full")
-                            .attributes("src", imageUrl)
-                            .build()
-                    ).build()
-            ).build();
+    static modalImage(imageUrl: StringOrSignal) {
+        return create("img")
+            .classes("full")
+            .attributes("src", imageUrl)
+            .build();
     }
 
     static textInputModal(title: HtmlPropertyValue, text: HtmlPropertyValue, currentValue: StringOrSignal,

@@ -28,16 +28,16 @@ export class Ui {
     }
 
     static async getPageHtml(page: string) {
-        let cachedContent = LydaCache.get("page/" + page).content;
+        const cachedContent = LydaCache.get("page/" + page).content;
         if (cachedContent) {
             return cachedContent;
         }
 
-        let r = await fetch(`/pages/${page}.html`);
+        const r = await fetch(`/pages/${page}.html`);
         if (r.status !== 200) {
             return null;
         }
-        let pageContent = await r.text();
+        const pageContent = await r.text();
         if (pageContent) {
             LydaCache.set("page/" + page, new CacheItem(pageContent));
             return pageContent;
@@ -48,7 +48,7 @@ export class Ui {
     }
 
     static async windowResize() {
-        let pageBackground = document.querySelector(".page-background") as HTMLElement;
+        const pageBackground = document.querySelector(".page-background") as HTMLElement;
         let nav = document.querySelector("nav");
         if (nav === null && !navInitialized.value) {
             navInitialized.value = true;
@@ -89,14 +89,14 @@ export class Ui {
     }
 
     static setImagesSource(userId: number, className: string, source: string) {
-        let images = document.querySelectorAll("." + className + "[data-user-id='" + userId + "']") as NodeListOf<HTMLImageElement>;
+        const images = document.querySelectorAll("." + className + "[data-user-id='" + userId + "']") as NodeListOf<HTMLImageElement>;
         for (let i = 0; i < images.length; i++) {
             images[i].src = source;
         }
     }
 
     static fillClassWithValue(userId: number, className: string, value: string, newPage = "", params: string[] = []) {
-        let elements = document.querySelectorAll("." + className + "[data-user-id='" + userId + "']") as NodeListOf<HTMLElement>;
+        const elements = document.querySelectorAll("." + className + "[data-user-id='" + userId + "']") as NodeListOf<HTMLElement>;
         elements.forEach(element => {
             element.innerHTML = value;
             element.onclick = async () => {
@@ -106,7 +106,7 @@ export class Ui {
     }
 
     static showImageModal(imageUrl: StringOrSignal) {
-        createModal([GenericTemplates.imageModal(imageUrl)], "image-modal");
+        createModal([GenericTemplates.modalImage(imageUrl)], "image-modal");
     }
 
     static async getConfirmationModal(title: StringOrSignal, text: StringOrSignal, confirmText: StringOrSignal,
