@@ -9,6 +9,7 @@ import {reload} from "../Routing/Router.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {AvailableSubscription} from "@targoninc/lyda-shared/src/Models/db/finance/AvailableSubscription";
 import {Subscription} from "@targoninc/lyda-shared/src/Models/db/finance/Subscription";
+import { Api } from "../Api/Api.ts";
 
 const clientId = "AUw6bB-HQTIfqy5fhk-s5wZOaEQdaCIjRnCyIC3WDCRxVKc9Qvz1c6xLw7etCit1CD1qSHY5Pv-3xgQN";
 // @ts-ignore
@@ -25,7 +26,7 @@ export class SubscriptionActions {
     static async startSubscription(id: number, subPlanId: string, optionMessage: Signal<string>) {
         SubscriptionActions.initializeDomForSubStart(id, optionMessage);
         SubscriptionActions.initializePaypalButton(subPlanId, "paypal-button-" + id, optionMessage, async (paypalData: any) => {
-            await SubscriptionActions.subscriptionSuccess(paypalData, {
+            await SubscriptionActions.subscriptionSuccess({
                 id,
                 planId: subPlanId,
                 orderId: paypalData.orderID,
@@ -75,14 +76,10 @@ export class SubscriptionActions {
         buttons.render("#" + button_id);
     }
 
-    static async subscriptionSuccess(data: any, parameters: any) {
-        const res = await HttpClient.postAsync(ApiRoutes.subscribe, {...parameters});
-        if (res.code === 200) {
-            notify("Subscription started", NotificationType.success);
-            reload();
-        } else {
-            notify("Error when starting subscription: " + getErrorMessage(res), NotificationType.error);
-        }
+    static async subscriptionSuccess(parameters: any) {
+        await Api.subscribe(parameters);
+        notify("Subscription started", NotificationType.success);
+        reload();
     }
 
     static async cancelSubscriptionWithConfirmationAsync(subscriptionId: number) {

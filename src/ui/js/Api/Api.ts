@@ -17,6 +17,10 @@ import { Library } from "@targoninc/lyda-shared/dist/Models/Library";
 import { RoyaltyInfo } from "@targoninc/lyda-shared/src/Models/RoyaltyInfo";
 import { get, post } from "./ApiClient.ts";
 import { Notification } from "@targoninc/lyda-shared/src/Models/db/lyda/Notification.ts";
+import { SearchResult } from "@targoninc/lyda-shared/src/Models/SearchResult";
+import { navigate } from "../Routing/Router.ts";
+import { RoutePath } from "../Routing/routes.ts";
+import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
 
 export class Api {
     static getLogs(filterState: Signal<any>, successCallback: (data: Log[]) => void) {
@@ -49,6 +53,20 @@ export class Api {
     }
 
     //region User
+    static async subscribe(parameters: Record<any, any>) {
+        await post(ApiRoutes.subscribe, parameters);
+    }
+
+    static async getUsers(search: string) {
+        return get<SearchResult[]>(ApiRoutes.searchUsers, { search });
+    }
+
+    static async logout() {
+        await post(ApiRoutes.logout);
+        notify("Logged out!", NotificationType.success);
+        navigate(RoutePath.login);
+    }
+
     static async markNotificationsAsRead(newestTimestamp: Signal<Date | null>) {
         await post(ApiRoutes.markAllNotificationsAsRead, {
             newest: newestTimestamp.value,
@@ -394,5 +412,14 @@ export class Api {
         await post(ApiRoutes.setCommentHidden, { id, hidden: v });
     }
 
+    //endregion
+
+    //region Media
+    static async deleteMedia(type: MediaFileType, referenceId: number) {
+        await post(ApiRoutes.deleteMedia, {
+            type,
+            referenceId
+        });
+    }
     //endregion
 }

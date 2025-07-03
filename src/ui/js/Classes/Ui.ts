@@ -134,7 +134,7 @@ export class Ui {
             cancelCallback();
             Util.removeModal();
         };
-        const modal = GenericTemplates.textInputModal(title, text, currentValue, value, icon, confirmText, cancelText, confirmCallback2, cancelCallback2);
+        const modal = GenericTemplates.textInputModal(title, text, value, icon, confirmText, cancelText, confirmCallback2, cancelCallback2);
         createModal([modal], "text-input");
     }
 

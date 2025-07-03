@@ -47,7 +47,7 @@ function getGetUrl(urlIn: string, params: Record<string, string>) {
 export const get = <T>(url: string, params: Record<string, any> = {}, headers: Record<string, string> = {}) =>
     refetch<T>("GET", getGetUrl(url, params), headers);
 
-export const post = <T>(url: string, body: any, headers: Record<string, string> = {}) =>
+export const post = <T>(url: string, body: any = {}, headers: Record<string, string> = {}) =>
     refetch<T>("POST", url, headers, body);
 
 export const postRaw = <T>(url: string, body: any, headers: Record<string, string> = {}) =>

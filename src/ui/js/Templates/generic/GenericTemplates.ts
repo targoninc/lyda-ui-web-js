@@ -1,7 +1,6 @@
 import {Icons} from "../../Enums/Icons.ts";
 import {AlbumActions} from "../../Actions/AlbumActions.ts";
 import {PlaylistActions} from "../../Actions/PlaylistActions.ts";
-import {HttpClient} from "../../Api/HttpClient.ts";
 import {
     AnyElement,
     AnyNode,
@@ -16,7 +15,6 @@ import {
 } from "@targoninc/jess";
 import {Util} from "../../Classes/Util.ts";
 import {navigate} from "../../Routing/Router.ts";
-import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {currentTrackId, playingHere} from "../../state.ts";
 import {PillOption} from "../../Models/PillOption.ts";
 import {dayFromValue} from "../../Classes/Helpers/Date.ts";
@@ -547,7 +545,7 @@ export class GenericTemplates {
             .build();
     }
 
-    static textInputModal(title: HtmlPropertyValue, text: HtmlPropertyValue, currentValue: StringOrSignal,
+    static textInputModal(title: HtmlPropertyValue, text: HtmlPropertyValue,
                           newValue: Signal<string>, icon: HtmlPropertyValue, confirmText: StringOrSignal, cancelText: StringOrSignal,
                           confirmCallback: Function, cancelCallback: Function) {
         return GenericTemplates.modal([
@@ -817,13 +815,7 @@ export class GenericTemplates {
                         onkeydown: async (e) => {
                             const target = e.target as HTMLInputElement;
                             const search = target.value;
-                            const res = await HttpClient.getAsync<SearchResult[]>(ApiRoutes.searchUsers, {
-                                search,
-                                filters: JSON.stringify(["users"])
-                            });
-                            if (res.code === 200) {
-                                users.value = res.data;
-                            }
+                            users.value = (await Api.getUsers(search)) ?? [];
                         },
                     }),
                     create("div")
@@ -1075,7 +1067,7 @@ export class GenericTemplates {
                         button({
                             text: "Reload",
                             onclick: () => {
-                                // @ts-ignore
+                                // @ts-expect-error because it works on firefox
                                 window.location.reload(true);
                             },
                             classes: ["positive"],

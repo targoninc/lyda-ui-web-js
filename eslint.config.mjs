@@ -38,6 +38,7 @@ export default defineConfig([globalIgnores(["**/node_modules/", "**/dist/", "**/
         "@typescript-eslint/no-unused-vars": "off",
         "unused-imports/no-unused-imports": "error",
         "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-unsafe-function-type": "off",
 
         "unused-imports/no-unused-vars": ["warn", {
             vars: "all",
