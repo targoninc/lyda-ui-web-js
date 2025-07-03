@@ -1,38 +1,33 @@
 import {HttpClient, ApiResponse} from "./HttpClient.ts";
-import {notify} from "../Classes/Ui.ts";
 import {ApiRoutes} from "./ApiRoutes.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {WebauthnVerificationRequest} from "@targoninc/lyda-shared/dist/Models/WebauthnVerificationRequest";
 import {AuthenticationJSON, CredentialDescriptor, RegistrationJSON} from "@passwordless-id/webauthn/dist/esm/types";
 import {MfaOption} from "@targoninc/lyda-shared/dist/Enums/MfaOption";
+import { Api } from "./Api.ts";
 
 export class AuthApi {
     static userExists(email: string, successCallback: Function = () => {
     }, errorCallback: Function = () => {
     }) {
-        HttpClient.getAsync(ApiRoutes.userExists, {email: encodeURIComponent(email)}).then((response) => {
-            if (response.code === 200) {
-                successCallback(response.data);
-            } else {
-                errorCallback(response.code, response.data);
+        HttpClient.getAsync(ApiRoutes.userExists, { email: encodeURIComponent(email) }).then(
+            response => {
+                if (response.code === 200) {
+                    successCallback(response.data);
+                } else {
+                    errorCallback(response.code, response.data);
+                }
             }
-        });
+        );
     }
 
-    static login(email: string, password: string, challenge: string|undefined, successCallback: Function, errorCallback: Function = () => {}) {
-        HttpClient.postAsync(ApiRoutes.login, {
-            email,
-            password,
-            challenge
-        }).then((response) => {
-            if (response.code === 200) {
-                successCallback(response.data);
-            } else {
-                notify(response.data.error ?? "Unknown error while logging in", NotificationType.error);
-                errorCallback(response.code, response.data);
-            }
-        });
+    static async login(email: string, password: string, challenge: string|undefined, successCallback: Function, errorCallback: Function = () => {}) {
+        try {
+            const data = await Api.login(email, password, challenge);
+            successCallback(data);
+        } catch (error) {
+            errorCallback(error);
+        }
     }
 
     static user(id: number|null, successCallback: (user: User) => void) {
@@ -43,20 +38,13 @@ export class AuthApi {
         });
     }
 
-    static register(username: string, displayname: string, email: string, password: string, successCallback: Function, errorCallback: Function = () => {}) {
-        HttpClient.postAsync(ApiRoutes.register, {
-            username,
-            displayname,
-            email,
-            password
-        }).then((response) => {
-            if (response.code === 200) {
-                successCallback(response);
-            } else {
-                notify(response.data.error ?? "Unknown error while registering", NotificationType.error);
-                errorCallback(response);
-            }
-        });
+    static async register(username: string, displayname: string, email: string, password: string, successCallback: Function, errorCallback: Function = () => {}) {
+        try {
+            await Api.register(username, displayname, email, password);
+        } catch (e) {
+            errorCallback(e);
+        }
+        successCallback();
     }
 
     static async requestPasswordReset(email: string): Promise<ApiResponse<any>> {

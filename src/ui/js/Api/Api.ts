@@ -52,6 +52,37 @@ export class Api {
         successCallback(response.data);
     }
 
+    //region Auth
+    static async login(email: string, password: string, challenge: string|undefined) {
+        await post<{ user: User } | null>(ApiRoutes.login, {
+            email,
+            password,
+            challenge
+        });
+    }
+
+    static async logout() {
+        await post(ApiRoutes.logout);
+        notify("Logged out!", NotificationType.success);
+        navigate(RoutePath.login);
+    }
+
+    static async register(username: string, displayname: string, email: string, password: string) {
+        await post(ApiRoutes.register, {
+            username,
+            displayname,
+            email,
+            password
+        });
+    }
+
+    static async verifyEmail(code: string) {
+        await post(ApiRoutes.verifyEmail, {
+            activationCode: code,
+        })
+    }
+    //endregion
+
     //region User
     static async subscribe(parameters: Record<any, any>) {
         await post(ApiRoutes.subscribe, parameters);
@@ -81,12 +112,6 @@ export class Api {
 
     static async getUser(name: string) {
         return get<User>(ApiRoutes.getUser, { name });
-    }
-
-    static async logout() {
-        await post(ApiRoutes.logout);
-        notify("Logged out!", NotificationType.success);
-        navigate(RoutePath.login);
     }
 
     static async markNotificationsAsRead(newestTimestamp: Signal<Date | null>) {
