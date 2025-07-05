@@ -1,4 +1,3 @@
-import { HttpClient } from "../Api/HttpClient.ts";
 import {
     getUserSettingValue,
     updateImagesWithSource,
@@ -11,7 +10,6 @@ import { CacheItem } from "../Cache/CacheItem.ts";
 import { Icons } from "../Enums/Icons.ts";
 import { MediaUploader } from "../Api/MediaUploader.ts";
 import { Signal } from "@targoninc/jess";
-import { ApiRoutes } from "../Api/ApiRoutes.ts";
 import { Api } from "../Api/Api.ts";
 import { currentQuality, currentUser, notifications } from "../state.ts";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
@@ -102,7 +100,7 @@ export class UserActions {
 
     static async setStreamingQuality(quality: StreamingQuality) {
         currentQuality.value = quality;
-        await UserActions.setStringSetting(UserSettings.streamingQuality, quality);
+        await Api.updateUserSetting(UserSettings.streamingQuality, quality);
     }
 
     static async setUiTheme(themeName: Theme, onlyLocal = false) {
@@ -198,9 +196,5 @@ export class UserActions {
             () => {},
             Icons.PEN
         ).then();
-    }
-
-    private static setStringSetting(settingKey: string, value: string) {
-        return HttpClient.postAsync(ApiRoutes.updateUserSetting, { setting: settingKey, value });
     }
 }

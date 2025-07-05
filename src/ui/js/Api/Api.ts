@@ -23,6 +23,10 @@ import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts
 import { WebauthnVerificationRequest } from "@targoninc/lyda-shared/dist/Models/WebauthnVerificationRequest";
 import { AuthenticationJSON, CredentialDescriptor, RegistrationJSON } from "@passwordless-id/webauthn/dist/esm/types";
 import { MfaOption } from "@targoninc/lyda-shared/src/Enums/MfaOption.ts";
+import { UploadableTrack } from "../Models/UploadableTrack.ts";
+import { InteractionType } from "@targoninc/lyda-shared/src/Enums/InteractionType";
+import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
+import { MonthIdentifier } from "../Classes/Helpers/Date.ts";
 
 export class Api {
     static getLogs(filterState: Signal<any>, successCallback: (data: Log[]) => void) {
@@ -54,12 +58,32 @@ export class Api {
         successCallback(response.data);
     }
 
+    //region Interactions
+    static async toggleInteraction(entityType: EntityType, interactionType: InteractionType, id: number, interacted$: Signal<boolean>) {
+        return post(ApiRoutes.toggleInteraction, {
+            entityType,
+            interactionType,
+            id,
+            toggle: !interacted$.value
+        });
+    }
+    //endregion
+
+    //region Royalties
+    static async getRoyaltiesForExport(month: MonthIdentifier, type: string) {
+        return get<string>(ApiRoutes.royaltiesForExport, {
+            ...month,
+            type
+        });
+    }
+    //endregion
+
     //region Auth
-    static async login(email: string, password: string, challenge: string|undefined) {
+    static async login(email: string, password: string, challenge: string | undefined) {
         await post<{ user: User } | null>(ApiRoutes.login, {
             email,
             password,
-            challenge
+            challenge,
         });
     }
 
@@ -74,27 +98,31 @@ export class Api {
             username,
             displayname,
             email,
-            password
+            password,
         });
     }
 
     static async verifyEmail(code: string) {
         await post(ApiRoutes.verifyEmail, {
             activationCode: code,
-        })
+        });
     }
 
     static async requestPasswordReset(email: string): Promise<any> {
         return post(ApiRoutes.requestPasswordReset, {
-            email
+            email,
         });
     }
 
-    static async resetPassword(token: string, newPassword: string, newPasswordConfirm: string): Promise<any> {
+    static async resetPassword(
+        token: string,
+        newPassword: string,
+        newPasswordConfirm: string
+    ): Promise<any> {
         return post(ApiRoutes.resetPassword, {
             token,
             newPassword,
-            newPasswordConfirm
+            newPasswordConfirm,
         });
     }
 
@@ -106,14 +134,14 @@ export class Api {
         return await post(ApiRoutes.verifyTotp, {
             userId,
             token,
-            type
+            type,
         });
     }
 
     static async deleteTotpMethod(id: number, token: string) {
         return await post(ApiRoutes.deleteTotp, {
             id,
-            token
+            token,
         });
     }
 
@@ -122,7 +150,7 @@ export class Api {
             secret: string;
             qrDataUrl: string;
         }>(ApiRoutes.addTotp, {
-            name
+            name,
         });
     }
 
@@ -134,31 +162,31 @@ export class Api {
         return post(ApiRoutes.registerWebauthn, {
             registration,
             challenge,
-            name
+            name,
         });
     }
 
     static verifyWebauthn(json: AuthenticationJSON, challenge: string) {
         return post(ApiRoutes.verifyWebauthn, {
             verification: json,
-            challenge
+            challenge,
         });
     }
 
     static async deleteWebauthnMethod(key_id: string, challenge: string) {
         return await post(ApiRoutes.deleteWebauthn, {
             key_id,
-            challenge
+            challenge,
         });
     }
 
     static async getMfaOptions(email: string, password: string) {
         return await post<{
-            userId: number,
-            options: { type: MfaOption }[]
+            userId: number;
+            options: { type: MfaOption }[];
         }>(ApiRoutes.mfaOptions, {
             email,
-            password
+            password,
         });
     }
 
@@ -172,7 +200,7 @@ export class Api {
         }>(ApiRoutes.requestMfaCode, {
             email,
             password,
-            method
+            method,
         });
     }
     //endregion
@@ -188,16 +216,17 @@ export class Api {
 
     static async updateUserSetting(setting: string, value: any) {
         await post(ApiRoutes.updateUserSetting, {
-            setting, value
-        })
+            setting,
+            value,
+        });
     }
 
     static async verifyUser(id: number) {
-        await post(ApiRoutes.verifyUser, { id })
+        await post(ApiRoutes.verifyUser, { id });
     }
 
     static async unverifyUser(id: number) {
-        await post(ApiRoutes.unverifyUser, { id })
+        await post(ApiRoutes.unverifyUser, { id });
     }
 
     static async getUsers(search: string) {
@@ -291,6 +320,22 @@ export class Api {
     //endregion
 
     //region Tracks
+    static async createTrack(track: UploadableTrack): Promise<Track | null> {
+        return await post<Track>(ApiRoutes.createTrack, <Partial<Track>>{
+            title: track.title,
+            isrc: track.isrc,
+            upc: track.upc,
+            artistname: track.artistname,
+            visibility: track.visibility,
+            collaborators: track.collaborators,
+            credits: track.credits,
+            release_date: track.release_date,
+            genre: track.genre,
+            description: track.description,
+            price: track.price,
+        });
+    }
+
     static async getNewAutoQueueTracks() {
         const response = await HttpClient.getAsync<any[]>(ApiRoutes.autoQueueFeed);
         return response.data;
@@ -527,7 +572,7 @@ export class Api {
     static async deleteMedia(type: MediaFileType, referenceId: number) {
         await post(ApiRoutes.deleteMedia, {
             type,
-            referenceId
+            referenceId,
         });
     }
     //endregion
