@@ -2,7 +2,7 @@ import { AuthApi } from "../Api/AuthApi.ts";
 import { GenericTemplates, horizontal, vertical } from "./generic/GenericTemplates.ts";
 import { FormTemplates } from "./generic/FormTemplates.ts";
 import { UserValidator } from "../Classes/Validators/UserValidator.ts";
-import { finalizeLogin, getErrorMessage, target, Util } from "../Classes/Util.ts";
+import { finalizeLogin, target, Util } from "../Classes/Util.ts";
 import { notify } from "../Classes/Ui.ts";
 import { navigate } from "../Routing/Router.ts";
 import { currentUser } from "../state.ts";
@@ -92,7 +92,7 @@ export class LandingPageTemplates {
             termsOfService: false,
         });
         const history = signal(["email"]);
-        const pageMap = {
+        const pageMap: Record<string, string> = {
             email: "E-Mail",
             register: "Register",
             login: "Login",
@@ -103,7 +103,6 @@ export class LandingPageTemplates {
 
         const template = signal(templateMap[step.value](step, user));
         step.subscribe((newStep: keyof typeof templateMap) => {
-            // @ts-ignore
             if (pageMap[newStep] && !history.value.includes(newStep)) {
                 history.value = [...history.value, newStep];
             }
@@ -134,9 +133,9 @@ export class LandingPageTemplates {
     static mfaSelection(step: Signal<string>, user: Signal<AuthData>) {
         const options = signal<{ type: MfaOption }[]>([]);
         const selected = signal<MfaOption | undefined>(user.value.mfaMethod);
-        AuthApi.getMfaOptions(user.value.email, user.value.password).then(r => {
-            if (r.code === 200) {
-                options.value = r.data.options;
+        Api.getMfaOptions(user.value.email, user.value.password).then(data => {
+            if (data) {
+                options.value = data.options;
                 if (options.value.length === 1) {
                     selected.value = options.value[0].type;
                 }
@@ -249,25 +248,13 @@ export class LandingPageTemplates {
 
     static mfaVerify(step: Signal<string>, user: Signal<AuthData>) {
         if (user.value.mfaMethod! === MfaOption.webauthn) {
-            AuthApi.verifyWebauthn(user.value.verification!, user.value.challenge!).then(r => {
-                if (r.code === 200) {
-                    step.value = "logging-in";
-                } else {
-                    notify(getErrorMessage(r), NotificationType.error);
-                    step.value = "mfa-request";
-                }
-            });
+            Api.verifyWebauthn(user.value.verification!, user.value.challenge!)
+                .then(() => step.value = "logging-in")
+                .catch(() => step.value = "mfa-request");
         } else {
-            AuthApi.verifyTotp(user.value.id!, user.value.mfaCode!, user.value.mfaMethod!).then(
-                r => {
-                    if (r.code === 200) {
-                        step.value = "logging-in";
-                    } else {
-                        notify(getErrorMessage(r), NotificationType.error);
-                        step.value = "mfa-request";
-                    }
-                }
-            );
+            Api.verifyTotp(user.value.id!, user.value.mfaCode!, user.value.mfaMethod!)
+                .then(() => step.value = "logging-in")
+                .catch(() => step.value = "mfa-request");
         }
 
         return horizontal();
@@ -281,9 +268,9 @@ export class LandingPageTemplates {
 
         if (code) {
             Api.verifyEmail(code)
-                .then(() => done.value = true)
-                .catch(e => error$.value = e ?? "Unknown error")
-                .finally(() => activating.value = false);
+                .then(() => (done.value = true))
+                .catch(e => (error$.value = e ?? "Unknown error"))
+                .finally(() => (activating.value = false));
         } else {
             error$.value = "Missing code";
         }
@@ -335,18 +322,21 @@ export class LandingPageTemplates {
     }
 
     static checkForMfaBox(step: Signal<string>, user: Signal<AuthData>) {
-        AuthApi.getMfaOptions(user.value.email, user.value.password).then(r => {
-            if (r.code === 200) {
-                const options = r.data.options;
-                user.value = {
-                    ...user.value,
-                    id: r.data.userId,
-                };
-                if (options.length === 0) {
-                    step.value = "logging-in";
-                } else {
-                    step.value = "mfa-select";
-                }
+        Api.getMfaOptions(user.value.email, user.value.password).then(data => {
+            if (!data) {
+                step.value = "logging-in";
+                return;
+            }
+
+            const options = data.options;
+            user.value = {
+                ...user.value,
+                id: data.userId,
+            };
+            if (options.length === 0) {
+                step.value = "logging-in";
+            } else {
+                step.value = "mfa-select";
             }
         });
 
@@ -522,19 +512,15 @@ export class LandingPageTemplates {
                             classes: ["positive"],
                             disabled: compute(u => !u.email || u.email.trim().length === 0, user),
                             onclick: async () => {
-                                const res = await AuthApi.requestPasswordReset(email.value);
-                                if (res.code === 200) {
+                                try {
+                                    await Api.requestPasswordReset(email.value);
                                     notify(
                                         "Password reset requested, check your email",
                                         NotificationType.success
                                     );
                                     step.value = "password-reset-requested";
-                                } else {
-                                    notify(
-                                        `Failed to reset password: ${res.data.error}`,
-                                        NotificationType.error
-                                    );
-                                    errors.value = [res.data.error];
+                                } catch (error: any) {
+                                    errors.value = [error];
                                 }
                             },
                         }),
@@ -602,23 +588,19 @@ export class LandingPageTemplates {
                                     notify("Token is missing", NotificationType.error);
                                     return;
                                 }
-                                const res = await AuthApi.resetPassword(
-                                    token,
-                                    user.value.password,
-                                    user.value.password2
-                                );
-                                if (res.code === 200) {
+                                try {
+                                    await Api.resetPassword(
+                                        token,
+                                        user.value.password,
+                                        user.value.password2
+                                    );
                                     notify(
                                         "Password updated, you can now log in",
                                         NotificationType.success
                                     );
                                     step.value = "login";
-                                } else {
-                                    notify(
-                                        `Failed to reset password: ${res.data.error}`,
-                                        NotificationType.error
-                                    );
-                                    errors.value = [res.data.error];
+                                } catch (error: any) {
+                                    errors.value = [error];
                                 }
                             },
                         }),
@@ -719,7 +701,7 @@ export class LandingPageTemplates {
         const errors = signal<string[]>([]);
         const touchedFields = new Set<string>();
         for (const key in user.value) {
-            // @ts-ignore
+            // @ts-expect-error ts is stupid
             if (Object.hasOwn(user.value, key) && user.value[key] !== "") {
                 touchedFields.add(key);
             }

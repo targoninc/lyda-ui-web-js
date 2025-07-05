@@ -68,7 +68,7 @@ export class Util {
     }
 
     static async fileExists(url: string) {
-        let response = await fetch(url);
+        const response = await fetch(url);
         return response.status === 200;
     }
 
@@ -127,15 +127,19 @@ export class Util {
         return array.some((e) => e[property] === currentUser.value!.id);
     }
 
-    static userIsFollowing(user$: User|Signal<User|null>) {
+    static isFollowing(user$: User|Signal<User|null>) {
         return compute(u => {
             const user = asSignal(user$).value as User;
             return !!(u && user?.follows?.some(f => f.following_user_id === u.id));
         }, currentUser);
     }
 
-    static userIsFollowedBy(user: User) {
-        return compute(u => !!(u && user.follows?.some(f => f.user_id === u.id)), currentUser);
+    static isFollowedBy(user: User) {
+        return compute(u => {
+            const ye = !!u && user.following?.some(f => f.user_id === u.id);
+            console.log(user.follows, u?.id);
+            return ye;
+        }, currentUser);
     }
 
     static async getUserByNameAsync(name: string) {
@@ -277,7 +281,7 @@ export function finalizeLogin(step: Signal<string>, user: User) {
     getUserPermissions();
     step.value = "complete";
 
-    let referrer = document.referrer;
+    const referrer = document.referrer;
     if (referrer !== "" && !referrer.includes("login")) {
         //window.location.href = referrer;
     } else {

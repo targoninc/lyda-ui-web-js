@@ -3,7 +3,6 @@ import { notify } from "../Classes/Ui.ts";
 import { Signal } from "@targoninc/jess";
 import { ApiRoutes } from "./ApiRoutes.ts";
 import { currentUser } from "../state.ts";
-import { getErrorMessage } from "../Classes/Util.ts";
 import { Log } from "@targoninc/lyda-shared/src/Models/db/lyda/Log";
 import { NotificationType } from "../Enums/NotificationType.ts";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
@@ -21,6 +20,9 @@ import { SearchResult } from "@targoninc/lyda-shared/src/Models/SearchResult";
 import { navigate } from "../Routing/Router.ts";
 import { RoutePath } from "../Routing/routes.ts";
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
+import { WebauthnVerificationRequest } from "@targoninc/lyda-shared/dist/Models/WebauthnVerificationRequest";
+import { AuthenticationJSON, CredentialDescriptor, RegistrationJSON } from "@passwordless-id/webauthn/dist/esm/types";
+import { MfaOption } from "@targoninc/lyda-shared/src/Enums/MfaOption.ts";
 
 export class Api {
     static getLogs(filterState: Signal<any>, successCallback: (data: Log[]) => void) {
@@ -81,6 +83,98 @@ export class Api {
             activationCode: code,
         })
     }
+
+    static async requestPasswordReset(email: string): Promise<any> {
+        return post(ApiRoutes.requestPasswordReset, {
+            email
+        });
+    }
+
+    static async resetPassword(token: string, newPassword: string, newPasswordConfirm: string): Promise<any> {
+        return post(ApiRoutes.resetPassword, {
+            token,
+            newPassword,
+            newPasswordConfirm
+        });
+    }
+
+    static async sendActivationEmail() {
+        return post(ApiRoutes.sendActivationEmail);
+    }
+
+    static async verifyTotp(userId: number, token: string, type?: string) {
+        return await post(ApiRoutes.verifyTotp, {
+            userId,
+            token,
+            type
+        });
+    }
+
+    static async deleteTotpMethod(id: number, token: string) {
+        return await post(ApiRoutes.deleteTotp, {
+            id,
+            token
+        });
+    }
+
+    static addTotpMethod(name: string) {
+        return post<{
+            secret: string;
+            qrDataUrl: string;
+        }>(ApiRoutes.addTotp, {
+            name
+        });
+    }
+
+    static getWebauthnChallenge() {
+        return post<WebauthnVerificationRequest>(ApiRoutes.challengeWebauthn);
+    }
+
+    static registerWebauthnMethod(registration: RegistrationJSON, challenge: string, name: string) {
+        return post(ApiRoutes.registerWebauthn, {
+            registration,
+            challenge,
+            name
+        });
+    }
+
+    static verifyWebauthn(json: AuthenticationJSON, challenge: string) {
+        return post(ApiRoutes.verifyWebauthn, {
+            verification: json,
+            challenge
+        });
+    }
+
+    static async deleteWebauthnMethod(key_id: string, challenge: string) {
+        return await post(ApiRoutes.deleteWebauthn, {
+            key_id,
+            challenge
+        });
+    }
+
+    static async getMfaOptions(email: string, password: string) {
+        return await post<{
+            userId: number,
+            options: { type: MfaOption }[]
+        }>(ApiRoutes.mfaOptions, {
+            email,
+            password
+        });
+    }
+
+    static mfaRequest(email: string, password: string, method: MfaOption) {
+        return post<{
+            mfa_needed: boolean;
+            type?: MfaOption;
+            credentialDescriptors?: CredentialDescriptor[];
+            userId?: number;
+            user?: User;
+        }>(ApiRoutes.requestMfaCode, {
+            email,
+            password,
+            method
+        });
+    }
     //endregion
 
     //region User
@@ -129,7 +223,7 @@ export class Api {
     }
 
     static async deleteUser() {
-        return await HttpClient.postAsync(ApiRoutes.deleteUser);
+        return await post(ApiRoutes.deleteUser);
     }
 
     static async updateUser(user: Partial<User>) {
@@ -166,53 +260,31 @@ export class Api {
     }
 
     static async deleteAlbum(id: number): Promise<boolean> {
-        const res = await HttpClient.postAsync(ApiRoutes.deleteAlbum, { id });
-        if (res.code !== 200) {
-            notify("Error trying to delete album: " + getErrorMessage(res), NotificationType.error);
-            return false;
-        }
+        await post(ApiRoutes.deleteAlbum, { id });
         notify("Successfully deleted album", NotificationType.success);
         return true;
     }
 
     static async addTrackToAlbums(track_id: number, album_ids: number[]): Promise<boolean> {
-        const res = await HttpClient.postAsync(ApiRoutes.addTrackToAlbums, { album_ids, track_id });
-        if (res.code !== 200) {
-            notify(
-                "Failed to add track to albums: " + getErrorMessage(res),
-                NotificationType.error
-            );
-            return false;
-        }
+        await post(ApiRoutes.addTrackToAlbums, { album_ids, track_id });
         notify("Added track to albums", NotificationType.success);
         return true;
     }
 
     static async removeTrackFromAlbums(track_id: number, album_ids: number[]): Promise<boolean> {
-        const res = await HttpClient.postAsync(ApiRoutes.removeTrackFromAlbums, {
+        await post(ApiRoutes.removeTrackFromAlbums, {
             album_ids,
             track_id,
         });
-        if (res.code !== 200) {
-            notify(
-                "Failed to remove track from album: " + getErrorMessage(res),
-                NotificationType.error
-            );
-            return false;
-        }
         notify("Removed track from album", NotificationType.success);
         return true;
     }
 
     static async moveTrackInAlbum(albumId: number, tracks: ListTrack[]): Promise<boolean> {
-        const res = await HttpClient.postAsync(ApiRoutes.reorderAlbumTracks, {
+        await post(ApiRoutes.reorderAlbumTracks, {
             album_id: albumId,
             tracks,
         });
-        if (res.code !== 200) {
-            notify("Failed to move tracks: " + getErrorMessage(res), NotificationType.error);
-            return false;
-        }
         return true;
     }
 
@@ -225,7 +297,7 @@ export class Api {
     }
 
     static async savePlay(id: number, quality: string): Promise<any> {
-        return await HttpClient.postAsync(ApiRoutes.saveTrackPlay, { id, quality });
+        return await post(ApiRoutes.saveTrackPlay, { id, quality });
     }
 
     static async unfollowUser(userId: number): Promise<any> {
@@ -237,25 +309,15 @@ export class Api {
     }
 
     static async deleteTrack(id: number): Promise<boolean> {
-        const res = await HttpClient.postAsync(ApiRoutes.deleteTrack, { id });
-        if (res.code !== 200) {
-            notify("Error trying to delete track: " + getErrorMessage(res), NotificationType.error);
-            return false;
-        }
+        await post(ApiRoutes.deleteTrack, { id });
         notify("Track deleted", NotificationType.success);
         return true;
     }
 
     static async deleteComment(commentId: number): Promise<boolean> {
-        const res = await HttpClient.postAsync(ApiRoutes.deleteComment, {
+        await post(ApiRoutes.deleteComment, {
             id: commentId,
         });
-
-        if (res.code !== 200) {
-            notify(getErrorMessage(res), NotificationType.error);
-            return false;
-        }
-
         notify("Comment deleted", NotificationType.success);
         return true;
     }

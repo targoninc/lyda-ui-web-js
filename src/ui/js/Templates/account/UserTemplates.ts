@@ -60,7 +60,7 @@ export class UserTemplates {
             if (extraClasses) {
                 base.classes(...extraClasses);
             }
-            out.value = this.userWidgetInternal(context, newUser, base, Util.userIsFollowing(user));
+            out.value = this.userWidgetInternal(context, newUser, base, Util.isFollowing(user));
         }
 
         if (user.constructor === Signal) {
@@ -515,6 +515,10 @@ export class UserTemplates {
         const canUnverify = compute((v, p) => v && p.some(p => p.name === Permissions.canVerifyUsers), verified, permissions);
         const hasBadges = user.badges && user.badges.length > 0;
         const isOwnProfile = currentUser.value?.id === user.id;
+        const isFollowed = compute(f => {
+            console.log(f, isOwnProfile);
+            return f && !isOwnProfile;
+        }, Util.isFollowedBy(user));
 
         return create("div")
             .classes("flex", "align-children")
@@ -540,8 +544,8 @@ export class UserTemplates {
                         verified.value = false;
                     }
                 })),
-                !isOwnProfile && currentUser.value ? UserTemplates.followButton(Util.userIsFollowing(user), user.id) : null,
-                !isOwnProfile && Util.userIsFollowedBy(user) ? UserTemplates.followsBackIndicator() : null,
+                (!isOwnProfile && currentUser.value) ? UserTemplates.followButton(Util.isFollowing(user), user.id) : null,
+                when(isFollowed, UserTemplates.followsBackIndicator()),
             ).build();
     }
 
