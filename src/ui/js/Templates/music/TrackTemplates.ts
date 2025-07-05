@@ -18,7 +18,6 @@ import {navigate} from "../../Routing/Router.ts";
 import {compute, Signal, signal, AnyElement, AnyNode, create, HtmlPropertyValue, when, signalMap} from "@targoninc/jess";
 import {currentTrackId, currentTrackPosition, currentUser, manualQueue, playingHere} from "../../state.ts";
 import {Ui} from "../../Classes/Ui.ts";
-import {HttpClient} from "../../Api/HttpClient.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {MediaActions} from "../../Actions/MediaActions.ts";
 import {RoutePath} from "../../Routing/routes.ts";
@@ -33,13 +32,12 @@ import {Repost} from "@targoninc/lyda-shared/src/Models/db/lyda/Repost";
 import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
 import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
-import {TrackLike} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackLike";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
 import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
-import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {Comment} from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import {InteractionTemplates} from "../InteractionTemplates.ts";
 import {Api} from "../../Api/Api.ts";
+import { get } from "../../Api/ApiClient.ts";
 
 export class TrackTemplates {
     static collabIndicator(collab: TrackCollaborator): any {
@@ -556,11 +554,8 @@ export class TrackTemplates {
         }
         const showComments = signal(true);
         const comments = signal<Comment[]>([]);
-        HttpClient.getAsync<Comment[]>(ApiRoutes.getCommentsByTrackId, {track_id: track.id}).then((c) => {
-            if (!c.data || c.data.error) {
-                return;
-            }
-            comments.value = c.data;
+        get<Comment[]>(ApiRoutes.getCommentsByTrackId, {track_id: track.id}).then((c) => {
+            comments.value = c ?? [];
         });
 
         return create("div")
@@ -758,7 +753,7 @@ export class TrackTemplates {
         });
     }
 
-    static toBeApprovedTrack(collabType: CollaboratorType, track: TrackCollaborator, user: User) {
+    static toBeApprovedTrack(collabType: CollaboratorType, track: TrackCollaborator) {
         const avatarState = signal(Images.DEFAULT_AVATAR);
         if (track.user?.has_avatar) {
             avatarState.value = Util.getUserAvatar(track.user_id);
@@ -800,7 +795,7 @@ export class TrackTemplates {
                             .classes("flex")
                             .children(
                                 GenericTemplates.action(Icons.CHECK, "Approve", track.track_id, async () => {
-                                    await TrackActions.approveCollab(track.track_id, track.track!.title);
+                                    await TrackActions.approveCollab(track.track_id);
                                 }, [], ["secondary", "positive"]),
                                 GenericTemplates.action(Icons.X, "Deny", track.track_id, async () => {
                                     await TrackActions.denyCollab(track.track_id, track.track!.title);
@@ -810,12 +805,12 @@ export class TrackTemplates {
             ).build();
     }
 
-    static unapprovedTracks(tracks: TrackCollaborator[], user: User) {
+    static unapprovedTracks(tracks: TrackCollaborator[]) {
         const trackList = tracks.map((track: TrackCollaborator) => {
             if (!track.collab_type) {
                 throw new Error(`Track Collab type is not set for unapproved track with ID ${track.track_id}`);
             }
-            return TrackTemplates.toBeApprovedTrack(track.collab_type, track, user);
+            return TrackTemplates.toBeApprovedTrack(track.collab_type, track);
         });
         return create("div")
             .classes("flex-v")

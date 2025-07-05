@@ -98,14 +98,7 @@ export class StatisticTemplates {
                                     classes: ["positive"],
                                     onclick: async () => {
                                         await Ui.getTextInputModal("Set PayPal mail", "The account you will receive payments with", "", "Save", "Cancel", async (address: string) => {
-                                            const res = await HttpClient.postAsync(ApiRoutes.updateUserSetting, {
-                                                setting: UserSettings.paypalMail,
-                                                value: address
-                                            });
-                                            if (res.code !== 200) {
-                                                notify(getErrorMessage(res), NotificationType.error);
-                                                return;
-                                            }
+                                            await Api.updateUserSetting(UserSettings.paypalMail, address);
                                             notify("PayPal mail set", NotificationType.success);
                                             paypalMailExists$.value = true;
                                         }, () => {
@@ -216,20 +209,14 @@ export class StatisticTemplates {
                                     text: "Download",
                                     icon: {icon: "download"},
                                     onclick: async () => {
-                                        const res = await HttpClient.getAsync<string>(ApiRoutes.royaltiesForExport, {
-                                            ...month.value,
-                                            type: types[selectedTypeIndex.value]
-                                        });
-                                        if (res.code !== 200) {
-                                            notify(getErrorMessage(res), NotificationType.error);
-                                            return;
+                                        const royalties = await Api.getRoyaltiesForExport(month.value, types[selectedTypeIndex.value]);
+                                        if (royalties) {
+                                            let extension = types[selectedTypeIndex.value];
+                                            if (extension === "excel") {
+                                                extension = "xlsx";
+                                            }
+                                            downloadFile(`Lyda Royalties ${month.value.year}-${month.value.month}.${extension}`, royalties);
                                         }
-
-                                        let extension = types[selectedTypeIndex.value];
-                                        if (extension === "excel") {
-                                            extension = "xlsx";
-                                        }
-                                        downloadFile(`Lyda Royalties ${month.value.year}-${month.value.month}.${extension}`, res.data);
                                     }
                                 })
                             ).build()

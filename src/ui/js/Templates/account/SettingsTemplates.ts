@@ -32,7 +32,7 @@ export class SettingsTemplates {
         const user = currentUser.value;
         if (!user) {
             navigate(RoutePath.login);
-            return;
+            return nullElement();
         }
 
         return create("div")

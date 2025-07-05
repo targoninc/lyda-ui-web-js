@@ -3,7 +3,7 @@ import {LandingPageTemplates} from "./LandingPageTemplates.ts";
 import {UserTemplates} from "./account/UserTemplates.ts";
 import {HttpClient} from "../Api/HttpClient.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {create, when, signal} from "@targoninc/jess";
+import { create, when, signal, AnyElement } from "@targoninc/jess";
 import {SearchTemplates} from "./SearchTemplates.ts";
 import {SettingsTemplates} from "./account/SettingsTemplates.ts";
 import {RoadmapTemplates} from "./RoadmapTemplates.ts";
@@ -32,7 +32,7 @@ import {NotificationType} from "../Enums/NotificationType.ts";
 import {Api} from "../Api/Api.ts";
 
 export class PageTemplates {
-    static mapping: Record<RoutePath, Function> = {
+    static mapping: Record<RoutePath, (route: Route, params: Record<string, string>) => Promise<AnyElement> | AnyElement> = {
         [RoutePath.explore]: () => MusicTemplates.feed("explore"),
         [RoutePath.following]: () => MusicTemplates.feed("following"),
         [RoutePath.history]: () => MusicTemplates.feed("history"),
@@ -253,9 +253,8 @@ export class PageTemplates {
         return create("div")
             .classes("unapprovedTracks")
             .children(
-                TrackTemplates.unapprovedTracks(tracks, user)
-            )
-            .build();
+                TrackTemplates.unapprovedTracks(tracks ?? [])
+            ).build();
     }
 
     static subscribePage() {

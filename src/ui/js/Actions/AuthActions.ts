@@ -1,13 +1,11 @@
-import {HttpClient} from "../Api/HttpClient.ts";
-import {notify, Ui} from "../Classes/Ui.ts";
+import { Ui} from "../Classes/Ui.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {Icons} from "../Enums/Icons.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
 import {navigate} from "../Routing/Router.ts";
-import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {navInitialized} from "../state.ts";
 import {RoutePath} from "../Routing/routes.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
+import { Api } from "../Api/Api.ts";
 
 export class AuthActions {
     static resetUiState() {
@@ -26,22 +24,13 @@ export class AuthActions {
 
     static async logOut() {
         AuthActions.resetUiState();
-        const res = await HttpClient.postAsync(ApiRoutes.logout);
-        if (res.code === 200) {
-            notify("Logged out!", NotificationType.success);
-            navigate(RoutePath.login);
-        }
-        return res;
+        await Api.logout();
     }
 
     static async logOutWithRedirect() {
-        let r = await AuthActions.logOut();
-        if (r.code === 200) {
-            window.location.reload();
-            navigate(RoutePath.login);
-        } else {
-            notify("Failed to log out. Please try again later.", NotificationType.error);
-        }
+        await AuthActions.logOut();
+        window.location.reload();
+        navigate(RoutePath.login);
     }
 
     static async loginLogout() {

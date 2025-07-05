@@ -1,6 +1,4 @@
 import { compute, Signal, signal, AnyElement, create, when } from "@targoninc/jess";
-import { HttpClient } from "../Api/HttpClient.ts";
-import { notify } from "../Classes/Ui.ts";
 import { navigate } from "../Routing/Router.ts";
 import { ApiRoutes } from "../Api/ApiRoutes.ts";
 import { GenericTemplates } from "./generic/GenericTemplates.ts";
@@ -10,7 +8,7 @@ import { RoutePath } from "../Routing/routes.ts";
 import { button } from "@targoninc/jess-components";
 import { SearchContext } from "@targoninc/lyda-shared/src/Enums/SearchContext";
 import { SearchResult } from "@targoninc/lyda-shared/src/Models/SearchResult";
-import { NotificationType } from "../Enums/NotificationType.ts";
+import { get } from "../Api/ApiClient.ts";
 
 export class SearchTemplates {
     static search(context: SearchContext) {
@@ -78,19 +76,15 @@ export class SearchTemplates {
                 ApiRoutes.searchUsers,
             ];
             const promises = endpoints.map(async endpoint => {
-                const res = await HttpClient.getAsync<SearchResult[]>(endpoint, {
+                const data = await get<SearchResult[]>(endpoint, {
                     search: currentSearch.value,
                 });
 
-                if (res.code !== 200) {
-                    notify("Failed to search, status code " + res.code, NotificationType.error);
+                if (currentSearchCount !== searchCount || !data) {
                     return;
                 }
 
-                if (currentSearchCount !== searchCount) {
-                    return;
-                }
-                results.value = results.value.concat(res.data);
+                results.value = results.value.concat(data);
             });
             await Promise.all(promises);
         }
