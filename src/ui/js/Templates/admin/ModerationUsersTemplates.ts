@@ -1,5 +1,3 @@
-import {ApiRoutes} from "../../Api/ApiRoutes.ts";
-import {HttpClient} from "../../Api/HttpClient.ts";
 import {compute, Signal, signal, create, when} from "@targoninc/jess";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
@@ -8,6 +6,7 @@ import {Time} from "../../Classes/Helpers/Time.ts";
 import { button, checkbox } from "@targoninc/jess-components";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {Permission} from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
+import { Api } from "../../Api/Api.ts";
 
 export class ModerationUsersTemplates {
     static usersPage() {
@@ -23,16 +22,12 @@ export class ModerationUsersTemplates {
         const offset = signal<number>(0);
 
         const refresh = async () => {
-            const res = await HttpClient.getAsync<User[]>(ApiRoutes.getUsers, {
-                query: query.value ?? "%",
-                offset: offset.value,
-                limit: 100
-            });
-            if (res.data) {
-                users.value = res.data;
+            const res = await Api.getUsers(query.value ?? "%", offset.value, 100);
+            if (res) {
+                users.value = res;
             }
-        }
-        refresh();
+        };
+        refresh().then();
 
         return create("div")
             .children(
@@ -41,30 +36,31 @@ export class ModerationUsersTemplates {
                     .children(
                         button({
                             text: "Refresh",
-                            icon: {icon: "refresh"},
+                            icon: { icon: "refresh" },
                             classes: ["positive"],
                             onclick: async () => {
                                 users.value = [];
                                 await refresh();
-                            }
-                        }),
-                    ).build(),
+                            },
+                        })
+                    )
+                    .build(),
                 compute(u => ModerationUsersTemplates.usersList(u), users)
-            ).build();
+            )
+            .build();
     }
 
     static usersList(users: User[]) {
         return GenericTemplates.tableBody(
             GenericTemplates.tableHeaders([
-                {title: "Username"},
-                {title: "Display name"},
-                {title: "Permissions"},
-                {title: "Last login"},
+                { title: "Username" },
+                { title: "Display name" },
+                { title: "Permissions" },
+                { title: "Last login" },
             ]),
             create("tbody")
-                .children(
-                    ...users.map(u => ModerationUsersTemplates.user(u))
-                ).build(),
+                .children(...users.map(u => ModerationUsersTemplates.user(u)))
+                .build()
         );
     }
 
@@ -74,27 +70,27 @@ export class ModerationUsersTemplates {
 
         return create("tr")
             .children(
-                create("td")
-                    .text(u.username)
-                    .build(),
-                create("td")
-                    .text(u.displayname)
-                    .build(),
+                create("td").text(u.username).build(),
+                create("td").text(u.displayname).build(),
                 create("td")
                     .classes("relative")
                     .children(
                         button({
                             text: compute(p => p.length.toString(), permissions),
-                            onclick: () => permissionsOpen.value = !permissionsOpen.value,
-                            icon: {icon: "lock_open"},
+                            onclick: () => (permissionsOpen.value = !permissionsOpen.value),
+                            icon: { icon: "lock_open" },
                         }),
-                        when(permissionsOpen,
-                            ModerationUsersTemplates.permissionsPopup(permissions, u))
-                    ).build(),
+                        when(
+                            permissionsOpen,
+                            ModerationUsersTemplates.permissionsPopup(permissions, u)
+                        )
+                    )
+                    .build(),
                 create("td")
                     .text(u.lastlogin ? Time.agoUpdating(new Date(u.lastlogin)) : "")
-                    .build(),
-            ).build()
+                    .build()
+            )
+            .build();
     }
 
     private static permissionsPopup(permissions: Signal<Permission[]>, u: User) {
@@ -102,46 +98,54 @@ export class ModerationUsersTemplates {
             .classes("popout-below", "flex-v", "padded", "rounded")
             .children(
                 ...Object.values(Permissions).map(p => {
-                    const hasPermission = compute(up => up.some(upp => upp.name === p), permissions);
+                    const hasPermission = compute(
+                        up => up.some(upp => upp.name === p),
+                        permissions
+                    );
 
                     return create("div")
                         .classes("flex", "space-outwards")
                         .children(
-                            ModerationUsersTemplates.permissionCheckbox(p, hasPermission, u, permissions)
-                        ).build();
-                }),
-            ).build();
+                            ModerationUsersTemplates.permissionCheckbox(
+                                p,
+                                hasPermission,
+                                u,
+                                permissions
+                            )
+                        )
+                        .build();
+                })
+            )
+            .build();
     }
 
-    private static permissionCheckbox(p: string, hasPermission: Signal<any>, u: User, permissions: Signal<Permission[]>) {
+    private static permissionCheckbox(
+        p: string,
+        hasPermission: Signal<any>,
+        u: User,
+        permissions: Signal<Permission[]>
+    ) {
         return checkbox({
             text: p,
             checked: hasPermission,
-            onchange: () => {
+            onchange: async () => {
                 const val = !hasPermission.value;
-                HttpClient.postAsync(ApiRoutes.setUserPermission, {
-                    permissionName: p,
-                    user_id: u.id,
-                    userHasPermission: val
-                }).then(res => {
-                    if (res.code === 200) {
-                        if (val) {
-                            permissions.value = [
-                                ...permissions.value,
-                                {
-                                    name: p,
-                                    id: -1,
-                                    created_at: new Date(),
-                                    updated_at: new Date(),
-                                    description: "",
-                                }
-                            ];
-                        } else {
-                            permissions.value = permissions.value.filter(pm => pm.name !== p);
-                        }
-                    }
-                })
-            }
+                await Api.setUserPermission(u.id, p, val);
+                if (val) {
+                    permissions.value = [
+                        ...permissions.value,
+                        {
+                            name: p,
+                            id: -1,
+                            created_at: new Date(),
+                            updated_at: new Date(),
+                            description: "",
+                        },
+                    ];
+                } else {
+                    permissions.value = permissions.value.filter(pm => pm.name !== p);
+                }
+            },
         });
     }
 }

@@ -815,7 +815,7 @@ export class GenericTemplates {
                         onkeydown: async (e) => {
                             const target = e.target as HTMLInputElement;
                             const search = target.value;
-                            users.value = (await Api.getUsers(search)) ?? [];
+                            users.value = (await Api.searchUsers(search)) ?? [];
                         },
                     }),
                     create("div")

@@ -1,9 +1,8 @@
 import {compute, signal, create, when, nullElement} from "@targoninc/jess";
 import {currency} from "../Classes/Helpers/Num.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
-import {HttpClient} from "../Api/HttpClient.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {downloadFile, getErrorMessage} from "../Classes/Util.ts";
+import {downloadFile} from "../Classes/Util.ts";
 import {ChartTemplates} from "./generic/ChartTemplates.ts";
 import {anonymize} from "../Classes/Helpers/CustomText.ts";
 import {navigate, reload} from "../Routing/Router.ts";
@@ -112,14 +111,7 @@ export class StatisticTemplates {
                                     classes: ["negative"],
                                     onclick: async () => {
                                         await Ui.getConfirmationModal("Remove PayPal mail", "Are you sure you want to remove your paypal mail? You'll have to add it again manually.", "Yes", "No", async () => {
-                                            const res = await HttpClient.postAsync(ApiRoutes.updateUserSetting, {
-                                                setting: "paypalMail",
-                                                value: ""
-                                            });
-                                            if (res.code !== 200) {
-                                                notify(getErrorMessage(res), NotificationType.error);
-                                                return;
-                                            }
+                                            await Api.updateUserSetting(UserSettings.paypalMail, "");
                                             notify("PayPal mail removed", NotificationType.success);
                                             paypalMailExists$.value = false;
                                         }, () => {
@@ -132,11 +124,7 @@ export class StatisticTemplates {
                                     classes: ["positive"],
                                     onclick: async () => {
                                         await Ui.getConfirmationModal("Request payment", "Are you sure you want to request a payment?", "Yes", "No", async () => {
-                                            const res = await HttpClient.postAsync(ApiRoutes.requestPayout);
-                                            if (res.code !== 200) {
-                                                notify(getErrorMessage(res), NotificationType.error);
-                                                return;
-                                            }
+                                            await Api.requestPayout();
                                             notify("Payment requested", NotificationType.success);
                                             reload();
                                         }, () => {

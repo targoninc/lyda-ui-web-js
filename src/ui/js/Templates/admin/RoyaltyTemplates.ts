@@ -13,6 +13,7 @@ import {button, SelectOption, toggle } from "@targoninc/jess-components";
 import {RoyaltyInfo} from "@targoninc/lyda-shared/src/Models/RoyaltyInfo";
 import {RoyaltyMonth} from "@targoninc/lyda-shared/src/Models/RoyaltyMonth";
 import {NotificationType} from "../../Enums/NotificationType.ts";
+import { Api } from "../../Api/Api.ts";
 
 export class RoyaltyTemplates {
     static royaltyCalculator(royaltyInfo: RoyaltyInfo) {
@@ -66,14 +67,7 @@ export class RoyaltyTemplates {
                                     notify("Please select a month", NotificationType.error);
                                     return;
                                 }
-                                const res = await HttpClient.postAsync(ApiRoutes.calculateEarnings, {
-                                    month: month.month,
-                                    year: month.year,
-                                });
-                                if (res.code !== 200) {
-                                    notify(getErrorMessage(res), NotificationType.error);
-                                    return;
-                                }
+                                await Api.calculateEarnings(month);
                                 notify("Earnings calculated", NotificationType.success);
                             }
                         }),

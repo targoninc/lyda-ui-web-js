@@ -10,6 +10,7 @@ import { button } from "@targoninc/jess-components";
 import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
 import {PaypalWebhook} from "@targoninc/lyda-shared/src/Models/db/finance/PaypalWebhook";
 import { NotificationType } from "../../Enums/NotificationType.ts";
+import { Api } from "../../Api/Api.ts";
 
 export class EventsTemplates {
     static eventsPage() {
@@ -82,9 +83,7 @@ export class EventsTemplates {
                                     icon: {icon: "start"},
                                     classes: ["positive"],
                                     onclick: () => {
-                                        HttpClient.postAsync(ApiRoutes.triggerEventHandling, {
-                                            id: event.id,
-                                        }).then(() => {
+                                        Api.triggerEventHandling(event.id).then(() => {
                                             notify("Event triggered", NotificationType.success);
                                         }).catch(e => {
                                             notify("Failed to trigger event: " + e, NotificationType.error);

@@ -67,6 +67,12 @@ export class Api {
             toggle: !interacted$.value
         });
     }
+
+    static async triggerEventHandling(eventId: string) {
+        return post(ApiRoutes.triggerEventHandling, {
+            id: eventId,
+        });
+    }
     //endregion
 
     //region Royalties
@@ -74,6 +80,17 @@ export class Api {
         return get<string>(ApiRoutes.royaltiesForExport, {
             ...month,
             type
+        });
+    }
+
+    static async requestPayout() {
+        return post(ApiRoutes.requestPayout);
+    }
+
+    static async calculateEarnings(month: MonthIdentifier) {
+        return post(ApiRoutes.calculateEarnings, {
+            month: month.month,
+            year: month.year
         });
     }
     //endregion
@@ -206,6 +223,14 @@ export class Api {
     //endregion
 
     //region User
+    static async setUserPermission(userId: number, permissionName: string, has: boolean) {
+        return post(ApiRoutes.setUserPermission, {
+            permissionName,
+            user_id: userId,
+            userHasPermission: has
+        });
+    }
+
     static async subscribe(parameters: Record<any, any>) {
         await post(ApiRoutes.subscribe, parameters);
     }
@@ -229,8 +254,16 @@ export class Api {
         await post(ApiRoutes.unverifyUser, { id });
     }
 
-    static async getUsers(search: string) {
+    static async searchUsers(search: string) {
         return get<SearchResult[]>(ApiRoutes.searchUsers, { search });
+    }
+
+    static async getUsers(query: string, offset: number = 0, limit = 100) {
+        return get<User[]>(ApiRoutes.getUsers, {
+            query,
+            offset,
+            limit
+        })
     }
 
     static async getUser(name: string) {
