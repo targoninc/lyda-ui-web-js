@@ -1,4 +1,3 @@
-import {HttpClient} from "../Api/HttpClient.ts";
 import {notify} from "./Ui.ts";
 import {navigate} from "../Routing/Router.ts";
 import {Signal} from "@targoninc/jess";
@@ -16,7 +15,6 @@ export class AudioUpload {
     triggerEvent: Event;
     state: Signal<UploadableTrack>;
     id: number | undefined;
-    api: HttpClient | undefined;
     private progress: Signal<ProgressPart|null>;
 
     constructor(e: Event, state: Signal<UploadableTrack>, progress: Signal<ProgressPart|null>) {

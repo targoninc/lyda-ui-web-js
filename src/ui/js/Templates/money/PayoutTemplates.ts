@@ -1,12 +1,11 @@
 import {create, compute, signal} from "@targoninc/jess";
-import {HttpClient} from "../../Api/HttpClient.ts";
-import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
 import {currency} from "../../Classes/Helpers/Num.ts";
 import {permissions} from "../../state.ts";
 import {Payout} from "@targoninc/lyda-shared/src/Models/db/finance/Payout";
 import {PaymentStatus} from "@targoninc/lyda-shared/src/Enums/PaymentStatus";
+import { Api } from "../../Api/Api.ts";
 
 export class PayoutTemplates {
     static payoutsPage() {
@@ -14,10 +13,8 @@ export class PayoutTemplates {
         const skip = signal(0);
         const load = (filter?: any) => {
             loading.value = true;
-            HttpClient.getAsync<Payout[]>(ApiRoutes.getPayouts, {
-                skip: skip.value,
-                ...(filter ?? {})
-            }).then(e => payouts.value = e.data)
+            Api.getPayouts(skip.value, filter)
+                .then(e => payouts.value = e ?? [])
                 .finally(() => loading.value = false);
         }
         const loading = signal(false);

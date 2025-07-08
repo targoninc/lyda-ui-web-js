@@ -1,12 +1,10 @@
 import {notify} from "./Ui.ts";
 import {Images} from "../Enums/Images.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
-import { ApiResponse} from "../Api/HttpClient.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {chartColor, currentUser} from "../state.ts";
+import { chartColor, currentUser, permissions } from "../state.ts";
 import {AnyElement, asSignal, compute, signal, Signal} from "@targoninc/jess";
-import {getUserPermissions} from "../../main.ts";
 import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {NotificationType} from "../Enums/NotificationType.ts";
@@ -268,7 +266,7 @@ export function nullIfEmpty(value: any) {
 
 export function finalizeLogin(step: Signal<string>, user: User) {
     LydaCache.set("user", new CacheItem(JSON.stringify(user)));
-    getUserPermissions();
+    Api.getPermissions().then(res => permissions.value = res ?? []);
     step.value = "complete";
 
     const referrer = document.referrer;
@@ -301,27 +299,6 @@ export function updateUserSetting(user: User, key: string, value: string) {
 
 export function target<T = HTMLInputElement>(e: Event) {
     return e.target as T;
-}
-
-export function getErrorMessage(res: ApiResponse<any>) {
-    if (res.data?.error) {
-        return res.data.error;
-    }
-
-    switch (res.code) {
-        case 400:
-            return "Invalid request";
-        case 401:
-            return "Not logged in";
-        case 403:
-            return "Missing permissions";
-        case 404:
-            return "Not found";
-        case 500:
-            return "Server error";
-        default:
-            return "Unknown error";
-    }
 }
 
 export async function copy(text: string) {

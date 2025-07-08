@@ -1,12 +1,11 @@
 import {create, compute, signal} from "@targoninc/jess";
-import {HttpClient} from "../../Api/HttpClient.ts";
-import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
 import {currency} from "../../Classes/Helpers/Num.ts";
 import {permissions} from "../../state.ts";
 import {copy} from "../../Classes/Util.ts";
 import {PaymentHistory} from "@targoninc/lyda-shared/src/Models/db/finance/PaymentHistory";
+import { Api } from "../../Api/Api.ts";
 
 export class PaymentTemplates {
     static paymentsPage() {
@@ -14,10 +13,8 @@ export class PaymentTemplates {
         const skip = signal(0);
         const load = (filter?: any) => {
             loading.value = true;
-            HttpClient.getAsync<PaymentHistory[]>(ApiRoutes.getPaymentHistory, {
-                skip: skip.value,
-                ...(filter ?? {})
-            }).then(e => payments.value = e.data)
+            Api.getPaymentHistory(skip.value, filter)
+                .then(e => payments.value = e ?? [])
                 .finally(() => loading.value = false);
         }
         const loading = signal(false);

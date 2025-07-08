@@ -1,8 +1,6 @@
 import {compute, Signal, signal, create, when, nullElement} from "@targoninc/jess";
 import {FormTemplates} from "../generic/FormTemplates.ts";
 import {notify} from "../../Classes/Ui.ts";
-import {HttpClient} from "../../Api/HttpClient.ts";
-import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
 import {permissions} from "../../state.ts";
 import {currency} from "../../Classes/Helpers/Num.ts";
@@ -106,9 +104,9 @@ export class RoyaltyTemplates {
 
     static royaltyManagement() {
         const royaltyInfo = signal<any>(null);
-        HttpClient.getAsync<RoyaltyInfo>(ApiRoutes.getRoyaltyInfo).then(res => {
-            if (res.data) {
-                royaltyInfo.value = res.data;
+        Api.getRoyaltyInfo().then(res => {
+            if (res) {
+                royaltyInfo.value = res;
             }
         });
 

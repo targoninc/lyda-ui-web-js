@@ -20,7 +20,11 @@ import { navigate } from "../Routing/Router.ts";
 import { RoutePath } from "../Routing/routes.ts";
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
 import { WebauthnVerificationRequest } from "@targoninc/lyda-shared/dist/Models/WebauthnVerificationRequest";
-import { AuthenticationJSON, CredentialDescriptor, RegistrationJSON } from "@passwordless-id/webauthn/dist/esm/types";
+import {
+    AuthenticationJSON,
+    CredentialDescriptor,
+    RegistrationJSON,
+} from "@passwordless-id/webauthn/dist/esm/types";
 import { MfaOption } from "@targoninc/lyda-shared/src/Enums/MfaOption.ts";
 import { UploadableTrack } from "../Models/UploadableTrack.ts";
 import { InteractionType } from "@targoninc/lyda-shared/src/Enums/InteractionType";
@@ -31,6 +35,9 @@ import { AvailableSubscription } from "@targoninc/lyda-shared/src/Models/db/fina
 import { Subscription } from "@targoninc/lyda-shared/src/Models/db/finance/Subscription.ts";
 import { Statistic } from "@targoninc/lyda-shared/src/Models/Statistic";
 import { TypedStatistic } from "@targoninc/lyda-shared/src/Models/TypedStatistic";
+import { PaymentHistory } from "@targoninc/lyda-shared/src/Models/db/finance/PaymentHistory.ts";
+import { Payout } from "@targoninc/lyda-shared/src/Models/db/finance/Payout";
+import { Permission } from "@targoninc/lyda-shared/src/Models/db/lyda/Permission.ts";
 
 export class Api {
     static getLogs(filterState: Signal<any>, successCallback: (data: Log[]) => void) {
@@ -89,9 +96,31 @@ export class Api {
             ...filter,
         });
     }
+
+    //endregion
+
+    //region logs
+    static async getActionLogs() {
+        return get<any[]>(ApiRoutes.getActionLogs);
+    }
+
     //endregion
 
     //region Royalties
+    static async getPaymentHistory(skip: number, filter: any = {}) {
+        return get<PaymentHistory[]>(ApiRoutes.getPaymentHistory, {
+            skip,
+            ...filter,
+        });
+    }
+
+    static async getPayouts(skip: number, filter: any = {}) {
+        return get<Payout[]>(ApiRoutes.getPayouts, {
+            skip,
+            ...filter,
+        });
+    }
+
     static async calculateRoyalties(month: MonthIdentifier) {
         return post(ApiRoutes.calculateRoyalties, {
             month: month.month,
@@ -124,11 +153,21 @@ export class Api {
             year: month.year,
         });
     }
+
     //endregion
 
     //region Statistics
-    static async getStatistic(endpoint: string) {
-        return get<Statistic[]>(endpoint);
+    static async getStatistic(
+        endpoint: string,
+        params: any = {},
+        offset: number = 0,
+        limit: number = 100
+    ) {
+        return get<Statistic[]>(endpoint, {
+            ...params,
+            offset,
+            limit,
+        });
     }
 
     static async getTypedStatistic(endpoint: string) {
@@ -262,6 +301,7 @@ export class Api {
             method,
         });
     }
+
     //endregion
 
     //region Subscription
@@ -279,9 +319,14 @@ export class Api {
     static async unsubscribe(id: number) {
         await post(ApiRoutes.unsubscribe, { id });
     }
+
     //endregion
 
     //region User
+    static async getPermissions() {
+        return get<Permission[]>(ApiRoutes.userPermissions);
+    }
+
     static async userExists(email: string) {
         return get<User>(ApiRoutes.userExists, {
             email: encodeURIComponent(email),
@@ -374,14 +419,19 @@ export class Api {
     static async getRoyaltyInfo(): Promise<RoyaltyInfo | null> {
         return await get<RoyaltyInfo>(ApiRoutes.getRoyaltyInfo);
     }
+
     //endregion
 
     //region Albums
     static async getAlbumsByUser(name: string, id: number | null = null) {
         return get<Album[]>(ApiRoutes.getAlbumsByUserId, {
             id,
-            name
+            name,
         });
+    }
+
+    static async getAlbumById(id: number) {
+        return get<{ album: Album, canEdit: boolean }>(ApiRoutes.getAlbumById, { id });
     }
 
     static async updateAlbum(album: Partial<Album>) {
@@ -428,17 +478,21 @@ export class Api {
     //endregion
 
     //region Tracks
+    static async getFeed(endpoint: string, params: any = {}) {
+        return get<Track[]>(endpoint, params);
+    }
+
     static async getTracksByUser(name: string, id: number | null = null) {
         return get<Track[]>(ApiRoutes.getTracksByUserId, {
             id,
-            name
+            name,
         });
     }
 
     static async getRepostsByUser(name: string, id: number | null = null) {
         return get<Track[]>(ApiRoutes.getTracksByUserId, {
             id,
-            name
+            name,
         });
     }
 
@@ -585,13 +639,14 @@ export class Api {
             price: track.price,
         });
     }
+
     //endregion
 
     //region Playlists
     static async getPlaylistsByUser(name: string, id: number | null = null) {
         return get<Playlist[]>(ApiRoutes.getPlaylistsByUserId, {
             id,
-            name
+            name,
         });
     }
 
@@ -702,5 +757,6 @@ export class Api {
             referenceId,
         });
     }
+
     //endregion
 }
