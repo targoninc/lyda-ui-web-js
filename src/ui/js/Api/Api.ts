@@ -29,6 +29,8 @@ import { MonthIdentifier } from "../Classes/Helpers/Date.ts";
 import { PaypalWebhook } from "@targoninc/lyda-shared/src/Models/db/finance/PaypalWebhook";
 import { AvailableSubscription } from "@targoninc/lyda-shared/src/Models/db/finance/AvailableSubscription.ts";
 import { Subscription } from "@targoninc/lyda-shared/src/Models/db/finance/Subscription.ts";
+import { Statistic } from "@targoninc/lyda-shared/src/Models/Statistic";
+import { TypedStatistic } from "@targoninc/lyda-shared/src/Models/TypedStatistic";
 
 export class Api {
     static getLogs(filterState: Signal<any>, successCallback: (data: Log[]) => void) {
@@ -122,6 +124,17 @@ export class Api {
             year: month.year,
         });
     }
+    //endregion
+
+    //region Statistics
+    static async getStatistic(endpoint: string) {
+        return get<Statistic[]>(endpoint);
+    }
+
+    static async getTypedStatistic(endpoint: string) {
+        return get<TypedStatistic[]>(endpoint);
+    }
+
     //endregion
 
     //region Auth
@@ -314,8 +327,12 @@ export class Api {
         return get<User>(ApiRoutes.getUser, { name });
     }
 
-    static async getUserById(id: number | null) {
+    static async getUserById(id: number | null = null) {
         return get<User>(ApiRoutes.getUser, { id });
+    }
+
+    static async getRandomUser() {
+        return get<User>(ApiRoutes.randomUser);
     }
 
     static async markNotificationsAsRead(newestTimestamp: Signal<Date | null>) {

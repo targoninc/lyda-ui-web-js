@@ -1,7 +1,7 @@
 import {notify} from "./Ui.ts";
 import {Images} from "../Enums/Images.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
-import {HttpClient, ApiResponse} from "../Api/HttpClient.ts";
+import { ApiResponse} from "../Api/HttpClient.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {chartColor, currentUser} from "../state.ts";
@@ -11,6 +11,7 @@ import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {Comment} from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
+import { Api } from "../Api/Api.ts";
 
 export class Util {
     static capitalizeFirstLetter(string: string) {
@@ -108,15 +109,12 @@ export class Util {
             if (allowCache) {
                 // TODO: Implement caching for user by id
             }
-            const res = await HttpClient.getAsync<User>(ApiRoutes.getUser, {id: nullIfEmpty(id)});
-            if (res.code === 401) {
+            try {
+                const user = await Api.getUserById(nullIfEmpty(id));
+                return Util.mapNullToEmptyString(user);
+            } catch (e: any) {
                 return null;
             }
-            if (res.code === 500) {
-                notify("An error occurred while fetching the user", NotificationType.error);
-                return null;
-            }
-            return Util.mapNullToEmptyString(res.data);
         }
     }
 
@@ -143,15 +141,12 @@ export class Util {
     }
 
     static async getUserByNameAsync(name: string) {
-        const res = await HttpClient.getAsync(ApiRoutes.getUser, {name: nullIfEmpty(name)});
-        if (res.code === 401) {
+        try {
+            const user = await Api.getUserByName(nullIfEmpty(name));
+            return Util.mapNullToEmptyString(user);
+        } catch (e: any) {
             return null;
         }
-        if (res.code === 500) {
-            notify("An error occurred while fetching the user", NotificationType.error);
-            return null;
-        }
-        return Util.mapNullToEmptyString(res.data);
     }
 
     static initializeModalRemove(modalContainer: AnyElement) {
@@ -194,16 +189,11 @@ export class Util {
     }
 
     static async getUser() {
-        let userData;
-        const res = await HttpClient.getAsync<User>(ApiRoutes.getUser);
-        if (res.code === 401) {
+        const user = await Api.getUserById();
+        if (!user) {
             return null;
         }
-        userData = res.data;
-        if (userData === null) {
-            return null;
-        }
-        currentUser.value = Util.mapNullToEmptyString(userData);
+        currentUser.value = Util.mapNullToEmptyString(user);
         return currentUser.value;
     }
 
