@@ -5,7 +5,7 @@ export class AuthApi {
     }, errorCallback: Function = () => {
     }) {
         Api.userExists(email)
-            .then(user => successCallback(user))
+            .then(user => user ? successCallback(user) : errorCallback())
             .catch((e) => errorCallback(e));
     }
 

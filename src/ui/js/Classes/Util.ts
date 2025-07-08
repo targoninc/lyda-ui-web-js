@@ -187,11 +187,15 @@ export class Util {
     }
 
     static async getUser() {
-        const user = await Api.getUserById();
-        if (!user) {
+        try {
+            const user = await Api.getUserById();
+            if (!user) {
+                return null;
+            }
+            currentUser.value = Util.mapNullToEmptyString(user);
+        } catch (e: any) {
             return null;
         }
-        currentUser.value = Util.mapNullToEmptyString(user);
         return currentUser.value;
     }
 

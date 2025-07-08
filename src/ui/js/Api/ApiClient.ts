@@ -18,6 +18,11 @@ const refetch = async <T>(
 
     const text = await res.text();
     if (!res.ok) {
+        const noErrorCodes = [401, 404];
+        if (noErrorCodes.includes(res.status)) {
+            return null;
+        }
+
         console.error(text);
         notify(
             `API call failed: ${text.substring(0, 100) + (text.length > 100) ? "..." : ""}`,
