@@ -1,22 +1,20 @@
-import {HttpClient} from "../Api/HttpClient.ts";
 import {notify} from "./Ui.ts";
 import {navigate} from "../Routing/Router.ts";
 import {Signal} from "@targoninc/jess";
 import {UploadableTrack} from "../Models/UploadableTrack.ts";
 import {MediaUploader} from "../Api/MediaUploader.ts";
-import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {RoutePath} from "../Routing/routes.ts";
 import {ProgressState} from "@targoninc/lyda-shared/src/Enums/ProgressState";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import {ProgressPart} from "../Models/ProgressPart.ts";
+import { Api } from "../Api/Api.ts";
 
 export class AudioUpload {
     triggerEvent: Event;
     state: Signal<UploadableTrack>;
     id: number | undefined;
-    api: HttpClient | undefined;
     private progress: Signal<ProgressPart|null>;
 
     constructor(e: Event, state: Signal<UploadableTrack>, progress: Signal<ProgressPart|null>) {
@@ -193,26 +191,7 @@ export class AudioUpload {
 
     async createTrack() {
         const state = this.state.value;
-
-        const res = await HttpClient.postAsync<Track>(ApiRoutes.createTrack, <Partial<Track>>{
-            title: state.title,
-            isrc: state.isrc,
-            upc: state.upc,
-            artistname: state.artistname,
-            visibility: state.visibility,
-            collaborators: state.collaborators,
-            credits: state.credits,
-            release_date: state.release_date,
-            genre: state.genre,
-            description: state.description,
-            price: state.price,
-        });
-
-        if (res.code !== 200) {
-            return res.data.error;
-        }
-
-        return res.data as Track;
+        return Api.createTrack(state);
     }
 
     private async uploadMedia(type: MediaFileType, id: number, file: File, onProgress?: (event: ProgressEvent) => void) {

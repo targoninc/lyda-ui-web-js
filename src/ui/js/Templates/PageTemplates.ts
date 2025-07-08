@@ -1,9 +1,7 @@
 import {AuthActions} from "../Actions/AuthActions.ts";
 import {LandingPageTemplates} from "./LandingPageTemplates.ts";
 import {UserTemplates} from "./account/UserTemplates.ts";
-import {HttpClient} from "../Api/HttpClient.ts";
-import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {create, when, signal} from "@targoninc/jess";
+import { create, when, signal, AnyElement } from "@targoninc/jess";
 import {SearchTemplates} from "./SearchTemplates.ts";
 import {SettingsTemplates} from "./account/SettingsTemplates.ts";
 import {RoadmapTemplates} from "./RoadmapTemplates.ts";
@@ -32,7 +30,7 @@ import {NotificationType} from "../Enums/NotificationType.ts";
 import {Api} from "../Api/Api.ts";
 
 export class PageTemplates {
-    static mapping: Record<RoutePath, Function> = {
+    static mapping: Record<RoutePath, (route: Route, params: Record<string, string>) => Promise<AnyElement> | AnyElement> = {
         [RoutePath.explore]: () => MusicTemplates.feed("explore"),
         [RoutePath.following]: () => MusicTemplates.feed("following"),
         [RoutePath.history]: () => MusicTemplates.feed("history"),
@@ -210,13 +208,11 @@ export class PageTemplates {
         const randomUserWidget = signal(create("span").text("loading...").build());
         const user = signal<User|null>(null);
 
-        HttpClient.getAsync(ApiRoutes.randomUser).then(async data => {
-            if (data.code !== 200) {
-                randomUserWidget.value = create("span").text("Failed to load random user").build();
-                return;
-            }
-            user.value = data.data as User;
-        });
+        Api.getRandomUser()
+            .then(async data => user.value = data)
+            .catch(() => randomUserWidget.value = create("span")
+                .text("Failed to load random user")
+                .build());
 
         return create("div")
             .classes("flex-v")
@@ -253,9 +249,8 @@ export class PageTemplates {
         return create("div")
             .classes("unapprovedTracks")
             .children(
-                TrackTemplates.unapprovedTracks(tracks, user)
-            )
-            .build();
+                TrackTemplates.unapprovedTracks(tracks ?? [])
+            ).build();
     }
 
     static subscribePage() {

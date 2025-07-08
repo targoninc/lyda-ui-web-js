@@ -1,16 +1,15 @@
 import {notify} from "./Ui.ts";
 import {Images} from "../Enums/Images.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
-import {HttpClient, ApiResponse} from "../Api/HttpClient.ts";
 import {CacheItem} from "../Cache/CacheItem.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {chartColor, currentUser} from "../state.ts";
+import { chartColor, currentUser, permissions } from "../state.ts";
 import {AnyElement, asSignal, compute, signal, Signal} from "@targoninc/jess";
-import {getUserPermissions} from "../../main.ts";
 import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {Comment} from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
+import { Api } from "../Api/Api.ts";
 
 export class Util {
     static capitalizeFirstLetter(string: string) {
@@ -68,7 +67,7 @@ export class Util {
     }
 
     static async fileExists(url: string) {
-        let response = await fetch(url);
+        const response = await fetch(url);
         return response.status === 200;
     }
 
@@ -108,15 +107,12 @@ export class Util {
             if (allowCache) {
                 // TODO: Implement caching for user by id
             }
-            const res = await HttpClient.getAsync<User>(ApiRoutes.getUser, {id: nullIfEmpty(id)});
-            if (res.code === 401) {
+            try {
+                const user = await Api.getUserById(nullIfEmpty(id));
+                return Util.mapNullToEmptyString(user);
+            } catch (e: any) {
                 return null;
             }
-            if (res.code === 500) {
-                notify("An error occurred while fetching the user", NotificationType.error);
-                return null;
-            }
-            return Util.mapNullToEmptyString(res.data);
         }
     }
 
@@ -127,27 +123,28 @@ export class Util {
         return array.some((e) => e[property] === currentUser.value!.id);
     }
 
-    static userIsFollowing(user$: User|Signal<User|null>) {
+    static isFollowing(user$: User|Signal<User|null>) {
         return compute(u => {
             const user = asSignal(user$).value as User;
             return !!(u && user?.follows?.some(f => f.following_user_id === u.id));
         }, currentUser);
     }
 
-    static userIsFollowedBy(user: User) {
-        return compute(u => !!(u && user.follows?.some(f => f.user_id === u.id)), currentUser);
+    static isFollowedBy(user: User) {
+        return compute(u => {
+            const ye = !!u && user.following?.some(f => f.user_id === u.id);
+            console.log(user.follows, u?.id);
+            return ye;
+        }, currentUser);
     }
 
     static async getUserByNameAsync(name: string) {
-        const res = await HttpClient.getAsync(ApiRoutes.getUser, {name: nullIfEmpty(name)});
-        if (res.code === 401) {
+        try {
+            const user = await Api.getUserByName(nullIfEmpty(name));
+            return Util.mapNullToEmptyString(user);
+        } catch (e: any) {
             return null;
         }
-        if (res.code === 500) {
-            notify("An error occurred while fetching the user", NotificationType.error);
-            return null;
-        }
-        return Util.mapNullToEmptyString(res.data);
     }
 
     static initializeModalRemove(modalContainer: AnyElement) {
@@ -190,16 +187,11 @@ export class Util {
     }
 
     static async getUser() {
-        let userData;
-        const res = await HttpClient.getAsync<User>(ApiRoutes.getUser);
-        if (res.code === 401) {
+        const user = await Api.getUserById();
+        if (!user) {
             return null;
         }
-        userData = res.data;
-        if (userData === null) {
-            return null;
-        }
-        currentUser.value = Util.mapNullToEmptyString(userData);
+        currentUser.value = Util.mapNullToEmptyString(user);
         return currentUser.value;
     }
 
@@ -274,10 +266,10 @@ export function nullIfEmpty(value: any) {
 
 export function finalizeLogin(step: Signal<string>, user: User) {
     LydaCache.set("user", new CacheItem(JSON.stringify(user)));
-    getUserPermissions();
+    Api.getPermissions().then(res => permissions.value = res ?? []);
     step.value = "complete";
 
-    let referrer = document.referrer;
+    const referrer = document.referrer;
     if (referrer !== "" && !referrer.includes("login")) {
         //window.location.href = referrer;
     } else {
@@ -307,27 +299,6 @@ export function updateUserSetting(user: User, key: string, value: string) {
 
 export function target<T = HTMLInputElement>(e: Event) {
     return e.target as T;
-}
-
-export function getErrorMessage(res: ApiResponse<any>) {
-    if (res.data?.error) {
-        return res.data.error;
-    }
-
-    switch (res.code) {
-        case 400:
-            return "Invalid request";
-        case 401:
-            return "Not logged in";
-        case 403:
-            return "Missing permissions";
-        case 404:
-            return "Not found";
-        case 500:
-            return "Server error";
-        default:
-            return "Unknown error";
-    }
 }
 
 export async function copy(text: string) {

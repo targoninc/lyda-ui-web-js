@@ -1,20 +1,18 @@
 import {Signal} from "@targoninc/jess";
 import {MfaOption} from "@targoninc/lyda-shared/dist/Enums/MfaOption";
-import {AuthApi} from "../../Api/AuthApi.ts";
 import {notify} from "../Ui.ts";
-import {getErrorMessage} from "../Util.ts";
 import {NotificationType} from "../../Enums/NotificationType.ts";
 import {webauthnLogin} from "./Webauthn.ts";
 import {AuthData} from "../../Templates/LandingPageTemplates.ts";
+import { Api } from "../../Api/Api.ts";
 
 function loginWithWebauthn(credentialDescriptors: any, loading: Signal<boolean>, step: Signal<string>, user: Signal<AuthData>) {
-    AuthApi.getWebauthnChallenge()
+    Api.getWebauthnChallenge()
         .then(async (res2) => {
-            if (res2.code !== 200) {
-                notify(getErrorMessage(res2), NotificationType.error);
+            if (!res2) {
                 return;
             }
-            const challenge = res2.data.challenge;
+            const challenge = res2.challenge;
             webauthnLogin(challenge, credentialDescriptors)
                 .then(async (verification) => {
                     user.value = {
@@ -31,12 +29,16 @@ function loginWithWebauthn(credentialDescriptors: any, loading: Signal<boolean>,
 
 export function sendMfaRequest(loading: Signal<boolean>, step: Signal<string>, user: Signal<AuthData>, selected: MfaOption) {
     loading.value = true;
-    AuthApi.mfaRequest(user.value.email, user.value.password, selected)
+    Api.mfaRequest(user.value.email, user.value.password, selected)
         .then(async (res) => {
-            if (res.data.mfa_needed) {
-                switch (res.data.type) {
+            if (!res) {
+                return;
+            }
+
+            if (res.mfa_needed) {
+                switch (res.type) {
                     case "webauthn":
-                        loginWithWebauthn(res.data.credentialDescriptors, loading, step, user);
+                        loginWithWebauthn(res.credentialDescriptors, loading, step, user);
                         break;
                 }
             } else {

@@ -1,11 +1,7 @@
 import {AnyNode, compute, create, HtmlPropertyValue, nullElement, Signal, signal, when} from "@targoninc/jess";
 import {GenericTemplates} from "./generic/GenericTemplates.ts";
-import {HttpClient} from "../Api/HttpClient.ts";
-import {notify} from "../Classes/Ui.ts";
-import {getErrorMessage} from "../Classes/Util.ts";
 import {InteractionMetadata} from "@targoninc/lyda-shared/src/Models/InteractionMetadata";
 import {InteractionConfig} from "@targoninc/lyda-shared/src/Models/InteractionConfig";
-import {NotificationType} from "../Enums/NotificationType.ts";
 import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import {InteractionType} from "@targoninc/lyda-shared/src/Enums/InteractionType";
@@ -13,9 +9,8 @@ import {Icons} from "../Enums/Icons.ts";
 import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import {currentUser} from "../state.ts";
-import { ApiRoutes } from "../Api/ApiRoutes.ts";
 import {Visibility} from "@targoninc/lyda-shared/dist/Enums/Visibility";
-import {TrackTemplates} from "./music/TrackTemplates.ts";
+import { Api } from "../Api/Api.ts";
 
 const interactionConfigs: Record<InteractionType, InteractionConfig> = {
     [InteractionType.like]: {
@@ -121,20 +116,11 @@ async function toggleInteraction(entityType: EntityType, interactionType: Intera
         return;
     }
 
-    const res = await HttpClient.postAsync(ApiRoutes.toggleInteraction, {
-        entityType,
-        interactionType,
-        id,
-        toggle: !interacted$.value
-    });
-    if (res.code === 200) {
-        interacted$.value = !interacted$.value;
-        if (interacted$.value) {
-            count$.value = count$.value + 1;
-        } else {
-            count$.value = count$.value - 1;
-        }
+    await Api.toggleInteraction(entityType, interactionType, id, interacted$);
+    interacted$.value = !interacted$.value;
+    if (interacted$.value) {
+        count$.value = count$.value + 1;
     } else {
-        notify(getErrorMessage(res), NotificationType.error);
+        count$.value = count$.value - 1;
     }
 }

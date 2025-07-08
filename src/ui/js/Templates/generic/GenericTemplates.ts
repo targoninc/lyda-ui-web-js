@@ -1,7 +1,6 @@
 import {Icons} from "../../Enums/Icons.ts";
 import {AlbumActions} from "../../Actions/AlbumActions.ts";
 import {PlaylistActions} from "../../Actions/PlaylistActions.ts";
-import {HttpClient} from "../../Api/HttpClient.ts";
 import {
     AnyElement,
     AnyNode,
@@ -16,7 +15,6 @@ import {
 } from "@targoninc/jess";
 import {Util} from "../../Classes/Util.ts";
 import {navigate} from "../../Routing/Router.ts";
-import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {currentTrackId, playingHere} from "../../state.ts";
 import {PillOption} from "../../Models/PillOption.ts";
 import {dayFromValue} from "../../Classes/Helpers/Date.ts";
@@ -429,7 +427,7 @@ export class GenericTemplates {
             .required(required)
             .attributes("accept", accept)
             .onchange(_ => {
-                let fileName = input.value;
+                const fileName = input.value;
                 if (accept && !accept.includes("*")) {
                     const accepts = accept.split(",");
                     const extension = fileName.substring(fileName.lastIndexOf(".") + 1);
@@ -540,25 +538,14 @@ export class GenericTemplates {
         ], "confirmation");
     }
 
-    static imageModal(imageUrl: StringOrSignal) {
-        return create("div")
-            .classes("modal-container")
-            .children(
-                create("div")
-                    .classes("modal-overlay")
-                    .build(),
-                create("div")
-                    .classes("modal", "padded-large", "rounded")
-                    .children(
-                        create("img")
-                            .classes("full")
-                            .attributes("src", imageUrl)
-                            .build()
-                    ).build()
-            ).build();
+    static modalImage(imageUrl: StringOrSignal) {
+        return create("img")
+            .classes("full")
+            .attributes("src", imageUrl)
+            .build();
     }
 
-    static textInputModal(title: HtmlPropertyValue, text: HtmlPropertyValue, currentValue: StringOrSignal,
+    static textInputModal(title: HtmlPropertyValue, text: HtmlPropertyValue,
                           newValue: Signal<string>, icon: HtmlPropertyValue, confirmText: StringOrSignal, cancelText: StringOrSignal,
                           confirmCallback: Function, cancelCallback: Function) {
         return GenericTemplates.modal([
@@ -790,7 +777,7 @@ export class GenericTemplates {
         const collabType = signal("1");
         let collabTypes: CollaboratorType[] = [];
         Api.getCollabTypes().then((types) => {
-            collabTypes = types;
+            collabTypes = types ?? [];
             collabTypeOptions.value = searchableSelect(<SearchableSelectConfig>{
                 options: signal(types as SelectOption[]),
                 value: collabType,
@@ -828,13 +815,7 @@ export class GenericTemplates {
                         onkeydown: async (e) => {
                             const target = e.target as HTMLInputElement;
                             const search = target.value;
-                            const res = await HttpClient.getAsync<SearchResult[]>(ApiRoutes.searchUsers, {
-                                search,
-                                filters: JSON.stringify(["users"])
-                            });
-                            if (res.code === 200) {
-                                users.value = res.data;
-                            }
+                            users.value = (await Api.searchUsers(search)) ?? [];
                         },
                     }),
                     create("div")
@@ -1086,7 +1067,7 @@ export class GenericTemplates {
                         button({
                             text: "Reload",
                             onclick: () => {
-                                // @ts-ignore
+                                // @ts-expect-error because it works on firefox
                                 window.location.reload(true);
                             },
                             classes: ["positive"],

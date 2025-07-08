@@ -1,6 +1,6 @@
 import {AlbumTemplates} from "../Templates/music/AlbumTemplates.ts";
-import {getErrorMessage, Util} from "../Classes/Util.ts";
-import {createModal, notify, Ui} from "../Classes/Ui.ts";
+import {Util} from "../Classes/Util.ts";
+import {createModal, notify} from "../Classes/Ui.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
 import {QueueManager} from "../Streaming/QueueManager.ts";
 import {navigate} from "../Routing/Router.ts";
@@ -10,7 +10,6 @@ import {RoutePath} from "../Routing/routes.ts";
 import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import {NotificationType} from "../Enums/NotificationType.ts";
-import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
 import {playingHere} from "../state.ts";
 import {Api} from "../Api/Api.ts";
@@ -18,7 +17,7 @@ import {Api} from "../Api/Api.ts";
 export class AlbumActions {
     static async openAddToAlbumModal(track: Track) {
         const albums = await Api.getAlbumsByUserId(track.user_id);
-        if (albums.length === 0) {
+        if (!albums || albums.length === 0) {
             return;
         }
         createModal([await AlbumTemplates.addToAlbumModal(track, albums)], "add-to-album");
@@ -50,7 +49,7 @@ export class AlbumActions {
         }
         const oldSrc = target.src;
         loading.value = true;
-        let fileInput = document.createElement("input");
+        const fileInput = document.createElement("input");
         fileInput.type = "file";
         fileInput.accept = "image/*";
         fileInput.onchange = async (e) => {

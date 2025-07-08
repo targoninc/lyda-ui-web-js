@@ -1,6 +1,4 @@
 import {create, when, compute, signal} from "@targoninc/jess";
-import {HttpClient} from "../../Api/HttpClient.ts";
-import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {copy} from "../../Classes/Util.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
@@ -10,6 +8,7 @@ import { button } from "@targoninc/jess-components";
 import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
 import {PaypalWebhook} from "@targoninc/lyda-shared/src/Models/db/finance/PaypalWebhook";
 import { NotificationType } from "../../Enums/NotificationType.ts";
+import { Api } from "../../Api/Api.ts";
 
 export class EventsTemplates {
     static eventsPage() {
@@ -24,10 +23,8 @@ export class EventsTemplates {
         const skip = signal(0);
         const load = (filter?: any) => {
             loading.value = true;
-            HttpClient.getAsync<PaypalWebhook[]>(ApiRoutes.getEvents, {
-                skip: skip.value,
-                ...(filter ?? {})
-            }).then(e => events.value = e.data)
+            Api.getEvents(skip.value, filter)
+                .then(e => events.value = e ?? [])
                 .finally(() => loading.value = false);
         }
         const loading = signal(false);
@@ -82,9 +79,7 @@ export class EventsTemplates {
                                     icon: {icon: "start"},
                                     classes: ["positive"],
                                     onclick: () => {
-                                        HttpClient.postAsync(ApiRoutes.triggerEventHandling, {
-                                            id: event.id,
-                                        }).then(() => {
+                                        Api.triggerEventHandling(event.id).then(() => {
                                             notify("Event triggered", NotificationType.success);
                                         }).catch(e => {
                                             notify("Failed to trigger event: " + e, NotificationType.error);

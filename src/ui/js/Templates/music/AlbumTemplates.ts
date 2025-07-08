@@ -3,13 +3,11 @@ import {AlbumActions} from "../../Actions/AlbumActions.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
-import {PlayManager} from "../../Streaming/PlayManager.ts";
 import {TrackTemplates} from "./TrackTemplates.ts";
-import {QueueManager} from "../../Streaming/QueueManager.ts";
 import {PlaylistActions} from "../../Actions/PlaylistActions.ts";
 import {Images} from "../../Enums/Images.ts";
-import {getErrorMessage, Util} from "../../Classes/Util.ts";
-import {createModal, notify, Ui} from "../../Classes/Ui.ts";
+import { Util} from "../../Classes/Util.ts";
+import {createModal, Ui} from "../../Classes/Ui.ts";
 import {
     AnyNode,
     compute,
@@ -23,14 +21,11 @@ import {
 } from "@targoninc/jess";
 import {navigate, Route} from "../../Routing/Router.ts";
 import {currentTrackId, currentUser, playingFrom, playingHere} from "../../state.ts";
-import {HttpClient} from "../../Api/HttpClient.ts";
-import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {PageTemplates} from "../PageTemplates.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {button, input, textarea, toggle} from "@targoninc/jess-components";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
-import {NotificationType} from "../../Enums/NotificationType.ts";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
 import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
 import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
@@ -205,11 +200,9 @@ export class AlbumTemplates {
                             icon: {icon: "save"},
                             onclick: async () => {
                                 loading.value = true;
-                                HttpClient.postAsync(ApiRoutes.updateAlbum, state.value).then(() => {
-                                    Util.removeModal();
-                                }).catch(e => {
-                                    notify("Failed to update album: " + getErrorMessage(e), NotificationType.error);
-                                }).finally(() => loading.value = false);
+                                Api.updateAlbum(state.value)
+                                    .then(() => Util.removeModal())
+                                    .finally(() => loading.value = false);
                             },
                         }),
                         GenericTemplates.modalCancelButton()
@@ -432,9 +425,9 @@ export class AlbumTemplates {
             canEdit: false
         });
         const loading = signal(true);
-        HttpClient.getAsync<{ album: Album, canEdit: boolean }>(ApiRoutes.getAlbumById, {id: params.id}).then(async res => {
-            if (res.code === 200) {
-                data.value = res.data;
+        Api.getAlbumById(parseInt(params.id)).then(async res => {
+            if (res) {
+                data.value = res;
                 return;
             }
             data.value = {

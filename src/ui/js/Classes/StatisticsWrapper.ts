@@ -1,20 +1,15 @@
 import {StatisticTemplates} from "../Templates/StatisticTemplates.ts";
-import {HttpClient} from "../Api/HttpClient.ts";
-import {notify} from "./Ui.ts";
 import {Num} from "./Helpers/Num.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {create, signalMap, signal} from "@targoninc/jess";
-import {getErrorMessage} from "./Util.ts";
 import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
 import {Permission} from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
-import {Statistic} from "@targoninc/lyda-shared/src/Models/Statistic";
-import {NotificationType} from "../Enums/NotificationType.ts";
-import {TypedStatistic} from "@targoninc/lyda-shared/src/Models/TypedStatistic";
 import {TimeResolution} from "@targoninc/lyda-shared/src/Enums/TimeResolution";
+import { Api } from "../Api/Api.ts";
 
 export class StatisticsWrapper {
     static async getStatistics(permissions: Permission[]) {
-        let additionalStats = [];
+        const additionalStats = [];
         if (permissions.some(p => p.name === Permissions.canViewLogs)) {
             additionalStats.push(StatisticsWrapper.getActivityByTime());
         }
@@ -31,16 +26,13 @@ export class StatisticsWrapper {
 
     static async getSingleStat(template: Function, endpoint: string, reverse: boolean = false) {
         const chart = signal(template([], []));
-        HttpClient.getAsync<Statistic[]>(endpoint).then((res) => {
-            if (res.code !== 200) {
-                notify(getErrorMessage(res), NotificationType.error);
-                return;
-            }
+        Api.getStatistic(endpoint).then((stat) => {
+            stat ??= [];
             if (reverse) {
-                res.data.reverse();
+                stat.reverse();
             }
-            const labels = res.data.map((item: any) => item.label);
-            const values = Num.shortenInArray(res.data.map((item: any) => item.value));
+            const labels = stat.map((item: any) => item.label);
+            const values = Num.shortenInArray(stat.map((item: any) => item.value));
             chart.value = template(labels, values);
         });
         return chart;
@@ -49,17 +41,13 @@ export class StatisticsWrapper {
     static getMultipleStats(template: Function, endpoint: string, reverse: boolean = false) {
         const charts = signal<any[]>([]);
 
-        HttpClient.getAsync<TypedStatistic[]>(endpoint).then((res) => {
-            if (res.code !== 200) {
-                notify(getErrorMessage(res), NotificationType.error);
-                return;
-            }
-            const data = res.data as TypedStatistic[];
+        Api.getTypedStatistic(endpoint).then((data) => {
+            data ??= [];
             if (reverse) {
                 data.reverse();
             }
 
-            let components = [];
+            const components = [];
             for (const stat of data) {
                 const labels = stat.stats.map((item) => item.label);
                 const values = Num.shortenInArray(stat.stats.map((item) => item.value));

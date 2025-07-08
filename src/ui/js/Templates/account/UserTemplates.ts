@@ -1,4 +1,4 @@
-import {getAvatar, getErrorMessage, target, Util} from "../../Classes/Util.ts";
+import {getAvatar, target, Util} from "../../Classes/Util.ts";
 import {TrackActions} from "../../Actions/TrackActions.ts";
 import {TrackTemplates} from "../music/TrackTemplates.ts";
 import {UserActions} from "../../Actions/UserActions.ts";
@@ -40,8 +40,6 @@ import {Badge} from "@targoninc/lyda-shared/src/Models/db/lyda/Badge";
 import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import {NotificationType} from "../../Enums/NotificationType.ts";
-import {HttpClient} from "../../Api/HttpClient.ts";
-import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {Api} from "../../Api/Api.ts";
 
 export class UserTemplates {
@@ -60,7 +58,7 @@ export class UserTemplates {
             if (extraClasses) {
                 base.classes(...extraClasses);
             }
-            out.value = this.userWidgetInternal(context, newUser, base, Util.userIsFollowing(user));
+            out.value = this.userWidgetInternal(context, newUser, base, Util.isFollowing(user));
         }
 
         if (user.constructor === Signal) {
@@ -251,9 +249,7 @@ export class UserTemplates {
 
     static unapprovedTracksLink() {
         const unapprovedTracks = signal<any[]>([]);
-        Api.getUnapprovedTracks().then(tracks => {
-            unapprovedTracks.value = tracks;
-        });
+        Api.getUnapprovedTracks().then(tracks => unapprovedTracks.value = tracks ?? []);
         const link = signal(create("div").build());
         unapprovedTracks.subscribe((tracks: Track[]) => {
             link.value = tracks.length === 0 ? nullElement() : GenericTemplates.action(Icons.APPROVAL, "Unapproved tracks", "unapproved-tracks", async (e: Event) => {
@@ -273,11 +269,9 @@ export class UserTemplates {
 
         const base = vertical();
 
-        HttpClient.getAsync<User>(ApiRoutes.getUser, {
-            name: params["name"]
-        }).then(u => {
-            user.value = u.data;
-            document.title = u.data.displayname;
+        Api.getUserByName(params["name"]).then(u => {
+            user.value = u;
+            document.title = u?.displayname ?? "";
             if (!user && isOwnProfile) {
                 notify("You need to be logged in to see your profile", NotificationType.error);
                 return;
@@ -299,16 +293,12 @@ export class UserTemplates {
         ).build();
     }
 
-    static profileTab(endpoint: string, user: User, isOwnProfile: boolean, dataTemplate: Function) {
-        const data = signal(null);
+    static profileTab<T>(apiFunc: (name: string, id?: number | null) => Promise<T[] | null>, user: User, isOwnProfile: boolean, dataTemplate: (data: T[], ownProfile: boolean) => AnyElement) {
+        const data = signal<T[] | null>(null);
         const loading = signal(false);
-        HttpClient.getAsync<any>(endpoint, {id: user.id, name: user.username}).then(d => {
-            if (d.code !== 200) {
-                notify("Error while getting profile content: " + getErrorMessage(d));
-                return;
-            }
-            data.value = d.data;
-        }).finally(() => loading.value = false);
+        apiFunc(user.username, user.id)
+            .then(d => data.value = d)
+            .finally(() => loading.value = false);
 
         return vertical(
             when(loading, GenericTemplates.loadingSpinner()),
@@ -336,10 +326,10 @@ export class UserTemplates {
 
         return vertical(
             GenericTemplates.combinedSelector(tabs, (i: number) => currentIndex.value = i, currentIndex.value),
-            when(tabSelected(0), UserTemplates.profileTab(ApiRoutes.getTracksByUserId, user, isOwnProfile, UserTemplates.profileTrackList)),
-            when(tabSelected(1), UserTemplates.profileTab(ApiRoutes.getAlbumsByUserId, user, isOwnProfile, UserTemplates.albumCards)),
-            when(tabSelected(2), UserTemplates.profileTab(ApiRoutes.getPlaylistsByUserId, user, isOwnProfile, UserTemplates.playlistCards)),
-            when(tabSelected(3), UserTemplates.profileTab(ApiRoutes.getRepostsByUserId, user, isOwnProfile, UserTemplates.profileRepostList)),
+            when(tabSelected(0), UserTemplates.profileTab(Api.getTracksByUser, user, isOwnProfile, UserTemplates.profileTrackList)),
+            when(tabSelected(1), UserTemplates.profileTab(Api.getAlbumsByUser, user, isOwnProfile, UserTemplates.albumCards)),
+            when(tabSelected(2), UserTemplates.profileTab(Api.getPlaylistsByUser, user, isOwnProfile, UserTemplates.playlistCards)),
+            when(tabSelected(3), UserTemplates.profileTab(Api.getRepostsByUser, user, isOwnProfile, UserTemplates.profileRepostList)),
             when(tabSelected(4), MusicTemplates.feed("history", {
                 userId: user.id
             }))).build();
@@ -519,6 +509,10 @@ export class UserTemplates {
         const canUnverify = compute((v, p) => v && p.some(p => p.name === Permissions.canVerifyUsers), verified, permissions);
         const hasBadges = user.badges && user.badges.length > 0;
         const isOwnProfile = currentUser.value?.id === user.id;
+        const isFollowed = compute(f => {
+            console.log(f, isOwnProfile);
+            return f && !isOwnProfile;
+        }, Util.isFollowedBy(user));
 
         return create("div")
             .classes("flex", "align-children")
@@ -531,7 +525,7 @@ export class UserTemplates {
                     icon: {icon: "verified"},
                     classes: ["positive"],
                     onclick: async () => {
-                        await UserActions.verifyUser(user.id);
+                        await Api.verifyUser(user.id);
                         verified.value = true;
                     }
                 })),
@@ -540,12 +534,12 @@ export class UserTemplates {
                     icon: {icon: "close"},
                     classes: ["negative"],
                     onclick: async () => {
-                        await UserActions.unverifyUser(user.id);
+                        await Api.unverifyUser(user.id);
                         verified.value = false;
                     }
                 })),
-                !isOwnProfile && currentUser.value ? UserTemplates.followButton(Util.userIsFollowing(user), user.id) : null,
-                !isOwnProfile && Util.userIsFollowedBy(user) ? UserTemplates.followsBackIndicator() : null,
+                (!isOwnProfile && currentUser.value) ? UserTemplates.followButton(Util.isFollowing(user), user.id) : null,
+                when(isFollowed, UserTemplates.followsBackIndicator()),
             ).build();
     }
 
@@ -558,7 +552,7 @@ export class UserTemplates {
     }
 
     static badge(badge: Badge) {
-        let addClasses = [];
+        const addClasses = [];
         const colorBadges = ["staff", "cute", "vip"];
         if (colorBadges.includes(badge.name)) {
             addClasses.push("no-filter");

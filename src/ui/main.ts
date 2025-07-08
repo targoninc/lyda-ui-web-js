@@ -18,16 +18,14 @@ import {
     playingFrom
 } from "./js/state.ts";
 import {StreamingBroadcaster} from "./js/Streaming/StreamingBroadcaster.ts";
-import {HttpClient} from "./js/Api/HttpClient.ts";
-import {ApiRoutes} from "./js/Api/ApiRoutes.ts";
 import {PlayingFrom} from "@targoninc/lyda-shared/src/Models/PlayingFrom";
 import {ListeningHistory} from "@targoninc/lyda-shared/dist/Models/db/lyda/ListeningHistory";
-import {Permission} from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
 import {TrackPosition} from "@targoninc/lyda-shared/src/Models/TrackPosition";
 import {QueueManager} from "./js/Streaming/QueueManager.ts";
 import {initializeMediaSessionCallbacks} from "./js/Classes/Helpers/MediaSession.ts";
+import { Api } from "./js/Api/Api.ts";
 
-let pageContainer = document.querySelector(".page-container");
+const pageContainer = document.querySelector(".page-container");
 if (!pageContainer) {
     throw new Error("No page container found");
 }
@@ -42,7 +40,7 @@ export const router = new Router(routes, async (route: Route, params: any) => {
 
     currentUser.value = await Util.getUserAsync(null, false);
     pageContainer.innerHTML = "";
-    let template = await PageTemplates.mapping[page](route, params);
+    const template = await PageTemplates.mapping[page](route, params);
     if (!currentUser.value && PageTemplates.needLoginPages.includes(page)) {
         navigate(RoutePath.login);
     }
@@ -59,18 +57,8 @@ export const router = new Router(routes, async (route: Route, params: any) => {
     }, 100);
 });
 
-export function getUserPermissions() {
-    HttpClient.getAsync<Permission[]>(ApiRoutes.userPermissions).then(res => {
-        if (res.code !== 200) {
-            console.error("Failed to get permissions: ", res.data);
-            return;
-        }
-        permissions.value = res.data as Permission[];
-    });
-}
-
 if (currentUser.value) {
-    getUserPermissions();
+    Api.getPermissions().then(res => permissions.value = res ?? []);
     QueueManager.fillAutoQueue().then();
 
     const currentTrackPositionTmp = LydaCache.get<TrackPosition>("currentTrackPosition").content;

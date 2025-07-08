@@ -15,9 +15,6 @@ export class SubscriptionTemplates {
         const options = signal<AvailableSubscription[]>([]);
         const currentSubscription = signal<Subscription|null>(null);
         SubscriptionActions.loadSubscriptionOptions().then(res => {
-            if (!res || res.error) {
-                return;
-            }
             options.value = res.options;
             currentSubscription.value = res.currentSubscription;
         });
