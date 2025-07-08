@@ -3,7 +3,6 @@ import {FormTemplates} from "../generic/FormTemplates.ts";
 import {notify} from "../../Classes/Ui.ts";
 import {HttpClient} from "../../Api/HttpClient.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
-import {getErrorMessage} from "../../Classes/Util.ts";
 import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
 import {permissions} from "../../state.ts";
 import {currency} from "../../Classes/Helpers/Num.ts";
@@ -82,14 +81,8 @@ export class RoyaltyTemplates {
                                     notify("Please select a month", NotificationType.error);
                                     return;
                                 }
-                                const res = await HttpClient.postAsync(ApiRoutes.calculateRoyalties, {
-                                    month: month.month,
-                                    year: month.year,
-                                });
-                                if (res.code !== 200) {
-                                    notify(getErrorMessage(res), NotificationType.error);
-                                    return;
-                                }
+
+                                await Api.calculateRoyalties(month);
                                 notify("Royalties calculated", NotificationType.success);
                             }
                         }),
@@ -102,11 +95,8 @@ export class RoyaltyTemplates {
                                     notify("Please select a month", NotificationType.error);
                                     return;
                                 }
-                                await HttpClient.postAsync(ApiRoutes.setRoyaltyActivation, {
-                                    month: month.month,
-                                    year: month.year,
-                                    approved: v,
-                                });
+
+                                await Api.setRoyaltyActivation(month, v);
                                 notify("Switched approval status", NotificationType.success);
                             }
                         })

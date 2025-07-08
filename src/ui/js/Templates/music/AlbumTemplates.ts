@@ -3,9 +3,7 @@ import {AlbumActions} from "../../Actions/AlbumActions.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
-import {PlayManager} from "../../Streaming/PlayManager.ts";
 import {TrackTemplates} from "./TrackTemplates.ts";
-import {QueueManager} from "../../Streaming/QueueManager.ts";
 import {PlaylistActions} from "../../Actions/PlaylistActions.ts";
 import {Images} from "../../Enums/Images.ts";
 import {getErrorMessage, Util} from "../../Classes/Util.ts";
@@ -205,7 +203,7 @@ export class AlbumTemplates {
                             icon: {icon: "save"},
                             onclick: async () => {
                                 loading.value = true;
-                                HttpClient.postAsync(ApiRoutes.updateAlbum, state.value).then(() => {
+                                Api.updateAlbum(state.value).then(() => {
                                     Util.removeModal();
                                 }).catch(e => {
                                     notify("Failed to update album: " + getErrorMessage(e), NotificationType.error);

@@ -64,14 +64,6 @@ export class HttpClient {
         };
     }
 
-    static async postAsync<T = string>(
-        url: string,
-        body: any = {},
-        authorizationHeaders: any = {}
-    ): Promise<ApiResponse<T>> {
-        return await HttpClient.postRawAsync(url, JSON.stringify(body), authorizationHeaders);
-    }
-
     static async postRawAsync(url: string, body: any = {}, authorizationHeaders = {}) {
         const headers: Record<string, string> =
             body.constructor === FormData

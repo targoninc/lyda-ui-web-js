@@ -27,6 +27,7 @@ import { UploadableTrack } from "../Models/UploadableTrack.ts";
 import { InteractionType } from "@targoninc/lyda-shared/src/Enums/InteractionType";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 import { MonthIdentifier } from "../Classes/Helpers/Date.ts";
+import { PaypalWebhook } from "@targoninc/lyda-shared/src/Models/db/finance/PaypalWebhook";
 
 export class Api {
     static getLogs(filterState: Signal<any>, successCallback: (data: Log[]) => void) {
@@ -73,9 +74,31 @@ export class Api {
             id: eventId,
         });
     }
+
+    static async getEvents(skip: number, filter: any = {}) {
+        return get<PaypalWebhook[]>(ApiRoutes.getEvents, {
+            skip,
+            ...filter,
+        })
+    }
     //endregion
 
     //region Royalties
+    static async calculateRoyalties(month: MonthIdentifier) {
+        return post(ApiRoutes.calculateRoyalties, {
+            month: month.month,
+            year: month.year,
+        })
+    }
+
+    static async setRoyaltyActivation(month: MonthIdentifier, approved: boolean) {
+        return post(ApiRoutes.setRoyaltyActivation, {
+            month: month.month,
+            year: month.year,
+            approved
+        })
+    }
+
     static async getRoyaltiesForExport(month: MonthIdentifier, type: string) {
         return get<string>(ApiRoutes.royaltiesForExport, {
             ...month,
@@ -313,6 +336,10 @@ export class Api {
     //endregion
 
     //region Albums
+    static async updateAlbum(album: Partial<Album>) {
+        return post(ApiRoutes.updateAlbum, album);
+    }
+
     static async getAlbumsByUserId(userId: number): Promise<Album[] | null> {
         return await get<Album[]>(ApiRoutes.getAlbumsByUserId, { id: userId });
     }
