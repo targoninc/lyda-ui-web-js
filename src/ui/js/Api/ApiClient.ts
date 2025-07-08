@@ -38,7 +38,9 @@ function getGetUrl(urlIn: string, params: Record<string, string>) {
     const url = new URL(urlIn);
 
     for (const key in params) {
-        url.searchParams.set(key, params[key].toString());
+        if (params[key] !== undefined && params[key] !== null) {
+            url.searchParams.set(key, params[key].toString());
+        }
     }
 
     return url.href;
