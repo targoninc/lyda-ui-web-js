@@ -377,6 +377,13 @@ export class Api {
     //endregion
 
     //region Albums
+    static async getAlbumsByUser(name: string, id: number | null = null) {
+        return get<Album[]>(ApiRoutes.getAlbumsByUserId, {
+            id,
+            name
+        });
+    }
+
     static async updateAlbum(album: Partial<Album>) {
         return post(ApiRoutes.updateAlbum, album);
     }
@@ -421,6 +428,20 @@ export class Api {
     //endregion
 
     //region Tracks
+    static async getTracksByUser(name: string, id: number | null = null) {
+        return get<Track[]>(ApiRoutes.getTracksByUserId, {
+            id,
+            name
+        });
+    }
+
+    static async getRepostsByUser(name: string, id: number | null = null) {
+        return get<Track[]>(ApiRoutes.getTracksByUserId, {
+            id,
+            name
+        });
+    }
+
     static async createTrack(track: UploadableTrack): Promise<Track | null> {
         return await post<Track>(ApiRoutes.createTrack, <Partial<Track>>{
             title: track.title,
@@ -564,10 +585,16 @@ export class Api {
             price: track.price,
         });
     }
-
     //endregion
 
     //region Playlists
+    static async getPlaylistsByUser(name: string, id: number | null = null) {
+        return get<Playlist[]>(ApiRoutes.getPlaylistsByUserId, {
+            id,
+            name
+        });
+    }
+
     static async getPlaylistById(id: number): Promise<{
         playlist: Playlist;
         canEdit: boolean;
