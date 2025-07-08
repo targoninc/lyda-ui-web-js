@@ -1,12 +1,9 @@
-import {HttpClient} from "../Api/HttpClient.ts";
 import {notify, Ui} from "../Classes/Ui.ts";
-import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {Signal} from "@targoninc/jess";
 import {CreateSubscriptionActions, loadScript,
     OnApproveActions, OnApproveData, PayPalButtonsComponentOptions} from "@paypal/paypal-js";
 import {reload} from "../Routing/Router.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
-import {AvailableSubscription} from "@targoninc/lyda-shared/src/Models/db/finance/AvailableSubscription";
 import {Subscription} from "@targoninc/lyda-shared/src/Models/db/finance/Subscription";
 import { Api } from "../Api/Api.ts";
 
@@ -99,16 +96,10 @@ export class SubscriptionActions {
     }
 
     static async loadSubscriptionOptions() {
-        const res = await HttpClient.getAsync<{
-            options: AvailableSubscription[],
-            currentSubscription: Subscription|null
-        }>(ApiRoutes.getSubscriptionOptions);
-        if (res.code !== 200) {
-            notify("Failed to load subscription options", NotificationType.error);
-            return;
-        }
-
-        return res.data;
+        return (await Api.getSubscriptionOptions()) ?? {
+            options: [],
+            currentSubscription: null
+        };
     }
 }
 

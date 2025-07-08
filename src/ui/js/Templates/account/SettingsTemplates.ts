@@ -7,7 +7,6 @@ import {create, when, signalMap, compute, Signal, signal, InputType, nullElement
 import {navigate, reload} from "../../Routing/Router.ts";
 import {UserTemplates} from "./UserTemplates.ts";
 import {currentUser, permissions} from "../../state.ts";
-import {AuthApi} from "../../Api/AuthApi.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {
     button,
@@ -297,14 +296,10 @@ export class SettingsTemplates {
                             onclick: () => {
                                 Ui.getConfirmationModal("Delete account", "Are you sure you want to delete your account? This action cannot be undone.",
                                     "Yes, delete my account", "No, keep account", async () => {
-                                        Api.deleteUser().then(res => {
-                                            if (res.code === 200) {
-                                                notify("Account deleted", NotificationType.success);
-                                                navigate(RoutePath.login);
-                                                window.location.reload();
-                                            } else {
-                                                notify("Account deletion failed", NotificationType.error);
-                                            }
+                                        Api.deleteUser().then(() => {
+                                            notify("Account deleted", NotificationType.success);
+                                            navigate(RoutePath.login);
+                                            window.location.reload();
                                         })
                                     }, () => {
                                     }, "delete").then();
@@ -315,17 +310,15 @@ export class SettingsTemplates {
                             icon: {icon: "download"},
                             onclick: () => {
                                 Api.exportUser().then(res => {
-                                    if (res.code === 200) {
-                                        const blob = new Blob([JSON.stringify(res.data)], {type: 'application/octet-stream'});
-                                        const url = URL.createObjectURL(blob);
-                                        const a = document.createElement('a');
-                                        a.href = url;
-                                        a.download = `userdata-${user.username}.json`;
-                                        document.body.appendChild(a);
-                                        a.click();
-                                        document.body.removeChild(a);
-                                        URL.revokeObjectURL(url);
-                                    }
+                                    const blob = new Blob([JSON.stringify(res)], {type: 'application/octet-stream'});
+                                    const url = URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+                                    a.download = `userdata-${user.username}.json`;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    document.body.removeChild(a);
+                                    URL.revokeObjectURL(url);
                                 });
                             }
                         })
@@ -482,7 +475,7 @@ export class SettingsTemplates {
                             classes: ["positive"],
                             disabled: activationTimedOut,
                             onclick: async () => {
-                                await AuthApi.sendActivationEmail();
+                                await Api.sendActivationEmail();
                                 activationTimedOut.value = true;
                                 const interval = setInterval(async () => {
                                     const user = await Util.getUserAsync(null, false);

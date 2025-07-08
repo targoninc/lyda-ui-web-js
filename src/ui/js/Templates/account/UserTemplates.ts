@@ -271,7 +271,7 @@ export class UserTemplates {
 
         const base = vertical();
 
-        Api.getUser(params["name"]).then(u => {
+        Api.getUserByName(params["name"]).then(u => {
             user.value = u;
             document.title = u?.displayname ?? "";
             if (!user && isOwnProfile) {

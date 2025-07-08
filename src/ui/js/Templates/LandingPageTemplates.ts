@@ -122,8 +122,10 @@ export class LandingPageTemplates {
     }
 
     static completeBox() {
-        AuthApi.user(null, user => {
-            currentUser.value = user;
+        Api.getUserById(null).then((user) => {
+            if (user) {
+                currentUser.value = user;
+            }
         });
         navigate(RoutePath.profile);
 
@@ -350,8 +352,10 @@ export class LandingPageTemplates {
             user.value.challenge,
             (data: { user: User }) => {
                 notify("Logged in as " + data.user.username, NotificationType.success);
-                AuthApi.user(data.user.id, (user: User) => {
-                    finalizeLogin(step, user);
+                Api.getUserById(data.user.id).then((user) => {
+                    if (user) {
+                        finalizeLogin(step, user);
+                    }
                 });
             },
             () => {

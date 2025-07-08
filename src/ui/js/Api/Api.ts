@@ -1,4 +1,3 @@
-import { HttpClient } from "./HttpClient.ts";
 import { notify } from "../Classes/Ui.ts";
 import { Signal } from "@targoninc/jess";
 import { ApiRoutes } from "./ApiRoutes.ts";
@@ -28,25 +27,27 @@ import { InteractionType } from "@targoninc/lyda-shared/src/Enums/InteractionTyp
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 import { MonthIdentifier } from "../Classes/Helpers/Date.ts";
 import { PaypalWebhook } from "@targoninc/lyda-shared/src/Models/db/finance/PaypalWebhook";
+import { AvailableSubscription } from "@targoninc/lyda-shared/src/Models/db/finance/AvailableSubscription.ts";
+import { Subscription } from "@targoninc/lyda-shared/src/Models/db/finance/Subscription.ts";
 
 export class Api {
     static getLogs(filterState: Signal<any>, successCallback: (data: Log[]) => void) {
         const errorText = "Failed to get logs";
-        HttpClient.getAsync<Log[]>(ApiRoutes.getLogs, {
+        get<Log[]>(ApiRoutes.getLogs, {
             logLevel: filterState.value,
             offset: 0,
             limit: 50,
         }).then(logs => {
-            Api.handleResponse(logs, errorText, successCallback);
+            Api.handleResponse(logs ?? [], errorText, successCallback);
         });
 
         filterState.subscribe(async newValue => {
-            HttpClient.getAsync<Log[]>(ApiRoutes.getLogs, {
+            get<Log[]>(ApiRoutes.getLogs, {
                 logLevel: newValue,
                 offset: 0,
                 limit: 100,
             }).then(logs => {
-                Api.handleResponse(logs, errorText, successCallback);
+                Api.handleResponse(logs ?? [], errorText, successCallback);
             });
         });
     }
@@ -60,12 +61,17 @@ export class Api {
     }
 
     //region Interactions
-    static async toggleInteraction(entityType: EntityType, interactionType: InteractionType, id: number, interacted$: Signal<boolean>) {
+    static async toggleInteraction(
+        entityType: EntityType,
+        interactionType: InteractionType,
+        id: number,
+        interacted$: Signal<boolean>
+    ) {
         return post(ApiRoutes.toggleInteraction, {
             entityType,
             interactionType,
             id,
-            toggle: !interacted$.value
+            toggle: !interacted$.value,
         });
     }
 
@@ -79,7 +85,7 @@ export class Api {
         return get<PaypalWebhook[]>(ApiRoutes.getEvents, {
             skip,
             ...filter,
-        })
+        });
     }
     //endregion
 
@@ -88,21 +94,21 @@ export class Api {
         return post(ApiRoutes.calculateRoyalties, {
             month: month.month,
             year: month.year,
-        })
+        });
     }
 
     static async setRoyaltyActivation(month: MonthIdentifier, approved: boolean) {
         return post(ApiRoutes.setRoyaltyActivation, {
             month: month.month,
             year: month.year,
-            approved
-        })
+            approved,
+        });
     }
 
     static async getRoyaltiesForExport(month: MonthIdentifier, type: string) {
         return get<string>(ApiRoutes.royaltiesForExport, {
             ...month,
-            type
+            type,
         });
     }
 
@@ -113,7 +119,7 @@ export class Api {
     static async calculateEarnings(month: MonthIdentifier) {
         return post(ApiRoutes.calculateEarnings, {
             month: month.month,
-            year: month.year
+            year: month.year,
         });
     }
     //endregion
@@ -245,13 +251,12 @@ export class Api {
     }
     //endregion
 
-    //region User
-    static async setUserPermission(userId: number, permissionName: string, has: boolean) {
-        return post(ApiRoutes.setUserPermission, {
-            permissionName,
-            user_id: userId,
-            userHasPermission: has
-        });
+    //region Subscription
+    static async getSubscriptionOptions() {
+        return get<{
+            options: AvailableSubscription[];
+            currentSubscription: Subscription | null;
+        }>(ApiRoutes.getSubscriptionOptions);
     }
 
     static async subscribe(parameters: Record<any, any>) {
@@ -260,6 +265,22 @@ export class Api {
 
     static async unsubscribe(id: number) {
         await post(ApiRoutes.unsubscribe, { id });
+    }
+    //endregion
+
+    //region User
+    static async userExists(email: string) {
+        return get<User>(ApiRoutes.userExists, {
+            email: encodeURIComponent(email),
+        });
+    }
+
+    static async setUserPermission(userId: number, permissionName: string, has: boolean) {
+        return post(ApiRoutes.setUserPermission, {
+            permissionName,
+            user_id: userId,
+            userHasPermission: has,
+        });
     }
 
     static async updateUserSetting(setting: string, value: any) {
@@ -285,12 +306,16 @@ export class Api {
         return get<User[]>(ApiRoutes.getUsers, {
             query,
             offset,
-            limit
-        })
+            limit,
+        });
     }
 
-    static async getUser(name: string) {
+    static async getUserByName(name: string) {
         return get<User>(ApiRoutes.getUser, { name });
+    }
+
+    static async getUserById(id: number | null) {
+        return get<User>(ApiRoutes.getUser, { id });
     }
 
     static async markNotificationsAsRead(newestTimestamp: Signal<Date | null>) {
@@ -322,7 +347,7 @@ export class Api {
     }
 
     static async exportUser() {
-        return await HttpClient.getAsync(ApiRoutes.exportUser);
+        return await get(ApiRoutes.exportUser);
     }
 
     static async getLibrary(name: string) {
@@ -332,7 +357,6 @@ export class Api {
     static async getRoyaltyInfo(): Promise<RoyaltyInfo | null> {
         return await get<RoyaltyInfo>(ApiRoutes.getRoyaltyInfo);
     }
-
     //endregion
 
     //region Albums
@@ -397,8 +421,7 @@ export class Api {
     }
 
     static async getNewAutoQueueTracks() {
-        const response = await HttpClient.getAsync<any[]>(ApiRoutes.autoQueueFeed);
-        return response.data;
+        return (await get<any[]>(ApiRoutes.autoQueueFeed)) ?? [];
     }
 
     static async savePlay(id: number, quality: string): Promise<any> {
