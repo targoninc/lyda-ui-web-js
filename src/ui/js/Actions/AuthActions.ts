@@ -3,7 +3,7 @@ import {LydaCache} from "../Cache/LydaCache.ts";
 import {Icons} from "../Enums/Icons.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
 import {navigate} from "../Routing/Router.ts";
-import {navInitialized} from "../state.ts";
+import { currentTrackId, navInitialized } from "../state.ts";
 import {RoutePath} from "../Routing/routes.ts";
 import { Api } from "../Api/Api.ts";
 
@@ -20,6 +20,7 @@ export class AuthActions {
         navInitialized.value = false;
         LydaCache.clear();
         PlayManager.stopAllAsync().then();
+        currentTrackId.value = 0;
     }
 
     static async logOut() {
