@@ -131,11 +131,7 @@ export class Util {
     }
 
     static isFollowedBy(user: User) {
-        return compute(u => {
-            const ye = !!u && user.following?.some(f => f.user_id === u.id);
-            console.log(user.follows, u?.id);
-            return ye;
-        }, currentUser);
+        return compute(u => !!u && user.following?.some(f => f.user_id === u.id), currentUser);
     }
 
     static async getUserByNameAsync(name: string) {

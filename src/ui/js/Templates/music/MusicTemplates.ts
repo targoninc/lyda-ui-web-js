@@ -169,7 +169,7 @@ export class MusicTemplates {
             imageState.value = Util.getImage(item.id, fileType);
         }
         const coverLoading = signal(false);
-        const start = async () => startItem(type, item, startCallback);
+        const start = async () => startItem(type, item, { startCallback });
         const isOwnItem = compute(u => u?.id === item.user_id, currentUser);
         const playButtonContexts = ["inline-cover", "card-cover", "queue-cover"];
         const onlyShowOnHover = compute(

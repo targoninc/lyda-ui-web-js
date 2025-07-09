@@ -187,8 +187,7 @@ export class AlbumTemplates {
                         create("h2")
                             .text("Edit album")
                             .build()
-                    )
-                    .build(),
+                    ).build(),
                 AlbumTemplates.albumInputs(state),
                 create("div")
                     .classes("flex")

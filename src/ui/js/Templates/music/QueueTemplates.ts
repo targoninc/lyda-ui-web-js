@@ -55,13 +55,13 @@ export class QueueTemplates {
 
         return base
             .on("dblclick", async () => {
-                await startItem(EntityType.track, track, null, false)
+                await startItem(EntityType.track, track)
             })
             .children(
                 horizontal(
                     when(isManual, GenericTemplates.verticalDragIndicator()),
                     MusicTemplates.cover(EntityType.track, track, "queue-cover", async () => {
-                        await startItem(EntityType.track, track, null, false);
+                        await startItem(EntityType.track, track);
                         QueueManager.removeIndexFromManualQueue(index);
                     }),
                     vertical(

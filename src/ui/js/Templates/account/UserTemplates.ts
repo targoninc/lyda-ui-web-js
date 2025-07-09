@@ -509,10 +509,7 @@ export class UserTemplates {
         const canUnverify = compute((v, p) => v && p.some(p => p.name === Permissions.canVerifyUsers), verified, permissions);
         const hasBadges = user.badges && user.badges.length > 0;
         const isOwnProfile = currentUser.value?.id === user.id;
-        const isFollowed = compute(f => {
-            console.log(f, isOwnProfile);
-            return f && !isOwnProfile;
-        }, Util.isFollowedBy(user));
+        const isFollowed = compute(f => f && !isOwnProfile, Util.isFollowedBy(user));
 
         return create("div")
             .classes("flex", "align-children")

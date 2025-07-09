@@ -1,4 +1,3 @@
-import {StreamingUpdater} from "./StreamingUpdater.ts";
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {autoQueue, contextQueue, manualQueue} from "../state.ts";
 import {Api} from "../Api/Api.ts";
@@ -6,14 +5,10 @@ import {Api} from "../Api/Api.ts";
 export class QueueManager {
     static addToAutoQueue(id: number) {
         autoQueue.value.push(id);
-
-        StreamingUpdater.updateQueue().then();
     }
 
     static setAutoQueue(queue: number[]) {
         autoQueue.value = queue;
-
-        StreamingUpdater.updateQueue().then();
     }
 
     static addToManualQueue(id: number) {
@@ -21,26 +16,18 @@ export class QueueManager {
             return;
         }
         manualQueue.value = [...new Set([...manualQueue.value, id])];
-
-        StreamingUpdater.updateQueue().then();
     }
 
     static clearAutoQueue() {
         autoQueue.value = [];
-
-        StreamingUpdater.updateQueue().then();
     }
 
     static setContextQueue(queue: number[]) {
         contextQueue.value = queue;
-
-        StreamingUpdater.updateQueue().then();
     }
 
     static clearContextQueue() {
         contextQueue.value = [];
-
-        StreamingUpdater.updateQueue().then();
     }
 
     static async popFromAutoQueue() {
@@ -57,8 +44,6 @@ export class QueueManager {
 
         autoQueueTmp = autoQueueTmp.slice(1);
         autoQueue.value = autoQueueTmp;
-
-        StreamingUpdater.updateQueue().then();
         return firstItem;
     }
 
@@ -69,8 +54,6 @@ export class QueueManager {
         const queueToAdd = await Api.getNewAutoQueueTracks();
         const ids = queueToAdd.map((item) => item.id);
         autoQueue.value = autoQueue.value.concat(ids);
-
-        StreamingUpdater.updateQueue().then();
         return autoQueue.value;
     }
 
@@ -84,22 +67,16 @@ export class QueueManager {
 
     static removeFromManualQueue(id: number) {
         manualQueue.value = manualQueue.value.filter((queueId) => queueId !== id);
-
-        StreamingUpdater.updateQueue().then();
     }
 
     static removeIndexFromManualQueue(index: number) {
         manualQueue.value = manualQueue.value.filter((_, i) => index !== i);
-
-        StreamingUpdater.updateQueue().then();
     }
 
     static removeFromAllQueues(id: number) {
         manualQueue.value = manualQueue.value.filter((queueId) => queueId !== id);
         contextQueue.value = contextQueue.value.filter((queueId) => queueId !== id);
         autoQueue.value = autoQueue.value.filter((queueId) => queueId !== id);
-
-        StreamingUpdater.updateQueue().then();
     }
 
     static toggleInManualQueue(id: number) {
@@ -113,7 +90,7 @@ export class QueueManager {
     static getAutoQueue() {
         let autoQueueTmp = autoQueue.value;
         if (autoQueueTmp.length === 0) {
-            let cache = LydaCache.get<number[] | number>("queue").content;
+            const cache = LydaCache.get<number[] | number>("queue").content;
             if (cache) {
                 autoQueueTmp = ((cache as any[]).length ? cache : [cache]) as number[];
                 autoQueue.value = autoQueueTmp;
@@ -125,7 +102,7 @@ export class QueueManager {
     static getContextQueue() {
         let contextQueueTmp = contextQueue.value;
         if (contextQueueTmp.length === 0) {
-            let cache = LydaCache.get<number[] | number>("contextQueue").content;
+            const cache = LydaCache.get<number[] | number>("contextQueue").content;
             if (cache) {
                 contextQueueTmp = ((cache as any[]).length ? cache : [cache]) as number[];
                 contextQueue.value = contextQueueTmp;
@@ -149,6 +126,5 @@ export class QueueManager {
         queue.splice(index, 1);
         queue.splice(newIndex, 0, item);
         manualQueue.value = queue;
-        StreamingUpdater.updateQueue().then();
     }
 }

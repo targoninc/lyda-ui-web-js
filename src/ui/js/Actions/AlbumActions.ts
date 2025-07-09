@@ -1,18 +1,20 @@
-import {AlbumTemplates} from "../Templates/music/AlbumTemplates.ts";
-import {Util} from "../Classes/Util.ts";
-import {createModal, notify} from "../Classes/Ui.ts";
-import {PlayManager} from "../Streaming/PlayManager.ts";
-import {QueueManager} from "../Streaming/QueueManager.ts";
-import {navigate} from "../Routing/Router.ts";
-import {Signal} from "@targoninc/jess";
-import {MediaUploader} from "../Api/MediaUploader.ts";
-import {RoutePath} from "../Routing/routes.ts";
-import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
-import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import {NotificationType} from "../Enums/NotificationType.ts";
+import { AlbumTemplates } from "../Templates/music/AlbumTemplates.ts";
+import { Util } from "../Classes/Util.ts";
+import { createModal, notify } from "../Classes/Ui.ts";
+import { PlayManager } from "../Streaming/PlayManager.ts";
+import { QueueManager } from "../Streaming/QueueManager.ts";
+import { navigate } from "../Routing/Router.ts";
+import { Signal } from "@targoninc/jess";
+import { MediaUploader } from "../Api/MediaUploader.ts";
+import { RoutePath } from "../Routing/routes.ts";
+import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import { NotificationType } from "../Enums/NotificationType.ts";
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
-import {playingHere} from "../state.ts";
-import {Api} from "../Api/Api.ts";
+import { playingHere } from "../state.ts";
+import { Api } from "../Api/Api.ts";
+import { startItem } from "./MusicActions.ts";
+import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 
 export class AlbumActions {
     static async openAddToAlbumModal(track: Track) {
@@ -42,7 +44,12 @@ export class AlbumActions {
         return success;
     }
 
-    static async replaceCover(e: MouseEvent, id: number, canEdit: boolean, loading: Signal<boolean>) {
+    static async replaceCover(
+        e: MouseEvent,
+        id: number,
+        canEdit: boolean,
+        loading: Signal<boolean>
+    ) {
         const target = e.target as HTMLImageElement;
         if (!target || !canEdit) {
             return;
@@ -52,11 +59,11 @@ export class AlbumActions {
         const fileInput = document.createElement("input");
         fileInput.type = "file";
         fileInput.accept = "image/*";
-        fileInput.onchange = async (e) => {
+        fileInput.onchange = async e => {
             const fileTarget = e.target as HTMLInputElement;
             const file = fileTarget.files![0];
             try {
-                await MediaUploader.upload(MediaFileType.albumCover, id, file)
+                await MediaUploader.upload(MediaFileType.albumCover, id, file);
                 notify("Cover updated", NotificationType.success);
                 await Util.updateImage(URL.createObjectURL(file), oldSrc);
             } catch (e: any) {
@@ -64,13 +71,17 @@ export class AlbumActions {
             }
             loading.value = false;
         };
-        fileInput.onabort = () => loading.value = false;
+        fileInput.onabort = () => (loading.value = false);
         fileInput.click();
     }
 
     static async startTrackInAlbum(album: Album, trackId: number, stopIfPlaying = false) {
         const playingFrom = PlayManager.getPlayingFrom();
-        const isPlaying = playingFrom && playingFrom.type === "album" && playingFrom.id === album.id && playingHere.value;
+        const isPlaying =
+            playingFrom &&
+            playingFrom.type === "album" &&
+            playingFrom.id === album.id &&
+            playingHere.value;
 
         if (isPlaying && stopIfPlaying) {
             await PlayManager.stopAllAsync();
@@ -78,15 +89,10 @@ export class AlbumActions {
             if (!album.tracks) {
                 throw new Error(`Invalid album (${album.id}), has no tracks.`);
             }
-            PlayManager.playFrom("album", album.title, album.id, album);
-            QueueManager.setContextQueue(album.tracks.map(t => t.track_id));
-            const track = album.tracks.find(t => t.track_id === trackId);
-            if (!track) {
-                notify("This track could not be found in this album", NotificationType.error);
-                return;
-            }
-            PlayManager.addStreamClientIfNotExists(track.track_id, track.track?.length ?? 0);
-            await PlayManager.startAsync(track.track_id);
+
+            await startItem(EntityType.album, album, {
+                trackId
+            });
         }
     }
 }

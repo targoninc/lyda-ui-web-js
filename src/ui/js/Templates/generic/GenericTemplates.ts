@@ -895,7 +895,6 @@ export class GenericTemplates {
         const localSearch = signal("");
         const filteredResults = compute((r, f) => {
             if (!r) {
-                console.log(r);
                 return [];
             }
             return r.filter(e => JSON.stringify(e).includes(f));

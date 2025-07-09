@@ -37,6 +37,7 @@ export class ChartTemplates {
             options: ChartOptions.defaultOptions,
         };
 
+        //@ts-expect-error bc Chart.js stupid
         new Chart(ctx, config);
 
         return create("div")

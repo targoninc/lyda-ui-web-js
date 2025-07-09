@@ -1,4 +1,4 @@
-import {compute, computeAsync, signal} from "@targoninc/jess";
+import { signal} from "@targoninc/jess";
 import {StreamClient} from "./Streaming/StreamClient.ts";
 import {LydaCache} from "./Cache/LydaCache.ts";
 import {CacheItem} from "./Cache/CacheItem.ts";
@@ -11,7 +11,6 @@ import {Permission} from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
 import {Notification} from "@targoninc/lyda-shared/src/Models/db/lyda/Notification";
 import {ListeningHistory} from "@targoninc/lyda-shared/dist/Models/db/lyda/ListeningHistory";
 import {PlayManager} from "./Streaming/PlayManager.ts";
-import {initializeMediaSessionCallbacks} from "./Classes/Helpers/MediaSession.ts";
 
 export const navInitialized = signal(false);
 
@@ -76,13 +75,17 @@ currentTrackPosition.subscribe((p, changed) => {
     }
     LydaCache.set("currentTrackPosition", new CacheItem(p));
 
-    PlayManager.getTrackData(currentTrackId.value).then(d => {
-        navigator.mediaSession.setPositionState({
-            position: currentTrackPosition.value.absolute,
-            duration: d.track.length,
-            playbackRate: 1,
+    if (currentTrackId.value) {
+        PlayManager.getTrackData(currentTrackId.value).then(d => {
+            if (d) {
+                navigator.mediaSession.setPositionState({
+                    position: currentTrackPosition.value.absolute,
+                    duration: d.track.length,
+                    playbackRate: 1,
+                });
+            }
         })
-    })
+    }
 });
 
 export const currentlyBuffered = signal(0);

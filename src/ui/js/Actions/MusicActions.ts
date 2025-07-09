@@ -6,10 +6,14 @@ import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import {QueueManager} from "../Streaming/QueueManager.ts";
 import {notify} from "../Classes/Ui.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
+import { contextQueue } from "../state.ts";
 
-export async function startItem(type: EntityType, item: Track | Album | Playlist, startCallback: Function | null, clearPlayFrom: boolean = true) {
-    if (startCallback) {
-        startCallback(item.id);
+export async function startItem(type: EntityType, item: Track | Album | Playlist, options: {
+    startCallback?: Function | null,
+    trackId?: number
+} = {}) {
+    if (options.startCallback) {
+        options.startCallback(item.id);
         return;
     }
 
@@ -21,9 +25,11 @@ export async function startItem(type: EntityType, item: Track | Album | Playlist
             item = item as Playlist;
             break;
         case EntityType.track:
-            if (clearPlayFrom) {
+            if (!contextQueue.value.includes(item.id)) {
                 PlayManager.clearPlayFrom();
+                QueueManager.clearContextQueue();
             }
+
             PlayManager.addStreamClientIfNotExists(item.id, (item as Track).length);
             await PlayManager.startAsync(item.id);
             return;
@@ -31,11 +37,13 @@ export async function startItem(type: EntityType, item: Track | Album | Playlist
 
     PlayManager.playFrom(type, item.title, item.id, item);
     QueueManager.setContextQueue(item.tracks!.map(t => t.track_id));
-    const firstTrack = item.tracks![0];
-    if (!firstTrack) {
-        notify(`This ${type} has no tracks`, NotificationType.error);
+    const track = options.trackId ? item.tracks!.find(t => t.track_id === options.trackId) : item.tracks!.at(0);
+
+    if (!track) {
+        notify(`This ${type} does not contain the requested track`, NotificationType.error);
         return;
     }
-    PlayManager.addStreamClientIfNotExists(firstTrack.track_id, firstTrack.track?.length ?? 0);
-    await PlayManager.startAsync(firstTrack.track_id);
+
+    PlayManager.addStreamClientIfNotExists(track.track_id, track.track?.length ?? 0);
+    await PlayManager.startAsync(track.track_id);
 }

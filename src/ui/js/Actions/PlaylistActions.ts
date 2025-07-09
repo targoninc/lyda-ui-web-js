@@ -14,11 +14,13 @@ import {NotificationType} from "../Enums/NotificationType.ts";
 import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import {playingHere} from "../state.ts";
 import {Api} from "../Api/Api.ts";
+import { startItem } from "./MusicActions.ts";
+import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 
 export class PlaylistActions {
     static async openAddToPlaylistModal(objectToBeAdded: Album | Track, type: "track" | "album") {
         const playlists = await Api.getPlaylistsByUserId(objectToBeAdded.user_id);
-        if (playlists.length === 0) {
+        if (!playlists || playlists.length === 0) {
             return;
         }
 
@@ -54,7 +56,7 @@ export class PlaylistActions {
             return;
         }
         const oldSrc = target.src;
-        let fileInput = document.createElement("input");
+        const fileInput = document.createElement("input");
         fileInput.type = "file";
         fileInput.accept = "image/*";
         fileInput.onchange = async (e) => {
@@ -84,15 +86,10 @@ export class PlaylistActions {
             if (!playlist.tracks) {
                 throw new Error(`Invalid album (${playlist.id}), has no tracks.`);
             }
-            PlayManager.playFrom("playlist", playlist.title, playlist.id, playlist);
-            QueueManager.setContextQueue(playlist.tracks!.map(t => t.track_id));
-            const track = playlist.tracks!.find(t => t.track_id === trackId);
-            if (!track) {
-                notify("This track could not be found in this playlist", NotificationType.error);
-                return;
-            }
-            PlayManager.addStreamClientIfNotExists(track.track_id, track.track?.length ?? 0);
-            await PlayManager.startAsync(track.track_id);
+
+            await startItem(EntityType.playlist, playlist, {
+                trackId
+            });
         }
     }
 
