@@ -178,7 +178,7 @@ export class Api {
 
     //region Auth
     static async login(email: string, password: string, challenge: string | undefined) {
-        await post<{ user: User } | null>(ApiRoutes.login, {
+        return post<{ user: User } | null>(ApiRoutes.login, {
             email,
             password,
             challenge,
