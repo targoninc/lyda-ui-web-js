@@ -24,7 +24,8 @@ import {StreamingQuality} from "@targoninc/lyda-shared/src/Enums/StreamingQualit
 import {Permission} from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {UserEmail} from "@targoninc/lyda-shared/src/Models/db/lyda/UserEmail";
-import {NotificationType} from "../../Enums/NotificationType.ts";
+import { NotificationType } from "../../Enums/NotificationType.ts";
+import { TotpTemplates } from "./TotpTemplates.ts";
 
 export class SettingsTemplates {
     static settingsPage() {
@@ -54,9 +55,6 @@ export class SettingsTemplates {
 
     static permissionsSection() {
         const hasAnyPermissions = compute(p => p.length > 0, permissions);
-        if (!hasAnyPermissions.value) {
-
-        }
 
         return create("div")
             .children(
@@ -527,6 +525,45 @@ export class SettingsTemplates {
     }
 
     private static mfaSection(user: User) {
-        return nullElement();
+        const totpMethods = compute(u => u?.totp ?? [], currentUser);
+        const userId = compute(u => u?.id, currentUser);
+        const hasMethods = compute(m => m.length > 0, totpMethods);
+        const loading = signal(false);
+
+        return create("div")
+            .classes("flex-v")
+            .children(
+                create("h2")
+                    .text("TOTP devices")
+                    .build(),
+                when(hasMethods, create("span")
+                    .text("You have no TOTP methods configured")
+                    .build(), true),
+                when(hasMethods, TotpTemplates.totpDevices(totpMethods, loading, userId)),
+                button({
+                    text: "Add TOTP method",
+                    icon: {icon: "add"},
+                    classes: ["positive", "fit-content"],
+                    onclick: async () => {
+                        await Ui.getTextInputModal(
+                            "TOTP method name",
+                            "Enter the name for this method. Make sure it's something you'll recognize later on.",
+                            "",
+                            "Add",
+                            "Cancel",
+                            async (name: string) => {
+                                loading.value = true;
+                                await Api.addTotpMethod(name).then((res) => {
+                                    Api.getUserById().then(u => {
+                                        currentUser.value = u;
+                                    });
+                                    //Modals.totpVerificationModal(res.secret, res.qrDataUrl);
+                                }).finally(() => loading.value = false);
+                            },
+                            () => {}
+                        );
+                    }
+                })
+            ).build();
     }
 }

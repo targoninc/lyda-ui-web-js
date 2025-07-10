@@ -503,8 +503,7 @@ export class GenericTemplates {
     static confirmationModal(title: HtmlPropertyValue, text: HtmlPropertyValue, icon: StringOrSignal,
                              confirmText: StringOrSignal, cancelText: StringOrSignal, confirmCallback: Function,
                              cancelCallback: Function) {
-        return GenericTemplates.modal([
-            create("div")
+        return create("div")
                 .classes("flex")
                 .children(
                     create("h2")
@@ -534,8 +533,7 @@ export class GenericTemplates {
                         classes: ["negative"],
                         icon: {icon: "close"}
                     }),
-                ).build()
-        ], "confirmation");
+                ).build();
     }
 
     static modalImage(imageUrl: StringOrSignal) {
@@ -548,8 +546,7 @@ export class GenericTemplates {
     static textInputModal(title: HtmlPropertyValue, text: HtmlPropertyValue,
                           newValue: Signal<string>, icon: HtmlPropertyValue, confirmText: StringOrSignal, cancelText: StringOrSignal,
                           confirmCallback: Function, cancelCallback: Function) {
-        return GenericTemplates.modal([
-            create("div")
+        return create("div")
                 .classes("flex-v")
                 .children(
                     create("div")
@@ -593,15 +590,13 @@ export class GenericTemplates {
                                 icon: {icon: "close"}
                             }),
                         ).build()
-                ).build(),
-        ], "text-input");
+                ).build();
     }
 
     static textAreaInputModal(title: HtmlPropertyValue, text: HtmlPropertyValue, currentValue: HtmlPropertyValue,
                               newValue: Signal<string>, icon: HtmlPropertyValue, confirmText: StringOrSignal, cancelText: StringOrSignal,
                               confirmCallback: Function, cancelCallback: Function) {
-        return GenericTemplates.modal([
-            create("div")
+        return create("div")
                 .classes("flex-v")
                 .children(
                     create("div")
@@ -644,8 +639,7 @@ export class GenericTemplates {
                                 icon: {icon: "close"}
                             }),
                         ).build()
-                ).build(),
-        ], "text-area-input");
+                ).build();
     }
 
     static combinedSelector(tabs: any[], callback: Function, selectedIndex = 0) {
@@ -788,8 +782,7 @@ export class GenericTemplates {
         });
         const users = signal<SearchResult[]>([]);
 
-        return GenericTemplates.modal([
-            create("div")
+        return create("div")
                 .classes("flex-v")
                 .children(
                     create("div")
@@ -846,8 +839,7 @@ export class GenericTemplates {
                                 icon: {icon: "close"}
                             }),
                         ).build()
-                ).build(),
-        ], "add-linked-user");
+                ).build();
     }
 
     static breadcrumbs(pageMap: any, history: Signal<any>, stepState: Signal<any>) {

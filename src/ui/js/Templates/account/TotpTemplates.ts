@@ -1,10 +1,11 @@
-import {compute, create, InputType, signal, Signal, when} from "@targoninc/jess";
+import { compute, create, signal, Signal, signalMap, when } from "@targoninc/jess";
 import { UserTotp } from "@targoninc/lyda-shared/src/Models/db/lyda/UserTotp";
-import {currentUser} from "../../state.ts";
 import {button} from "@targoninc/jess-components";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
-import {createModal, Ui} from "../../Classes/Ui.ts";
+import {Ui} from "../../Classes/Ui.ts";
+import { Api } from "../../Api/Api.ts";
+import { currentUser } from "../../state.ts";
 
 export class TotpTemplates {
     static qrCode(dataUrl: string) {
@@ -15,6 +16,10 @@ export class TotpTemplates {
                     .attributes("src", dataUrl)
                     .build(),
             ).build();
+    }
+
+    static totpDevices(totpMethods: Signal<UserTotp[]>, loading: Signal<boolean>, userId: Signal<any>) {
+        return signalMap(totpMethods, create("div").classes("flex"), method => TotpTemplates.totpMethodInTable(method, loading, userId));
     }
 
     static totpMethodInTable(method: UserTotp, loading: Signal<boolean>, userId: Signal<any>) {
@@ -49,14 +54,24 @@ export class TotpTemplates {
                     icon: {icon: "verified"},
                     classes: ["positive"],
                     onclick: async () => {
-                        await Ui.getTextInputModal("Verify TOTP method", "Enter the code from this TOTP method", "", "Verify", "Cancel", () => {
-                            loading.value = true;
-                            /*await Api.verifyTotp(userId.value, token, "totp").then(() => {
-                                Api.getUser().then(u => {
-                                    currentUser.value = u;
-                                });
-                            }).finally(() => loading.value = false);*/
-                        }, () => {});
+                        await Ui.getTextInputModal(
+                            "Verify TOTP method",
+                            "Enter the code from this TOTP method",
+                            "",
+                            "Verify",
+                            "Cancel",
+                            async (token: string) => {
+                                loading.value = true;
+                                await Api.verifyTotp(userId.value, token, "totp")
+                                    .then(() => {
+                                        Api.getUserById().then(u => {
+                                            currentUser.value = u;
+                                        });
+                                    })
+                                    .finally(() => (loading.value = false));
+                            },
+                            () => {}
+                        );
                     }
                 }), true),
                 button({
@@ -65,25 +80,33 @@ export class TotpTemplates {
                     classes: ["negative"],
                     onclick: async () => {
                         if (!method.verified) {
-                            await Ui.getConfirmationModal("Delete TOTP method", `Are you sure you want to delete TOTP method ${method.name}?`, "Delete", "Cancel", () => {
-                                loading.value = true;
-                                /*await Api.deleteTotpMethod(method.id, "").then(() => {
-                                    Api.getUser().then(u => {
-                                        currentUser.value = u;
-                                    });
-                                }).finally(() => loading.value = false);*/
-                            }, () => {
-                            });
+                            await Ui.getConfirmationModal(
+                                "Delete TOTP method",
+                                `Are you sure you want to delete TOTP method ${method.name}?`,
+                                "Delete",
+                                "Cancel",
+                                async () => {
+                                    loading.value = true;
+                                    await Api.deleteTotpMethod(method.id, "")
+                                        .then(() => {
+                                            Api.getUserById().then(u => {
+                                                currentUser.value = u;
+                                            });
+                                        })
+                                        .finally(() => (loading.value = false));
+                                },
+                                () => {}
+                            );
                             return;
                         }
 
-                        await Ui.getTextInputModal("Delete TOTP method", "Enter the code from this TOTP method to delete it", "", "Delete", "Cancel", () => {
+                        await Ui.getTextInputModal("Delete TOTP method", "Enter the code from this TOTP method to delete it", "", "Delete", "Cancel", async (token: string) => {
                             loading.value = true;
-                            /*await Api.deleteTotpMethod(method.id, token).then(() => {
-                                Api.getUser().then(u => {
+                            await Api.deleteTotpMethod(method.id, token).then(() => {
+                                Api.getUserById().then(u => {
                                     currentUser.value = u;
                                 });
-                            }).finally(() => loading.value = false);*/
+                            }).finally(() => loading.value = false);
                         }, () => {});
                     }
                 })
