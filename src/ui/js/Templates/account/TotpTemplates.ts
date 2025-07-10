@@ -30,14 +30,12 @@ export class TotpTemplates {
             .classes("card", "flex-v")
             .children(
                 create("div")
-                    .classes("flex", "center-items")
+                    .classes("flex", "center-items", "text-small")
                     .children(
-                        create("h2")
+                        create("span")
+                            .classes("text-large")
                             .text(method.name),
-                        when(method.verified, GenericTemplates.pill({
-                            text: "Verified",
-                            icon: "check",
-                        }, signal(null), ["green"])),
+                        when(method.verified, GenericTemplates.benefit("Verified", "check")),
                     ).build(),
                 create("span")
                     .text(times)
@@ -173,7 +171,7 @@ export class TotpTemplates {
                                     currentUser.value = u;
                                 });
                             }).finally(() => loading.value = false);
-                        }, () => {});
+                        }, () => {}, "delete");
                     }
                 })
             ).build();

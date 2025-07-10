@@ -40,35 +40,6 @@ import { Payout } from "@targoninc/lyda-shared/src/Models/db/finance/Payout";
 import { Permission } from "@targoninc/lyda-shared/src/Models/db/lyda/Permission.ts";
 
 export class Api {
-    static getLogs(filterState: Signal<any>, successCallback: (data: Log[]) => void) {
-        const errorText = "Failed to get logs";
-        get<Log[]>(ApiRoutes.getLogs, {
-            logLevel: filterState.value,
-            offset: 0,
-            limit: 50,
-        }).then(logs => {
-            Api.handleResponse(logs ?? [], errorText, successCallback);
-        });
-
-        filterState.subscribe(async newValue => {
-            get<Log[]>(ApiRoutes.getLogs, {
-                logLevel: newValue,
-                offset: 0,
-                limit: 100,
-            }).then(logs => {
-                Api.handleResponse(logs ?? [], errorText, successCallback);
-            });
-        });
-    }
-
-    static handleResponse(response: any, errorText: string, successCallback: (data: any) => void) {
-        if (response.code !== 200) {
-            notify(errorText, NotificationType.error);
-            return;
-        }
-        successCallback(response.data);
-    }
-
     //region Interactions
     static async toggleInteraction(
         entityType: EntityType,
@@ -102,6 +73,14 @@ export class Api {
     //region logs
     static async getActionLogs() {
         return get<any[]>(ApiRoutes.getActionLogs);
+    }
+
+    static async getLogs(filter: any) {
+        return (await get<Log[]>(ApiRoutes.getLogs, {
+            logLevel: filter,
+            offset: 0,
+            limit: 50,
+        })) ?? [];
     }
 
     //endregion

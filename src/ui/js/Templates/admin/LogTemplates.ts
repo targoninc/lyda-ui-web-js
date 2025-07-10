@@ -232,24 +232,26 @@ export class LogTemplates {
         return DashboardTemplates.pageNeedingPermissions(
             [Permissions.canViewLogs],
             LogTemplates.logsView()
-        )
+        );
     }
 
     static logsView() {
         const filterState = signal(LogLevel.debug);
         const refreshOnInterval = signal(false);
         const logs = signal<Log[]>([]);
-        const refresh = () => {
-            Api.getLogs(filterState, async (newLogs: Log[]) => {
-                logs.value = newLogs;
-            });
+        const loading = signal(false);
+        const refresh = async () => {
+            loading.value = true;
+            logs.value = await Api.getLogs(filterState.value);
+            loading.value = false;
         };
+        filterState.subscribe(refresh);
         setInterval(() => {
-            if (refreshOnInterval.value) {
-                refresh();
+            if (refreshOnInterval.value && !loading.value) {
+                refresh().then();
             }
         }, 1000 * 5);
-        refresh();
+        refresh().then();
 
         return create("div")
             .classes("flex-v")
@@ -264,7 +266,7 @@ export class LogTemplates {
                             classes: ["positive"],
                             onclick: async () => {
                                 logs.value = [];
-                                refresh();
+                                refresh().then();
                             }
                         }),
                         toggle({

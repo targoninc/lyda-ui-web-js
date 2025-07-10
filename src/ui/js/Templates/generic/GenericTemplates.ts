@@ -11,7 +11,7 @@ import {
     StringOrSignal,
     TypeOrSignal,
     compute, signal, Signal,
-    InputType, asSignal
+    InputType, asSignal,
 } from "@targoninc/jess";
 import {Util} from "../../Classes/Util.ts";
 import {navigate} from "../../Routing/Router.ts";
@@ -551,15 +551,11 @@ export class GenericTemplates {
         return create("div")
                 .classes("flex-v")
                 .children(
-                    create("div")
+                    create("h2")
                         .classes("flex")
                         .children(
-                            create("img")
-                                .classes("icon", "svg")
-                                .styles("width", "30px", "height", "auto")
-                                .attributes("src", icon)
-                                .build(),
-                            create("h2")
+                            icon ? GenericTemplates.icon(icon as StringOrSignal, true) : null,
+                            create("span")
                                 .text(title)
                                 .build()
                         ).build(),

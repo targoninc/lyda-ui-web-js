@@ -514,7 +514,7 @@ export class SettingsTemplates {
                             icon: {icon: "delete"},
                             classes: ["negative"],
                             onclick: async () => {
-                                await Ui.getConfirmationModal("Delete email", "Are you sure you want to delete this email? This can't be undone.", "Yes", "No", async () => {
+                                await Ui.getConfirmationModal("Delete E-mail address", "Are you sure you want to delete this email? This can't be undone.", "Yes", "No", async () => {
                                     emails$.value = emails$.value.filter((e, i) => i !== index.value);
                                 }, () => {
                                 }, "delete");
@@ -563,7 +563,8 @@ export class SettingsTemplates {
                                     createModal([TotpTemplates.verifyTotpAddModal(res.secret, res.qrDataUrl)], "add-modal-verify");
                                 }).finally(() => loading.value = false);
                             },
-                            () => {}
+                            () => {},
+                            "qr_code"
                         );
                     }
                 })
