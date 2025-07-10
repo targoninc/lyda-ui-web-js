@@ -1,11 +1,12 @@
-import { compute, create, signal, Signal, signalMap, when } from "@targoninc/jess";
+import { compute, create, InputType, signal, Signal, signalMap, when } from "@targoninc/jess";
 import { UserTotp } from "@targoninc/lyda-shared/src/Models/db/lyda/UserTotp";
-import {button} from "@targoninc/jess-components";
+import { button, input } from "@targoninc/jess-components";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {Time} from "../../Classes/Helpers/Time.ts";
 import {Ui} from "../../Classes/Ui.ts";
 import { Api } from "../../Api/Api.ts";
 import { currentUser } from "../../state.ts";
+import { Util } from "../../Classes/Util.ts";
 
 export class TotpTemplates {
     static qrCode(dataUrl: string) {
@@ -42,6 +43,71 @@ export class TotpTemplates {
                     .text(times)
                     .build(),
                 TotpTemplates.totpMethodActions(method, loading, userId),
+            ).build();
+    }
+
+    static verifyTotpAddModal(secret: string, qrDataUrl: string) {
+        const token = signal("");
+
+        return create("div")
+            .classes("flex-v")
+            .children(
+                TotpTemplates.qrCode(qrDataUrl),
+                create("h2")
+                    .classes("flex")
+                    .text("Add TOTP method")
+                    .build(),
+                create("div")
+                    .classes("flex", "center-items")
+                    .children(
+                        create("span")
+                            .text(secret)
+                            .build()
+                    ).build(),
+                create("div")
+                    .classes("flex-v")
+                    .children(
+                        create("div")
+                            .classes("flex", "center-items")
+                            .children(
+                                input({
+                                    type: InputType.text,
+                                    name: "token",
+                                    placeholder: "Token",
+                                    attributes: ["autocomplete", "off"],
+                                    value: token,
+                                    onchange: (v) => token.value = v
+                                }),
+                            ).build(),
+                        create("div")
+                            .classes("flex", "center-items")
+                            .children(
+                                button({
+                                    text: "Verify",
+                                    icon: {icon: "verified"},
+                                    classes: ["positive"],
+                                    onclick: async (e) => {
+                                        if (!token.value) {
+                                            return;
+                                        }
+                                        await Api.verifyTotp(currentUser.value?.id ?? 0, token.value, "totp").then(() => {
+                                            Api.getUserById().then(u => {
+                                                currentUser.value = u;
+                                            });
+                                        });
+                                        Util.removeModal();
+                                    }
+                                }),
+                                button({
+                                    text: "Cancel",
+                                    icon: {icon: "cancel"},
+                                    classes: ["negative"],
+                                    onclick: async () => {
+                                        Util.removeModal();
+                                    }
+                                }),
+                            ).build()
+                    ).build()
             ).build();
     }
 

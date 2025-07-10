@@ -503,7 +503,8 @@ export class GenericTemplates {
     static confirmationModal(title: HtmlPropertyValue, text: HtmlPropertyValue, icon: StringOrSignal,
                              confirmText: StringOrSignal, cancelText: StringOrSignal, confirmCallback: Function,
                              cancelCallback: Function) {
-        return create("div")
+        return vertical(
+            create("div")
                 .classes("flex")
                 .children(
                     create("h2")
@@ -533,7 +534,8 @@ export class GenericTemplates {
                         classes: ["negative"],
                         icon: {icon: "close"}
                     }),
-                ).build();
+                ).build()
+        );
     }
 
     static modalImage(imageUrl: StringOrSignal) {

@@ -1,7 +1,7 @@
 import {UserActions} from "../../Actions/UserActions.ts";
 import {GenericTemplates, horizontal} from "../generic/GenericTemplates.ts";
 import {getUserSettingValue, Util} from "../../Classes/Util.ts";
-import {notify, Ui} from "../../Classes/Ui.ts";
+import { createModal, notify, Ui } from "../../Classes/Ui.ts";
 import {Api} from "../../Api/Api.ts";
 import {create, when, signalMap, compute, Signal, signal, InputType, nullElement} from "@targoninc/jess";
 import {navigate, reload} from "../../Routing/Router.ts";
@@ -42,7 +42,7 @@ export class SettingsTemplates {
                     .text("Settings")
                     .build(),
                 SettingsTemplates.accountSection(user),
-                SettingsTemplates.mfaSection(user),
+                SettingsTemplates.mfaSection(),
                 SettingsTemplates.themeSection(getUserSettingValue<Theme>(user, UserSettings.theme)),
                 SettingsTemplates.qualitySection(getUserSettingValue<StreamingQuality>(user, UserSettings.streamingQuality) ?? "m"),
                 SettingsTemplates.permissionsSection(),
@@ -524,14 +524,14 @@ export class SettingsTemplates {
             ).build();
     }
 
-    private static mfaSection(user: User) {
+    private static mfaSection() {
         const totpMethods = compute(u => u?.totp ?? [], currentUser);
         const userId = compute(u => u?.id, currentUser);
         const hasMethods = compute(m => m.length > 0, totpMethods);
         const loading = signal(false);
 
         return create("div")
-            .classes("flex-v")
+            .classes("flex-v", "card")
             .children(
                 create("h2")
                     .text("TOTP devices")
@@ -554,10 +554,13 @@ export class SettingsTemplates {
                             async (name: string) => {
                                 loading.value = true;
                                 await Api.addTotpMethod(name).then((res) => {
+                                    if (!res) {
+                                        return;
+                                    }
                                     Api.getUserById().then(u => {
                                         currentUser.value = u;
                                     });
-                                    //Modals.totpVerificationModal(res.secret, res.qrDataUrl);
+                                    createModal([TotpTemplates.verifyTotpAddModal(res.secret, res.qrDataUrl)], "add-modal-verify");
                                 }).finally(() => loading.value = false);
                             },
                             () => {}
