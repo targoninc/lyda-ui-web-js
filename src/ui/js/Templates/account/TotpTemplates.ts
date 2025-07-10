@@ -35,7 +35,7 @@ export class TotpTemplates {
                         create("span")
                             .classes("text-large")
                             .text(method.name),
-                        when(method.verified, GenericTemplates.benefit("Verified", "check")),
+                        when(method.verified, GenericTemplates.verifiedWithDate(method.created_at)),
                     ).build(),
                 create("span")
                     .text(times)

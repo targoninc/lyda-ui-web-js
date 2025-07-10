@@ -332,6 +332,23 @@ export class GenericTemplates {
         });
     }
 
+    static verifiedWithDate(date: Date) {
+        return create("div")
+            .classes("flex", "noflexwrap", "small-gap", "align-children")
+            .children(
+                icon({
+                    icon: "new_releases",
+                    adaptive: true,
+                    classes: ["text-positive"],
+                }),
+                create("span")
+                    .classes("text-positive")
+                    .text("Verified on " + Util.formatDate(date))
+                    .build()
+            )
+            .build();
+    }
+
     static pills(options: PillOption[], pillState: Signal<any>, extraClasses: string[] = [], loadingState: Signal<boolean> | null = null) {
         return create("div")
             .classes("flex", "pill-container", ...extraClasses)
