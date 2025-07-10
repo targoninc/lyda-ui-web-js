@@ -26,6 +26,7 @@ import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {UserEmail} from "@targoninc/lyda-shared/src/Models/db/lyda/UserEmail";
 import { NotificationType } from "../../Enums/NotificationType.ts";
 import { TotpTemplates } from "./TotpTemplates.ts";
+import { WebauthnTemplates } from "./WebauthnTemplates.ts";
 
 export class SettingsTemplates {
     static settingsPage() {
@@ -40,7 +41,8 @@ export class SettingsTemplates {
             .children(
                 create("h1").text("Settings").build(),
                 SettingsTemplates.accountSection(user),
-                SettingsTemplates.mfaSection(),
+                SettingsTemplates.totpSection(),
+                WebauthnTemplates.devicesSection(),
                 SettingsTemplates.themeSection(
                     getUserSettingValue<Theme>(user, UserSettings.theme)
                 ),
@@ -664,7 +666,7 @@ export class SettingsTemplates {
             .build();
     }
 
-    private static mfaSection() {
+    private static totpSection() {
         const totpMethods = compute(u => u?.totp ?? [], currentUser);
         const userId = compute(u => u?.id, currentUser);
         const hasMethods = compute(m => m.length > 0, totpMethods);

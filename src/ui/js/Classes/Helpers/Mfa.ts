@@ -20,7 +20,7 @@ function loginWithWebauthn(credentialDescriptors: any, loading: Signal<boolean>,
                         verification,
                         challenge
                     };
-                    step.value = "logging-in";
+                    Api.verifyWebauthn(verification, challenge).then(() => step.value = "logging-in");
                 }).catch(e => notify(e.message, NotificationType.error))
                 .finally(() => loading.value = false);
         }).catch(e => notify(e.message, NotificationType.error))
