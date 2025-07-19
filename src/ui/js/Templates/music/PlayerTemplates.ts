@@ -187,36 +187,31 @@ export class PlayerTemplates {
         if (track.has_cover) {
             cover.value = Util.getTrackCover(track.id);
         }
-        // TODO: make classes for vis of player states
 
         return create("div")
             .classes("flex-v", "relative")
+            .id("permanent-player")
             .children(
-                when(playerExpanded, create("div")
-                    .classes("flex-v", "relative")
-                    .id("permanent-player")
-                    .children(
-                        when(playingElsewhere, heading({
-                            text: "Playing on another instance of Lyda",
-                            level: 2,
-                        })),
-                        when(playingElsewhere, horizontal(
-                            horizontal(
-                                MusicTemplates.cover(EntityType.track, track, "player-cover", () => {
-                                    const windowWidth = window.innerWidth;
-                                    if (windowWidth < 600) {
-                                        navigate(`${RoutePath.track}/` + track.id);
-                                    } else {
-                                        Ui.showImageModal(cover);
-                                    }
-                                }),
-                            ).classes("hideOnSmallBreakpoint"),
-                            await PlayerTemplates.smallPlayerLayout(track),
-                            await PlayerTemplates.bigPlayerLayout(track, trackUser),
-                        ).classes("fullWidth").build(), true),
-                        QueueTemplates.queuePopout(),
-                    ).build(), true),
-                when(playerExpanded, await PlayerTemplates.playerPopout(track)),
+                when(playingElsewhere, heading({
+                    text: "Playing on another instance of Lyda",
+                    level: 2,
+                })),
+                when(playingElsewhere, horizontal(
+                    horizontal(
+                        MusicTemplates.cover(EntityType.track, track, "player-cover", () => {
+                            const windowWidth = window.innerWidth;
+                            if (windowWidth < 600) {
+                                navigate(`${RoutePath.track}/` + track.id);
+                            } else {
+                                Ui.showImageModal(cover);
+                            }
+                        }),
+                    ).classes("hideOnSmallBreakpoint"),
+                    when(playerExpanded, await PlayerTemplates.smallPlayerLayout(track), true),
+                    await PlayerTemplates.bigPlayerLayout(track, trackUser),
+                ).classes("fullWidth").build(), true),
+                QueueTemplates.queuePopout(),
+                await PlayerTemplates.playerPopout(track)
             ).build();
     }
 
@@ -378,6 +373,7 @@ export class PlayerTemplates {
     }
 
     private static async playerPopout(track: Track) {
+        const vClass = compute((v): string => v ? "visible" : "hide", playerExpanded);
         const trackUser = track.user!;
         const cover = signal(Images.DEFAULT_COVER_TRACK);
         if (track.has_cover) {
@@ -385,24 +381,30 @@ export class PlayerTemplates {
         }
 
         return create("div")
-            .classes("player-popout")
+            .classes("player-popout", vClass, "flex-v", "space-outwards")
             .children(
-                MusicTemplates.cover(EntityType.track, track, "fullsize-cover", () => {
-                    const windowWidth = window.innerWidth;
-                    if (windowWidth < 600) {
-                        navigate(`${RoutePath.track}/` + track.id);
-                    } else {
-                        Ui.showImageModal(cover);
-                    }
-                }),
-                await PlayerTemplates.trackInfo(track, trackUser),
-                await PlayerTemplates.bigAudioPlayer(track),
-                create("div")
-                    .classes("flex", "hideOnMidBreakpoint")
-                    .children(
-                        PlayerTemplates.loudnessControl(track),
-                        QueueTemplates.queueButton(),
-                    ).build()
+                vertical(
+                    MusicTemplates.cover(EntityType.track, track, "fullsize-cover", () => {
+                        const windowWidth = window.innerWidth;
+                        if (windowWidth < 600) {
+                            navigate(`${RoutePath.track}/` + track.id);
+                        } else {
+                            Ui.showImageModal(cover);
+                        }
+                    }),
+                    horizontal(
+                        await PlayerTemplates.trackInfo(track, trackUser),
+                    )
+                ),
+                vertical(
+                    await PlayerTemplates.bigAudioPlayer(track),
+                    create("div")
+                        .classes("flex", "hideOnMidBreakpoint")
+                        .children(
+                            PlayerTemplates.loudnessControl(track),
+                            QueueTemplates.queueButton(),
+                        ).build()
+                )
             ).build();
     }
 }

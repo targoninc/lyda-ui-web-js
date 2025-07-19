@@ -234,7 +234,7 @@ nav, footer {
     padding: var(--page-padding);
 }
 
-nav, #permanent-player, .fixed-bar, .modal-overlay, .modal, .card, .user-preview, .queue-popout, .player-popout {
+nav, footer, .fixed-bar, .modal-overlay, .modal, .card, .user-preview, .queue-popout, .player-popout {
     background: var(--background-glass);
     backdrop-filter: saturate(180%) blur(10px);
 }
@@ -243,18 +243,12 @@ nav, #permanent-player, .fixed-bar, .modal-overlay, .modal, .card, .user-preview
     background: var(--background-light-glass);
 }
 
-footer:empty {
-    padding: 0;
-    width: 100%;
-    border: none;
-}
-
-#permanent-player {
+footer {
     position: absolute;
     z-index: 2;
-    bottom: calc(var(--base-padding) * 2);
+    bottom: var(--base-padding);
     left: 50%;
-    width: 100%;
+    width: calc(100% - 2 * var(--base-padding));
     box-sizing: border-box;
     border: 1px solid var(--color-7);
     transform: translateX(-50%);
@@ -884,10 +878,10 @@ td:last-child, th:last-child {
 
 .player-popout {
     position: absolute;
-    bottom: calc(100% + 15px);
+    bottom: calc(100%);
     width: calc(100% - var(--base-padding) * 2);
     max-width: var(--breakpoint-big);
-    height: 90dvh;
+    height: calc(100dvh - 95px);
     border: 1px solid var(--color-7);
     border-radius: var(--large-border-radius);
     transition: height 100ms ease-in-out;
@@ -907,9 +901,10 @@ td:last-child, th:last-child {
     overflow: auto;
 }
 
-.queue-popout.hide {
+.hide {
     height: 0 !important;
     border: none;
+    padding: 0;
 }
 
 .queue-popout.visible {
@@ -1099,6 +1094,17 @@ img.loading:before {
 
     .showOnSmallBreakpoint {
         display: flex !important;
+    }
+
+    footer.no-padding {
+        padding: 0;
+        border: none;
+    }
+}
+
+@media only screen and (min-width: 600px) {
+    .player-popout {
+        display: none !important;
     }
 }
 
