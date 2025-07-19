@@ -131,3 +131,5 @@ history.subscribe((h, changed) => {
 });
 
 export const queueVisible = signal(false);
+
+export const playerExpanded = signal(false);

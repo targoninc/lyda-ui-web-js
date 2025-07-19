@@ -7,7 +7,7 @@ import {UserTemplates} from "../account/UserTemplates.ts";
 import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
 import {Ui} from "../../Classes/Ui.ts";
 import {Util} from "../../Classes/Util.ts";
-import {AnyElement, compute, create, Signal, signal, when} from "@targoninc/jess";
+import {compute, create, Signal, signal, when} from "@targoninc/jess";
 import {navigate} from "../../Routing/Router.ts";
 import {
     currentlyBuffered,
@@ -15,12 +15,11 @@ import {
     currentTrackId,
     currentTrackPosition,
     loopMode,
-    manualQueue,
-    muted,
+    muted, playerExpanded,
     playingElsewhere,
     playingFrom,
-    playingHere, queueVisible,
-    volume
+    playingHere,
+    volume,
 } from "../../state.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {heading} from "@targoninc/jess-components";
@@ -188,30 +187,36 @@ export class PlayerTemplates {
         if (track.has_cover) {
             cover.value = Util.getTrackCover(track.id);
         }
+        // TODO: make classes for vis of player states
 
         return create("div")
             .classes("flex-v", "relative")
-            .id("permanent-player")
             .children(
-                when(playingElsewhere, heading({
-                    text: "Playing on another instance of Lyda",
-                    level: 2,
-                })),
-                when(playingElsewhere, horizontal(
-                    horizontal(
-                        MusicTemplates.cover(EntityType.track, track, "player-cover", () => {
-                            const windowWidth = window.innerWidth;
-                            if (windowWidth < 600) {
-                                navigate(`${RoutePath.track}/` + track.id);
-                            } else {
-                                Ui.showImageModal(cover);
-                            }
-                        }),
-                    ).classes("hideOnSmallBreakpoint"),
-                    await PlayerTemplates.smallPlayerLayout(track),
-                    await PlayerTemplates.bigPlayerLayout(track, trackUser),
-                ).classes("fullWidth").build(), true),
-                QueueTemplates.queuePopout()
+                when(playerExpanded, create("div")
+                    .classes("flex-v", "relative")
+                    .id("permanent-player")
+                    .children(
+                        when(playingElsewhere, heading({
+                            text: "Playing on another instance of Lyda",
+                            level: 2,
+                        })),
+                        when(playingElsewhere, horizontal(
+                            horizontal(
+                                MusicTemplates.cover(EntityType.track, track, "player-cover", () => {
+                                    const windowWidth = window.innerWidth;
+                                    if (windowWidth < 600) {
+                                        navigate(`${RoutePath.track}/` + track.id);
+                                    } else {
+                                        Ui.showImageModal(cover);
+                                    }
+                                }),
+                            ).classes("hideOnSmallBreakpoint"),
+                            await PlayerTemplates.smallPlayerLayout(track),
+                            await PlayerTemplates.bigPlayerLayout(track, trackUser),
+                        ).classes("fullWidth").build(), true),
+                        QueueTemplates.queuePopout(),
+                    ).build(), true),
+                when(playerExpanded, await PlayerTemplates.playerPopout(track)),
             ).build();
     }
 
@@ -245,6 +250,12 @@ export class PlayerTemplates {
                     TrackTemplates.title(track.title, track.id, PlayerTemplates.trackIcons(track)),
                     PlayerTemplates.trackScrubbar(track, bufferPercent, positionPercent),
                 ).classes("flex-grow", "no-gap").build(),
+                vertical(
+                    GenericTemplates.roundIconButton({
+                        icon: compute((p): string => p ? "keyboard_arrow_down" : "keyboard_arrow_up", playerExpanded),
+                        adaptive: true,
+                    }, async () => playerExpanded.value = !playerExpanded.value, "Toggle expanded player"),
+                ).classes("align-center")
             ).build();
     }
 
@@ -364,5 +375,34 @@ export class PlayerTemplates {
         }, async () => {
             await PlayManager.nextLoopMode();
         }, "Change loop mode");
+    }
+
+    private static async playerPopout(track: Track) {
+        const trackUser = track.user!;
+        const cover = signal(Images.DEFAULT_COVER_TRACK);
+        if (track.has_cover) {
+            cover.value = Util.getTrackCover(track.id);
+        }
+
+        return create("div")
+            .classes("player-popout")
+            .children(
+                MusicTemplates.cover(EntityType.track, track, "fullsize-cover", () => {
+                    const windowWidth = window.innerWidth;
+                    if (windowWidth < 600) {
+                        navigate(`${RoutePath.track}/` + track.id);
+                    } else {
+                        Ui.showImageModal(cover);
+                    }
+                }),
+                await PlayerTemplates.trackInfo(track, trackUser),
+                await PlayerTemplates.bigAudioPlayer(track),
+                create("div")
+                    .classes("flex", "hideOnMidBreakpoint")
+                    .children(
+                        PlayerTemplates.loudnessControl(track),
+                        QueueTemplates.queueButton(),
+                    ).build()
+            ).build();
     }
 }
