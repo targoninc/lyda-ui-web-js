@@ -237,6 +237,7 @@ nav, footer {
 nav, footer, .fixed-bar, .modal-overlay, .modal, .card, .user-preview, .queue-popout, .player-popout {
     background: var(--background-glass);
     backdrop-filter: saturate(180%) blur(10px);
+    -webkit-backdrop-filter: saturate(180%) blur(10px);
 }
 
 .card {

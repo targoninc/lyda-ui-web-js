@@ -749,6 +749,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     border-radius: var(--border-radius);
     overflow: auto;
     backdrop-filter: blur(50px);
+    -webkit-backdrop-filter: blur(50px);
     background: color-mix(in oklab, var(--color-3), transparent 30%);
     max-height: 300px;
     box-sizing: border-box;
