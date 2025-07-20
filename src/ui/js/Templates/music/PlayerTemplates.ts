@@ -532,34 +532,59 @@ export class PlayerTemplates {
         if (track.has_cover) {
             cover.value = Util.getTrackCover(track.id);
         }
+        const tabs: any[] = ["Player", "Queue"];
+        const tabContents = [
+            await this.mobilePlayerTab(track, cover, trackUser)
+        ];
 
         return create("div")
-            .classes("player-popout", vClass, "flex-v", "space-outwards")
+            .classes("player-popout", vClass, "flex-v")
             .children(
-                vertical(
-                    horizontal(
-                        MusicTemplates.cover(EntityType.track, track, "fullsize-cover", () => {
-                            const windowWidth = window.innerWidth;
-                            if (windowWidth < 600) {
-                                navigate(`${RoutePath.track}/` + track.id);
-                            } else {
-                                Ui.showImageModal(cover);
-                            }
-                        })
-                    ).classes("align-center"),
-                    horizontal(await PlayerTemplates.trackInfo(track, trackUser))
-                ).classes("centered"),
-                vertical(
-                    await PlayerTemplates.mobileAudioPlayer(track),
-                    create("div")
-                        .classes("flex", "hideOnMidBreakpoint")
-                        .children(
-                            PlayerTemplates.loudnessControl(track),
-                            QueueTemplates.queueButton()
-                        )
-                        .build()
-                )
+                horizontal(
+                    GenericTemplates.combinedSelector(tabs, i => {
+                        tabContents.forEach((c, j) => {
+                            c.style.display = i === j ? "flex" : "none";
+                        });
+                    }, 0),
+                    GenericTemplates.roundIconButton({
+                        icon: "close",
+                        adaptive: true,
+                        isUrl: false,
+                    }, () => {
+                        playerExpanded.value = false;
+                    })
+                ).classes("align-children", "space-outwards"),
+                ...tabContents
+            ).build();
+    }
+
+    private static async mobilePlayerTab(track: Track, cover: Signal<string>, trackUser: User) {
+        return vertical(
+            vertical(
+                horizontal(
+                    MusicTemplates.cover(EntityType.track, track, "fullsize-cover", () => {
+                        const windowWidth = window.innerWidth;
+                        if (windowWidth < 600) {
+                            navigate(`${RoutePath.track}/` + track.id);
+                        } else {
+                            Ui.showImageModal(cover);
+                        }
+                    }),
+                ).classes("align-center"),
+                horizontal(await PlayerTemplates.trackInfo(track, trackUser)),
+            ).classes("centered"),
+            vertical(
+                await PlayerTemplates.mobileAudioPlayer(track),
+                create("div")
+                    .classes("flex", "hideOnMidBreakpoint")
+                    .children(
+                        PlayerTemplates.loudnessControl(track),
+                        QueueTemplates.queueButton()
+                    )
+                    .build()
             )
-            .build();
+        ).classes("space-outwards")
+        .styles("flex-grow", "1")
+        .build();
     }
 }
