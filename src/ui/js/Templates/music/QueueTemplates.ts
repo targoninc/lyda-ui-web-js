@@ -1,7 +1,7 @@
 import {QueueManager} from "../../Streaming/QueueManager.ts";
 import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
 import {userHasSettingValue, Util} from "../../Classes/Util.ts";
-import {compute, create, nullElement, signal, when} from "@targoninc/jess";
+import { compute, create, nullElement, signal, StringOrSignal, when } from "@targoninc/jess";
 import {Images} from "../../Enums/Images.ts";
 import {button, icon} from "@targoninc/jess-components";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
@@ -131,22 +131,27 @@ export class QueueTemplates {
 
     static queuePopout() {
         const qClass = compute((v): string => v ? "visible" : "hide", queueVisible);
-        const playFromAutoEnabled = compute(u => {
-            return u && userHasSettingValue(u, UserSettings.playFromAutoQueue, true);
-        }, currentUser);
 
         return create("div")
             .classes("queue-popout", qClass)
             .children(
-                vertical(
-                    compute(id => QueueTemplates.trackAsQueueItem(id, 0, false), currentTrackId),
-                    compute((q) => QueueTemplates.queueList(q, "Manual queue", true), manualQueue),
-                    compute((q) => QueueTemplates.queueList(q, "Context queue"), contextQueue),
-                    when(playFromAutoEnabled, vertical(
-                        compute((q) => QueueTemplates.queueList(q, "Auto queue"), autoQueue)
-                    ).build()),
-                ).classes("padded", "rounded", "fullWidth").build()
+                QueueTemplates.fullQueueList(["padded", "rounded"])
             ).build();
+    }
+
+    static fullQueueList(classes: StringOrSignal[] = []) {
+        const playFromAutoEnabled = compute(u => {
+            return u && userHasSettingValue(u, UserSettings.playFromAutoQueue, true);
+        }, currentUser);
+
+        return vertical(
+            compute(id => QueueTemplates.trackAsQueueItem(id, 0, false), currentTrackId),
+            compute((q) => QueueTemplates.queueList(q, "Manual queue", true), manualQueue),
+            compute((q) => QueueTemplates.queueList(q, "Context queue"), contextQueue),
+            when(playFromAutoEnabled, vertical(
+                compute((q) => QueueTemplates.queueList(q, "Auto queue"), autoQueue),
+            ).build()),
+        ).classes("fullWidth", ...classes).build();
     }
 
     static queueList(q: number[], text: string, isManual: boolean = false) {

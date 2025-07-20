@@ -534,7 +534,8 @@ export class PlayerTemplates {
         }
         const tabs: any[] = ["Player", "Queue"];
         const tabContents = [
-            await this.mobilePlayerTab(track, cover, trackUser)
+            await PlayerTemplates.mobilePlayerTab(track, cover, trackUser),
+            QueueTemplates.fullQueueList()
         ];
 
         return create("div")
@@ -553,7 +554,7 @@ export class PlayerTemplates {
                     }, () => {
                         playerExpanded.value = false;
                     })
-                ).classes("align-children", "space-outwards"),
+                ).classes("align-children", "space-outwards", "mobile-player"),
                 ...tabContents
             ).build();
     }
@@ -583,7 +584,7 @@ export class PlayerTemplates {
                     )
                     .build()
             )
-        ).classes("space-outwards")
+        ).classes("space-outwards", "mobile-player")
         .styles("flex-grow", "1")
         .build();
     }
