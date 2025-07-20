@@ -175,13 +175,11 @@ export class PlayerTemplates {
                             .id("audio_" + track.id)
                             .styles("display", "none")
                             .build(),
-                        PlayerTemplates.currentTrackTime(),
+                        PlayerTemplates.currentTrackTime(true),
                         PlayerTemplates.trackScrubbar(track, bufferPercent, positionPercent),
-                        PlayerTemplates.totalTrackTime(track)
-                    )
-                    .build()
-            )
-            .build();
+                        PlayerTemplates.totalTrackTime(track, true)
+                    ).build()
+            ).build();
     }
 
     private static roundPlayButton(track: Track) {
@@ -198,16 +196,16 @@ export class PlayerTemplates {
         );
     }
 
-    private static currentTrackTime() {
+    private static currentTrackTime(mobilePlayer = false) {
         return create("span")
-            .classes("nopointer", "align-center", "hideOnMidBreakpoint")
+            .classes("nopointer", "align-center", mobilePlayer ? "_" : "hideOnMidBreakpoint")
             .text(compute(t => Time.format(t.absolute), currentTrackPosition))
             .build();
     }
 
-    private static totalTrackTime(track: Track) {
+    private static totalTrackTime(track: Track, mobilePlayer = false) {
         return create("span")
-            .classes("audio-player-time-total", "nopointer", "align-center", "hideOnMidBreakpoint")
+            .classes("audio-player-time-total", "nopointer", "align-center", mobilePlayer ? "_" : "hideOnMidBreakpoint")
             .text(Time.format(track.length))
             .build();
     }
@@ -367,7 +365,7 @@ export class PlayerTemplates {
         );
 
         return create("div")
-            .classes("flex", "flex-grow", "showOnSmallBreakpoint")
+            .classes("flex", "flex-grow", "showOnSmallBreakpoint", "noflexwrap")
             .children(
                 vertical(PlayerTemplates.roundPlayButton(track)).classes("align-center"),
                 vertical(
