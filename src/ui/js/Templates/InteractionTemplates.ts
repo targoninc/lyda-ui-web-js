@@ -11,6 +11,7 @@ import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import {currentUser} from "../state.ts";
 import {Visibility} from "@targoninc/lyda-shared/dist/Enums/Visibility";
 import { Api } from "../Api/Api.ts";
+import { InteractionOptions } from "../Models/InteractionOptions.ts";
 
 const interactionConfigs: Record<InteractionType, InteractionConfig> = {
     [InteractionType.like]: {
@@ -37,7 +38,8 @@ const interactionConfigs: Record<InteractionType, InteractionConfig> = {
 }
 
 export class InteractionTemplates {
-    private static interactionButton<T extends { id: number, visibility: Visibility }>(entityType: EntityType, interactionType: InteractionType, metadata: InteractionMetadata<T>, config: InteractionConfig, entity: T) {
+    private static interactionButton<T extends { id: number, visibility: Visibility }>(entityType: EntityType,
+        interactionType: InteractionType, metadata: InteractionMetadata<T>, config: InteractionConfig, entity: T, showCount = true) {
         const count$ = signal(metadata.count ?? 0);
         const interacted$ = signal(metadata.interacted ?? false);
         //const list$ = signal(metadata.list); TODO: Not yet used...figure out if we want to display the list of interactions right where the count is or elsewhere (probably the second option)
@@ -55,24 +57,24 @@ export class InteractionTemplates {
                     isUrl: icon$.value.includes("http")
                 }, () => toggleInteraction(entityType, interactionType, config, entity.id, interacted$, count$), interactionType,
                     ["positive", stateClass$, "stats-indicator", inertClass]),
-                when(metadata.count !== undefined && metadata.count !== null, create("span")
+                when(metadata.count !== undefined && metadata.count !== null && showCount, create("span")
                     .classes("interaction-count")
                     .text(count$ as HtmlPropertyValue)
                     .build()),
             ).build();
     }
 
-    static interactions<T>(entityType: EntityType, entity: T) {
+    static interactions<T>(entityType: EntityType, entity: T, options?: InteractionOptions) {
         let elements: AnyNode[];
         switch (entityType) {
             case EntityType.track:
-                elements = InteractionTemplates.trackInteractions(entity as Track);
+                elements = InteractionTemplates.trackInteractions(entity as Track, options?.overrideActions, options?.showCount);
                 break;
             case EntityType.album:
-                elements = InteractionTemplates.albumInteractions(entity as Album);
+                elements = InteractionTemplates.albumInteractions(entity as Album, options?.showCount);
                 break;
             case EntityType.playlist:
-                elements = InteractionTemplates.playlistInteractions(entity as Playlist);
+                elements = InteractionTemplates.playlistInteractions(entity as Playlist, options?.showCount);
                 break;
             default:
                 elements = [nullElement()];
@@ -85,29 +87,29 @@ export class InteractionTemplates {
 
     private static interactionList<T extends {
         id: number
-    }>(interactions: InteractionType[], entity: T, entityType: EntityType) {
+    }>(interactions: InteractionType[], entity: T, entityType: EntityType, showCount = true) {
         const elements = [];
         for (const interaction of interactions) {
             const config = interactionConfigs[interaction];
-            elements.push(InteractionTemplates.interactionButton(entityType, interaction, entity[interaction + "s" as keyof T] ?? {} as InteractionMetadata<any>, config, entity));
+            elements.push(InteractionTemplates.interactionButton(entityType, interaction, entity[interaction + "s" as keyof T] ?? {} as InteractionMetadata<any>, config, entity, showCount));
         }
 
         return elements;
     }
 
-    private static trackInteractions(entity: Track, overrideActions?: InteractionType[]) {
+    private static trackInteractions(entity: Track, overrideActions?: InteractionType[], showCount = true) {
         const interactions = [InteractionType.like, InteractionType.repost, InteractionType.comment];
-        return this.interactionList(overrideActions ?? interactions, entity, EntityType.track);
+        return this.interactionList(overrideActions ?? interactions, entity, EntityType.track, showCount);
     }
 
-    private static albumInteractions(entity: Album) {
+    private static albumInteractions(entity: Album, showCount = true) {
         const interactions = [InteractionType.like];
-        return this.interactionList(interactions, entity, EntityType.album);
+        return this.interactionList(interactions, entity, EntityType.album, showCount);
     }
 
-    private static playlistInteractions(entity: Playlist) {
+    private static playlistInteractions(entity: Playlist, showCount = true) {
         const interactions = [InteractionType.like];
-        return this.interactionList(interactions, entity, EntityType.playlist);
+        return this.interactionList(interactions, entity, EntityType.playlist, showCount);
     }
 }
 

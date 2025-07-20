@@ -256,6 +256,11 @@ footer {
     padding: var(--base-padding);
 }
 
+footer:empty {
+    padding: 0;
+    border: none;
+}
+
 .icon {
     width: 20px;
     height: 20px;
@@ -879,14 +884,15 @@ td:last-child, th:last-child {
 .player-popout {
     position: absolute;
     bottom: calc(100%);
-    width: calc(100% - var(--base-padding) * 2);
+    width: 100%;
     max-width: var(--breakpoint-big);
-    height: calc(100dvh - 95px);
+    height: calc(100dvh - 70px);
     border: 1px solid var(--color-7);
     border-radius: var(--large-border-radius);
     transition: height 100ms ease-in-out;
     overflow: auto;
-    padding: var(--base-padding);
+    padding: calc(var(--base-padding) * 2);
+    box-sizing: border-box;
 }
 
 .queue-popout {
