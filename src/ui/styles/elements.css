@@ -210,11 +210,6 @@
     width: var(--cover-size);
 }
 
-.fullsize-cover {
-    --cover-size: 100dvh;
-    height: auto;
-}
-
 .popularity-container {
     max-width: 150px;
     border-radius: 10px;
@@ -562,8 +557,8 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .cover-container.fullsize-cover {
-    --cover-size: 100%;
-    height: auto;
+    --cover-size: min(40dvh, calc(100dvw - var(--base-padding) * 6));
+    width: auto;
 }
 
 .cover-container.queue-cover {

@@ -539,7 +539,7 @@ export class PlayerTemplates {
         ];
 
         return create("div")
-            .classes("player-popout", vClass, "flex-v")
+            .classes("player-popout", vClass, "flex-v", "noflexwrap")
             .children(
                 horizontal(
                     GenericTemplates.combinedSelector(tabs, i => {
@@ -573,7 +573,7 @@ export class PlayerTemplates {
                     }),
                 ).classes("align-center"),
                 horizontal(await PlayerTemplates.trackInfo(track, trackUser)),
-            ).classes("centered"),
+            ),
             vertical(
                 await PlayerTemplates.mobileAudioPlayer(track),
                 create("div")
