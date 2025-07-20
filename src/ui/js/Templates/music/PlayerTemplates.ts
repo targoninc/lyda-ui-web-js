@@ -224,6 +224,9 @@ export class PlayerTemplates {
                     await PlayManager.scrubFromElement(e, track.id);
                 }
             })
+            .on("pointerdown", async e => {
+                await PlayManager.scrubFromElement(e, track.id);
+            })
             .children(
                 create("div")
                     .id(track.id)
