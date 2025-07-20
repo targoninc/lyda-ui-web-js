@@ -225,10 +225,7 @@ export class PlayerTemplates {
                 }
             })
             .on("pointerdown", async e => {
-                await PlayManager.scrubFromElement(e, track.id);
-            })
-            .on("pointermove", async e => {
-                await PlayManager.scrubFromElement(e, track.id);
+                await PlayManager.scrubFromElement(e as PointerEvent, track.id);
             })
             .children(
                 create("div")

@@ -4,7 +4,7 @@ import {StreamingUpdater} from "./StreamingUpdater.ts";
 import {QueueManager} from "./QueueManager.ts";
 import {TrackActions} from "../Actions/TrackActions.ts";
 import {StreamClient} from "./StreamClient.ts";
-import { userHasSettingValue, Util} from "../Classes/Util.ts";
+import { target, userHasSettingValue, Util } from "../Classes/Util.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {
     trackInfo,
@@ -294,8 +294,8 @@ export class PlayManager {
         await StreamingUpdater.updatePlayState();
     }
 
-    static async scrubFromElement(e: any, id: number) {
-        const value = e.offsetX / e.target.offsetWidth;
+    static async scrubFromElement(e: MouseEvent, id: number) {
+        const value = e.offsetX / target(e).clientWidth;
         if (id !== currentTrackId.value) {
             await PlayManager.startAsync(id);
         }
