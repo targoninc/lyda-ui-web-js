@@ -657,7 +657,7 @@ export class GenericTemplates {
                 ).build();
     }
 
-    static combinedSelector(tabs: any[], callback: Function, selectedIndex = 0) {
+    static combinedSelector(tabs: any[], callback: (newIndex: number) => void, selectedIndex = 0) {
         const selectedState = signal(selectedIndex);
         selectedState.subscribe((newSelected: number) => {
             callback(newSelected);

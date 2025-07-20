@@ -204,10 +204,15 @@
     align-self: center;
 }
 
-.inline-cover, .player-cover {
+.inline-cover, .player-cover, .fullsize-cover {
     --cover-size: 36px;
     height: var(--cover-size);
     width: var(--cover-size);
+}
+
+.fullsize-cover {
+    --cover-size: 100dvh;
+    height: auto;
 }
 
 .popularity-container {
@@ -554,6 +559,11 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .cover-container.card-cover {
     --cover-size: 120px;
+}
+
+.cover-container.fullsize-cover {
+    --cover-size: 100%;
+    height: auto;
 }
 
 .cover-container.queue-cover {

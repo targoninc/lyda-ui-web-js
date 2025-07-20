@@ -131,3 +131,13 @@ history.subscribe((h, changed) => {
 });
 
 export const queueVisible = signal(false);
+
+export const playerExpanded = signal(false);
+playerExpanded.subscribe((expanded) => {
+    const footer = document.querySelector("footer");
+    if (expanded) {
+        footer?.classList.add("no-padding");
+    } else {
+        footer?.classList.remove("no-padding");
+    }
+});
