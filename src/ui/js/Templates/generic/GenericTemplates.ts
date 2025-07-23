@@ -746,31 +746,23 @@ export class GenericTemplates {
     }
 
     static addUserLinkSearchResult(entry: SearchResult, selectedState: Signal<number>) {
-        const selectedClassState = signal(selectedState.value === entry.id ? "active" : "_");
-        selectedState.subscribe((newSelected: number) => {
-            selectedClassState.value = newSelected === entry.id ? "active" : "_";
-        });
-
+        const selectedClassState = compute((s): string => s === entry.id ? "active" : "_", selectedState);
         const avatar = signal(Images.DEFAULT_AVATAR);
         if (entry.hasImage) {
             avatar.value = Util.getUserAvatar(entry.id);
         }
 
-        return create("div")
-            .classes("flex", "clickable", "align-children", "fakeButton", "padded", "rounded", selectedClassState)
-            .onclick(() => {
-                selectedState.value = entry.id;
-            })
-            .children(
-                create("img")
-                    .classes("user-icon", "nopointer")
-                    .attributes("src", avatar)
-                    .build(),
-                create("span")
-                    .classes("nopointer")
-                    .text(entry.display)
-                    .build()
-            ).build();
+        return button({
+            onclick: () => selectedState.value = entry.id,
+            icon: {
+                isUrl: true,
+                icon: avatar,
+                adaptive: true,
+                classes: ["user-icon", "nopointer"]
+            },
+            classes: [selectedClassState],
+            text: `${entry.display} ${entry.subtitle}`
+        });
     }
 
     static breadcrumbs(pageMap: any, history: Signal<any>, stepState: Signal<any>) {

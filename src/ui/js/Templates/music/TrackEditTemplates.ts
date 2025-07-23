@@ -572,25 +572,21 @@ export class TrackEditTemplates {
                 create("label")
                     .text("Linked Users")
                     .build(),
-                create("div")
-                    .classes("flex")
-                    .children(
-                        signalMap(linkedUserState, horizontal(), collaborator => {
-                            const user = collaborator.user;
-                            if (!user) {
-                                return nullElement();
-                            }
-                            const avatarState = signal(Images.DEFAULT_AVATAR);
-                            if (user.has_avatar) {
-                                avatarState.value = Util.getUserAvatar(user.id);
-                            }
-                            return UserTemplates.linkedUser(user.id, user.username, user.displayname, avatarState, collaborator.collab_type!.name, TrackEditTemplates.removeLinkedUser(user.id, linkedUserState), [], ["no-redirect"]);
-                        }),
-                        vertical(
-                            TrackEditTemplates.addLinkedUserButton(editorVisible, ["align-center"]),
-                            when(editorVisible, TrackEditTemplates.linkedUsersEditor(linkedUserState, id))
-                        )
-                    ).build(),
+                vertical(
+                    signalMap(linkedUserState, horizontal(), collaborator => {
+                        const user = collaborator.user;
+                        if (!user) {
+                            return nullElement();
+                        }
+                        const avatarState = signal(Images.DEFAULT_AVATAR);
+                        if (user.has_avatar) {
+                            avatarState.value = Util.getUserAvatar(user.id);
+                        }
+                        return UserTemplates.linkedUser(user.id, user.username, user.displayname, avatarState, collaborator.collab_type!.name, TrackEditTemplates.removeLinkedUser(user.id, linkedUserState), [], ["no-redirect"]);
+                    }),
+                    TrackEditTemplates.addLinkedUserButton(editorVisible, ["align-center"]),
+                    when(editorVisible, TrackEditTemplates.linkedUsersEditor(linkedUserState, id))
+                ),
             ).build();
     }
 
@@ -617,7 +613,7 @@ export class TrackEditTemplates {
         return TrackEditTemplates.linkedUsersAdder(collabTypes, async (username: string, collabTypeId: number) => {
             const newUser = await Util.getUserByNameAsync(username);
             const collabType = collabTypes.value.find(x => x.id === collabTypeId);
-            
+
             if (collabType && !linkedUserState.value.some(tc => tc.user_id === newUser.id)) {
                 linkedUserState.value = [
                     ...linkedUserState.value,
@@ -646,6 +642,7 @@ export class TrackEditTemplates {
             });
         }, collabTypes);
         const users = signal<SearchResult[]>([]);
+        let lastSearch = "";
 
         return create("div")
             .classes("flex-v", "card", "secondary")
@@ -658,8 +655,9 @@ export class TrackEditTemplates {
                     value: "",
                     debounce: 200,
                     onchange: async search => {
-                        if (search.trim().length > 0) {
-                            users.value = (await Api.searchUsers(search)) ?? [];
+                        if (search.trim().length > 0 && search.trim() !== lastSearch) {
+                            lastSearch = search.trim();
+                            users.value = (await Api.searchUsers(search.trim())) ?? [];
                         }
                     },
                 }),
@@ -682,7 +680,7 @@ export class TrackEditTemplates {
                                 if (!user) {
                                     return;
                                 }
-                                addUser(user.display, collabType.value);
+                                addUser(user.subtitle?.substring(1) ?? "", collabType.value);
                             },
                             icon: {
                                 icon: "person_add",
