@@ -25,20 +25,15 @@ import {Images} from "../../Enums/Images.ts";
 import {
     button,
     input,
-    searchableSelect,
     icon,
     textarea,
-    IconConfig,
-    SearchableSelectConfig,
-    SelectOption
+    IconConfig
 } from "@targoninc/jess-components";
 import {NotificationType} from "../../Enums/NotificationType.ts";
 import {SearchResult} from "@targoninc/lyda-shared/src/Models/SearchResult";
-import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
 import {Filter} from "@targoninc/lyda-shared/src/Models/Filter";
 import {ProgressState} from "@targoninc/lyda-shared/src/Enums/ProgressState";
 import {ProgressPart} from "../../Models/ProgressPart.ts";
-import {Api} from "../../Api/Api.ts";
 
 export class GenericTemplates {
     static icon(icon$: StringOrSignal, adaptive = false, classes: StringOrSignal[] = [], title = "", onclick: Function | undefined = undefined) {
@@ -776,85 +771,6 @@ export class GenericTemplates {
                     .text(entry.display)
                     .build()
             ).build();
-    }
-
-    static addLinkedUserModal(title: HtmlPropertyValue, text: HtmlPropertyValue, currentValue: string,
-                              icon: StringOrSignal, confirmText: StringOrSignal, cancelText: StringOrSignal,
-                              confirmCallback: Function, cancelCallback: Function) {
-        const selectedState = signal(0);
-        const collabTypeOptions = signal(create("span").text("Loading collab types...").build());
-        const collabType = signal("1");
-        let collabTypes: CollaboratorType[] = [];
-        Api.getCollabTypes().then((types) => {
-            collabTypes = types ?? [];
-            collabTypeOptions.value = searchableSelect(<SearchableSelectConfig>{
-                options: signal(types as SelectOption[]),
-                value: collabType,
-                onchange: (v) => {
-                    collabType.value = v;
-                }
-            });
-        });
-        const users = signal<SearchResult[]>([]);
-
-        return create("div")
-                .classes("flex-v")
-                .children(
-                    create("div")
-                        .classes("flex")
-                        .children(
-                            create("h2")
-                                .classes("flex")
-                                .children(
-                                    GenericTemplates.icon(icon, true),
-                                    create("span")
-                                        .text(title)
-                                        .build(),
-                                ).build()
-                        ).build(),
-                    create("p")
-                        .text(text)
-                        .build(),
-                    input({
-                        id: "addUserSearch",
-                        name: "addUserSearch",
-                        type: InputType.text,
-                        value: currentValue ?? "",
-                        onkeydown: async (e) => {
-                            const target = e.target as HTMLInputElement;
-                            const search = target.value;
-                            users.value = (await Api.searchUsers(search)) ?? [];
-                        },
-                    }),
-                    create("div")
-                        .classes("flex-v")
-                        .styles("max-height", "200px", "overflow", "auto", "flex-wrap", "nowrap")
-                        .children(
-                            signalMap(users, create("div").classes("flex-v"),
-                                user => GenericTemplates.addUserLinkSearchResult(user, selectedState))
-                        ).build(),
-                    collabTypeOptions,
-                    create("div")
-                        .classes("flex")
-                        .children(
-                            button({
-                                text: confirmText ?? "Confirm",
-                                onclick: async () => {
-                                    confirmCallback(selectedState.value, parseInt(collabType.value), collabTypes);
-                                },
-                                icon: {
-                                    icon: "person_add"
-                                },
-                                classes: ["positive"],
-                            }),
-                            button({
-                                text: cancelText ?? "Cancel",
-                                onclick: cancelCallback,
-                                classes: ["negative"],
-                                icon: {icon: "close"}
-                            }),
-                        ).build()
-                ).build();
     }
 
     static breadcrumbs(pageMap: any, history: Signal<any>, stepState: Signal<any>) {

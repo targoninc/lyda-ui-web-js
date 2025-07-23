@@ -14,26 +14,36 @@ import {
     create,
     DomNode,
     HtmlPropertyValue,
-    InputType,
+    InputType, nullElement,
     Signal,
     signal,
     signalMap,
     StringOrSignal,
     TypeOrSignal,
-    when
+    when,
 } from "@targoninc/jess";
 import {AlbumActions} from "../../Actions/AlbumActions.ts";
 import {reload} from "../../Routing/Router.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
-import {button, checkbox, errorList, input, SelectOption, textarea, toggle} from "@targoninc/jess-components";
+import {
+    button,
+    checkbox,
+    errorList,
+    input,
+    SelectOption,
+    textarea,
+    toggle,
+} from "@targoninc/jess-components";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import {UploadInfo} from "../../Models/UploadInfo.ts";
 import {UploadableTrack} from "../../Models/UploadableTrack.ts";
 import {TrackCollaborator} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
-import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {Genre} from "@targoninc/lyda-shared/src/Enums/Genre";
 import {TrackValidators} from "../../Classes/Validators/TrackValidators.ts";
 import {ProgressPart} from "../../Models/ProgressPart.ts";
+import { CollaboratorType } from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
+import { Api } from "../../Api/Api.ts";
+import { SearchResult } from "@targoninc/lyda-shared/src/Models/SearchResult";
 
 export class TrackEditTemplates {
     static uploadPage() {
@@ -533,45 +543,28 @@ export class TrackEditTemplates {
         });
     }
 
-    static addLinkedUserButton(callback: Function, classes: string[] = []) {
+    static addLinkedUserButton(editorVisible: Signal<boolean>, classes: string[] = []) {
         return button({
             text: "Add collaborator",
             id: "add_linked_user",
             icon: {icon: "person_add"},
             classes,
-            onclick: async () => {
-                await Ui.getAddLinkedUserModal("Link a user", "Enter the username of the user you want to link", "", "Link", "Cancel", callback, () => {
-                }, "person_add");
-            },
+            onclick: async () => editorVisible.value = !editorVisible.value,
         });
     }
 
     static linkedUsers(linkedUsers: Partial<TrackCollaborator>[] = [], parentState: Signal<UploadableTrack> | null = null) {
         const linkedUserState = signal(linkedUsers);
-        const sendJson = signal(JSON.stringify(linkedUsers));
-        const userMap = new Map();
-        const container = create("div")
-            .classes("flex")
-            .build();
         linkedUserState.subscribe((newValue: any[]) => {
-            container.innerHTML = "";
-            for (const id of newValue) {
-                const user = userMap.get(id);
-                const avatarState = signal(Images.DEFAULT_AVATAR);
-                if (user.has_avatar) {
-                    avatarState.value = Util.getUserAvatar(user.id);
-                }
-                container.appendChild(UserTemplates.linkedUser(user.id, user.username, user.displayname, avatarState, user.collab_type.name, TrackEditTemplates.removeLinkedUser(user.id, linkedUserState), [], ["no-redirect"]));
-            }
-            const sendValue = newValue.map((id: number) => userMap.get(id));
-            sendJson.value = JSON.stringify(sendValue);
-            if (parentState && parentState.value.collaborators !== sendValue) {
+            if (parentState && parentState.value.collaborators !== newValue) {
                 parentState.value = {
                     ...parentState.value,
-                    collaborators: sendValue
+                    collaborators: newValue
                 };
             }
         });
+        const editorVisible = signal(false);
+        const id = compute(s => s.id, parentState ?? signal(<UploadableTrack>{}));
 
         return create("div")
             .classes("flex-v", "small-gap")
@@ -582,27 +575,21 @@ export class TrackEditTemplates {
                 create("div")
                     .classes("flex")
                     .children(
-                        create("div")
-                            .classes("flex")
-                            .id("linked_users_container")
-                            .build(),
-                        create("input")
-                            .classes("hidden")
-                            .value(sendJson)
-                            .name("linked_users")
-                            .build(),
-                        TrackEditTemplates.addLinkedUserButton((newUsername: string, newUser: User) => {
-                            userMap.set(newUser.id, newUser);
-                            if (!linkedUserState.value.some(tc => tc.user_id === newUser.id)) {
-                                linkedUserState.value = [...linkedUserState.value, <Partial<TrackCollaborator>>{
-                                    user_id: newUser.id,
-                                    type: -1, // TODO: Use actual type?
-                                    track_id: parentState ? parentState.value.id : null,
-                                    approved: false,
-                                    denied: false,
-                                }];
+                        signalMap(linkedUserState, horizontal(), collaborator => {
+                            const user = collaborator.user;
+                            if (!user) {
+                                return nullElement();
                             }
-                        }, ["align-center"])
+                            const avatarState = signal(Images.DEFAULT_AVATAR);
+                            if (user.has_avatar) {
+                                avatarState.value = Util.getUserAvatar(user.id);
+                            }
+                            return UserTemplates.linkedUser(user.id, user.username, user.displayname, avatarState, collaborator.collab_type!.name, TrackEditTemplates.removeLinkedUser(user.id, linkedUserState), [], ["no-redirect"]);
+                        }),
+                        vertical(
+                            TrackEditTemplates.addLinkedUserButton(editorVisible, ["align-center"]),
+                            when(editorVisible, TrackEditTemplates.linkedUsersEditor(linkedUserState, id))
+                        )
                     ).build(),
             ).build();
     }
@@ -612,7 +599,7 @@ export class TrackEditTemplates {
 
         return button({
             text: "Replace Audio",
-            icon: {icon: "upload"},
+            icon: { icon: "upload" },
             disabled: loading,
             onclick: async () => {
                 await TrackActions.replaceAudio(track.id, true, loading, () => {
@@ -621,5 +608,88 @@ export class TrackEditTemplates {
                 });
             },
         });
+    }
+
+    private static linkedUsersEditor(linkedUserState: Signal<Partial<TrackCollaborator>[]>, referenceId: Signal<number|undefined>) {
+        const collabTypes = signal<CollaboratorType[]>([]);
+        Api.getCollabTypes().then((types) => collabTypes.value = types ?? []);
+
+        return TrackEditTemplates.linkedUsersAdder(collabTypes, async (username: string, collabTypeId: number) => {
+            const newUser = await Util.getUserByNameAsync(username);
+            const collabType = collabTypes.value.find(x => x.id === collabTypeId);
+            
+            if (collabType && !linkedUserState.value.some(tc => tc.user_id === newUser.id)) {
+                linkedUserState.value = [
+                    ...linkedUserState.value,
+                    <TrackCollaborator>{
+                        user_id: newUser.id,
+                        user: newUser,
+                        type: collabType.id,
+                        collab_type: collabType,
+                        track_id: referenceId.value,
+                        created_at: new Date(),
+                        updated_at: new Date(),
+                        approved: false,
+                        denied: false,
+                    },
+                ];
+            }
+        });
+    }
+
+    static linkedUsersAdder(collabTypes: Signal<CollaboratorType[]>, addUser: (username: string, collaboratorTypeId: number) => void) {
+        const selectedState = signal(0);
+        const collabType = signal(1);
+        const collabTypeOptions = compute(types => {
+            return GenericTemplates.combinedSelector(types.map(t => t.name), i => {
+                collabType.value = types[i]?.id;
+            });
+        }, collabTypes);
+        const users = signal<SearchResult[]>([]);
+
+        return create("div")
+            .classes("flex-v", "card", "secondary")
+            .children(
+                create("p").text("Linking a user will send a request to them for approval first").build(),
+                input({
+                    id: "addUserSearch",
+                    name: "addUserSearch",
+                    type: InputType.text,
+                    value: "",
+                    debounce: 200,
+                    onchange: async search => {
+                        if (search.trim().length > 0) {
+                            users.value = (await Api.searchUsers(search)) ?? [];
+                        }
+                    },
+                }),
+                create("div")
+                    .classes("flex-v")
+                    .styles("max-height", "200px", "overflow", "auto", "flex-wrap", "nowrap")
+                    .children(
+                        signalMap(users, create("div").classes("flex-v"), user =>
+                            GenericTemplates.addUserLinkSearchResult(user, selectedState)
+                        )
+                    ).build(),
+                collabTypeOptions,
+                create("div")
+                    .classes("flex")
+                    .children(
+                        button({
+                            text: "Add",
+                            onclick: async () => {
+                                const user = users.value.find(u => u.id === selectedState.value);
+                                if (!user) {
+                                    return;
+                                }
+                                addUser(user.display, collabType.value);
+                            },
+                            icon: {
+                                icon: "person_add",
+                            },
+                            classes: ["positive"],
+                        })
+                    ).build()
+            ).build();
     }
 }
