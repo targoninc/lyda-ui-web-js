@@ -9,7 +9,6 @@ import {navigate} from "../Routing/Router.ts";
 import {currentUser, navInitialized, openMenus} from "../state.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {Theme} from "@targoninc/lyda-shared/src/Enums/Theme";
-import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
 
 export class Ui {
     static async initializeNavBar() {
@@ -151,24 +150,6 @@ export class Ui {
         };
         const modal = GenericTemplates.textAreaInputModal(title, text, currentValue, value, icon, confirmText, cancelText, confirmCallback2, cancelCallback2);
         createModal([modal], "text-area-input");
-    }
-
-    static async getAddLinkedUserModal(title: StringOrSignal, text: StringOrSignal, currentValue: string,
-                                       confirmText: StringOrSignal, cancelText: StringOrSignal,
-                                       confirmCallback: Function = () => {}, cancelCallback: Function = () => {},
-                                       icon = "") {
-        const confirmCallback2 = async (username: string, collabType: number, collabTypes: CollaboratorType[]) => {
-            Util.removeModal();
-            const user = await Util.getUserByNameAsync(username);
-            user.collab_type = collabTypes.find(x => x.id === collabType);
-            confirmCallback(username, user);
-        };
-        const cancelCallback2 = () => {
-            cancelCallback();
-            Util.removeModal();
-        };
-        const modal = GenericTemplates.addLinkedUserModal(title, text, currentValue, icon, confirmText, cancelText, confirmCallback2, cancelCallback2);
-        createModal([modal], "add-linked-user");
     }
 }
 
