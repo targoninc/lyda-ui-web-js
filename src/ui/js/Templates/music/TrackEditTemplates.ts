@@ -631,24 +631,6 @@ export class TrackEditTemplates {
             .build();
     }
 
-    static removeLinkedUser(
-        removeUserId: number,
-        linkedUserState: Signal<Partial<TrackCollaborator>[]>
-    ) {
-        return GenericTemplates.inlineAction(
-            "Remove",
-            "remove",
-            "remove_linked_user_" + removeUserId,
-            () => {
-                linkedUserState.value = linkedUserState.value.filter(
-                    tc => tc.user_id !== removeUserId
-                );
-            },
-            [],
-            ["negative"]
-        );
-    }
-
     static deleteTrackButton(trackId: number) {
         return button({
             text: "Delete",

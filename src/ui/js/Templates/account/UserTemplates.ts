@@ -225,11 +225,11 @@ export class UserTemplates {
             .attributes("user_id", user_id, "username", username)
             .children(
                 create("div")
-                    .classes("flex")
+                    .classes("flex", "align-children")
                     .children(
                         UserTemplates.userIcon(user_id, avatar),
                         create("span")
-                            .classes("text", "align-center", "nopointer", "user-displayname")
+                            .classes("text", "nopointer", "user-displayname")
                             .text(displayname)
                             .attributes("data-user-id", user_id)
                             .build(),
@@ -246,7 +246,11 @@ export class UserTemplates {
                             .attributes("data-user-id", user_id)
                             .build(),
                         TrackEditTemplates.collaboratorTypeSelect(collab_type, collabTypes),
-                        TrackEditTemplates.removeLinkedUser(user_id, linkedUsersState)
+                        GenericTemplates.deleteIconButton(`remove_linked_user_${user_id}`, () => {
+                            linkedUsersState.value = linkedUsersState.value.filter(
+                                tc => tc.user_id !== user_id
+                            );
+                        })
                     )
                     .build()
             )
