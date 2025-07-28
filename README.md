@@ -20,7 +20,7 @@ Use the [Dockerfile](Dockerfile) to build a docker image that can be deployed to
 
 # Code Quality Tools
 
-This project uses ESLint and Prettier to maintain code quality and consistency.
+This project uses ESLint to maintain code quality and consistency.
 
 ## Automatic Formatting and Linting
 
@@ -44,5 +44,4 @@ You can also run these tools manually:
 ## Configuration Files
 
 - `.eslintrc.json` - ESLint configuration
-- `.prettierrc.json` - Prettier configuration
 - `.lintstagedrc.json` - lint-staged configuration

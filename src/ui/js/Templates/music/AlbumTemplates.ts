@@ -1,13 +1,13 @@
-import {Icons} from "../../Enums/Icons.ts";
-import {AlbumActions} from "../../Actions/AlbumActions.ts";
-import {Time} from "../../Classes/Helpers/Time.ts";
-import {GenericTemplates} from "../generic/GenericTemplates.ts";
-import {UserTemplates} from "../account/UserTemplates.ts";
-import {TrackTemplates} from "./TrackTemplates.ts";
-import {PlaylistActions} from "../../Actions/PlaylistActions.ts";
-import {Images} from "../../Enums/Images.ts";
-import { Util} from "../../Classes/Util.ts";
-import {createModal, Ui} from "../../Classes/Ui.ts";
+import { Icons } from "../../Enums/Icons.ts";
+import { AlbumActions } from "../../Actions/AlbumActions.ts";
+import { Time } from "../../Classes/Helpers/Time.ts";
+import { GenericTemplates } from "../generic/GenericTemplates.ts";
+import { UserTemplates } from "../account/UserTemplates.ts";
+import { TrackTemplates } from "./TrackTemplates.ts";
+import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
+import { Images } from "../../Enums/Images.ts";
+import { Util } from "../../Classes/Util.ts";
+import { createModal, Ui } from "../../Classes/Ui.ts";
 import {
     AnyNode,
     compute,
@@ -17,21 +17,21 @@ import {
     nullElement,
     signal,
     Signal,
-    when
+    when,
 } from "@targoninc/jess";
-import {navigate, Route} from "../../Routing/Router.ts";
-import {currentTrackId, currentUser, playingFrom, playingHere} from "../../state.ts";
-import {PageTemplates} from "../PageTemplates.ts";
-import {RoutePath} from "../../Routing/routes.ts";
-import {button, input, textarea, toggle} from "@targoninc/jess-components";
-import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
-import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
-import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
-import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
-import {InteractionTemplates} from "../InteractionTemplates.ts";
-import {MusicTemplates} from "./MusicTemplates.ts";
-import {Api} from "../../Api/Api.ts";
+import { navigate, Route } from "../../Routing/Router.ts";
+import { currentTrackId, currentUser, playingFrom, playingHere } from "../../state.ts";
+import { PageTemplates } from "../PageTemplates.ts";
+import { RoutePath } from "../../Routing/routes.ts";
+import { button, input, textarea, toggle } from "@targoninc/jess-components";
+import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
+import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType";
+import { ListTrack } from "@targoninc/lyda-shared/src/Models/ListTrack";
+import { InteractionTemplates } from "../InteractionTemplates.ts";
+import { MusicTemplates } from "./MusicTemplates.ts";
+import { Api } from "../../Api/Api.ts";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
@@ -71,7 +71,7 @@ export class AlbumTemplates {
                             .build(),
                         create("h5")
                             .text(`Add ${track.title} to album`)
-                            .build()
+                            .build(),
                     )
                     .build(),
                 create("div")
@@ -85,19 +85,19 @@ export class AlbumTemplates {
                         button({
                             text: buttonText,
                             classes: ["positive"],
-                            icon: {icon: "forms_add_on"},
+                            icon: { icon: "forms_add_on" },
                             disabled: compute((ch: number[]) => ch.length === 0, checkedAlbums),
                             onclick: async () => {
                                 await AlbumActions.addTrackToAlbums(track.id, checkedAlbums.value);
-                            }
+                            },
                         }),
                         button({
                             text: "Cancel",
                             classes: ["negative"],
-                            icon: {icon: "close"},
-                            onclick: Util.removeModal
+                            icon: { icon: "close" },
+                            onclick: Util.removeModal,
                         }),
-                    ).build()
+                    ).build(),
             ).build();
     }
 
@@ -147,7 +147,7 @@ export class AlbumTemplates {
                             .build(),
                         create("h2")
                             .text("New album")
-                            .build()
+                            .build(),
                     )
                     .build(),
                 AlbumTemplates.albumInputs(album),
@@ -161,11 +161,11 @@ export class AlbumTemplates {
                                 await Api.createNewAlbum(album.value);
                                 Util.removeModal();
                             },
-                            icon: {icon: "playlist_add"},
+                            icon: { icon: "playlist_add" },
                             classes: ["positive"],
                         }),
-                        GenericTemplates.modalCancelButton()
-                    ).build()
+                        GenericTemplates.modalCancelButton(),
+                    ).build(),
             ).build();
     }
 
@@ -186,7 +186,7 @@ export class AlbumTemplates {
                             .build(),
                         create("h2")
                             .text("Edit album")
-                            .build()
+                            .build(),
                     ).build(),
                 AlbumTemplates.albumInputs(state),
                 create("div")
@@ -196,16 +196,16 @@ export class AlbumTemplates {
                             text: "Update",
                             disabled: loading,
                             classes: ["positive"],
-                            icon: {icon: "save"},
+                            icon: { icon: "save" },
                             onclick: async () => {
                                 loading.value = true;
                                 Api.updateAlbum(state.value)
-                                    .then(() => Util.removeModal())
-                                    .finally(() => loading.value = false);
+                                   .then(() => Util.removeModal())
+                                   .finally(() => loading.value = false);
                             },
                         }),
-                        GenericTemplates.modalCancelButton()
-                    ).build()
+                        GenericTemplates.modalCancelButton(),
+                    ).build(),
             ).build();
     }
 
@@ -227,8 +227,8 @@ export class AlbumTemplates {
                     placeholder: "Album name",
                     value: name,
                     onchange: (v) => {
-                        album.value = {...album.value, title: v};
-                    }
+                        album.value = { ...album.value, title: v };
+                    },
                 }),
                 input<string>({
                     type: InputType.text,
@@ -237,8 +237,8 @@ export class AlbumTemplates {
                     placeholder: "12-digit number",
                     value: upc,
                     onchange: (v) => {
-                        album.value = {...album.value, upc: v};
-                    }
+                        album.value = { ...album.value, upc: v };
+                    },
                 }),
                 textarea({
                     name: "description",
@@ -246,8 +246,8 @@ export class AlbumTemplates {
                     placeholder: "My cool album",
                     value: description,
                     onchange: (v) => {
-                        album.value = {...album.value, description: v};
-                    }
+                        album.value = { ...album.value, description: v };
+                    },
                 }),
                 GenericTemplates.releaseDateInput(album),
                 toggle({
@@ -256,8 +256,8 @@ export class AlbumTemplates {
                     text: "Private",
                     checked: visibility,
                     onchange: (v) => {
-                        album.value = {...album.value, visibility: v ? "private" : "public"};
-                    }
+                        album.value = { ...album.value, visibility: v ? "private" : "public" };
+                    },
                 }),
             ).build();
     }
@@ -269,20 +269,19 @@ export class AlbumTemplates {
                 create("p")
                     .text("Share an album you made:")
                     .build(),
-                GenericTemplates.newAlbumButton(["secondary"])
+                GenericTemplates.newAlbumButton(["secondary"]),
             ];
         } else {
             children = [
                 create("p")
                     .text("No albums on this profile.")
-                    .build()
+                    .build(),
             ];
         }
 
         return create("div")
             .classes("card", "flex-v")
-            .children(...children)
-            .build();
+            .children(...children).build();
     }
 
     static albumCard(album: Album, isSecondary = false) {
@@ -340,15 +339,13 @@ export class AlbumTemplates {
             .classes("cover", "rounded", "nopointer", "blurOnParentHover")
             .styles("height", "var(--font-size-large)")
             .src(coverState)
-            .alt(album.title)
-            .build();
+            .alt(album.title).build();
     }
 
     static albumCardsContainer(children: AnyNode[]) {
         return create("div")
             .classes("profileContent", "albums", "flex")
-            .children(...children)
-            .build();
+            .children(...children).build();
     }
 
     private static albumPageDisplay(album: Album, canEdit: boolean) {
@@ -375,7 +372,7 @@ export class AlbumTemplates {
                             .classes("title", "wordwrap")
                             .text(album.title)
                             .build(),
-                        UserTemplates.userWidget(albumUser, [], [], UserWidgetContext.singlePage)
+                        UserTemplates.userWidget(albumUser, [], [], UserWidgetContext.singlePage),
                     ).build(),
                 create("div")
                     .classes("album-info-container", "flex")
@@ -392,7 +389,7 @@ export class AlbumTemplates {
                                     .classes("cover", "blurOnParentHover", "nopointer")
                                     .src(coverState)
                                     .alt(album.title)
-                                    .build()
+                                    .build(),
                             ).build(),
                         create("div")
                             .classes("flex-v")
@@ -404,12 +401,12 @@ export class AlbumTemplates {
                                         create("span")
                                             .classes("date", "text-small")
                                             .text("Released " + Util.formatDate(album.release_date))
-                                            .build()
+                                            .build(),
                                     ).build(),
                                 InteractionTemplates.interactions(EntityType.album, album),
-                            ).build()
+                            ).build(),
                     ).build(),
-                TrackTemplates.tracksInList(noTracks, tracks, canEdit, album, "album", startCallback)
+                TrackTemplates.tracksInList(noTracks, tracks, canEdit, album, "album", startCallback),
             ).build();
     }
 
@@ -419,9 +416,9 @@ export class AlbumTemplates {
             return nullElement();
         }
 
-        const data = signal<{ album: Album|null, canEdit: boolean }>({
+        const data = signal<{ album: Album | null, canEdit: boolean }>({
             album: null,
-            canEdit: false
+            canEdit: false,
         });
         const loading = signal(true);
         Api.getAlbumById(parseInt(params.id)).then(async res => {
@@ -431,7 +428,7 @@ export class AlbumTemplates {
             }
             data.value = {
                 album: null,
-                canEdit: false
+                canEdit: false,
             };
         }).finally(() => loading.value = false);
 
@@ -449,7 +446,7 @@ export class AlbumTemplates {
 
         return create("div")
             .children(
-                template
+                template,
             ).build();
     }
 
@@ -472,7 +469,7 @@ export class AlbumTemplates {
                                 icon: playIcon,
                                 classes: ["inline-icon", "svg", "nopointer"],
                                 adaptive: true,
-                                isUrl: true
+                                isUrl: true,
                             },
                             classes: ["secondary"],
                             attributes: ["duration", duration.toString()],
@@ -496,7 +493,7 @@ export class AlbumTemplates {
                                 icon: Icons.PLAYLIST_ADD,
                                 classes: ["inline-icon", "svg", "nopointer"],
                                 adaptive: true,
-                                isUrl: true
+                                isUrl: true,
                             },
                             classes: ["secondary"],
                             onclick: async () => {
@@ -506,21 +503,21 @@ export class AlbumTemplates {
                     ).build()),
                 when(canEdit, button({
                     text: "Edit",
-                    icon: {icon: "edit"},
+                    icon: { icon: "edit" },
                     classes: ["positive"],
                     onclick: async () => {
                         createModal([AlbumTemplates.editAlbumModal(album)], "edit-album");
-                    }
+                    },
                 })),
                 when(canEdit, button({
                     text: "Delete",
-                    icon: {icon: "delete"},
+                    icon: { icon: "delete" },
                     classes: ["negative"],
                     onclick: async () => {
                         await Ui.getConfirmationModal("Delete album", "Are you sure you want to delete this album?", "Yes", "No", () => AlbumActions.deleteAlbum(album.id), () => {
                         }, Icons.WARNING);
-                    }
-                }))
+                    },
+                })),
             ).build();
     }
 }

@@ -1,4 +1,4 @@
-import { compute, Signal, signal, AnyElement, create, when } from "@targoninc/jess";
+import { AnyElement, compute, create, Signal, signal, when } from "@targoninc/jess";
 import { navigate } from "../Routing/Router.ts";
 import { ApiRoutes } from "../Api/ApiRoutes.ts";
 import { GenericTemplates } from "./generic/GenericTemplates.ts";
@@ -47,8 +47,7 @@ export class SearchTemplates {
                     currentSearch,
                     context
                 )
-            )
-            .build();
+            ).build();
     }
 
     static searchInput(
@@ -167,8 +166,7 @@ export class SearchTemplates {
                         timeout = setTimeout(() => getResults(), debounce);
                     })
                     .build()
-            )
-            .build();
+            ).build();
     }
 
     private static selectNextResult(selectedResult: Signal<number | null>, list: SearchResult[]) {
@@ -288,8 +286,7 @@ export class SearchTemplates {
                         })
                     )
                     .build()
-            )
-            .build();
+            ).build();
     }
 
     static searchResultsCards(
@@ -352,8 +349,7 @@ export class SearchTemplates {
                         })
                     )
                     .build()
-            )
-            .build();
+            ).build();
     }
 
     static searchResult(
@@ -445,8 +441,7 @@ export class SearchTemplates {
                     )
                     .text(searchResult.type)
                     .build()
-            )
-            .build();
+            ).build();
         return elementReference;
     }
 

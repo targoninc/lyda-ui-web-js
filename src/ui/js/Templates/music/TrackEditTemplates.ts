@@ -26,16 +26,7 @@ import {
 import { AlbumActions } from "../../Actions/AlbumActions.ts";
 import { reload } from "../../Routing/Router.ts";
 import { PlayManager } from "../../Streaming/PlayManager.ts";
-import {
-    button,
-    checkbox,
-    errorList,
-    input,
-    select,
-    SelectOption,
-    textarea,
-    toggle,
-} from "@targoninc/jess-components";
+import { button, checkbox, errorList, input, select, SelectOption, textarea, toggle } from "@targoninc/jess-components";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { UploadInfo } from "../../Models/UploadInfo.ts";
 import { UploadableTrack } from "../../Models/UploadableTrack.ts";
@@ -68,27 +59,18 @@ export class TrackEditTemplates {
         const errorFields = signal<string[]>([]);
         const uploadInfo = signal<UploadInfo[]>([]);
 
-        return create("div")
-            .children(
-                create("progress")
-                    .classes("progress")
-                    .attributes("max", "100", "value", "0")
-                    .styles("display", "none")
-                    .build(),
-                create("div").classes("success").build(),
-                create("div").classes("error").build(),
-                create("div")
-                    .classes("flex-v")
-                    .children(
-                        create("h3").text("Upload").build(),
-                        TrackEditTemplates.upDownButtons(state, true),
-                        TrackEditTemplates.trackUpload(state, errorSections),
-                        TrackEditTemplates.uploadButton(state, errorSections, errorFields),
-                        TrackEditTemplates.uploadInfo(uploadInfo)
-                    )
-                    .build()
-            )
-            .build();
+        return create("div").children(
+            create("progress").classes("progress").attributes("max", "100", "value", "0").styles("display", "none").build(),
+            create("div").classes("success").build(),
+            create("div").classes("error").build(),
+            create("div").classes("flex-v").children(
+                create("h3").text("Upload").build(),
+                TrackEditTemplates.upDownButtons(state, true),
+                TrackEditTemplates.trackUpload(state, errorSections),
+                TrackEditTemplates.uploadButton(state, errorSections, errorFields),
+                TrackEditTemplates.uploadInfo(uploadInfo),
+            ).build(),
+        ).build();
     }
 
     static openEditPageButton(track: Track) {
@@ -117,44 +99,31 @@ export class TrackEditTemplates {
             release_date: new Date(track.release_date),
         });
 
-        return create("div")
-            .classes("flex-v")
-            .children(
-                create("div")
-                    .classes("flex")
-                    .children(
-                        create("img")
-                            .classes("icon", "svg")
-                            .styles("width", "30px", "height", "auto")
-                            .attributes("src", Icons.PEN)
-                            .build(),
-                        create("h2").text("Edit track").build()
-                    )
-                    .build(),
-                create("p").text("Edit the track details below").build(),
-                TrackEditTemplates.upDownButtons(state, true),
-                TrackEditTemplates.trackEdit(state, signal<string[]>([]), false),
-                create("div")
-                    .classes("flex")
-                    .children(
-                        button({
-                            text: "Save",
-                            icon: { icon: "check" },
-                            classes: ["positive"],
-                            onclick: () => {
-                                confirmCallback(state.value);
-                            },
-                        }),
-                        button({
-                            text: "Cancel",
-                            icon: { icon: "close" },
-                            classes: ["negative"],
-                            onclick: cancelCallback,
-                        })
-                    )
-                    .build()
-            )
-            .build();
+        return create("div").classes("flex-v").children(
+            create("div").classes("flex").children(
+                create("img").classes("icon", "svg").styles("width", "30px", "height", "auto").attributes("src", Icons.PEN).build(),
+                create("h2").text("Edit track").build(),
+            ).build(),
+            create("p").text("Edit the track details below").build(),
+            TrackEditTemplates.upDownButtons(state, true),
+            TrackEditTemplates.trackEdit(state, signal<string[]>([]), false),
+            create("div").classes("flex").children(
+                button({
+                    text: "Save",
+                    icon: { icon: "check" },
+                    classes: ["positive"],
+                    onclick: () => {
+                        confirmCallback(state.value);
+                    },
+                }),
+                button({
+                    text: "Cancel",
+                    icon: { icon: "close" },
+                    classes: ["negative"],
+                    onclick: cancelCallback,
+                }),
+            ).build(),
+        ).build();
     }
 
     static upDownButtons(state: Signal<any>, uploadEnabled = false) {
@@ -188,44 +157,31 @@ export class TrackEditTemplates {
                         };
                         fileInput.click();
                     },
-                })
+                }),
             );
         }
 
-        return create("div")
-            .classes("flex")
-            .children(...buttons)
-            .build();
+        return create("div").classes("flex").children(...buttons).build();
     }
 
     static uploadInfo(uploadInfo: Signal<UploadInfo[]>) {
-        return create("div")
-            .id("upload-info")
-            .children(
-                signalMap(uploadInfo, create("div").classes("flex-v"), (info: UploadInfo) =>
-                    TrackEditTemplates.uploadInfoItem(info)
-                )
-            )
-            .build();
+        return create("div").id("upload-info").children(
+            signalMap(uploadInfo, create("div").classes("flex-v"), (info: UploadInfo) =>
+                TrackEditTemplates.uploadInfoItem(info),
+            ),
+        ).build();
     }
 
     static uploadInfoItem(info: UploadInfo) {
-        return create("div")
-            .classes("flex-v")
-            .children(
-                create("span")
-                    .id("upload-info-" + info.type)
-                    .classes("upload-info-item", ...(info.classes ?? []))
-                    .text(info.value)
-                    .build()
-            )
-            .build();
+        return create("div").classes("flex-v").children(
+            create("span").id("upload-info-" + info.type).classes("upload-info-item", ...(info.classes ?? [])).text(info.value).build(),
+        ).build();
     }
 
     static uploadButton(
         state: Signal<UploadableTrack>,
         errorSections: Signal<string[]>,
-        errorFields: Signal<string[]>
+        errorFields: Signal<string[]>,
     ) {
         const errors = signal<string[]>([]);
         const disabled = compute((s: UploadableTrack) => {
@@ -263,97 +219,71 @@ export class TrackEditTemplates {
                     },
                     icon: { icon: "upload" },
                 }),
-                GenericTemplates.progressSectionPart(progressState)
+                GenericTemplates.progressSectionPart(progressState),
             ),
-            errorList(errors)
+            errorList(errors),
         );
     }
 
-    static filesSection(
-        isNewTrack = false,
-        state: Signal<UploadableTrack>,
-        errorSections: Signal<string[]>
-    ) {
-        return create("div")
-            .classes("flex-v")
-            .children(
-                TrackEditTemplates.sectionCard(
-                    "Audio",
-                    errorSections,
-                    "audio",
-                    [TrackEditTemplates.audioFile(isNewTrack, state)],
-                    "music_note",
-                    ["flex-grow"]
-                ),
-                TrackEditTemplates.sectionCard(
-                    "Artwork",
-                    errorSections,
-                    "artwork",
-                    [
-                        TrackEditTemplates.coverFile(state),
-                        TrackEditTemplates.imagePreview("cover-file"),
-                    ],
-                    "image",
-                    ["flex-grow"]
-                )
-            )
-            .build();
+    static filesSection(isNewTrack = false, state: Signal<UploadableTrack>, errorSections: Signal<string[]>) {
+        return create("div").classes("flex-v").children(
+            TrackEditTemplates.sectionCard(
+                "Audio",
+                errorSections,
+                "audio",
+                [TrackEditTemplates.audioFile(isNewTrack, state)],
+                "music_note",
+                ["flex-grow"],
+            ),
+            TrackEditTemplates.sectionCard(
+                "Artwork",
+                errorSections,
+                "artwork",
+                [TrackEditTemplates.coverFile(state), TrackEditTemplates.imagePreview("cover-file")],
+                "image",
+                ["flex-grow"],
+            ),
+        ).build();
     }
 
-    static trackEdit(
-        state: Signal<UploadableTrack>,
-        errorSections: Signal<string[]>,
-        enableLinkedUsers = true
-    ) {
+    static trackEdit(state: Signal<UploadableTrack>, errorSections: Signal<string[]>, enableLinkedUsers = true) {
         const isPrivate = compute(s => s.visibility === "private", state);
 
-        return create("div")
-            .classes("flex-v")
-            .children(
-                TrackEditTemplates.trackDetails(errorSections, isPrivate, state, enableLinkedUsers),
-                create("div")
-                    .classes("flex-v")
-                    .children(TrackEditTemplates.monetizationSection(errorSections, state))
-                    .build()
-            )
-            .build();
+        return create("div").classes("flex-v").children(
+            TrackEditTemplates.trackDetails(errorSections, isPrivate, state, enableLinkedUsers),
+            create("div").classes("flex-v").children(TrackEditTemplates.monetizationSection(errorSections, state)).build(),
+        ).build();
     }
 
     private static trackDetails(
         errorSections: Signal<string[]>,
         isPrivate: Signal<boolean>,
         state: Signal<UploadableTrack>,
-        enableLinkedUsers: boolean
+        enableLinkedUsers: boolean,
     ) {
         return TrackEditTemplates.sectionCard(
             "Track Details",
             errorSections,
             "info",
             [
-                create("div")
-                    .classes("flex")
-                    .children(
-                        toggle({
-                            name: "visibility",
-                            label: "Private",
-                            text: "Private",
-                            checked: isPrivate,
-                            onchange: v => {
-                                state.value = {
-                                    ...state.value,
-                                    visibility: v ? "private" : "public",
-                                };
-                            },
-                        })
-                    )
-                    .build(),
+                create("div").classes("flex").children(
+                    toggle({
+                        name: "visibility",
+                        label: "Private",
+                        text: "Private",
+                        checked: isPrivate,
+                        onchange: v => {
+                            state.value = {
+                                ...state.value,
+                                visibility: v ? "private" : "public",
+                            };
+                        },
+                    }),
+                ).build(),
                 TrackEditTemplates.titleInput(state),
                 TrackEditTemplates.creditsInput(state),
                 TrackEditTemplates.artistNameInput(state),
-                when(
-                    enableLinkedUsers,
-                    TrackEditTemplates.linkedUsers(state.value.collaborators, state)
-                ),
+                when(enableLinkedUsers, TrackEditTemplates.linkedUsers(state.value.collaborators, state)),
                 GenericTemplates.releaseDateInput(state),
                 TrackEditTemplates.genreInput(state),
                 TrackEditTemplates.isrcInput(state),
@@ -361,14 +291,11 @@ export class TrackEditTemplates {
                 TrackEditTemplates.descriptionInput(state),
             ],
             "info",
-            ["flex-grow"]
+            ["flex-grow"],
         );
     }
 
-    private static monetizationSection(
-        errorSections: Signal<string[]>,
-        state: Signal<UploadableTrack>
-    ) {
+    private static monetizationSection(errorSections: Signal<string[]>, state: Signal<UploadableTrack>) {
         return TrackEditTemplates.sectionCard(
             "Monetization",
             errorSections,
@@ -393,7 +320,7 @@ export class TrackEditTemplates {
                     },
                 }),
             ],
-            "attach_money"
+            "attach_money",
         );
     }
 
@@ -454,9 +381,7 @@ export class TrackEditTemplates {
     }
 
     static genreInput(parentState: Signal<UploadableTrack>) {
-        const genres = Object.values(Genre).map((genre: string) => {
-            return { name: genre, id: genre };
-        }) as SelectOption[];
+        const genres = Object.values(Genre).map((genre: string) => ({ name: genre, id: genre })) as SelectOption[];
         const value = compute(p => p.genre ?? "other", parentState);
         value.subscribe((v, changed) => {
             if (!changed) {
@@ -503,67 +428,53 @@ export class TrackEditTemplates {
         state: Signal<UploadableTrack>,
         errorSections: Signal<string[]>,
         enableTos = true,
-        enableLinkedUsers = true
+        enableLinkedUsers = true,
     ) {
         const isPrivate = compute(s => s.visibility === "private", state);
 
-        return create("div")
-            .classes("flex")
-            .children(
-                TrackEditTemplates.trackDetails(errorSections, isPrivate, state, enableLinkedUsers),
-                create("div")
-                    .classes("flex-v")
-                    .children(
-                        TrackEditTemplates.filesSection(true, state, errorSections),
-                        TrackEditTemplates.monetizationSection(errorSections, state),
-                        enableTos
-                            ? TrackEditTemplates.sectionCard(
-                                  "Copyright",
-                                  errorSections,
-                                  "terms",
-                                  [
-                                      checkbox({
-                                          name: "termsOfService",
-                                          text: "I have all the necessary rights to distribute this content*",
-                                          checked: compute(s => s.termsOfService, state),
-                                          required: true,
-                                          onchange: () => {
-                                              const old = state.value;
-                                              state.value = {
-                                                  ...old,
-                                                  termsOfService: !old.termsOfService,
-                                              };
-                                          },
-                                      }),
-                                  ],
-                                  "gavel"
-                              )
-                            : null
+        return create("div").classes("flex").children(
+            TrackEditTemplates.trackDetails(errorSections, isPrivate, state, enableLinkedUsers),
+            create("div").classes("flex-v").children(
+                TrackEditTemplates.filesSection(true, state, errorSections),
+                TrackEditTemplates.monetizationSection(errorSections, state),
+                enableTos
+                    ? TrackEditTemplates.sectionCard(
+                        "Copyright",
+                        errorSections,
+                        "terms",
+                        [
+                            checkbox({
+                                name: "termsOfService",
+                                text: "I have all the necessary rights to distribute this content*",
+                                checked: compute(s => s.termsOfService, state),
+                                required: true,
+                                onchange: () => {
+                                    const old = state.value;
+                                    state.value = {
+                                        ...old,
+                                        termsOfService: !old.termsOfService,
+                                    };
+                                },
+                            }),
+                        ],
+                        "gavel",
                     )
-                    .build()
-            )
-            .build();
+                    : null,
+            ).build(),
+        ).build();
     }
 
     static sectionCard(
         title: HtmlPropertyValue,
         errorSections: Signal<string[]>,
         id: string,
-        children: (
-            | TypeOrSignal<DomNode>
-            | TypeOrSignal<AnyElement>
-            | TypeOrSignal<AnyNode>
-            | null
-        )[],
+        children: (TypeOrSignal<DomNode> | TypeOrSignal<AnyElement> | TypeOrSignal<AnyNode> | null)[],
         icon: string | null = null,
-        classes: StringOrSignal[] = []
+        classes: StringOrSignal[] = [],
     ) {
         const hasError = compute((e: string[]) => e.includes(id), errorSections);
 
-        return create("div")
-            .classes("border-card", "flex-v", ...classes)
-            .children(GenericTemplates.cardLabel(title, icon, hasError), ...children)
-            .build();
+        return create("div").classes("border-card", "flex-v", ...classes).children(GenericTemplates.cardLabel(title, icon, hasError), ...children).build();
     }
 
     static audioFile(canOverwriteTitle = false, parentState: Signal<UploadableTrack>) {
@@ -590,7 +501,7 @@ export class TrackEditTemplates {
                     ...parentState.value,
                     audioFiles: files,
                 };
-            }
+            },
         );
     }
 
@@ -612,23 +523,16 @@ export class TrackEditTemplates {
                     ...parentState.value,
                     coverArtFiles: files,
                 };
-            }
+            },
         );
     }
 
     static imagePreview(name: HtmlPropertyValue) {
-        return create("img")
-            .id(name + "-preview")
-            .classes("image-preview", "hidden")
-            .build();
+        return create("img").id(name + "-preview").classes("image-preview", "hidden").build();
     }
 
     static monetizationInfo() {
-        return create("span")
-            .text(
-                "This track will be monetized through streaming subscriptions and available for buying."
-            )
-            .build();
+        return create("span").text("This track will be monetized through streaming subscriptions and available for buying.").build();
     }
 
     static deleteTrackButton(trackId: number) {
@@ -644,7 +548,7 @@ export class TrackEditTemplates {
                     "No",
                     () => TrackActions.deleteTrack(trackId),
                     () => {},
-                    Icons.WARNING
+                    Icons.WARNING,
                 );
             },
         });
@@ -662,7 +566,7 @@ export class TrackEditTemplates {
 
     static linkedUsers(
         linkedUsers: Partial<TrackCollaborator>[] = [],
-        parentState: Signal<UploadableTrack> | null = null
+        parentState: Signal<UploadableTrack> | null = null,
     ) {
         const linkedUserState = signal(linkedUsers);
         linkedUserState.subscribe((newValue: any[]) => {
@@ -677,35 +581,32 @@ export class TrackEditTemplates {
         const collabTypes = signal<CollaboratorType[]>([]);
         Api.getCollabTypes().then(types => (collabTypes.value = types ?? []));
 
-        return create("div")
-            .classes("flex-v", "small-gap", "border-card")
-            .children(
-                create("label").text("Linked Users").build(),
-                vertical(
-                    signalMap(linkedUserState, horizontal(), collaborator => {
-                        const user = collaborator.user;
-                        if (!user) {
-                            return nullElement();
-                        }
-                        const avatarState = signal(Images.DEFAULT_AVATAR);
-                        if (user.has_avatar) {
-                            avatarState.value = Util.getUserAvatar(user.id);
-                        }
+        return create("div").classes("flex-v", "small-gap", "border-card").children(
+            create("label").text("Linked Users").build(),
+            vertical(
+                signalMap(linkedUserState, horizontal(), collaborator => {
+                    const user = collaborator.user;
+                    if (!user) {
+                        return nullElement();
+                    }
+                    const avatarState = signal(Images.DEFAULT_AVATAR);
+                    if (user.has_avatar) {
+                        avatarState.value = Util.getUserAvatar(user.id);
+                    }
 
-                        return UserTemplates.editableLinkedUser(
-                            user.id,
-                            user.username,
-                            user.displayname,
-                            avatarState,
-                            signal(collaborator.collab_type?.name ?? ""),
-                            linkedUserState,
-                            collabTypes
-                        );
-                    }),
-                    TrackEditTemplates.linkedUsersEditor(linkedUserState, id, collabTypes)
-                )
-            )
-            .build();
+                    return UserTemplates.editableLinkedUser(
+                        user.id,
+                        user.username,
+                        user.displayname,
+                        avatarState,
+                        signal(collaborator.collab_type?.name ?? ""),
+                        linkedUserState,
+                        collabTypes,
+                    );
+                }),
+                TrackEditTemplates.linkedUsersEditor(linkedUserState, id, collabTypes),
+            ),
+        ).build();
     }
 
     static replaceAudioButton(track: Track) {
@@ -727,32 +628,29 @@ export class TrackEditTemplates {
     private static linkedUsersEditor(
         linkedUserState: Signal<Partial<TrackCollaborator>[]>,
         referenceId: Signal<number | undefined>,
-        collabTypes: Signal<CollaboratorType[]>
+        collabTypes: Signal<CollaboratorType[]>,
     ) {
-        return TrackEditTemplates.linkedUsersAdder(
-            linkedUserState,
-            async (username: string) => {
-                const newUser = await Util.getUserByNameAsync(username);
-                const ct = collabTypes.value.at(0);
+        return TrackEditTemplates.linkedUsersAdder(linkedUserState, async (username: string) => {
+            const newUser = await Util.getUserByNameAsync(username);
+            const ct = collabTypes.value.at(0);
 
-                if (ct && !linkedUserState.value.some(tc => tc.user_id === newUser.id)) {
-                    linkedUserState.value = [
-                        ...linkedUserState.value,
-                        <TrackCollaborator>{
-                            user_id: newUser.id,
-                            user: newUser,
-                            type: ct.id,
-                            collab_type: ct,
-                            track_id: referenceId.value,
-                            created_at: new Date(),
-                            updated_at: new Date(),
-                            approved: false,
-                            denied: false,
-                        },
-                    ];
-                }
+            if (ct && !linkedUserState.value.some(tc => tc.user_id === newUser.id)) {
+                linkedUserState.value = [
+                    ...linkedUserState.value,
+                    <TrackCollaborator>{
+                        user_id: newUser.id,
+                        user: newUser,
+                        type: ct.id,
+                        collab_type: ct,
+                        track_id: referenceId.value,
+                        created_at: new Date(),
+                        updated_at: new Date(),
+                        approved: false,
+                        denied: false,
+                    },
+                ];
             }
-        );
+        });
     }
 
     static collaboratorTypeSelect(collabType: Signal<string>, collabTypes: Signal<CollaboratorType[]>) {
@@ -767,7 +665,7 @@ export class TrackEditTemplates {
                     <SelectOption>{
                         name: t.name,
                         id: t.id.toString(),
-                    }
+                    },
             );
         }, collabTypes);
 
@@ -777,77 +675,70 @@ export class TrackEditTemplates {
                     options: signal(opts),
                     value: collabType,
                 }),
-            collabTypeOptions
+            collabTypeOptions,
         );
     }
 
-    static linkedUsersAdder(linkedUserState: Signal<Partial<TrackCollaborator>[]>, addUser: (username: string) => void) {
+    static linkedUsersAdder(
+        linkedUserState: Signal<Partial<TrackCollaborator>[]>,
+        addUser: (username: string) => void,
+    ) {
         const selectedState = signal(0);
         const users = signal<SearchResult[]>([]);
         let lastSearch = "";
-        const alreadyHasUser = compute((tcs, s) => tcs.find((tc) => tc.user_id === s) !== undefined, linkedUserState, selectedState);
+        const alreadyHasUser = compute(
+            (tcs, s) => tcs.find(tc => tc.user_id === s) !== undefined,
+            linkedUserState,
+            selectedState,
+        );
         const disabled = compute(
             (s, u, a) => u.find(u => u.id === s) === undefined || a,
             selectedState,
             users,
-            alreadyHasUser
+            alreadyHasUser,
         );
 
-        return create("div")
-            .classes("flex-v")
-            .children(
-                create("p")
-                    .text("Linking a user will send a request to them for approval first")
-                    .build(),
-                horizontal(
-                    input({
-                        id: "addUserSearch",
-                        name: "addUserSearch",
-                        type: InputType.text,
-                        placeholder: "Search for a user",
-                        value: "",
-                        debounce: 200,
-                        onchange: async search => {
-                            if (search.trim().length > 0 && search.trim() !== lastSearch) {
-                                lastSearch = search.trim();
-                                users.value = (await Api.searchUsers(search.trim())) ?? [];
+        return create("div").classes("flex-v").children(
+            create("p").text("Linking a user will send a request to them for approval first").build(),
+            horizontal(
+                input({
+                    id: "addUserSearch",
+                    name: "addUserSearch",
+                    type: InputType.text,
+                    placeholder: "Search for a user",
+                    value: "",
+                    debounce: 200,
+                    onchange: async search => {
+                        if (search.trim().length > 0 && search.trim() !== lastSearch) {
+                            lastSearch = search.trim();
+                            users.value = (await Api.searchUsers(search.trim())) ?? [];
+                        }
+                    },
+                }),
+                create("div").classes("flex").children(
+                    button({
+                        text: "Add",
+                        disabled: disabled,
+                        onclick: async () => {
+                            const user = users.value.find(u => u.id === selectedState.value);
+                            if (!user) {
+                                return;
                             }
-                        },
-                    }),
-                    create("div")
-                        .classes("flex")
-                        .children(
-                            button({
-                                text: "Add",
-                                disabled: disabled,
-                                onclick: async () => {
-                                    const user = users.value.find(
-                                        u => u.id === selectedState.value
-                                    );
-                                    if (!user) {
-                                        return;
-                                    }
 
-                                    addUser(user.subtitle?.substring(1) ?? "",);
-                                },
-                                icon: {
-                                    icon: "person_add",
-                                },
-                                classes: ["positive"],
-                            })
-                        )
-                        .build()
+                            addUser(user.subtitle?.substring(1) ?? "");
+                        },
+                        icon: {
+                            icon: "person_add",
+                        },
+                        classes: ["positive"],
+                    }),
+                ).build(),
+            ),
+            create("div").classes("flex-v").styles("max-height", "200px", "overflow", "auto", "flex-wrap", "nowrap").children(
+                signalMap(users, create("div").classes("flex-v"), user =>
+                    GenericTemplates.addUserLinkSearchResult(user, selectedState),
                 ),
-                create("div")
-                    .classes("flex-v")
-                    .styles("max-height", "200px", "overflow", "auto", "flex-wrap", "nowrap")
-                    .children(
-                        signalMap(users, create("div").classes("flex-v"), user =>
-                            GenericTemplates.addUserLinkSearchResult(user, selectedState)
-                        )
-                    )
-                    .build()
-            )
-            .build();
+            ).build(),
+        ).build();
     }
 }

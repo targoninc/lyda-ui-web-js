@@ -127,8 +127,7 @@ export class MusicTemplates {
                             .build()
                     )
                     .build()
-            )
-            .build();
+            ).build();
     }
 
     private static itemSpecificItems(type: EntityType, item: Track | Playlist | Album) {
@@ -227,8 +226,7 @@ export class MusicTemplates {
                         .children(MusicTemplates.playButton(type, item.id, start))
                         .build()
                 )
-            )
-            .build();
+            ).build();
     }
 
     static playButton(type: EntityType, itemId: number, start: Function) {
@@ -312,8 +310,7 @@ export class MusicTemplates {
                         filterState
                     )
                 )
-            )
-            .build();
+            ).build();
     }
 
     static addListToQueueButton(list: Playlist | Album) {

@@ -1,15 +1,15 @@
-import {AnyNode, compute, create, HtmlPropertyValue, nullElement, Signal, signal, when} from "@targoninc/jess";
-import {GenericTemplates} from "./generic/GenericTemplates.ts";
-import {InteractionMetadata} from "@targoninc/lyda-shared/src/Models/InteractionMetadata";
-import {InteractionConfig} from "@targoninc/lyda-shared/src/Models/InteractionConfig";
-import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
-import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import {InteractionType} from "@targoninc/lyda-shared/src/Enums/InteractionType";
-import {Icons} from "../Enums/Icons.ts";
-import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
-import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
-import {currentUser} from "../state.ts";
-import {Visibility} from "@targoninc/lyda-shared/dist/Enums/Visibility";
+import { AnyNode, compute, create, HtmlPropertyValue, nullElement, Signal, signal, when } from "@targoninc/jess";
+import { GenericTemplates } from "./generic/GenericTemplates.ts";
+import { InteractionMetadata } from "@targoninc/lyda-shared/src/Models/InteractionMetadata";
+import { InteractionConfig } from "@targoninc/lyda-shared/src/Models/InteractionConfig";
+import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType";
+import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import { InteractionType } from "@targoninc/lyda-shared/src/Enums/InteractionType";
+import { Icons } from "../Enums/Icons.ts";
+import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import { currentUser } from "../state.ts";
+import { Visibility } from "@targoninc/lyda-shared/dist/Enums/Visibility";
 import { Api } from "../Api/Api.ts";
 import { InteractionOptions } from "../Models/InteractionOptions.ts";
 
@@ -81,8 +81,7 @@ export class InteractionTemplates {
         }
         return create("div")
             .classes("interactions-container", "flex", "align-children")
-            .children(...elements)
-            .build();
+            .children(...elements).build();
     }
 
     private static interactionList<T extends {

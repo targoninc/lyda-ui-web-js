@@ -1,6 +1,6 @@
 import { Chart, registerables } from "chart.js";
 import { BoxPlotChart } from "@sgratzl/chartjs-chart-boxplot";
-import { computeAsync, compute, signal, create, HtmlPropertyValue } from "@targoninc/jess";
+import { compute, computeAsync, create, HtmlPropertyValue, signal } from "@targoninc/jess";
 import { ChartOptions } from "../../Classes/ChartOptions.ts";
 import { chartColor } from "../../state.ts";
 import { button } from "@targoninc/jess-components";
@@ -15,7 +15,7 @@ export class ChartTemplates {
         values: number[],
         valueTitle: string,
         title: string,
-        id: string
+        id: string,
     ) {
         const ctx = create("canvas").classes("chart").id(id).build();
 
@@ -42,8 +42,7 @@ export class ChartTemplates {
 
         return create("div")
             .classes("chart-container-full", "card", "flex-v")
-            .children(create("h4").classes("chart-title").text(title).build(), ctx)
-            .build();
+            .children(create("h4").classes("chart-title").text(title).build(), ctx).build();
     }
 
     static boxPlotChart(values: number[], title: string, id: string) {
@@ -73,8 +72,7 @@ export class ChartTemplates {
 
         return create("div")
             .classes("chart-container-vertical", "card", "secondary", "flex-v")
-            .children(ctx)
-            .build();
+            .children(ctx).build();
     }
 
     static noData(title: HtmlPropertyValue) {
@@ -85,9 +83,8 @@ export class ChartTemplates {
                 create("div")
                     .classes("flex", "align-center", "chart")
                     .children(create("span").text("No data yet").build())
-                    .build()
-            )
-            .build();
+                    .build(),
+            ).build();
     }
 
     static async paginatedBarChart(options: PaginatedBarChartOptions) {
@@ -96,7 +93,7 @@ export class ChartTemplates {
         const data = await computeAsync(
             async (s, t) => (await Api.getStatistic(options.endpoint, options.params, s, t)) ?? [],
             skip,
-            take
+            take,
         );
 
         const chart = compute((d: Statistic[]) => {
@@ -146,12 +143,11 @@ export class ChartTemplates {
                             onclick: () => (skip.value = Math.max(0, skip.value - take.value)),
                             disabled: compute(s => s <= 0, skip),
                             classes: ["previousPage"],
-                        })
+                        }),
                     )
                     .build(),
-                chart
-            )
-            .build();
+                chart,
+            ).build();
     }
 }
 

@@ -1,14 +1,12 @@
-import {Icons} from "../../Enums/Icons.ts";
-import {GenericTemplates} from "../generic/GenericTemplates.ts";
-import {PlaylistActions} from "../../Actions/PlaylistActions.ts";
-import {Time} from "../../Classes/Helpers/Time.ts";
-import {TrackTemplates} from "./TrackTemplates.ts";
-import {UserTemplates} from "../account/UserTemplates.ts";
-import {QueueManager} from "../../Streaming/QueueManager.ts";
-import {PlayManager} from "../../Streaming/PlayManager.ts";
-import {Images} from "../../Enums/Images.ts";
-import {Util} from "../../Classes/Util.ts";
-import {Ui} from "../../Classes/Ui.ts";
+import { Icons } from "../../Enums/Icons.ts";
+import { GenericTemplates } from "../generic/GenericTemplates.ts";
+import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
+import { Time } from "../../Classes/Helpers/Time.ts";
+import { TrackTemplates } from "./TrackTemplates.ts";
+import { UserTemplates } from "../account/UserTemplates.ts";
+import { Images } from "../../Enums/Images.ts";
+import { Util } from "../../Classes/Util.ts";
+import { Ui } from "../../Classes/Ui.ts";
 import {
     AnyElement,
     AnyNode,
@@ -19,22 +17,22 @@ import {
     nullElement,
     Signal,
     signal,
-    when
+    when,
 } from "@targoninc/jess";
-import {navigate} from "../../Routing/Router.ts";
-import {RoutePath} from "../../Routing/routes.ts";
-import {button, icon, input, textarea, toggle} from "@targoninc/jess-components";
-import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
-import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
-import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
-import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
-import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
-import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
-import {InteractionTemplates} from "../InteractionTemplates.ts";
-import {playingFrom, playingHere} from "../../state.ts";
-import {MusicTemplates} from "./MusicTemplates.ts";
-import {Api} from "../../Api/Api.ts";
+import { navigate } from "../../Routing/Router.ts";
+import { RoutePath } from "../../Routing/routes.ts";
+import { button, icon, input, textarea, toggle } from "@targoninc/jess-components";
+import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
+import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType";
+import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import { ListTrack } from "@targoninc/lyda-shared/src/Models/ListTrack";
+import { InteractionTemplates } from "../InteractionTemplates.ts";
+import { playingFrom, playingHere } from "../../state.ts";
+import { MusicTemplates } from "./MusicTemplates.ts";
+import { Api } from "../../Api/Api.ts";
 
 export class PlaylistTemplates {
     static addTrackToPlaylistModal(track: Track, playlists: Playlist[]) {
@@ -261,8 +259,7 @@ export class PlaylistTemplates {
 
         return create("div")
             .classes("card", "flex-v")
-            .children(...children)
-            .build();
+            .children(...children).build();
     }
 
     static playlistCard(playlist: Playlist, isSecondary: boolean = false) {
@@ -323,15 +320,13 @@ export class PlaylistTemplates {
             .classes("cover", "rounded", "nopointer", "blurOnParentHover")
             .styles("height", "var(--font-size-large)")
             .src(coverState)
-            .alt(playlist.title)
-            .build();
+            .alt(playlist.title).build();
     }
 
     static playlistCardsContainer(children: AnyNode[]) {
         return create("div")
             .classes("profileContent", "playlists", "flex")
-            .children(...children)
-            .build();
+            .children(...children).build();
     }
 
     static async playlistPage(data: { playlist: Playlist, canEdit: boolean }, user: User) {
