@@ -29,7 +29,7 @@ import {
     button,
     checkbox,
     errorList,
-    input,
+    input, select,
     SelectOption,
     textarea,
     toggle,
@@ -563,11 +563,10 @@ export class TrackEditTemplates {
                 };
             }
         });
-        const editorVisible = signal(false);
         const id = compute(s => s.id, parentState ?? signal(<UploadableTrack>{}));
 
         return create("div")
-            .classes("flex-v", "small-gap")
+            .classes("flex-v", "small-gap", "border-card")
             .children(
                 create("label")
                     .text("Linked Users")
@@ -584,8 +583,7 @@ export class TrackEditTemplates {
                         }
                         return UserTemplates.linkedUser(user.id, user.username, user.displayname, avatarState, collaborator.collab_type!.name, TrackEditTemplates.removeLinkedUser(user.id, linkedUserState), [], ["no-redirect"]);
                     }),
-                    TrackEditTemplates.addLinkedUserButton(editorVisible, ["align-center"]),
-                    when(editorVisible, TrackEditTemplates.linkedUsersEditor(linkedUserState, id))
+                    TrackEditTemplates.linkedUsersEditor(linkedUserState, id)
                 ),
             ).build();
     }
@@ -635,32 +633,63 @@ export class TrackEditTemplates {
 
     static linkedUsersAdder(collabTypes: Signal<CollaboratorType[]>, addUser: (username: string, collaboratorTypeId: number) => void) {
         const selectedState = signal(0);
-        const collabType = signal(1);
+        const collabType = signal("0");
         const collabTypeOptions = compute(types => {
-            return GenericTemplates.combinedSelector(types.map(t => t.name), i => {
-                collabType.value = types[i]?.id;
+            collabType.value = types[0]?.id.toString();
+            const opts = types.map(t => <SelectOption>{
+                name: t.name,
+                id: t.id.toString(),
             });
+            console.log(opts);
+            return opts;
         }, collabTypes);
         const users = signal<SearchResult[]>([]);
         let lastSearch = "";
+        const noUserSelected = compute((s, u) => u.find(u => u.id === s) === undefined, selectedState, users);
 
         return create("div")
-            .classes("flex-v", "card", "secondary")
+            .classes("flex-v")
             .children(
                 create("p").text("Linking a user will send a request to them for approval first").build(),
-                input({
-                    id: "addUserSearch",
-                    name: "addUserSearch",
-                    type: InputType.text,
-                    value: "",
-                    debounce: 200,
-                    onchange: async search => {
-                        if (search.trim().length > 0 && search.trim() !== lastSearch) {
-                            lastSearch = search.trim();
-                            users.value = (await Api.searchUsers(search.trim())) ?? [];
-                        }
-                    },
-                }),
+                horizontal(
+                    input({
+                        id: "addUserSearch",
+                        name: "addUserSearch",
+                        type: InputType.text,
+                        placeholder: "Search for a user",
+                        value: "",
+                        debounce: 200,
+                        onchange: async search => {
+                            if (search.trim().length > 0 && search.trim() !== lastSearch) {
+                                lastSearch = search.trim();
+                                users.value = (await Api.searchUsers(search.trim())) ?? [];
+                            }
+                        },
+                    }),
+                    compute(opts => select({
+                        options: signal(opts),
+                        value: collabType
+                    }), collabTypeOptions),
+                    create("div")
+                        .classes("flex")
+                        .children(
+                            button({
+                                text: "Add",
+                                disabled: noUserSelected,
+                                onclick: async () => {
+                                    const user = users.value.find(u => u.id === selectedState.value);
+                                    if (!user) {
+                                        return;
+                                    }
+                                    addUser(user.subtitle?.substring(1) ?? "", parseInt(collabType.value));
+                                },
+                                icon: {
+                                    icon: "person_add",
+                                },
+                                classes: ["positive"],
+                            })
+                        ).build()
+                ),
                 create("div")
                     .classes("flex-v")
                     .styles("max-height", "200px", "overflow", "auto", "flex-wrap", "nowrap")
@@ -669,25 +698,6 @@ export class TrackEditTemplates {
                             GenericTemplates.addUserLinkSearchResult(user, selectedState)
                         )
                     ).build(),
-                collabTypeOptions,
-                create("div")
-                    .classes("flex")
-                    .children(
-                        button({
-                            text: "Add",
-                            onclick: async () => {
-                                const user = users.value.find(u => u.id === selectedState.value);
-                                if (!user) {
-                                    return;
-                                }
-                                addUser(user.subtitle?.substring(1) ?? "", collabType.value);
-                            },
-                            icon: {
-                                icon: "person_add",
-                            },
-                            classes: ["positive"],
-                        })
-                    ).build()
             ).build();
     }
 }

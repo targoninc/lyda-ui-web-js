@@ -584,6 +584,7 @@ button.unread:before {
 
 .border-card {
     background: var(--color-6);
+    border: 1px solid var(--color-7);
 }
 
 .card.active {
