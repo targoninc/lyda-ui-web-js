@@ -279,26 +279,13 @@ export class UserTemplates {
     static unapprovedTracksLink() {
         const unapprovedTracks = signal<any[]>([]);
         Api.getUnapprovedTracks().then(tracks => (unapprovedTracks.value = tracks ?? []));
-        const link = signal(create("div").build());
-        unapprovedTracks.subscribe((tracks: Track[]) => {
-            link.value =
-                tracks.length === 0
-                    ? nullElement()
-                    : GenericTemplates.action(
-                        Icons.APPROVAL,
-                        "Unapproved tracks",
-                        "unapproved-tracks",
-                        async (e: Event) => {
-                            e.preventDefault();
-                            navigate(RoutePath.unapprovedTracks);
-                        },
-                        [],
-                        [],
-                        Links.LINK(RoutePath.unapprovedTracks),
-                    );
-        });
+        const hasTracks = compute(t => t.length > 0, unapprovedTracks);
 
-        return link;
+        return when(hasTracks, button({
+            text: compute(t => `${t.length} unapproved tracks`, unapprovedTracks),
+            icon: { icon: "order_approve" },
+            onclick: () => navigate(RoutePath.unapprovedTracks),
+        }));
     }
 
     static profile(route: Route, params: Record<string, string>) {

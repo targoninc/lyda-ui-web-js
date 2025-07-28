@@ -861,30 +861,24 @@ export class TrackTemplates {
                         create("div")
                             .classes("flex")
                             .children(
-                                GenericTemplates.action(
-                                    Icons.CHECK,
-                                    "Approve",
-                                    track.track_id,
-                                    async () => {
-                                        await TrackActions.approveCollab(track.track_id);
+                                button({
+                                    text: "Approve",
+                                    icon: {
+                                        icon: "check",
                                     },
-                                    [],
-                                    ["secondary", "positive"],
-                                ),
-                                GenericTemplates.action(
-                                    Icons.X,
-                                    "Deny",
-                                    track.track_id,
-                                    async () => {
-                                        await TrackActions.denyCollab(track.track_id, track.track!.title);
+                                    onclick: async () => await TrackActions.approveCollab(track.track_id),
+                                    classes: ["positive"],
+                                }),
+                                button({
+                                    text: "Deny",
+                                    icon: {
+                                        icon: "close",
                                     },
-                                    [],
-                                    ["secondary", "negative"],
-                                ),
-                            )
-                            .build()
-                    )
-                    .build()
+                                    onclick: async () => await TrackActions.denyCollab(track.track_id, track.track!.title),
+                                    classes: ["negative"],
+                                }),
+                            ).build()
+                    ).build()
             ).build();
     }
 

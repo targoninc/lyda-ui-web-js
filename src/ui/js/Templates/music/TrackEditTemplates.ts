@@ -40,7 +40,7 @@ import { SearchResult } from "@targoninc/lyda-shared/src/Models/SearchResult";
 
 export class TrackEditTemplates {
     static uploadPage() {
-        const state = signal({
+        const state = signal(<UploadableTrack>{
             title: "",
             credits: "",
             artistname: "",
@@ -54,7 +54,7 @@ export class TrackEditTemplates {
             price: 1,
             collaborators: [],
             termsOfService: false,
-        } satisfies UploadableTrack);
+        });
         const errorSections = signal<string[]>([]);
         const errorFields = signal<string[]>([]);
         const uploadInfo = signal<UploadInfo[]>([]);

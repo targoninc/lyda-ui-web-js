@@ -200,18 +200,6 @@ export class GenericTemplates {
         );
     }
 
-    static action(
-        icon: StringOrSignal,
-        text: HtmlPropertyValue,
-        id: HtmlPropertyValue,
-        onclick: Function,
-        attributes: HtmlPropertyValue[] = [],
-        classes: StringOrSignal[] = [],
-        link: StringOrSignal | null = null,
-    ) {
-        return create(link ? "a" : "div").classes("flex", "small-gap", "clickable", "fakeButton", "padded-inline", "rounded").children(GenericTemplates.icon(icon), create("span").classes("nopointer").text(text).build()).id(id).attributes(...attributes).classes(...classes).href(link).onclick(onclick).build();
-    }
-
     static newAlbumButton(classes: string[] = []) {
         return button({
             text: "New album",
@@ -285,25 +273,6 @@ export class GenericTemplates {
                 loadingState,
                 create("img").src(Icons.SPINNER).alt("Loading...").classes("spinner-animation", "icon", "align-center", "nopointer").build(),
             ),
-        ).build();
-    }
-
-    static inlineAction(
-        text: HtmlPropertyValue,
-        icon$: StringOrSignal,
-        id: HtmlPropertyValue = null,
-        callback: Function,
-        extraAttributes: HtmlPropertyValue[] = [],
-        extraClasses: StringOrSignal[] = [],
-    ) {
-        return create("div").classes("inline-action", "flex", "clickable", "fakeButton", "padded-inline", "rounded", "align-center").id(id).attributes(...extraAttributes).classes(...extraClasses).onclick(callback).children(
-            icon({
-                icon: icon$,
-                adaptive: true,
-                classes: ["inline-icon", "svg", "nopointer"],
-                isUrl: false,
-            }),
-            create("span").classes("nopointer", "text-xsmall").text(text).build(),
         ).build();
     }
 
