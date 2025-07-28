@@ -15,7 +15,18 @@ import {TrackEditTemplates} from "./TrackEditTemplates.ts";
 import {CustomText} from "../../Classes/Helpers/CustomText.ts";
 import {CommentTemplates} from "../CommentTemplates.ts";
 import {navigate} from "../../Routing/Router.ts";
-import {compute, Signal, signal, AnyElement, AnyNode, create, HtmlPropertyValue, when, signalMap} from "@targoninc/jess";
+import {
+    compute,
+    Signal,
+    signal,
+    AnyElement,
+    AnyNode,
+    create,
+    HtmlPropertyValue,
+    when,
+    signalMap,
+    StringOrSignal, nullElement,
+} from "@targoninc/jess";
 import {currentTrackId, currentTrackPosition, currentUser, manualQueue, playingHere} from "../../state.ts";
 import {Ui} from "../../Classes/Ui.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
@@ -458,7 +469,8 @@ export class TrackTemplates {
         if (collaborator.user?.has_avatar) {
             avatarState.value = Util.getUserAvatar(collaborator.user_id);
         }
-        let actionButton = null, classes = [];
+        let actionButton = null;
+        const classes: StringOrSignal[] = [];
         const user = currentUser.value;
         if (user && user.id === track.user_id) {
             actionButton = button({
@@ -482,7 +494,8 @@ export class TrackTemplates {
             throw new Error(`Collaborator ${collaborator.user_id} has no collab_type`);
         }
 
-        return UserTemplates.linkedUser(collaborator.user_id, collaborator.user.username, collaborator.user.displayname, avatarState, collaborator.collab_type.name, actionButton, [], classes);
+        return nullElement();
+        //return UserTemplates.editableLinkedUser(collaborator.user_id, collaborator.user.username, collaborator.user.displayname, avatarState, collaborator.collab_type.name, actionButton);
     }
 
     static async trackPage(trackData: any) {
