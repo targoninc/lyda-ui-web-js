@@ -38,5 +38,5 @@
         "express": "^5.1.0",
         "typescript": "^5.8.3"
     },
-    "version": "0.0.292"
+    "version": "0.0.293"
 }

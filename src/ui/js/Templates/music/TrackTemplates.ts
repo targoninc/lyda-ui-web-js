@@ -194,7 +194,7 @@ export class TrackTemplates {
                     tracksState,
                 ),
                 when(empty, create("p").text("No tracks found").build()),
-                TrackTemplates.paginationControls(pageState)
+                TrackTemplates.paginationControls(pageState),
             ).build();
     }
 
@@ -248,7 +248,7 @@ export class TrackTemplates {
                     icon: { icon: "arrow_right" },
                     onclick: nextCallback,
                     disabled: currentPage === Infinity,
-                })
+                }),
             ).build();
     }
 
@@ -298,7 +298,7 @@ export class TrackTemplates {
                         .classes("waveform-bar", "nopointer", index % 2 === 0 ? "even" : "odd", barClass)
                         .styles("height", loudness * 100 + "%")
                         .build();
-                })
+                }),
             ).build();
     }
 
@@ -458,7 +458,7 @@ export class TrackTemplates {
                     onclick: async () => {
                         await TrackActions.removeTrackFromList(tracks, list, type, listTrack);
                     },
-                })
+                }),
             ).build();
     }
 
@@ -496,11 +496,11 @@ export class TrackTemplates {
                                 .build(),
                         )
                         .build();
-                })
+                }),
             ).build();
     }
 
-    static title(title: HtmlPropertyValue, id: number, icons: any[], textSize: string = "text-large") {
+    static title(title: HtmlPropertyValue, id: number, icons: any[] = [], textSize: string = "text-large") {
         return create("div")
             .classes("flex")
             .children(
@@ -674,9 +674,9 @@ export class TrackTemplates {
                                 create("span")
                                     .classes("playcount", "text-small")
                                     .text(track.plays + " plays")
-                                    .build()
+                                    .build(),
                             )
-                            .build()
+                            .build(),
                     )
                     .build(),
                 create("div")
@@ -700,15 +700,15 @@ export class TrackTemplates {
                                             .build(),
                                         InteractionTemplates.interactions(EntityType.track, track),
                                     )
-                                    .build()
+                                    .build(),
                             )
-                            .build()
+                            .build(),
                     )
                     .build(),
                 TrackTemplates.audioActions(track, editActions),
                 CommentTemplates.commentListFullWidth(track.id, comments, showComments),
                 TrackTemplates.inAlbumsList(track),
-                await TrackTemplates.inPlaylistsList(track)
+                await TrackTemplates.inPlaylistsList(track),
             ).build();
     }
 
@@ -745,7 +745,7 @@ export class TrackTemplates {
                 create("div")
                     .classes("flex")
                     .children(...albumCards)
-                    .build()
+                    .build(),
             ).build();
     }
 
@@ -765,7 +765,7 @@ export class TrackTemplates {
                 create("div")
                     .classes("flex")
                     .children(...playlistCards)
-                    .build()
+                    .build(),
             ).build();
     }
 
@@ -783,7 +783,7 @@ export class TrackTemplates {
                         },
                     }),
                 ),
-                ...editActions
+                ...editActions,
             ).build();
     }
 
@@ -825,61 +825,63 @@ export class TrackTemplates {
         });
     }
 
-    static toBeApprovedTrack(collabType: CollaboratorType, track: TrackCollaborator) {
+    static toBeApprovedTrack(collabType: CollaboratorType, data: TrackCollaborator) {
         const avatarState = signal(Images.DEFAULT_AVATAR);
-        if (track.user?.has_avatar) {
-            avatarState.value = Util.getUserAvatar(track.user_id);
+        if (data.user?.has_avatar) {
+            avatarState.value = Util.getUserAvatar(data.user_id);
         }
-        if (!track.user) {
+        if (!data.user) {
             throw new Error("User not set on to be approved track with ID ${track.track_id}");
         }
-        if (!track.track) {
-            throw new Error(`Track not set on to be approved track with ID ${track.track_id}`);
+        if (!data.track) {
+            throw new Error(`Track not set on to be approved track with ID ${data.track_id}`);
         }
-        if (!track.user.follows) {
-            throw new Error(`User follows not set on to be approved track with ID ${track.track_id}`);
+        if (!data.user.follows) {
+            throw new Error(`User follows not set on to be approved track with ID ${data.track_id}`);
         }
 
-        return create("div")
-            .classes("flex", "card", "collab")
-            .id(track.track_id)
-            .children(
-                create("div")
-                    .classes("flex-v")
-                    .children(
-                        create("span").classes("text-large").text(track.track.title).build(),
-                        create("span").classes("text-small").text(Time.ago(track.created_at)).build(),
-                        UserTemplates.userWidget(track.user, [], [], UserWidgetContext.card),
+        return horizontal(
+            horizontal(
+                MusicTemplates.cover(EntityType.track, data.track, "inline-cover"),
+                vertical(
+                    TrackTemplates.title(data.track.title, data.track.id),
+                    horizontal(
+                        UserTemplates.userWidget(data.user, [], [], UserWidgetContext.card),
                         create("span")
-                            .text("Requested you to be " + collabType.name)
-                            .build()
-                    )
-                    .build(),
-                create("div")
-                    .classes("flex-v")
-                    .children(
-                        create("div")
-                            .classes("flex")
-                            .children(
-                                button({
-                                    text: "Approve",
-                                    icon: {
-                                        icon: "check",
-                                    },
-                                    onclick: async () => await TrackActions.approveCollab(track.track_id),
-                                    classes: ["positive"],
-                                }),
-                                button({
-                                    text: "Deny",
-                                    icon: {
-                                        icon: "close",
-                                    },
-                                    onclick: async () => await TrackActions.denyCollab(track.track_id, track.track!.title),
-                                    classes: ["negative"],
-                                }),
-                            ).build()
-                    ).build()
-            ).build();
+                            .text("Requested you to be")
+                            .build(),
+                        create("span")
+                            .classes("warning")
+                            .text(collabType.name)
+                            .build(),
+                        create("span")
+                            .classes("text-small")
+                            .text(Time.ago(data.created_at))
+                            .build(),
+                    ).classes("small-gap", "align-children"),
+                ),
+            ),
+            horizontal(
+                button({
+                    text: "Approve",
+                    icon: {
+                        icon: "check",
+                    },
+                    onclick: async () => await TrackActions.approveCollab(data.track_id),
+                    classes: ["positive"],
+                }),
+                button({
+                    text: "Deny",
+                    icon: {
+                        icon: "close",
+                    },
+                    onclick: async () => await TrackActions.denyCollab(data.track_id, data.track!.title),
+                    classes: ["negative"],
+                }),
+            ),
+        ).classes("card", "collab", "space-outwards", "align-children")
+         .id(data.track_id)
+         .build();
     }
 
     static unapprovedTracks(tracks: TrackCollaborator[]) {
