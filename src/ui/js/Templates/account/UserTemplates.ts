@@ -28,7 +28,7 @@ import { notify, Ui } from "../../Classes/Ui.ts";
 import { MediaActions } from "../../Actions/MediaActions.ts";
 import { RoutePath } from "../../Routing/routes.ts";
 import { MusicTemplates } from "../music/MusicTemplates.ts";
-import { button } from "@targoninc/jess-components";
+import { button, icon } from "@targoninc/jess-components";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
@@ -176,6 +176,8 @@ export class UserTemplates {
         collab_type: Signal<string>,
         linkedUsersState: Signal<Partial<TrackCollaborator>[]>,
         collabTypes: Signal<CollaboratorType[]>,
+        approved: boolean,
+        denied: boolean,
     ) {
         collab_type.subscribe((t, changed) => {
             if (!changed) {
@@ -222,6 +224,7 @@ export class UserTemplates {
                         GenericTemplates.deleteIconButton(`remove_linked_user_${user_id}`, () => {
                             linkedUsersState.value = linkedUsersState.value.filter(tc => tc.user_id !== user_id);
                         }),
+                        UserTemplates.collabApprovalStatus(approved, denied),
                     ).build(),
             ).build();
     }
@@ -233,6 +236,8 @@ export class UserTemplates {
         avatar: StringOrSignal,
         collab_type: Signal<string>,
         collabTypes: Signal<CollaboratorType[]>,
+        approved: boolean,
+        denied: boolean,
     ) {
         const typeName = compute((ct, types) => types.find(t => t.id.toString() === ct)?.name ?? "", collab_type, collabTypes);
 
@@ -262,8 +267,31 @@ export class UserTemplates {
                             .attributes("data-user-id", user_id)
                             .build(),
                         GenericTemplates.tag(typeName),
+                        UserTemplates.collabApprovalStatus(approved, denied),
                     ).build(),
             ).build();
+    }
+
+    private static collabApprovalStatus(approved: boolean, denied: boolean) {
+        return horizontal(
+            when(approved, horizontal(icon({
+                icon: "new_releases",
+                adaptive: true,
+                classes: ["text-positive"],
+                title: "User has verified this association",
+            })).build()),
+            when(denied, horizontal(icon({
+                icon: "block",
+                adaptive: true,
+                classes: ["negative"],
+                title: "User has denied this association",
+            })).build()),
+            when((!approved && !denied), horizontal(icon({
+                icon: "hourglass_empty",
+                adaptive: true,
+                title: "Pending request",
+            })).build()),
+        );
     }
 
     static userIcon(user_id: HtmlPropertyValue, avatar: StringOrSignal) {

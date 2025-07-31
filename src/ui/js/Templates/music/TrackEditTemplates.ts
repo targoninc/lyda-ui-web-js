@@ -597,6 +597,8 @@ export class TrackEditTemplates {
                                 signal(collaborator.collab_type?.id.toString() ?? ""),
                                 linkedUserState,
                                 collabTypes,
+                                collaborator.approved ?? false,
+                                collaborator.denied ?? false,
                             );
                         }
 
@@ -607,6 +609,8 @@ export class TrackEditTemplates {
                             avatarState,
                             signal(collaborator.collab_type?.id.toString() ?? ""),
                             collabTypes,
+                            collaborator.approved ?? false,
+                            collaborator.denied ?? false,
                         );
                     }),
                     when(editable, TrackEditTemplates.linkedUsersEditor(linkedUserState, id, collabTypes)),
