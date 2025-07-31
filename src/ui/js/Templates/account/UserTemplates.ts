@@ -181,9 +181,13 @@ export class UserTemplates {
             if (!changed) {
                 return;
             }
-            linkedUsersState.value = linkedUsersState.value.map(tc => {
+            linkedUsersState.value = structuredClone(linkedUsersState.value).map(tc => {
                 if (tc.user_id === user_id) {
-                    tc.collab_type = collabTypes.value.find(ct => ct.name.toString() === t.toString());
+                    const collabType = collabTypes.value.find(ct => ct.id.toString() === t);
+                    if (collabType) {
+                        tc.collab_type = collabType;
+                        tc.type = collabType.id;
+                    }
                 }
                 return tc;
             });
@@ -218,6 +222,43 @@ export class UserTemplates {
                         GenericTemplates.deleteIconButton(`remove_linked_user_${user_id}`, () => {
                             linkedUsersState.value = linkedUsersState.value.filter(tc => tc.user_id !== user_id);
                         }),
+                    ).build(),
+            ).build();
+    }
+
+    static linkedUser(
+        user_id: number,
+        username: string,
+        displayname: string,
+        avatar: StringOrSignal,
+        collab_type: Signal<string>,
+    ) {
+        return create("div")
+            .classes("user-widget", "collaborator", "rounded", "flex-v", "padded-inline")
+            .attributes("user_id", user_id, "username", username)
+            .children(
+                create("div")
+                    .classes("flex", "align-children")
+                    .children(
+                        UserTemplates.userIcon(user_id, avatar),
+                        create("span")
+                            .classes("text", "nopointer", "user-displayname")
+                            .text(displayname)
+                            .attributes("data-user-id", user_id)
+                            .build(),
+                        create("span")
+                            .classes(
+                                "text",
+                                "align-center",
+                                "text-small",
+                                "nopointer",
+                                "user-name",
+                                "hideOnSmallBreakpoint",
+                            )
+                            .text("@" + username)
+                            .attributes("data-user-id", user_id)
+                            .build(),
+                        GenericTemplates.tag(collab_type),
                     ).build(),
             ).build();
     }

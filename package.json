@@ -30,7 +30,7 @@
         "@paypal/paypal-js": "^8.2.0",
         "@sgratzl/chartjs-chart-boxplot": "^4.4.4",
         "@targoninc/jess": "^0.0.19",
-        "@targoninc/jess-components": "^0.0.19",
+        "@targoninc/jess-components": "^0.0.22",
         "@targoninc/lyda-shared": "^0.0.19",
         "@types/bun": "^1.2.19",
         "chart.js": "^4.5.0",
@@ -38,5 +38,5 @@
         "express": "^5.1.0",
         "typescript": "^5.8.3"
     },
-    "version": "0.0.293"
+    "version": "0.0.294"
 }

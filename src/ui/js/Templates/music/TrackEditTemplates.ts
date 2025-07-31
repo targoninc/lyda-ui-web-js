@@ -283,7 +283,7 @@ export class TrackEditTemplates {
                 TrackEditTemplates.titleInput(state),
                 TrackEditTemplates.creditsInput(state),
                 TrackEditTemplates.artistNameInput(state),
-                when(enableLinkedUsers, TrackEditTemplates.linkedUsers(state.value.collaborators, state)),
+                when(enableLinkedUsers, TrackEditTemplates.linkedUsers(state.value.collaborators, state as Signal<UploadableTrack | Track>, true)),
                 GenericTemplates.releaseDateInput(state),
                 TrackEditTemplates.genreInput(state),
                 TrackEditTemplates.isrcInput(state),
@@ -554,19 +554,10 @@ export class TrackEditTemplates {
         });
     }
 
-    static addLinkedUserButton(editorVisible: Signal<boolean>, classes: string[] = []) {
-        return button({
-            text: "Add collaborator",
-            id: "add_linked_user",
-            icon: { icon: "person_add" },
-            classes,
-            onclick: async () => (editorVisible.value = !editorVisible.value),
-        });
-    }
-
     static linkedUsers(
         linkedUsers: Partial<TrackCollaborator>[] = [],
-        parentState: Signal<UploadableTrack> | null = null,
+        parentState: Signal<UploadableTrack | Track> | null = null,
+        editable: boolean,
     ) {
         const linkedUserState = signal(linkedUsers);
         linkedUserState.subscribe((newValue: any[]) => {
@@ -577,7 +568,7 @@ export class TrackEditTemplates {
                 };
             }
         });
-        const id = compute(s => s.id, parentState ?? signal(<UploadableTrack>{}));
+        const id = compute(s => s.id, parentState ?? signal(<UploadableTrack | Track>{}));
         const collabTypes = signal<CollaboratorType[]>([]);
         Api.getCollabTypes().then(types => (collabTypes.value = types ?? []));
 
@@ -594,14 +585,24 @@ export class TrackEditTemplates {
                         avatarState.value = Util.getUserAvatar(user.id);
                     }
 
-                    return UserTemplates.editableLinkedUser(
+                    if (editable) {
+                        return UserTemplates.editableLinkedUser(
+                            user.id,
+                            user.username,
+                            user.displayname,
+                            avatarState,
+                            signal(collaborator.collab_type?.id.toString() ?? ""),
+                            linkedUserState,
+                            collabTypes,
+                        );
+                    }
+
+                    return UserTemplates.linkedUser(
                         user.id,
                         user.username,
                         user.displayname,
                         avatarState,
-                        signal(collaborator.collab_type?.name ?? ""),
-                        linkedUserState,
-                        collabTypes,
+                        signal(collaborator.collab_type?.id.toString() ?? ""),
                     );
                 }),
                 TrackEditTemplates.linkedUsersEditor(linkedUserState, id, collabTypes),
@@ -655,11 +656,6 @@ export class TrackEditTemplates {
 
     static collaboratorTypeSelect(collabType: Signal<string>, collabTypes: Signal<CollaboratorType[]>) {
         const collabTypeOptions = compute(types => {
-            const first = types[0]?.name.toString();
-            if (first !== collabType.value) {
-                collabType.value = first;
-            }
-
             return types.map(
                 t =>
                     <SelectOption>{
@@ -674,6 +670,7 @@ export class TrackEditTemplates {
                 select({
                     options: signal(opts),
                     value: collabType,
+                    onchange: v => collabType.value = v,
                 }),
             collabTypeOptions,
         );

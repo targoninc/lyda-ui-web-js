@@ -15,19 +15,7 @@ import { TrackEditTemplates } from "./TrackEditTemplates.ts";
 import { CustomText } from "../../Classes/Helpers/CustomText.ts";
 import { CommentTemplates } from "../CommentTemplates.ts";
 import { navigate } from "../../Routing/Router.ts";
-import {
-    AnyElement,
-    AnyNode,
-    compute,
-    create,
-    HtmlPropertyValue,
-    nullElement,
-    Signal,
-    signal,
-    signalMap,
-    StringOrSignal,
-    when,
-} from "@targoninc/jess";
+import { AnyNode, compute, create, HtmlPropertyValue, Signal, signal, signalMap, when } from "@targoninc/jess";
 import { currentTrackId, currentTrackPosition, currentUser, manualQueue, playingHere } from "../../state.ts";
 import { Ui } from "../../Classes/Ui.ts";
 import { ApiRoutes } from "../../Api/ApiRoutes.ts";
@@ -48,8 +36,9 @@ import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
 import { CollaboratorType } from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
 import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import { InteractionTemplates } from "../InteractionTemplates.ts";
-import { Api } from "../../Api/Api.ts";
 import { get } from "../../Api/ApiClient.ts";
+import { UploadableTrack } from "../../Models/UploadableTrack.ts";
+import { Api } from "../../Api/Api.ts";
 
 export class TrackTemplates {
     static collabIndicator(collab: TrackCollaborator): any {
@@ -519,40 +508,6 @@ export class TrackTemplates {
             ).build();
     }
 
-    static collaborator(track: Track, collaborator: TrackCollaborator): any {
-        const avatarState = signal(Images.DEFAULT_AVATAR);
-        if (collaborator.user?.has_avatar) {
-            avatarState.value = Util.getUserAvatar(collaborator.user_id);
-        }
-        let actionButton = null;
-        const classes: StringOrSignal[] = [];
-        const user = currentUser.value;
-        if (user && user.id === track.user_id) {
-            actionButton = button({
-                icon: {
-                    icon: Icons.X,
-                    isUrl: true,
-                    adaptive: true,
-                },
-                text: "Remove",
-                classes: ["negative", "align-children"],
-                onclick: async () => {
-                    await TrackActions.removeCollaboratorFromTrack(track.id, collaborator.user_id);
-                },
-            });
-            classes.push("no-redirect");
-        }
-        if (!collaborator.user) {
-            throw new Error(`Collaborator ${collaborator.user_id} has no user`);
-        }
-        if (!collaborator.collab_type) {
-            throw new Error(`Collaborator ${collaborator.user_id} has no collab_type`);
-        }
-
-        return nullElement();
-        //return UserTemplates.editableLinkedUser(collaborator.user_id, collaborator.user.username, collaborator.user.displayname, avatarState, collaborator.collab_type.name, actionButton);
-    }
-
     static async trackPage(trackData: any) {
         if (!trackData.track) {
             console.log(trackData);
@@ -563,37 +518,14 @@ export class TrackTemplates {
         const collaborators = track.collaborators ?? [];
         const toAppend = [];
         const linkedUserState = signal(collaborators);
-
-        function collabList(collaborators: TrackCollaborator[]) {
-            return create("div")
-                .classes("flex")
-                .children(
-                    ...collaborators.map(collaborator => TrackTemplates.collaborator(track, collaborator)),
-                    trackData.canEdit
-                        ? TrackEditTemplates.addLinkedUserButton(
-                            async (newUsername: string, newUser: TrackCollaborator) => {
-                                const newCollab = await Api.addCollaboratorToTrack(
-                                    track.id,
-                                    newUser.user_id,
-                                    newUser.type,
-                                );
-                                if (!newCollab) {
-                                    return;
-                                }
-                                linkedUserState.value = [...linkedUserState.value, newCollab];
-                            },
-                            ["secondary"],
-                        )
-                        : null,
-                ).build();
-        }
-
-        const collaboratorChildren = signal(collabList(collaborators));
-        linkedUserState.subscribe((newCollaborators: TrackCollaborator[]) => {
-            collaboratorChildren.value = collabList(newCollaborators);
+        const track$ = signal(track as Track | UploadableTrack);
+        track$.subscribe(newTrack => {
+            Api.updateTrackFull(newTrack).then(() => {
+                linkedUserState.value = newTrack.collaborators ?? [];
+            });
         });
 
-        toAppend.push(TrackTemplates.collaboratorSection(collaboratorChildren, linkedUserState));
+        toAppend.push(TrackTemplates.collaboratorSection(track$, linkedUserState, trackData.canEdit));
         const icons = [];
         const isPrivate = track.visibility === "private";
         if (isPrivate) {
@@ -713,19 +645,20 @@ export class TrackTemplates {
     }
 
     static collaboratorSection(
-        collaboratorChildren: AnyNode | Signal<AnyElement>,
-        linkedUserState: Signal<TrackCollaborator[]>,
+        track$: Signal<Track | UploadableTrack>,
+        linkedUsers$: Signal<TrackCollaborator[]>,
+        editable: boolean,
     ) {
-        const collabText = signal("");
-        linkedUserState.subscribe((newCollaborators: TrackCollaborator[]) => {
-            collabText.value = newCollaborators.length > 0 ? "Collaborators" : "";
-        });
+        const collabText = compute((c): string => c.length > 0 ? "Collaborators" : "", linkedUsers$);
 
         return create("div")
             .classes("flex-v", "nogap")
             .children(
-                create("span").classes("text-small").text(collabText).build(),
-                create("div").classes("flex").id("linked_users_container").children(collaboratorChildren).build(),
+                create("span")
+                    .classes("text-small")
+                    .text(collabText)
+                    .build(),
+                TrackEditTemplates.linkedUsers(linkedUsers$.value, track$, editable),
             ).build();
     }
 

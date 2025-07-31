@@ -484,6 +484,15 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     height: max-content;
 }
 
+.user-widget.collaborator {
+    border: 1px solid var(--color-7);
+    border-radius: 999px;
+}
+
+.tag {
+    background: var(--color-7);
+}
+
 .user-icon, .user-icon-big {
     border-radius: 50%;
 }

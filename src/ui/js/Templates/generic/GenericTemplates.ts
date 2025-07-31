@@ -797,6 +797,13 @@ export class GenericTemplates {
             ).build(),
         ).build();
     }
+
+    static tag(text: StringOrSignal, type: string = "generic") {
+        return create("span")
+            .classes("tag", type)
+            .text(text)
+            .build();
+    }
 }
 
 export function vertical(...children: (AnyNode | Signal<AnyNode> | Signal<AnyElement>)[]) {
