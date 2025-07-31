@@ -1,21 +1,21 @@
-import {Util} from "../Classes/Util.ts";
-import {Icons} from "../Enums/Icons.ts";
-import {PlayManager} from "../Streaming/PlayManager.ts";
-import {TrackEditTemplates} from "../Templates/music/TrackEditTemplates.ts";
-import {createModal, notify, Ui} from "../Classes/Ui.ts";
-import {navigate, reload} from "../Routing/Router.ts";
-import {Signal} from "@targoninc/jess";
-import {MediaUploader} from "../Api/MediaUploader.ts";
-import {currentQuality, playingHere} from "../state.ts";
-import {RoutePath} from "../Routing/routes.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
-import {Comment} from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
+import { Util } from "../Classes/Util.ts";
+import { Icons } from "../Enums/Icons.ts";
+import { PlayManager } from "../Streaming/PlayManager.ts";
+import { TrackEditTemplates } from "../Templates/music/TrackEditTemplates.ts";
+import { createModal, notify, Ui } from "../Classes/Ui.ts";
+import { navigate, reload } from "../Routing/Router.ts";
+import { Signal } from "@targoninc/jess";
+import { MediaUploader } from "../Api/MediaUploader.ts";
+import { currentQuality, playingHere } from "../state.ts";
+import { RoutePath } from "../Routing/routes.ts";
+import { NotificationType } from "../Enums/NotificationType.ts";
+import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
-import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
-import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
-import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
-import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import {Api} from "../Api/Api.ts";
+import { ListTrack } from "@targoninc/lyda-shared/src/Models/ListTrack";
+import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import { Api } from "../Api/Api.ts";
 
 export class TrackActions {
     static async savePlay(id: number) {
@@ -232,15 +232,6 @@ export class TrackActions {
         }
         if (!(await success)) {
             this.moveTrackToPosition(trackId, oldPosition, tracks);
-        }
-    }
-
-    static async removeCollaboratorFromTrack(trackId: number, userId: number) {
-        const success = await Api.removeCollaboratorFromTrack(trackId, userId);
-
-        if (success) {
-            const collaborator = document.querySelector(".collaborator[user_id='" + userId + "']");
-            if (collaborator) collaborator.remove();
         }
     }
 

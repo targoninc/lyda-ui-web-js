@@ -106,7 +106,7 @@ export class TrackEditTemplates {
             ).build(),
             create("p").text("Edit the track details below").build(),
             TrackEditTemplates.upDownButtons(state, true),
-            TrackEditTemplates.trackEdit(state, signal<string[]>([]), false),
+            TrackEditTemplates.trackEdit(state, signal<string[]>([])),
             create("div").classes("flex").children(
                 button({
                     text: "Save",
@@ -246,11 +246,11 @@ export class TrackEditTemplates {
         ).build();
     }
 
-    static trackEdit(state: Signal<UploadableTrack>, errorSections: Signal<string[]>, enableLinkedUsers = true) {
+    static trackEdit(state: Signal<UploadableTrack>, errorSections: Signal<string[]>) {
         const isPrivate = compute(s => s.visibility === "private", state);
 
         return create("div").classes("flex-v").children(
-            TrackEditTemplates.trackDetails(errorSections, isPrivate, state, enableLinkedUsers),
+            TrackEditTemplates.trackDetails(errorSections, isPrivate, state),
             create("div").classes("flex-v").children(TrackEditTemplates.monetizationSection(errorSections, state)).build(),
         ).build();
     }
@@ -259,7 +259,6 @@ export class TrackEditTemplates {
         errorSections: Signal<string[]>,
         isPrivate: Signal<boolean>,
         state: Signal<UploadableTrack>,
-        enableLinkedUsers: boolean,
     ) {
         return TrackEditTemplates.sectionCard(
             "Track Details",
@@ -283,7 +282,7 @@ export class TrackEditTemplates {
                 TrackEditTemplates.titleInput(state),
                 TrackEditTemplates.creditsInput(state),
                 TrackEditTemplates.artistNameInput(state),
-                when(enableLinkedUsers, TrackEditTemplates.linkedUsers(state.value.collaborators, state as Signal<UploadableTrack | Track>, true)),
+                TrackEditTemplates.linkedUsers(state.value.collaborators, state as Signal<UploadableTrack | Track>, true),
                 GenericTemplates.releaseDateInput(state),
                 TrackEditTemplates.genreInput(state),
                 TrackEditTemplates.isrcInput(state),
@@ -428,12 +427,11 @@ export class TrackEditTemplates {
         state: Signal<UploadableTrack>,
         errorSections: Signal<string[]>,
         enableTos = true,
-        enableLinkedUsers = true,
     ) {
         const isPrivate = compute(s => s.visibility === "private", state);
 
         return create("div").classes("flex").children(
-            TrackEditTemplates.trackDetails(errorSections, isPrivate, state, enableLinkedUsers),
+            TrackEditTemplates.trackDetails(errorSections, isPrivate, state),
             create("div").classes("flex-v").children(
                 TrackEditTemplates.filesSection(true, state, errorSections),
                 TrackEditTemplates.monetizationSection(errorSections, state),
@@ -571,43 +569,49 @@ export class TrackEditTemplates {
         const id = compute(s => s.id, parentState ?? signal(<UploadableTrack | Track>{}));
         const collabTypes = signal<CollaboratorType[]>([]);
         Api.getCollabTypes().then(types => (collabTypes.value = types ?? []));
+        const hasLus = linkedUsers.length > 0;
 
-        return create("div").classes("flex-v", "small-gap", "border-card").children(
-            create("label").text("Linked Users").build(),
-            vertical(
-                signalMap(linkedUserState, horizontal(), collaborator => {
-                    const user = collaborator.user;
-                    if (!user) {
-                        return nullElement();
-                    }
-                    const avatarState = signal(Images.DEFAULT_AVATAR);
-                    if (user.has_avatar) {
-                        avatarState.value = Util.getUserAvatar(user.id);
-                    }
+        return create("div")
+            .classes("flex-v", "small-gap")
+            .children(
+                when(hasLus, create("label")
+                    .text("Linked Users")
+                    .build()),
+                vertical(
+                    signalMap(linkedUserState, horizontal(), collaborator => {
+                        const user = collaborator.user;
+                        if (!user) {
+                            return nullElement();
+                        }
+                        const avatarState = signal(Images.DEFAULT_AVATAR);
+                        if (user.has_avatar) {
+                            avatarState.value = Util.getUserAvatar(user.id);
+                        }
 
-                    if (editable) {
-                        return UserTemplates.editableLinkedUser(
+                        if (editable) {
+                            return UserTemplates.editableLinkedUser(
+                                user.id,
+                                user.username,
+                                user.displayname,
+                                avatarState,
+                                signal(collaborator.collab_type?.id.toString() ?? ""),
+                                linkedUserState,
+                                collabTypes,
+                            );
+                        }
+
+                        return UserTemplates.linkedUser(
                             user.id,
                             user.username,
                             user.displayname,
                             avatarState,
                             signal(collaborator.collab_type?.id.toString() ?? ""),
-                            linkedUserState,
                             collabTypes,
                         );
-                    }
-
-                    return UserTemplates.linkedUser(
-                        user.id,
-                        user.username,
-                        user.displayname,
-                        avatarState,
-                        signal(collaborator.collab_type?.id.toString() ?? ""),
-                    );
-                }),
-                TrackEditTemplates.linkedUsersEditor(linkedUserState, id, collabTypes),
-            ),
-        ).build();
+                    }),
+                    when(editable, TrackEditTemplates.linkedUsersEditor(linkedUserState, id, collabTypes)),
+                ),
+            ).build();
     }
 
     static replaceAudioButton(track: Track) {

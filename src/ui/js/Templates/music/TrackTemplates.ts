@@ -38,7 +38,6 @@ import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import { InteractionTemplates } from "../InteractionTemplates.ts";
 import { get } from "../../Api/ApiClient.ts";
 import { UploadableTrack } from "../../Models/UploadableTrack.ts";
-import { Api } from "../../Api/Api.ts";
 
 export class TrackTemplates {
     static collabIndicator(collab: TrackCollaborator): any {
@@ -519,13 +518,8 @@ export class TrackTemplates {
         const toAppend = [];
         const linkedUserState = signal(collaborators);
         const track$ = signal(track as Track | UploadableTrack);
-        track$.subscribe(newTrack => {
-            Api.updateTrackFull(newTrack).then(() => {
-                linkedUserState.value = newTrack.collaborators ?? [];
-            });
-        });
 
-        toAppend.push(TrackTemplates.collaboratorSection(track$, linkedUserState, trackData.canEdit));
+        toAppend.push(TrackTemplates.collaboratorSection(track$, linkedUserState));
         const icons = [];
         const isPrivate = track.visibility === "private";
         if (isPrivate) {
@@ -647,18 +641,9 @@ export class TrackTemplates {
     static collaboratorSection(
         track$: Signal<Track | UploadableTrack>,
         linkedUsers$: Signal<TrackCollaborator[]>,
-        editable: boolean,
     ) {
-        const collabText = compute((c): string => c.length > 0 ? "Collaborators" : "", linkedUsers$);
-
-        return create("div")
-            .classes("flex-v", "nogap")
-            .children(
-                create("span")
-                    .classes("text-small")
-                    .text(collabText)
-                    .build(),
-                TrackEditTemplates.linkedUsers(linkedUsers$.value, track$, editable),
+        return horizontal(
+            TrackEditTemplates.linkedUsers(linkedUsers$.value, track$, false),
             ).build();
     }
 

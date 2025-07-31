@@ -491,6 +491,9 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .tag {
     background: var(--color-7);
+    border-radius: 999px;
+    font-size: var(--font-size-xsmall);
+    padding: 1px 10px;
 }
 
 .user-icon, .user-icon-big {

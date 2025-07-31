@@ -232,7 +232,10 @@ export class UserTemplates {
         displayname: string,
         avatar: StringOrSignal,
         collab_type: Signal<string>,
+        collabTypes: Signal<CollaboratorType[]>,
     ) {
+        const typeName = compute((ct, types) => types.find(t => t.id.toString() === ct)?.name ?? "", collab_type, collabTypes);
+
         return create("div")
             .classes("user-widget", "collaborator", "rounded", "flex-v", "padded-inline")
             .attributes("user_id", user_id, "username", username)
@@ -258,7 +261,7 @@ export class UserTemplates {
                             .text("@" + username)
                             .attributes("data-user-id", user_id)
                             .build(),
-                        GenericTemplates.tag(collab_type),
+                        GenericTemplates.tag(typeName),
                     ).build(),
             ).build();
     }
