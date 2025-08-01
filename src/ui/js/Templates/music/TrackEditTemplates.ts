@@ -37,6 +37,7 @@ import { ProgressPart } from "../../Models/ProgressPart.ts";
 import { CollaboratorType } from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
 import { Api } from "../../Api/Api.ts";
 import { SearchResult } from "@targoninc/lyda-shared/src/Models/SearchResult";
+import { currentUser } from "../../state.ts";
 
 export class TrackEditTemplates {
     static uploadPage() {
@@ -716,7 +717,8 @@ export class TrackEditTemplates {
                     onchange: async search => {
                         if (search.trim().length > 0 && search.trim() !== lastSearch) {
                             lastSearch = search.trim();
-                            users.value = (await Api.searchUsers(search.trim())) ?? [];
+                            const newUsers = (await Api.searchUsers(search.trim())) ?? [];
+                            users.value = newUsers.filter(u => u.id !== currentUser.value?.id);
                         }
                     },
                 }),

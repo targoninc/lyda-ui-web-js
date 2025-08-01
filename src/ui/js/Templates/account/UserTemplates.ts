@@ -216,8 +216,7 @@ export class UserTemplates {
                                 "nopointer",
                                 "user-name",
                                 "hideOnSmallBreakpoint",
-                            )
-                            .text("@" + username)
+                            ).text("@" + username)
                             .attributes("data-user-id", user_id)
                             .build(),
                         TrackEditTemplates.collaboratorTypeSelect(collab_type, collabTypes),
@@ -241,9 +240,10 @@ export class UserTemplates {
     ) {
         const typeName = compute((ct, types) => types.find(t => t.id.toString() === ct)?.name ?? "", collab_type, collabTypes);
 
-        return create("div")
+        return create("a")
             .classes("user-widget", "collaborator", "rounded", "flex-v", "padded-inline")
             .attributes("user_id", user_id, "username", username)
+            .href(Links.PROFILE(username))
             .children(
                 create("div")
                     .classes("flex", "align-children")
@@ -262,8 +262,7 @@ export class UserTemplates {
                                 "nopointer",
                                 "user-name",
                                 "hideOnSmallBreakpoint",
-                            )
-                            .text("@" + username)
+                            ).text("@" + username)
                             .attributes("data-user-id", user_id)
                             .build(),
                         GenericTemplates.tag(typeName),
