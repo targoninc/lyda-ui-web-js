@@ -667,10 +667,10 @@ export class TrackEditTemplates {
         const collabTypeOptions = compute(types => {
             return types.map(
                 t =>
-                    <SelectOption>{
+                    {
                         name: t.name,
                         id: t.id.toString(),
-                    },
+                    } as SelectOption,
             );
         }, collabTypes);
 
