@@ -1,21 +1,21 @@
-import {QueueManager} from "../../Streaming/QueueManager.ts";
-import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
-import {userHasSettingValue, Util} from "../../Classes/Util.ts";
+import { QueueManager } from "../../Streaming/QueueManager.ts";
+import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
+import { userHasSettingValue, Util } from "../../Classes/Util.ts";
 import { compute, create, nullElement, signal, StringOrSignal, when } from "@targoninc/jess";
-import {Images} from "../../Enums/Images.ts";
-import {button, icon} from "@targoninc/jess-components";
-import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import {autoQueue, contextQueue, currentTrackId, currentUser, manualQueue, queueVisible} from "../../state.ts";
-import {PlayManager} from "../../Streaming/PlayManager.ts";
-import {MusicTemplates} from "./MusicTemplates.ts";
-import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
-import {startItem} from "../../Actions/MusicActions.ts";
-import {TrackTemplates} from "./TrackTemplates.ts";
-import {PlayerTemplates} from "./PlayerTemplates.ts";
-import {UserTemplates} from "../account/UserTemplates.ts";
-import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
-import {DragActions} from "../../Actions/DragActions.ts";
-import {UserSettings} from "@targoninc/lyda-shared/src/Enums/UserSettings";
+import { Images } from "../../Enums/Images.ts";
+import { button, icon } from "@targoninc/jess-components";
+import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import { autoQueue, contextQueue, currentTrackId, currentUser, manualQueue, queueVisible } from "../../state.ts";
+import { PlayManager } from "../../Streaming/PlayManager.ts";
+import { MusicTemplates } from "./MusicTemplates.ts";
+import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
+import { startItem } from "../../Actions/MusicActions.ts";
+import { TrackTemplates } from "./TrackTemplates.ts";
+import { PlayerTemplates } from "./PlayerTemplates.ts";
+import { UserTemplates } from "../account/UserTemplates.ts";
+import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
+import { DragActions } from "../../Actions/DragActions.ts";
+import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
 
 export class QueueTemplates {
     static queueItem(track: Track, index: number, isManual: boolean) {
@@ -70,8 +70,7 @@ export class QueueTemplates {
                     ).classes("no-gap"),
                 ),
                 when(isManual, QueueTemplates.manualQueueItemActions(index))
-            ).id(track.id)
-            .build();
+            ).id(track.id).build();
     }
 
     static manualQueueItemActions(index: number) {
@@ -181,7 +180,6 @@ export class QueueTemplates {
             parent.children(
                 compute(t => t ? QueueTemplates.queueItem(t.track, i, isManual) : nullElement(), track)
             ).build()
-        ).classes("relative")
-            .build();
+        ).classes("relative").build();
     }
 }

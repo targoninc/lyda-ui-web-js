@@ -1,14 +1,14 @@
-import {notify} from "./Ui.ts";
-import {navigate} from "../Routing/Router.ts";
-import {Signal} from "@targoninc/jess";
-import {UploadableTrack} from "../Models/UploadableTrack.ts";
-import {MediaUploader} from "../Api/MediaUploader.ts";
-import {RoutePath} from "../Routing/routes.ts";
-import {ProgressState} from "@targoninc/lyda-shared/src/Enums/ProgressState";
-import {NotificationType} from "../Enums/NotificationType.ts";
-import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
-import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import {ProgressPart} from "../Models/ProgressPart.ts";
+import { notify } from "./Ui.ts";
+import { navigate } from "../Routing/Router.ts";
+import { Signal } from "@targoninc/jess";
+import { UploadableTrack } from "../Models/UploadableTrack.ts";
+import { MediaUploader } from "../Api/MediaUploader.ts";
+import { RoutePath } from "../Routing/routes.ts";
+import { ProgressState } from "@targoninc/lyda-shared/src/Enums/ProgressState";
+import { NotificationType } from "../Enums/NotificationType.ts";
+import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType";
+import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import { ProgressPart } from "../Models/ProgressPart.ts";
 import { Api } from "../Api/Api.ts";
 
 export class AudioUpload {
@@ -28,31 +28,6 @@ export class AudioUpload {
             state: ProgressState.notStarted,
             retryFunction: () => this.createTrackThenNext()
         };
-        /*this.progress.value = [
-            {
-                id: "details",
-                icon: "info",
-                text: signal("Details"),
-                state: signal<ProgressState>(ProgressState.notStarted),
-                retryFunction: () => this.createTrackThenNext()
-            },
-            {
-                id: "audio",
-                icon: "music_note",
-                text: signal("Audio"),
-                state: signal<ProgressState>(ProgressState.notStarted),
-                retryFunction: () => this.uploadAudioThenNext(),
-                progress: signal(0)
-            },
-            {
-                id: "cover",
-                icon: "add_photo_alternate",
-                text: signal("Cover"),
-                state: signal<ProgressState>(ProgressState.notStarted),
-                retryFunction: () => this.uploadCoverThenNext(),
-                progress: signal(0)
-            }
-        ]*/
 
         this.uploadTrack().then();
     }

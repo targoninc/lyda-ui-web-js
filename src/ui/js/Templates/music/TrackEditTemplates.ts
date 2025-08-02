@@ -1,12 +1,12 @@
-import {FormTemplates} from "../generic/FormTemplates.ts";
-import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
-import {Icons} from "../../Enums/Icons.ts";
-import {UserTemplates} from "../account/UserTemplates.ts";
-import {Images} from "../../Enums/Images.ts";
-import {TrackActions} from "../../Actions/TrackActions.ts";
-import {downloadFile, target, Util} from "../../Classes/Util.ts";
-import {AudioUpload} from "../../Classes/AudioUpload.ts";
-import {Ui} from "../../Classes/Ui.ts";
+import { FormTemplates } from "../generic/FormTemplates.ts";
+import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
+import { Icons } from "../../Enums/Icons.ts";
+import { UserTemplates } from "../account/UserTemplates.ts";
+import { Images } from "../../Enums/Images.ts";
+import { TrackActions } from "../../Actions/TrackActions.ts";
+import { downloadFile, target, Util } from "../../Classes/Util.ts";
+import { AudioUpload } from "../../Classes/AudioUpload.ts";
+import { Ui } from "../../Classes/Ui.ts";
 import {
     AnyElement,
     AnyNode,
@@ -15,25 +15,29 @@ import {
     DomNode,
     HtmlPropertyValue,
     InputType,
+    nullElement,
     Signal,
     signal,
     signalMap,
     StringOrSignal,
     TypeOrSignal,
-    when
+    when,
 } from "@targoninc/jess";
-import {AlbumActions} from "../../Actions/AlbumActions.ts";
-import {reload} from "../../Routing/Router.ts";
-import {PlayManager} from "../../Streaming/PlayManager.ts";
-import {button, checkbox, errorList, input, SelectOption, textarea, toggle} from "@targoninc/jess-components";
-import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import {UploadInfo} from "../../Models/UploadInfo.ts";
-import {UploadableTrack} from "../../Models/UploadableTrack.ts";
-import {TrackCollaborator} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
-import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
-import {Genre} from "@targoninc/lyda-shared/src/Enums/Genre";
-import {TrackValidators} from "../../Classes/Validators/TrackValidators.ts";
-import {ProgressPart} from "../../Models/ProgressPart.ts";
+import { AlbumActions } from "../../Actions/AlbumActions.ts";
+import { reload } from "../../Routing/Router.ts";
+import { PlayManager } from "../../Streaming/PlayManager.ts";
+import { button, checkbox, errorList, input, select, SelectOption, textarea, toggle } from "@targoninc/jess-components";
+import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import { UploadInfo } from "../../Models/UploadInfo.ts";
+import { UploadableTrack } from "../../Models/UploadableTrack.ts";
+import { TrackCollaborator } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
+import { Genre } from "@targoninc/lyda-shared/src/Enums/Genre";
+import { TrackValidators } from "../../Classes/Validators/TrackValidators.ts";
+import { ProgressPart } from "../../Models/ProgressPart.ts";
+import { CollaboratorType } from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
+import { Api } from "../../Api/Api.ts";
+import { SearchResult } from "@targoninc/lyda-shared/src/Models/SearchResult";
+import { currentUser } from "../../state.ts";
 
 export class TrackEditTemplates {
     static uploadPage() {
@@ -51,173 +55,143 @@ export class TrackEditTemplates {
             price: 1,
             collaborators: [],
             termsOfService: false,
-        } satisfies UploadableTrack);
+        });
         const errorSections = signal<string[]>([]);
         const errorFields = signal<string[]>([]);
         const uploadInfo = signal<UploadInfo[]>([]);
 
-        return create("div")
-            .children(
-                create("progress")
-                    .classes("progress")
-                    .attributes("max", "100", "value", "0")
-                    .styles("display", "none")
-                    .build(),
-                create("div")
-                    .classes("success")
-                    .build(),
-                create("div")
-                    .classes("error")
-                    .build(),
-                create("div")
-                    .classes("flex-v")
-                    .children(
-                        create("h3")
-                            .text("Upload")
-                            .build(),
-                        TrackEditTemplates.upDownButtons(state, true),
-                        TrackEditTemplates.trackUpload(state, errorSections),
-                        TrackEditTemplates.uploadButton(state, errorSections, errorFields),
-                        TrackEditTemplates.uploadInfo(uploadInfo),
-                    ).build(),
-            ).build();
+        return create("div").children(
+            create("progress").classes("progress").attributes("max", "100", "value", "0").styles("display", "none").build(),
+            create("div").classes("success").build(),
+            create("div").classes("error").build(),
+            create("div").classes("flex-v").children(
+                create("h3").text("Upload").build(),
+                TrackEditTemplates.upDownButtons(state, true),
+                TrackEditTemplates.trackUpload(state, errorSections),
+                TrackEditTemplates.uploadButton(state, errorSections, errorFields),
+                TrackEditTemplates.uploadInfo(uploadInfo),
+            ).build(),
+        ).build();
     }
 
     static openEditPageButton(track: Track) {
         return button({
             text: "Edit",
-            icon: {icon: "edit"},
+            icon: { icon: "edit" },
             onclick: async () => {
                 TrackActions.getTrackEditModal(track);
-            }
+            },
         });
     }
 
     static addToAlbumsButton(track: Track) {
         return button({
             text: "Add to albums",
-            icon: {icon: "forms_add_on"},
+            icon: { icon: "forms_add_on" },
             onclick: async () => {
                 await AlbumActions.openAddToAlbumModal(track);
-            }
+            },
         });
     }
 
     static editTrackModal(track: Track, confirmCallback: Function, cancelCallback: Function) {
         const state = signal(<UploadableTrack>{
             ...track,
-            release_date: new Date(track.release_date)
+            release_date: new Date(track.release_date),
         });
 
-        return create("div")
-                .classes("flex-v")
-                .children(
-                    create("div")
-                        .classes("flex")
-                        .children(
-                            create("img")
-                                .classes("icon", "svg")
-                                .styles("width", "30px", "height", "auto")
-                                .attributes("src", Icons.PEN)
-                                .build(),
-                            create("h2")
-                                .text("Edit track")
-                                .build()
-                        ).build(),
-                    create("p")
-                        .text("Edit the track details below")
-                        .build(),
-                    TrackEditTemplates.upDownButtons(state, true),
-                    TrackEditTemplates.trackEdit(state, signal<string[]>([]), false),
-                    create("div")
-                        .classes("flex")
-                        .children(
-                            button({
-                                text: "Save",
-                                icon: {icon: "check"},
-                                classes: ["positive"],
-                                onclick: () => {
-                                    confirmCallback(state.value);
-                                }
-                            }),
-                            button({
-                                text: "Cancel",
-                                icon: {icon: "close"},
-                                classes: ["negative"],
-                                onclick: cancelCallback
-                            }),
-                        ).build()
-                ).build();
+        return create("div").classes("flex-v").children(
+            create("div").classes("flex").children(
+                create("img").classes("icon", "svg").styles("width", "30px", "height", "auto").attributes("src", Icons.PEN).build(),
+                create("h2").text("Edit track").build(),
+            ).build(),
+            create("p").text("Edit the track details below").build(),
+            TrackEditTemplates.upDownButtons(state, true),
+            TrackEditTemplates.trackEdit(state, signal<string[]>([])),
+            create("div").classes("flex").children(
+                button({
+                    text: "Save",
+                    icon: { icon: "check" },
+                    classes: ["positive"],
+                    onclick: () => {
+                        confirmCallback(state.value);
+                    },
+                }),
+                button({
+                    text: "Cancel",
+                    icon: { icon: "close" },
+                    classes: ["negative"],
+                    onclick: cancelCallback,
+                }),
+            ).build(),
+        ).build();
     }
 
     static upDownButtons(state: Signal<any>, uploadEnabled = false) {
         const buttons = [
             button({
                 text: "Download Info",
-                icon: {icon: "file_save"},
+                icon: { icon: "file_save" },
                 onclick: () => {
                     const json = JSON.stringify(state.value);
                     downloadFile(`${state.value.title}_${Date.now()}.json`, json);
-                }
+                },
             }),
         ];
 
         if (uploadEnabled) {
-            buttons.push(button({
-                text: "Upload Info",
-                icon: {icon: "upload_file"},
-                onclick: () => {
-                    const fileInput = document.createElement("input");
-                    fileInput.type = "file";
-                    fileInput.onchange = async (e) => {
-                        const file = target(e).files![0];
-                        const reader = new FileReader();
-                        reader.onload = async (e) => {
-                            const jsonString = target<FileReader>(e).result as string;
-                            state.value = JSON.parse(jsonString);
+            buttons.push(
+                button({
+                    text: "Upload Info",
+                    icon: { icon: "upload_file" },
+                    onclick: () => {
+                        const fileInput = document.createElement("input");
+                        fileInput.type = "file";
+                        fileInput.onchange = async e => {
+                            const file = target(e).files![0];
+                            const reader = new FileReader();
+                            reader.onload = async e => {
+                                const jsonString = target<FileReader>(e).result as string;
+                                state.value = JSON.parse(jsonString);
+                            };
+                            reader.readAsText(file);
                         };
-                        reader.readAsText(file);
-                    };
-                    fileInput.click();
-                },
-            }));
+                        fileInput.click();
+                    },
+                }),
+            );
         }
 
-        return create("div")
-            .classes("flex")
-            .children(...buttons)
-            .build();
+        return create("div").classes("flex").children(...buttons).build();
     }
 
     static uploadInfo(uploadInfo: Signal<UploadInfo[]>) {
-        return create("div")
-            .id("upload-info")
-            .children(
-                signalMap(uploadInfo, create("div").classes("flex-v"), (info: UploadInfo) => TrackEditTemplates.uploadInfoItem(info)),
-            ).build();
+        return create("div").id("upload-info").children(
+            signalMap(uploadInfo, create("div").classes("flex-v"), (info: UploadInfo) =>
+                TrackEditTemplates.uploadInfoItem(info),
+            ),
+        ).build();
     }
 
     static uploadInfoItem(info: UploadInfo) {
-        return create("div")
-            .classes("flex-v")
-            .children(
-                create("span")
-                    .id("upload-info-" + info.type)
-                    .classes("upload-info-item", ...(info.classes ?? []))
-                    .text(info.value)
-                    .build()
-            ).build();
+        return create("div").classes("flex-v").children(
+            create("span").id("upload-info-" + info.type).classes("upload-info-item", ...(info.classes ?? [])).text(info.value).build(),
+        ).build();
     }
 
-    static uploadButton(state: Signal<UploadableTrack>, errorSections: Signal<string[]>, errorFields: Signal<string[]>) {
+    static uploadButton(
+        state: Signal<UploadableTrack>,
+        errorSections: Signal<string[]>,
+        errorFields: Signal<string[]>,
+    ) {
         const errors = signal<string[]>([]);
         const disabled = compute((s: UploadableTrack) => {
             const newErrors = [];
             const requiredProps = [
-                {section: "audio", field: "audioFileName"},
-                {section: "info", field: "title"},
-                {section: "info", field: "genre"},
-                {section: "terms", field: "termsOfService"},
+                { section: "audio", field: "audioFileName" },
+                { section: "info", field: "title" },
+                { section: "info", field: "genre" },
+                { section: "terms", field: "termsOfService" },
             ];
             if (requiredProps.some(p => !s[p.field])) {
                 newErrors.push("Missing required fields");
@@ -232,7 +206,7 @@ export class TrackEditTemplates {
 
             return newErrors.length > 0;
         }, state);
-        const buttonClass = compute((d): string => d ? "disabled" : "positive", disabled);
+        const buttonClass = compute((d): string => (d ? "disabled" : "positive"), disabled);
         const progressState = signal<ProgressPart | null>(null);
 
         return vertical(
@@ -241,92 +215,113 @@ export class TrackEditTemplates {
                     text: "Upload",
                     disabled,
                     classes: [buttonClass],
-                    onclick: (e) => {
+                    onclick: e => {
                         new AudioUpload(e, state, progressState);
                     },
-                    icon: {icon: "upload"},
+                    icon: { icon: "upload" },
                 }),
-                GenericTemplates.progressSectionPart(progressState)
+                GenericTemplates.progressSectionPart(progressState),
             ),
             errorList(errors),
         );
     }
 
     static filesSection(isNewTrack = false, state: Signal<UploadableTrack>, errorSections: Signal<string[]>) {
-        return create("div")
-            .classes("flex-v")
-            .children(
-                TrackEditTemplates.sectionCard("Audio", errorSections, "audio", [TrackEditTemplates.audioFile(isNewTrack, state)], "music_note", ["flex-grow"]),
-                TrackEditTemplates.sectionCard("Artwork", errorSections, "artwork", [
-                    TrackEditTemplates.coverFile(state),
-                    TrackEditTemplates.imagePreview("cover-file")
-                ], "image", ["flex-grow"]),
-            ).build();
+        return create("div").classes("flex-v").children(
+            TrackEditTemplates.sectionCard(
+                "Audio",
+                errorSections,
+                "audio",
+                [TrackEditTemplates.audioFile(isNewTrack, state)],
+                "music_note",
+                ["flex-grow"],
+            ),
+            TrackEditTemplates.sectionCard(
+                "Artwork",
+                errorSections,
+                "artwork",
+                [TrackEditTemplates.coverFile(state), TrackEditTemplates.imagePreview("cover-file")],
+                "image",
+                ["flex-grow"],
+            ),
+        ).build();
     }
 
-    static trackEdit(state: Signal<UploadableTrack>, errorSections: Signal<string[]>, enableLinkedUsers = true) {
-        const isPrivate = compute((s) => s.visibility === "private", state);
+    static trackEdit(state: Signal<UploadableTrack>, errorSections: Signal<string[]>) {
+        const isPrivate = compute(s => s.visibility === "private", state);
 
-        return create("div")
-            .classes("flex-v")
-            .children(
-                TrackEditTemplates.trackDetails(errorSections, isPrivate, state, enableLinkedUsers),
-                create("div")
-                    .classes("flex-v")
-                    .children(
-                        TrackEditTemplates.monetizationSection(errorSections, state),
-                    ).build()
-            ).build();
+        return create("div").classes("flex-v").children(
+            TrackEditTemplates.trackDetails(errorSections, isPrivate, state),
+            create("div").classes("flex-v").children(TrackEditTemplates.monetizationSection(errorSections, state)).build(),
+        ).build();
     }
 
-    private static trackDetails(errorSections: Signal<string[]>, isPrivate: Signal<boolean>, state: Signal<UploadableTrack>, enableLinkedUsers: boolean) {
-        return TrackEditTemplates.sectionCard("Track Details", errorSections, "info", [
-            create("div")
-                .classes("flex")
-                .children(
+    private static trackDetails(
+        errorSections: Signal<string[]>,
+        isPrivate: Signal<boolean>,
+        state: Signal<UploadableTrack>,
+    ) {
+        return TrackEditTemplates.sectionCard(
+            "Track Details",
+            errorSections,
+            "info",
+            [
+                create("div").classes("flex").children(
                     toggle({
                         name: "visibility",
                         label: "Private",
                         text: "Private",
                         checked: isPrivate,
-                        onchange: (v) => {
-                            state.value = {...state.value, visibility: v ? "private" : "public"};
-                        }
+                        onchange: v => {
+                            state.value = {
+                                ...state.value,
+                                visibility: v ? "private" : "public",
+                            };
+                        },
                     }),
                 ).build(),
-            TrackEditTemplates.titleInput(state),
-            TrackEditTemplates.creditsInput(state),
-            TrackEditTemplates.artistNameInput(state),
-            when(enableLinkedUsers, TrackEditTemplates.linkedUsers(state.value.collaborators, state)),
-            GenericTemplates.releaseDateInput(state),
-            TrackEditTemplates.genreInput(state),
-            TrackEditTemplates.isrcInput(state),
-            TrackEditTemplates.upcInput(state),
-            TrackEditTemplates.descriptionInput(state),
-        ], "info", ["flex-grow"]);
+                TrackEditTemplates.titleInput(state),
+                TrackEditTemplates.creditsInput(state),
+                TrackEditTemplates.artistNameInput(state),
+                TrackEditTemplates.linkedUsers(state.value.collaborators, state as Signal<UploadableTrack | Track>, true),
+                GenericTemplates.releaseDateInput(state),
+                TrackEditTemplates.genreInput(state),
+                TrackEditTemplates.isrcInput(state),
+                TrackEditTemplates.upcInput(state),
+                TrackEditTemplates.descriptionInput(state),
+            ],
+            "info",
+            ["flex-grow"],
+        );
     }
 
     private static monetizationSection(errorSections: Signal<string[]>, state: Signal<UploadableTrack>) {
-        return TrackEditTemplates.sectionCard("Monetization", errorSections, "monetization", [
-            TrackEditTemplates.monetizationInfo(),
-            input<number>({
-                type: InputType.number,
-                name: "price",
-                label: "Minimum track price in USD",
-                placeholder: "1$",
-                value: compute(s => s.price ?? 0, state),
-                validators: [
-                    (v) => {
-                        if (v < 0) {
-                            return ["Minimum track price must be a positive number"];
-                        }
-                    }
-                ],
-                onchange: (v) => {
-                    state.value = {...state.value, price: v};
-                }
-            }),
-        ], "attach_money");
+        return TrackEditTemplates.sectionCard(
+            "Monetization",
+            errorSections,
+            "monetization",
+            [
+                TrackEditTemplates.monetizationInfo(),
+                input<number>({
+                    type: InputType.number,
+                    name: "price",
+                    label: "Minimum track price in USD",
+                    placeholder: "1$",
+                    value: compute(s => s.price ?? 0, state),
+                    validators: [
+                        v => {
+                            if (v < 0) {
+                                return ["Minimum track price must be a positive number"];
+                            }
+                        },
+                    ],
+                    onchange: v => {
+                        state.value = { ...state.value, price: v };
+                    },
+                }),
+            ],
+            "attach_money",
+        );
     }
 
     private static titleInput(state: Signal<UploadableTrack>) {
@@ -338,9 +333,9 @@ export class TrackEditTemplates {
             placeholder: "Track title",
             value: compute(s => s.title ?? "", state),
             validators: TrackValidators.titleValidators,
-            onchange: (v) => {
-                state.value = {...state.value, title: v};
-            }
+            onchange: v => {
+                state.value = { ...state.value, title: v };
+            },
         });
     }
 
@@ -352,9 +347,9 @@ export class TrackEditTemplates {
             placeholder: "John Music, Alice Frequency",
             validators: TrackValidators.creditsValidators,
             value: compute(s => s.credits ?? "", state),
-            onchange: (v) => {
-                state.value = {...state.value, credits: v};
-            }
+            onchange: v => {
+                state.value = { ...state.value, credits: v };
+            },
         });
     }
 
@@ -365,9 +360,9 @@ export class TrackEditTemplates {
             placeholder: "My cool track",
             validators: TrackValidators.descriptionValidators,
             value: compute(s => s.description ?? "", state),
-            onchange: (v) => {
-                state.value = {...state.value, description: v};
-            }
+            onchange: v => {
+                state.value = { ...state.value, description: v };
+            },
         });
     }
 
@@ -379,16 +374,14 @@ export class TrackEditTemplates {
             placeholder: "00888072469600",
             validators: TrackValidators.upcValidators,
             value: compute(s => s.upc ?? "", state),
-            onchange: (v) => {
-                state.value = {...state.value, upc: v};
-            }
+            onchange: v => {
+                state.value = { ...state.value, upc: v };
+            },
         });
     }
 
     static genreInput(parentState: Signal<UploadableTrack>) {
-        const genres = Object.values(Genre).map((genre: string) => {
-            return {name: genre, id: genre};
-        }) as SelectOption[];
+        const genres = Object.values(Genre).map((genre: string) => ({ name: genre, id: genre })) as SelectOption[];
         const value = compute(p => p.genre ?? "other", parentState);
         value.subscribe((v, changed) => {
             if (!changed) {
@@ -397,7 +390,7 @@ export class TrackEditTemplates {
 
             parentState.value = {
                 ...parentState.value,
-                genre: v
+                genre: v,
             };
         });
         return FormTemplates.dropDownField("Genre", signal(genres), value);
@@ -411,9 +404,9 @@ export class TrackEditTemplates {
             placeholder: "QZNWX2227540",
             validators: TrackValidators.isrcValidators,
             value: compute(s => s.isrc ?? "", state),
-            onchange: (v) => {
-                state.value = {...state.value, isrc: v};
-            }
+            onchange: v => {
+                state.value = { ...state.value, isrc: v };
+            },
         });
     }
 
@@ -425,25 +418,30 @@ export class TrackEditTemplates {
             placeholder: "My other alias",
             validators: TrackValidators.artistnameValidators,
             value: compute(s => s.artistname ?? "", state),
-            onchange: (v) => {
-                state.value = {...state.value, artistname: v};
-            }
+            onchange: v => {
+                state.value = { ...state.value, artistname: v };
+            },
         });
     }
 
-    static trackUpload(state: Signal<UploadableTrack>, errorSections: Signal<string[]>, enableTos = true, enableLinkedUsers = true) {
-        const isPrivate = compute((s) => s.visibility === "private", state);
+    static trackUpload(
+        state: Signal<UploadableTrack>,
+        errorSections: Signal<string[]>,
+        enableTos = true,
+    ) {
+        const isPrivate = compute(s => s.visibility === "private", state);
 
-        return create("div")
-            .classes("flex")
-            .children(
-                TrackEditTemplates.trackDetails(errorSections, isPrivate, state, enableLinkedUsers),
-                create("div")
-                    .classes("flex-v")
-                    .children(
-                        TrackEditTemplates.filesSection(true, state, errorSections),
-                        TrackEditTemplates.monetizationSection(errorSections, state),
-                        enableTos ? TrackEditTemplates.sectionCard("Copyright", errorSections, "terms", [
+        return create("div").classes("flex").children(
+            TrackEditTemplates.trackDetails(errorSections, isPrivate, state),
+            create("div").classes("flex-v").children(
+                TrackEditTemplates.filesSection(true, state, errorSections),
+                TrackEditTemplates.monetizationSection(errorSections, state),
+                enableTos
+                    ? TrackEditTemplates.sectionCard(
+                        "Copyright",
+                        errorSections,
+                        "terms",
+                        [
                             checkbox({
                                 name: "termsOfService",
                                 text: "I have all the necessary rights to distribute this content*",
@@ -451,159 +449,173 @@ export class TrackEditTemplates {
                                 required: true,
                                 onchange: () => {
                                     const old = state.value;
-                                    state.value = {...old, termsOfService: !old.termsOfService};
-                                }
+                                    state.value = {
+                                        ...old,
+                                        termsOfService: !old.termsOfService,
+                                    };
+                                },
                             }),
-                        ], "gavel") : null,
-                    ).build()
-            ).build();
+                        ],
+                        "gavel",
+                    )
+                    : null,
+            ).build(),
+        ).build();
     }
 
-    static sectionCard(title: HtmlPropertyValue, errorSections: Signal<string[]>, id: string, children: (TypeOrSignal<DomNode> | TypeOrSignal<AnyElement> | TypeOrSignal<AnyNode> | null)[], icon: string | null = null, classes: StringOrSignal[] = []) {
+    static sectionCard(
+        title: HtmlPropertyValue,
+        errorSections: Signal<string[]>,
+        id: string,
+        children: (TypeOrSignal<DomNode> | TypeOrSignal<AnyElement> | TypeOrSignal<AnyNode> | null)[],
+        icon: string | null = null,
+        classes: StringOrSignal[] = [],
+    ) {
         const hasError = compute((e: string[]) => e.includes(id), errorSections);
 
-        return create("div")
-            .classes("border-card", "flex-v", ...classes)
-            .children(
-                GenericTemplates.cardLabel(title, icon, hasError),
-                ...children
-            ).build();
+        return create("div").classes("border-card", "flex-v", ...classes).children(GenericTemplates.cardLabel(title, icon, hasError), ...children).build();
     }
 
     static audioFile(canOverwriteTitle = false, parentState: Signal<UploadableTrack>) {
-        return FormTemplates.fileField("Audio File*", "Choose audio file", "audio-file", "audio/*", true, async (fileName: string, files) => {
-            if (canOverwriteTitle) {
-                if (fileName) {
-                    const safeName = fileName.replace(/\.[^/.]+$/, "");
-                    if (parentState) {
-                        parentState.value = {...parentState.value, title: safeName, audioFileName: safeName};
+        return FormTemplates.fileField(
+            "Audio File*",
+            "Choose audio file",
+            "audio-file",
+            "audio/*",
+            true,
+            async (fileName: string, files) => {
+                if (canOverwriteTitle) {
+                    if (fileName) {
+                        const safeName = fileName.replace(/\.[^/.]+$/, "");
+                        if (parentState) {
+                            parentState.value = {
+                                ...parentState.value,
+                                title: safeName,
+                                audioFileName: safeName,
+                            };
+                        }
                     }
                 }
-            }
-            parentState.value = {
-                ...parentState.value,
-                audioFiles: files
-            };
-        });
+                parentState.value = {
+                    ...parentState.value,
+                    audioFiles: files,
+                };
+            },
+        );
     }
 
     static coverFile(parentState: Signal<UploadableTrack>) {
-        return FormTemplates.fileField("Cover File", "Choose image file", "cover-file", "image/*", false, async (fileName: string, files) => {
-            if (fileName) {
-                if (parentState) {
-                    const safeName = fileName.replace(/\.[^/.]+$/, "");
-                    parentState.value = {...parentState.value, coverArtFileName: safeName};
+        return FormTemplates.fileField(
+            "Cover File",
+            "Choose image file",
+            "cover-file",
+            "image/*",
+            false,
+            async (fileName: string, files) => {
+                if (fileName) {
+                    if (parentState) {
+                        const safeName = fileName.replace(/\.[^/.]+$/, "");
+                        parentState.value = { ...parentState.value, coverArtFileName: safeName };
+                    }
                 }
-            }
-            parentState.value = {
-                ...parentState.value,
-                coverArtFiles: files
-            };
-        });
+                parentState.value = {
+                    ...parentState.value,
+                    coverArtFiles: files,
+                };
+            },
+        );
     }
 
     static imagePreview(name: HtmlPropertyValue) {
-        return create("img")
-            .id(name + "-preview")
-            .classes("image-preview", "hidden")
-            .build();
+        return create("img").id(name + "-preview").classes("image-preview", "hidden").build();
     }
 
     static monetizationInfo() {
-        return create("span")
-            .text("This track will be monetized through streaming subscriptions and available for buying.")
-            .build();
-    }
-
-    static removeLinkedUser(removeUserId: number, linkedUserState: Signal<Partial<TrackCollaborator>[]>) {
-        return GenericTemplates.inlineAction("Remove", "remove", "remove_linked_user_" + removeUserId, () => {
-            linkedUserState.value = linkedUserState.value.filter((tc) => tc.user_id !== removeUserId);
-        }, [], ["negative"]);
+        return create("span").text("This track will be monetized through streaming subscriptions and available for buying.").build();
     }
 
     static deleteTrackButton(trackId: number) {
         return button({
             text: "Delete",
-            icon: {icon: "delete"},
+            icon: { icon: "delete" },
             classes: ["negative"],
             onclick: async () => {
-                await Ui.getConfirmationModal("Delete track", "Are you sure you want to delete this track?", "Yes", "No", () => TrackActions.deleteTrack(trackId), () => {
-                }, Icons.WARNING);
-            }
-        });
-    }
-
-    static addLinkedUserButton(callback: Function, classes: string[] = []) {
-        return button({
-            text: "Add collaborator",
-            id: "add_linked_user",
-            icon: {icon: "person_add"},
-            classes,
-            onclick: async () => {
-                await Ui.getAddLinkedUserModal("Link a user", "Enter the username of the user you want to link", "", "Link", "Cancel", callback, () => {
-                }, "person_add");
+                await Ui.getConfirmationModal(
+                    "Delete track",
+                    "Are you sure you want to delete this track?",
+                    "Yes",
+                    "No",
+                    () => TrackActions.deleteTrack(trackId),
+                    () => {},
+                    Icons.WARNING,
+                );
             },
         });
     }
 
-    static linkedUsers(linkedUsers: Partial<TrackCollaborator>[] = [], parentState: Signal<UploadableTrack> | null = null) {
+    static linkedUsers(
+        linkedUsers: Partial<TrackCollaborator>[] = [],
+        parentState: Signal<UploadableTrack | Track> | null = null,
+        editable: boolean,
+    ) {
         const linkedUserState = signal(linkedUsers);
-        const sendJson = signal(JSON.stringify(linkedUsers));
-        const userMap = new Map();
-        const container = create("div")
-            .classes("flex")
-            .build();
         linkedUserState.subscribe((newValue: any[]) => {
-            container.innerHTML = "";
-            for (const id of newValue) {
-                const user = userMap.get(id);
-                const avatarState = signal(Images.DEFAULT_AVATAR);
-                if (user.has_avatar) {
-                    avatarState.value = Util.getUserAvatar(user.id);
-                }
-                container.appendChild(UserTemplates.linkedUser(user.id, user.username, user.displayname, avatarState, user.collab_type.name, TrackEditTemplates.removeLinkedUser(user.id, linkedUserState), [], ["no-redirect"]));
-            }
-            const sendValue = newValue.map((id: number) => userMap.get(id));
-            sendJson.value = JSON.stringify(sendValue);
-            if (parentState && parentState.value.collaborators !== sendValue) {
+            if (parentState && JSON.stringify(parentState.value.collaborators) !== JSON.stringify(newValue)) {
                 parentState.value = {
                     ...parentState.value,
-                    collaborators: sendValue
+                    collaborators: newValue,
                 };
             }
         });
+        const id = compute(s => s.id, parentState ?? signal(<UploadableTrack | Track>{}));
+        const collabTypes = signal<CollaboratorType[]>([]);
+        Api.getCollabTypes().then(types => (collabTypes.value = types ?? []));
+        const hasLus = linkedUsers.length > 0;
 
         return create("div")
             .classes("flex-v", "small-gap")
             .children(
-                create("label")
+                when(hasLus, create("label")
                     .text("Linked Users")
-                    .build(),
-                create("div")
-                    .classes("flex")
-                    .children(
-                        create("div")
-                            .classes("flex")
-                            .id("linked_users_container")
-                            .build(),
-                        create("input")
-                            .classes("hidden")
-                            .value(sendJson)
-                            .name("linked_users")
-                            .build(),
-                        TrackEditTemplates.addLinkedUserButton((newUsername: string, newUser: User) => {
-                            userMap.set(newUser.id, newUser);
-                            if (!linkedUserState.value.some(tc => tc.user_id === newUser.id)) {
-                                linkedUserState.value = [...linkedUserState.value, <Partial<TrackCollaborator>>{
-                                    user_id: newUser.id,
-                                    type: -1, // TODO: Use actual type?
-                                    track_id: parentState ? parentState.value.id : null,
-                                    approved: false,
-                                    denied: false,
-                                }];
-                            }
-                        }, ["align-center"])
-                    ).build(),
+                    .build()),
+                vertical(
+                    signalMap(linkedUserState, horizontal(), collaborator => {
+                        const user = collaborator.user;
+                        if (!user) {
+                            return nullElement();
+                        }
+                        const avatarState = signal(Images.DEFAULT_AVATAR);
+                        if (user.has_avatar) {
+                            avatarState.value = Util.getUserAvatar(user.id);
+                        }
+
+                        if (editable) {
+                            return UserTemplates.editableLinkedUser(
+                                user.id,
+                                user.username,
+                                user.displayname,
+                                avatarState,
+                                signal(collaborator.collab_type?.id.toString() ?? ""),
+                                linkedUserState,
+                                collabTypes,
+                                collaborator.approved ?? false,
+                                collaborator.denied ?? false,
+                            );
+                        }
+
+                        return UserTemplates.linkedUser(
+                            user.id,
+                            user.username,
+                            user.displayname,
+                            avatarState,
+                            signal(collaborator.collab_type?.id.toString() ?? ""),
+                            collabTypes,
+                            collaborator.approved ?? false,
+                            collaborator.denied ?? false,
+                        );
+                    }),
+                    when(editable, TrackEditTemplates.linkedUsersEditor(linkedUserState, id, collabTypes)),
+                ),
             ).build();
     }
 
@@ -612,7 +624,7 @@ export class TrackEditTemplates {
 
         return button({
             text: "Replace Audio",
-            icon: {icon: "upload"},
+            icon: { icon: "upload" },
             disabled: loading,
             onclick: async () => {
                 await TrackActions.replaceAudio(track.id, true, loading, () => {
@@ -621,5 +633,119 @@ export class TrackEditTemplates {
                 });
             },
         });
+    }
+
+    private static linkedUsersEditor(
+        linkedUserState: Signal<Partial<TrackCollaborator>[]>,
+        referenceId: Signal<number | undefined>,
+        collabTypes: Signal<CollaboratorType[]>,
+    ) {
+        return TrackEditTemplates.linkedUsersAdder(linkedUserState, async (username: string) => {
+            const newUser = await Util.getUserByNameAsync(username);
+            const ct = collabTypes.value.at(0);
+
+            if (ct && !linkedUserState.value.some(tc => tc.user_id === newUser.id)) {
+                linkedUserState.value = [
+                    ...linkedUserState.value,
+                    {
+                        user_id: newUser.id,
+                        user: newUser,
+                        type: ct.id,
+                        collab_type: ct,
+                        track_id: referenceId.value,
+                        created_at: new Date(),
+                        updated_at: new Date(),
+                        approved: false,
+                        denied: false,
+                    },
+                ];
+            }
+        });
+    }
+
+    static collaboratorTypeSelect(collabType: Signal<string>, collabTypes: Signal<CollaboratorType[]>) {
+        const collabTypeOptions = compute(types => {
+            return types.map(
+                t =>
+                    {
+                        name: t.name,
+                        id: t.id.toString(),
+                    } as SelectOption,
+            );
+        }, collabTypes);
+
+        return compute(
+            opts =>
+                select({
+                    options: signal(opts),
+                    value: collabType,
+                    onchange: v => collabType.value = v,
+                }),
+            collabTypeOptions,
+        );
+    }
+
+    static linkedUsersAdder(
+        linkedUserState: Signal<Partial<TrackCollaborator>[]>,
+        addUser: (username: string) => void,
+    ) {
+        const selectedState = signal(0);
+        const users = signal<SearchResult[]>([]);
+        let lastSearch = "";
+        const alreadyHasUser = compute(
+            (tcs, s) => tcs.find(tc => tc.user_id === s) !== undefined,
+            linkedUserState,
+            selectedState,
+        );
+        const disabled = compute(
+            (s, u, a) => u.find(u => u.id === s) === undefined || a,
+            selectedState,
+            users,
+            alreadyHasUser,
+        );
+
+        return create("div").classes("flex-v").children(
+            create("p").text("Linking a user will send a request to them for approval first").build(),
+            horizontal(
+                input({
+                    id: "addUserSearch",
+                    name: "addUserSearch",
+                    type: InputType.text,
+                    placeholder: "Search for a user",
+                    value: "",
+                    debounce: 200,
+                    onchange: async search => {
+                        if (search.trim().length > 0 && search.trim() !== lastSearch) {
+                            lastSearch = search.trim();
+                            const newUsers = (await Api.searchUsers(search.trim())) ?? [];
+                            users.value = newUsers.filter(u => u.id !== currentUser.value?.id);
+                        }
+                    },
+                }),
+                create("div").classes("flex").children(
+                    button({
+                        text: "Add",
+                        disabled: disabled,
+                        onclick: async () => {
+                            const user = users.value.find(u => u.id === selectedState.value);
+                            if (!user) {
+                                return;
+                            }
+
+                            addUser(user.subtitle?.substring(1) ?? "");
+                        },
+                        icon: {
+                            icon: "person_add",
+                        },
+                        classes: ["positive"],
+                    }),
+                ).build(),
+            ),
+            create("div").classes("flex-v").styles("max-height", "200px", "overflow", "auto", "flex-wrap", "nowrap").children(
+                signalMap(users, create("div").classes("flex-v"), user =>
+                    GenericTemplates.addUserLinkSearchResult(user, selectedState),
+                ),
+            ).build(),
+        ).build();
     }
 }

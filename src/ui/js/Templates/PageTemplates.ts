@@ -1,33 +1,33 @@
-import {AuthActions} from "../Actions/AuthActions.ts";
-import {LandingPageTemplates} from "./LandingPageTemplates.ts";
-import {UserTemplates} from "./account/UserTemplates.ts";
-import { create, when, signal, AnyElement } from "@targoninc/jess";
-import {SearchTemplates} from "./SearchTemplates.ts";
-import {SettingsTemplates} from "./account/SettingsTemplates.ts";
-import {RoadmapTemplates} from "./RoadmapTemplates.ts";
-import {EventsTemplates} from "./admin/EventsTemplates.ts";
-import {AlbumTemplates} from "./music/AlbumTemplates.ts";
-import {RoutePath} from "../Routing/routes.ts";
-import {DashboardTemplates} from "./admin/DashboardTemplates.ts";
-import {ModerationUsersTemplates} from "./admin/ModerationUsersTemplates.ts";
-import {ModerationCommentsTemplates} from "./admin/ModerationCommentsTemplates.ts";
-import {LogTemplates} from "./admin/LogTemplates.ts";
-import {RoyaltyTemplates} from "./admin/RoyaltyTemplates.ts";
-import {PayoutTemplates} from "./money/PayoutTemplates.ts";
-import {MusicTemplates} from "./music/MusicTemplates.ts";
-import {PaymentTemplates} from "./money/PaymentTemplates.ts";
-import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
-import {TrackEditTemplates} from "./music/TrackEditTemplates.ts";
-import {Route} from "../Routing/Router.ts";
-import {PlayManager} from "../Streaming/PlayManager.ts";
-import {currentSecretCode, currentUser} from "../state.ts";
-import {TrackTemplates} from "./music/TrackTemplates.ts";
-import {PlaylistTemplates} from "./music/PlaylistTemplates.ts";
-import {StatisticTemplates} from "./StatisticTemplates.ts";
-import {SubscriptionTemplates} from "./SubscriptionTemplates.ts";
-import {notify} from "../Classes/Ui.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
-import {Api} from "../Api/Api.ts";
+import { AuthActions } from "../Actions/AuthActions.ts";
+import { LandingPageTemplates } from "./LandingPageTemplates.ts";
+import { UserTemplates } from "./account/UserTemplates.ts";
+import { AnyElement, create, signal, when } from "@targoninc/jess";
+import { SearchTemplates } from "./SearchTemplates.ts";
+import { SettingsTemplates } from "./account/SettingsTemplates.ts";
+import { RoadmapTemplates } from "./RoadmapTemplates.ts";
+import { EventsTemplates } from "./admin/EventsTemplates.ts";
+import { AlbumTemplates } from "./music/AlbumTemplates.ts";
+import { RoutePath } from "../Routing/routes.ts";
+import { DashboardTemplates } from "./admin/DashboardTemplates.ts";
+import { ModerationUsersTemplates } from "./admin/ModerationUsersTemplates.ts";
+import { ModerationCommentsTemplates } from "./admin/ModerationCommentsTemplates.ts";
+import { LogTemplates } from "./admin/LogTemplates.ts";
+import { RoyaltyTemplates } from "./admin/RoyaltyTemplates.ts";
+import { PayoutTemplates } from "./money/PayoutTemplates.ts";
+import { MusicTemplates } from "./music/MusicTemplates.ts";
+import { PaymentTemplates } from "./money/PaymentTemplates.ts";
+import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import { TrackEditTemplates } from "./music/TrackEditTemplates.ts";
+import { Route } from "../Routing/Router.ts";
+import { PlayManager } from "../Streaming/PlayManager.ts";
+import { currentSecretCode, currentUser } from "../state.ts";
+import { TrackTemplates } from "./music/TrackTemplates.ts";
+import { PlaylistTemplates } from "./music/PlaylistTemplates.ts";
+import { StatisticTemplates } from "./StatisticTemplates.ts";
+import { SubscriptionTemplates } from "./SubscriptionTemplates.ts";
+import { notify } from "../Classes/Ui.ts";
+import { NotificationType } from "../Enums/NotificationType.ts";
+import { Api } from "../Api/Api.ts";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, (route: Route, params: Record<string, string>) => Promise<AnyElement> | AnyElement> = {
@@ -133,8 +133,7 @@ export class PageTemplates {
                 StatisticTemplates.artistRoyaltyActions(),
                 await StatisticTemplates.allStats(),
                 StatisticTemplates.dataExport()
-            )
-            .build();
+            ).build();
     }
 
     static async trackPage(route: Route, params: Record<string, string>) {
@@ -168,8 +167,7 @@ export class PageTemplates {
     static logoutPage() {
         AuthActions.logOutWithRedirect().then();
         return create("div")
-            .text("Logging out...")
-            .build();
+            .text("Logging out...").build();
     }
 
     static faqPage() {
@@ -200,8 +198,7 @@ export class PageTemplates {
                     .classes("answer")
                     .text("We take a percentage of all subscriptions and sales. This varies based on how high our income and expenses are.")
                     .build()
-            )
-            .build();
+            ).build();
     }
 
     static notFoundPage() {

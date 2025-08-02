@@ -1,11 +1,11 @@
-import {compute, Signal, signal, create, when} from "@targoninc/jess";
-import {GenericTemplates} from "../generic/GenericTemplates.ts";
-import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
-import {DashboardTemplates} from "./DashboardTemplates.ts";
-import {Time} from "../../Classes/Helpers/Time.ts";
+import { compute, create, signal, Signal, when } from "@targoninc/jess";
+import { GenericTemplates } from "../generic/GenericTemplates.ts";
+import { Permissions } from "@targoninc/lyda-shared/src/Enums/Permissions";
+import { DashboardTemplates } from "./DashboardTemplates.ts";
+import { Time } from "../../Classes/Helpers/Time.ts";
 import { button, checkbox } from "@targoninc/jess-components";
-import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
-import {Permission} from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
+import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import { Permission } from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
 import { Api } from "../../Api/Api.ts";
 
 export class ModerationUsersTemplates {
@@ -46,8 +46,7 @@ export class ModerationUsersTemplates {
                     )
                     .build(),
                 compute(u => ModerationUsersTemplates.usersList(u), users)
-            )
-            .build();
+            ).build();
     }
 
     static usersList(users: User[]) {
@@ -89,8 +88,7 @@ export class ModerationUsersTemplates {
                 create("td")
                     .text(u.lastlogin ? Time.agoUpdating(new Date(u.lastlogin)) : "")
                     .build()
-            )
-            .build();
+            ).build();
     }
 
     private static permissionsPopup(permissions: Signal<Permission[]>, u: User) {
@@ -115,8 +113,7 @@ export class ModerationUsersTemplates {
                         )
                         .build();
                 })
-            )
-            .build();
+            ).build();
     }
 
     private static permissionCheckbox(

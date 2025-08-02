@@ -106,8 +106,7 @@ export class PlayerTemplates {
                         PlayerTemplates.totalTrackTime(track)
                     )
                     .build()
-            )
-            .build();
+            ).build();
     }
 
     static async mobileAudioPlayer(track: Track) {
@@ -199,15 +198,13 @@ export class PlayerTemplates {
     private static currentTrackTime(mobilePlayer = false) {
         return create("span")
             .classes("nopointer", "align-center", mobilePlayer ? "_" : "hideOnMidBreakpoint")
-            .text(compute(t => Time.format(t.absolute), currentTrackPosition))
-            .build();
+            .text(compute(t => Time.format(t.absolute), currentTrackPosition)).build();
     }
 
     private static totalTrackTime(track: Track, mobilePlayer = false) {
         return create("span")
             .classes("audio-player-time-total", "nopointer", "align-center", mobilePlayer ? "_" : "hideOnMidBreakpoint")
-            .text(Time.format(track.length))
-            .build();
+            .text(Time.format(track.length)).build();
     }
 
     private static trackScrubbar(
@@ -243,8 +240,7 @@ export class PlayerTemplates {
                     .classes("audio-player-scrubhead", "rounded", "nopointer")
                     .styles("left", positionPercent)
                     .build()
-            )
-            .build();
+            ).build();
     }
 
     static loudnessControl(track: Track) {
@@ -293,8 +289,7 @@ export class PlayerTemplates {
                             .build()
                     )
                     .build()
-            )
-            .build();
+            ).build();
     }
 
     static async player(track: Track, trackUser: User) {
@@ -336,8 +331,7 @@ export class PlayerTemplates {
                 ),
                 QueueTemplates.queuePopout(),
                 await PlayerTemplates.playerPopout(track)
-            )
-            .build();
+            ).build();
     }
 
     private static async bigPlayerLayout(track: Track, trackUser: User) {
@@ -350,8 +344,7 @@ export class PlayerTemplates {
                     .classes("flex", "hideOnMidBreakpoint")
                     .children(PlayerTemplates.loudnessControl(track), QueueTemplates.queueButton())
                     .build()
-            )
-            .build();
+            ).build();
     }
 
     private static async smallPlayerLayout(track: Track) {
@@ -390,8 +383,7 @@ export class PlayerTemplates {
                         "Toggle expanded player"
                     )
                 ).classes("align-center")
-            )
-            .build();
+            ).build();
     }
 
     static playingFrom() {
@@ -456,8 +448,7 @@ export class PlayerTemplates {
                     e.preventDefault();
                     navigate(RoutePath.settings);
                 }
-            })
-            .build();
+            }).build();
     }
 
     static trackIcons(track: Track) {
@@ -470,8 +461,7 @@ export class PlayerTemplates {
             UserTemplates.userLink(UserWidgetContext.player, trackUser),
             horizontal(PlayerTemplates.noSubscriptionInfo(), PlayerTemplates.playingFrom())
         )
-            .classes("align-center", "no-gap")
-            .build();
+            .classes("align-center", "no-gap").build();
     }
 
     private static async moreMenu(track: Track) {
@@ -502,8 +492,7 @@ export class PlayerTemplates {
                         )
                         .build()
                 )
-            )
-            .build();
+            ).build();
     }
 
     static loopModeButton() {

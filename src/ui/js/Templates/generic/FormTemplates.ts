@@ -1,6 +1,6 @@
-import {input, searchableSelect, SelectOption } from "@targoninc/jess-components";
-import {GenericTemplates} from "./GenericTemplates.ts";
-import {InputType, create, HtmlPropertyValue, StringOrSignal, TypeOrSignal, signal, Signal} from "@targoninc/jess";
+import { input, searchableSelect, SelectOption } from "@targoninc/jess-components";
+import { GenericTemplates } from "./GenericTemplates.ts";
+import { create, HtmlPropertyValue, InputType, signal, Signal, StringOrSignal, TypeOrSignal } from "@targoninc/jess";
 
 export class FormTemplates {
     static fileField(title: string, text: string, name: string, accept: string, required = false, onchange = (v: string, files: FileList | null) => {}) {
@@ -37,8 +37,7 @@ export class FormTemplates {
     static checkBoxField(name: HtmlPropertyValue, text: HtmlPropertyValue, checked: TypeOrSignal<boolean> = false, required = false, onchange = (v: boolean) => {}) {
         return create("div")
             .classes("flex", "space-outwards")
-            .children(GenericTemplates.checkbox(name, checked, text, required, onchange))
-            .build();
+            .children(GenericTemplates.checkbox(name, checked, text, required, onchange)).build();
     }
 
     static textField(title: string, name: string, placeholder: string, type = "text", value: StringOrSignal = "", required = false, onchange: Function = (val: string) => {

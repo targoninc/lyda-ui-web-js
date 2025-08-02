@@ -12,11 +12,11 @@ const __dirname = path.dirname(__filename);
 const compat = new FlatCompat({
     baseDirectory: __dirname,
     recommendedConfig: js.configs.recommended,
-    allConfig: js.configs.all
+    allConfig: js.configs.all,
 });
 
 export default defineConfig([globalIgnores(["**/node_modules/", "**/dist/", "**/out/"]), {
-    extends: compat.extends("eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier"),
+    extends: compat.extends("eslint:recommended", "plugin:@typescript-eslint/recommended"),
 
     plugins: {
         "@typescript-eslint": typescriptEslint,
@@ -39,7 +39,6 @@ export default defineConfig([globalIgnores(["**/node_modules/", "**/dist/", "**/
         "unused-imports/no-unused-imports": "error",
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/no-unsafe-function-type": "off",
-
         "unused-imports/no-unused-vars": ["warn", {
             vars: "all",
             varsIgnorePattern: "^_",
@@ -47,4 +46,4 @@ export default defineConfig([globalIgnores(["**/node_modules/", "**/dist/", "**/
             argsIgnorePattern: "^_",
         }],
     },
-}]);
+}])

@@ -1,12 +1,12 @@
-import {DashboardTemplates} from "./DashboardTemplates.ts";
-import {CommentTemplates} from "../CommentTemplates.ts";
-import {AnyElement, create, when, compute, signal, Signal, InputType} from "@targoninc/jess";
-import {TrackActions} from "../../Actions/TrackActions.ts";
-import {GenericTemplates} from "../generic/GenericTemplates.ts";
-import {button, input, toggle } from "@targoninc/jess-components";
-import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
-import {Comment} from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
-import {Api} from "../../Api/Api.ts";
+import { DashboardTemplates } from "./DashboardTemplates.ts";
+import { CommentTemplates } from "../CommentTemplates.ts";
+import { AnyElement, compute, create, InputType, Signal, signal, when } from "@targoninc/jess";
+import { TrackActions } from "../../Actions/TrackActions.ts";
+import { GenericTemplates } from "../generic/GenericTemplates.ts";
+import { button, input, toggle } from "@targoninc/jess-components";
+import { Permissions } from "@targoninc/lyda-shared/src/Enums/Permissions";
+import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
+import { Api } from "../../Api/Api.ts";
 
 export class ModerationCommentsTemplates {
     static commentModerationPage() {
@@ -107,8 +107,7 @@ export class ModerationCommentsTemplates {
 
         return create("div")
             .classes("flex-v", "fixed-bar-content")
-            .children(...comments.map(c => ModerationCommentsTemplates.moderatableComment(c, signal(comments))))
-            .build();
+            .children(...comments.map(c => ModerationCommentsTemplates.moderatableComment(c, signal(comments)))).build();
     }
 
     static moderatableComment(comment: Comment, comments: Signal<Comment[]>) {

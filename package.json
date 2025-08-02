@@ -11,36 +11,32 @@
         "prepare": "husky",
         "lint": "eslint --ext .ts,.tsx,.js,.jsx src/",
         "lint:fix": "eslint --ext .ts,.tsx,.js,.jsx src/ --fix",
-        "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
-        "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
         "lint-staged": "lint-staged"
     },
     "devDependencies": {
         "@eslint/eslintrc": "^3.3.1",
-        "@eslint/js": "^9.30.0",
-        "@passwordless-id/webauthn": "^2.3.0",
-        "@types/express": "^4.17.21",
-        "@typescript-eslint/eslint-plugin": "^8.35.0",
-        "@typescript-eslint/parser": "^8.35.0",
-        "eslint": "^9.30.0",
-        "eslint-config-prettier": "^10.1.5",
+        "@eslint/js": "^9.32.0",
+        "@passwordless-id/webauthn": "^2.3.1",
+        "@types/express": "^4.17.23",
+        "@typescript-eslint/eslint-plugin": "^8.38.0",
+        "@typescript-eslint/parser": "^8.38.0",
+        "eslint": "^9.32.0",
         "eslint-plugin-unused-imports": "^4.1.4",
         "husky": "^9.1.7",
         "lint-staged": "^16.1.2",
-        "prettier": "^3.2.5",
         "three": "^0.156.1"
     },
     "dependencies": {
         "@paypal/paypal-js": "^8.2.0",
         "@sgratzl/chartjs-chart-boxplot": "^4.4.4",
         "@targoninc/jess": "^0.0.19",
-        "@targoninc/jess-components": "^0.0.18",
+        "@targoninc/jess-components": "^0.0.29",
         "@targoninc/lyda-shared": "^0.0.19",
-        "@types/bun": "^1.2.17",
+        "@types/bun": "^1.2.19",
         "chart.js": "^4.5.0",
-        "dotenv": "^17.0.0",
+        "dotenv": "^17.2.1",
         "express": "^5.1.0",
         "typescript": "^5.8.3"
     },
-    "version": "0.0.284"
+    "version": "0.0.298"
 }

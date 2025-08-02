@@ -1,7 +1,7 @@
-import {PlayManager} from "./PlayManager.ts";
-import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {currentQuality, currentTrackId, currentTrackPosition, volume} from "../state.ts";
-import {compute, create} from "@targoninc/jess";
+import { PlayManager } from "./PlayManager.ts";
+import { ApiRoutes } from "../Api/ApiRoutes.ts";
+import { currentQuality, currentTrackId, currentTrackPosition, volume } from "../state.ts";
+import { compute, create } from "@targoninc/jess";
 
 export class StreamClient {
     id: number;
@@ -16,8 +16,7 @@ export class StreamClient {
             .attributes("crossOrigin", "use-credentials")
             .attributes("preload", "auto")
             .attributes("autoplay", "false")
-            .src(src)
-            .build() as HTMLAudioElement;
+            .src(src).build() as HTMLAudioElement;
         this.duration = this.audio.duration;
         this.playing = false;
         currentQuality.subscribe(async q => {

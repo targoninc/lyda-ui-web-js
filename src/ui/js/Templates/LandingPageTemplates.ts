@@ -49,8 +49,7 @@ export class LandingPageTemplates {
                     .classes("flex", "auth-box", "card")
                     .children(LandingPageTemplates.registrationLoginBox())
                     .build()
-            )
-            .build();
+            ).build();
     }
 
     static registrationLoginBox() {
@@ -164,8 +163,7 @@ export class LandingPageTemplates {
                         )
                     )
                     .build()
-            )
-            .build();
+            ).build();
     }
 
     static mfaOption(opt: MfaOption, selected: Signal<MfaOption | undefined>) {
@@ -244,8 +242,7 @@ export class LandingPageTemplates {
                         ).classes("align-children")
                     )
                     .build()
-            )
-            .build();
+            ).build();
     }
 
     static mfaVerify(step: Signal<string>, user: Signal<AuthData>) {
@@ -306,8 +303,7 @@ export class LandingPageTemplates {
                         )
                     )
                     .build()
-            )
-            .build();
+            ).build();
     }
 
     static registeringBox(step: Signal<string>, user: Signal<AuthData>) {
@@ -378,8 +374,7 @@ export class LandingPageTemplates {
                         create("span").text(message).build()
                     )
                     .build()
-            )
-            .build();
+            ).build();
     }
 
     static loginBox(step: Signal<string>, user: Signal<AuthData>) {
@@ -465,8 +460,7 @@ export class LandingPageTemplates {
                         }, "Register instead")
                     )
                     .build()
-            )
-            .build();
+            ).build();
     }
 
     static resetPasswordBox(step: Signal<string>, user: Signal<AuthData>) {
@@ -531,8 +525,7 @@ export class LandingPageTemplates {
                         errorList(errors)
                     )
                     .build()
-            )
-            .build();
+            ).build();
     }
 
     static enterNewPasswordBox(step: Signal<string>, user: Signal<AuthData>) {
@@ -611,8 +604,7 @@ export class LandingPageTemplates {
                         errorList(errors)
                     )
                     .build()
-            )
-            .build();
+            ).build();
     }
 
     private static passwordInput(
@@ -678,8 +670,7 @@ export class LandingPageTemplates {
                         })
                     )
                     .build()
-            )
-            .build();
+            ).build();
     }
 
     static checkEmailBox(step: Signal<string>, user: Signal<AuthData>) {
@@ -913,8 +904,7 @@ export class LandingPageTemplates {
                         )
                     )
                     .build()
-            )
-            .build();
+            ).build();
     }
 
     static emailBox(step: Signal<string>, user: Signal<AuthData>) {
@@ -1035,8 +1025,7 @@ export class LandingPageTemplates {
                             .build()
                     )
                     .build()
-            )
-            .build();
+            ).build();
     }
 
     static lydaBenefits() {
@@ -1046,8 +1035,7 @@ export class LandingPageTemplates {
                 GenericTemplates.benefit("Transparent royalties", "visibility"),
                 GenericTemplates.benefit("No ads", "ad_group_off"),
                 GenericTemplates.benefit("Social features", "people")
-            )
-            .build();
+            ).build();
 
         /* Add back marquee when we have more benefits
         return create("div")

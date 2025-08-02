@@ -1,13 +1,13 @@
-import {UserActions} from "../../Actions/UserActions.ts";
-import {GenericTemplates, horizontal} from "../generic/GenericTemplates.ts";
-import {getUserSettingValue, Util} from "../../Classes/Util.ts";
+import { UserActions } from "../../Actions/UserActions.ts";
+import { GenericTemplates, horizontal } from "../generic/GenericTemplates.ts";
+import { getUserSettingValue, Util } from "../../Classes/Util.ts";
 import { createModal, notify, Ui } from "../../Classes/Ui.ts";
-import {Api} from "../../Api/Api.ts";
-import {create, when, signalMap, compute, Signal, signal, InputType, nullElement} from "@targoninc/jess";
-import {navigate, reload} from "../../Routing/Router.ts";
-import {UserTemplates} from "./UserTemplates.ts";
-import {currentUser, permissions} from "../../state.ts";
-import {RoutePath} from "../../Routing/routes.ts";
+import { Api } from "../../Api/Api.ts";
+import { compute, create, InputType, nullElement, Signal, signal, signalMap, when } from "@targoninc/jess";
+import { navigate, reload } from "../../Routing/Router.ts";
+import { UserTemplates } from "./UserTemplates.ts";
+import { currentUser, permissions } from "../../state.ts";
+import { RoutePath } from "../../Routing/routes.ts";
 import {
     button,
     ButtonConfig,
@@ -16,14 +16,14 @@ import {
     InputConfig,
     textarea,
     TextareaConfig,
-    toggle
+    toggle,
 } from "@targoninc/jess-components";
-import {Theme} from "@targoninc/lyda-shared/src/Enums/Theme";
-import {UserSettings} from "@targoninc/lyda-shared/src/Enums/UserSettings";
-import {StreamingQuality} from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
-import {Permission} from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
-import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
-import {UserEmail} from "@targoninc/lyda-shared/src/Models/db/lyda/UserEmail";
+import { Theme } from "@targoninc/lyda-shared/src/Enums/Theme";
+import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
+import { StreamingQuality } from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
+import { Permission } from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
+import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import { UserEmail } from "@targoninc/lyda-shared/src/Models/db/lyda/UserEmail";
 import { NotificationType } from "../../Enums/NotificationType.ts";
 import { TotpTemplates } from "./TotpTemplates.ts";
 import { WebauthnTemplates } from "./WebauthnTemplates.ts";
@@ -55,8 +55,7 @@ export class SettingsTemplates {
                 SettingsTemplates.notificationsSection(user),
                 SettingsTemplates.dangerSection(user),
                 SettingsTemplates.linksSection()
-            )
-            .build();
+            ).build();
     }
 
     static permissionsSection() {
@@ -84,8 +83,7 @@ export class SettingsTemplates {
                         )
                         .build()
                 )
-            )
-            .build();
+            ).build();
     }
 
     static permissionCard(permission: Permission) {
@@ -172,8 +170,7 @@ export class SettingsTemplates {
                         }
                     },
                 })
-            )
-            .build();
+            ).build();
     }
 
     static notificationsSection(user: User) {
@@ -206,8 +203,7 @@ export class SettingsTemplates {
                     "collaboration",
                     getUserSettingValue(user, UserSettings.notificationCollaboration)
                 )
-            )
-            .build();
+            ).build();
     }
 
     static notificationToggle(text: string, key: string, currentValue: boolean) {
@@ -233,8 +229,7 @@ export class SettingsTemplates {
                 SettingsTemplates.publicLikesToggle(
                     getUserSettingValue(user, UserSettings.publicLikes)
                 )
-            )
-            .build();
+            ).build();
     }
 
     static qualitySelector(
@@ -285,8 +280,7 @@ export class SettingsTemplates {
                     },
                     themes.indexOf(currentTheme$.value)
                 )
-            )
-            .build();
+            ).build();
     }
 
     static qualitySection(currentValue: StreamingQuality) {
@@ -332,8 +326,7 @@ export class SettingsTemplates {
                         )
                     )
                     .build()
-            )
-            .build();
+            ).build();
     }
 
     static playFromAutoQueueToggle(currentValue: boolean) {
@@ -411,8 +404,7 @@ export class SettingsTemplates {
                         })
                     )
                     .build()
-            )
-            .build();
+            ).build();
     }
 
     private static linksSection() {
@@ -447,8 +439,7 @@ export class SettingsTemplates {
                     () => window.open("https://github.com/targoninc/lyda-ui-web-js", "_blank"),
                     "Source code"
                 )
-            )
-            .build();
+            ).build();
     }
 
     private static userImageSettings(user: User) {
@@ -471,8 +462,7 @@ export class SettingsTemplates {
                         UserTemplates.bannerReplaceButton(user)
                     )
                     .build()
-            )
-            .build();
+            ).build();
     }
 
     private static emailSettings(emails: UserEmail[], updatedUser: Signal<Partial<User>>) {
@@ -524,8 +514,7 @@ export class SettingsTemplates {
                         ];
                     },
                 })
-            )
-            .build();
+            ).build();
     }
 
     private static emailSetting(
@@ -662,8 +651,7 @@ export class SettingsTemplates {
                         )
                     )
                     .build()
-            )
-            .build();
+            ).build();
     }
 
     private static totpSection() {
@@ -720,7 +708,6 @@ export class SettingsTemplates {
                         );
                     },
                 })
-            )
-            .build();
+            ).build();
     }
 }
