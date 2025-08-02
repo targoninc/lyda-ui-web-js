@@ -911,6 +911,7 @@ td:last-child, th:last-child {
     border-radius: var(--large-border-radius);
     transition: height 100ms ease-in-out;
     overflow: auto;
+    user-select: none;
 }
 
 .hide {
