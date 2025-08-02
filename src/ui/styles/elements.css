@@ -1211,6 +1211,10 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     border-radius: var(--border-radius);
 }
 
+.queue-spacer {
+    height: 50dvh;
+}
+
 @keyframes scroll-left {
     0% {
         transform: translateX(0%);

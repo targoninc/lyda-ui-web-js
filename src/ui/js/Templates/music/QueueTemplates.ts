@@ -5,7 +5,15 @@ import { compute, create, nullElement, signal, StringOrSignal, when } from "@tar
 import { Images } from "../../Enums/Images.ts";
 import { button, icon } from "@targoninc/jess-components";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import { autoQueue, contextQueue, currentTrackId, currentUser, manualQueue, queueVisible } from "../../state.ts";
+import {
+    autoQueue,
+    contextQueue,
+    currentTrackId,
+    currentUser,
+    history,
+    manualQueue,
+    queueVisible,
+} from "../../state.ts";
 import { PlayManager } from "../../Streaming/PlayManager.ts";
 import { MusicTemplates } from "./MusicTemplates.ts";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
@@ -32,7 +40,7 @@ export class QueueTemplates {
         const dragData = {
             type: "track",
             id: track.id,
-            index
+            index,
         };
 
         const base = create("div")
@@ -55,7 +63,7 @@ export class QueueTemplates {
 
         return base
             .on("dblclick", async () => {
-                await startItem(EntityType.track, track)
+                await startItem(EntityType.track, track);
             })
             .children(
                 horizontal(
@@ -69,7 +77,7 @@ export class QueueTemplates {
                         UserTemplates.userLink(UserWidgetContext.player, track.user!),
                     ).classes("no-gap"),
                 ),
-                when(isManual, QueueTemplates.manualQueueItemActions(index))
+                when(isManual, QueueTemplates.manualQueueItemActions(index)),
             ).id(track.id).build();
     }
 
@@ -79,31 +87,31 @@ export class QueueTemplates {
             .children(
                 button({
                     text: "Up",
-                    icon: {icon: "keyboard_arrow_up"},
+                    icon: { icon: "keyboard_arrow_up" },
                     classes: ["align-children"],
                     disabled: index === 0,
                     onclick: async () => {
                         QueueManager.moveInManualQueue(index, index - 1);
-                    }
+                    },
                 }),
                 button({
                     text: "Down",
-                    icon: {icon: "keyboard_arrow_down"},
+                    icon: { icon: "keyboard_arrow_down" },
                     classes: ["align-children"],
                     disabled: compute(q => index === (q.length - 1), manualQueue),
                     onclick: async () => {
                         QueueManager.moveInManualQueue(index, index + 1);
-                    }
+                    },
                 }),
                 button({
                     text: "Remove",
-                    icon: {icon: "close"},
+                    icon: { icon: "close" },
                     classes: ["negative", "align-children"],
                     onclick: async () => {
                         QueueManager.removeIndexFromManualQueue(index);
-                    }
-                })
-            ).build()
+                    },
+                }),
+            ).build();
     }
 
     static queueButton() {
@@ -124,17 +132,25 @@ export class QueueTemplates {
                             .classes("align-center", "nopointer")
                             .text("Queue")
                             .build(),
-                    ).build()
+                    ).build(),
             ).build();
     }
 
     static queuePopout() {
         const qClass = compute((v): string => v ? "visible" : "hide", queueVisible);
+        queueVisible.subscribe(v => {
+            if (v) {
+                document.querySelector(`.current-track`)?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                });
+            }
+        });
 
         return create("div")
             .classes("queue-popout", qClass)
             .children(
-                QueueTemplates.fullQueueList(["padded", "rounded"])
+                QueueTemplates.fullQueueList(["padded", "rounded"]),
             ).build();
     }
 
@@ -144,23 +160,28 @@ export class QueueTemplates {
         }, currentUser);
 
         return vertical(
-            compute(id => QueueTemplates.trackAsQueueItem(id, 0, false), currentTrackId),
+            compute((q) => QueueTemplates.queueList(q.map(i => i.track_id), "History"), history),
+            compute(id => QueueTemplates.queueList([id], "Current track", false, true), currentTrackId),
             compute((q) => QueueTemplates.queueList(q, "Manual queue", true), manualQueue),
             compute((q) => QueueTemplates.queueList(q, "Context queue"), contextQueue),
             when(playFromAutoEnabled, vertical(
                 compute((q) => QueueTemplates.queueList(q, "Auto queue"), autoQueue),
             ).build()),
+            create("div")
+                .classes("queue-spacer")
+                .build(),
         ).classes("fullWidth", ...classes).build();
     }
 
-    static queueList(q: number[], text: string, isManual: boolean = false) {
+    static queueList(q: number[], text: string, isManual: boolean = false, isCurrent: boolean = false) {
         return vertical(
             create("span")
                 .classes("color-dim", "text-small")
                 .text(text)
                 .build(),
             ...q.map((id, i) => QueueTemplates.trackAsQueueItem(id, i, isManual)),
-        ).classes("no-gap").build();
+        ).classes("no-gap", isCurrent ? "current-track" : "_")
+         .build();
     }
 
     static trackAsQueueItem(id: number, i: number, isManual: boolean) {
@@ -178,8 +199,9 @@ export class QueueTemplates {
 
         return vertical(
             parent.children(
-                compute(t => t ? QueueTemplates.queueItem(t.track, i, isManual) : nullElement(), track)
-            ).build()
-        ).classes("relative").build();
+                compute(t => t ? QueueTemplates.queueItem(t.track, i, isManual) : nullElement(), track),
+            ).build(),
+        ).classes("relative")
+         .build();
     }
 }
