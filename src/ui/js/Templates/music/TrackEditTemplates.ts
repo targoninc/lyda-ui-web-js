@@ -41,7 +41,7 @@ import { currentUser } from "../../state.ts";
 
 export class TrackEditTemplates {
     static uploadPage() {
-        const state = signal(<UploadableTrack>{
+        const state = signal({
             title: "",
             credits: "",
             artistname: "",
