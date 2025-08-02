@@ -488,7 +488,7 @@ export class TrackTemplates {
             ).build();
     }
 
-    static title(title: HtmlPropertyValue, id: number, icons: any[] = [], textSize: string = "text-large") {
+    static title(title: HtmlPropertyValue, id: number, icons: AnyNode[] = [], textSize: string = "text-large") {
         return create("div")
             .classes("flex")
             .children(
