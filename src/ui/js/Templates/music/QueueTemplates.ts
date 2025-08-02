@@ -174,6 +174,10 @@ export class QueueTemplates {
     }
 
     static queueList(q: number[], text: string, isManual: boolean = false, isCurrent: boolean = false) {
+        if (q.length === 0) {
+            return nullElement();
+        }
+
         return vertical(
             create("span")
                 .classes("color-dim", "text-small")
