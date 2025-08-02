@@ -236,24 +236,18 @@ export class TrackActions {
     }
 
     static async approveCollab(id: number) {
-        const success = await Api.approveCollab(id);
-
-        if (success) {
-            const collab = document.querySelector(".collab[id='" + id + "']");
-            if (collab) {
-                collab.remove();
-            }
+        await Api.approveCollab(id);
+        const collab = document.querySelector(`.collab[id="${id}"]`);
+        if (collab) {
+            collab.remove();
         }
     }
 
     static async denyCollab(id: number, name = "track") {
-        const success = await Api.denyCollab(id, name);
-
-        if (success) {
-            const collab = document.querySelector(".collab[id='" + id + "']");
-            if (collab) {
-                collab.remove();
-            }
+        await Api.denyCollab(id, name);
+        const collab = document.querySelector(`.collab[id="${id}"]`);
+        if (collab) {
+            collab.remove();
         }
     }
 

@@ -20,11 +20,7 @@ import { navigate } from "../Routing/Router.ts";
 import { RoutePath } from "../Routing/routes.ts";
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
 import { WebauthnVerificationRequest } from "@targoninc/lyda-shared/dist/Models/WebauthnVerificationRequest";
-import {
-    AuthenticationJSON,
-    CredentialDescriptor,
-    RegistrationJSON,
-} from "@passwordless-id/webauthn/dist/esm/types";
+import { AuthenticationJSON, CredentialDescriptor, RegistrationJSON } from "@passwordless-id/webauthn/dist/esm/types";
 import { MfaOption } from "@targoninc/lyda-shared/src/Enums/MfaOption.ts";
 import { UploadableTrack } from "../Models/UploadableTrack.ts";
 import { InteractionType } from "@targoninc/lyda-shared/src/Enums/InteractionType";
@@ -578,8 +574,8 @@ export class Api {
         return await get<any[]>(ApiRoutes.getUnapprovedCollabs);
     }
 
-    static async approveCollab(id: number): Promise<boolean> {
-        return !!(await post(ApiRoutes.approveCollab, { id }));
+    static async approveCollab(id: number) {
+        return await post(ApiRoutes.approveCollab, { id });
     }
 
     static async denyCollab(id: number, name = "track"): Promise<boolean> {

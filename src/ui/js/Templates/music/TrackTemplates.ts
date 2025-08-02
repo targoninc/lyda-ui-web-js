@@ -757,6 +757,7 @@ export class TrackTemplates {
         if (!data.user.follows) {
             throw new Error(`User follows not set on to be approved track with ID ${data.track_id}`);
         }
+        const loading = signal(false);
 
         return horizontal(
             horizontal(
@@ -785,7 +786,12 @@ export class TrackTemplates {
                     icon: {
                         icon: "check",
                     },
-                    onclick: async () => await TrackActions.approveCollab(data.track_id),
+                    disabled: loading,
+                    onclick: async () => {
+                        loading.value = true;
+                        await TrackActions.approveCollab(data.track_id);
+                        loading.value = false;
+                    },
                     classes: ["positive"],
                 }),
                 button({
@@ -793,9 +799,15 @@ export class TrackTemplates {
                     icon: {
                         icon: "close",
                     },
-                    onclick: async () => await TrackActions.denyCollab(data.track_id, data.track!.title),
+                    disabled: loading,
+                    onclick: async () => {
+                        loading.value = true;
+                        await TrackActions.denyCollab(data.track_id, data.track!.title);
+                        loading.value = false;
+                    },
                     classes: ["negative"],
                 }),
+                when(loading, GenericTemplates.loadingSpinner()),
             ),
         ).classes("card", "collab", "space-outwards", "align-children")
          .id(data.track_id)
