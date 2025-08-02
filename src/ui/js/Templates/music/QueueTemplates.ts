@@ -160,7 +160,7 @@ export class QueueTemplates {
         }, currentUser);
 
         return vertical(
-            compute((q) => QueueTemplates.queueList(q.map(i => i.track_id), "History"), history),
+            compute((q) => QueueTemplates.queueList(q.map(i => i.track_id).slice(0, q.length - 1), "History"), history),
             compute(id => QueueTemplates.queueList([id], "Current track", false, true), currentTrackId),
             compute((q) => QueueTemplates.queueList(q, "Manual queue", true), manualQueue),
             compute((q) => QueueTemplates.queueList(q, "Context queue"), contextQueue),
