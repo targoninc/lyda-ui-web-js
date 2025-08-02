@@ -749,7 +749,7 @@ export class TrackTemplates {
             avatarState.value = Util.getUserAvatar(data.user_id);
         }
         if (!data.user) {
-            throw new Error("User not set on to be approved track with ID ${track.track_id}");
+            throw new Error(`User not set on to be approved track with ID ${data.track_id}`);
         }
         if (!data.track) {
             throw new Error(`Track not set on to be approved track with ID ${data.track_id}`);
