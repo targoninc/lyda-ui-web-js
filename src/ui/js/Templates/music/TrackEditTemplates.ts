@@ -647,7 +647,7 @@ export class TrackEditTemplates {
             if (ct && !linkedUserState.value.some(tc => tc.user_id === newUser.id)) {
                 linkedUserState.value = [
                     ...linkedUserState.value,
-                    <TrackCollaborator>{
+                    {
                         user_id: newUser.id,
                         user: newUser,
                         type: ct.id,
