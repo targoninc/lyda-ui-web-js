@@ -666,11 +666,10 @@ export class TrackEditTemplates {
     static collaboratorTypeSelect(collabType: Signal<string>, collabTypes: Signal<CollaboratorType[]>) {
         const collabTypeOptions = compute(types => {
             return types.map(
-                t =>
-                    {
-                        name: t.name,
-                        id: t.id.toString(),
-                    } as SelectOption,
+                t => ({
+                    name: t.name,
+                    id: t.id.toString(),
+                } as SelectOption),
             );
         }, collabTypes);
 
