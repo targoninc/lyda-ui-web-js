@@ -52,57 +52,46 @@ export class RoyaltyTemplates {
                     .children(
                         FormTemplates.dropDownField("Month", signal(months), selectedState),
                     ).build(),
-                compute(m => {
+                compute(month => {
+                    if (!month) {
+                        return nullElement();
+                    }
+
                     return create("div")
                         .classes("flex", "align-children")
                         .children(
+                            create("span")
+                                .text(`Available actions for ${month}:`)
+                                .build(),
                             button({
                                 text: "Calculate earnings",
                                 icon: { icon: "account_balance" },
                                 classes: ["positive"],
                                 onclick: async () => {
-                                    const month = selectedMonth.value;
-                                    if (!month) {
-                                        notify("Please select a month", NotificationType.error);
-                                        return;
-                                    }
                                     await Api.calculateEarnings(month);
                                     notify("Earnings calculated", NotificationType.success);
                                     refresh();
                                 },
                             }),
-                            button({
+                            when(hasEarnings, button({
                                 text: "Calculate royalties",
                                 icon: { icon: "calculate" },
                                 classes: ["positive"],
-                                disabled: compute(has => !has, hasEarnings),
                                 onclick: async () => {
-                                    const month = selectedMonth.value;
-                                    if (!month) {
-                                        notify("Please select a month", NotificationType.error);
-                                        return;
-                                    }
-
                                     await Api.calculateRoyalties(month);
                                     notify("Royalties calculated", NotificationType.success);
                                     refresh();
                                 }
-                            }),
-                            toggle({
+                            })),
+                            when(hasEarnings, toggle({
                                 text: "Approve monthly earnings",
                                 checked: isApproved,
                                 onchange: async (v) => {
-                                    const month = selectedMonth.value;
-                                    if (!month) {
-                                        notify("Please select a month", NotificationType.error);
-                                        return;
-                                    }
-
                                     await Api.setRoyaltyActivation(month, v);
                                     notify("Switched approval status", NotificationType.success);
                                     refresh();
                                 }
-                            })
+                            }))
                         ).build();
                 }, selectedMonth),
             ).build();
@@ -117,6 +106,7 @@ export class RoyaltyTemplates {
                 }
             });
         };
+        refresh();
 
         return create("div")
             .classes("flex-v")
