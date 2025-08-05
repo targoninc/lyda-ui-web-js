@@ -61,7 +61,7 @@ export class RoyaltyTemplates {
                         .classes("flex", "align-children")
                         .children(
                             create("span")
-                                .text(`Available actions for ${month}:`)
+                                .text(`Available actions for ${month.year}-${month.month}:`)
                                 .build(),
                             button({
                                 text: "Calculate earnings",
