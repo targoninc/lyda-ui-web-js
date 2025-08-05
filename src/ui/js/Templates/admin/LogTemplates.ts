@@ -1,16 +1,16 @@
-import {Time} from "../../Classes/Helpers/Time.ts";
-import {UserTemplates} from "../account/UserTemplates.ts";
-import {GenericTemplates} from "../generic/GenericTemplates.ts";
-import {copy} from "../../Classes/Util.ts";
-import {compute, signal, Signal, AnyElement, create, when, signalMap} from "@targoninc/jess";
-import {Api} from "../../Api/Api.ts";
-import {truncateText} from "../../Classes/Helpers/CustomText.ts";
-import {DashboardTemplates} from "./DashboardTemplates.ts";
-import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
+import { Time } from "../../Classes/Helpers/Time.ts";
+import { UserTemplates } from "../account/UserTemplates.ts";
+import { GenericTemplates } from "../generic/GenericTemplates.ts";
+import { copy } from "../../Classes/Util.ts";
+import { AnyElement, compute, create, signal, Signal, signalMap, when } from "@targoninc/jess";
+import { Api } from "../../Api/Api.ts";
+import { truncateText } from "../../Classes/Helpers/CustomText.ts";
+import { DashboardTemplates } from "./DashboardTemplates.ts";
+import { Permissions } from "@targoninc/lyda-shared/src/Enums/Permissions";
 import { button, toggle } from "@targoninc/jess-components";
-import {Log} from "@targoninc/lyda-shared/src/Models/db/lyda/Log";
-import {LogLevel} from "@targoninc/lyda-shared/src/Enums/LogLevel";
-import {PillOption} from "../../Models/PillOption.ts";
+import { Log } from "@targoninc/lyda-shared/src/Models/db/lyda/Log";
+import { LogLevel } from "@targoninc/lyda-shared/src/Enums/LogLevel";
+import { PillOption } from "../../Models/PillOption.ts";
 
 export class LogTemplates {
     static actionLogsPage() {
@@ -175,17 +175,8 @@ export class LogTemplates {
             ).build();
     }
 
-    static signalProperty(key: string, value: Signal<any>): AnyElement {
-        const el = create("div")
-            .children(
-                LogTemplates.property(key, value.value)
-            ).build();
-        value.subscribe(v => {
-            el.innerHTML = "";
-            el.appendChild(LogTemplates.property(key, v));
-        });
-
-        return el;
+    static signalProperty(key: string, value: Signal<any>): Signal<HTMLElement | SVGElement> {
+        return compute(v => LogTemplates.property(key, v), value);
     }
 
     static property(key: string, value: any): AnyElement {
