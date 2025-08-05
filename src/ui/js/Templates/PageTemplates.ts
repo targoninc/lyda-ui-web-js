@@ -28,6 +28,7 @@ import { SubscriptionTemplates } from "./SubscriptionTemplates.ts";
 import { notify } from "../Classes/Ui.ts";
 import { NotificationType } from "../Enums/NotificationType.ts";
 import { Api } from "../Api/Api.ts";
+import { GenericTemplates, tabSelected, vertical } from "./generic/GenericTemplates.ts";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, (route: Route, params: Record<string, string>) => Promise<AnyElement> | AnyElement> = {
@@ -127,12 +128,27 @@ export class PageTemplates {
     }
 
     static async statisticsPage() {
+        const tabs = ["Your statistics", "Global"];
+        const selectedTab = signal(0);
+
         return create("div")
             .classes("statistics", "flex-v")
             .children(
-                StatisticTemplates.artistRoyaltyActions(),
-                await StatisticTemplates.allStats(),
-                StatisticTemplates.dataExport()
+                GenericTemplates.combinedSelector(tabs, i => selectedTab.value = i),
+                when(
+                    tabSelected(selectedTab, 0),
+                    vertical(
+                        PayoutTemplates.artistRoyaltyActions(),
+                        await StatisticTemplates.allStats(),
+                        PayoutTemplates.dataExport(),
+                    ).build(),
+                ),
+                when(
+                    tabSelected(selectedTab, 1),
+                    vertical(
+                        await StatisticTemplates.globalStats(),
+                    ).build(),
+                ),
             ).build();
     }
 

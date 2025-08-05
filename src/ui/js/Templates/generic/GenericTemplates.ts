@@ -813,3 +813,7 @@ export function vertical(...children: (AnyNode | Signal<AnyNode> | Signal<AnyEle
 export function horizontal(...children: (AnyNode | Signal<AnyNode> | Signal<AnyElement>)[]) {
     return create("div").classes("flex").children(...children);
 }
+
+export const tabSelected = (current: Signal<number>, i: number) => {
+    return compute(c => c === i, current);
+};

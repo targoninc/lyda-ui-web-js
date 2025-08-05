@@ -1,26 +1,24 @@
-import {StatisticTemplates} from "../Templates/StatisticTemplates.ts";
-import {Num} from "./Helpers/Num.ts";
-import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {create, signalMap, signal} from "@targoninc/jess";
-import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
-import {Permission} from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
-import {TimeResolution} from "@targoninc/lyda-shared/src/Enums/TimeResolution";
+import { StatisticTemplates } from "../Templates/StatisticTemplates.ts";
+import { Num } from "./Helpers/Num.ts";
+import { ApiRoutes } from "../Api/ApiRoutes.ts";
+import { create, signal, signalMap } from "@targoninc/jess";
 import { Api } from "../Api/Api.ts";
 
 export class StatisticsWrapper {
-    static async getStatistics(permissions: Permission[]) {
-        const additionalStats = [];
-        if (permissions.some(p => p.name === Permissions.canViewLogs)) {
-            additionalStats.push(StatisticsWrapper.getActivityByTime());
-        }
-
+    static async getStatistics() {
         return [
-            await StatisticsWrapper.getPlayCountByMonth(),
-            await StatisticsWrapper.getRoyaltiesByMonth(),
+            await StatisticTemplates.playCountByMonthChart(),
+            await StatisticTemplates.royaltiesByMonthChart(),
             await StatisticsWrapper.getRoyaltiesByTrack(),
             await StatisticsWrapper.getPlayCountByTracks(),
             await StatisticsWrapper.getLikesByTrack(),
-            ...additionalStats,
+        ];
+    }
+
+    static async getGlobalStatistics() {
+        return [
+            await StatisticTemplates.globalRoyaltiesByMonthChart(),
+            await StatisticTemplates.globalPlayCountByMonthChart(),
         ];
     }
 
@@ -59,10 +57,6 @@ export class StatisticsWrapper {
         return signalMap(charts, create("div").classes("flex", "fullWidth"), (chart: any) => chart);
     }
 
-    static async getRoyaltiesByMonth() {
-        return StatisticTemplates.royaltiesByMonthChart();
-    }
-
     static async getRoyaltiesByTrack() {
         return StatisticsWrapper.getSingleStat(StatisticTemplates.royaltiesByTrackChart, ApiRoutes.getRoyaltiesByTrack);
     }
@@ -71,19 +65,7 @@ export class StatisticsWrapper {
         return StatisticsWrapper.getSingleStat(StatisticTemplates.playCountByTrackChart, ApiRoutes.getPlayCountByTrack);
     }
 
-    static async getPlayCountByMonth() {
-        return StatisticTemplates.playCountByMonthChart();
-    }
-
     static async getLikesByTrack() {
         return StatisticsWrapper.getSingleStat(StatisticTemplates.likesByTrackChart, ApiRoutes.getLikesByTrack, true);
-    }
-
-    static getActivityByTime() {
-        const types = ["tracks"];
-        const params = new URLSearchParams();
-        params.append("types", types.join(","));
-        params.append("resolution", TimeResolution.hour);
-        return StatisticsWrapper.getMultipleStats(StatisticTemplates.activityByTimeChart, ApiRoutes.getActivityByTime + `?` + params.toString());
     }
 }

@@ -1,4 +1,4 @@
-import {Config} from "../Classes/Config.ts";
+import { Config } from "../Classes/Config.ts";
 
 export class ApiRoutes {
     static base = Config.apiBaseUrl;
@@ -146,7 +146,10 @@ export class ApiRoutes {
     static getLikesByTrack = ApiRoutes.statistics + "/likesByTrack";
     static getRoyaltiesByMonth = ApiRoutes.statistics + "/royaltiesByMonth";
     static getRoyaltiesByTrack = ApiRoutes.statistics + "/royaltiesByTrack";
-    static getActivityByTime = ApiRoutes.statistics + "/activityByTime";
+
+    private static globalStatistics = ApiRoutes.statistics + "/global";
+    static getGlobalPlayCountByMonth = ApiRoutes.globalStatistics + "/playCountByMonth";
+    static getGlobalRoyaltiesByMonth = ApiRoutes.globalStatistics + "/royaltiesByMonth";
     // endregion
 
     // region Royalties

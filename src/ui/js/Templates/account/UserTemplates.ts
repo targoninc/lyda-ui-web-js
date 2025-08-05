@@ -2,7 +2,7 @@ import { getAvatar, target, Util } from "../../Classes/Util.ts";
 import { TrackActions } from "../../Actions/TrackActions.ts";
 import { TrackTemplates } from "../music/TrackTemplates.ts";
 import { UserActions } from "../../Actions/UserActions.ts";
-import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
+import { GenericTemplates, horizontal, tabSelected, vertical } from "../generic/GenericTemplates.ts";
 import { AlbumTemplates } from "../music/AlbumTemplates.ts";
 import { Icons as Icons } from "../../Enums/Icons.ts";
 import { Links } from "../../Enums/Links.ts";
@@ -429,30 +429,27 @@ export class UserTemplates {
             url.searchParams.set("tab", tabName);
             window.history.replaceState(null, "", url.toString());
         });
-        const tabSelected = (i: number) => {
-            return compute(c => c === i, currentIndex);
-        };
 
         return vertical(
             GenericTemplates.combinedSelector(tabs, (i: number) => (currentIndex.value = i), currentIndex.value),
             when(
-                tabSelected(0),
+                tabSelected(currentIndex, 0),
                 UserTemplates.profileTab(Api.getTracksByUser, user, isOwnProfile, UserTemplates.profileTrackList),
             ),
             when(
-                tabSelected(1),
+                tabSelected(currentIndex, 1),
                 UserTemplates.profileTab(Api.getAlbumsByUser, user, isOwnProfile, UserTemplates.albumCards),
             ),
             when(
-                tabSelected(2),
+                tabSelected(currentIndex, 2),
                 UserTemplates.profileTab(Api.getPlaylistsByUser, user, isOwnProfile, UserTemplates.playlistCards),
             ),
             when(
-                tabSelected(3),
+                tabSelected(currentIndex, 3),
                 UserTemplates.profileTab(Api.getRepostsByUser, user, isOwnProfile, UserTemplates.profileRepostList),
             ),
             when(
-                tabSelected(4),
+                tabSelected(currentIndex, 4),
                 MusicTemplates.feed("history", {
                     userId: user.id,
                 }),
