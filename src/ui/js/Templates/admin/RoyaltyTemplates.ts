@@ -13,7 +13,7 @@ import { NotificationType } from "../../Enums/NotificationType.ts";
 import { Api } from "../../Api/Api.ts";
 
 export class RoyaltyTemplates {
-    static royaltyCalculator(royaltyInfo: RoyaltyInfo) {
+    static royaltyCalculator(royaltyInfo: RoyaltyInfo, refresh: () => void) {
         const months = royaltyInfo.calculatableMonths.map((m: any) => {
             return <SelectOption>{
                 id: (m.year * 100 + m.month).toString(),
@@ -31,7 +31,7 @@ export class RoyaltyTemplates {
         return create("div")
             .classes("flex-v")
             .children(
-                RoyaltyTemplates.royaltyActions(months, selectedState, selectedMonth, hasEarnings, isApproved),
+                RoyaltyTemplates.royaltyActions(months, selectedState, selectedMonth, hasEarnings, isApproved, refresh),
                 when(hasEarnings, create("div")
                     .classes("flex-v")
                     .children(
@@ -42,7 +42,8 @@ export class RoyaltyTemplates {
             ).build();
     }
 
-    private static royaltyActions(months: SelectOption[], selectedState: Signal<string>, selectedMonth: Signal<RoyaltyMonth | undefined>, hasEarnings: Signal<boolean>, isApproved: Signal<any>) {
+    private static royaltyActions(months: SelectOption[], selectedState: Signal<string>, selectedMonth: Signal<RoyaltyMonth | undefined>,
+                                  hasEarnings: Signal<boolean>, isApproved: Signal<any>, refresh: () => void) {
         return create("div")
             .classes("flex-v")
             .children(
@@ -67,6 +68,7 @@ export class RoyaltyTemplates {
                                     }
                                     await Api.calculateEarnings(month);
                                     notify("Earnings calculated", NotificationType.success);
+                                    refresh();
                                 },
                             }),
                             button({
@@ -83,6 +85,7 @@ export class RoyaltyTemplates {
 
                                     await Api.calculateRoyalties(month);
                                     notify("Royalties calculated", NotificationType.success);
+                                    refresh();
                                 }
                             }),
                             toggle({
@@ -97,6 +100,7 @@ export class RoyaltyTemplates {
 
                                     await Api.setRoyaltyActivation(month, v);
                                     notify("Switched approval status", NotificationType.success);
+                                    refresh();
                                 }
                             })
                         ).build();
@@ -106,20 +110,22 @@ export class RoyaltyTemplates {
 
     static royaltyManagement() {
         const royaltyInfo = signal<any>(null);
-        Api.getRoyaltyInfo().then(res => {
-            if (res) {
-                royaltyInfo.value = res;
-            }
-        });
+        const refresh = () => {
+            Api.getRoyaltyInfo().then(res => {
+                if (res) {
+                    royaltyInfo.value = res;
+                }
+            });
+        };
 
         return create("div")
             .classes("flex-v")
             .children(
-                compute(r => r ? RoyaltyTemplates.royaltyOverview(r) : nullElement(), royaltyInfo)
+                compute(r => r ? RoyaltyTemplates.royaltyOverview(r, refresh) : nullElement(), royaltyInfo),
             ).build();
     }
 
-    static royaltyOverview(royaltyInfo: RoyaltyInfo) {
+    static royaltyOverview(royaltyInfo: RoyaltyInfo, refresh: () => void) {
         if (!royaltyInfo.calculatableMonths) {
             return nullElement();
         }
@@ -134,7 +140,7 @@ export class RoyaltyTemplates {
                         create("h2")
                             .text("Royalty overview")
                             .build(),
-                        RoyaltyTemplates.royaltyCalculator(royaltyInfo)
+                        RoyaltyTemplates.royaltyCalculator(royaltyInfo, refresh),
                     ).build())
             ).build();
     }
