@@ -84,7 +84,7 @@ export class RoyaltyTemplates {
                                 }
                             })),
                             when(hasEarnings, toggle({
-                                text: "Approve monthly earnings",
+                                text: "Royalties approved and visible",
                                 checked: isApproved,
                                 onchange: async (v) => {
                                     await Api.setRoyaltyActivation(month, v);
