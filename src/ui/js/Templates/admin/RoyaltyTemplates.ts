@@ -1,15 +1,15 @@
-import {compute, Signal, signal, create, when, nullElement} from "@targoninc/jess";
-import {FormTemplates} from "../generic/FormTemplates.ts";
-import {notify} from "../../Classes/Ui.ts";
-import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
-import {permissions} from "../../state.ts";
-import {currency} from "../../Classes/Helpers/Num.ts";
-import {LogTemplates} from "./LogTemplates.ts";
-import {DashboardTemplates} from "./DashboardTemplates.ts";
-import {button, SelectOption, toggle } from "@targoninc/jess-components";
-import {RoyaltyInfo} from "@targoninc/lyda-shared/src/Models/RoyaltyInfo";
-import {RoyaltyMonth} from "@targoninc/lyda-shared/src/Models/RoyaltyMonth";
-import {NotificationType} from "../../Enums/NotificationType.ts";
+import { compute, create, nullElement, Signal, signal, when } from "@targoninc/jess";
+import { FormTemplates } from "../generic/FormTemplates.ts";
+import { notify } from "../../Classes/Ui.ts";
+import { Permissions } from "@targoninc/lyda-shared/src/Enums/Permissions";
+import { permissions } from "../../state.ts";
+import { currency } from "../../Classes/Helpers/Num.ts";
+import { LogTemplates } from "./LogTemplates.ts";
+import { DashboardTemplates } from "./DashboardTemplates.ts";
+import { button, SelectOption, toggle } from "@targoninc/jess-components";
+import { RoyaltyInfo } from "@targoninc/lyda-shared/src/Models/RoyaltyInfo";
+import { RoyaltyMonth } from "@targoninc/lyda-shared/src/Models/RoyaltyMonth";
+import { NotificationType } from "../../Enums/NotificationType.ts";
 import { Api } from "../../Api/Api.ts";
 
 export class RoyaltyTemplates {
@@ -51,54 +51,56 @@ export class RoyaltyTemplates {
                     .children(
                         FormTemplates.dropDownField("Month", signal(months), selectedState),
                     ).build(),
-                create("div")
-                    .classes("flex", "align-children")
-                    .children(
-                        button({
-                            text: "Calculate earnings",
-                            icon: {icon: "account_balance"},
-                            classes: ["positive"],
-                            onclick: async () => {
-                                const month = selectedMonth.value;
-                                if (!month) {
-                                    notify("Please select a month", NotificationType.error);
-                                    return;
-                                }
-                                await Api.calculateEarnings(month);
-                                notify("Earnings calculated", NotificationType.success);
-                            }
-                        }),
-                        button({
-                            text: "Calculate royalties",
-                            icon: {icon: "calculate"},
-                            classes: ["positive"],
-                            disabled: compute(has => !has, hasEarnings),
-                            onclick: async () => {
-                                const month = selectedMonth.value;
-                                if (!month) {
-                                    notify("Please select a month", NotificationType.error);
-                                    return;
-                                }
+                compute(m => {
+                    return create("div")
+                        .classes("flex", "align-children")
+                        .children(
+                            button({
+                                text: "Calculate earnings",
+                                icon: { icon: "account_balance" },
+                                classes: ["positive"],
+                                onclick: async () => {
+                                    const month = selectedMonth.value;
+                                    if (!month) {
+                                        notify("Please select a month", NotificationType.error);
+                                        return;
+                                    }
+                                    await Api.calculateEarnings(month);
+                                    notify("Earnings calculated", NotificationType.success);
+                                },
+                            }),
+                            button({
+                                text: "Calculate royalties",
+                                icon: { icon: "calculate" },
+                                classes: ["positive"],
+                                disabled: compute(has => !has, hasEarnings),
+                                onclick: async () => {
+                                    const month = selectedMonth.value;
+                                    if (!month) {
+                                        notify("Please select a month", NotificationType.error);
+                                        return;
+                                    }
 
-                                await Api.calculateRoyalties(month);
-                                notify("Royalties calculated", NotificationType.success);
-                            }
-                        }),
-                        toggle({
-                            text: "Approve monthly earnings",
-                            checked: isApproved,
-                            onchange: async (v) => {
-                                const month = selectedMonth.value;
-                                if (!month) {
-                                    notify("Please select a month", NotificationType.error);
-                                    return;
+                                    await Api.calculateRoyalties(month);
+                                    notify("Royalties calculated", NotificationType.success);
                                 }
+                            }),
+                            toggle({
+                                text: "Approve monthly earnings",
+                                checked: isApproved,
+                                onchange: async (v) => {
+                                    const month = selectedMonth.value;
+                                    if (!month) {
+                                        notify("Please select a month", NotificationType.error);
+                                        return;
+                                    }
 
-                                await Api.setRoyaltyActivation(month, v);
-                                notify("Switched approval status", NotificationType.success);
-                            }
-                        })
-                    ).build(),
+                                    await Api.setRoyaltyActivation(month, v);
+                                    notify("Switched approval status", NotificationType.success);
+                                }
+                            })
+                        ).build();
+                }, selectedMonth),
             ).build();
     }
 
