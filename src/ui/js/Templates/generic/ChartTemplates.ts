@@ -1,6 +1,6 @@
 import { Chart, registerables } from "chart.js";
 import { BoxPlotChart } from "@sgratzl/chartjs-chart-boxplot";
-import { compute, computeAsync, create, HtmlPropertyValue, signal } from "@targoninc/jess";
+import { compute, create, HtmlPropertyValue, signal } from "@targoninc/jess";
 import { ChartOptions } from "../../Classes/ChartOptions.ts";
 import { chartColor } from "../../state.ts";
 import { button } from "@targoninc/jess-components";
@@ -90,11 +90,13 @@ export class ChartTemplates {
     static async paginatedBarChart(options: PaginatedBarChartOptions) {
         const skip = signal(0);
         const take = signal(12);
-        const data = await computeAsync(
-            async (s, t) => (await Api.getStatistic(options.endpoint, options.params, s, t)) ?? [],
-            skip,
-            take,
-        );
+        const data = signal<Statistic[]>([]);
+        const update = async () => {
+            data.value = (await Api.getStatistic(options.endpoint, options.params, skip.value, take.value)) ?? [];
+        };
+        skip.subscribe(update);
+        take.subscribe(update);
+        update().then();
 
         const chart = compute((d: Statistic[]) => {
             const ctx = create("canvas")
