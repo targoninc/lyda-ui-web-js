@@ -211,7 +211,12 @@ export class PayoutTemplates {
                         button({
                             text: "Next",
                             icon: { icon: "skip_next" },
-                            onclick: () => offset.value -= 1,
+                            disabled: compute(o => o <= 0, offset),
+                            onclick: () => {
+                                if (offset.value > 0) {
+                                    offset.value -= 1;
+                                }
+                            },
                         }),
                         button({
                             text: "Current",

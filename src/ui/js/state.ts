@@ -1,16 +1,16 @@
-import { signal} from "@targoninc/jess";
-import {StreamClient} from "./Streaming/StreamClient.ts";
-import {LydaCache} from "./Cache/LydaCache.ts";
-import {CacheItem} from "./Cache/CacheItem.ts";
-import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import {PlayingFrom} from "@targoninc/lyda-shared/src/Models/PlayingFrom";
-import {TrackPosition} from "@targoninc/lyda-shared/src/Models/TrackPosition";
-import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
-import {LoopMode} from "@targoninc/lyda-shared/src/Enums/LoopMode";
-import {Permission} from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
-import {Notification} from "@targoninc/lyda-shared/src/Models/db/lyda/Notification";
-import {ListeningHistory} from "@targoninc/lyda-shared/dist/Models/db/lyda/ListeningHistory";
-import {PlayManager} from "./Streaming/PlayManager.ts";
+import { signal } from "@targoninc/jess";
+import { StreamClient } from "./Streaming/StreamClient.ts";
+import { LydaCache } from "./Cache/LydaCache.ts";
+import { CacheItem } from "./Cache/CacheItem.ts";
+import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom";
+import { TrackPosition } from "@targoninc/lyda-shared/src/Models/TrackPosition";
+import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import { LoopMode } from "@targoninc/lyda-shared/src/Enums/LoopMode";
+import { Permission } from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
+import { Notification } from "@targoninc/lyda-shared/src/Models/db/lyda/Notification";
+import { ListeningHistory } from "@targoninc/lyda-shared/dist/Models/db/lyda/ListeningHistory";
+import { PlayManager } from "./Streaming/PlayManager.ts";
 
 export const navInitialized = signal(false);
 
@@ -120,7 +120,7 @@ export const notifications = signal<Notification[]>([]);
 
 export const permissions = signal<Permission[]>([]);
 
-export const chartColor = signal("black");
+export const chartColor = signal(getComputedStyle(document.documentElement).getPropertyValue("--color-5").trim());
 
 export const history = signal<ListeningHistory[]>([]);
 history.subscribe((h, changed) => {
