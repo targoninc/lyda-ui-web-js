@@ -294,8 +294,8 @@ export class MusicTemplates {
         };
         pageState.subscribe(update);
         filterState.subscribe(update);
-        pageState.value = 1;
         const feedVisible = compute(u => u || type === "explore", currentUser);
+        setTimeout(() => update());
 
         return create("div")
             .classes("fullHeight")
