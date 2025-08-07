@@ -181,7 +181,7 @@ export class TrackTemplates {
                         ),
                     tracksState,
                 ),
-                when(empty, create("p").text("No tracks found").build()),
+                when(empty, GenericTemplates.noTracks()),
                 TrackTemplates.paginationControls(pageState),
             ).build();
     }

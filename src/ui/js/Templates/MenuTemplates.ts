@@ -1,17 +1,19 @@
-import {AlbumActions} from "../Actions/AlbumActions.ts";
-import {PlaylistActions} from "../Actions/PlaylistActions.ts";
-import {GenericTemplates} from "./generic/GenericTemplates.ts";
-import {Util} from "../Classes/Util.ts";
-import {navigate} from "../Routing/Router.ts";
-import {compute, Signal, signal, AnyElement, create, HtmlPropertyValue, StringOrSignal} from "@targoninc/jess";
-import {RoutePath} from "../Routing/routes.ts";
+import { AlbumActions } from "../Actions/AlbumActions.ts";
+import { PlaylistActions } from "../Actions/PlaylistActions.ts";
+import { GenericTemplates, horizontal } from "./generic/GenericTemplates.ts";
+import { Util } from "../Classes/Util.ts";
+import { navigate } from "../Routing/Router.ts";
+import { AnyElement, compute, create, HtmlPropertyValue, signal, Signal, StringOrSignal } from "@targoninc/jess";
+import { RoutePath } from "../Routing/routes.ts";
 import { button } from "@targoninc/jess-components";
 
 export class MenuTemplates {
-    static genericMenu(title: HtmlPropertyValue, menuItems: any[]) {
+    static genericMenu(title: HtmlPropertyValue, menuItems: any[], onClose: () => void) {
         const indexState = signal(0);
         const menuItemCount = menuItems.length;
-        let modal = MenuTemplates.getGenericModalWithSelectedIndex(indexState, title, menuItems);
+
+        const modal = MenuTemplates.getGenericModalWithSelectedIndex(indexState, title, menuItems, onClose);
+
         const eventListener = (e: KeyboardEvent) => {
             if (e.code === "ArrowUp") {
                 e.preventDefault();
@@ -36,11 +38,18 @@ export class MenuTemplates {
         return modal;
     }
 
-    static getGenericModalWithSelectedIndex(selectedIndex: Signal<number>, title: HtmlPropertyValue, menuItems: any[]) {
+    static getGenericModalWithSelectedIndex(selectedIndex: Signal<number>, title: HtmlPropertyValue, menuItems: any[], onClose: () => void) {
         return create("div")
             .classes("flex-v")
             .children(
-                GenericTemplates.title(title),
+                horizontal(
+                    GenericTemplates.title(title),
+                    button({
+                        text: "Close",
+                        icon: { icon: "close" },
+                        onclick: onClose,
+                    }),
+                ),
                 ...menuItems.map((menuItem, itemIndex) => MenuTemplates.menuItem(menuItem.text, menuItem.action, menuItem.icon, selectedIndex, itemIndex))
             ).build();
     }
@@ -86,7 +95,9 @@ export class MenuTemplates {
                 }
             }
         ];
-        modal = MenuTemplates.genericMenu(title, items);
+        modal = MenuTemplates.genericMenu(title, items, () => {
+            Util.removeModal(modal);
+        });
         return modal;
     }
 }

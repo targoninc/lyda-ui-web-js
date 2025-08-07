@@ -1199,6 +1199,11 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     flex-wrap: nowrap;
 }
 
+.graphic {
+    width: 200px;
+    height: auto;
+}
+
 .update-available {
     position: fixed;
     bottom: var(--base-padding);

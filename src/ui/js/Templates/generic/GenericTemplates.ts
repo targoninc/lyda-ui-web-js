@@ -412,7 +412,27 @@ export class GenericTemplates {
     }
 
     static modalImage(imageUrl: StringOrSignal) {
-        return create("img").classes("full").attributes("src", imageUrl).build();
+        return create("img")
+            .classes("full")
+            .attributes("src", imageUrl)
+            .build();
+    }
+
+    static graphic(imageUrl: string) {
+        return create("img")
+            .classes("graphic")
+            .attributes("src", `/img/graphics/${imageUrl}`)
+            .build();
+    }
+
+    static noTracks() {
+        return horizontal(
+            GenericTemplates.graphic("no_track_found.svg"),
+            create("span")
+                .text("No tracks found")
+                .build(),
+        ).classes("align-children")
+         .build();
     }
 
     static textInputModal(
