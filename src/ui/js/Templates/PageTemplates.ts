@@ -18,7 +18,7 @@ import { MusicTemplates } from "./music/MusicTemplates.ts";
 import { PaymentTemplates } from "./money/PaymentTemplates.ts";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { TrackEditTemplates } from "./music/TrackEditTemplates.ts";
-import { Route } from "../Routing/Router.ts";
+import { navigate, Route } from "../Routing/Router.ts";
 import { PlayManager } from "../Streaming/PlayManager.ts";
 import { currentSecretCode, currentUser } from "../state.ts";
 import { TrackTemplates } from "./music/TrackTemplates.ts";
@@ -196,24 +196,31 @@ export class PageTemplates {
                     .build(),
                 create("p")
                     .classes("answer")
-                    .text("Yes, you can. However, the features are very limited and streaming quality will not be great. You can still buy songs and download them.")
+                    .text("Yes, you can. However, the features are very limited and streaming quality will be limited to 92kbps (audible artifacts). However, you can still buy songs and download them.")
                     .build(),
                 create("h3")
                     .classes("question")
                     .text("How can I cancel my subscription?")
                     .build(),
                 create("p")
-                    .classes("answer")
-                    .text("You can manage your subscriptions <a href=\"https://finance.targoninc.com\">here</a>. Your subscription will be cancelled and if you are on a yearly plan, the remaining time refunded.")
-                    .build(),
+                    .classes("answer", "flex")
+                    .children(
+                        create("span")
+                            .text("You can manage your subscription"),
+                        GenericTemplates.inlineLink(() => navigate(RoutePath.subscribe), "here"),
+                    ).build(),
                 create("h3")
                     .classes("question")
-                    .text("How do you make money?")
+                    .text("How are artist royalties calculated?")
                     .build(),
                 create("p")
-                    .classes("answer")
-                    .text("We take a percentage of all subscriptions and sales. This varies based on how high our income and expenses are.")
-                    .build()
+                    .classes("answer", "flex")
+                    .children(
+                        create("span")
+                            .text("Instead of the pro rata model that other platforms like Spotify use, we distribute your subscription earnings among the artists of the tracks you actually listened to every month."),
+                        create("span")
+                            .text("This is especially beneficial for smaller artists, as it relies on the relative percentages of your generated plays, not the absolute count of them."),
+                    ).build(),
             ).build();
     }
 

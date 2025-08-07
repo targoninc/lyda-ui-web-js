@@ -1,9 +1,4 @@
-import {
-    getUserSettingValue,
-    updateImagesWithSource,
-    updateUserSetting,
-    Util,
-} from "../Classes/Util.ts";
+import { getUserSettingValue, updateImagesWithSource, updateUserSetting, Util } from "../Classes/Util.ts";
 import { notify, Ui } from "../Classes/Ui.ts";
 import { LydaCache } from "../Cache/LydaCache.ts";
 import { CacheItem } from "../Cache/CacheItem.ts";
@@ -113,9 +108,9 @@ export class UserActions {
             if (t === themeName) {
                 return;
             }
-            Util.removeStylesheet("/styles/" + t + ".css");
+            Util.removeStylesheet("/styles/themes/" + t + ".css");
         });
-        Util.includeStylesheet(`/styles/${themeName}.css`);
+        Util.includeStylesheet(`/styles/themes/${themeName}.css`);
         Util.setForeGroundColor();
         if (onlyLocal) {
             return;

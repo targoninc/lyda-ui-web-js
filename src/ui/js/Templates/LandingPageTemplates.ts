@@ -113,8 +113,7 @@ export class LandingPageTemplates {
                         .children(GenericTemplates.breadcrumbs(pageMap, history, step))
                         .build(),
                     templateMap[newStep](step, user)
-                )
-                .build();
+                ).build();
         });
 
         return template;
@@ -961,10 +960,8 @@ export class LandingPageTemplates {
                                             ...user.value,
                                             password: target(e).value,
                                         };
-                                    })
-                                    .build()
-                            )
-                            .build(),
+                                    }).build()
+                            ).build(),
                         button({
                             text: "Next",
                             id: "checkEmailTrigger",
@@ -980,8 +977,7 @@ export class LandingPageTemplates {
                             },
                             classes: ["secondary", "positive"],
                         })
-                    )
-                    .build(),
+                    ).build(),
                 create("div")
                     .classes("flex-v")
                     .children(
@@ -993,10 +989,8 @@ export class LandingPageTemplates {
                                 create("span")
                                     .text(
                                         "We are focused on building a platform that is both good for artists as well as listeners."
-                                    )
-                                    .build()
-                            )
-                            .build(),
+                                    ).build()
+                            ).build(),
                         create("p")
                             .classes("color-dim")
                             .styles("max-width", "300px")
@@ -1004,10 +998,8 @@ export class LandingPageTemplates {
                                 create("span")
                                     .text(
                                         "We want to make sure that artists can earn money from their work, and listeners can enjoy their music without ads."
-                                    )
-                                    .build()
-                            )
-                            .build(),
+                                    ).build()
+                            ).build(),
                         create("p")
                             .classes("color-dim")
                             .styles("max-width", "300px")
@@ -1015,16 +1007,20 @@ export class LandingPageTemplates {
                                 create("span")
                                     .text(
                                         " If you're curious about what we're building, you can take a look at our "
-                                    )
-                                    .build(),
-                                GenericTemplates.inlineLink(
-                                    () => navigate(RoutePath.roadmap),
-                                    "roadmap"
-                                )
-                            )
-                            .build()
-                    )
-                    .build()
+                                    ).build(),
+                                GenericTemplates.inlineLink(() => navigate(RoutePath.roadmap), "roadmap"),
+                            ).build(),
+                        create("p")
+                            .classes("color-dim")
+                            .styles("max-width", "300px")
+                            .children(
+                                create("span")
+                                    .text(
+                                        "You can also check out our ",
+                                    ).build(),
+                                GenericTemplates.inlineLink(() => navigate(RoutePath.faq), "FAQ"),
+                            ).build(),
+                    ).build()
             ).build();
     }
 

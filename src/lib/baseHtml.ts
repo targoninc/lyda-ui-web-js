@@ -1,6 +1,6 @@
-import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
-import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
+import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 
 export async function baseHtml(req: Request) {
     const url = req.url;
@@ -94,7 +94,7 @@ export async function baseHtml(req: Request) {
     
     <link rel="stylesheet" type="text/css" href="/styles/style.css"/>
     <link rel="stylesheet" type="text/css" href="/styles/elements.css"/>
-    <link rel="stylesheet" type="text/css" href="/styles/dark.css"/>
+    <link rel="stylesheet" type="text/css" href="/styles/themes/dark.css"/>
     <link rel="stylesheet" type="text/css" href="/styles/shared_targon.css"/>
     
     <!-- base64 encoded favicon -->

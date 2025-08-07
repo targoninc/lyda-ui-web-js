@@ -1220,6 +1220,10 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     height: 50dvh;
 }
 
+.question {
+    margin-top: 1em;
+}
+
 @keyframes scroll-left {
     0% {
         transform: translateX(0%);
