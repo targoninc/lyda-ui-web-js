@@ -294,13 +294,15 @@ export class PlaylistTemplates {
             .classes("cover", "rounded", "nopointer", "blurOnParentHover")
             .styles("height", "var(--font-size-large)")
             .src(coverState)
-            .alt(playlist.title).build();
+            .alt(playlist.title)
+            .build();
     }
 
     static playlistCardsContainer(children: AnyNode[]) {
         return create("div")
-            .classes("profileContent", "playlists", "flex")
-            .children(...children).build();
+            .classes("playlists", "flex")
+            .children(...children)
+            .build();
     }
 
     static async playlistPage(data: { playlist: Playlist, canEdit: boolean }, user: User) {

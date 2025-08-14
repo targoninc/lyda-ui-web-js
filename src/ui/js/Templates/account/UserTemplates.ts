@@ -16,6 +16,7 @@ import {
     create,
     DomNode,
     HtmlPropertyValue,
+    InputType,
     nullElement,
     Signal,
     signal,
@@ -28,7 +29,7 @@ import { notify, Ui } from "../../Classes/Ui.ts";
 import { MediaActions } from "../../Actions/MediaActions.ts";
 import { RoutePath } from "../../Routing/routes.ts";
 import { MusicTemplates } from "../music/MusicTemplates.ts";
-import { button, icon } from "@targoninc/jess-components";
+import { button, icon, input } from "@targoninc/jess-components";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
@@ -325,23 +326,23 @@ export class UserTemplates {
             .text("Follows you").build();
     }
 
-    static profileTrackList(tracks: Track[], isOwnProfile: boolean) {
+    static profileTrackList(entityType: EntityType, tracks: Track[], isOwnProfile: boolean) {
         let children = [];
         if (tracks.length === 0) {
             return TrackTemplates.noTracksUploadedYet(isOwnProfile);
         } else {
-            children = tracks.reverse().map(track => MusicTemplates.feedEntry(EntityType.track, track));
+            children = tracks.reverse().map(track => MusicTemplates.feedEntry(entityType, track));
         }
 
         return TrackTemplates.trackList(children);
     }
 
-    static profileRepostList(tracks: Track[], isOwnProfile: boolean) {
+    static profileRepostList(entityType: EntityType, tracks: Track[], isOwnProfile: boolean) {
         let children = [];
         if (tracks.length === 0) {
             return TrackTemplates.noRepostsYet(isOwnProfile);
         } else {
-            children = tracks.reverse().map(track => MusicTemplates.feedEntry(EntityType.track, track));
+            children = tracks.reverse().map(track => MusicTemplates.feedEntry(entityType, track));
         }
 
         return TrackTemplates.trackList(children);
@@ -398,10 +399,11 @@ export class UserTemplates {
     }
 
     static profileTab<T>(
+        entityType: EntityType,
         apiFunc: (name: string, id?: number | null) => Promise<T[] | null>,
         user: User,
         isOwnProfile: boolean,
-        dataTemplate: (data: T[], ownProfile: boolean) => AnyElement,
+        dataTemplate: (entityType: EntityType, data: T[], ownProfile: boolean) => AnyElement,
     ) {
         const data = signal<T[] | null>(null);
         const loading = signal(false);
@@ -411,7 +413,7 @@ export class UserTemplates {
 
         return vertical(
             when(loading, GenericTemplates.loadingSpinner()),
-            when(data, () => (data.value ? dataTemplate(data.value, isOwnProfile) : nullElement()), false),
+            when(data, () => (data.value ? dataTemplate(entityType, data.value, isOwnProfile) : nullElement()), false),
         ).build();
     }
 
@@ -434,19 +436,19 @@ export class UserTemplates {
             GenericTemplates.combinedSelector(tabs, (i: number) => (currentIndex.value = i), currentIndex.value),
             when(
                 tabSelected(currentIndex, 0),
-                UserTemplates.profileTab(Api.getTracksByUser, user, isOwnProfile, UserTemplates.profileTrackList),
+                UserTemplates.profileTab(EntityType.track, Api.getTracksByUser, user, isOwnProfile, UserTemplates.profileTrackList),
             ),
             when(
                 tabSelected(currentIndex, 1),
-                UserTemplates.profileTab(Api.getAlbumsByUser, user, isOwnProfile, UserTemplates.albumCards),
+                UserTemplates.profileTab(EntityType.album, Api.getAlbumsByUser, user, isOwnProfile, UserTemplates.listCards),
             ),
             when(
                 tabSelected(currentIndex, 2),
-                UserTemplates.profileTab(Api.getPlaylistsByUser, user, isOwnProfile, UserTemplates.playlistCards),
+                UserTemplates.profileTab(EntityType.playlist, Api.getPlaylistsByUser, user, isOwnProfile, UserTemplates.listCards),
             ),
             when(
                 tabSelected(currentIndex, 3),
-                UserTemplates.profileTab(Api.getRepostsByUser, user, isOwnProfile, UserTemplates.profileRepostList),
+                UserTemplates.profileTab(EntityType.track, Api.getRepostsByUser, user, isOwnProfile, UserTemplates.profileRepostList),
             ),
             when(
                 tabSelected(currentIndex, 4),
@@ -754,15 +756,37 @@ export class UserTemplates {
             .classes("icon", "badge", "svg", ...addClasses).build();
     }
 
-    static albumCards(albums: Album[], isOwnProfile: boolean) {
-        let children = [];
-        if (albums.length === 0) {
+    static listCards(type: EntityType, list: (Album | Playlist)[], isOwnProfile: boolean) {
+        if (list.length === 0) {
             return AlbumTemplates.noAlbumsYet(isOwnProfile);
-        } else {
-            children = albums.map((album: Album) => AlbumTemplates.albumCard(album));
         }
 
-        return AlbumTemplates.albumCardsContainer(children);
+        const search = signal("");
+        const filteredAlbums = compute(s => {
+            return list.filter(a => a.title.includes(s)
+                || a.user?.displayname?.includes(s)
+                || a.user?.username?.includes(s),
+            );
+        }, search);
+
+        return vertical(
+            input({
+                type: InputType.text,
+                validators: [],
+                name: "albums-filter",
+                placeholder: `Filter ${type}s`,
+                onchange: value => search.value = value,
+                value: search,
+            }),
+            compute(a => {
+                if (type === EntityType.playlist) {
+                    return PlaylistTemplates.playlistCardsContainer((a as Playlist[]).map((entity) => PlaylistTemplates.playlistCard(entity)));
+                } else if (type === EntityType.album) {
+                    return AlbumTemplates.albumCardsContainer((a as Album[]).map((entity) => AlbumTemplates.albumCard(entity)));
+                }
+                return vertical();
+            }, filteredAlbums),
+        ).build();
     }
 
     static playlistCards(playlists: Playlist[], isOwnProfile: boolean) {
@@ -778,8 +802,8 @@ export class UserTemplates {
 
     static libraryPage(albums: Album[], playlists: Playlist[], tracks: Track[]) {
         const tracksContainer = UserTemplates.libraryTracks(tracks);
-        const albumsContainer = UserTemplates.libraryAlbums(albums);
-        const playlistsContainer = UserTemplates.libraryPlaylists(playlists);
+        const albumsContainer = UserTemplates.listCards(EntityType.album, albums, false);
+        const playlistsContainer = UserTemplates.listCards(EntityType.playlist, playlists, false);
 
         const tabs = ["Tracks", "Albums", "Playlists"];
         const tabContents = [tracksContainer, albumsContainer, playlistsContainer];
@@ -787,7 +811,7 @@ export class UserTemplates {
             tabs,
             (i: number) => {
                 tabContents.forEach((c, j) => {
-                    c.value.style.display = i === j ? "flex" : "none";
+                    c.style.display = i === j ? "flex" : "none";
                 });
             },
             0,
@@ -804,38 +828,15 @@ export class UserTemplates {
             ).build();
     }
 
-    static libraryAlbums(albums: Album[]) {
-        const template = signal(create("div").build());
-        const update = (albums: Album[]) => {
-            let children;
-            if (albums.length === 0) {
-                children = [create("span").text("Like some albums to see them here").build()];
-            } else {
-                children = albums.map((album: Album) => AlbumTemplates.albumCard(album));
-            }
-
-            template.value = AlbumTemplates.albumCardsContainer(children);
-        };
-        update(albums);
-
-        return template;
-    }
-
     static libraryTracks(tracks: Track[]) {
-        const template = signal(create("div").build());
-        const update = (tracks: Track[]) => {
-            let children;
-            if (tracks.length === 0) {
-                children = [create("span").text("Like some tracks to see them here").build()];
-            } else {
-                children = tracks.map((track: Track) => MusicTemplates.feedEntry(EntityType.track, track));
-            }
+        let children;
+        if (tracks.length === 0) {
+            children = [create("span").text("Like some tracks to see them here").build()];
+        } else {
+            children = tracks.map((track: Track) => MusicTemplates.feedEntry(EntityType.track, track));
+        }
 
-            template.value = TrackTemplates.trackList(children);
-        };
-        update(tracks);
-
-        return template;
+        return TrackTemplates.trackList(children);
     }
 
     static libraryPlaylists(playlists: Playlist[]) {

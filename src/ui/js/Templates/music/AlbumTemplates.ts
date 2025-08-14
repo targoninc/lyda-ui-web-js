@@ -264,7 +264,7 @@ export class AlbumTemplates {
         } else {
             children = [
                 create("p")
-                    .text("No albums on this profile.")
+                    .text("No albums here.")
                     .build(),
             ];
         }
@@ -321,8 +321,9 @@ export class AlbumTemplates {
 
     static albumCardsContainer(children: AnyNode[]) {
         return create("div")
-            .classes("profileContent", "albums", "flex")
-            .children(...children).build();
+            .classes("albums", "flex")
+            .children(...children)
+            .build();
     }
 
     private static albumPageDisplay(album: Album, canEdit: boolean) {
