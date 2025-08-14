@@ -8,17 +8,7 @@ import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
 import { Images } from "../../Enums/Images.ts";
 import { Util } from "../../Classes/Util.ts";
 import { createModal, Ui } from "../../Classes/Ui.ts";
-import {
-    AnyNode,
-    compute,
-    create,
-    HtmlPropertyValue,
-    InputType,
-    nullElement,
-    signal,
-    Signal,
-    when,
-} from "@targoninc/jess";
+import { AnyNode, compute, create, InputType, nullElement, signal, Signal, when } from "@targoninc/jess";
 import { navigate, Route } from "../../Routing/Router.ts";
 import { currentTrackId, currentUser, playingFrom, playingHere } from "../../state.ts";
 import { PageTemplates } from "../PageTemplates.ts";
@@ -304,7 +294,7 @@ export class AlbumTemplates {
                         create("div")
                             .classes("flex-v", "small-gap")
                             .children(
-                                AlbumTemplates.title(album.title, album.id, icons),
+                                MusicTemplates.title(EntityType.album, album.title, album.id, icons),
                                 UserTemplates.userWidget(album.user, [], [], UserWidgetContext.card),
                                 create("span")
                                     .classes("date", "text-small", "nopointer", "color-dim")
@@ -313,19 +303,6 @@ export class AlbumTemplates {
                             ).build(),
                     ).build(),
                 InteractionTemplates.interactions(EntityType.album, album),
-            ).build();
-    }
-
-    static title(title: HtmlPropertyValue, id: number, icons: any[]) {
-        return create("div")
-            .classes("flex")
-            .children(
-                create("span")
-                    .classes("clickable", "text-large", "pointer")
-                    .text(title)
-                    .onclick(() => navigate(`${RoutePath.album}/` + id))
-                    .build(),
-                ...icons,
             ).build();
     }
 

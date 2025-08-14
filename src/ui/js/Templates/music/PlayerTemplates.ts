@@ -31,7 +31,6 @@ import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType";
 import { LoopMode } from "@targoninc/lyda-shared/src/Enums/LoopMode";
 import { InteractionTemplates } from "../InteractionTemplates.ts";
 import { MusicTemplates } from "./MusicTemplates.ts";
-import { TrackTemplates } from "./TrackTemplates.ts";
 import { StreamingQuality } from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
 import { InteractionType } from "@targoninc/lyda-shared/src/Enums/InteractionType.ts";
@@ -365,7 +364,7 @@ export class PlayerTemplates {
             .children(
                 vertical(PlayerTemplates.roundPlayButton(track)).classes("align-center"),
                 vertical(
-                    TrackTemplates.title(track.title, track.id, PlayerTemplates.trackIcons(track)),
+                    MusicTemplates.title(EntityType.track, track.title, track.id, PlayerTemplates.trackIcons(track)),
                     PlayerTemplates.trackScrubbar(track, bufferPercent, positionPercent)
                 )
                     .classes("flex-grow", "no-gap")
@@ -457,7 +456,7 @@ export class PlayerTemplates {
 
     static async trackInfo(track: Track, trackUser: User) {
         return vertical(
-            TrackTemplates.title(track.title, track.id, PlayerTemplates.trackIcons(track)),
+            MusicTemplates.title(EntityType.track, track.title, track.id, PlayerTemplates.trackIcons(track)),
             UserTemplates.userLink(UserWidgetContext.player, trackUser),
             horizontal(PlayerTemplates.noSubscriptionInfo(), PlayerTemplates.playingFrom())
         )

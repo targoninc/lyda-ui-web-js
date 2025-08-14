@@ -1,5 +1,5 @@
 import { GenericTemplates, horizontal } from "../generic/GenericTemplates.ts";
-import { compute, create, signal, when } from "@targoninc/jess";
+import { AnyNode, compute, create, signal, when } from "@targoninc/jess";
 import { currentTrackId, currentUser, manualQueue, playingFrom, playingHere } from "../../state.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { Util } from "../../Classes/Util.ts";
@@ -23,6 +23,8 @@ import { InteractionTemplates } from "../InteractionTemplates.ts";
 import { button } from "@targoninc/jess-components";
 import { QueueManager } from "../../Streaming/QueueManager.ts";
 import { Api } from "../../Api/Api.ts";
+import { navigate } from "../../Routing/Router.ts";
+import { RoutePath } from "../../Routing/routes.ts";
 
 export class MusicTemplates {
     static feedEntry(type: EntityType, item: Track | Playlist | Album) {
@@ -65,7 +67,8 @@ export class MusicTemplates {
                                                 create("div")
                                                     .classes("flex")
                                                     .children(
-                                                        TrackTemplates.title(
+                                                        MusicTemplates.title(
+                                                            type,
                                                             item.title,
                                                             item.id,
                                                             icons
@@ -342,5 +345,28 @@ export class MusicTemplates {
                 }
             },
         });
+    }
+
+    static title(type: EntityType, title: string, id: number, icons: AnyNode[] = [], textSize: string = "text-large") {
+        let baseRoute = RoutePath.track;
+        switch (type) {
+            case EntityType.album:
+                baseRoute = RoutePath.album;
+                break;
+            case EntityType.playlist:
+                baseRoute = RoutePath.playlist;
+                break;
+        }
+
+        return create("div")
+            .classes("flex")
+            .children(
+                create("span")
+                    .classes("clickable", textSize, "pointer")
+                    .text(title)
+                    .onclick(() => navigate(`${baseRoute}/${id}`))
+                    .build(),
+                ...icons,
+            ).build();
     }
 }

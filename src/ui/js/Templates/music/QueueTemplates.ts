@@ -18,7 +18,6 @@ import { PlayManager } from "../../Streaming/PlayManager.ts";
 import { MusicTemplates } from "./MusicTemplates.ts";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 import { startItem } from "../../Actions/MusicActions.ts";
-import { TrackTemplates } from "./TrackTemplates.ts";
 import { PlayerTemplates } from "./PlayerTemplates.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
@@ -73,7 +72,7 @@ export class QueueTemplates {
                         QueueManager.removeIndexFromManualQueue(index);
                     }),
                     vertical(
-                        TrackTemplates.title(track.title, track.id, PlayerTemplates.trackIcons(track), "text-medium"),
+                        MusicTemplates.title(EntityType.track, track.title, track.id, PlayerTemplates.trackIcons(track), "text-medium"),
                         UserTemplates.userLink(UserWidgetContext.player, track.user!),
                     ).classes("no-gap"),
                 ),

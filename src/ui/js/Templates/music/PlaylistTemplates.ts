@@ -7,20 +7,7 @@ import { UserTemplates } from "../account/UserTemplates.ts";
 import { Images } from "../../Enums/Images.ts";
 import { Util } from "../../Classes/Util.ts";
 import { Ui } from "../../Classes/Ui.ts";
-import {
-    AnyElement,
-    AnyNode,
-    compute,
-    create,
-    HtmlPropertyValue,
-    InputType,
-    nullElement,
-    Signal,
-    signal,
-    when,
-} from "@targoninc/jess";
-import { navigate } from "../../Routing/Router.ts";
-import { RoutePath } from "../../Routing/routes.ts";
+import { AnyElement, AnyNode, compute, create, InputType, nullElement, Signal, signal, when } from "@targoninc/jess";
 import { button, icon, input, textarea, toggle } from "@targoninc/jess-components";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
@@ -285,7 +272,7 @@ export class PlaylistTemplates {
                         create("div")
                             .classes("flex-v", "small-gap")
                             .children(
-                                PlaylistTemplates.title(playlist.title, playlist.id, icons),
+                                MusicTemplates.title(EntityType.playlist, playlist.title, playlist.id, icons),
                                 UserTemplates.userWidget(playlist.user, [], [], UserWidgetContext.card),
                                 create("span")
                                     .classes("date", "text-small", "nopointer", "color-dim")
@@ -294,19 +281,6 @@ export class PlaylistTemplates {
                             ).build(),
                     ).build(),
                 InteractionTemplates.interactions(EntityType.playlist, playlist),
-            ).build();
-    }
-
-    static title(title: HtmlPropertyValue, id: HtmlPropertyValue, icons: AnyNode[] = []) {
-        return create("div")
-            .classes("flex")
-            .children(
-                create("span")
-                    .classes("clickable", "text-large", "pointer")
-                    .text(title)
-                    .onclick(() => navigate(`${RoutePath.playlist}/` + id))
-                    .build(),
-                ...icons,
             ).build();
     }
 

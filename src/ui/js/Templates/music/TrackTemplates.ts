@@ -15,7 +15,7 @@ import { TrackEditTemplates } from "./TrackEditTemplates.ts";
 import { CustomText } from "../../Classes/Helpers/CustomText.ts";
 import { CommentTemplates } from "../CommentTemplates.ts";
 import { navigate } from "../../Routing/Router.ts";
-import { AnyNode, compute, create, HtmlPropertyValue, Signal, signal, signalMap, when } from "@targoninc/jess";
+import { AnyNode, compute, create, Signal, signal, signalMap, when } from "@targoninc/jess";
 import { currentTrackId, currentTrackPosition, currentUser, manualQueue, playingHere } from "../../state.ts";
 import { Ui } from "../../Classes/Ui.ts";
 import { ApiRoutes } from "../../Api/ApiRoutes.ts";
@@ -382,7 +382,7 @@ export class TrackTemplates {
                             .children(
                                 vertical(
                                     horizontal(
-                                        TrackTemplates.title(track.title, track.id, icons),
+                                        MusicTemplates.title(EntityType.track, track.title, track.id, icons),
                                         create("span")
                                             .classes("nopointer", "text-small", "align-center")
                                             .text(Time.format(track.length))
@@ -485,25 +485,6 @@ export class TrackTemplates {
                         )
                         .build();
                 }),
-            ).build();
-    }
-
-    static title(title: HtmlPropertyValue, id: number, icons: AnyNode[] = [], textSize: string = "text-large") {
-        return create("div")
-            .classes("flex")
-            .children(
-                create("a")
-                    .classes("clickable", textSize, "pointer")
-                    .href(`/${RoutePath.track}/${id}`)
-                    .text(title)
-                    .onclick(e => {
-                        if (e.button === 0) {
-                            e.preventDefault();
-                            navigate(`${RoutePath.track}/${id}`);
-                        }
-                    })
-                    .build(),
-                ...icons,
             ).build();
     }
 
@@ -763,7 +744,7 @@ export class TrackTemplates {
             horizontal(
                 MusicTemplates.cover(EntityType.track, data.track, "inline-cover"),
                 vertical(
-                    TrackTemplates.title(data.track.title, data.track.id),
+                    MusicTemplates.title(EntityType.track, data.track.title, data.track.id),
                     horizontal(
                         UserTemplates.userWidget(data.user, [], [], UserWidgetContext.card),
                         create("span")
