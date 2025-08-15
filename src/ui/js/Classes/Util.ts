@@ -1,14 +1,14 @@
-import {notify} from "./Ui.ts";
-import {Images} from "../Enums/Images.ts";
-import {LydaCache} from "../Cache/LydaCache.ts";
-import {CacheItem} from "../Cache/CacheItem.ts";
-import {ApiRoutes} from "../Api/ApiRoutes.ts";
+import { notify } from "./Ui.ts";
+import { Images } from "../Enums/Images.ts";
+import { LydaCache } from "../Cache/LydaCache.ts";
+import { CacheItem } from "../Cache/CacheItem.ts";
+import { ApiRoutes } from "../Api/ApiRoutes.ts";
 import { chartColor, currentUser, permissions } from "../state.ts";
-import {AnyElement, asSignal, compute, signal, Signal} from "@targoninc/jess";
-import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
-import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
-import {NotificationType} from "../Enums/NotificationType.ts";
-import {Comment} from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
+import { AnyElement, asSignal, compute, signal, Signal } from "@targoninc/jess";
+import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType";
+import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import { NotificationType } from "../Enums/NotificationType.ts";
+import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import { Api } from "../Api/Api.ts";
 
 export class Util {
@@ -149,6 +149,8 @@ export class Util {
                 const foundModal = document.querySelector(".modal");
                 if (foundModal && !foundModal.contains(target(e))) {
                     Util.removeModal(modalContainer);
+                } else {
+                    Util.initializeModalRemove(modalContainer);
                 }
             }, {once: true});
         }, 100);
