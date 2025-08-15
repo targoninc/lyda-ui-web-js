@@ -763,9 +763,10 @@ export class UserTemplates {
 
         const search = signal("");
         const filteredAlbums = compute(s => {
-            return list.filter(a => a.title.includes(s)
-                || a.user?.displayname?.includes(s)
-                || a.user?.username?.includes(s),
+            const ls = s.toLowerCase();
+            return list.filter(a => a.title.toLowerCase().includes(ls)
+                || a.user?.displayname?.toLowerCase().includes(ls)
+                || a.user?.username?.toLowerCase().includes(ls),
             );
         }, search);
 
