@@ -45,12 +45,12 @@ export class PlayerTemplates {
         const positionPercent = compute(
             (p, isCurrent) => (isCurrent ? `${p.relative * 100}%` : "0%"),
             currentTrackPosition,
-            isCurrentTrack,
+            isCurrentTrack
         );
         const bufferPercent = compute(
             (p, isCurrent) => (isCurrent ? `${p * 100}%` : "0%"),
             currentlyBuffered,
-            isCurrentTrack,
+            isCurrentTrack
         );
 
         return create("div")
@@ -66,7 +66,7 @@ export class PlayerTemplates {
                                 adaptive: true,
                             },
                             PlayManager.playPreviousFromQueues,
-                            "Previous",
+                            "Previous"
                         ),
                         PlayerTemplates.roundPlayButton(track),
                         GenericTemplates.roundIconButton(
@@ -75,14 +75,14 @@ export class PlayerTemplates {
                                 adaptive: true,
                             },
                             PlayManager.playNextFromQueues,
-                            "Next",
+                            "Next"
                         ),
                         PlayerTemplates.loopModeButton(),
                         create("div")
                             .classes("flex", "align-center", "hideOnMidBreakpoint")
                             .children(InteractionTemplates.interactions(EntityType.track, track))
                             .build(),
-                        await PlayerTemplates.moreMenu(track),
+                        await PlayerTemplates.moreMenu(track)
                     )
                     .build(),
                 create("div")
@@ -91,7 +91,7 @@ export class PlayerTemplates {
                         "fullWidth",
                         "flex",
                         "rounded",
-                        "align-children",
+                        "align-children"
                     )
                     .id(track.id)
                     .attributes("duration", track.length)
@@ -102,9 +102,9 @@ export class PlayerTemplates {
                             .build(),
                         PlayerTemplates.currentTrackTime(),
                         PlayerTemplates.trackScrubbar(track, bufferPercent, positionPercent),
-                        PlayerTemplates.totalTrackTime(track),
+                        PlayerTemplates.totalTrackTime(track)
                     )
-                    .build(),
+                    .build()
             ).build();
     }
 
@@ -117,12 +117,12 @@ export class PlayerTemplates {
         const positionPercent = compute(
             (p, isCurrent) => (isCurrent ? `${p.relative * 100}%` : "0%"),
             currentTrackPosition,
-            isCurrentTrack,
+            isCurrentTrack
         );
         const bufferPercent = compute(
             (p, isCurrent) => (isCurrent ? `${p * 100}%` : "0%"),
             currentlyBuffered,
-            isCurrentTrack,
+            isCurrentTrack
         );
 
         return create("div")
@@ -140,7 +140,7 @@ export class PlayerTemplates {
                                     adaptive: true,
                                 },
                                 PlayManager.playPreviousFromQueues,
-                                "Previous",
+                                "Previous"
                             ),
                             PlayerTemplates.roundPlayButton(track),
                             GenericTemplates.roundIconButton(
@@ -149,13 +149,13 @@ export class PlayerTemplates {
                                     adaptive: true,
                                 },
                                 PlayManager.playNextFromQueues,
-                                "Next",
+                                "Next"
                             ),
                         ),
                         InteractionTemplates.interactions(EntityType.track, track, {
                             showCount: false,
                             overrideActions: [InteractionType.like],
-                        }),
+                        })
                     )
                     .build(),
                 create("div")
@@ -164,7 +164,7 @@ export class PlayerTemplates {
                         "fullWidth",
                         "flex",
                         "rounded",
-                        "align-children",
+                        "align-children"
                     )
                     .id(track.id)
                     .attributes("duration", track.length)
@@ -175,8 +175,8 @@ export class PlayerTemplates {
                             .build(),
                         PlayerTemplates.currentTrackTime(true),
                         PlayerTemplates.trackScrubbar(track, bufferPercent, positionPercent),
-                        PlayerTemplates.totalTrackTime(track, true),
-                    ).build(),
+                        PlayerTemplates.totalTrackTime(track, true)
+                    ).build()
             ).build();
     }
 
@@ -190,7 +190,7 @@ export class PlayerTemplates {
             async () => {
                 PlayManager.togglePlayAsync(track.id).then();
             },
-            "Play/Pause",
+            "Play/Pause"
         );
     }
 
@@ -209,57 +209,20 @@ export class PlayerTemplates {
     private static trackScrubbar(
         track: Track,
         bufferPercent: Signal<string>,
-        positionPercent: Signal<string>,
+        positionPercent: Signal<string>
     ) {
-        const drag = { active: false };
         return create("div")
             .classes("audio-player-scrubber", "flex-grow", "flex", "rounded", "padded-inline")
             .id(track.id)
-            .onmousedown(e => {
-                drag.active = true;
-                PlayManager.scrubFromElement(e, track.id);
-            })
+            .onmousedown(e => PlayManager.scrubFromElement(e, track.id))
             .onmousemove(async e => {
-                if (drag.active || e.buttons === 1) {
+                if (e.buttons === 1) {
                     await PlayManager.scrubFromElement(e, track.id);
                 }
             })
-            .on("mouseup", () => { drag.active = false; })
             .on("pointerdown", async e => {
-                try { (e as PointerEvent).preventDefault?.(); } catch (_e) { /* ignore */ }
-                drag.active = true;
-                try {
-                    (e.currentTarget as HTMLElement)?.setPointerCapture?.((e as PointerEvent).pointerId);
-                } catch (_e) { /* ignore */ }
                 await PlayManager.scrubFromElement(e as PointerEvent, track.id);
             })
-            .on("pointermove", async e => {
-                if (!drag.active) return;
-                await PlayManager.scrubFromElement(e as PointerEvent, track.id);
-            })
-            .on("pointerup", e => {
-                drag.active = false;
-                try {
-                    (e.currentTarget as HTMLElement)?.releasePointerCapture?.((e as PointerEvent).pointerId);
-                } catch (_e) { /* ignore */ }
-            })
-            .on("pointercancel", () => { drag.active = false; })
-            .on("touchstart", async e => {
-                try {
-                    (e as TouchEvent).preventDefault();
-                } catch (_e) { /* ignore */ }
-                drag.active = true;
-                await PlayManager.scrubFromElement(e as unknown as Event, track.id);
-            })
-            .on("touchmove", async e => {
-                if (!drag.active) return;
-                try {
-                    (e as TouchEvent).preventDefault();
-                } catch (_e) { /* ignore */ }
-                await PlayManager.scrubFromElement(e as unknown as Event, track.id);
-            })
-            .on("touchend", () => { drag.active = false; })
-            .on("touchcancel", () => { drag.active = false; })
             .children(
                 create("div")
                     .id(track.id)
@@ -275,7 +238,7 @@ export class PlayerTemplates {
                     .id(track.id)
                     .classes("audio-player-scrubhead", "rounded", "nopointer")
                     .styles("left", positionPercent)
-                    .build(),
+                    .build()
             ).build();
     }
 
@@ -297,7 +260,7 @@ export class PlayerTemplates {
                         PlayManager.toggleMute(track.id);
                     },
                     "Mute/Unmute",
-                    ["loudness-button"],
+                    ["loudness-button"]
                 ),
                 create("div")
                     .classes("loudness-bar", "rounded", "padded", "relative", "hidden")
@@ -322,9 +285,9 @@ export class PlayerTemplates {
                             .classes("audio-player-loudnesshead", "rounded", "nopointer")
                             .styles("bottom", volumePercent)
                             .id(track.id)
-                            .build(),
+                            .build()
                     )
-                    .build(),
+                    .build()
             ).build();
     }
 
@@ -343,7 +306,7 @@ export class PlayerTemplates {
                     heading({
                         text: "Playing on another instance of Lyda",
                         level: 2,
-                    }),
+                    })
                 ),
                 when(
                     playingElsewhere,
@@ -356,17 +319,17 @@ export class PlayerTemplates {
                                 } else {
                                     Ui.showImageModal(cover);
                                 }
-                            }),
+                            })
                         ).classes("hideOnSmallBreakpoint"),
                         when(playerExpanded, await PlayerTemplates.smallPlayerLayout(track), true),
-                        await PlayerTemplates.bigPlayerLayout(track, trackUser),
+                        await PlayerTemplates.bigPlayerLayout(track, trackUser)
                     )
                         .classes("fullWidth")
                         .build(),
-                    true,
+                    true
                 ),
                 QueueTemplates.queuePopout(),
-                await PlayerTemplates.playerPopout(track),
+                await PlayerTemplates.playerPopout(track)
             ).build();
     }
 
@@ -379,7 +342,7 @@ export class PlayerTemplates {
                 create("div")
                     .classes("flex", "hideOnMidBreakpoint")
                     .children(PlayerTemplates.loudnessControl(track), QueueTemplates.queueButton())
-                    .build(),
+                    .build()
             ).build();
     }
 
@@ -388,12 +351,12 @@ export class PlayerTemplates {
         const positionPercent = compute(
             (p, isCurrent) => (isCurrent ? `${p.relative * 100}%` : "0%"),
             currentTrackPosition,
-            isCurrentTrack,
+            isCurrentTrack
         );
         const bufferPercent = compute(
             (p, isCurrent) => (isCurrent ? `${p * 100}%` : "0%"),
             currentlyBuffered,
-            isCurrentTrack,
+            isCurrentTrack
         );
 
         return create("div")
@@ -402,7 +365,7 @@ export class PlayerTemplates {
                 vertical(PlayerTemplates.roundPlayButton(track)).classes("align-center"),
                 vertical(
                     MusicTemplates.title(EntityType.track, track.title, track.id, PlayerTemplates.trackIcons(track)),
-                    PlayerTemplates.trackScrubbar(track, bufferPercent, positionPercent),
+                    PlayerTemplates.trackScrubbar(track, bufferPercent, positionPercent)
                 )
                     .classes("flex-grow", "no-gap")
                     .build(),
@@ -411,14 +374,14 @@ export class PlayerTemplates {
                         {
                             icon: compute(
                                 (p): string => (p ? "keyboard_arrow_down" : "keyboard_arrow_up"),
-                                playerExpanded,
+                                playerExpanded
                             ),
                             adaptive: true,
                         },
                         async () => (playerExpanded.value = !playerExpanded.value),
-                        "Toggle expanded player",
-                    ),
-                ).classes("align-center"),
+                        "Toggle expanded player"
+                    )
+                ).classes("align-center")
             ).build();
     }
 
@@ -453,11 +416,11 @@ export class PlayerTemplates {
                         })
                         .children(
                             create("img").classes("tiny-cover").src(img$),
-                            create("span").classes("text-small").text(name),
+                            create("span").classes("text-small").text(name)
                         )
-                        .build(),
+                        .build()
                 )
-                .build(),
+                .build()
         );
     }
 
@@ -495,7 +458,7 @@ export class PlayerTemplates {
         return vertical(
             MusicTemplates.title(EntityType.track, track.title, track.id, PlayerTemplates.trackIcons(track)),
             UserTemplates.userLink(UserWidgetContext.player, trackUser),
-            horizontal(PlayerTemplates.noSubscriptionInfo(), PlayerTemplates.playingFrom()),
+            horizontal(PlayerTemplates.noSubscriptionInfo(), PlayerTemplates.playingFrom())
         )
             .classes("align-center", "no-gap").build();
     }
@@ -516,7 +479,7 @@ export class PlayerTemplates {
                         menuShown.value = !menuShown.value;
                     },
                     "Open menu",
-                    ["showOnMidBreakpoint", activeClass],
+                    ["showOnMidBreakpoint", activeClass]
                 ),
                 when(
                     menuShown,
@@ -524,10 +487,10 @@ export class PlayerTemplates {
                         .classes("flex", "popout-above", "absolute-align-right", "card")
                         .children(
                             InteractionTemplates.interactions(EntityType.track, track),
-                            QueueTemplates.queueButton(),
+                            QueueTemplates.queueButton()
                         )
-                        .build(),
-                ),
+                        .build()
+                )
             ).build();
     }
 
@@ -547,7 +510,7 @@ export class PlayerTemplates {
             async () => {
                 await PlayManager.nextLoopMode();
             },
-            "Change loop mode",
+            "Change loop mode"
         );
     }
 
@@ -561,7 +524,7 @@ export class PlayerTemplates {
         const tabs: any[] = ["Player", "Queue"];
         const tabContents = [
             await PlayerTemplates.mobilePlayerTab(track, cover, trackUser),
-            QueueTemplates.fullQueueList(),
+            QueueTemplates.fullQueueList()
         ];
 
         return create("div")
@@ -579,9 +542,9 @@ export class PlayerTemplates {
                         isUrl: false,
                     }, () => {
                         playerExpanded.value = false;
-                    }),
+                    })
                 ).classes("align-children", "space-outwards", "mobile-player"),
-                ...tabContents,
+                ...tabContents
             ).build();
     }
 
@@ -606,12 +569,12 @@ export class PlayerTemplates {
                     .classes("flex", "hideOnMidBreakpoint")
                     .children(
                         PlayerTemplates.loudnessControl(track),
-                        QueueTemplates.queueButton(),
+                        QueueTemplates.queueButton()
                     )
-                    .build(),
-            ),
+                    .build()
+            )
         ).classes("space-outwards", "mobile-player")
-         .styles("flex-grow", "1")
-         .build();
+        .styles("flex-grow", "1")
+        .build();
     }
 }
