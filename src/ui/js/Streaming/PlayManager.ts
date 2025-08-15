@@ -1,30 +1,33 @@
-import {LydaCache} from "../Cache/LydaCache.ts";
-import {CacheItem} from "../Cache/CacheItem.ts";
-import {StreamingUpdater} from "./StreamingUpdater.ts";
-import {QueueManager} from "./QueueManager.ts";
-import {TrackActions} from "../Actions/TrackActions.ts";
-import {StreamClient} from "./StreamClient.ts";
+import { LydaCache } from "../Cache/LydaCache.ts";
+import { CacheItem } from "../Cache/CacheItem.ts";
+import { StreamingUpdater } from "./StreamingUpdater.ts";
+import { QueueManager } from "./QueueManager.ts";
+import { TrackActions } from "../Actions/TrackActions.ts";
+import { StreamClient } from "./StreamClient.ts";
 import { target, userHasSettingValue, Util } from "../Classes/Util.ts";
-import {ApiRoutes} from "../Api/ApiRoutes.ts";
+import { ApiRoutes } from "../Api/ApiRoutes.ts";
 import {
-    trackInfo,
+    currentQuality,
+    currentSecretCode,
     currentTrackId,
-    playingFrom,
-    streamClients,
-    volume,
-    playingHere,
     currentTrackPosition,
+    history,
     loopMode,
-    muted, currentSecretCode, history, currentQuality
+    muted,
+    playingFrom,
+    playingHere,
+    streamClients,
+    trackInfo,
+    volume,
 } from "../state.ts";
-import {StreamingBroadcaster, StreamingEvent} from "./StreamingBroadcaster.ts";
-import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import {PlayingFrom} from "@targoninc/lyda-shared/src/Models/PlayingFrom";
-import {LoopMode} from "@targoninc/lyda-shared/src/Enums/LoopMode";
-import {TrackPosition} from "@targoninc/lyda-shared/src/Models/TrackPosition";
-import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
-import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
-import {UserSettings} from "@targoninc/lyda-shared/src/Enums/UserSettings";
+import { StreamingBroadcaster, StreamingEvent } from "./StreamingBroadcaster.ts";
+import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom";
+import { LoopMode } from "@targoninc/lyda-shared/src/Enums/LoopMode";
+import { TrackPosition } from "@targoninc/lyda-shared/src/Models/TrackPosition";
+import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import { get } from "../Api/ApiClient.ts";
 
 export class PlayManager {
@@ -295,7 +298,8 @@ export class PlayManager {
     }
 
     static async scrubFromElement(e: MouseEvent, id: number) {
-        const value = e.offsetX / target(e).clientWidth;
+        const rect = target(e).getBoundingClientRect();
+        const value = e.offsetX / rect.width;
         if (id !== currentTrackId.value) {
             await PlayManager.startAsync(id);
         }
