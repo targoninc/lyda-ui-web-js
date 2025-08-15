@@ -297,9 +297,40 @@ export class PlayManager {
         await StreamingUpdater.updatePlayState();
     }
 
-    static async scrubFromElement(e: MouseEvent, id: number) {
-        const rect = target(e).getBoundingClientRect();
-        const value = e.offsetX / rect.width;
+    static async scrubFromElement(e: Event, id: number) {
+        // Use the element the handler is bound to, not the deepest child clicked
+        const el = (e.currentTarget as HTMLElement) ?? target<HTMLElement>(e);
+        const rect = el.getBoundingClientRect();
+
+        let clientX: number | null = null;
+        // Pointer/Mouse support
+        if ("clientX" in (e as any) && typeof (e as any).clientX === "number") {
+            clientX = (e as any).clientX as number;
+        } else {
+            // Touch support
+            const te = e as any;
+            if (te.touches && te.touches.length > 0) {
+                clientX = te.touches[0].clientX as number;
+            } else if (te.changedTouches && te.changedTouches.length > 0) {
+                clientX = te.changedTouches[0].clientX as number;
+            }
+        }
+
+        let value = 0;
+        if (clientX !== null && rect.width > 0) {
+            const x = clientX - rect.left;
+            value = x / rect.width;
+        } else if ((e as any).offsetX !== undefined && rect.width > 0) {
+            // Fallback for environments providing offsetX
+            value = (e as any).offsetX / rect.width;
+        } else {
+            value = 0; // safe default
+        }
+
+        if (!isFinite(value) || isNaN(value)) {
+            value = 0;
+        }
+
         if (id !== currentTrackId.value) {
             await PlayManager.startAsync(id);
         }
