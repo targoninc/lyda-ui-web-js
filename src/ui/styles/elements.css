@@ -371,6 +371,7 @@ label {
 
 .loudness-control {
     width: 36px;
+    user-select: none;
 }
 
 .loudness-control:hover .loudness-bar, .loudness-bar:hover {

@@ -52,7 +52,7 @@ export class StreamClient {
 
     async stopAsync() {
         this.playing = false;
-        await this.audio.pause();
+        this.audio.pause();
     }
 
     async scrubTo(time: number, relative = true, togglePlay = false) {
