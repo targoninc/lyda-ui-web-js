@@ -1,5 +1,4 @@
 import { signal } from "@targoninc/jess";
-import { StreamClient } from "./Streaming/StreamClient.ts";
 import { LydaCache } from "./Cache/LydaCache.ts";
 import { CacheItem } from "./Cache/CacheItem.ts";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
@@ -11,12 +10,13 @@ import { Permission } from "@targoninc/lyda-shared/src/Models/db/lyda/Permission
 import { Notification } from "@targoninc/lyda-shared/src/Models/db/lyda/Notification";
 import { ListeningHistory } from "@targoninc/lyda-shared/dist/Models/db/lyda/ListeningHistory";
 import { PlayManager } from "./Streaming/PlayManager.ts";
+import { IStreamClient } from "./Streaming/IStreamClient.ts";
 
 export const navInitialized = signal(false);
 
-export const streamClients = signal<Record<number, StreamClient>>({});
+export const streamClients = signal<Record<number, IStreamClient>>({});
 
-export const currentTrackId = signal(0);
+export const currentTrackId = signal(LydaCache.get<number>("currentTrackId").content ?? 0);
 currentTrackId.subscribe((id, changed) => {
     if (!changed) {
         return;

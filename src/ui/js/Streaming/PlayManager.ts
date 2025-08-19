@@ -95,7 +95,7 @@ export class PlayManager {
         await PlayManager.safeStartAsync(lastTrack.track_id);
     }
 
-    static addStreamClient(id: number, streamClient: StreamClient) {
+    static addStreamClient(id: number, streamClient: IStreamClient) {
         streamClients.value[id] = streamClient;
     }
 
@@ -329,7 +329,7 @@ export class PlayManager {
         }
 
         const streamClient = PlayManager.getStreamClient(currentTrackId.value);
-        streamClient.audio.loop = loopMode.value === LoopMode.single;
+        streamClient.setLoop(loopMode.value === LoopMode.single);
     }
 
     static async scrubTo(id: number, value: number) {

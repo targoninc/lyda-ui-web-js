@@ -15,4 +15,6 @@ export interface IStreamClient {
     setVolume(volume: number): void;
 
     getBufferedLength(): any;
+
+    setLoop(looping: boolean): void;
 }

@@ -28,6 +28,12 @@ export class StreamClient implements IStreamClient {
         initializeClient(this);
     }
 
+    setLoop(looping: boolean): void {
+        if (this.source) {
+            this.source.loop = looping;
+        }
+    }
+
     public async startAsync(): Promise<void> {
         await this.ensureAudioContext();
 

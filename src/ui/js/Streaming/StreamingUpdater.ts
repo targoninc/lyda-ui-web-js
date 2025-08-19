@@ -1,14 +1,7 @@
-import {PlayManager} from "./PlayManager.ts";
-import {Icons} from "../Enums/Icons.ts";
-import {PlayerTemplates} from "../Templates/music/PlayerTemplates.ts";
-import {
-    currentlyBuffered,
-    currentTrackId,
-    currentTrackPosition,
-    playingHere,
-    trackInfo,
-} from "../state.ts";
-import {signal} from "@targoninc/jess";
+import { PlayManager } from "./PlayManager.ts";
+import { PlayerTemplates } from "../Templates/music/PlayerTemplates.ts";
+import { currentlyBuffered, currentTrackId, currentTrackPosition, playingHere, trackInfo } from "../state.ts";
+import { signal } from "@targoninc/jess";
 
 const updatingPlayState = signal(false);
 
@@ -74,39 +67,6 @@ export class StreamingUpdater {
             playingHere.value = currentStreamClient.playing;
         } else {
             playingHere.value = false;
-        }
-
-        const targets = document.querySelectorAll(".audio-player-toggle");
-        for (const target of targets) {
-            const streamClient = PlayManager.getStreamClient(parseInt(target.id));
-            if (streamClient === undefined) {
-                continue;
-            }
-            const img = target.querySelector("img") as HTMLImageElement;
-            const text = target.querySelector("span") as HTMLSpanElement;
-            if (!img || !text) {
-                const i = target.querySelector("i");
-                if (i) {
-                    if (streamClient.playing) {
-                        i.innerText = "pause";
-                        text.innerText = "Pause";
-                    } else {
-                        i.innerText = "play_arrow";
-                        text.innerText = "Play";
-                    }
-                }
-                continue;
-            }
-            if (streamClient.playing) {
-                img.src = Icons.PAUSE;
-                img.alt = "Pause";
-                text.innerText = "Pause";
-            } else {
-                img.src = Icons.PLAY;
-                img.alt = "Play";
-                text.innerText = "Play";
-            }
-            img.classList.remove("spinner-animation");
         }
 
         await StreamingUpdater.updatePermanentPlayer();
