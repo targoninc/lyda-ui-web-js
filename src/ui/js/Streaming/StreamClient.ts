@@ -68,7 +68,7 @@ export class StreamClient implements IStreamClient {
         this.startCtxTime = 0;
     }
 
-    public async scrubTo(time: number, relative: boolean, togglePlay: boolean): Promise<void> {
+    public async scrubTo(time: number, relative: boolean): Promise<void> {
         await this.ensureAudioContext();
 
         // Interpret `relative` as "time is a 0..1 fraction of duration"
@@ -77,38 +77,14 @@ export class StreamClient implements IStreamClient {
             : time;
         const target = this.clampTime(targetSeconds);
 
-        const wasPlaying = this.playing;
-        if (wasPlaying) {
-            // Restart playback from new position
-            this.stopSourceOnly();
-        }
-
+        this.stopSourceOnly();
         this.offset = target;
 
-        if (togglePlay) {
-            if (wasPlaying) {
-                // toggled to pause (stay stopped)
-                this.playing = false;
-                return;
-            } else {
-                // toggled to play
-                if (!this.buffer) {
-                    this.loadingPromise ??= this.loadAndDecode();
-                    await this.loadingPromise;
-                }
-                this.startFromOffset(this.offset);
-                return;
-            }
+        if (!this.buffer) {
+            this.loadingPromise ??= this.loadAndDecode();
+            await this.loadingPromise;
         }
-
-        // If we were playing before, continue playing from new offset
-        if (wasPlaying) {
-            if (!this.buffer) {
-                this.loadingPromise ??= this.loadAndDecode();
-                await this.loadingPromise;
-            }
-            this.startFromOffset(this.offset);
-        }
+        this.startFromOffset(this.offset);
     }
 
     public getCurrentTime(relative: boolean): number {

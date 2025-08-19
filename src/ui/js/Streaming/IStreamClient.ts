@@ -6,7 +6,7 @@ export interface IStreamClient {
 
     stopAsync(): void;
 
-    scrubTo(time: number, relative: boolean, togglePlay: boolean): Promise<void>;
+    scrubTo(time: number, relative: boolean): Promise<void>;
 
     getCurrentTime(relative: boolean): any;
 
