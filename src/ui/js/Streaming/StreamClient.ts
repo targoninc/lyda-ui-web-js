@@ -1,6 +1,6 @@
 import { IStreamClient } from "./IStreamClient.ts";
 import { ApiRoutes } from "../Api/ApiRoutes.ts";
-import { currentQuality, currentTrackId } from "../state.ts";
+import { currentQuality, currentTrackId, volume } from "../state.ts";
 import { initializeClient } from "./InitializeClient.ts";
 
 export class StreamClient implements IStreamClient {
@@ -246,6 +246,7 @@ export class StreamClient implements IStreamClient {
         };
 
         this.source = src;
+        this.setVolume(volume.value);
 
         // Start immediately at the desired offset
         try {

@@ -19,6 +19,9 @@ export function initializeClient(client: IStreamClient) {
         }
     });
 
+    volume.subscribe(async q => client.setVolume(q));
+    client.setVolume(volume.value);
+
     const currentStreamClient = PlayManager.getStreamClient(currentTrackId.value);
     if (!currentStreamClient) {
         client.setVolume(volume.value ?? 0.2);
