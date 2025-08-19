@@ -270,7 +270,7 @@ export class PlayManager {
             streamClient = PlayManager.addStreamClientIfNotExists(id, track.track.length);
         }
         if (currentTrackPosition.value.relative !== 0) {
-            await streamClient.scrubTo(currentTrackPosition.value.relative * track.track.length, false, false);
+            await streamClient.scrubTo(currentTrackPosition.value.relative * track.track.length, false);
         }
         await StreamingUpdater.updatePlayState();
     }
