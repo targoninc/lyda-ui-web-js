@@ -1,85 +1,286 @@
-import { PlayManager } from "./PlayManager.ts";
-import { ApiRoutes } from "../Api/ApiRoutes.ts";
-import { currentQuality, currentTrackId, currentTrackPosition, volume } from "../state.ts";
-import { compute, create } from "@targoninc/jess";
 import { IStreamClient } from "./IStreamClient.ts";
+import { ApiRoutes } from "../Api/ApiRoutes.ts";
+import { currentQuality, currentTrackId } from "../state.ts";
 
 export class StreamClient implements IStreamClient {
-    duration: number;
-    playing: boolean;
+    public duration = 0;
+    public playing = false;
+
     private readonly id: number;
-    private audio: HTMLAudioElement;
-    private waitingForPlay: boolean = false;
+    private readonly code: string;
+
+    private ctx?: AudioContext;
+    private gain?: GainNode;
+    private source?: AudioBufferSourceNode;
+    private buffer?: AudioBuffer;
+
+    private startCtxTime = 0;  // AudioContext.currentTime when playback started
+    private offset = 0;        // seconds into the buffer where playback is/was
+    private loadingPromise?: Promise<void>;
+
+    private bytesReceived = 0;
+    private totalBytes = 0;
 
     constructor(id: number, code: string) {
         this.id = id;
-        const src = compute(q => `${ApiRoutes.getTrackAudio}?id=${this.id}&quality=${q}&code=${code}`, currentQuality);
-        this.audio = create("audio")
-            .attributes("crossOrigin", "use-credentials")
-            .attributes("preload", "auto")
-            .attributes("autoplay", "false")
-            .src(src).build() as HTMLAudioElement;
-        this.duration = this.audio.duration;
-        this.playing = false;
-        currentQuality.subscribe(async q => {
-            if (this.playing) {
-                this.stopAsync();
-                const interval = setInterval(async () => {
-                    if (this.getBufferedLength() >= this.duration) {
-                        console.log("Starting because buffer loaded");
-                        await this.scrubTo(currentTrackPosition.value.absolute, false, false);
-                        await this.startAsync();
-                        clearInterval(interval);
-                    }
-                }, 100);
-            } else {
-                this.stopAsync();
+        this.code = code;
+    }
+
+    public async startAsync(): Promise<void> {
+        await this.ensureAudioContext();
+
+        // If not loaded yet, start loading/decoding
+        if (!this.buffer) {
+            this.loadingPromise ??= this.loadAndDecode();
+            await this.loadingPromise;
+        }
+
+        // If already playing, do nothing
+        if (this.playing) {
+            return;
+        }
+
+        // Start/resume from current offset
+        this.startFromOffset(this.offset);
+    }
+
+    public stopAsync(): void {
+        // Stop playback and reset offset
+        if (this.source) {
+            try {
+                this.source.stop();
+            } catch (e: any) {
+                console.warn(e);
             }
-        });
-
-        const currentStreamClient = PlayManager.getStreamClient(currentTrackId.value);
-        if (!currentStreamClient) {
-            this.setVolume(volume.value ?? 0.2);
-        } else {
-            this.setVolume(currentStreamClient.getVolume());
+            this.source.disconnect();
+            this.source = undefined;
         }
-    }
-
-    async startAsync() {
-        this.playing = true;
-        currentTrackId.value = this.id;
-        if (this.waitingForPlay) {
-            this.waitingForPlay = true;
-            await this.audio.play();
-            this.waitingForPlay = false;
-            this.duration = this.audio.duration;
-        }
-    }
-
-    stopAsync() {
         this.playing = false;
-        this.audio.pause();
+        this.offset = 0;
+        this.startCtxTime = 0;
     }
 
-    async scrubTo(time: number, relative = true, togglePlay = false) {
-        if (togglePlay) this.stopAsync();
-        this.audio.currentTime = time * (relative ? this.audio.duration : 1);
-        if (togglePlay) await this.startAsync();
+    public async scrubTo(time: number, relative: boolean, togglePlay: boolean): Promise<void> {
+        await this.ensureAudioContext();
+
+        const target = this.clampTime(relative ? (this.getCurrentTime(true) + time) : time);
+
+        const wasPlaying = this.playing;
+        if (wasPlaying) {
+            // Restart playback from new position
+            this.stopSourceOnly();
+        }
+
+        this.offset = target;
+
+        if (togglePlay) {
+            if (wasPlaying) {
+                // toggled to pause (stay stopped)
+                this.playing = false;
+                return;
+            } else {
+                // toggled to play
+                if (!this.buffer) {
+                    this.loadingPromise ??= this.loadAndDecode();
+                    await this.loadingPromise;
+                }
+                this.startFromOffset(this.offset);
+                return;
+            }
+        }
+
+        // If we were playing before, continue playing from new offset
+        if (wasPlaying) {
+            if (!this.buffer) {
+                this.loadingPromise ??= this.loadAndDecode();
+                await this.loadingPromise;
+            }
+            this.startFromOffset(this.offset);
+        }
     }
 
-    getCurrentTime(relative = false) {
-        return relative ? this.audio.currentTime / this.audio.duration : this.audio.currentTime;
+    public getCurrentTime(_relative: boolean): number {
+        if (!this.ctx) {
+            return 0;
+        }
+
+        if (!this.playing) {
+            return this.offset;
+        }
+
+        const elapsed = this.ctx.currentTime - this.startCtxTime;
+        const now = this.offset + elapsed;
+        // Auto-clamp if we overran the duration
+        return this.duration > 0 ? Math.min(now, this.duration) : now;
     }
 
-    getVolume() {
-        return Math.sqrt(this.audio.volume);
+    public getVolume(): number {
+        return this.gain?.gain.value ?? 1;
     }
 
-    setVolume(volume: number) {
-        this.audio.volume = volume * volume;
+    public setVolume(volume: number): void {
+        if (!this.gain) {
+            return;
+        }
+
+        this.gain.gain.value = Math.max(0, Math.min(1, volume));
     }
 
-    getBufferedLength() {
-        return this.audio.buffered.length > 0 ? this.audio.buffered.end(0) : 0;
+    public getBufferedLength(): number {
+        // If fully decoded, all duration is available.
+        if (this.buffer && this.duration > 0) {
+            return this.duration;
+        }
+
+        // Otherwise, estimate based on response Content-Length (if known).
+        if (this.totalBytes > 0 && this.duration > 0) {
+            return Math.max(0, Math.min(this.duration, (this.bytesReceived / this.totalBytes) * this.duration));
+        }
+
+        // Unknown length.
+        return 0;
+    }
+
+    // Internals
+
+    private async ensureAudioContext(): Promise<void> {
+        if (!this.ctx) {
+            this.ctx = new AudioContext();
+            await this.ctx.resume().catch(() => {});
+        }
+
+        if (!this.gain) {
+            this.gain = this.ctx.createGain();
+            this.gain.gain.value = 1;
+            this.gain.connect(this.ctx.destination);
+        }
+    }
+
+    private buildUrl(): string {
+        return `${ApiRoutes.getTrackAudio}?id=${this.id}&quality=${currentQuality.value}&code=${this.code}`;
+    }
+
+    private async loadAndDecode(): Promise<void> {
+        if (!this.ctx) throw new Error("AudioContext not initialized");
+
+        const url = this.buildUrl();
+        const res = await fetch(url);
+
+        if (!res.ok || !res.body) {
+            throw new Error(`Failed to fetch stream: ${res.status} ${res.statusText}`);
+        }
+
+        const contentLength = res.headers.get("Content-Length");
+        this.totalBytes = contentLength ? parseInt(contentLength, 10) || 0 : 0;
+
+        // Accumulate the stream into a single buffer for decodeAudioData
+        const reader = res.body.getReader();
+        const chunks: Uint8Array[] = [];
+        let received = 0;
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+                break;
+            }
+
+            if (value) {
+                chunks.push(value);
+                received += value.byteLength;
+                this.bytesReceived = received;
+            }
+        }
+
+        const merged = new Uint8Array(received);
+        let offset = 0;
+        for (const c of chunks) {
+            merged.set(c, offset);
+            offset += c.byteLength;
+        }
+
+        const arrayBuffer = merged.buffer as ArrayBuffer;
+
+        // Decode to AudioBuffer
+        const buf = await this.ctx.decodeAudioData(arrayBuffer.slice(0));
+        this.buffer = buf;
+        this.duration = buf.duration;
+    }
+
+    private startFromOffset(offsetSeconds: number): void {
+        if (!this.ctx || !this.gain || !this.buffer) {
+            return;
+        }
+
+        // Clean existing source if any
+        this.stopSourceOnly();
+
+        const src = this.ctx.createBufferSource();
+        src.buffer = this.buffer;
+        src.connect(this.gain);
+
+        const startAt = this.clampTime(offsetSeconds);
+        this.offset = startAt;
+        this.startCtxTime = this.ctx.currentTime;
+        this.playing = true;
+
+        src.onended = () => {
+            // When natural end occurs, update state
+            if (!this.source || src !== this.source) {
+                return;
+            }
+
+            this.playing = false;
+            // Move offset to end
+            this.offset = this.duration;
+        };
+
+        this.source = src;
+
+        // Start immediately at the desired offset
+        try {
+            src.start(0, startAt);
+            currentTrackId.value = this.id;
+        } catch (e) {
+            // If invalid offset is passed, clamp and retry
+            const clamped = this.clampTime(startAt);
+            this.offset = clamped;
+            src.start(0, clamped);
+        }
+    }
+
+    private stopSourceOnly(): void {
+        if (this.source) {
+            try {
+                this.source.stop();
+            } catch (e: any) {
+                console.warn(e);
+            }
+            try {
+                this.source.disconnect();
+            } catch (e: any) {
+                console.warn(e);
+            }
+            this.source = undefined;
+        }
+
+        this.playing = false;
+
+        // Update offset to where we stopped
+        if (this.ctx) {
+            const elapsed = Math.max(0, this.ctx.currentTime - this.startCtxTime);
+            this.offset = this.clampTime(this.offset + elapsed);
+        }
+    }
+
+    private clampTime(t: number): number {
+        if (!isFinite(t) || t < 0) {
+            return 0;
+        }
+
+        if (this.duration > 0) {
+            return Math.min(t, this.duration);
+        }
+
+        return t;
     }
 }
