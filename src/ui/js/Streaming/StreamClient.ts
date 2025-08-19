@@ -1,6 +1,7 @@
 import { IStreamClient } from "./IStreamClient.ts";
 import { ApiRoutes } from "../Api/ApiRoutes.ts";
 import { currentQuality, currentTrackId } from "../state.ts";
+import { initializeClient } from "./InitializeClient.ts";
 
 export class StreamClient implements IStreamClient {
     public duration = 0;
@@ -24,6 +25,7 @@ export class StreamClient implements IStreamClient {
     constructor(id: number, code: string) {
         this.id = id;
         this.code = code;
+        initializeClient(this);
     }
 
     public async startAsync(): Promise<void> {
@@ -63,7 +65,11 @@ export class StreamClient implements IStreamClient {
     public async scrubTo(time: number, relative: boolean, togglePlay: boolean): Promise<void> {
         await this.ensureAudioContext();
 
-        const target = this.clampTime(relative ? (this.getCurrentTime(true) + time) : time);
+        // Interpret `relative` as "time is a 0..1 fraction of duration"
+        const targetSeconds = relative
+            ? (this.duration > 0 ? time * this.duration : 0)
+            : time;
+        const target = this.clampTime(targetSeconds);
 
         const wasPlaying = this.playing;
         if (wasPlaying) {
@@ -99,19 +105,24 @@ export class StreamClient implements IStreamClient {
         }
     }
 
-    public getCurrentTime(_relative: boolean): number {
+    public getCurrentTime(relative: boolean): number {
         if (!this.ctx) {
-            return 0;
+            return relative ? 0 : 0;
         }
 
-        if (!this.playing) {
-            return this.offset;
+        const baseOffset = this.playing
+            ? this.clampTime(this.offset + (this.ctx.currentTime - this.startCtxTime))
+            : this.offset;
+
+        if (relative) {
+            if (this.duration <= 0) {
+                return 0;
+            }
+
+            return Math.max(0, Math.min(1, baseOffset / this.duration));
         }
 
-        const elapsed = this.ctx.currentTime - this.startCtxTime;
-        const now = this.offset + elapsed;
-        // Auto-clamp if we overran the duration
-        return this.duration > 0 ? Math.min(now, this.duration) : now;
+        return this.duration > 0 ? Math.min(baseOffset, this.duration) : baseOffset;
     }
 
     public getVolume(): number {
