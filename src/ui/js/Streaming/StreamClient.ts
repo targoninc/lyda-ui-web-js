@@ -2,12 +2,13 @@ import { PlayManager } from "./PlayManager.ts";
 import { ApiRoutes } from "../Api/ApiRoutes.ts";
 import { currentQuality, currentTrackId, currentTrackPosition, volume } from "../state.ts";
 import { compute, create } from "@targoninc/jess";
+import { IStreamClient } from "./IStreamClient.ts";
 
-export class StreamClient {
-    id: number;
-    audio: HTMLAudioElement;
+export class StreamClient implements IStreamClient {
     duration: number;
     playing: boolean;
+    private readonly id: number;
+    private audio: HTMLAudioElement;
     private waitingForPlay: boolean = false;
 
     constructor(id: number, code: string) {

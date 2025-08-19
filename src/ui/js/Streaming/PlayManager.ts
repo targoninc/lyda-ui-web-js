@@ -29,6 +29,7 @@ import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import { get } from "../Api/ApiClient.ts";
+import { IStreamClient } from "./IStreamClient.ts";
 
 export class PlayManager {
     static async playCheck(track: Track) {
@@ -102,7 +103,7 @@ export class PlayManager {
         delete streamClients.value[id];
     }
 
-    static getStreamClient(id: number): StreamClient {
+    static getStreamClient(id: number): IStreamClient {
         return streamClients.value[id];
     }
 
