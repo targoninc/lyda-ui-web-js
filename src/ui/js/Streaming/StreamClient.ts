@@ -126,7 +126,7 @@ export class StreamClient implements IStreamClient {
     }
 
     public getVolume(): number {
-        return this.gain?.gain.value ?? 1;
+        return Math.sqrt(this.gain?.gain.value ?? 1);
     }
 
     public setVolume(volume: number): void {
@@ -134,7 +134,7 @@ export class StreamClient implements IStreamClient {
             return;
         }
 
-        this.gain.gain.value = Math.max(0, Math.min(1, volume));
+        this.gain.gain.value = Math.max(0, Math.min(1, volume * volume));
     }
 
     public getBufferedLength(): number {
