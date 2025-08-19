@@ -43,12 +43,10 @@ export class StreamClient implements IStreamClient {
             await this.loadingPromise;
         }
 
-        // If already playing, do nothing
         if (this.playing) {
             return;
         }
 
-        // Start/resume from current offset
         this.startFromOffset(this.offset);
     }
 
@@ -64,8 +62,6 @@ export class StreamClient implements IStreamClient {
             this.source = undefined;
         }
         this.playing = false;
-        this.offset = 0;
-        this.startCtxTime = 0;
     }
 
     public async scrubTo(time: number, relative: boolean): Promise<void> {
