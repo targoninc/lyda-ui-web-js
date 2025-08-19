@@ -177,7 +177,7 @@ export class PlayManager {
             return;
         }
 
-        await streamClient.stopAsync();
+        streamClient.stopAsync();
         playingHere.value = false;
         StreamingBroadcaster.send(StreamingEvent.trackStop, id);
 
@@ -280,7 +280,7 @@ export class PlayManager {
             return;
         }
 
-        await streamClient.stopAsync();
+        streamClient.stopAsync();
         playingHere.value = false;
         await StreamingUpdater.updatePlayState();
     }
@@ -290,7 +290,7 @@ export class PlayManager {
             if (key === exclusionId) {
                 continue;
             }
-            await streamClients.value[key].stopAsync();
+            streamClients.value[key].stopAsync();
         }
         playingHere.value = false;
 

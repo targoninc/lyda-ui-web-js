@@ -8,6 +8,7 @@ export class StreamClient {
     audio: HTMLAudioElement;
     duration: number;
     playing: boolean;
+    private waitingForPlay: boolean = false;
 
     constructor(id: number, code: string) {
         this.id = id;
@@ -21,7 +22,7 @@ export class StreamClient {
         this.playing = false;
         currentQuality.subscribe(async q => {
             if (this.playing) {
-                await this.stopAsync();
+                this.stopAsync();
                 const interval = setInterval(async () => {
                     if (this.getBufferedLength() >= this.duration) {
                         console.log("Starting because buffer loaded");
@@ -31,7 +32,7 @@ export class StreamClient {
                     }
                 }, 100);
             } else {
-                await this.stopAsync();
+                this.stopAsync();
             }
         });
 
@@ -46,17 +47,21 @@ export class StreamClient {
     async startAsync() {
         this.playing = true;
         currentTrackId.value = this.id;
-        await this.audio.play();
-        this.duration = this.audio.duration;
+        if (this.waitingForPlay) {
+            this.waitingForPlay = true;
+            await this.audio.play();
+            this.waitingForPlay = false;
+            this.duration = this.audio.duration;
+        }
     }
 
-    async stopAsync() {
+    stopAsync() {
         this.playing = false;
         this.audio.pause();
     }
 
     async scrubTo(time: number, relative = true, togglePlay = false) {
-        if (togglePlay) await this.stopAsync();
+        if (togglePlay) this.stopAsync();
         this.audio.currentTime = time * (relative ? this.audio.duration : 1);
         if (togglePlay) await this.startAsync();
     }
