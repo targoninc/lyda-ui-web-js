@@ -51,7 +51,11 @@ export class StreamClient implements IStreamClient {
     }
 
     public stopAsync(): void {
-        // Stop playback and reset offset
+        if (this.playing && this.ctx && this.source) {
+            const elapsed = Math.max(0, this.ctx.currentTime - this.startCtxTime);
+            this.offset = this.clampTime(this.offset + elapsed);
+        }
+
         if (this.source) {
             try {
                 this.source.stop();
