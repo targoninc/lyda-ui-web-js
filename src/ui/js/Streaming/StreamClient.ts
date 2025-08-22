@@ -157,7 +157,9 @@ export class StreamClient implements IStreamClient {
         if (!this.ctx) throw new Error("AudioContext not initialized");
 
         const url = this.buildUrl();
-        const res = await fetch(url);
+        const res = await fetch(url, {
+            credentials: 'include'
+        });
 
         if (!res.ok || !res.body) {
             throw new Error(`Failed to fetch stream: ${res.status} ${res.statusText}`);
