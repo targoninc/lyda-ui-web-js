@@ -35,12 +35,12 @@ import { StreamingQuality } from "@targoninc/lyda-shared/src/Enums/StreamingQual
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
 import { InteractionType } from "@targoninc/lyda-shared/src/Enums/InteractionType.ts";
 
+export const PLAYCHECK_INTERVAL = 200;
+
 export class PlayerTemplates {
     static async bigAudioPlayer(track: Track) {
         PlayManager.addStreamClientIfNotExists(track.id, track.length);
-        setInterval(async () => {
-            await PlayManager.playCheck(track);
-        }, 1000);
+        setInterval(async () => await PlayManager.playCheck(track), PLAYCHECK_INTERVAL);
         const isCurrentTrack = compute(id => id === track.id, currentTrackId);
         const positionPercent = compute(
             (p, isCurrent) => (isCurrent ? `${p.relative * 100}%` : "0%"),
@@ -110,9 +110,7 @@ export class PlayerTemplates {
 
     static async mobileAudioPlayer(track: Track) {
         PlayManager.addStreamClientIfNotExists(track.id, track.length);
-        setInterval(async () => {
-            await PlayManager.playCheck(track);
-        }, 1000);
+        setInterval(async () => await PlayManager.playCheck(track), PLAYCHECK_INTERVAL);
         const isCurrentTrack = compute(id => id === track.id, currentTrackId);
         const positionPercent = compute(
             (p, isCurrent) => (isCurrent ? `${p.relative * 100}%` : "0%"),

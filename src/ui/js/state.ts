@@ -79,7 +79,7 @@ currentTrackPosition.subscribe((p, changed) => {
         PlayManager.getTrackData(currentTrackId.value).then(d => {
             if (d) {
                 navigator.mediaSession.setPositionState({
-                    position: currentTrackPosition.value.absolute,
+                    position: Math.min(currentTrackPosition.value.absolute, d.track.length),
                     duration: d.track.length,
                     playbackRate: 1,
                 });
@@ -141,3 +141,5 @@ playerExpanded.subscribe((expanded) => {
         footer?.classList.remove("no-padding");
     }
 });
+
+export const loadingAudio = signal(false);
