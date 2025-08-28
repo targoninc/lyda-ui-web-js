@@ -7,8 +7,12 @@ export function maxLengthValidator(length: number) {
     }
 }
 
-export function minLengthValidator(length: number) {
+export function minLengthValidator(length: number, optional: boolean = false) {
     return (val: string) => {
+        if (optional && (val.trim().length === 0)) {
+            return null;
+        }
+
         if (val && val.trim().length < length) {
             return [`Must be longer than ${length} characters`];
         }
@@ -21,6 +25,7 @@ export function exactLengthValidator(length: number, optional: boolean = false) 
         if (optional && (val.trim().length === 0)) {
             return null;
         }
+
         if (val.trim().length !== length) {
             return [`Must be exactly ${length} characters long`];
         }
