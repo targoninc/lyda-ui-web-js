@@ -10,6 +10,7 @@ import { NotificationType } from "../../Enums/NotificationType.ts";
 import { Api } from "../../Api/Api.ts";
 import { GenericTemplates, vertical } from "../generic/GenericTemplates.ts";
 import { MonthIdentifier } from "../../Classes/Helpers/Date.ts";
+import { currency } from "../../Classes/Helpers/Num.ts";
 
 export class RoyaltyTemplates {
     static royaltyCalculator(month: Partial<RoyaltyMonth>, monthIdentifier: MonthIdentifier, refresh: () => void) {
@@ -20,9 +21,9 @@ export class RoyaltyTemplates {
                 when(month.hasEarnings ?? false, create("div")
                     .classes("flex-v")
                     .children(
-                        LogTemplates.property("Earnings", month.earnings),
-                        LogTemplates.property("Artist royalties", month.artistRoyalties),
-                        LogTemplates.property("Track royalties", month.trackRoyalties),
+                        LogTemplates.property("Earnings", currency((month.earnings ?? 0) / 100, "USD")),
+                        LogTemplates.property("Artist royalties", currency((month.artistRoyalties ?? 0) / 100, "USD")),
+                        LogTemplates.property("Track royalties", currency((month.trackRoyalties ?? 0) / 100, "USD")),
                     ).build()),
             ).build();
     }
