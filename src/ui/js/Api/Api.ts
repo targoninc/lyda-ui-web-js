@@ -34,6 +34,7 @@ import { TypedStatistic } from "@targoninc/lyda-shared/src/Models/TypedStatistic
 import { PaymentHistory } from "@targoninc/lyda-shared/src/Models/db/finance/PaymentHistory.ts";
 import { Payout } from "@targoninc/lyda-shared/src/Models/db/finance/Payout";
 import { Permission } from "@targoninc/lyda-shared/src/Models/db/lyda/Permission.ts";
+import { RoyaltyMonth } from "@targoninc/lyda-shared/src/Models/RoyaltyMonth";
 
 export class Api {
     //region Interactions
@@ -393,6 +394,13 @@ export class Api {
 
     static async getRoyaltyInfo(): Promise<RoyaltyInfo | null> {
         return await get<RoyaltyInfo>(ApiRoutes.getRoyaltyInfo);
+    }
+
+    static async getRoyaltyCalculationInfo(month: MonthIdentifier): Promise<Partial<RoyaltyMonth> | null> {
+        return await get<Partial<RoyaltyMonth>>(ApiRoutes.getRoyaltyCalculationInfo, {
+            month: month.month,
+            year: month.year,
+        });
     }
 
     //endregion
