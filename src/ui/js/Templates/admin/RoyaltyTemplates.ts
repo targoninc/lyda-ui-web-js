@@ -79,7 +79,7 @@ export class RoyaltyTemplates {
             d.setMonth(d.getMonth() - i);
             return { year: d.getFullYear(), month: d.getMonth() + 1 };
         }));
-        const selectedMonth = compute((mo, sm) => sm[Math.abs(mo)], monthOffset, selectableMonths);
+        const selectedMonth = compute((mo, sm) => sm.at(-Math.abs(mo) - 1)!, monthOffset, selectableMonths);
         const month = signal<Partial<RoyaltyMonth> | null>(null);
         const refresh = () => {
             Api.getRoyaltyCalculationInfo(selectedMonth.value).then(res => {
