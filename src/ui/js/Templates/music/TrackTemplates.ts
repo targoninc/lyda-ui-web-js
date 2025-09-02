@@ -298,9 +298,7 @@ export class TrackTemplates {
         return button({
             text: "@" + repost.user.username,
             icon: {
-                icon: Icons.REPOST,
-                classes: ["inline-icon", "svg"],
-                isUrl: true,
+                icon: "arrow_outward",
                 adaptive: true,
             },
             classes: ["special", "rounded-max", "align-center", "text-small"],
