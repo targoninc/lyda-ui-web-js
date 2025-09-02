@@ -521,8 +521,9 @@ export class TrackTemplates {
 
         const description = create("span")
             .id("track-description")
-            .classes("description", "break-lines")
-            .html(CustomText.renderToHtml(track.description)).build();
+            .classes("description", "break-lines", "card")
+            .html(CustomText.renderToHtml(track.description))
+            .build();
 
         setTimeout(() => {
             if (description.clientHeight < description.scrollHeight) {
@@ -547,28 +548,26 @@ export class TrackTemplates {
                     .children(
                         create("div")
                             .classes("flex")
-                            .children(create("span").classes("text-xxlarge").text(track.title).build(), ...icons)
-                            .build(),
-                        UserTemplates.userWidget(
-                            {
-                                ...trackUser,
-                                displayname:
-                                    track.artistname && track.artistname.trim().length > 0
-                                        ? track.artistname.trim()
-                                        : trackUser.displayname,
-                            },
-                            [],
-                            [],
-                            UserWidgetContext.singlePage,
-                        ),
-                    )
-                    .build(),
+                            .children(
+                                create("span")
+                                    .classes("text-xxlarge")
+                                    .text(track.title)
+                                    .build(),
+                                ...icons,
+                            ).build(),
+                        UserTemplates.userWidget({
+                            ...trackUser,
+                            displayname:
+                                track.artistname && track.artistname.trim().length > 0
+                                    ? track.artistname.trim()
+                                    : trackUser.displayname,
+                        }, [], [], UserWidgetContext.singlePage),
+                    ).build(),
                 ...toAppend,
                 create("div")
                     .classes("track-title-container", "flex-v", "small-gap")
                     .children(
                         create("span").classes("collaborators").text(track.credits).build(),
-                        when(track.description.length > 0, description),
                         create("div")
                             .classes("flex")
                             .children(
@@ -580,10 +579,8 @@ export class TrackTemplates {
                                     .classes("playcount", "text-small")
                                     .text(track.plays + " plays")
                                     .build(),
-                            )
-                            .build(),
-                    )
-                    .build(),
+                            ).build(),
+                    ).build(),
                 create("div")
                     .classes("track-info-container", "flex", "align-bottom")
                     .children(
@@ -608,6 +605,7 @@ export class TrackTemplates {
                             ).build(),
                     ).build(),
                 TrackTemplates.audioActions(track, editActions),
+                when(track.description.length > 0, description),
                 CommentTemplates.commentListFullWidth(track.id, comments, showComments),
                 TrackTemplates.inAlbumsList(track),
                 await TrackTemplates.inPlaylistsList(track),
@@ -620,7 +618,7 @@ export class TrackTemplates {
     ) {
         return horizontal(
             TrackEditTemplates.linkedUsers(linkedUsers$.value, track$, false),
-            ).build();
+        ).build();
     }
 
     static inAlbumsList(track: Track) {

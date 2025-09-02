@@ -1049,7 +1049,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 #track-description, #user-description {
-    max-height: max-content;
+    max-height: 30dvh;
     min-width: 100px;
     overflow: auto;
     position: relative;
