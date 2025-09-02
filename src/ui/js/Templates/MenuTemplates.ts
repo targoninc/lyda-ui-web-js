@@ -34,8 +34,12 @@ export class MenuTemplates {
                 menuItems[indexState.value].action();
             }
         };
+
         document.addEventListener("keydown", eventListener);
-        return modal;
+        return {
+            modal,
+            eventListener,
+        };
     }
 
     static getGenericModalWithSelectedIndex(selectedIndex: Signal<number>, title: HtmlPropertyValue, menuItems: any[], onClose: () => void) {
@@ -69,12 +73,18 @@ export class MenuTemplates {
     static createMenu() {
         const title = "Create something new";
         let modal: AnyElement;
+        let listener: (this: Document, ev: KeyboardEvent) => void = () => {};
+        const cleanup = () => {
+            document.removeEventListener("keydown", listener);
+            Util.removeModal(modal);
+        };
+
         const items = [
             {
                 text: "New Album",
                 icon: "forms_add_on",
                 action: async () => {
-                    Util.removeModal(modal);
+                    cleanup();
                     await AlbumActions.openNewAlbumModal();
                 }
             },
@@ -82,7 +92,7 @@ export class MenuTemplates {
                 text: "New Track",
                 icon: "upload",
                 action: async () => {
-                    Util.removeModal(modal);
+                    cleanup();
                     navigate(RoutePath.upload);
                 }
             },
@@ -90,14 +100,14 @@ export class MenuTemplates {
                 text: "New Playlist",
                 icon: "playlist_add",
                 action: async () => {
-                    Util.removeModal(modal);
+                    cleanup();
                     await PlaylistActions.openNewPlaylistModal();
                 }
             }
         ];
-        modal = MenuTemplates.genericMenu(title, items, () => {
-            Util.removeModal(modal);
-        });
+        const out = MenuTemplates.genericMenu(title, items, cleanup);
+        modal = out.modal;
+        listener = out.eventListener;
         return modal;
     }
 }
