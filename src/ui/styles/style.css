@@ -61,7 +61,10 @@
     --anti-gap-margin: -7px;
     --default-shadow: 0 0 15px -7px var(--color-5);
     --button-bottom-border-size: 3px;
-    --default-font-family: "Inter Tight", serif;
+    --default-font-family: "InterVariable", serif;
+    font-optical-sizing: auto;
+    letter-spacing: -.8px;
+    font-kerning: normal;
 
     /* Jess Component overrides */
     --jessc-text-color: var(--color-5);
