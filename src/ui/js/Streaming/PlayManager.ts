@@ -450,7 +450,7 @@ export class PlayManager {
             return trackInfo.value[id];
         }
 
-        if (!id) {
+        if (!id || id.toString().length === 0) {
             throw new Error("id is missing");
         }
 

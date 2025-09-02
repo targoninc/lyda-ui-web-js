@@ -635,6 +635,28 @@ export class TrackEditTemplates {
         });
     }
 
+    static downloadAudioButton(track: Track) {
+        const loading = signal(false);
+
+        return button({
+            text: "Download Audio",
+            icon: { icon: "download" },
+            disabled: loading,
+            onclick: async () => {
+                if (loading.value) {
+                    return;
+                }
+
+                loading.value = true;
+                try {
+                    await TrackActions.downloadTrack(track);
+                } finally {
+                    loading.value = false;
+                }
+            },
+        });
+    }
+
     private static linkedUsersEditor(
         linkedUserState: Signal<Partial<TrackCollaborator>[]>,
         referenceId: Signal<number | undefined>,

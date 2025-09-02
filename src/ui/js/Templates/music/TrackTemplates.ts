@@ -601,15 +601,12 @@ export class TrackTemplates {
                                                 TrackTemplates.playButton(track),
                                                 TrackTemplates.addToQueueButton(track),
                                                 when(trackData.canEdit, TrackEditTemplates.replaceAudioButton(track)),
-                                            )
-                                            .build(),
+                                                when(trackData.canEdit, TrackEditTemplates.downloadAudioButton(track)),
+                                            ).build(),
                                         InteractionTemplates.interactions(EntityType.track, track),
-                                    )
-                                    .build(),
-                            )
-                            .build(),
-                    )
-                    .build(),
+                                    ).build(),
+                            ).build(),
+                    ).build(),
                 TrackTemplates.audioActions(track, editActions),
                 CommentTemplates.commentListFullWidth(track.id, comments, showComments),
                 TrackTemplates.inAlbumsList(track),

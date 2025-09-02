@@ -741,5 +741,16 @@ export class Api {
         });
     }
 
+    /**
+     * Will only be called when directly downloading tracks, which is why we're requesting source quality
+     * @param id
+     */
+    static async getTrackAudio(id: number) {
+        return await get<Blob>(ApiRoutes.getTrackAudio, {
+            id,
+            quality: "source",
+        });
+    }
+
     //endregion
 }

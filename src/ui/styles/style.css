@@ -916,6 +916,7 @@ td:last-child, th:last-child {
     transition: height 100ms ease-in-out;
     overflow: auto;
     user-select: none;
+    background: var(--color-3);
 }
 
 .hide {
