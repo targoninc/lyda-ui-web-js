@@ -901,6 +901,10 @@ td:last-child, th:last-child {
     --round-button-size: 13dvw;
 }
 
+.limitToContentWidth {
+    max-width: max-content;
+}
+
 .queue-popout {
     position: absolute;
     bottom: calc(100% + 15px);
