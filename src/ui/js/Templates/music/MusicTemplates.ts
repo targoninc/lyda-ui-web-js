@@ -42,21 +42,14 @@ export class MusicTemplates {
             .classes("flex")
             .children(
                 create("div")
-                    .classes(
-                        `feed-${type}`,
-                        "flex",
-                        "padded",
-                        "rounded",
-                        "fullWidth",
-                        "card",
-                        playingClass
-                    )
+                    .classes(`feed-${type}`, "flex", "padded", "rounded", "fullWidth", "card", "align-children", playingClass)
                     .id(item.id)
                     .styles("max-width", "100%")
                     .children(
+                        MusicTemplates.playButton(type, item.id, () => startItem(type, item)),
                         MusicTemplates.cover(type, item, "inline-cover"),
                         create("div")
-                            .classes("flex-v", "flex-grow", "no-gap")
+                            .classes("flex", "flex-grow", "no-gap", "space-outwards")
                             .children(
                                 create("div")
                                     .classes("flex")
@@ -67,56 +60,24 @@ export class MusicTemplates {
                                                 create("div")
                                                     .classes("flex")
                                                     .children(
-                                                        MusicTemplates.title(
-                                                            type,
-                                                            item.title,
-                                                            item.id,
-                                                            icons
-                                                        ),
-                                                        item.collab
-                                                            ? TrackTemplates.collabIndicator(
-                                                                  item.collab
-                                                              )
-                                                            : null,
-                                                        item.repost
-                                                            ? TrackTemplates.repostIndicator(
-                                                                  item.repost
-                                                              )
-                                                            : null
-                                                    )
-                                                    .build(),
+                                                        MusicTemplates.title(type, item.title, item.id, icons),
+                                                        item.collab ? TrackTemplates.collabIndicator(item.collab) : null,
+                                                        item.repost ? TrackTemplates.repostIndicator(item.repost) : null,
+                                                    ).build(),
                                                 create("div")
                                                     .classes("flex")
                                                     .children(
-                                                        UserTemplates.userLink(
-                                                            UserWidgetContext.card,
-                                                            item.user!
-                                                        ),
+                                                        UserTemplates.userLink(UserWidgetContext.card, item.user!),
                                                         create("span")
-                                                            .classes(
-                                                                "date",
-                                                                "text-small",
-                                                                "nopointer",
-                                                                "color-dim",
-                                                                "align-center"
-                                                            )
+                                                            .classes("date", "text-small", "nopointer", "color-dim", "align-center")
                                                             .text(Time.ago(item.created_at))
                                                             .build()
-                                                    )
-                                                    .build()
-                                            )
-                                            .build()
-                                    )
-                                    .build(),
+                                                    ).build()
+                                            ).build()
+                                    ).build(),
                                 create("div")
                                     .classes("flex", "space-outwards", "align-children")
                                     .children(
-                                        create("div")
-                                            .classes("flex", "align-children")
-                                            .children(
-                                                ...MusicTemplates.itemSpecificItems(type, item)
-                                            )
-                                            .build(),
                                         horizontal(
                                             when(
                                                 type === EntityType.track,
@@ -124,12 +85,9 @@ export class MusicTemplates {
                                             ),
                                             InteractionTemplates.interactions(type, item)
                                         ).classes("align-children")
-                                    )
-                                    .build()
-                            )
-                            .build()
-                    )
-                    .build()
+                                    ).build()
+                            ).build()
+                    ).build()
             ).build();
     }
 
@@ -173,7 +131,7 @@ export class MusicTemplates {
         const coverLoading = signal(false);
         const start = async () => startItem(type, item, { startCallback });
         const isOwnItem = compute(u => u?.id === item.user_id, currentUser);
-        const playButtonContexts = ["inline-cover", "card-cover", "queue-cover"];
+        const playButtonContexts = ["card-cover", "queue-cover"];
         const onlyShowOnHover = compute(
             id => coverContext !== "cover" && id !== item.id,
             currentTrackId

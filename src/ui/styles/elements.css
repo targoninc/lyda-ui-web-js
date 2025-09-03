@@ -1,5 +1,5 @@
 :root {
-    --inline-track-height: 85px;
+    --inline-track-height: 55px;
     --small-track-height: 75px;
     --card-width: 405px;
     --round-button-size: 36px;
@@ -658,7 +658,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     gap: 1px;
 }
 
-.trackPage .waveform {
+.single-page .waveform {
     height: 2em;
     gap: 2px;
 }
