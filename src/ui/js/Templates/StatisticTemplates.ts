@@ -5,7 +5,7 @@ import { StatisticsWrapper } from "../Classes/StatisticsWrapper.ts";
 import { PayoutTemplates } from "./money/PayoutTemplates.ts";
 import { RoyaltyInfo } from "@targoninc/lyda-shared/src/Models/RoyaltyInfo.ts";
 import { Api } from "../Api/Api.ts";
-import { horizontal } from "./generic/GenericTemplates.ts";
+import { horizontal, vertical } from "./generic/GenericTemplates.ts";
 
 export class StatisticTemplates {
     static playCountByMonthChart() {
@@ -76,13 +76,15 @@ export class StatisticTemplates {
         const royaltyInfo = signal<RoyaltyInfo | null>(null);
         Api.getRoyaltyInfo().then(ri => royaltyInfo.value = ri);
 
-        return create("div")
-            .classes("flex", "fullWidth")
-            .children(
-                horizontal(
-                    compute(ri => ri ? PayoutTemplates.globalRoyaltyInfo(ri) : nullElement(), royaltyInfo),
-                ).classes("card"),
-                ...stats,
-            ).build();
+        return vertical(
+            horizontal(
+                compute(ri => ri ? PayoutTemplates.globalRoyaltyInfo(ri) : nullElement(), royaltyInfo),
+            ).classes("card"),
+            create("div")
+                .classes("flex", "fullWidth")
+                .children(
+                    ...stats,
+                ).build(),
+        ).build();
     }
 }
