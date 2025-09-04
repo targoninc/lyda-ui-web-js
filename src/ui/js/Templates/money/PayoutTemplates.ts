@@ -162,6 +162,34 @@ export class PayoutTemplates {
             ).build();
     }
 
+    static globalRoyaltyInfo(royaltyInfo: RoyaltyInfo) {
+        return create("div")
+            .classes("flex")
+            .children(
+                create("div")
+                    .classes("card", "secondary", "flex-v")
+                    .children(
+                        create("span")
+                            .classes("text-small")
+                            .text(currency(royaltyInfo.global.totalRoyalties) + " Total royalties")
+                            .build(),
+                        create("span")
+                            .classes("text-small")
+                            .text(currency(royaltyInfo.global.paidTotal) + " paid out")
+                            .build(),
+                        create("span")
+                            .classes("text-small")
+                            .text(currency(royaltyInfo.global.meanTrackRoyalty) + " average track royalty")
+                            .build(),
+                    ).build(),
+                create("div")
+                    .classes("flex-v")
+                    .children(
+                        ChartTemplates.boxPlotChart([royaltyInfo.global.trackRoyaltyValues], "Average track royalty", "averageTrackRoyaltyChart"),
+                    ).build(),
+            ).build();
+    }
+
     static dataExport() {
         const offset = signal(0);
         const month = compute(yearAndMonthByOffset, offset);

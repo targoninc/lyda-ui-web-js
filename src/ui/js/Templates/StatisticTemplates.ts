@@ -1,7 +1,10 @@
-import { create } from "@targoninc/jess";
+import { compute, create, nullElement, signal } from "@targoninc/jess";
 import { ApiRoutes } from "../Api/ApiRoutes.ts";
 import { ChartTemplates } from "./generic/ChartTemplates.ts";
 import { StatisticsWrapper } from "../Classes/StatisticsWrapper.ts";
+import { PayoutTemplates } from "./money/PayoutTemplates.ts";
+import { RoyaltyInfo } from "@targoninc/lyda-shared/src/Models/RoyaltyInfo.ts";
+import { Api } from "../Api/Api.ts";
 
 export class StatisticTemplates {
     static playCountByMonthChart() {
@@ -69,10 +72,13 @@ export class StatisticTemplates {
 
     static async globalStats() {
         const stats = await StatisticsWrapper.getGlobalStatistics();
+        const royaltyInfo = signal<RoyaltyInfo | null>(null);
+        Api.getRoyaltyInfo().then(ri => royaltyInfo.value = ri);
 
         return create("div")
             .classes("flex", "fullWidth")
             .children(
+                compute(ri => ri ? PayoutTemplates.globalRoyaltyInfo(ri) : nullElement(), royaltyInfo),
                 ...stats,
             ).build();
     }
