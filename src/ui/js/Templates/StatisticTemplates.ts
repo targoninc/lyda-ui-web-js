@@ -5,6 +5,7 @@ import { StatisticsWrapper } from "../Classes/StatisticsWrapper.ts";
 import { PayoutTemplates } from "./money/PayoutTemplates.ts";
 import { RoyaltyInfo } from "@targoninc/lyda-shared/src/Models/RoyaltyInfo.ts";
 import { Api } from "../Api/Api.ts";
+import { horizontal } from "./generic/GenericTemplates.ts";
 
 export class StatisticTemplates {
     static playCountByMonthChart() {
@@ -78,7 +79,9 @@ export class StatisticTemplates {
         return create("div")
             .classes("flex", "fullWidth")
             .children(
-                compute(ri => ri ? PayoutTemplates.globalRoyaltyInfo(ri) : nullElement(), royaltyInfo),
+                horizontal(
+                    compute(ri => ri ? PayoutTemplates.globalRoyaltyInfo(ri) : nullElement(), royaltyInfo),
+                ).classes("card"),
                 ...stats,
             ).build();
     }
