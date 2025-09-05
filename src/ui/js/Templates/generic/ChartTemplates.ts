@@ -64,7 +64,7 @@ export class ChartTemplates {
         const config = {
             type: "boxplot",
             data: data,
-            options: ChartOptions.defaultOptions,
+            options: ChartOptions.defaultBoxPlotOptions,
         };
 
         //@ts-expect-error bc Chart.js stupid
