@@ -1,5 +1,5 @@
 import { compute, create, nullElement, signal, when } from "@targoninc/jess";
-import { GenericTemplates } from "../generic/GenericTemplates.ts";
+import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
 import { Time } from "../../Classes/Helpers/Time.ts";
 import { currency } from "../../Classes/Helpers/Num.ts";
 import { permissions } from "../../state.ts";
@@ -163,30 +163,44 @@ export class PayoutTemplates {
     }
 
     static globalRoyaltyInfo(royaltyInfo: RoyaltyInfo) {
-        return create("div")
-            .classes("flex")
-            .children(
-                create("div")
-                    .classes("card", "secondary", "flex-v")
-                    .children(
-                        create("span")
-                            .classes("text-small")
-                            .text(currency(royaltyInfo.global.totalRoyalties) + " Total royalties")
-                            .build(),
-                        create("span")
-                            .classes("text-small")
-                            .text(currency(royaltyInfo.global.paidTotal) + " paid out")
-                            .build(),
-                        create("span")
-                            .classes("text-small")
-                            .text(currency(royaltyInfo.global.meanTrackRoyalty) + " median track royalty")
-                            .build(),
-                    ).build(),
-                create("div")
-                    .classes("flex-v")
-                    .children(
-                        ChartTemplates.boxPlotChart(royaltyInfo.global.trackRoyaltyValues, "Average track royalty", "averageTrackRoyaltyChart"),
-                    ).build(),
+        return horizontal(
+                vertical(
+                    create("span")
+                        .classes("text-small")
+                        .text(currency(royaltyInfo.global.totalRoyalties) + " Total royalties")
+                        .build(),
+                    create("span")
+                        .classes("text-small")
+                        .text(currency(royaltyInfo.global.paidTotal) + " paid out")
+                        .build(),
+                    create("span")
+                        .classes("text-small")
+                        .text(currency(royaltyInfo.global.meanTrackRoyalty) + " median track royalty")
+                        .build(),
+                ).classes("card", "secondary")
+                    .build(),
+                vertical(
+                    create("span")
+                        .classes("text-small")
+                        .text(currency(royaltyInfo.global.counts.users) + " users")
+                        .build(),
+                    create("span")
+                        .classes("text-small")
+                        .text(currency(royaltyInfo.global.counts.tracks) + " tracks")
+                        .build(),
+                    create("span")
+                        .classes("text-small")
+                        .text(currency(royaltyInfo.global.counts.albums) + " albums")
+                        .build(),
+                    create("span")
+                        .classes("text-small")
+                        .text(currency(royaltyInfo.global.counts.playlists) + " playlists")
+                        .build(),
+                ).classes("card", "secondary")
+                    .build(),
+                vertical(
+                    ChartTemplates.boxPlotChart(royaltyInfo.global.trackRoyaltyValues, "Average track royalty", "averageTrackRoyaltyChart"),
+                ).build(),
             ).build();
     }
 
