@@ -1,4 +1,4 @@
-import { Chart, ChartConfiguration, registerables } from "chart.js";
+import { Chart, registerables } from "chart.js";
 import { BoxPlotChart } from "@sgratzl/chartjs-chart-boxplot";
 import { compute, create, HtmlPropertyValue, signal } from "@targoninc/jess";
 import { ChartOptions } from "../../Classes/ChartOptions.ts";
@@ -49,12 +49,20 @@ export class ChartTemplates {
     static boxPlotChart(values: BoxPlotValues, title: string, id: string) {
         const ctx = create("canvas").classes("chart").id(id).build();
 
-        const data: ChartConfiguration<"boxplot">["data"] = {
+        const data = {
             labels: [title],
             datasets: [
                 {
                     label: title,
-                    data: [values],
+                    data: [
+                        {
+                            "whiskerMin": values.min,
+                            "q1": values.q1,
+                            "median": values.median,
+                            "q3": values.q3,
+                            "whiskerMax": values.max,
+                        },
+                    ],
                     backgroundColor: chartColor.value,
                     borderColor: chartColor.value,
                 },
@@ -64,8 +72,10 @@ export class ChartTemplates {
         const config = {
             type: "boxplot",
             data: data,
-            options: ChartOptions.defaultBoxPlotOptions,
+            options: ChartOptions.defaultOptions,
         };
+
+        config.options.scales.y.max = values.max * 1.1;
 
         //@ts-expect-error bc Chart.js stupid
         new BoxPlotChart(ctx, config);
