@@ -61,7 +61,6 @@ export class ChartTemplates {
             ],
         };
 
-        console.log(data);
         const config = {
             type: "boxplot",
             data: data,
