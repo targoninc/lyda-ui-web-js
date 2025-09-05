@@ -231,7 +231,7 @@ export class GenericTemplates {
         });
     }
 
-    static pill(p: PillOption, pillState: Signal<any>, extraClasses: string[] = []) {
+    static pill(p: PillOption, pillState: Signal<any> = signal(null), extraClasses: string[] = []) {
         const selectedState = compute((s): string => (s === p.value ? "active" : "_"), pillState);
 
         return button({

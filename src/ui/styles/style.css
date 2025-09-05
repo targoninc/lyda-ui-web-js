@@ -721,7 +721,7 @@ details > *:not(summary) {
 }
 
 .rounded-max {
-    border-radius: 100vw;
+    border-radius: 100vw !important;
 }
 
 .bordered {
