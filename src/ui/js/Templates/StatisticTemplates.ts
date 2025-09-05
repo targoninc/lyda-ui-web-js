@@ -67,7 +67,8 @@ export class StatisticTemplates {
         return create("div")
             .classes("flex", "fullWidth")
             .children(
-                ...stats
+                ...stats,
+                PayoutTemplates.dataExport(),
             ).build();
     }
 

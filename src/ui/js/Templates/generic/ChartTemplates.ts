@@ -6,6 +6,7 @@ import { chartColor } from "../../state.ts";
 import { button } from "@targoninc/jess-components";
 import { Statistic } from "@targoninc/lyda-shared/src/Models/Statistic";
 import { Api } from "../../Api/Api.ts";
+import { BoxPlotValues } from "@targoninc/lyda-shared/dist/Models/BoxPlotValues";
 
 Chart.register(...registerables);
 
@@ -45,7 +46,7 @@ export class ChartTemplates {
             .children(create("h4").classes("chart-title").text(title).build(), ctx).build();
     }
 
-    static boxPlotChart(values: number[], title: string, id: string) {
+    static boxPlotChart(values: BoxPlotValues, title: string, id: string) {
         const ctx = create("canvas").classes("chart").id(id).build();
 
         const data = {
@@ -53,7 +54,7 @@ export class ChartTemplates {
             datasets: [
                 {
                     label: title,
-                    data: values,
+                    data: [values],
                     backgroundColor: chartColor.value,
                     borderColor: chartColor.value,
                     hoverOffset: 4,
@@ -61,6 +62,7 @@ export class ChartTemplates {
             ],
         };
 
+        console.log(data);
         const config = {
             type: "boxplot",
             data: data,

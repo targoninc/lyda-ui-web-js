@@ -140,7 +140,6 @@ export class PageTemplates {
                     vertical(
                         PayoutTemplates.artistRoyaltyActions(),
                         await StatisticTemplates.allStats(),
-                        PayoutTemplates.dataExport(),
                     ).build(),
                 ),
                 when(

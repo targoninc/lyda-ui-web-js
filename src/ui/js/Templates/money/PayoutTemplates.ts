@@ -151,13 +151,13 @@ export class PayoutTemplates {
                             .build(),
                         create("span")
                             .classes("text-small")
-                            .text(currency(royaltyInfo.personal.meanTrackRoyalty) + " average track royalty")
+                            .text(currency(royaltyInfo.personal.meanTrackRoyalty) + " median track royalty")
                             .build(),
                     ).build(),
                 create("div")
                     .classes("flex-v")
                     .children(
-                        ChartTemplates.boxPlotChart([royaltyInfo.personal.trackRoyaltyValues], "Average track royalty", "averageTrackRoyaltyChart"),
+                        ChartTemplates.boxPlotChart(royaltyInfo.personal.trackRoyaltyValues, "Average track royalty", "averageTrackRoyaltyChart"),
                     ).build(),
             ).build();
     }
@@ -179,13 +179,13 @@ export class PayoutTemplates {
                             .build(),
                         create("span")
                             .classes("text-small")
-                            .text(currency(royaltyInfo.global.meanTrackRoyalty) + " average track royalty")
+                            .text(currency(royaltyInfo.global.meanTrackRoyalty) + " median track royalty")
                             .build(),
                     ).build(),
                 create("div")
                     .classes("flex-v")
                     .children(
-                        ChartTemplates.boxPlotChart([royaltyInfo.global.trackRoyaltyValues], "Average track royalty", "averageTrackRoyaltyChart"),
+                        ChartTemplates.boxPlotChart(royaltyInfo.global.trackRoyaltyValues, "Average track royalty", "averageTrackRoyaltyChart"),
                     ).build(),
             ).build();
     }

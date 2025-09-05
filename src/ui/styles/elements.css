@@ -629,6 +629,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 .chart-container-full {
     width: 600px !important;
     max-width: 100% !important;
+    flex-grow: 1;
 }
 
 .chart-container-vertical {
