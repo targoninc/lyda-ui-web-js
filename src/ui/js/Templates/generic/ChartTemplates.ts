@@ -1,4 +1,4 @@
-import { Chart, registerables } from "chart.js";
+import { Chart, ChartConfiguration, registerables } from "chart.js";
 import { BoxPlotChart } from "@sgratzl/chartjs-chart-boxplot";
 import { compute, create, HtmlPropertyValue, signal } from "@targoninc/jess";
 import { ChartOptions } from "../../Classes/ChartOptions.ts";
@@ -49,7 +49,7 @@ export class ChartTemplates {
     static boxPlotChart(values: BoxPlotValues, title: string, id: string) {
         const ctx = create("canvas").classes("chart").id(id).build();
 
-        const data = {
+        const data: ChartConfiguration<"boxplot">["data"] = {
             labels: [title],
             datasets: [
                 {
@@ -57,7 +57,6 @@ export class ChartTemplates {
                     data: [values],
                     backgroundColor: chartColor.value,
                     borderColor: chartColor.value,
-                    hoverOffset: 4,
                 },
             ],
         };
