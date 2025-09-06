@@ -1,6 +1,6 @@
 import { GenericTemplates, horizontal } from "../generic/GenericTemplates.ts";
 import { AnyNode, compute, create, signal, when } from "@targoninc/jess";
-import { currentTrackId, currentUser, manualQueue, playingFrom, playingHere } from "../../state.ts";
+import { currentTrackId, currentUser, loadingAudio, manualQueue, playingFrom, playingHere } from "../../state.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { Util } from "../../Classes/Util.ts";
 import { Time } from "../../Classes/Helpers/Time.ts";
@@ -203,7 +203,6 @@ export class MusicTemplates {
             playingFrom,
             playingHere
         );
-        const icon = compute(p => (p ? Icons.PAUSE : Icons.PLAY), isPlaying);
         const onclick = async () => {
             if (playingHere.value && currentTrackId.value === itemId) {
                 await PlayManager.pauseAsync(currentTrackId.value);
@@ -211,12 +210,14 @@ export class MusicTemplates {
                 start();
             }
         };
+        const isLoading = compute((id, loading) => id === itemId && loading, currentTrackId, loadingAudio);
+        const icon = compute((p, l) => (p ? Icons.PAUSE : (l ? Icons.SPINNER : Icons.PLAY)), isPlaying, isLoading);
 
         return GenericTemplates.roundIconButton(
             {
                 icon,
                 isUrl: true,
-                classes: ["inline-icon", "svgInverted"],
+                classes: ["svgInverted", compute((l): string => l ? "spinner-animation" : "_", isLoading)],
             },
             onclick
         );

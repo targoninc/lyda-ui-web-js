@@ -558,7 +558,7 @@ export class GenericTemplates {
         return create("button").classes("round-button", "jess", ...classes).onclick(onclick).title(title).children(
             icon({
                 ...iconConfig,
-                classes: ["round-button-icon", "align-center", "inline-icon", "svg", "nopointer"],
+                classes: ["round-button-icon", "align-center", "inline-icon", "svg", "nopointer", ...(iconConfig.classes ?? [])],
             }),
         ).build();
     }

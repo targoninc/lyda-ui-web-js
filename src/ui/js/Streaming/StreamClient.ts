@@ -174,6 +174,7 @@ export class StreamClient implements IStreamClient {
         const reader = res.body.getReader();
         const chunks: Uint8Array[] = [];
         let received = 0;
+        currentTrackId.value = this.id;
         loadingAudio.value = true;
 
         while (true) {
