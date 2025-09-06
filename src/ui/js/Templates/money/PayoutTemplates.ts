@@ -163,44 +163,40 @@ export class PayoutTemplates {
     }
 
     static globalRoyaltyInfo(royaltyInfo: RoyaltyInfo) {
-        return horizontal(
-            vertical(
-                horizontal(
-                    GenericTemplates.pill({
-                        icon: "attach_money",
-                        text: `${currency(royaltyInfo.global.totalRoyalties)} total royalties`,
-                    }),
-                    GenericTemplates.pill({
-                        icon: "account_balance",
-                        text: `${currency(royaltyInfo.global.paidTotal)} paid out`,
-                    }),
-                    GenericTemplates.pill({
-                        icon: "bar_chart",
-                        text: `${currency(royaltyInfo.global.meanTrackRoyalty)} median track royalty`,
-                    }),
-                ).build(),
-                horizontal(
-                    GenericTemplates.pill({
-                        icon: "group",
-                        text: `${royaltyInfo.global.counts.users} users`,
-                    }),
-                    GenericTemplates.pill({
-                        icon: "audio_file",
-                        text: `${royaltyInfo.global.counts.tracks} tracks`,
-                    }),
-                    GenericTemplates.pill({
-                        icon: "album",
-                        text: `${royaltyInfo.global.counts.albums} albums`,
-                    }),
-                    GenericTemplates.pill({
-                        icon: "playlist_play",
-                        text: `${royaltyInfo.global.counts.playlists} playlists`,
-                    }),
-                ).build(),
-            ),
-            vertical(
-                ChartTemplates.boxPlotChart(royaltyInfo.global.trackRoyaltyValues, "Average track royalty", "averageTrackRoyaltyChart"),
+        return vertical(
+            horizontal(
+                GenericTemplates.pill({
+                    icon: "attach_money",
+                    text: `${currency(royaltyInfo.global.totalRoyalties)} total royalties`,
+                }),
+                GenericTemplates.pill({
+                    icon: "account_balance",
+                    text: `${currency(royaltyInfo.global.paidTotal)} paid out`,
+                }),
+                GenericTemplates.pill({
+                    icon: "bar_chart",
+                    text: `${currency(royaltyInfo.global.meanTrackRoyalty)} median track royalty`,
+                }),
             ).build(),
+            horizontal(
+                GenericTemplates.pill({
+                    icon: "group",
+                    text: `${royaltyInfo.global.counts.users} users`,
+                }),
+                GenericTemplates.pill({
+                    icon: "audio_file",
+                    text: `${royaltyInfo.global.counts.tracks} tracks`,
+                }),
+                GenericTemplates.pill({
+                    icon: "album",
+                    text: `${royaltyInfo.global.counts.albums} albums`,
+                }),
+                GenericTemplates.pill({
+                    icon: "playlist_play",
+                    text: `${royaltyInfo.global.counts.playlists} playlists`,
+                }),
+            ).build(),
+            ChartTemplates.boxPlotChart(royaltyInfo.global.trackRoyaltyValues, "Average track royalty", "averageTrackRoyaltyChart"),
         ).build();
     }
 

@@ -76,6 +76,7 @@ export class ChartTemplates {
         };
 
         config.options.scales.y.max = values.max * 1.1;
+        config.options.indexAxis = "y";
 
         //@ts-expect-error bc Chart.js stupid
         new BoxPlotChart(ctx, config);
