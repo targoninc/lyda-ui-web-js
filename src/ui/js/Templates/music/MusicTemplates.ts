@@ -1,5 +1,5 @@
 import { GenericTemplates, horizontal } from "../generic/GenericTemplates.ts";
-import { AnyNode, compute, create, signal, when } from "@targoninc/jess";
+import { AnyNode, compute, create, Signal, signal, when } from "@targoninc/jess";
 import { currentTrackId, currentUser, loadingAudio, manualQueue, playingFrom, playingHere } from "../../state.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { Util } from "../../Classes/Util.ts";
@@ -165,17 +165,7 @@ export class MusicTemplates {
                             "flex"
                         )
                         .children(
-                            GenericTemplates.deleteIconButton("delete-image-button", () =>
-                                MediaActions.deleteMedia(
-                                    fileType,
-                                    item.id,
-                                    imageState,
-                                    coverLoading
-                                )
-                            ),
-                            GenericTemplates.uploadIconButton("replace-image-button", () =>
-                                TrackActions.replaceCover(item.id, true, imageState, coverLoading)
-                            ),
+                            MusicTemplates.entityCoverButtons(fileType, item, imageState, coverLoading),
                             when(coverLoading, GenericTemplates.loadingSpinner())
                         )
                         .build()
@@ -188,6 +178,22 @@ export class MusicTemplates {
                         .build()
                 )
             ).build();
+    }
+
+    static entityCoverButtons(fileType: MediaFileType, item: Track | Playlist | Album, imageState: Signal<string>, coverLoading: Signal<boolean>) {
+        return horizontal(
+            GenericTemplates.deleteIconButton("delete-image-button", () =>
+                MediaActions.deleteMedia(
+                    fileType,
+                    item.id,
+                    imageState,
+                    coverLoading,
+                ),
+            ),
+            GenericTemplates.uploadIconButton("replace-image-button", () =>
+                TrackActions.replaceCover(item.id, true, imageState, coverLoading),
+            ),
+        );
     }
 
     static playButton(type: EntityType, itemId: number, start: Function) {

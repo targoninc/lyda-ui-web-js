@@ -26,7 +26,17 @@ import {
 import { AlbumActions } from "../../Actions/AlbumActions.ts";
 import { reload } from "../../Routing/Router.ts";
 import { PlayManager } from "../../Streaming/PlayManager.ts";
-import { button, checkbox, errorList, input, select, SelectOption, textarea, toggle } from "@targoninc/jess-components";
+import {
+    button,
+    checkbox,
+    errorList,
+    heading,
+    input,
+    select,
+    SelectOption,
+    textarea,
+    toggle,
+} from "@targoninc/jess-components";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { UploadInfo } from "../../Models/UploadInfo.ts";
 import { UploadableTrack } from "../../Models/UploadableTrack.ts";
@@ -38,6 +48,8 @@ import { CollaboratorType } from "@targoninc/lyda-shared/src/Models/db/lyda/Coll
 import { Api } from "../../Api/Api.ts";
 import { SearchResult } from "@targoninc/lyda-shared/src/Models/SearchResult";
 import { currentUser } from "../../state.ts";
+import { MusicTemplates } from "./MusicTemplates.ts";
+import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
 
 export class TrackEditTemplates {
     static uploadPage() {
@@ -266,20 +278,7 @@ export class TrackEditTemplates {
             errorSections,
             "info",
             [
-                create("div").classes("flex").children(
-                    toggle({
-                        name: "visibility",
-                        label: "Private",
-                        text: "Private",
-                        checked: isPrivate,
-                        onchange: v => {
-                            state.value = {
-                                ...state.value,
-                                visibility: v ? "private" : "public",
-                            };
-                        },
-                    }),
-                ).build(),
+                TrackEditTemplates.visibilityToggle(isPrivate, state),
                 TrackEditTemplates.titleInput(state),
                 TrackEditTemplates.creditsInput(state),
                 TrackEditTemplates.artistNameInput(state),
@@ -295,6 +294,23 @@ export class TrackEditTemplates {
         );
     }
 
+    private static visibilityToggle(isPrivate: Signal<boolean>, state: Signal<UploadableTrack>) {
+        return create("div").classes("flex").children(
+            toggle({
+                name: "visibility",
+                label: "Private",
+                text: "Private",
+                checked: isPrivate,
+                onchange: v => {
+                    state.value = {
+                        ...state.value,
+                        visibility: v ? "private" : "public",
+                    };
+                },
+            }),
+        ).build();
+    }
+
     private static monetizationSection(errorSections: Signal<string[]>, state: Signal<UploadableTrack>) {
         return TrackEditTemplates.sectionCard(
             "Monetization",
@@ -302,26 +318,30 @@ export class TrackEditTemplates {
             "monetization",
             [
                 TrackEditTemplates.monetizationInfo(),
-                input<number>({
-                    type: InputType.number,
-                    name: "price",
-                    label: "Minimum track price in USD",
-                    placeholder: "1$",
-                    value: compute(s => s.price ?? 0, state),
-                    validators: [
-                        v => {
-                            if (v < 0) {
-                                return ["Minimum track price must be a positive number"];
-                            }
-                        },
-                    ],
-                    onchange: v => {
-                        state.value = { ...state.value, price: v };
-                    },
-                }),
+                TrackEditTemplates.priceInput(state),
             ],
             "attach_money",
         );
+    }
+
+    private static priceInput(state: Signal<UploadableTrack>) {
+        return input<number>({
+            type: InputType.number,
+            name: "price",
+            label: "Minimum track price in USD",
+            placeholder: "1$",
+            value: compute(s => s.price ?? 0, state),
+            validators: [
+                v => {
+                    if (v < 0) {
+                        return ["Minimum track price must be a positive number"];
+                    }
+                },
+            ],
+            onchange: v => {
+                state.value = { ...state.value, price: v };
+            },
+        });
     }
 
     private static titleInput(state: Signal<UploadableTrack>) {
@@ -767,6 +787,90 @@ export class TrackEditTemplates {
                     GenericTemplates.addUserLinkSearchResult(user, selectedState),
                 ),
             ).build(),
+        ).build();
+    }
+
+    static editableTrackInList(track: Track, tracks: Signal<Track[]>) {
+        const state = signal<UploadableTrack>(track as UploadableTrack);
+        const changed = compute(s => {
+            return s.title !== track.title ||
+                s.credits !== track.credits ||
+                s.artistname !== track.artistname ||
+                s.visibility !== track.visibility ||
+                s.price !== track.price;
+        }, state);
+        const loading = signal(false);
+        const coverLoading = signal(false);
+        const imageState = signal("");
+        const isPrivate = compute(s => s.visibility === "private", state);
+
+        return horizontal(
+            vertical(
+                horizontal(
+                    TrackEditTemplates.titleInput(state),
+                    TrackEditTemplates.artistNameInput(state),
+                ),
+                horizontal(
+                    TrackEditTemplates.creditsInput(state),
+                    TrackEditTemplates.priceInput(state),
+                ),
+                TrackEditTemplates.visibilityToggle(isPrivate, state),
+            ),
+            vertical(
+                horizontal(
+                    TrackEditTemplates.replaceAudioButton(track),
+                    TrackEditTemplates.downloadAudioButton(track),
+                ).classes("align-end"),
+                horizontal(
+                    create("span")
+                        .text("Cover")
+                        .build(),
+                    MusicTemplates.entityCoverButtons(MediaFileType.trackCover, track, imageState, coverLoading),
+                    when(coverLoading, GenericTemplates.loadingSpinner()),
+                ).classes("align-end"),
+                when(changed, horizontal(
+                    create("span")
+                        .classes("warning")
+                        .text("Unsaved changes")
+                        .build(),
+                    button({
+                        disabled: loading,
+                        classes: ["positive"],
+                        icon: { icon: "save" },
+                        text: "Save",
+                        onclick: async () => Api.updateTrackFull(state.value).then(() => {
+                            Api.getTrackById(track.id).then(t => {
+                                tracks.value = tracks.value.map(t2 => {
+                                    if (t2.id === track.id) {
+                                        return t?.track ?? t2;
+                                    }
+                                    return t2;
+                                });
+                            });
+                        }),
+                    }),
+                    button({
+                        disabled: loading,
+                        icon: { icon: "undo" },
+                        text: "Revert",
+                        onclick: () => state.value = track as UploadableTrack,
+                    }),
+                ).classes("align-end", "align-children").build()),
+            ),
+        ).classes("card", "space-outwards")
+         .build();
+    }
+
+    static batchEditTracksPage() {
+        const tracks = signal<Track[]>([]);
+        Api.getTracksByUser(currentUser.value?.username ?? "", currentUser.value?.id).then(t => tracks.value = t ?? []);
+
+        return vertical(
+            heading({
+                level: 1,
+                text: "Edit tracks",
+            }),
+            signalMap(tracks, vertical(), t => TrackEditTemplates.editableTrackInList(t, tracks)),
         ).build();
     }
 }

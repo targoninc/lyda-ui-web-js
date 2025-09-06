@@ -102,6 +102,10 @@
     align-self: end;
 }
 
+.align-end {
+    align-self: end;
+}
+
 .single-page .title {
     font-size: var(--font-size-xlarge);
 }

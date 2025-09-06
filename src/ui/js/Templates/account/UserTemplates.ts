@@ -476,6 +476,11 @@ export class UserTemplates {
                                     onclick: UiActions.openCreateMenu,
                                 }),
                                 button({
+                                    text: "Edit tracks",
+                                    icon: { icon: "edit_note" },
+                                    onclick: () => navigate(RoutePath.editTracks),
+                                }),
+                                button({
                                     text: "Statistics",
                                     icon: { icon: "finance" },
                                     onclick: () => navigate(RoutePath.statistics),

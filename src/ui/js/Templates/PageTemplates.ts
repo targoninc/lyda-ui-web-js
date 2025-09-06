@@ -56,6 +56,7 @@ export class PageTemplates {
         [RoutePath.roadmap]: RoadmapTemplates.roadmapPage,
         [RoutePath.payouts]: PayoutTemplates.payoutsPage,
         [RoutePath.payments]: PaymentTemplates.paymentsPage,
+        [RoutePath.editTracks]: TrackEditTemplates.batchEditTracksPage,
 
         // admin pages
         [RoutePath.admin]: DashboardTemplates.dashboardPage,
@@ -82,6 +83,7 @@ export class PageTemplates {
         RoutePath.actionLogs,
         RoutePath.users,
         RoutePath.events,
+        RoutePath.editTracks,
     ];
 
     static async libraryPage(route: Route, params: Record<string, string>) {
