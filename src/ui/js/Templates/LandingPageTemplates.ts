@@ -48,7 +48,7 @@ export class LandingPageTemplates {
                 create("div")
                     .classes("flex", "auth-box", "card")
                     .children(LandingPageTemplates.registrationLoginBox())
-                    .build()
+                    .build(),
             ).build();
     }
 
@@ -77,7 +77,7 @@ export class LandingPageTemplates {
         let firstStep: keyof typeof templateMap | undefined = "email";
         if (altEntryPoints.some(entryPoint => window.location.pathname.includes(entryPoint))) {
             firstStep = altEntryPoints.find(entryPoint =>
-                window.location.pathname.includes(entryPoint)
+                window.location.pathname.includes(entryPoint),
             ) as keyof typeof templateMap;
         }
         const step = signal<keyof typeof templateMap>(firstStep ?? "email");
@@ -90,7 +90,7 @@ export class LandingPageTemplates {
             password2: "",
             termsOfService: false,
         });
-        const history = signal(["email"]);
+        const history = signal<string[]>([]);
         const pageMap: Record<string, string> = {
             email: "E-Mail",
             register: "Register",
@@ -100,23 +100,29 @@ export class LandingPageTemplates {
             complete: "Complete",
         };
 
-        const template = signal(templateMap[step.value](step, user));
+        const template = signal(LandingPageTemplates.templatedLandingPageBox(pageMap, history, step, templateMap, step.value, user));
         step.subscribe((newStep: keyof typeof templateMap) => {
-            if (pageMap[newStep] && !history.value.includes(newStep)) {
-                history.value = [...history.value, newStep];
+            if (pageMap[newStep] && !history.value.includes(newStep) && newStep !== "email") {
+                if (!history.value.includes("email")) {
+                    history.value = ["email", ...history.value, newStep];
+                } else {
+                    history.value = [...history.value, newStep];
+                }
             }
-            template.value = create("div")
-                .classes("flex-v")
-                .children(
-                    create("div")
-                        .classes("flex")
-                        .children(GenericTemplates.breadcrumbs(pageMap, history, step))
-                        .build(),
-                    templateMap[newStep](step, user)
-                ).build();
+            template.value = LandingPageTemplates.templatedLandingPageBox(pageMap, history, step, templateMap, newStep, user);
         });
 
         return template;
+    }
+
+    private static templatedLandingPageBox(pageMap: Record<string, string>, history: Signal<string[]>, step: Signal<keyof Record<string, (step: Signal<string>, user: Signal<AuthData>) => AnyNode>>, templateMap: Record<string, (step: Signal<string>, user: Signal<AuthData>) => AnyNode>, newStep: string, user: Signal<AuthData>) {
+        return vertical(
+            create("div")
+                .classes("flex")
+                .children(GenericTemplates.breadcrumbs(pageMap, history, step))
+                .build(),
+            templateMap[newStep](step, user),
+        ).classes("fullWidth").build();
     }
 
     static completeBox() {
@@ -150,7 +156,7 @@ export class LandingPageTemplates {
         });
 
         return create("div")
-            .classes("flex-v", "align-center")
+            .classes("flex-v")
             .children(
                 create("h1").text("Select MFA method").build(),
                 create("div")
@@ -158,10 +164,10 @@ export class LandingPageTemplates {
                     .children(
                         create("p").text("Please select the MFA method you want to use.").build(),
                         signalMap(options, vertical(), o =>
-                            LandingPageTemplates.mfaOption(o.type, selected)
-                        )
+                            LandingPageTemplates.mfaOption(o.type, selected),
+                        ),
                     )
-                    .build()
+                    .build(),
             ).build();
     }
 
@@ -192,7 +198,7 @@ export class LandingPageTemplates {
         sendMfaRequest(loading, step, user, user.value.mfaMethod!);
 
         return create("div")
-            .classes("flex-v", "align-center")
+            .classes("flex-v")
             .children(
                 create("h1").text("MFA verification").build(),
                 create("div")
@@ -200,7 +206,7 @@ export class LandingPageTemplates {
                     .children(
                         create("p")
                             .text(
-                                "You have two-factor authentication enabled. Please enter the code from the e-mail you just got sent to continue."
+                                "You have two-factor authentication enabled. Please enter the code from the e-mail you just got sent to continue.",
                             )
                             .build(),
                         when(
@@ -221,8 +227,8 @@ export class LandingPageTemplates {
                                         step.value = "verify-mfa";
                                     }
                                 },
-                                true
-                            )
+                                true,
+                            ),
                         ),
                         horizontal(
                             when(
@@ -235,24 +241,24 @@ export class LandingPageTemplates {
                                     onclick: () => {
                                         step.value = "verify-mfa";
                                     },
-                                })
+                                }),
                             ),
-                            when(loading, GenericTemplates.loadingSpinner())
-                        ).classes("align-children")
+                            when(loading, GenericTemplates.loadingSpinner()),
+                        ).classes("align-children"),
                     )
-                    .build()
+                    .build(),
             ).build();
     }
 
     static mfaVerify(step: Signal<string>, user: Signal<AuthData>) {
         if (user.value.mfaMethod! === MfaOption.webauthn) {
             Api.verifyWebauthn(user.value.verification!, user.value.challenge!)
-                .then(() => step.value = "logging-in")
-                .catch(() => step.value = "mfa-request");
+               .then(() => step.value = "logging-in")
+               .catch(() => step.value = "mfa-request");
         } else {
             Api.verifyTotp(user.value.id!, user.value.mfaCode!, user.value.mfaMethod!)
-                .then(() => step.value = "logging-in")
-                .catch(() => step.value = "mfa-request");
+               .then(() => step.value = "logging-in")
+               .catch(() => step.value = "mfa-request");
         }
 
         return horizontal();
@@ -266,15 +272,15 @@ export class LandingPageTemplates {
 
         if (code) {
             Api.verifyEmail(code)
-                .then(() => (done.value = true))
-                .catch(e => (error$.value = e ?? "Unknown error"))
-                .finally(() => (activating.value = false));
+               .then(() => (done.value = true))
+               .catch(e => (error$.value = e ?? "Unknown error"))
+               .finally(() => (activating.value = false));
         } else {
             error$.value = "Missing code";
         }
 
         return create("div")
-            .classes("flex-v", "align-center")
+            .classes("flex-v")
             .children(
                 create("h1").text("Email verification").build(),
                 create("div")
@@ -284,7 +290,7 @@ export class LandingPageTemplates {
                             activating,
                             create("p")
                                 .text(`We're verifying your email with code ${code}...`)
-                                .build()
+                                .build(),
                         ),
                         when(done, create("p").text(`This email is now verified!`).build()),
                         when(
@@ -294,14 +300,14 @@ export class LandingPageTemplates {
                                 icon: { icon: "person" },
                                 classes: ["positive"],
                                 onclick: () => navigate(RoutePath.profile),
-                            })
+                            }),
                         ),
                         when(
                             compute(e => e.length > 0, error$),
-                            error(error$)
-                        )
+                            error(error$),
+                        ),
                     )
-                    .build()
+                    .build(),
             ).build();
     }
 
@@ -312,7 +318,7 @@ export class LandingPageTemplates {
             user.value.email,
             user.value.password,
             () => (step.value = "complete"),
-            () => (step.value = "register")
+            () => (step.value = "register"),
         ).then();
 
         return LandingPageTemplates.waitingBox("Registering...", "Please wait");
@@ -355,7 +361,7 @@ export class LandingPageTemplates {
             },
             () => {
                 step.value = "login";
-            }
+            },
         ).then();
 
         return LandingPageTemplates.waitingBox("Logging in...", "Please wait");
@@ -363,16 +369,16 @@ export class LandingPageTemplates {
 
     static waitingBox(title: HtmlPropertyValue, message: HtmlPropertyValue) {
         return create("div")
-            .classes("flex-v", "align-center")
+            .classes("flex-v")
             .children(
                 create("h1").text(title).build(),
                 create("div")
                     .classes("flex")
                     .children(
                         GenericTemplates.loadingSpinner(),
-                        create("span").text(message).build()
+                        create("span").text(message).build(),
                     )
-                    .build()
+                    .build(),
             ).build();
     }
 
@@ -391,7 +397,7 @@ export class LandingPageTemplates {
         const password = compute((u: AuthData) => u.password, user);
 
         return create("div")
-            .classes("flex-v", "align-center")
+            .classes("flex-v")
             .children(
                 create("h1").text("Log in").build(),
                 create("div")
@@ -418,7 +424,7 @@ export class LandingPageTemplates {
                                         errors.value = [
                                             "This E-mail address is not registered. Please register instead.",
                                         ];
-                                    }
+                                    },
                                 );
                             },
                         }),
@@ -426,7 +432,7 @@ export class LandingPageTemplates {
                             password,
                             user,
                             () => (step.value = "check-mfa"),
-                            true
+                            true,
                         ),
                         button({
                             text: "Login",
@@ -437,7 +443,7 @@ export class LandingPageTemplates {
                                     !u.password ||
                                     u.email.trim().length === 0 ||
                                     u.password.trim().length === 0,
-                                user
+                                user,
                             ),
                             onclick: continueLogin,
                             icon: {
@@ -452,13 +458,13 @@ export class LandingPageTemplates {
                                 step.value = "reset-password";
                             },
                             "Change/forgot password?",
-                            false
+                            false,
                         ),
                         GenericTemplates.inlineLink(() => {
                             step.value = "register";
-                        }, "Register instead")
+                        }, "Register instead"),
                     )
-                    .build()
+                    .build(),
             ).build();
     }
 
@@ -500,7 +506,7 @@ export class LandingPageTemplates {
                                             };
                                         }
                                     },
-                                })
+                                }),
                             )
                             .build(),
                         button({
@@ -513,7 +519,7 @@ export class LandingPageTemplates {
                                     await Api.requestPasswordReset(email.value);
                                     notify(
                                         "Password reset requested, check your email",
-                                        NotificationType.success
+                                        NotificationType.success,
                                     );
                                     step.value = "password-reset-requested";
                                 } catch (error: any) {
@@ -521,9 +527,9 @@ export class LandingPageTemplates {
                                 }
                             },
                         }),
-                        errorList(errors)
+                        errorList(errors),
                     )
-                    .build()
+                    .build(),
             ).build();
     }
 
@@ -577,7 +583,7 @@ export class LandingPageTemplates {
                                     u.password !== u.password2 ||
                                     u.password2.trim().length === 0 ||
                                     !token,
-                                user
+                                user,
                             ),
                             onclick: async () => {
                                 if (!token) {
@@ -588,11 +594,11 @@ export class LandingPageTemplates {
                                     await Api.resetPassword(
                                         token,
                                         user.value.password,
-                                        user.value.password2
+                                        user.value.password2,
                                     );
                                     notify(
                                         "Password updated, you can now log in",
-                                        NotificationType.success
+                                        NotificationType.success,
                                     );
                                     step.value = "login";
                                 } catch (error: any) {
@@ -600,9 +606,9 @@ export class LandingPageTemplates {
                                 }
                             },
                         }),
-                        errorList(errors)
+                        errorList(errors),
                     )
-                    .build()
+                    .build(),
             ).build();
     }
 
@@ -610,7 +616,7 @@ export class LandingPageTemplates {
         password: Signal<string>,
         user: Signal<AuthData>,
         onEnter: Function = () => {},
-        focusImmediately = false
+        focusImmediately = false,
     ) {
         setTimeout(() => {
             if (focusImmediately) {
@@ -655,7 +661,7 @@ export class LandingPageTemplates {
                     .children(
                         create("span")
                             .text(
-                                "Please check your email for a password reset link. After you've reset your password, you can log in."
+                                "Please check your email for a password reset link. After you've reset your password, you can log in.",
                             )
                             .build(),
                         button({
@@ -666,9 +672,9 @@ export class LandingPageTemplates {
                                 step.value = "login";
                             },
                             classes: ["secondary", "positive"],
-                        })
+                        }),
                     )
-                    .build()
+                    .build(),
             ).build();
     }
 
@@ -685,7 +691,7 @@ export class LandingPageTemplates {
             },
             () => {
                 step.value = "register";
-            }
+            },
         );
 
         return LandingPageTemplates.waitingBox("Checking E-mail address...", "Please wait");
@@ -715,7 +721,7 @@ export class LandingPageTemplates {
                     },
                     () => {
                         step.value = "registering";
-                    }
+                    },
                 );
             }
         };
@@ -731,7 +737,7 @@ export class LandingPageTemplates {
         }
 
         return create("div")
-            .classes("flex-v", "align-center")
+            .classes("flex-v")
             .children(
                 create("h1").text("Register").build(),
                 create("div")
@@ -756,7 +762,7 @@ export class LandingPageTemplates {
                             },
                             true,
                             () => {},
-                            ["flex-grow"]
+                            ["flex-grow"],
                         ),
                         FormTemplates.textField(
                             "Display name",
@@ -777,7 +783,7 @@ export class LandingPageTemplates {
                             },
                             false,
                             () => {},
-                            ["flex-grow"]
+                            ["flex-grow"],
                         ),
                         input<string>({
                             type: InputType.email,
@@ -800,11 +806,11 @@ export class LandingPageTemplates {
                                                 const tmpErrors = [...errors.value];
                                                 tmpErrors.splice(
                                                     tmpErrors.indexOf(emailInUseError),
-                                                    1
+                                                    1,
                                                 );
                                                 errors.value = tmpErrors;
                                                 resolve(null);
-                                            }
+                                            },
                                         );
                                     });
                                 },
@@ -839,7 +845,7 @@ export class LandingPageTemplates {
                             },
                             false,
                             () => {},
-                            ["flex-grow"]
+                            ["flex-grow"],
                         ),
                         FormTemplates.textField(
                             "Repeat password",
@@ -860,7 +866,7 @@ export class LandingPageTemplates {
                             },
                             false,
                             () => {},
-                            ["flex-grow"]
+                            ["flex-grow"],
                         ),
                         FormTemplates.checkBoxField(
                             "tos-checkbox",
@@ -876,11 +882,11 @@ export class LandingPageTemplates {
                                     ...user.value,
                                     termsOfService: !user.value.termsOfService,
                                 };
-                            }
+                            },
                         ),
                         GenericTemplates.inlineLink(
                             "https://targoninc.com/tos",
-                            "Read the Terms of Service / Privacy Policy"
+                            "Read the Terms of Service / Privacy Policy",
                         ),
                         button({
                             text: "Register",
@@ -888,7 +894,7 @@ export class LandingPageTemplates {
                             disabled: compute(
                                 (e, allTouched) => e.length > 0 || !allTouched,
                                 errors,
-                                allFieldsTouched
+                                allFieldsTouched,
                             ),
                             onclick: continueRegistration,
                             icon: {
@@ -899,10 +905,10 @@ export class LandingPageTemplates {
                         }),
                         when(
                             allFieldsTouched,
-                            create("div").classes("flex-v").children(errorList(errors)).build()
-                        )
+                            create("div").classes("flex-v").children(errorList(errors)).build(),
+                        ),
                     )
-                    .build()
+                    .build(),
             ).build();
     }
 
@@ -917,67 +923,69 @@ export class LandingPageTemplates {
                 step.value = "check-email";
             }
         };
+        const loginDisabled = compute((u, e) => !u.email || u.email.trim().length === 0 || e.length > 0, user, errors);
 
         return create("div")
-            .classes("flex-v", "align-center")
+            .classes("flex-v", "align-center", "fullWidth")
             .children(
-                create("h1").text("Enter your email").build(),
-                create("div")
-                    .classes("flex-v")
-                    .children(
-                        create("div")
-                            .classes("flex", "space-outwards")
-                            .children(
-                                input<string>({
-                                    type: InputType.text,
-                                    name: "email",
-                                    label: "E-Mail",
-                                    placeholder: "E-Mail",
-                                    value: user.value.email,
-                                    required: true,
-                                    onchange: value => {
-                                        user.value = {
-                                            ...user.value,
-                                            email: value,
-                                        };
-                                    },
-                                    onkeydown: (e: KeyboardEvent) => {
-                                        if (e.key === "Enter") {
+                vertical(
+                    vertical(
+                        create("h1")
+                            .text("Proceed with E-Mail")
+                            .build(),
+                        horizontal(
+                            create("div")
+                                .classes("flex", "space-outwards")
+                                .children(
+                                    input<string>({
+                                        type: InputType.text,
+                                        name: "email",
+                                        placeholder: "E-Mail",
+                                        value: user.value.email,
+                                        required: true,
+                                        classes: ["bigger-input", "rounded-max"],
+                                        onchange: value => {
                                             user.value = {
                                                 ...user.value,
-                                                email: target(e).value,
+                                                email: value,
                                             };
-                                            triggerLogin();
-                                        }
-                                    },
-                                }),
-                                create("input")
-                                    .classes("hidden")
-                                    .name("password")
-                                    .type(InputType.password)
-                                    .onchange(e => {
-                                        user.value = {
-                                            ...user.value,
-                                            password: target(e).value,
-                                        };
-                                    }).build()
-                            ).build(),
-                        button({
-                            text: "Next",
-                            id: "checkEmailTrigger",
-                            disabled: compute(
-                                (u, e) => !u.email || u.email.trim().length === 0 || e.length > 0,
-                                user,
-                                errors
-                            ),
-                            onclick: triggerLogin,
-                            icon: {
-                                icon: "arrow_forward",
-                                adaptive: true,
-                            },
-                            classes: ["secondary", "positive"],
-                        })
-                    ).build(),
+                                        },
+                                        onkeydown: (e: KeyboardEvent) => {
+                                            if (e.key === "Enter") {
+                                                user.value = {
+                                                    ...user.value,
+                                                    email: target(e).value,
+                                                };
+                                                triggerLogin();
+                                            }
+                                        },
+                                    }),
+                                    create("input")
+                                        .classes("hidden")
+                                        .name("password")
+                                        .type(InputType.password)
+                                        .onchange(e => {
+                                            user.value = {
+                                                ...user.value,
+                                                password: target(e).value,
+                                            };
+                                        }).build(),
+                                ).build(),
+                            button({
+                                text: "Next",
+                                id: "checkEmailTrigger",
+                                disabled: loginDisabled,
+                                onclick: triggerLogin,
+                                icon: {
+                                    icon: "arrow_forward",
+                                    adaptive: true,
+                                },
+                                classes: ["special", "bigger-input", "rounded-max"],
+                            }),
+                        ),
+                    ),
+                ).classes("email-special-box", "animated-background", "align-children")
+                 .build(),
                 create("div")
                     .classes("flex-v")
                     .children(
@@ -988,8 +996,8 @@ export class LandingPageTemplates {
                             .children(
                                 create("span")
                                     .text(
-                                        "We are focused on building a platform that is both good for artists as well as listeners."
-                                    ).build()
+                                        "We are focused on building a platform that is both good for artists as well as listeners.",
+                                    ).build(),
                             ).build(),
                         create("p")
                             .classes("color-dim")
@@ -997,8 +1005,8 @@ export class LandingPageTemplates {
                             .children(
                                 create("span")
                                     .text(
-                                        "We want to make sure that artists can earn money from their work, and listeners can enjoy their music without ads."
-                                    ).build()
+                                        "We want to make sure that artists can earn money from their work, and listeners can enjoy their music without ads.",
+                                    ).build(),
                             ).build(),
                         create("p")
                             .classes("color-dim")
@@ -1006,7 +1014,7 @@ export class LandingPageTemplates {
                             .children(
                                 create("span")
                                     .text(
-                                        " If you're curious about what we're building, you can take a look at our "
+                                        " If you're curious about what we're building, you can take a look at our ",
                                     ).build(),
                                 GenericTemplates.inlineLink(() => navigate(RoutePath.roadmap), "roadmap"),
                             ).build(),
@@ -1020,23 +1028,14 @@ export class LandingPageTemplates {
                                     ).build(),
                                 GenericTemplates.inlineLink(() => navigate(RoutePath.faq), "FAQ"),
                             ).build(),
-                    ).build()
+                    ).build(),
             ).build();
     }
 
     static lydaBenefits() {
-        return create("div")
-            .classes("flex")
-            .children(
-                GenericTemplates.benefit("Transparent royalties", "visibility"),
-                GenericTemplates.benefit("No ads", "ad_group_off"),
-                GenericTemplates.benefit("Social features", "people")
-            ).build();
-
-        /* Add back marquee when we have more benefits
+        // Add back marquee when we have more benefits
         return create("div")
             .classes("marquee")
-            .styles("max-width", "min(500px, 100%)")
             .children(
                 create("div")
                     .classes("scrolling", "flex")
@@ -1044,7 +1043,14 @@ export class LandingPageTemplates {
                         GenericTemplates.benefit("Transparent royalties", "visibility"),
                         GenericTemplates.benefit("No ads", "ad_group_off"),
                         GenericTemplates.benefit("Social features", "people"),
+                        GenericTemplates.benefit("Support artists", "artist"),
+                        GenericTemplates.benefit("Not funding drones", "drone"),
+                        GenericTemplates.benefit("Transparent royalties", "visibility"),
+                        GenericTemplates.benefit("No ads", "ad_group_off"),
+                        GenericTemplates.benefit("Social features", "people"),
+                        GenericTemplates.benefit("Support artists", "artist"),
+                        GenericTemplates.benefit("Not funding drones", "drone"),
                     ).build()
-            ).build();*/
+            ).build();
     }
 }

@@ -1,13 +1,13 @@
-import {navigate, Route, Router} from "./js/Routing/Router.ts";
-import {PageTemplates} from "./js/Templates/PageTemplates.ts";
-import {KeyBinds} from "./js/Classes/KeyBindHandler.ts";
-import {LydaCache} from "./js/Cache/LydaCache.ts";
-import {PlayManager} from "./js/Streaming/PlayManager.ts";
-import {UiActions} from "./js/Actions/UiActions.ts";
-import {Ui} from "./js/Classes/Ui.ts";
-import {Util} from "./js/Classes/Util.ts";
-import {RoutePath, routes} from "./js/Routing/routes.js";
-import {GenericTemplates} from "./js/Templates/generic/GenericTemplates.ts";
+import { navigate, Route, Router } from "./js/Routing/Router.ts";
+import { PageTemplates } from "./js/Templates/PageTemplates.ts";
+import { KeyBinds } from "./js/Classes/KeyBindHandler.ts";
+import { LydaCache } from "./js/Cache/LydaCache.ts";
+import { PlayManager } from "./js/Streaming/PlayManager.ts";
+import { UiActions } from "./js/Actions/UiActions.ts";
+import { Ui } from "./js/Classes/Ui.ts";
+import { Util } from "./js/Classes/Util.ts";
+import { RoutePath, routes } from "./js/Routing/routes.js";
+import { GenericTemplates } from "./js/Templates/generic/GenericTemplates.ts";
 import {
     contextQueue,
     currentTrackId,
@@ -15,14 +15,14 @@ import {
     currentUser,
     history,
     permissions,
-    playingFrom
+    playingFrom,
 } from "./js/state.ts";
-import {StreamingBroadcaster} from "./js/Streaming/StreamingBroadcaster.ts";
-import {PlayingFrom} from "@targoninc/lyda-shared/src/Models/PlayingFrom";
-import {ListeningHistory} from "@targoninc/lyda-shared/dist/Models/db/lyda/ListeningHistory";
-import {TrackPosition} from "@targoninc/lyda-shared/src/Models/TrackPosition";
-import {QueueManager} from "./js/Streaming/QueueManager.ts";
-import {initializeMediaSessionCallbacks} from "./js/Classes/Helpers/MediaSession.ts";
+import { StreamingBroadcaster } from "./js/Streaming/StreamingBroadcaster.ts";
+import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom";
+import { ListeningHistory } from "@targoninc/lyda-shared/dist/Models/db/lyda/ListeningHistory";
+import { TrackPosition } from "@targoninc/lyda-shared/src/Models/TrackPosition";
+import { QueueManager } from "./js/Streaming/QueueManager.ts";
+import { initializeMediaSessionCallbacks } from "./js/Classes/Helpers/MediaSession.ts";
 import { Api } from "./js/Api/Api.ts";
 
 const pageContainer = document.querySelector(".page-container");
@@ -45,6 +45,7 @@ export const router = new Router(routes, async (route: Route, params: any) => {
         navigate(RoutePath.login);
     }
     pageContainer.appendChild(template);
+    pageContainer.setAttribute("page", page);
     pageContainer.scrollIntoView();
 
     Ui.loadTheme().then();

@@ -106,6 +106,33 @@
     align-self: end;
 }
 
+.bigger-input, .bigger-input * {
+    font-size: 1.2rem !important;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.animated-background {
+    background: url("/img/graphics/email-box.webp") no-repeat center center !important;
+    background-size: cover;
+    margin-top: -20px !important;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+.animated-background h1 {
+    font-weight: bold;
+}
+
+.email-special-box {
+    /* i'm committing so many sins rn */
+    padding: 6rem 20px 3rem 20px;
+    transform: translateX(-20px) translateY(-10px);
+    width: 100%;
+    margin-bottom: 2rem;
+}
+
 .single-page .title {
     font-size: var(--font-size-xlarge);
 }
@@ -1173,15 +1200,15 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     display: flex;
     align-items: center;
     gap: var(--gap);
-    border: 1px solid var(--green);
-    background: var(--green-dark);
+    border: 1px solid var(--blue);
+    background: var(--blue-dark);
     border-radius: var(--border-radius);
     padding: var(--inline-padding);
     height: max-content;
 }
 
 .benefit-item * {
-    color: var(--jessc-interactive-background);
+    color: var(--jessc-interactive-color);
 }
 
 .marquee {
@@ -1190,6 +1217,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     height: 40px;
     width: 100%;
     white-space: nowrap;
+    transform: translateX(-20px);
 }
 
 .marquee .scrolling {
