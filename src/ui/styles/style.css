@@ -1032,8 +1032,8 @@ td:last-child, th:last-child {
 }
 
 .auth-box {
-    max-width: min(600px, 100%);
-    width: 600px;
+    max-width: min(641px, 100%);
+    width: 641px;
     margin: auto;
     box-sizing: border-box;
 }

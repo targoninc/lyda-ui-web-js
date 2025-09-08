@@ -18,7 +18,7 @@ import {
     signalMap,
     when,
 } from "@targoninc/jess";
-import { button, error, errorList, input } from "@targoninc/jess-components";
+import { button, error, errorList, heading, input } from "@targoninc/jess-components";
 import { NotificationType } from "../Enums/NotificationType.ts";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { MfaOption } from "@targoninc/lyda-shared/src/Enums/MfaOption.ts";
@@ -930,9 +930,10 @@ export class LandingPageTemplates {
             .children(
                 vertical(
                     vertical(
-                        create("h1")
-                            .text("Proceed with E-Mail")
-                            .build(),
+                        heading({
+                            level: 1,
+                            text: "Enter Lyda",
+                        }),
                         horizontal(
                             create("div")
                                 .classes("flex", "space-outwards")
@@ -989,33 +990,30 @@ export class LandingPageTemplates {
                 create("div")
                     .classes("flex-v")
                     .children(
-                        create("h2").text("Why use Lyda?").build(),
+                        create("h2").text("Why should I not use another service?").build(),
                         LandingPageTemplates.lydaBenefits(),
                         create("p")
                             .styles("max-width", "300px")
                             .children(
                                 create("span")
-                                    .text(
-                                        "We are focused on building a platform that is both good for artists as well as listeners.",
-                                    ).build(),
+                                    .text("We are focused on building a platform that is both good for artists as well as listeners.")
+                                    .build(),
                             ).build(),
                         create("p")
                             .classes("color-dim")
                             .styles("max-width", "300px")
                             .children(
                                 create("span")
-                                    .text(
-                                        "We want to make sure that artists can earn money from their work, and listeners can enjoy their music without ads.",
-                                    ).build(),
+                                    .text("We want to make sure that artists can earn money from their work, and listeners can enjoy their music without ads.")
+                                    .build(),
                             ).build(),
                         create("p")
                             .classes("color-dim")
                             .styles("max-width", "300px")
                             .children(
                                 create("span")
-                                    .text(
-                                        " If you're curious about what we're building, you can take a look at our ",
-                                    ).build(),
+                                    .text(" If you're curious about what we're currently working on, you can take a look at our ")
+                                    .build(),
                                 GenericTemplates.inlineLink(() => navigate(RoutePath.roadmap), "roadmap"),
                             ).build(),
                         create("p")
@@ -1023,9 +1021,8 @@ export class LandingPageTemplates {
                             .styles("max-width", "300px")
                             .children(
                                 create("span")
-                                    .text(
-                                        "You can also check out our ",
-                                    ).build(),
+                                    .text("You can also check out our ")
+                                    .build(),
                                 GenericTemplates.inlineLink(() => navigate(RoutePath.faq), "FAQ"),
                             ).build(),
                     ).build(),
