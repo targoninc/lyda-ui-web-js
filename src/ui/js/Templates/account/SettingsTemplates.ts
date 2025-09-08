@@ -1,16 +1,17 @@
 import { UserActions } from "../../Actions/UserActions.ts";
 import { GenericTemplates, horizontal } from "../generic/GenericTemplates.ts";
-import { getUserSettingValue, Util } from "../../Classes/Util.ts";
+import { copy, getUserSettingValue, Util } from "../../Classes/Util.ts";
 import { createModal, notify, Ui } from "../../Classes/Ui.ts";
 import { Api } from "../../Api/Api.ts";
 import { compute, create, InputType, nullElement, Signal, signal, signalMap, when } from "@targoninc/jess";
-import { navigate, reload } from "../../Routing/Router.ts";
+import { navigate, reload, Route } from "../../Routing/Router.ts";
 import { UserTemplates } from "./UserTemplates.ts";
 import { currentUser, permissions } from "../../state.ts";
 import { RoutePath } from "../../Routing/routes.ts";
 import {
     button,
     ButtonConfig,
+    heading,
     icon,
     input,
     InputConfig,
@@ -29,11 +30,24 @@ import { TotpTemplates } from "./TotpTemplates.ts";
 import { WebauthnTemplates } from "./WebauthnTemplates.ts";
 
 export class SettingsTemplates {
-    static settingsPage() {
+    static settingsPage(route: Route, params: Record<string, string>) {
         const user = currentUser.value;
         if (!user) {
             navigate(RoutePath.login);
             return nullElement();
+        }
+
+        const url = new URL(window.location.href);
+        if (url.hash.length > 0) {
+            const scrollTo = url.hash.substring(1);
+            setTimeout(() => {
+                const heading = document.querySelector(`h1[id="${scrollTo}"]`);
+                if (heading) {
+                    heading.scrollIntoView({
+                        behavior: "smooth",
+                    });
+                }
+            }, 100);
         }
 
         return create("div")
@@ -68,7 +82,7 @@ export class SettingsTemplates {
                     create("div")
                         .classes("card", "flex-v")
                         .children(
-                            create("h2").text("My Permissions").build(),
+                            SettingsTemplates.sectionHeading("My permissions"),
                             button({
                                 text: "Go to Administration",
                                 icon: { icon: "terminal" },
@@ -100,7 +114,7 @@ export class SettingsTemplates {
         return create("div")
             .classes("card", "flex-v")
             .children(
-                create("h2").text("Account").build(),
+                SettingsTemplates.sectionHeading("Account"),
                 GenericTemplates.logoutButton(),
                 create("p").text("Change your account settings here.").build(),
                 when(
@@ -177,7 +191,7 @@ export class SettingsTemplates {
         return create("div")
             .classes("card", "flex-v")
             .children(
-                create("h2").text("E-Mail Notifications").build(),
+                SettingsTemplates.sectionHeading("E-Mail Notifications"),
                 SettingsTemplates.notificationToggle(
                     "Like notifications",
                     "like",
@@ -222,7 +236,7 @@ export class SettingsTemplates {
         return create("div")
             .classes("card", "flex-v")
             .children(
-                create("h2").text("Behaviour").build(),
+                SettingsTemplates.sectionHeading("Behaviour"),
                 SettingsTemplates.playFromAutoQueueToggle(
                     getUserSettingValue(user, UserSettings.playFromAutoQueue)
                 ),
@@ -271,7 +285,7 @@ export class SettingsTemplates {
         return create("div")
             .classes("card", "flex-v")
             .children(
-                create("h2").text("Interface theme").build(),
+                SettingsTemplates.sectionHeading("Interface theme"),
                 GenericTemplates.combinedSelector(
                     themes,
                     async (newIndex: number) => {
@@ -303,7 +317,7 @@ export class SettingsTemplates {
         return create("div")
             .classes("card", "flex-v")
             .children(
-                create("h2").text("Streaming quality").build(),
+                SettingsTemplates.sectionHeading("Streaming quality"),
                 when(
                     noSubscription,
                     create("div")
@@ -357,7 +371,7 @@ export class SettingsTemplates {
         return create("div")
             .classes("card", "flex-v")
             .children(
-                create("h2").text("Other").build(),
+                SettingsTemplates.sectionHeading("Other"),
                 create("div")
                     .classes("flex")
                     .children(
@@ -411,7 +425,7 @@ export class SettingsTemplates {
         return create("div")
             .classes("card", "flex-v")
             .children(
-                create("h2").text("Links").build(),
+                SettingsTemplates.sectionHeading("Links"),
                 create("div")
                     .classes("flex")
                     .children(
@@ -663,7 +677,7 @@ export class SettingsTemplates {
         return create("div")
             .classes("flex-v", "card")
             .children(
-                create("h2").text("TOTP devices").build(),
+                SettingsTemplates.sectionHeading("TOTP devices"),
                 when(
                     hasMethods,
                     create("span").text("You have no TOTP methods configured").build(),
@@ -709,5 +723,21 @@ export class SettingsTemplates {
                     },
                 })
             ).build();
+    }
+
+    static sectionHeading(text: string) {
+        const id = text.trim().replaceAll(/\s+/g, "-").toLowerCase();
+
+        return horizontal(
+            heading({
+                level: 1,
+                classes: ["bold"],
+                text,
+                id,
+            }),
+        ).onclick(async () => {
+            const url = new URL(window.location.href);
+            await copy(`${url.origin}${url.pathname}#${id}`);
+        });
     }
 }

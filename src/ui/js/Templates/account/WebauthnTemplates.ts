@@ -1,5 +1,5 @@
 import { compute, create, Signal, signal, signalMap, when } from "@targoninc/jess";
-import { button, heading } from "@targoninc/jess-components";
+import { button } from "@targoninc/jess-components";
 import { currentUser } from "../../state";
 import { Time } from "../../Classes/Helpers/Time.ts";
 import {
@@ -12,6 +12,7 @@ import { notify, Ui } from "../../Classes/Ui.ts";
 import { NotificationType } from "../../Enums/NotificationType.ts";
 import { Api } from "../../Api/Api.ts";
 import { PublicKey } from "@targoninc/lyda-shared/dist/Models/db/lyda/PublicKey";
+import { SettingsTemplates } from "./SettingsTemplates.ts";
 
 export class WebauthnTemplates {
     static devicesSection() {
@@ -23,10 +24,7 @@ export class WebauthnTemplates {
         return create("div")
             .classes("flex-v", "card")
             .children(
-                heading({
-                    text: "Passkeys",
-                    level: 2
-                }),
+                SettingsTemplates.sectionHeading("Passkeys"),
                 when(hasCredentials, create("span")
                     .text("You have no passkeys configured")
                     .build(), true),
@@ -43,12 +41,12 @@ export class WebauthnTemplates {
                                 create("span")
                                     .text(compute(t => `Created ${t}`, Time.agoUpdating(new Date(key.created_at), true)))
                                     .build(),
-                                WebauthnTemplates.webAuthNActions(loading, key, message)
+                                WebauthnTemplates.webAuthNActions(loading, key, message),
                             ).build()),
                     ).build()),
                 button({
                     text: "Add passkey",
-                    icon: {icon: "add"},
+                    icon: { icon: "add" },
                     classes: ["positive", "fit-content"],
                     disabled: loading,
                     onclick: async () => {
@@ -80,10 +78,10 @@ export class WebauthnTemplates {
                                     });
                                 }).finally(() => loading.value = false);
                             },
-                            () => {}
+                            () => {},
                         );
-                    }
-                })
+                    },
+                }),
             ).build();
     }
 
@@ -93,7 +91,7 @@ export class WebauthnTemplates {
             .children(
                 button({
                     text: "Delete",
-                    icon: {icon: "delete"},
+                    icon: { icon: "delete" },
                     classes: ["negative"],
                     disabled: loading,
                     onclick: () => {
@@ -106,7 +104,7 @@ export class WebauthnTemplates {
                             const challenge = res2.challenge;
                             const cred: CredentialDescriptor = {
                                 id: key.key_id,
-                                transports: key.transports.split(",") as ExtendedAuthenticatorTransport[]
+                                transports: key.transports.split(",") as ExtendedAuthenticatorTransport[],
                             };
                             webauthnLogin(challenge, [cred]).then(async (verification) => {
                                 await Api.verifyWebauthn(verification, res2.challenge);
@@ -122,11 +120,11 @@ export class WebauthnTemplates {
                         }).catch(e => {
                             message.value = e.message;
                         });
-                    }
+                    },
                 }),
                 when(message, create("span")
                     .text(message)
-                    .build())
+                    .build()),
             ).build();
     }
 }
