@@ -77,13 +77,15 @@ export class ChartTemplates {
 
         config.options.scales.y.max = values.max * 1.1;
         config.options.indexAxis = "y";
+        config.options.responsive = true;
 
         //@ts-expect-error bc Chart.js stupid
         new BoxPlotChart(ctx, config);
 
         return create("div")
-            .classes("chart-container-vertical", "card", "secondary", "flex-v")
-            .children(ctx).build();
+            .classes("chart-container-vertical", "flex-v")
+            .children(ctx)
+            .build();
     }
 
     static noData(title: HtmlPropertyValue) {
