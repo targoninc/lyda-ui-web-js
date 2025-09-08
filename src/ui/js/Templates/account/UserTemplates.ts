@@ -479,6 +479,7 @@ export class UserTemplates {
                                     text: "Edit tracks",
                                     icon: { icon: "edit_note" },
                                     onclick: () => navigate(RoutePath.editTracks),
+                                    classes: ["hideOnMidBreakpoint"],
                                 }),
                                 button({
                                     text: "Statistics",
