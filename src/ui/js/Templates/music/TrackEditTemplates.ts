@@ -226,7 +226,7 @@ export class TrackEditTemplates {
                 button({
                     text: "Upload",
                     disabled,
-                    classes: [buttonClass],
+                    classes: [buttonClass, "special", "bigger-input", "rounded-max"],
                     onclick: e => {
                         new AudioUpload(e, state, progressState);
                     },

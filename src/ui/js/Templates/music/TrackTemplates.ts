@@ -15,7 +15,7 @@ import { TrackEditTemplates } from "./TrackEditTemplates.ts";
 import { CustomText } from "../../Classes/Helpers/CustomText.ts";
 import { CommentTemplates } from "../CommentTemplates.ts";
 import { navigate } from "../../Routing/Router.ts";
-import { AnyNode, compute, create, Signal, signal, signalMap, when } from "@targoninc/jess";
+import { compute, create, Signal, signal, signalMap, when } from "@targoninc/jess";
 import { currentTrackId, currentTrackPosition, currentUser, manualQueue, playingHere } from "../../state.ts";
 import { Ui } from "../../Classes/Ui.ts";
 import { ApiRoutes } from "../../Api/ApiRoutes.ts";
@@ -515,6 +515,8 @@ export class TrackTemplates {
             if (isPrivate) {
                 editActions.push(TrackTemplates.copyPrivateLinkButton(track.id, track.secretcode));
             }
+            editActions.push(TrackEditTemplates.replaceAudioButton(track));
+            editActions.push(TrackEditTemplates.downloadAudioButton(track));
             editActions.push(TrackEditTemplates.openEditPageButton(track));
             editActions.push(TrackEditTemplates.deleteTrackButton(track.id));
         }
@@ -592,19 +594,27 @@ export class TrackTemplates {
                                 create("div")
                                     .classes("flex-v")
                                     .children(
-                                        create("div")
-                                            .classes("flex", "align-children")
-                                            .children(
-                                                TrackTemplates.playButton(track),
-                                                TrackTemplates.addToQueueButton(track),
-                                                when(trackData.canEdit, TrackEditTemplates.replaceAudioButton(track)),
-                                                when(trackData.canEdit, TrackEditTemplates.downloadAudioButton(track)),
-                                            ).build(),
-                                        InteractionTemplates.interactions(EntityType.track, track),
+                                        horizontal(
+                                            TrackTemplates.playButton(track),
+                                            InteractionTemplates.interactions(EntityType.track, track),
+                                            when(
+                                                currentUser,
+                                                horizontal(
+                                                    button({
+                                                        text: "Add to playlist",
+                                                        icon: { icon: "playlist_add" },
+                                                        onclick: async () => {
+                                                            await PlaylistActions.openAddToPlaylistModal(track, "track");
+                                                        },
+                                                    }),
+                                                    TrackTemplates.addToQueueButton(track),
+                                                ).build(),
+                                            ),
+                                        ).build(),
                                     ).build(),
                             ).build(),
                     ).build(),
-                TrackTemplates.audioActions(track, editActions),
+                horizontal(...editActions),
                 when(track.description.length > 0, description),
                 CommentTemplates.commentListFullWidth(track.id, comments, showComments),
                 TrackTemplates.inAlbumsList(track),
@@ -661,24 +671,6 @@ export class TrackTemplates {
             ).build();
     }
 
-    static audioActions(track: Track, editActions: AnyNode[]) {
-        return create("div")
-            .classes("audio-actions", "flex")
-            .children(
-                when(
-                    currentUser,
-                    button({
-                        text: "Add to playlist",
-                        icon: { icon: "playlist_add" },
-                        onclick: async () => {
-                            await PlaylistActions.openAddToPlaylistModal(track, "track");
-                        },
-                    }),
-                ),
-                ...editActions,
-            ).build();
-    }
-
     public static addToQueueButton(track: Track) {
         const inQueue = compute(q => q.includes(track.id), manualQueue);
         const text = compute((q: boolean): string => (q ? "Unqueue" : "Queue"), inQueue);
@@ -708,7 +700,7 @@ export class TrackTemplates {
                 classes: ["inline-icon", "svg", "nopointer"],
                 isUrl: true,
             },
-            classes: ["audio-player-toggle"],
+            classes: ["special", "bigger-input", "rounded-max"],
             id: track.id,
             onclick: async () => {
                 PlayManager.addStreamClientIfNotExists(track.id, track.length);

@@ -110,6 +110,10 @@
     font-size: 1.2rem !important;
 }
 
+.round-button.bigger-input {
+    --round-button-size: 48px;
+}
+
 .bold {
     font-weight: bold;
 }

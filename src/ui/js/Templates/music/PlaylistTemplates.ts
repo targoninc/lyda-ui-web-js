@@ -1,5 +1,5 @@
 import { Icons } from "../../Enums/Icons.ts";
-import { GenericTemplates } from "../generic/GenericTemplates.ts";
+import { GenericTemplates, horizontal } from "../generic/GenericTemplates.ts";
 import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
 import { Time } from "../../Classes/Helpers/Time.ts";
 import { TrackTemplates } from "./TrackTemplates.ts";
@@ -58,7 +58,7 @@ export class PlaylistTemplates {
                             .build(),
                         create("h5")
                             .text(`Add ${track.title} to playlist`)
-                            .build()
+                            .build(),
                     )
                     .build(),
                 create("div")
@@ -72,11 +72,11 @@ export class PlaylistTemplates {
                             text: compute(p => `Add to ${p.length} playlists`, checkedPlaylists),
                             disabled: compute(p => p.length === 0, checkedPlaylists),
                             onclick: async () => PlaylistActions.addTrackToPlaylists(track.id, checkedPlaylists.value),
-                            icon: {icon: "playlist_add"},
+                            icon: { icon: "playlist_add" },
                             classes: ["positive"],
                         }),
-                        GenericTemplates.modalCancelButton()
-                    ).build()
+                        GenericTemplates.modalCancelButton(),
+                    ).build(),
             ).build();
     }
 
@@ -105,7 +105,7 @@ export class PlaylistTemplates {
                             .build(),
                         create("h5")
                             .text(`Add ${album.title} to playlist`)
-                            .build()
+                            .build(),
                     ).build(),
                 create("div")
                     .classes("check-list")
@@ -118,11 +118,11 @@ export class PlaylistTemplates {
                             text: compute(p => `Add to ${p.length} playlists`, checkedPlaylists),
                             disabled: compute(p => p.length === 0, checkedPlaylists),
                             onclick: async () => PlaylistActions.addAlbumToPlaylists(album.id, checkedPlaylists.value),
-                            icon: {icon: "playlist_add"},
+                            icon: { icon: "playlist_add" },
                             classes: ["positive"],
                         }),
-                        GenericTemplates.modalCancelButton()
-                    ).build()
+                        GenericTemplates.modalCancelButton(),
+                    ).build(),
             ).build();
     }
 
@@ -185,8 +185,8 @@ export class PlaylistTemplates {
                             placeholder: "Playlist name",
                             value: name,
                             onchange: (v) => {
-                                playlist.value = {...playlist.value, title: v};
-                            }
+                                playlist.value = { ...playlist.value, title: v };
+                            },
                         }),
                         textarea({
                             name: "description",
@@ -194,8 +194,8 @@ export class PlaylistTemplates {
                             placeholder: "My cool playlist",
                             value: description,
                             onchange: (v) => {
-                                playlist.value = {...playlist.value, description: v};
-                            }
+                                playlist.value = { ...playlist.value, description: v };
+                            },
                         }),
                         toggle({
                             name: "visibility",
@@ -203,8 +203,8 @@ export class PlaylistTemplates {
                             text: "Private",
                             checked: visibility,
                             onchange: (v) => {
-                                playlist.value = {...playlist.value, visibility: v ? "private" : "public"};
-                            }
+                                playlist.value = { ...playlist.value, visibility: v ? "private" : "public" };
+                            },
                         }),
                     ).build(),
                 create("div")
@@ -218,12 +218,12 @@ export class PlaylistTemplates {
                                 Util.removeModal();
                             },
                             icon: {
-                                icon: "playlist_add"
+                                icon: "playlist_add",
                             },
                             classes: ["positive"],
                         }),
-                        GenericTemplates.modalCancelButton()
-                    ).build()
+                        GenericTemplates.modalCancelButton(),
+                    ).build(),
             ).build();
     }
 
@@ -234,13 +234,13 @@ export class PlaylistTemplates {
                 create("p")
                     .text("Put your favorite tunes into a playlist:")
                     .build(),
-                GenericTemplates.newPlaylistButton(["secondary"])
+                GenericTemplates.newPlaylistButton(["secondary"]),
             ];
         } else {
             children = [
                 create("p")
                     .text("No playlists on this profile.")
-                    .build()
+                    .build(),
             ];
         }
 
@@ -337,7 +337,7 @@ export class PlaylistTemplates {
                             .classes("title", "wordwrap")
                             .text(playlist.title)
                             .build(),
-                        UserTemplates.userWidget(a_user, [], [], UserWidgetContext.singlePage)
+                        UserTemplates.userWidget(a_user, [], [], UserWidgetContext.singlePage),
                     ).build(),
                 create("div")
                     .classes("playlist-info-container", "flex")
@@ -354,7 +354,7 @@ export class PlaylistTemplates {
                                     .classes("cover", "blurOnParentHover", "nopointer")
                                     .src(coverState)
                                     .alt(playlist.title)
-                                    .build()
+                                    .build(),
                             ).build(),
                         create("div")
                             .classes("flex-v")
@@ -366,12 +366,12 @@ export class PlaylistTemplates {
                                         create("span")
                                             .classes("date", "text-small")
                                             .text("Created " + Util.formatDate(playlist.created_at))
-                                            .build()
+                                            .build(),
                                     ).build(),
                                 InteractionTemplates.interactions(EntityType.playlist, playlist),
-                            ).build()
+                            ).build(),
                     ).build(),
-                TrackTemplates.tracksInList(noTracks, tracks, data.canEdit, playlist, "playlist", startCallback)
+                TrackTemplates.tracksInList(noTracks, tracks, data.canEdit, playlist, "playlist", startCallback),
             ).build();
     }
 
@@ -394,34 +394,32 @@ export class PlaylistTemplates {
                         icon: playIcon,
                         classes: ["inline-icon", "svg", "nopointer"],
                         adaptive: true,
-                        isUrl: true
+                        isUrl: true,
                     },
                     attributes: ["duration", duration.toString()],
                     id: playlist.id,
-                    classes: ["secondary"],
+                    classes: ["special", "bigger-input", "rounded-max"],
                     disabled: playlist.tracks?.length === 0,
                     onclick: async () => {
                         const firstTrack = playlist.tracks![0];
                         await PlaylistActions.startTrackInPlaylist(playlist, firstTrack.track_id, true);
-                    }
+                    },
                 }),
                 MusicTemplates.addListToQueueButton(playlist),
             ];
         }
 
-        return create("div")
-            .classes("audio-actions", "flex")
-            .children(
-                ...actions,
-                when(canEdit, button({
-                    text: "Delete",
-                    icon: {icon: "delete"},
-                    classes: ["negative"],
-                    onclick: async () => {
-                        await Ui.getConfirmationModal("Delete playlist", "Are you sure you want to delete this playlist?", "Yes", "No", () => PlaylistActions.deletePlaylist(playlist.id), () => {
-                        }, Icons.WARNING);
-                    }
-                }))
-            ).build();
+        return horizontal(
+            ...actions,
+            when(canEdit, button({
+                text: "Delete",
+                icon: { icon: "delete" },
+                classes: ["negative"],
+                onclick: async () => {
+                    await Ui.getConfirmationModal("Delete playlist", "Are you sure you want to delete this playlist?", "Yes", "No", () => PlaylistActions.deletePlaylist(playlist.id), () => {
+                    }, Icons.WARNING);
+                },
+            })),
+        ).build();
     }
 }

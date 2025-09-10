@@ -234,7 +234,7 @@ nav, footer {
     padding: var(--page-padding);
 }
 
-nav, footer, .fixed-bar, .modal-overlay, .modal, .card, .user-preview, .player-popout {
+nav, footer, .fixed-bar, .modal-overlay, .modal, .card, .user-preview {
     background: var(--background-glass);
     backdrop-filter: saturate(180%) blur(10px);
     -webkit-backdrop-filter: saturate(180%) blur(10px);
@@ -895,10 +895,15 @@ td:last-child, th:last-child {
     overflow: hidden;
     padding: calc(var(--base-padding) * 2);
     box-sizing: border-box;
+    background: color-mix(in oklab, var(--color-3), transparent 2%);
 }
 
 .mobile-player {
-    --round-button-size: 13dvw;
+    --round-button-size: 12dvw;
+}
+
+.mobile-player .round-button.bigger-input {
+    --round-button-size: 15dvw;
 }
 
 .limitToContentWidth {

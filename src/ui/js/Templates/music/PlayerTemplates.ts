@@ -58,7 +58,7 @@ export class PlayerTemplates {
             .id("player_" + track.id)
             .children(
                 create("div")
-                    .classes("flex", "align-center")
+                    .classes("flex", "align-center", "align-children")
                     .children(
                         GenericTemplates.roundIconButton(
                             {
@@ -128,7 +128,7 @@ export class PlayerTemplates {
             .id("player_" + track.id)
             .children(
                 create("div")
-                    .classes("flex", "space-outwards")
+                    .classes("flex", "space-outwards", "align-children")
                     .children(
                         PlayerTemplates.loopModeButton(),
                         horizontal(
@@ -149,7 +149,7 @@ export class PlayerTemplates {
                                 PlayManager.playNextFromQueues,
                                 "Next"
                             ),
-                        ),
+                        ).classes("align-children"),
                         InteractionTemplates.interactions(EntityType.track, track, {
                             showCount: false,
                             overrideActions: [InteractionType.like],
@@ -188,7 +188,8 @@ export class PlayerTemplates {
             async () => {
                 PlayManager.togglePlayAsync(track.id).then();
             },
-            "Play/Pause"
+            "Play/Pause",
+            ["special", "bigger-input", "rounded-max"],
         );
     }
 
