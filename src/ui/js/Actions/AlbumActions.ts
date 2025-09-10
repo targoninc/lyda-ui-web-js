@@ -20,6 +20,7 @@ export class AlbumActions {
     static async openAddToAlbumModal(track: Track) {
         const albums = await Api.getAlbumsByUserId(track.user_id);
         if (!albums || albums.length === 0) {
+            notify("You have no albums yet, create one first");
             return;
         }
         createModal([await AlbumTemplates.addToAlbumModal(track, albums)], "add-to-album");
