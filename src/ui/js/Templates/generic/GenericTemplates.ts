@@ -17,9 +17,9 @@ import {
     TypeOrSignal,
     when,
 } from "@targoninc/jess";
-import { Util } from "../../Classes/Util.ts";
+import { getPlayIcon, Util } from "../../Classes/Util.ts";
 import { navigate } from "../../Routing/Router.ts";
-import { currentTrackId, playingHere } from "../../state.ts";
+import { currentTrackId, loadingAudio, playingHere } from "../../state.ts";
 import { PillOption } from "../../Models/PillOption.ts";
 import { dayFromValue } from "../../Classes/Helpers/Date.ts";
 import { PlayManager } from "../../Streaming/PlayManager.ts";
@@ -541,10 +541,6 @@ export class GenericTemplates {
         ).build();
     }
 
-    static containerWithSpinner(className: string) {
-        return create("div").classes(className).children(GenericTemplates.loadingSpinner()).build();
-    }
-
     static loadingSpinner() {
         return create("div").classes("spinner").children().build();
     }
@@ -555,17 +551,21 @@ export class GenericTemplates {
         title: StringOrSignal = "",
         classes: StringOrSignal[] = [],
     ) {
-        return create("button").classes("round-button", "jess", ...classes).onclick(onclick).title(title).children(
-            icon({
-                ...iconConfig,
-                classes: ["round-button-icon", "align-center", "inline-icon", "svg", "nopointer", ...(iconConfig.classes ?? [])],
-            }),
-        ).build();
+        return create("button")
+            .classes("round-button", "jess", ...classes)
+            .onclick(onclick)
+            .title(title)
+            .children(
+                icon({
+                    ...iconConfig,
+                    classes: ["round-button-icon", "align-center", "inline-icon", "svg", "nopointer", ...(iconConfig.classes ?? [])],
+                }),
+            ).build();
     }
 
     static playButton(trackId: number, start: Function) {
         const isPlaying = compute((c, p) => c === trackId && p, currentTrackId, playingHere);
-        const icon = compute(p => (p ? Icons.PAUSE : Icons.PLAY), isPlaying);
+        const icon = getPlayIcon(isPlaying, loadingAudio);
         const onclick = async () => {
             if (isPlaying.value) {
                 await PlayManager.pauseAsync(trackId);

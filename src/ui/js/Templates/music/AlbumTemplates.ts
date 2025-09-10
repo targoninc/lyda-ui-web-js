@@ -6,11 +6,11 @@ import { UserTemplates } from "../account/UserTemplates.ts";
 import { TrackTemplates } from "./TrackTemplates.ts";
 import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
 import { Images } from "../../Enums/Images.ts";
-import { Util } from "../../Classes/Util.ts";
+import { getPlayIcon, Util } from "../../Classes/Util.ts";
 import { createModal, Ui } from "../../Classes/Ui.ts";
 import { AnyNode, compute, create, InputType, nullElement, signal, Signal, when } from "@targoninc/jess";
 import { navigate, Route } from "../../Routing/Router.ts";
-import { currentTrackId, currentUser, playingFrom, playingHere } from "../../state.ts";
+import { currentTrackId, currentUser, loadingAudio, playingFrom, playingHere } from "../../state.ts";
 import { PageTemplates } from "../PageTemplates.ts";
 import { RoutePath } from "../../Routing/routes.ts";
 import { button, input, textarea, toggle } from "@targoninc/jess-components";
@@ -429,10 +429,10 @@ export class AlbumTemplates {
     }
 
     static audioActions(album: Album, canEdit: boolean) {
-        const isPlaying = compute((p, pHere) => p && p.type === "album" && p.id === album.id && pHere, playingFrom, playingHere);
+        const isPlaying = compute((p, pHere) => (p && p.type === "album" && p.id === album.id && pHere) ?? false, playingFrom, playingHere);
         const duration = album.tracks!.reduce((acc, t) => acc + (t.track?.length ?? 0), 0);
         const hasTracks = album.tracks!.length > 0;
-        const playIcon = compute(p => p ? Icons.PAUSE : Icons.PLAY, isPlaying);
+        const playIcon = getPlayIcon(isPlaying, loadingAudio);
         const playText = compute((p): string => p ? "Pause" : "Play", isPlaying);
 
         return horizontal(

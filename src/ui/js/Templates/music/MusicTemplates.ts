@@ -2,7 +2,7 @@ import { GenericTemplates, horizontal } from "../generic/GenericTemplates.ts";
 import { AnyNode, compute, create, Signal, signal, when } from "@targoninc/jess";
 import { currentTrackId, currentUser, loadingAudio, manualQueue, playingFrom, playingHere } from "../../state.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
-import { Util } from "../../Classes/Util.ts";
+import { getPlayIcon, Util } from "../../Classes/Util.ts";
 import { Time } from "../../Classes/Helpers/Time.ts";
 import { TrackTemplates } from "./TrackTemplates.ts";
 import { DefaultImages } from "../../Enums/DefaultImages.ts";
@@ -217,7 +217,7 @@ export class MusicTemplates {
             }
         };
         const isLoading = compute((id, loading) => id === itemId && loading, currentTrackId, loadingAudio);
-        const icon = compute((p, l) => (p ? Icons.PAUSE : (l ? Icons.SPINNER : Icons.PLAY)), isPlaying, isLoading);
+        const icon = getPlayIcon(isPlaying, isLoading);
 
         return GenericTemplates.roundIconButton(
             {

@@ -5,7 +5,7 @@ import { Time } from "../../Classes/Helpers/Time.ts";
 import { TrackTemplates } from "./TrackTemplates.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { Images } from "../../Enums/Images.ts";
-import { Util } from "../../Classes/Util.ts";
+import { getPlayIcon, Util } from "../../Classes/Util.ts";
 import { Ui } from "../../Classes/Ui.ts";
 import { AnyElement, AnyNode, compute, create, InputType, nullElement, Signal, signal, when } from "@targoninc/jess";
 import { button, icon, input, textarea, toggle } from "@targoninc/jess-components";
@@ -17,7 +17,7 @@ import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { ListTrack } from "@targoninc/lyda-shared/src/Models/ListTrack";
 import { InteractionTemplates } from "../InteractionTemplates.ts";
-import { playingFrom, playingHere } from "../../state.ts";
+import { loadingAudio, playingFrom, playingHere } from "../../state.ts";
 import { MusicTemplates } from "./MusicTemplates.ts";
 import { Api } from "../../Api/Api.ts";
 
@@ -380,9 +380,9 @@ export class PlaylistTemplates {
             throw new Error(`Playlist ${playlist.id} has no tracks`);
         }
 
-        const isPlaying = compute((p, pHere) => p && p.type === "playlist" && p.id === playlist.id && pHere, playingFrom, playingHere);
+        const isPlaying = compute((p, pHere) => (p && p.type === "playlist" && p.id === playlist.id && pHere) ?? false, playingFrom, playingHere);
         const duration = playlist.tracks.reduce((acc, t) => acc + (t.track?.length ?? 0), 0);
-        const playIcon = compute(p => p ? Icons.PAUSE : Icons.PLAY, isPlaying);
+        const playIcon = getPlayIcon(isPlaying, loadingAudio);
         const playText = compute((p): string => p ? "Pause" : "Play", isPlaying);
 
         let actions: AnyNode[] = [];

@@ -6,7 +6,7 @@ import { QueueTemplates } from "./QueueTemplates.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
 import { Ui } from "../../Classes/Ui.ts";
-import { Util } from "../../Classes/Util.ts";
+import { getPlayIcon, Util } from "../../Classes/Util.ts";
 import { compute, create, Signal, signal, when } from "@targoninc/jess";
 import { navigate } from "../../Routing/Router.ts";
 import {
@@ -14,6 +14,7 @@ import {
     currentQuality,
     currentTrackId,
     currentTrackPosition,
+    loadingAudio,
     loopMode,
     muted,
     playerExpanded,
@@ -181,7 +182,7 @@ export class PlayerTemplates {
     private static roundPlayButton(track: Track) {
         return GenericTemplates.roundIconButton(
             {
-                icon: compute(p => (p ? Icons.PAUSE : Icons.PLAY), playingHere),
+                icon: getPlayIcon(playingHere, loadingAudio),
                 adaptive: true,
                 isUrl: true,
             },

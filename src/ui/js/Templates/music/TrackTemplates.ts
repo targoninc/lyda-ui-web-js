@@ -1,7 +1,6 @@
 import { TrackActions } from "../../Actions/TrackActions.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
-import { copy, Util } from "../../Classes/Util.ts";
-import { Icons } from "../../Enums/Icons.ts";
+import { copy, getPlayIcon, Util } from "../../Classes/Util.ts";
 import { PlayManager } from "../../Streaming/PlayManager.ts";
 import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
 import { Time } from "../../Classes/Helpers/Time.ts";
@@ -16,7 +15,14 @@ import { CustomText } from "../../Classes/Helpers/CustomText.ts";
 import { CommentTemplates } from "../CommentTemplates.ts";
 import { navigate } from "../../Routing/Router.ts";
 import { compute, create, Signal, signal, signalMap, when } from "@targoninc/jess";
-import { currentTrackId, currentTrackPosition, currentUser, manualQueue, playingHere } from "../../state.ts";
+import {
+    currentTrackId,
+    currentTrackPosition,
+    currentUser,
+    loadingAudio,
+    manualQueue,
+    playingHere,
+} from "../../state.ts";
 import { Ui } from "../../Classes/Ui.ts";
 import { ApiRoutes } from "../../Api/ApiRoutes.ts";
 import { MediaActions } from "../../Actions/MediaActions.ts";
@@ -691,7 +697,7 @@ export class TrackTemplates {
     static playButton(track: Track) {
         const isPlaying = compute((id, ph) => id === track.id && ph, currentTrackId, playingHere);
         const text = compute((p): string => (p ? "Pause" : "Play"), isPlaying);
-        const icon = compute((p): string => (p ? Icons.PAUSE : Icons.PLAY), isPlaying);
+        const icon = getPlayIcon(isPlaying, loadingAudio);
 
         return button({
             text,
