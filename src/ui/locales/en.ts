@@ -62,4 +62,11 @@ export const en = {
     CHANGE_ACCOUNT_SETTINGS: "Change your account settings here.",
     GO_TO_ADMINISTRATION: "Go to Administration",
     SETTINGS: "Settings",
+    ADD_PASSKEY: "Add passkey",
+    PASSKEY_NAME_DESCRIPTION: "Enter the name for this passkey. Make sure it's something you'll recognize later on.",
+    SUCCESSFULLY_REGISTERED_PASSKEY: "Successfully registered passkey",
+    PASSKEY_DELETED: "Passkey deleted",
+    NO_PASSKEYS: "You have no passkeys configured",
+    CREATED: "Created",
+    ERROR: "Error",
 } satisfies BaseTranslation;
