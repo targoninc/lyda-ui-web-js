@@ -497,11 +497,9 @@ export class UserTemplates {
                                     icon: { icon: "settings" },
                                     onclick: () => navigate(RoutePath.settings),
                                 }),
-                                GenericTemplates.logoutButton(),
-                            )
-                            .build(),
-                    )
-                    .build(),
+                                GenericTemplates.logoutButton(["hideOnSmallBreakpoint"]),
+                            ).build(),
+                    ).build(),
             ),
         );
     }

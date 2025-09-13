@@ -121,10 +121,10 @@ export class GenericTemplates {
         ).build();
     }
 
-    static logoutButton() {
+    static logoutButton(classes: string[] = []) {
         return button({
             text: "Log out",
-            classes: ["hideOnSmallBreakpoint", "negative"],
+            classes: ["negative", ...classes],
             icon: { icon: "logout" },
             onclick: async () => {
                 await AuthActions.logOut();
