@@ -223,7 +223,7 @@ export class MusicTemplates {
             {
                 icon,
                 isUrl: true,
-                classes: ["svgInverted", compute((l): string => l ? "spinner-animation" : "_", isLoading)],
+                classes: [compute((l): string => l ? "spinner-animation" : "_", isLoading)],
             },
             onclick
         );
