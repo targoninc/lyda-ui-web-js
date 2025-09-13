@@ -3,7 +3,17 @@ import { GenericTemplates, horizontal } from "../generic/GenericTemplates.ts";
 import { copy, getUserSettingValue, Util } from "../../Classes/Util.ts";
 import { createModal, notify, Ui } from "../../Classes/Ui.ts";
 import { Api } from "../../Api/Api.ts";
-import { compute, create, InputType, nullElement, Signal, signal, signalMap, when } from "@targoninc/jess";
+import {
+    compute,
+    create,
+    InputType,
+    nullElement,
+    Signal,
+    signal,
+    signalMap,
+    StringOrSignal,
+    when,
+} from "@targoninc/jess";
 import { navigate, reload, Route } from "../../Routing/Router.ts";
 import { UserTemplates } from "./UserTemplates.ts";
 import { currentUser, permissions } from "../../state.ts";
@@ -55,18 +65,16 @@ export class SettingsTemplates {
         return create("div")
             .classes("flex-v")
             .children(
-                create("h1").text("Settings").build(),
+                heading({
+                    level: 1,
+                    text: t("SETTINGS"),
+                }),
                 SettingsTemplates.accountSection(user),
                 SettingsTemplates.totpSection(),
                 WebauthnTemplates.devicesSection(),
-                SettingsTemplates.themeSection(
-                    getUserSettingValue<Theme>(user, UserSettings.theme),
-                ),
+                SettingsTemplates.themeSection(getUserSettingValue<Theme>(user, UserSettings.theme)),
                 SettingsTemplates.languageSection(),
-                SettingsTemplates.qualitySection(
-                    getUserSettingValue<StreamingQuality>(user, UserSettings.streamingQuality) ??
-                    "m",
-                ),
+                SettingsTemplates.qualitySection(getUserSettingValue<StreamingQuality>(user, UserSettings.streamingQuality) ?? "m"),
                 SettingsTemplates.permissionsSection(),
                 SettingsTemplates.behaviourSection(user),
                 SettingsTemplates.notificationsSection(user),
@@ -87,7 +95,7 @@ export class SettingsTemplates {
                         .children(
                             SettingsTemplates.sectionHeading(t("MY_PERMISSIONS")),
                             button({
-                                text: "Go to Administration",
+                                text: t("GO_TO_ADMINISTRATION"),
                                 icon: { icon: "terminal" },
                                 onclick: () => navigate(RoutePath.admin),
                             }),
@@ -118,12 +126,14 @@ export class SettingsTemplates {
             .children(
                 SettingsTemplates.sectionHeading(t("ACCOUNT")),
                 GenericTemplates.logoutButton(),
-                create("p").text("Change your account settings here.").build(),
+                create("p")
+                    .text(t("CHANGE_ACCOUNT_SETTINGS"))
+                    .build(),
                 when(
                     user.subscription,
                     button({
                         icon: { icon: "payments" },
-                        text: "Manage subscription",
+                        text: t("MANAGE_SUBSCRIPTION"),
                         classes: ["positive"],
                         onclick: () => navigate(RoutePath.subscribe),
                     }),
@@ -132,7 +142,7 @@ export class SettingsTemplates {
                     user.subscription,
                     button({
                         icon: { icon: "payments" },
-                        text: "Subscribe for more features",
+                        text: t("SUBSCRIBE_MORE_FEATURES"),
                         classes: ["special", "bigger-input", "rounded-max"],
                         onclick: () => navigate(RoutePath.subscribe),
                     }),
@@ -144,7 +154,7 @@ export class SettingsTemplates {
                     .children(
                         input(<InputConfig<string>>{
                             type: InputType.text,
-                            label: "Username",
+                            label: t("USER_NAME"),
                             name: "username",
                             required: true,
                             value: user.username,
@@ -154,7 +164,7 @@ export class SettingsTemplates {
                         }),
                         input(<InputConfig<string>>{
                             type: InputType.text,
-                            label: "Display name",
+                            label: t("DISPLAY_NAME"),
                             name: "displayname",
                             required: true,
                             value: user.displayname,
@@ -163,7 +173,7 @@ export class SettingsTemplates {
                             },
                         }),
                         textarea(<TextareaConfig>{
-                            label: "Description",
+                            label: t("DESCRIPTION"),
                             name: "description",
                             value: user.description,
                             onchange: v => {
@@ -176,7 +186,7 @@ export class SettingsTemplates {
                 button(<ButtonConfig>{
                     disabled: saveDisabled,
                     classes: ["positive"],
-                    text: "Save changes",
+                    text: t("SAVE_CHANGES"),
                     icon: { icon: "save" },
                     onclick: async () => {
                         if (await Api.updateUser(updatedUser.value)) {
@@ -195,43 +205,36 @@ export class SettingsTemplates {
             .children(
                 SettingsTemplates.sectionHeading(t("EMAIL_NOTIFICATIONS")),
                 SettingsTemplates.notificationToggle(
-                    "Like notifications",
+                    t("NOTIFS_LIKE"),
                     "like",
                     getUserSettingValue(user, UserSettings.notificationLike),
                 ),
                 SettingsTemplates.notificationToggle(
-                    "Comment notifications",
+                    t("NOTIFS_COMMENT"),
                     "comment",
                     getUserSettingValue(user, UserSettings.notificationComment),
                 ),
                 SettingsTemplates.notificationToggle(
-                    "Follow notifications",
+                    t("NOTIFS_FOLLOW"),
                     "follow",
                     getUserSettingValue(user, UserSettings.notificationFollow),
                 ),
                 SettingsTemplates.notificationToggle(
-                    "Repost notifications",
+                    t("NOTIFS_REPOST"),
                     "repost",
                     getUserSettingValue(user, UserSettings.notificationRepost),
                 ),
                 SettingsTemplates.notificationToggle(
-                    "Collaboration notifications",
+                    t("NOTIFS_COLLAB"),
                     "collaboration",
                     getUserSettingValue(user, UserSettings.notificationCollaboration),
                 ),
             ).build();
     }
 
-    static notificationToggle(text: string, key: string, currentValue: boolean) {
-        return GenericTemplates.toggle(
-            text,
-            "notification_" + key,
-            async () => {
-                await UserActions.toggleNotificationSetting(key);
-            },
-            [],
-            currentValue,
-        );
+    static notificationToggle(text: StringOrSignal, key: string, currentValue: boolean) {
+        return GenericTemplates.toggle(text, "notification_" + key, async () =>
+            await UserActions.toggleNotificationSetting(key), [], currentValue);
     }
 
     static behaviourSection(user: User) {
@@ -258,10 +261,10 @@ export class SettingsTemplates {
             u => value !== StreamingQuality.low && (!u || !u.subscription),
             currentUser,
         );
-        const textMap: Record<StreamingQuality, string> = {
-            [StreamingQuality.low]: "low (92kbps)",
-            [StreamingQuality.medium]: "medium (128kbps)",
-            [StreamingQuality.high]: "high (320kbps)",
+        const textMap: Record<StreamingQuality, StringOrSignal> = {
+            [StreamingQuality.low]: t("QUALITY_LOW"),
+            [StreamingQuality.medium]: t("QUALITY_MEDIUM"),
+            [StreamingQuality.high]: t("QUALITY_HIGH"),
         };
 
         return horizontal(
@@ -334,20 +337,12 @@ export class SettingsTemplates {
             .classes("card", "flex-v")
             .children(
                 SettingsTemplates.sectionHeading(t("STREAMING_QUALITY")),
-                when(
-                    noSubscription,
+                when(noSubscription,
                     create("div")
                         .classes("text", "text-small", "color-dim")
-                        .text("Medium and high qualities are only available with a subscription.")
-                        .build(),
-                ),
-                when(
-                    noSubscription,
-                    GenericTemplates.inlineLink(
-                        () => navigate(RoutePath.subscribe),
-                        "Subscribe for higher quality",
-                    ),
-                ),
+                        .text(t("MEDIUM_HIGH_ONLY_SUBSCRIPTION"))
+                        .build()),
+                when(noSubscription, GenericTemplates.inlineLink(() => navigate(RoutePath.subscribe), t("SUBSCRIBE_FOR_HIGHER_QUALITY"))),
                 create("div")
                     .classes("flex", "small-gap")
                     .children(
@@ -360,25 +355,21 @@ export class SettingsTemplates {
 
     static playFromAutoQueueToggle(currentValue: boolean) {
         return GenericTemplates.toggle(
-            "Play from auto queue",
+            t("PLAY_FROM_AUTO_QUEUE"),
             UserSettings.playFromAutoQueue,
             async () => {
                 await UserActions.togglePlayFromAutoQueue();
-            },
-            [],
-            currentValue,
+            }, [], currentValue,
         );
     }
 
     static publicLikesToggle(currentValue: boolean) {
         return GenericTemplates.toggle(
-            "Make my library public",
+            t("MAKE_LIBRARY_PUBLIC"),
             UserSettings.publicLikes,
             async () => {
                 await UserActions.togglePublicLikes();
-            },
-            [],
-            currentValue,
+            }, [], currentValue,
         );
     }
 
@@ -391,18 +382,18 @@ export class SettingsTemplates {
                     .classes("flex")
                     .children(
                         button({
-                            text: "Delete account",
+                            text: t("DELETE_ACCOUNT"),
                             icon: { icon: "delete" },
                             classes: ["negative"],
                             onclick: () => {
                                 Ui.getConfirmationModal(
-                                    "Delete account",
-                                    "Are you sure you want to delete your account? This action cannot be undone.",
-                                    "Yes, delete my account",
-                                    "No, keep account",
+                                    t("DELETE_ACCOUNT"),
+                                    t("DELETE_ACCOUNT_SURE"),
+                                    t("YES_DELETE_ACCOUNT"),
+                                    t("NO_KEEP_ACCOUNT"),
                                     async () => {
                                         Api.deleteUser().then(() => {
-                                            notify("Account deleted", NotificationType.success);
+                                            notify(t("ACCOUNT_DELETED"), NotificationType.success);
                                             navigate(RoutePath.login);
                                             window.location.reload();
                                         });
@@ -413,7 +404,7 @@ export class SettingsTemplates {
                             },
                         }),
                         button({
-                            text: "Download data",
+                            text: t("DOWNLOAD_DATA"),
                             icon: { icon: "download" },
                             onclick: () => {
                                 Api.exportUser().then(res => {
@@ -463,10 +454,10 @@ export class SettingsTemplates {
                         ),
                     )
                     .build(),
-                GenericTemplates.inlineLink(() => navigate(RoutePath.roadmap), "Roadmap"),
+                GenericTemplates.inlineLink(() => navigate(RoutePath.roadmap), t("ROADMAP")),
                 GenericTemplates.inlineLink(
                     () => window.open("https://github.com/targoninc/lyda-ui-web-js", "_blank"),
-                    "Source code",
+                    t("SOURCE_CODE"),
                 ),
             ).build();
     }
@@ -478,19 +469,17 @@ export class SettingsTemplates {
                 create("div")
                     .classes("flex", "card", "small-card", "secondary")
                     .children(
-                        create("span").text("Avatar").build(),
+                        create("span").text(t("AVATAR")).build(),
                         UserTemplates.avatarDeleteButton(user),
                         UserTemplates.avatarReplaceButton(user),
-                    )
-                    .build(),
+                    ).build(),
                 create("div")
                     .classes("flex", "card", "small-card", "secondary")
                     .children(
-                        create("span").text("Banner").build(),
+                        create("span").text(t("BANNER")).build(),
                         UserTemplates.bannerDeleteButton(user),
                         UserTemplates.bannerReplaceButton(user),
-                    )
-                    .build(),
+                    ).build(),
             ).build();
     }
 
@@ -655,7 +644,7 @@ export class SettingsTemplates {
                         when(
                             email.primary,
                             button({
-                                text: "Delete",
+                                text: t("DELETE"),
                                 icon: { icon: "delete" },
                                 classes: ["negative"],
                                 onclick: async () => {
@@ -692,21 +681,21 @@ export class SettingsTemplates {
                 SettingsTemplates.sectionHeading(t("TOTP_DEVICES")),
                 when(
                     hasMethods,
-                    create("span").text("You have no TOTP methods configured").build(),
+                    create("span").text(t("NO_TOTP_CONFIGURED")).build(),
                     true,
                 ),
                 when(hasMethods, TotpTemplates.totpDevices(totpMethods, loading, userId)),
                 button({
-                    text: "Add TOTP method",
+                    text: t("ADD_TOTP"),
                     icon: { icon: "add" },
                     classes: ["positive", "fit-content"],
                     onclick: async () => {
                         await Ui.getTextInputModal(
-                            "TOTP method name",
-                            "Enter the name for this method. Make sure it's something you'll recognize later on.",
+                            t("TOTP_NAME"),
+                            t("TOTP_NAME_DESCRIPTION"),
                             "",
-                            "Add",
-                            "Cancel",
+                            t("ADD"),
+                            t("CANCEL"),
                             async (name: string) => {
                                 loading.value = true;
                                 await Api.addTotpMethod(name)
@@ -719,18 +708,13 @@ export class SettingsTemplates {
                                              });
                                              createModal(
                                                  [
-                                                     TotpTemplates.verifyTotpAddModal(
-                                                         res.secret,
-                                                         res.qrDataUrl,
-                                                     ),
+                                                     TotpTemplates.verifyTotpAddModal(res.secret, res.qrDataUrl),
                                                  ],
                                                  "add-modal-verify",
                                              );
                                          })
                                          .finally(() => (loading.value = false));
-                            },
-                            () => {},
-                            "qr_code",
+                            }, () => {}, "qr_code",
                         );
                     },
                 }),
