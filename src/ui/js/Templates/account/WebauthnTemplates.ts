@@ -13,6 +13,7 @@ import { NotificationType } from "../../Enums/NotificationType.ts";
 import { Api } from "../../Api/Api.ts";
 import { PublicKey } from "@targoninc/lyda-shared/dist/Models/db/lyda/PublicKey";
 import { SettingsTemplates } from "./SettingsTemplates.ts";
+import { t } from "../../../locales";
 
 export class WebauthnTemplates {
     static devicesSection() {
@@ -24,7 +25,7 @@ export class WebauthnTemplates {
         return create("div")
             .classes("flex-v", "card")
             .children(
-                SettingsTemplates.sectionHeading("Passkeys"),
+                SettingsTemplates.sectionHeading(t("PASSKEYS")),
                 when(hasCredentials, create("span")
                     .text("You have no passkeys configured")
                     .build(), true),

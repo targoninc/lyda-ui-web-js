@@ -15,6 +15,7 @@ import {
     icon,
     input,
     InputConfig,
+    select,
     textarea,
     TextareaConfig,
     toggle,
@@ -28,6 +29,7 @@ import { UserEmail } from "@targoninc/lyda-shared/src/Models/db/lyda/UserEmail";
 import { NotificationType } from "../../Enums/NotificationType.ts";
 import { TotpTemplates } from "./TotpTemplates.ts";
 import { WebauthnTemplates } from "./WebauthnTemplates.ts";
+import { Language, language, LanguageOptions, t } from "../../../locales";
 
 export class SettingsTemplates {
     static settingsPage(route: Route, params: Record<string, string>) {
@@ -58,17 +60,18 @@ export class SettingsTemplates {
                 SettingsTemplates.totpSection(),
                 WebauthnTemplates.devicesSection(),
                 SettingsTemplates.themeSection(
-                    getUserSettingValue<Theme>(user, UserSettings.theme)
+                    getUserSettingValue<Theme>(user, UserSettings.theme),
                 ),
+                SettingsTemplates.languageSection(),
                 SettingsTemplates.qualitySection(
                     getUserSettingValue<StreamingQuality>(user, UserSettings.streamingQuality) ??
-                        "m"
+                    "m",
                 ),
                 SettingsTemplates.permissionsSection(),
                 SettingsTemplates.behaviourSection(user),
                 SettingsTemplates.notificationsSection(user),
                 SettingsTemplates.dangerSection(user),
-                SettingsTemplates.linksSection()
+                SettingsTemplates.linksSection(),
             ).build();
     }
 
@@ -82,7 +85,7 @@ export class SettingsTemplates {
                     create("div")
                         .classes("card", "flex-v")
                         .children(
-                            SettingsTemplates.sectionHeading("My permissions"),
+                            SettingsTemplates.sectionHeading(t("MY_PERMISSIONS")),
                             button({
                                 text: "Go to Administration",
                                 icon: { icon: "terminal" },
@@ -92,11 +95,10 @@ export class SettingsTemplates {
                                 permissions,
                                 create("div").classes("flex-v"),
                                 (permission: Permission) =>
-                                    SettingsTemplates.permissionCard(permission)
-                            )
-                        )
-                        .build()
-                )
+                                    SettingsTemplates.permissionCard(permission),
+                            ),
+                        ).build(),
+                ),
             ).build();
     }
 
@@ -114,7 +116,7 @@ export class SettingsTemplates {
         return create("div")
             .classes("card", "flex-v")
             .children(
-                SettingsTemplates.sectionHeading("Account"),
+                SettingsTemplates.sectionHeading(t("ACCOUNT")),
                 GenericTemplates.logoutButton(),
                 create("p").text("Change your account settings here.").build(),
                 when(
@@ -124,7 +126,7 @@ export class SettingsTemplates {
                         text: "Manage subscription",
                         classes: ["positive"],
                         onclick: () => navigate(RoutePath.subscribe),
-                    })
+                    }),
                 ),
                 when(
                     user.subscription,
@@ -134,7 +136,7 @@ export class SettingsTemplates {
                         classes: ["special", "bigger-input", "rounded-max"],
                         onclick: () => navigate(RoutePath.subscribe),
                     }),
-                    true
+                    true,
                 ),
                 SettingsTemplates.userImageSettings(user),
                 create("div")
@@ -168,7 +170,7 @@ export class SettingsTemplates {
                                 updatedUser.value = { ...updatedUser.value, description: v };
                             },
                         }),
-                        SettingsTemplates.emailSettings(user.emails, updatedUser)
+                        SettingsTemplates.emailSettings(user.emails, updatedUser),
                     )
                     .build(),
                 button(<ButtonConfig>{
@@ -183,7 +185,7 @@ export class SettingsTemplates {
                             reload();
                         }
                     },
-                })
+                }),
             ).build();
     }
 
@@ -191,32 +193,32 @@ export class SettingsTemplates {
         return create("div")
             .classes("card", "flex-v")
             .children(
-                SettingsTemplates.sectionHeading("E-Mail Notifications"),
+                SettingsTemplates.sectionHeading(t("EMAIL_NOTIFICATIONS")),
                 SettingsTemplates.notificationToggle(
                     "Like notifications",
                     "like",
-                    getUserSettingValue(user, UserSettings.notificationLike)
+                    getUserSettingValue(user, UserSettings.notificationLike),
                 ),
                 SettingsTemplates.notificationToggle(
                     "Comment notifications",
                     "comment",
-                    getUserSettingValue(user, UserSettings.notificationComment)
+                    getUserSettingValue(user, UserSettings.notificationComment),
                 ),
                 SettingsTemplates.notificationToggle(
                     "Follow notifications",
                     "follow",
-                    getUserSettingValue(user, UserSettings.notificationFollow)
+                    getUserSettingValue(user, UserSettings.notificationFollow),
                 ),
                 SettingsTemplates.notificationToggle(
                     "Repost notifications",
                     "repost",
-                    getUserSettingValue(user, UserSettings.notificationRepost)
+                    getUserSettingValue(user, UserSettings.notificationRepost),
                 ),
                 SettingsTemplates.notificationToggle(
                     "Collaboration notifications",
                     "collaboration",
-                    getUserSettingValue(user, UserSettings.notificationCollaboration)
-                )
+                    getUserSettingValue(user, UserSettings.notificationCollaboration),
+                ),
             ).build();
     }
 
@@ -228,7 +230,7 @@ export class SettingsTemplates {
                 await UserActions.toggleNotificationSetting(key);
             },
             [],
-            currentValue
+            currentValue,
         );
     }
 
@@ -236,25 +238,25 @@ export class SettingsTemplates {
         return create("div")
             .classes("card", "flex-v")
             .children(
-                SettingsTemplates.sectionHeading("Behaviour"),
+                SettingsTemplates.sectionHeading(t("BEHAVIOUR")),
                 SettingsTemplates.playFromAutoQueueToggle(
-                    getUserSettingValue(user, UserSettings.playFromAutoQueue)
+                    getUserSettingValue(user, UserSettings.playFromAutoQueue),
                 ),
                 SettingsTemplates.publicLikesToggle(
-                    getUserSettingValue(user, UserSettings.publicLikes)
-                )
+                    getUserSettingValue(user, UserSettings.publicLikes),
+                ),
             ).build();
     }
 
     static qualitySelector(
         value: StreamingQuality,
         currentValue$: Signal<StreamingQuality>,
-        actualValue$: Signal<StreamingQuality>
+        actualValue$: Signal<StreamingQuality>,
     ) {
         const active$ = compute(c => (c === value ? "active" : "_"), actualValue$);
         const disabled$ = compute(
             u => value !== StreamingQuality.low && (!u || !u.subscription),
-            currentUser
+            currentUser,
         );
         const textMap: Record<StreamingQuality, string> = {
             [StreamingQuality.low]: "low (92kbps)",
@@ -275,25 +277,39 @@ export class SettingsTemplates {
                     currentValue$.value = value;
                     await UserActions.setStreamingQuality(value);
                 },
-            })
+            }),
         ).classes("align-children");
     }
 
     static themeSection(currentTheme: Theme) {
         const themes = Object.values(Theme);
         const currentTheme$ = signal(currentTheme);
+
         return create("div")
             .classes("card", "flex-v")
             .children(
-                SettingsTemplates.sectionHeading("Interface theme"),
+                SettingsTemplates.sectionHeading(t("UI_THEME")),
                 GenericTemplates.combinedSelector(
                     themes,
                     async (newIndex: number) => {
                         currentTheme$.value = themes[newIndex];
                         await UserActions.setTheme(currentTheme$.value);
                     },
-                    themes.indexOf(currentTheme$.value)
-                )
+                    themes.indexOf(currentTheme$.value),
+                ),
+            ).build();
+    }
+
+    static languageSection() {
+        return create("div")
+            .classes("card", "flex-v")
+            .children(
+                SettingsTemplates.sectionHeading(t("LANGUAGE")),
+                select({
+                    options: signal(LanguageOptions),
+                    value: language,
+                    onchange: value => language.value = value as Language,
+                }),
             ).build();
     }
 
@@ -310,36 +326,35 @@ export class SettingsTemplates {
                 return v;
             },
             currentUser,
-            currentValue$
+            currentValue$,
         );
         const noSubscription = compute(u => !u || !u.subscription, currentUser);
 
         return create("div")
             .classes("card", "flex-v")
             .children(
-                SettingsTemplates.sectionHeading("Streaming quality"),
+                SettingsTemplates.sectionHeading(t("STREAMING_QUALITY")),
                 when(
                     noSubscription,
                     create("div")
                         .classes("text", "text-small", "color-dim")
                         .text("Medium and high qualities are only available with a subscription.")
-                        .build()
+                        .build(),
                 ),
                 when(
                     noSubscription,
                     GenericTemplates.inlineLink(
                         () => navigate(RoutePath.subscribe),
-                        "Subscribe for higher quality"
-                    )
+                        "Subscribe for higher quality",
+                    ),
                 ),
                 create("div")
                     .classes("flex", "small-gap")
                     .children(
                         ...values.map(value =>
-                            SettingsTemplates.qualitySelector(value, currentValue$, actualValue)
-                        )
-                    )
-                    .build()
+                            SettingsTemplates.qualitySelector(value, currentValue$, actualValue),
+                        ),
+                    ).build(),
             ).build();
     }
 
@@ -351,7 +366,7 @@ export class SettingsTemplates {
                 await UserActions.togglePlayFromAutoQueue();
             },
             [],
-            currentValue
+            currentValue,
         );
     }
 
@@ -363,7 +378,7 @@ export class SettingsTemplates {
                 await UserActions.togglePublicLikes();
             },
             [],
-            currentValue
+            currentValue,
         );
     }
 
@@ -371,7 +386,7 @@ export class SettingsTemplates {
         return create("div")
             .classes("card", "flex-v")
             .children(
-                SettingsTemplates.sectionHeading("Other"),
+                SettingsTemplates.sectionHeading(t("OTHER")),
                 create("div")
                     .classes("flex")
                     .children(
@@ -393,7 +408,7 @@ export class SettingsTemplates {
                                         });
                                     },
                                     () => {},
-                                    "delete"
+                                    "delete",
                                 ).then();
                             },
                         }),
@@ -415,9 +430,9 @@ export class SettingsTemplates {
                                     URL.revokeObjectURL(url);
                                 });
                             },
-                        })
+                        }),
                     )
-                    .build()
+                    .build(),
             ).build();
     }
 
@@ -425,34 +440,34 @@ export class SettingsTemplates {
         return create("div")
             .classes("card", "flex-v")
             .children(
-                SettingsTemplates.sectionHeading("Links"),
+                SettingsTemplates.sectionHeading(t("LINKS")),
                 create("div")
                     .classes("flex")
                     .children(
                         GenericTemplates.gif8831(
                             "/img/88x31/targoninc.gif",
-                            "https://targoninc.com"
+                            "https://targoninc.com",
                         ),
                         GenericTemplates.gif8831(
                             "/img/88x31/firefox.gif",
-                            "https://www.mozilla.org/en-US/firefox/new/"
+                            "https://www.mozilla.org/en-US/firefox/new/",
                         ),
                         GenericTemplates.gif8831(
                             "/img/88x31/discord.gif",
-                            "https://discord.gg/QeNU8b7Hbb"
+                            "https://discord.gg/QeNU8b7Hbb",
                         ),
                         GenericTemplates.gif8831("/img/88x31/ubuntu.gif", "https://ubuntu.com/"),
                         GenericTemplates.gif8831(
                             "/img/88x31/hetzner.gif",
-                            "https://www.hetzner.com/"
-                        )
+                            "https://www.hetzner.com/",
+                        ),
                     )
                     .build(),
                 GenericTemplates.inlineLink(() => navigate(RoutePath.roadmap), "Roadmap"),
                 GenericTemplates.inlineLink(
                     () => window.open("https://github.com/targoninc/lyda-ui-web-js", "_blank"),
-                    "Source code"
-                )
+                    "Source code",
+                ),
             ).build();
     }
 
@@ -465,7 +480,7 @@ export class SettingsTemplates {
                     .children(
                         create("span").text("Avatar").build(),
                         UserTemplates.avatarDeleteButton(user),
-                        UserTemplates.avatarReplaceButton(user)
+                        UserTemplates.avatarReplaceButton(user),
                     )
                     .build(),
                 create("div")
@@ -473,9 +488,9 @@ export class SettingsTemplates {
                     .children(
                         create("span").text("Banner").build(),
                         UserTemplates.bannerDeleteButton(user),
-                        UserTemplates.bannerReplaceButton(user)
+                        UserTemplates.bannerReplaceButton(user),
                     )
-                    .build()
+                    .build(),
             ).build();
     }
 
@@ -499,9 +514,8 @@ export class SettingsTemplates {
                     .classes("flex")
                     .children(
                         GenericTemplates.icon("email", true),
-                        create("h2").text("E-Mail settings").build()
-                    )
-                    .build(),
+                        create("span").text(t("EMAIL_SETTINGS")),
+                    ).build(),
                 signalMap(
                     emails$,
                     create("div").classes("flex-v", "card", "secondary"),
@@ -510,11 +524,11 @@ export class SettingsTemplates {
                             email,
                             signal(index),
                             primaryEmailIndex,
-                            emails$
-                        )
+                            emails$,
+                        ),
                 ),
                 button({
-                    text: "Add E-Mail",
+                    text: t("ADD_EMAIL"),
                     icon: { icon: "add" },
                     onclick: async () => {
                         emails$.value = [
@@ -527,7 +541,7 @@ export class SettingsTemplates {
                             },
                         ];
                     },
-                })
+                }),
             ).build();
     }
 
@@ -535,7 +549,7 @@ export class SettingsTemplates {
         email: UserEmail,
         index: Signal<number>,
         primaryEmailIndex: Signal<number>,
-        emails$: Signal<UserEmail[]>
+        emails$: Signal<UserEmail[]>,
     ) {
         const activationTimedOut = signal(false);
         const isPrimary = compute((i, i2) => i === i2, primaryEmailIndex, index);
@@ -561,12 +575,12 @@ export class SettingsTemplates {
                     .classes("flex", "align-children")
                     .children(
                         toggle({
-                            text: "Primary",
+                            text: t("PRIMARY"),
                             checked: isPrimary,
                             disabled: emails$.value.length === 1,
                             title:
                                 emails$.value.length === 1
-                                    ? "At least one email is required to be primary"
+                                    ? t("AT_LEAST_ONE_MAIL_REQUIRED_PRIMARY")
                                     : "",
                             onchange: v => {
                                 if (emails$.value.length === 1) {
@@ -585,7 +599,7 @@ export class SettingsTemplates {
                             email.verified || email.email === "",
                             button({
                                 icon: { icon: "verified_user" },
-                                text: "Verify",
+                                text: t("VERIFY"),
                                 classes: ["positive"],
                                 disabled: activationTimedOut,
                                 onclick: async () => {
@@ -597,7 +611,7 @@ export class SettingsTemplates {
                                             if (
                                                 user.emails.some(
                                                     (e: UserEmail) =>
-                                                        e.email === email.email && e.verified
+                                                        e.email === email.email && e.verified,
                                                 )
                                             ) {
                                                 clearInterval(interval);
@@ -613,7 +627,7 @@ export class SettingsTemplates {
                                     }, 60 * 1000);
                                 },
                             }),
-                            true
+                            true,
                         ),
                         when(
                             email.verified,
@@ -625,19 +639,18 @@ export class SettingsTemplates {
                                         adaptive: true,
                                         classes: ["warning"],
                                     }),
-                                    create("span").classes("warning").text("Not verified").build()
-                                )
-                                .build(),
-                            true
+                                    create("span")
+                                        .classes("warning")
+                                        .text(t("NOT_VERIFIED"))
+                                        .build(),
+                                ).build(),
+                            true,
                         ),
                         when(
                             activationTimedOut,
                             create("span")
                                 .classes("text-positive")
-                                .text(
-                                    "E-Mail sent, check your inbox and click the link to verify this address."
-                                )
-                                .build()
+                                .text(t("VERIFICATION_EMAIL_SENT")).build(),
                         ),
                         when(
                             email.primary,
@@ -647,24 +660,23 @@ export class SettingsTemplates {
                                 classes: ["negative"],
                                 onclick: async () => {
                                     await Ui.getConfirmationModal(
-                                        "Delete E-mail address",
-                                        "Are you sure you want to delete this email? This can't be undone.",
-                                        "Yes",
-                                        "No",
+                                        t("DELETE_EMAIL"),
+                                        t("DELETE_EMAIL_YOU_SURE"),
+                                        t("YES"),
+                                        t("NO"),
                                         async () => {
                                             emails$.value = emails$.value.filter(
-                                                (e, i) => i !== index.value
+                                                (e, i) => i !== index.value,
                                             );
                                         },
                                         () => {},
-                                        "delete"
+                                        "delete",
                                     );
                                 },
                             }),
-                            true
-                        )
-                    )
-                    .build()
+                            true,
+                        ),
+                    ).build(),
             ).build();
     }
 
@@ -677,11 +689,11 @@ export class SettingsTemplates {
         return create("div")
             .classes("flex-v", "card")
             .children(
-                SettingsTemplates.sectionHeading("TOTP devices"),
+                SettingsTemplates.sectionHeading(t("TOTP_DEVICES")),
                 when(
                     hasMethods,
                     create("span").text("You have no TOTP methods configured").build(),
-                    true
+                    true,
                 ),
                 when(hasMethods, TotpTemplates.totpDevices(totpMethods, loading, userId)),
                 button({
@@ -698,35 +710,35 @@ export class SettingsTemplates {
                             async (name: string) => {
                                 loading.value = true;
                                 await Api.addTotpMethod(name)
-                                    .then(res => {
-                                        if (!res) {
-                                            return;
-                                        }
-                                        Api.getUserById().then(u => {
-                                            currentUser.value = u;
-                                        });
-                                        createModal(
-                                            [
-                                                TotpTemplates.verifyTotpAddModal(
-                                                    res.secret,
-                                                    res.qrDataUrl
-                                                ),
-                                            ],
-                                            "add-modal-verify"
-                                        );
-                                    })
-                                    .finally(() => (loading.value = false));
+                                         .then(res => {
+                                             if (!res) {
+                                                 return;
+                                             }
+                                             Api.getUserById().then(u => {
+                                                 currentUser.value = u;
+                                             });
+                                             createModal(
+                                                 [
+                                                     TotpTemplates.verifyTotpAddModal(
+                                                         res.secret,
+                                                         res.qrDataUrl,
+                                                     ),
+                                                 ],
+                                                 "add-modal-verify",
+                                             );
+                                         })
+                                         .finally(() => (loading.value = false));
                             },
                             () => {},
-                            "qr_code"
+                            "qr_code",
                         );
                     },
-                })
+                }),
             ).build();
     }
 
-    static sectionHeading(text: string) {
-        const id = text.trim().replaceAll(/\s+/g, "-").toLowerCase();
+    static sectionHeading(text: Signal<string>) {
+        const id = text.value.trim().replaceAll(/\s+/g, "-").toLowerCase();
 
         return horizontal(
             heading({

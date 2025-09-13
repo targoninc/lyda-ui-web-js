@@ -1,0 +1,27 @@
+import { BaseTranslation } from "./index.ts";
+
+export const en = {
+    UPLOAD: "Upload",
+    ACCOUNT: "Account",
+    MY_PERMISSIONS: "My permissions",
+    EMAIL_NOTIFICATIONS: "E-Mail Notifications",
+    BEHAVIOUR: "Behaviour",
+    UI_THEME: "Interface theme",
+    STREAMING_QUALITY: "Streaming quality",
+    OTHER: "Other",
+    LINKS: "Links",
+    TOTP_DEVICES: "TOTP devices",
+    LANGUAGE: "Language",
+    PASSKEYS: "Passkeys",
+    EMAIL_SETTINGS: "E-Mail settings",
+    ADD_EMAIL: "Add E-Mail",
+    PRIMARY: "Primary",
+    AT_LEAST_ONE_MAIL_REQUIRED_PRIMARY: "At least one email is required to be primary",
+    VERIFY: "Verify",
+    NOT_VERIFIED: "Not verified",
+    VERIFICATION_EMAIL_SENT: "E-Mail sent, check your inbox and click the link to verify this address.",
+    DELETE_EMAIL: "Delete E-mail address",
+    DELETE_EMAIL_YOU_SURE: "Are you sure you want to delete this email? This can't be undone.",
+    YES: "Yes",
+    NO: "No",
+} satisfies BaseTranslation;

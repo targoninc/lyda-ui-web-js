@@ -1,0 +1,27 @@
+import { Translation } from "./index.ts";
+
+export const de: Translation = {
+    UPLOAD: "Hochladen",
+    LINKS: "Links",
+    TOTP_DEVICES: "TOTP Methoden",
+    OTHER: "Andere",
+    STREAMING_QUALITY: "Wiedergabequalität",
+    UI_THEME: "Aussehen",
+    BEHAVIOUR: "Verhalten",
+    EMAIL_NOTIFICATIONS: "E-Mail-Benachrichtigungen",
+    MY_PERMISSIONS: "Meine Berechtigungen",
+    ACCOUNT: "Konto",
+    LANGUAGE: "Sprache",
+    PASSKEYS: "Passkeys",
+    ADD_EMAIL: "E-Mail hinzufügen",
+    EMAIL_SETTINGS: "E-Mail Einstellungen",
+    PRIMARY: "Primär",
+    AT_LEAST_ONE_MAIL_REQUIRED_PRIMARY: "Mindestens eine Adresse muss primär sein",
+    VERIFY: "Verifizieren",
+    NOT_VERIFIED: "Nicht verifiziert",
+    VERIFICATION_EMAIL_SENT: "E-Mail gesendet, prüfe dein Postfach und klicke den Link, um diese Adresse zu verifizieren.",
+    DELETE_EMAIL: "E-Mail Adresse löschen",
+    DELETE_EMAIL_YOU_SURE: "Bist Du Dir sicher, dass Du diese E-Mail Adresse löschen möchtest? Dies kann nicht rückgängig gemacht werden.",
+    YES: "Ja",
+    NO: "Nein",
+};
