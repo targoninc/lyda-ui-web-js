@@ -693,19 +693,11 @@ export class UserTemplates {
 
     private static usernameAndIcons(user: User) {
         const verified = signal(user.verified);
-        const canVerify = compute(
-            (v, p) => !v && p.some(p => p.name === Permissions.canVerifyUsers),
-            verified,
-            permissions,
-        );
-        const canUnverify = compute(
-            (v, p) => v && p.some(p => p.name === Permissions.canVerifyUsers),
-            verified,
-            permissions,
-        );
+        const hasPermissionToVerify = compute(p => p.some(p => p.name === Permissions.canVerifyUsers), permissions);
         const hasBadges = user.badges && user.badges.length > 0;
         const isOwnProfile = currentUser.value?.id === user.id;
         const isFollowed = compute(f => f && !isOwnProfile, Util.isFollowedBy(user));
+        const menuShown = signal(false);
 
         return create("div")
             .classes("flex", "align-children")
@@ -713,31 +705,33 @@ export class UserTemplates {
                 UserTemplates.username(user, isOwnProfile),
                 when(hasBadges, UserTemplates.badges(user.badges ?? [])),
                 when(verified, UserTemplates.verificationBadge()),
-                when(
-                    canVerify,
-                    button({
-                        text: "Verify",
-                        icon: { icon: "verified" },
-                        classes: ["positive"],
-                        onclick: async () => {
-                            await Api.verifyUser(user.id);
-                            verified.value = true;
-                        },
-                    }),
-                ),
-                when(
-                    canUnverify,
-                    button({
-                        text: "Unverify",
-                        icon: { icon: "close" },
-                        classes: ["negative"],
-                        onclick: async () => {
-                            await Api.unverifyUser(user.id);
-                            verified.value = false;
-                        },
-                    }),
-                ),
                 !isOwnProfile && currentUser.value ? UserTemplates.followButton(Util.isFollowing(user), user.id) : null,
+                horizontal(
+                    when(hasPermissionToVerify, button({
+                        icon: { icon: "more_horiz" },
+                        onclick: () => menuShown.value = !menuShown.value,
+                    })),
+                    when(menuShown, vertical(
+                        when(verified, button({
+                            text: "Verify",
+                            icon: { icon: "verified" },
+                            classes: ["positive"],
+                            onclick: async () => {
+                                await Api.verifyUser(user.id);
+                                verified.value = true;
+                            },
+                        }), true),
+                        when(verified, button({
+                            text: "Unverify",
+                            icon: { icon: "close" },
+                            classes: ["negative"],
+                            onclick: async () => {
+                                await Api.unverifyUser(user.id);
+                                verified.value = false;
+                            },
+                        })),
+                    ).classes("popout-below", "card", "absolute-align-left").build()),
+                ).classes("relative"),
                 when(isFollowed, UserTemplates.followsBackIndicator()),
             ).build();
     }

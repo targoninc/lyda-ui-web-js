@@ -1,14 +1,14 @@
-import {compute, signal, Signal, create, when, signalMap} from "@targoninc/jess";
-import {currency} from "../Classes/Helpers/Num.ts";
-import {getSubscriptionLink, SubscriptionActions} from "../Actions/SubscriptionActions.ts";
-import {GenericTemplates} from "./generic/GenericTemplates.ts";
-import {Time} from "../Classes/Helpers/Time.ts";
-import {RoutePath} from "../Routing/routes.ts";
-import {navigate} from "../Routing/Router.ts";
+import { compute, create, Signal, signal, signalMap, when } from "@targoninc/jess";
+import { currency } from "../Classes/Helpers/Num.ts";
+import { getSubscriptionLink, SubscriptionActions } from "../Actions/SubscriptionActions.ts";
+import { GenericTemplates } from "./generic/GenericTemplates.ts";
+import { Time } from "../Classes/Helpers/Time.ts";
+import { RoutePath } from "../Routing/routes.ts";
+import { navigate } from "../Routing/Router.ts";
 import { button } from "@targoninc/jess-components";
-import {AvailableSubscription} from "@targoninc/lyda-shared/src/Models/db/finance/AvailableSubscription";
-import {Subscription} from "@targoninc/lyda-shared/src/Models/db/finance/Subscription";
-import {SubscriptionStatus} from "@targoninc/lyda-shared/src/Enums/SubscriptionStatus";
+import { AvailableSubscription } from "@targoninc/lyda-shared/src/Models/db/finance/AvailableSubscription";
+import { Subscription } from "@targoninc/lyda-shared/src/Models/db/finance/Subscription";
+import { SubscriptionStatus } from "@targoninc/lyda-shared/src/Enums/SubscriptionStatus";
 
 export class SubscriptionTemplates {
     static page() {
@@ -23,7 +23,7 @@ export class SubscriptionTemplates {
         const optionsLoading = compute(o => o.length === 0, options);
 
         return create("div")
-            .classes("flex-v")
+            .classes("flex-v", "card")
             .children(
                 create("h1")
                     .text("Lyda subscription")
@@ -141,7 +141,7 @@ export class SubscriptionTemplates {
                             .children(
                                 when(active, GenericTemplates.inlineLink(link, "Manage on PayPal")),
                                 create("div")
-                                    .classes("flex", "small-gap")
+                                    .classes("flex", "small-gap", "align-children")
                                     .children(
                                         when(active, button({
                                             classes: ["negative"],
@@ -157,8 +157,9 @@ export class SubscriptionTemplates {
                                             }
                                         })),
                                         when(enabled, button({
-                                            classes: ["special", selectedClass],
+                                            classes: ["special", selectedClass, "rounded-max"],
                                             text: buttonText,
+                                            disabled: isSelectedOption,
                                             id: option.id,
                                             onclick: async () => {
                                                 selectedOption.value = option.id;
@@ -166,7 +167,7 @@ export class SubscriptionTemplates {
                                             }
                                         })),
                                         when(isSelectedOption, button({
-                                            classes: [selectedClass],
+                                            classes: [selectedClass, "cancel-button", "rounded-max"],
                                             text: "Cancel",
                                             id: option.id,
                                             onclick: async () => {

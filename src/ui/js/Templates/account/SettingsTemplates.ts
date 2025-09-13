@@ -131,7 +131,7 @@ export class SettingsTemplates {
                     button({
                         icon: { icon: "payments" },
                         text: "Subscribe for more features",
-                        classes: ["special"],
+                        classes: ["special", "bigger-input", "rounded-max"],
                         onclick: () => navigate(RoutePath.subscribe),
                     }),
                     true

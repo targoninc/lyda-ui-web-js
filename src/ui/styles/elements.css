@@ -110,6 +110,14 @@
     font-size: 1.2rem !important;
 }
 
+.bigger-input {
+    padding: var(--jessc-input-padding-y) calc(var(--jessc-input-padding-x) * 1.2) !important;
+}
+
+.cancel-button {
+    border: none !important;
+}
+
 .round-button.bigger-input {
     --round-button-size: 48px;
 }
@@ -745,7 +753,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     --icon-size: 22px;
     --padding: calc((var(--icon-size) - 12px) / 2);
     padding: var(--padding);
-    border-radius: var(--border-radius);
+    border-radius: 999px;
     width: calc(var(--icon-size) - (var(--padding) * 2));
     height: calc(var(--icon-size) - (var(--padding) * 2));
     align-content: center;
