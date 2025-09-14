@@ -464,8 +464,19 @@ button.special {
     box-sizing: border-box;
 }
 
+button.special-floating {
+    color: var(--blue);
+    background: transparent;
+    box-sizing: border-box;
+    border: none;
+}
+
 button.special * {
     color: var(--color-5);
+}
+
+button.special-floating * {
+    color: var(--blue);
 }
 
 button.special.active {

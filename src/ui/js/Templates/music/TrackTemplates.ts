@@ -304,10 +304,10 @@ export class TrackTemplates {
         return button({
             text: "@" + repost.user.username,
             icon: {
-                icon: "arrow_outward",
+                icon: "redo",
                 adaptive: true,
             },
-            classes: ["special", "rounded-max", "align-center", "text-small"],
+            classes: ["special-floating", "rounded-max", "align-center", "text-small"],
             onclick: () => navigate(`${RoutePath.profile}/` + repost.user!.username),
         });
     }
