@@ -5,6 +5,7 @@
     "id": "targoninc/lyda",
     "start_url": "./",
     "scope": "/",
+    "display_override": ["fullscreen", "minimal-ui"],
     "display": "standalone",
     "background_color": "#202025",
     "theme_color": "#317eef",
