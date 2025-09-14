@@ -11,6 +11,7 @@ import { NotificationType } from "../Enums/NotificationType.ts";
 import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import { Api } from "../Api/Api.ts";
 import { Icons } from "../Enums/Icons.ts";
+import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 
 export class Util {
     static capitalizeFirstLetter(string: string) {
@@ -307,6 +308,10 @@ export function target<T = HTMLInputElement>(e: Event) {
 export async function copy(text: string) {
     await navigator.clipboard.writeText(text);
     notify("Copied to clipboard", NotificationType.success);
+}
+
+export function getAppLink(entityType: EntityType, id: number) {
+    return `web+music://${entityType}/${id}`;
 }
 
 export function updateImagesWithSource(newSrc: string, oldSrc: string) {

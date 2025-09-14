@@ -1,5 +1,5 @@
-import {router} from "../../main.ts";
-import {signal} from "@targoninc/jess";
+import { router } from "../../main.ts";
+import { signal } from "@targoninc/jess";
 
 export class Router {
     public currentRoute = signal<Route|null>(null);
@@ -56,7 +56,7 @@ export class Router {
             params["path_" + i] = path[i];
         }
         const urlParams = new URLSearchParams(window.location.search);
-        for (let [key, value] of urlParams.entries()) {
+        for (const [key, value] of urlParams.entries()) {
             params[key] = value;
         }
         if (route.params) {

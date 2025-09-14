@@ -28,7 +28,9 @@ import { SubscriptionTemplates } from "./SubscriptionTemplates.ts";
 import { notify } from "../Classes/Ui.ts";
 import { NotificationType } from "../Enums/NotificationType.ts";
 import { Api } from "../Api/Api.ts";
-import { GenericTemplates, tabSelected, vertical } from "./generic/GenericTemplates.ts";
+import { GenericTemplates, horizontal, tabSelected, vertical } from "./generic/GenericTemplates.ts";
+import { heading } from "@targoninc/jess-components";
+import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, (route: Route, params: Record<string, string>) => Promise<AnyElement> | AnyElement> = {
@@ -57,6 +59,7 @@ export class PageTemplates {
         [RoutePath.payouts]: PayoutTemplates.payoutsPage,
         [RoutePath.payments]: PaymentTemplates.paymentsPage,
         [RoutePath.editTracks]: TrackEditTemplates.batchEditTracksPage,
+        [RoutePath.protocolHandler]: PageTemplates.protocolHandlerPage,
 
         // admin pages
         [RoutePath.admin]: DashboardTemplates.dashboardPage,
@@ -285,5 +288,34 @@ export class PageTemplates {
         }
 
         return SubscriptionTemplates.page();
+    }
+
+    static protocolHandlerPage() {
+        const url = new URL(window.location.href);
+        const data = url.searchParams.get("data");
+        if (!data) {
+            return vertical(
+                heading({
+                    level: 1,
+                    text: "Link could not be found",
+                    classes: ["error"],
+                }),
+            );
+        }
+        const dataUrl = new URL(data);
+        // the url should have the following structure: "protocol://{entityTypeRoute}/{id}"
+        const entityType = dataUrl.host as EntityType;
+        const id = dataUrl.pathname.split("/")[1];
+        navigate(`${entityType}/${id}`);
+
+        return vertical(
+            horizontal(
+                heading({
+                    level: 1,
+                    text: "Opening link...",
+                }),
+                GenericTemplates.loadingSpinner(),
+            ).classes("align-children"),
+        ).build();
     }
 }
