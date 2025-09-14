@@ -5,15 +5,14 @@ import { SelectOption } from "@targoninc/jess-components";
 import { LydaCache } from "../js/Cache/LydaCache.ts";
 import { CacheItem } from "../js/Cache/CacheItem.ts";
 import { Api } from "../js/Api/Api.ts";
-import { currentUser } from "../js/state.ts";
-import { getUserSettingValue } from "../js/Classes/Util.ts";
 
 export type TranslationFunction = (...args: any[]) => void;
+export type TranslationValue = string | TranslationFunction;
 
-export type BaseTranslation = Record<string, string | TranslationFunction>;
+export type BaseTranslation = Record<string, TranslationValue>;
 
 type TranslationKey = keyof (typeof en);
-export type Translation = Record<TranslationKey, string>;
+export type Translation = Record<TranslationKey, TranslationValue>;
 
 export enum Language {
     en = "en",
@@ -39,11 +38,6 @@ language.subscribe((lang, changed) => {
     }
     LydaCache.set("language", new CacheItem(lang));
     Api.updateUserSetting("language", lang).then();
-});
-currentUser.subscribe(u => {
-    if (u) {
-        language.value = getUserSettingValue<Language>(u, "language");
-    }
 });
 
 export function getTranslation(lookup: TranslationKey | string, lang: Language) {
@@ -72,6 +66,13 @@ export function getTranslation(lookup: TranslationKey | string, lang: Language) 
     return "<i18n/ERR: Key not found>";
 }
 
-export function t(lookup: TranslationKey) {
-    return compute(l => getTranslation(lookup, l), language);
+export function t(lookup: TranslationKey, ...args: any[]) {
+    return compute(l => {
+        const tl = getTranslation(lookup, l);
+        if (tl.constructor === Function) {
+            return (tl as Function)(...args);
+        }
+
+        return tl;
+    }, language);
 }

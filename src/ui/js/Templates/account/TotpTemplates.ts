@@ -1,12 +1,13 @@
 import { compute, create, InputType, signal, Signal, signalMap, when } from "@targoninc/jess";
 import { UserTotp } from "@targoninc/lyda-shared/src/Models/db/lyda/UserTotp";
 import { button, input } from "@targoninc/jess-components";
-import {GenericTemplates} from "../generic/GenericTemplates.ts";
-import {Time} from "../../Classes/Helpers/Time.ts";
-import {Ui} from "../../Classes/Ui.ts";
+import { GenericTemplates } from "../generic/GenericTemplates.ts";
+import { Time } from "../../Classes/Helpers/Time.ts";
+import { Ui } from "../../Classes/Ui.ts";
 import { Api } from "../../Api/Api.ts";
 import { currentUser } from "../../state.ts";
 import { Util } from "../../Classes/Util.ts";
+import { t } from "../../../locales";
 
 export class TotpTemplates {
     static qrCode(dataUrl: string) {
@@ -24,7 +25,7 @@ export class TotpTemplates {
     }
 
     static totpMethodInTable(method: UserTotp, loading: Signal<boolean>, userId: Signal<any>) {
-        const times = compute((c, u) => `Created ${c}, updated ${u}`, Time.agoUpdating(new Date(method.created_at), true), Time.agoUpdating(new Date(method.updated_at), true));
+        const times = compute((c, u) => `${t("CREATED")} ${c}, ${t("UPDATED")} ${u}`, Time.agoUpdating(new Date(method.created_at), true), Time.agoUpdating(new Date(method.updated_at), true));
 
         return create("div")
             .classes("card", "flex-v")
@@ -53,7 +54,7 @@ export class TotpTemplates {
                 TotpTemplates.qrCode(qrDataUrl),
                 create("h2")
                     .classes("flex")
-                    .text("Add TOTP method")
+                    .text(t("ADD_TOTP"))
                     .build(),
                 create("div")
                     .classes("flex", "center-items")
@@ -71,7 +72,7 @@ export class TotpTemplates {
                                 input({
                                     type: InputType.text,
                                     name: "token",
-                                    placeholder: "Token",
+                                    placeholder: t("TOKEN"),
                                     attributes: ["autocomplete", "off"],
                                     value: token,
                                     onchange: (v) => token.value = v
@@ -81,7 +82,7 @@ export class TotpTemplates {
                             .classes("flex", "center-items")
                             .children(
                                 button({
-                                    text: "Verify",
+                                    text: t("VERIFY"),
                                     icon: {icon: "verified"},
                                     classes: ["positive"],
                                     onclick: async (e) => {
@@ -97,7 +98,7 @@ export class TotpTemplates {
                                     }
                                 }),
                                 button({
-                                    text: "Cancel",
+                                    text: t("CANCEL"),
                                     icon: {icon: "cancel"},
                                     classes: ["negative"],
                                     onclick: async () => {
@@ -114,16 +115,16 @@ export class TotpTemplates {
             .classes("flex", "center-items")
             .children(
                 when(method.verified, button({
-                    text: "Verify",
+                    text: t("VERIFY"),
                     icon: {icon: "verified"},
                     classes: ["positive"],
                     onclick: async () => {
                         await Ui.getTextInputModal(
-                            "Verify TOTP method",
-                            "Enter the code from this TOTP method",
+                            t("VERIFY_TOTP"),
+                            t("ENTER_CODE_TOTP"),
                             "",
-                            "Verify",
-                            "Cancel",
+                            t("VERIFY"),
+                            t("CANCEL"),
                             async (token: string) => {
                                 loading.value = true;
                                 await Api.verifyTotp(userId.value, token, "totp")
@@ -139,16 +140,16 @@ export class TotpTemplates {
                     }
                 }), true),
                 button({
-                    text: "Delete",
+                    text: t("DELETE"),
                     icon: {icon: "delete"},
                     classes: ["negative"],
                     onclick: async () => {
                         if (!method.verified) {
                             await Ui.getConfirmationModal(
-                                "Delete TOTP method",
-                                `Are you sure you want to delete TOTP method ${method.name}?`,
-                                "Delete",
-                                "Cancel",
+                                t("DELETE_TOTP"),
+                                t("DELETE_TOTP_SURE", method.name),
+                                t("DELETE"),
+                                t("CANCEL"),
                                 async () => {
                                     loading.value = true;
                                     await Api.deleteTotpMethod(method.id, "")

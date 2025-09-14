@@ -29,7 +29,7 @@
     "dependencies": {
         "@paypal/paypal-js": "^8.4.2",
         "@sgratzl/chartjs-chart-boxplot": "^4.4.4",
-        "@targoninc/jess": "^0.0.19",
+        "@targoninc/jess": "^0.0.20",
         "@targoninc/jess-components": "^0.0.30",
         "@targoninc/lyda-shared": "^0.0.25",
         "@types/bun": "^1.2.21",
@@ -38,5 +38,5 @@
         "express": "^5.1.0",
         "typescript": "^5.9.2"
     },
-    "version": "0.0.377"
+    "version": "0.0.378"
 }
