@@ -91,7 +91,7 @@ export class PageTemplates {
 
     static async libraryPage(route: Route, params: Record<string, string>) {
         const user = currentUser.value;
-        const name = params["name"] ?? "";
+        const name = params["name"] ?? user?.username;
 
         if (!user) {
             notify("You need to be logged in to view your library", NotificationType.error);

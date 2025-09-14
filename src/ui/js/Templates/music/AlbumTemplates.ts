@@ -402,6 +402,7 @@ export class AlbumTemplates {
         Api.getAlbumById(parseInt(params.id)).then(async res => {
             if (res) {
                 data.value = res;
+                document.title = res.album.title;
                 return;
             }
             data.value = {

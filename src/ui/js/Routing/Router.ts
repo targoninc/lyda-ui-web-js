@@ -36,12 +36,14 @@ export class Router {
         }
         this.currentRoute.value = route;
         if (route) {
+            document.title = route.title;
             const params = this.getParams(path, route);
             this.currentParams.value = params;
             this.preRouteChange && await this.preRouteChange(route, params);
             route.handler && await route.handler(route, params);
             this.postRouteChange && await this.postRouteChange(route,params);
         } else {
+            document.title = "Page not found";
             this.onNoRouteFound && await this.onNoRouteFound();
             this.currentParams.value = {};
         }
