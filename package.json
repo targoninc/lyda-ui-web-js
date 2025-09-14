@@ -15,12 +15,12 @@
     },
     "devDependencies": {
         "@eslint/eslintrc": "^3.3.1",
-        "@eslint/js": "^9.34.0",
+        "@eslint/js": "^9.35.0",
         "@passwordless-id/webauthn": "^2.3.1",
         "@types/express": "^4.17.23",
-        "@typescript-eslint/eslint-plugin": "^8.42.0",
-        "@typescript-eslint/parser": "^8.42.0",
-        "eslint": "^9.34.0",
+        "@typescript-eslint/eslint-plugin": "^8.43.0",
+        "@typescript-eslint/parser": "^8.43.0",
+        "eslint": "^9.35.0",
         "eslint-plugin-unused-imports": "^4.2.0",
         "husky": "^9.1.7",
         "lint-staged": "^16.1.6",
@@ -32,11 +32,11 @@
         "@targoninc/jess": "^0.0.20",
         "@targoninc/jess-components": "^0.0.30",
         "@targoninc/lyda-shared": "^0.0.25",
-        "@types/bun": "^1.2.21",
+        "@types/bun": "^1.2.22",
         "chart.js": "^4.5.0",
         "dotenv": "^17.2.2",
         "express": "^5.1.0",
         "typescript": "^5.9.2"
     },
-    "version": "0.0.381"
+    "version": "0.0.382"
 }
