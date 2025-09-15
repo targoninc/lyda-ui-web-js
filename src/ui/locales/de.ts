@@ -1,6 +1,10 @@
 import { Translation } from "./index.ts";
 
 export const de: Translation = {
+    LYDA_SUBSCRIPTION: "Lyda Abonnement",
+    NO_ACTIVE_SUBSCRIPTION: "Du hast kein aktives Abonnement. Wähle eine der unteren Optionen, um anzufangen. Alle Preise sind in USD.",
+    SUBSCRIPTIONS_GIFTED: "Verschenkte Abonnements",
+    YOUR_BENEFITS: "Deine Vorteile",
     NOTIFS_COLLAB: "Benachrichtigungen zu Kollaborationen",
     NOTIFS_COMMENT: "Benachrichtigungen zu Kommentaren",
     NOTIFS_FOLLOW: "Benachrichtigungen wenn dir jemand folgt",
@@ -102,4 +106,6 @@ export const de: Translation = {
     NEXT_YEAR: "Nächstes Jahr",
     LAST_CENTURY: "Letztes Jahrhundert",
     NEXT_CENTURY: "Nächstes Jahrhundert",
+    GIFTED_SUBSCRIPTION: "Dieses Abonnement wurde Dir geschenkt",
+    PAYMENT_HISTORY: "Vergangene Zahlungen",
 };

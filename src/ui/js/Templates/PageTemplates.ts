@@ -24,13 +24,13 @@ import { currentSecretCode, currentUser } from "../state.ts";
 import { TrackTemplates } from "./music/TrackTemplates.ts";
 import { PlaylistTemplates } from "./music/PlaylistTemplates.ts";
 import { StatisticTemplates } from "./StatisticTemplates.ts";
-import { SubscriptionTemplates } from "./SubscriptionTemplates.ts";
 import { notify } from "../Classes/Ui.ts";
 import { NotificationType } from "../Enums/NotificationType.ts";
 import { Api } from "../Api/Api.ts";
 import { GenericTemplates, horizontal, tabSelected, vertical } from "./generic/GenericTemplates.ts";
 import { heading } from "@targoninc/jess-components";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
+import { SubscriptionTemplates } from "./money/SubscriptionTemplates.ts";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, (route: Route, params: Record<string, string>) => Promise<AnyElement> | AnyElement> = {
@@ -300,7 +300,7 @@ export class PageTemplates {
                     text: "Link could not be found",
                     classes: ["error"],
                 }),
-            );
+            ).build();
         }
         const dataUrl = new URL(data);
         // the url should have the following structure: "protocol://{entityTypeRoute}/{id}"

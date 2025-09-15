@@ -644,7 +644,7 @@ export class GenericTemplates {
         return create("img").classes("corner-check", ...extraClasses).title(title).src(Icons.CHECK).build();
     }
 
-    static giftIcon(title = "") {
+    static giftIcon(title: StringOrSignal = "") {
         return GenericTemplates.icon("featured_seasonal_and_gifts", true, ["gift-icon"], title);
     }
 

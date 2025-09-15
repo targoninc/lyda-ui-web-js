@@ -102,4 +102,10 @@ export const en = {
     NEXT_YEAR: "Next year",
     LAST_CENTURY: "Last century",
     NEXT_CENTURY: "Next century",
+    GIFTED_SUBSCRIPTION: "This subscription has been gifted to you",
+    SUBSCRIPTIONS_GIFTED: "Subscriptions you gifted",
+    YOUR_BENEFITS: "Your benefits",
+    LYDA_SUBSCRIPTION: "Lyda subscription",
+    NO_ACTIVE_SUBSCRIPTION: "You do not have an active subscription. Choose any of the options below to start. All prices are in USD.",
+    PAYMENT_HISTORY: "Payment history",
 } satisfies BaseTranslation;
