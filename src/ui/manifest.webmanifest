@@ -1,0 +1,54 @@
+{
+    "name": "Lyda",
+    "short_name": "Lyda",
+    "description": "Stream the music you love.",
+    "id": "targoninc/lyda",
+    "start_url": "./",
+    "scope": "/",
+    "display_override": ["fullscreen", "minimal-ui"],
+    "display": "standalone",
+    "background_color": "#202025",
+    "theme_color": "#317eef",
+    "lang": "en-US",
+    "dir": "ltr",
+    "categories": ["music", "entertainment", "audio"],
+    "icons": [
+        {
+            "src": "/img/128.png",
+            "sizes": "128x128",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/img/256.png",
+            "sizes": "256x256",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/img/512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/img/screenshots/wide.png",
+            "sizes": "2560x1279",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "Example profile page showing tracks and playback"
+        }
+    ],
+    "protocol_handlers": [
+        {
+          "protocol": "web+music",
+          "url": "/protocol?data=%s"
+        },
+        {
+          "protocol": "web+lyda",
+          "url": "/protocol?data=%s"
+        }
+    ]
+}

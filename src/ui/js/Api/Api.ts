@@ -34,6 +34,7 @@ import { TypedStatistic } from "@targoninc/lyda-shared/src/Models/TypedStatistic
 import { PaymentHistory } from "@targoninc/lyda-shared/src/Models/db/finance/PaymentHistory.ts";
 import { Payout } from "@targoninc/lyda-shared/src/Models/db/finance/Payout";
 import { Permission } from "@targoninc/lyda-shared/src/Models/db/lyda/Permission.ts";
+import { RoyaltyMonth } from "@targoninc/lyda-shared/src/Models/RoyaltyMonth";
 
 export class Api {
     //region Interactions
@@ -395,6 +396,13 @@ export class Api {
         return await get<RoyaltyInfo>(ApiRoutes.getRoyaltyInfo);
     }
 
+    static async getRoyaltyCalculationInfo(month: MonthIdentifier): Promise<Partial<RoyaltyMonth> | null> {
+        return await get<Partial<RoyaltyMonth>>(ApiRoutes.getRoyaltyCalculationInfo, {
+            month: month.month,
+            year: month.year,
+        });
+    }
+
     //endregion
 
     //region Albums
@@ -730,6 +738,17 @@ export class Api {
         await post(ApiRoutes.deleteMedia, {
             type,
             referenceId,
+        });
+    }
+
+    /**
+     * Will only be called when directly downloading tracks, which is why we're requesting source quality
+     * @param id
+     */
+    static async getTrackAudio(id: number) {
+        return await get<Blob>(ApiRoutes.getTrackAudio, {
+            id,
+            quality: "source",
         });
     }
 

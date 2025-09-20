@@ -10,6 +10,8 @@ import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { NotificationType } from "../Enums/NotificationType.ts";
 import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import { Api } from "../Api/Api.ts";
+import { Icons } from "../Enums/Icons.ts";
+import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 
 export class Util {
     static capitalizeFirstLetter(string: string) {
@@ -308,6 +310,10 @@ export async function copy(text: string) {
     notify("Copied to clipboard", NotificationType.success);
 }
 
+export function getAppLink(entityType: EntityType, id: number) {
+    return `web+music://${entityType}/${id}`;
+}
+
 export function updateImagesWithSource(newSrc: string, oldSrc: string) {
     oldSrc = oldSrc.replace(/&t=\d+/, "");
     const imgs = document.querySelectorAll("img") as NodeListOf<HTMLImageElement>;
@@ -331,4 +337,8 @@ export function downloadFile(fileName: string, content: string) {
     link.href = "data:text/plain;charset=utf-8," + encodeURIComponent(content);
     link.download = fileName;
     link.click();
+}
+
+export function getPlayIcon(isPlaying: Signal<boolean>, isLoading: Signal<boolean>) {
+    return compute((p, l) => (p ? Icons.PAUSE : (l ? Icons.SPINNER : Icons.PLAY)), isPlaying, isLoading);
 }

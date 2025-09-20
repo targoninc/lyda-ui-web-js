@@ -1,14 +1,14 @@
-import {Util} from "./Util.ts";
-import {LydaCache} from "../Cache/LydaCache.ts";
-import {NavTemplates} from "../Templates/NavTemplates.ts";
-import {GenericTemplates, vertical} from "../Templates/generic/GenericTemplates.ts";
-import {CacheItem} from "../Cache/CacheItem.ts";
-import {UserActions} from "../Actions/UserActions.ts";
-import {signal, HtmlPropertyValue, StringOrSignal, when, AnyNode} from "@targoninc/jess";
-import {navigate} from "../Routing/Router.ts";
-import {currentUser, navInitialized, openMenus} from "../state.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
-import {Theme} from "@targoninc/lyda-shared/src/Enums/Theme";
+import { Util } from "./Util.ts";
+import { LydaCache } from "../Cache/LydaCache.ts";
+import { NavTemplates } from "../Templates/NavTemplates.ts";
+import { GenericTemplates, vertical } from "../Templates/generic/GenericTemplates.ts";
+import { CacheItem } from "../Cache/CacheItem.ts";
+import { UserActions } from "../Actions/UserActions.ts";
+import { AnyNode, HtmlPropertyValue, isSignal, signal, Signal, StringOrSignal, when } from "@targoninc/jess";
+import { navigate } from "../Routing/Router.ts";
+import { currentUser, navInitialized, openMenus } from "../state.ts";
+import { NotificationType } from "../Enums/NotificationType.ts";
+import { Theme } from "@targoninc/lyda-shared/src/Enums/Theme";
 
 export class Ui {
     static async initializeNavBar() {
@@ -155,7 +155,8 @@ export class Ui {
 
 const currentNotifications = signal<string[]>([]);
 
-export function notify(text: string, type = NotificationType.info, time = 7000) {
+export function notify(textIn: StringOrSignal, type = NotificationType.info, time = 7000) {
+    const text = isSignal(textIn) ? (textIn as Signal<string>).value : (textIn as string);
     if (currentNotifications.value.includes(text)) {
         return;
     }

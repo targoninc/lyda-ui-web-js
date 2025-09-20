@@ -1,19 +1,19 @@
-import {PlaylistTemplates} from "../Templates/music/PlaylistTemplates.ts";
-import {Util} from "../Classes/Util.ts";
-import {createModal, notify} from "../Classes/Ui.ts";
-import {PlayManager} from "../Streaming/PlayManager.ts";
-import {QueueManager} from "../Streaming/QueueManager.ts";
-import {navigate} from "../Routing/Router.ts";
-import {Signal} from "@targoninc/jess";
-import {MediaUploader} from "../Api/MediaUploader.ts";
-import {RoutePath} from "../Routing/routes.ts";
-import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
-import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
-import {NotificationType} from "../Enums/NotificationType.ts";
-import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
-import {playingHere} from "../state.ts";
-import {Api} from "../Api/Api.ts";
+import { PlaylistTemplates } from "../Templates/music/PlaylistTemplates.ts";
+import { Util } from "../Classes/Util.ts";
+import { createModal, notify } from "../Classes/Ui.ts";
+import { PlayManager } from "../Streaming/PlayManager.ts";
+import { QueueManager } from "../Streaming/QueueManager.ts";
+import { navigate } from "../Routing/Router.ts";
+import { Signal } from "@targoninc/jess";
+import { MediaUploader } from "../Api/MediaUploader.ts";
+import { RoutePath } from "../Routing/routes.ts";
+import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import { NotificationType } from "../Enums/NotificationType.ts";
+import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType";
+import { playingHere } from "../state.ts";
+import { Api } from "../Api/Api.ts";
 import { startItem } from "./MusicActions.ts";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 
@@ -21,6 +21,7 @@ export class PlaylistActions {
     static async openAddToPlaylistModal(objectToBeAdded: Album | Track, type: "track" | "album") {
         const playlists = await Api.getPlaylistsByUserId(objectToBeAdded.user_id);
         if (!playlists || playlists.length === 0) {
+            notify("You have no playlists yet, create one first");
             return;
         }
 

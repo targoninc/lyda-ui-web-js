@@ -6,7 +6,7 @@ import { QueueTemplates } from "./QueueTemplates.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
 import { Ui } from "../../Classes/Ui.ts";
-import { Util } from "../../Classes/Util.ts";
+import { getPlayIcon, Util } from "../../Classes/Util.ts";
 import { compute, create, Signal, signal, when } from "@targoninc/jess";
 import { navigate } from "../../Routing/Router.ts";
 import {
@@ -14,6 +14,7 @@ import {
     currentQuality,
     currentTrackId,
     currentTrackPosition,
+    loadingAudio,
     loopMode,
     muted,
     playerExpanded,
@@ -35,12 +36,12 @@ import { StreamingQuality } from "@targoninc/lyda-shared/src/Enums/StreamingQual
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
 import { InteractionType } from "@targoninc/lyda-shared/src/Enums/InteractionType.ts";
 
+export const PLAYCHECK_INTERVAL = 200;
+
 export class PlayerTemplates {
     static async bigAudioPlayer(track: Track) {
         PlayManager.addStreamClientIfNotExists(track.id, track.length);
-        setInterval(async () => {
-            await PlayManager.playCheck(track);
-        }, 1000);
+        setInterval(async () => await PlayManager.playCheck(track), PLAYCHECK_INTERVAL);
         const isCurrentTrack = compute(id => id === track.id, currentTrackId);
         const positionPercent = compute(
             (p, isCurrent) => (isCurrent ? `${p.relative * 100}%` : "0%"),
@@ -58,7 +59,7 @@ export class PlayerTemplates {
             .id("player_" + track.id)
             .children(
                 create("div")
-                    .classes("flex", "align-center")
+                    .classes("flex", "align-center", "align-children")
                     .children(
                         GenericTemplates.roundIconButton(
                             {
@@ -110,9 +111,7 @@ export class PlayerTemplates {
 
     static async mobileAudioPlayer(track: Track) {
         PlayManager.addStreamClientIfNotExists(track.id, track.length);
-        setInterval(async () => {
-            await PlayManager.playCheck(track);
-        }, 1000);
+        setInterval(async () => await PlayManager.playCheck(track), PLAYCHECK_INTERVAL);
         const isCurrentTrack = compute(id => id === track.id, currentTrackId);
         const positionPercent = compute(
             (p, isCurrent) => (isCurrent ? `${p.relative * 100}%` : "0%"),
@@ -130,7 +129,7 @@ export class PlayerTemplates {
             .id("player_" + track.id)
             .children(
                 create("div")
-                    .classes("flex", "space-outwards")
+                    .classes("flex", "space-outwards", "align-children")
                     .children(
                         PlayerTemplates.loopModeButton(),
                         horizontal(
@@ -151,7 +150,7 @@ export class PlayerTemplates {
                                 PlayManager.playNextFromQueues,
                                 "Next"
                             ),
-                        ),
+                        ).classes("align-children"),
                         InteractionTemplates.interactions(EntityType.track, track, {
                             showCount: false,
                             overrideActions: [InteractionType.like],
@@ -183,14 +182,15 @@ export class PlayerTemplates {
     private static roundPlayButton(track: Track) {
         return GenericTemplates.roundIconButton(
             {
-                icon: compute(p => (p ? Icons.PAUSE : Icons.PLAY), playingHere),
+                icon: getPlayIcon(playingHere, loadingAudio),
                 adaptive: true,
                 isUrl: true,
             },
             async () => {
                 PlayManager.togglePlayAsync(track.id).then();
             },
-            "Play/Pause"
+            "Play/Pause",
+            ["special", "bigger-input", "rounded-max"],
         );
     }
 

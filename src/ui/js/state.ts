@@ -11,6 +11,8 @@ import { Notification } from "@targoninc/lyda-shared/src/Models/db/lyda/Notifica
 import { ListeningHistory } from "@targoninc/lyda-shared/dist/Models/db/lyda/ListeningHistory";
 import { PlayManager } from "./Streaming/PlayManager.ts";
 import { IStreamClient } from "./Streaming/IStreamClient.ts";
+import { Language, language } from "../locales";
+import { getUserSettingValue } from "./Classes/Util.ts";
 
 export const navInitialized = signal(false);
 
@@ -79,7 +81,7 @@ currentTrackPosition.subscribe((p, changed) => {
         PlayManager.getTrackData(currentTrackId.value).then(d => {
             if (d) {
                 navigator.mediaSession.setPositionState({
-                    position: currentTrackPosition.value.absolute,
+                    position: Math.min(currentTrackPosition.value.absolute, d.track.length),
                     duration: d.track.length,
                     playbackRate: 1,
                 });
@@ -104,6 +106,11 @@ playingHere.subscribe((p, changed) => {
 export const openMenus = signal<string[]>([]);
 
 export const currentUser = signal<User|null>(null);
+currentUser.subscribe(u => {
+    if (u) {
+        language.value = getUserSettingValue<Language>(u, "language");
+    }
+});
 
 export const loopMode = signal<LoopMode>(LoopMode.off);
 loopMode.value = LydaCache.get<LoopMode>("loopMode").content ?? LoopMode.off;
@@ -141,3 +148,5 @@ playerExpanded.subscribe((expanded) => {
         footer?.classList.remove("no-padding");
     }
 });
+
+export const loadingAudio = signal(false);

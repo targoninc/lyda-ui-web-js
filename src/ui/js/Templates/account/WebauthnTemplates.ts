@@ -1,5 +1,5 @@
 import { compute, create, Signal, signal, signalMap, when } from "@targoninc/jess";
-import { button, heading } from "@targoninc/jess-components";
+import { button } from "@targoninc/jess-components";
 import { currentUser } from "../../state";
 import { Time } from "../../Classes/Helpers/Time.ts";
 import {
@@ -12,6 +12,8 @@ import { notify, Ui } from "../../Classes/Ui.ts";
 import { NotificationType } from "../../Enums/NotificationType.ts";
 import { Api } from "../../Api/Api.ts";
 import { PublicKey } from "@targoninc/lyda-shared/dist/Models/db/lyda/PublicKey";
+import { SettingsTemplates } from "./SettingsTemplates.ts";
+import { t } from "../../../locales";
 
 export class WebauthnTemplates {
     static devicesSection() {
@@ -23,12 +25,9 @@ export class WebauthnTemplates {
         return create("div")
             .classes("flex-v", "card")
             .children(
-                heading({
-                    text: "Passkeys",
-                    level: 2
-                }),
+                SettingsTemplates.sectionHeading(t("PASSKEYS")),
                 when(hasCredentials, create("span")
-                    .text("You have no passkeys configured")
+                    .text(t("NO_PASSKEYS"))
                     .build(), true),
                 when(hasCredentials, create("div")
                     .classes("flex-v")
@@ -41,23 +40,23 @@ export class WebauthnTemplates {
                                     .text(key.name)
                                     .build(),
                                 create("span")
-                                    .text(compute(t => `Created ${t}`, Time.agoUpdating(new Date(key.created_at), true)))
+                                    .text(compute(time => `${t("CREATED")} ${time}`, Time.agoUpdating(new Date(key.created_at), true)))
                                     .build(),
-                                WebauthnTemplates.webAuthNActions(loading, key, message)
+                                WebauthnTemplates.webAuthNActions(loading, key, message),
                             ).build()),
                     ).build()),
                 button({
-                    text: "Add passkey",
-                    icon: {icon: "add"},
+                    text: t("ADD_PASSKEY"),
+                    icon: { icon: "add" },
                     classes: ["positive", "fit-content"],
                     disabled: loading,
                     onclick: async () => {
                         await Ui.getTextInputModal(
-                            "Add passkey",
-                            "Enter the name for this passkey. Make sure it's something you'll recognize later on.",
+                            t("ADD_PASSKEY"),
+                            t("PASSKEY_NAME_DESCRIPTION"),
                             "",
-                            "Add",
-                            "Cancel",
+                            t("ADD"),
+                            t("CANCEL"),
                             async (name: string) => {
                                 loading.value = true;
                                 await Api.getWebauthnChallenge().then(async (res) => {
@@ -69,21 +68,20 @@ export class WebauthnTemplates {
                                     try {
                                         registration = await registerWebauthnMethod(user, res.challenge);
                                     } catch (e: any) {
-                                        notify(`Error: ${e.message}`, NotificationType.error);
+                                        notify(`${t("ERROR")}: ${e.message}`, NotificationType.error);
                                         return;
                                     }
                                     Api.registerWebauthnMethod(registration, res.challenge, name).then(() => {
                                         Api.getUserById().then(u => {
                                             currentUser.value = u;
                                         });
-                                        notify("Successfully registered passkey", NotificationType.success);
+                                        notify(t("SUCCESSFULLY_REGISTERED_PASSKEY"), NotificationType.success);
                                     });
                                 }).finally(() => loading.value = false);
-                            },
-                            () => {}
+                            }, () => {},
                         );
-                    }
-                })
+                    },
+                }),
             ).build();
     }
 
@@ -92,8 +90,8 @@ export class WebauthnTemplates {
             .classes("flex", "center-items")
             .children(
                 button({
-                    text: "Delete",
-                    icon: {icon: "delete"},
+                    text: t("DELETE"),
+                    icon: { icon: "delete" },
                     classes: ["negative"],
                     disabled: loading,
                     onclick: () => {
@@ -106,11 +104,12 @@ export class WebauthnTemplates {
                             const challenge = res2.challenge;
                             const cred: CredentialDescriptor = {
                                 id: key.key_id,
-                                transports: key.transports.split(",") as ExtendedAuthenticatorTransport[]
+                                transports: key.transports.split(",") as ExtendedAuthenticatorTransport[],
                             };
                             webauthnLogin(challenge, [cred]).then(async (verification) => {
                                 await Api.verifyWebauthn(verification, res2.challenge);
                                 await Api.deleteWebauthnMethod(key.key_id, res2.challenge);
+                                notify(t("PASSKEY_DELETED"));
                                 Api.getUserById().then(u => {
                                     currentUser.value = u;
                                 });
@@ -122,11 +121,11 @@ export class WebauthnTemplates {
                         }).catch(e => {
                             message.value = e.message;
                         });
-                    }
+                    },
                 }),
                 when(message, create("span")
                     .text(message)
-                    .build())
+                    .build()),
             ).build();
     }
 }

@@ -1,5 +1,5 @@
 :root {
-    --inline-track-height: 85px;
+    --inline-track-height: 55px;
     --small-track-height: 75px;
     --card-width: 405px;
     --round-button-size: 36px;
@@ -100,6 +100,49 @@
     height: auto;
     border-radius: var(--border-radius);
     align-self: end;
+}
+
+.align-end {
+    align-self: end;
+}
+
+.bigger-input, .bigger-input * {
+    font-size: 1.2rem !important;
+}
+
+.bigger-input {
+    padding: var(--jessc-input-padding-y) calc(var(--jessc-input-padding-x) * 1.2) !important;
+}
+
+.cancel-button {
+    border: none !important;
+}
+
+.round-button.bigger-input {
+    --round-button-size: 48px;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.animated-background {
+    background: url("/img/graphics/email-box.webp") no-repeat center center !important;
+    background-size: cover;
+    margin-top: -20px !important;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+.animated-background h1 {
+    font-weight: bold;
+}
+
+.email-special-box {
+    /* i'm committing so many sins rn */
+    padding: 6rem 20px 3rem 20px;
+    transform: translateX(-20px) translateY(-10px);
+    width: 100%;
+    margin-bottom: 2rem;
 }
 
 .single-page .title {
@@ -629,11 +672,12 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 .chart-container-full {
     width: 600px !important;
     max-width: 100% !important;
+    flex-grow: 1;
 }
 
 .chart-container-vertical {
-    height: 100% !important;
-    width: 300px !important;
+    height: 180px !important;
+    width: 600px !important;
     max-width: 100% !important;
 }
 
@@ -658,7 +702,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     gap: 1px;
 }
 
-.trackPage .waveform {
+.single-page .waveform {
     height: 2em;
     gap: 2px;
 }
@@ -709,7 +753,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     --icon-size: 22px;
     --padding: calc((var(--icon-size) - 12px) / 2);
     padding: var(--padding);
-    border-radius: var(--border-radius);
+    border-radius: 999px;
     width: calc(var(--icon-size) - (var(--padding) * 2));
     height: calc(var(--icon-size) - (var(--padding) * 2));
     align-content: center;
@@ -763,7 +807,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     overflow: auto;
     backdrop-filter: blur(50px);
     -webkit-backdrop-filter: blur(50px);
-    background: color-mix(in oklab, var(--color-3), transparent 30%);
+    background: color-mix(in oklab, var(--color-3), transparent 2%);
     max-height: 300px;
     box-sizing: border-box;
     box-shadow: 0 10px 20px 7px var(--color-4);
@@ -1049,7 +1093,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 #track-description, #user-description {
-    max-height: max-content;
+    max-height: 30dvh;
     min-width: 100px;
     overflow: auto;
     position: relative;
@@ -1168,15 +1212,15 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     display: flex;
     align-items: center;
     gap: var(--gap);
-    border: 1px solid var(--green);
-    background: var(--green-dark);
+    border: 1px solid var(--blue);
+    background: var(--blue-dark);
     border-radius: var(--border-radius);
     padding: var(--inline-padding);
     height: max-content;
 }
 
 .benefit-item * {
-    color: var(--jessc-interactive-background);
+    color: var(--jessc-interactive-color);
 }
 
 .marquee {
@@ -1185,6 +1229,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     height: 40px;
     width: 100%;
     white-space: nowrap;
+    transform: translateX(-20px);
 }
 
 .marquee .scrolling {

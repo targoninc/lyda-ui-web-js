@@ -16,6 +16,10 @@ const refetch = async <T>(
         body: body instanceof FormData ? body : JSON.stringify(body),
     });
 
+    if (url.includes("/audio?")) {
+        return await res.blob() as T;
+    }
+
     const text = await res.text();
     if (!res.ok) {
         const noErrorCodes = [401, 404];

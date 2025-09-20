@@ -30,13 +30,14 @@ import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import { get } from "../Api/ApiClient.ts";
 import { IStreamClient } from "./IStreamClient.ts";
+import { PLAYCHECK_INTERVAL } from "../Templates/music/PlayerTemplates.ts";
 
 export class PlayManager {
     static async playCheck(track: Track) {
         if (PlayManager.isPlaying(track.id)) {
             const currentTime = PlayManager.getCurrentTime(track.id);
 
-            if (currentTime.absolute >= PlayManager.getDuration(track.id)) {
+            if (currentTime.absolute >= PlayManager.getDuration(track.id) - (PLAYCHECK_INTERVAL / 1000)) {
                 const loopingSingle = PlayManager.isLoopingSingle();
                 if (loopingSingle) {
                     await PlayManager.togglePlayAsync(track.id);
@@ -449,7 +450,7 @@ export class PlayManager {
             return trackInfo.value[id];
         }
 
-        if (!id) {
+        if (!id || id.toString().length === 0) {
             throw new Error("id is missing");
         }
 

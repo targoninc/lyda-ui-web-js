@@ -24,11 +24,13 @@ import { currentSecretCode, currentUser } from "../state.ts";
 import { TrackTemplates } from "./music/TrackTemplates.ts";
 import { PlaylistTemplates } from "./music/PlaylistTemplates.ts";
 import { StatisticTemplates } from "./StatisticTemplates.ts";
-import { SubscriptionTemplates } from "./SubscriptionTemplates.ts";
 import { notify } from "../Classes/Ui.ts";
 import { NotificationType } from "../Enums/NotificationType.ts";
 import { Api } from "../Api/Api.ts";
-import { GenericTemplates, tabSelected, vertical } from "./generic/GenericTemplates.ts";
+import { GenericTemplates, horizontal, tabSelected, vertical } from "./generic/GenericTemplates.ts";
+import { heading } from "@targoninc/jess-components";
+import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
+import { SubscriptionTemplates } from "./money/SubscriptionTemplates.ts";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, (route: Route, params: Record<string, string>) => Promise<AnyElement> | AnyElement> = {
@@ -56,6 +58,8 @@ export class PageTemplates {
         [RoutePath.roadmap]: RoadmapTemplates.roadmapPage,
         [RoutePath.payouts]: PayoutTemplates.payoutsPage,
         [RoutePath.payments]: PaymentTemplates.paymentsPage,
+        [RoutePath.editTracks]: TrackEditTemplates.batchEditTracksPage,
+        [RoutePath.protocolHandler]: PageTemplates.protocolHandlerPage,
 
         // admin pages
         [RoutePath.admin]: DashboardTemplates.dashboardPage,
@@ -82,11 +86,12 @@ export class PageTemplates {
         RoutePath.actionLogs,
         RoutePath.users,
         RoutePath.events,
+        RoutePath.editTracks,
     ];
 
     static async libraryPage(route: Route, params: Record<string, string>) {
         const user = currentUser.value;
-        const name = params["name"] ?? "";
+        const name = params["name"] ?? user?.username;
 
         if (!user) {
             notify("You need to be logged in to view your library", NotificationType.error);
@@ -140,7 +145,6 @@ export class PageTemplates {
                     vertical(
                         PayoutTemplates.artistRoyaltyActions(),
                         await StatisticTemplates.allStats(),
-                        PayoutTemplates.dataExport(),
                     ).build(),
                 ),
                 when(
@@ -284,5 +288,34 @@ export class PageTemplates {
         }
 
         return SubscriptionTemplates.page();
+    }
+
+    static protocolHandlerPage() {
+        const url = new URL(window.location.href);
+        const data = url.searchParams.get("data");
+        if (!data) {
+            return vertical(
+                heading({
+                    level: 1,
+                    text: "Link could not be found",
+                    classes: ["error"],
+                }),
+            ).build();
+        }
+        const dataUrl = new URL(data);
+        // the url should have the following structure: "protocol://{entityTypeRoute}/{id}"
+        const entityType = dataUrl.host as EntityType;
+        const id = dataUrl.pathname.split("/")[1];
+        navigate(`${entityType}/${id}`);
+
+        return vertical(
+            horizontal(
+                heading({
+                    level: 1,
+                    text: "Opening link...",
+                }),
+                GenericTemplates.loadingSpinner(),
+            ).classes("align-children"),
+        ).build();
     }
 }

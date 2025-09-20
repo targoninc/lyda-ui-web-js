@@ -6,6 +6,7 @@ import { chartColor } from "../../state.ts";
 import { button } from "@targoninc/jess-components";
 import { Statistic } from "@targoninc/lyda-shared/src/Models/Statistic";
 import { Api } from "../../Api/Api.ts";
+import { BoxPlotValues } from "@targoninc/lyda-shared/dist/Models/BoxPlotValues";
 
 Chart.register(...registerables);
 
@@ -45,7 +46,7 @@ export class ChartTemplates {
             .children(create("h4").classes("chart-title").text(title).build(), ctx).build();
     }
 
-    static boxPlotChart(values: number[], title: string, id: string) {
+    static boxPlotChart(values: BoxPlotValues, title: string, id: string) {
         const ctx = create("canvas").classes("chart").id(id).build();
 
         const data = {
@@ -53,10 +54,17 @@ export class ChartTemplates {
             datasets: [
                 {
                     label: title,
-                    data: values,
+                    data: [
+                        {
+                            "whiskerMin": values.min,
+                            "q1": values.q1,
+                            "median": values.median,
+                            "q3": values.q3,
+                            "whiskerMax": values.max,
+                        },
+                    ],
                     backgroundColor: chartColor.value,
                     borderColor: chartColor.value,
-                    hoverOffset: 4,
                 },
             ],
         };
@@ -67,12 +75,17 @@ export class ChartTemplates {
             options: ChartOptions.defaultOptions,
         };
 
+        config.options.scales.y.max = values.max * 1.1;
+        config.options.indexAxis = "y";
+        config.options.responsive = true;
+
         //@ts-expect-error bc Chart.js stupid
         new BoxPlotChart(ctx, config);
 
         return create("div")
-            .classes("chart-container-vertical", "card", "secondary", "flex-v")
-            .children(ctx).build();
+            .classes("chart-container-vertical", "flex-v")
+            .children(ctx)
+            .build();
     }
 
     static noData(title: HtmlPropertyValue) {

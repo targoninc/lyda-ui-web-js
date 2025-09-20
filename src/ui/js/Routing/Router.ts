@@ -1,5 +1,5 @@
-import {router} from "../../main.ts";
-import {signal} from "@targoninc/jess";
+import { router } from "../../main.ts";
+import { signal } from "@targoninc/jess";
 
 export class Router {
     public currentRoute = signal<Route|null>(null);
@@ -36,12 +36,14 @@ export class Router {
         }
         this.currentRoute.value = route;
         if (route) {
+            document.title = route.title;
             const params = this.getParams(path, route);
             this.currentParams.value = params;
             this.preRouteChange && await this.preRouteChange(route, params);
             route.handler && await route.handler(route, params);
             this.postRouteChange && await this.postRouteChange(route,params);
         } else {
+            document.title = "Page not found";
             this.onNoRouteFound && await this.onNoRouteFound();
             this.currentParams.value = {};
         }
@@ -56,7 +58,7 @@ export class Router {
             params["path_" + i] = path[i];
         }
         const urlParams = new URLSearchParams(window.location.search);
-        for (let [key, value] of urlParams.entries()) {
+        for (const [key, value] of urlParams.entries()) {
             params[key] = value;
         }
         if (route.params) {

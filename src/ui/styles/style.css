@@ -183,6 +183,10 @@ body {
     padding: 0;
 }
 
+html, body {
+    overflow: hidden;
+}
+
 .loader {
     border-top: 1px solid var(--color-5);
     border-radius: 100%;
@@ -234,7 +238,7 @@ nav, footer {
     padding: var(--page-padding);
 }
 
-nav, footer, .fixed-bar, .modal-overlay, .modal, .card, .user-preview, .queue-popout, .player-popout {
+nav, footer, .fixed-bar, .modal-overlay, .modal, .card, .user-preview {
     background: var(--background-glass);
     backdrop-filter: saturate(180%) blur(10px);
     -webkit-backdrop-filter: saturate(180%) blur(10px);
@@ -460,8 +464,19 @@ button.special {
     box-sizing: border-box;
 }
 
+button.special-floating {
+    color: var(--blue);
+    background: transparent;
+    box-sizing: border-box;
+    border: none;
+}
+
 button.special * {
-    color: var(--color-4);
+    color: var(--color-5);
+}
+
+button.special-floating * {
+    color: var(--blue);
 }
 
 button.special.active {
@@ -721,7 +736,7 @@ details > *:not(summary) {
 }
 
 .rounded-max {
-    border-radius: 100vw;
+    border-radius: 100vw !important;
 }
 
 .bordered {
@@ -895,10 +910,19 @@ td:last-child, th:last-child {
     overflow: hidden;
     padding: calc(var(--base-padding) * 2);
     box-sizing: border-box;
+    background: color-mix(in oklab, var(--color-3), transparent 2%);
 }
 
 .mobile-player {
-    --round-button-size: 13dvw;
+    --round-button-size: 12dvw;
+}
+
+.mobile-player .round-button.bigger-input {
+    --round-button-size: 15dvw;
+}
+
+.limitToContentWidth {
+    max-width: max-content;
 }
 
 .queue-popout {
@@ -912,6 +936,7 @@ td:last-child, th:last-child {
     transition: height 100ms ease-in-out;
     overflow: auto;
     user-select: none;
+    background: color-mix(in oklab, var(--color-3), transparent 2%);
 }
 
 .hide {
@@ -1008,6 +1033,7 @@ td:last-child, th:last-child {
     border-radius: calc(var(--border-radius) * 2);
     max-height: calc(100% - 100px);
     overflow: auto;
+    min-width: 30dvw;
     max-width: 80dvw;
     width: max-content;
 }
@@ -1026,8 +1052,8 @@ td:last-child, th:last-child {
 }
 
 .auth-box {
-    max-width: min(600px, 100%);
-    width: 600px;
+    max-width: min(641px, 100%);
+    width: 641px;
     margin: auto;
     box-sizing: border-box;
 }

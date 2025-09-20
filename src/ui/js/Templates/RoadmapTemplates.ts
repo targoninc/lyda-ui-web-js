@@ -1,6 +1,6 @@
-import {create} from "@targoninc/jess";
-import {GenericTemplates} from "./generic/GenericTemplates.ts";
-import {roadMapItemIcons, RoadmapItemStatus} from "@targoninc/lyda-shared/src/Enums/RoadmapItemStatus";
+import { create } from "@targoninc/jess";
+import { GenericTemplates } from "./generic/GenericTemplates.ts";
+import { roadMapItemIcons, RoadmapItemStatus } from "@targoninc/lyda-shared/src/Enums/RoadmapItemStatus";
 
 let index = 0;
 
@@ -16,8 +16,8 @@ export class RoadmapTemplates {
                     .build(),
                 RoadmapTemplates.roadmapItem(RoadmapItemStatus.todo, "2025-2026", "Stripe payments + payouts"),
                 RoadmapTemplates.roadmapItem(RoadmapItemStatus.todo, "2025", "Buying music"),
-                RoadmapTemplates.roadmapItem(RoadmapItemStatus.todo, "2025", "MFA"),
                 RoadmapTemplates.roadmapItem(RoadmapItemStatus.inProgress, "2025", "UX improvements and bugfixes"),
+                RoadmapTemplates.roadmapItem(RoadmapItemStatus.done, "2025", "MFA"),
                 RoadmapTemplates.roadmapItem(RoadmapItemStatus.done, "2025", "Royalty payouts"),
                 RoadmapTemplates.roadmapItem(RoadmapItemStatus.done, "2024", "Subscriptions"),
                 RoadmapTemplates.roadmapItem(RoadmapItemStatus.done, "2024", "Complete UI + API rewrite"),

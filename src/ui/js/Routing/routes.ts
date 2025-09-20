@@ -1,4 +1,4 @@
-import {Route} from "./Router.ts";
+import { Route } from "./Router.ts";
 
 export enum RoutePath {
     explore = "explore",
@@ -32,6 +32,8 @@ export enum RoutePath {
     payouts = "payouts",
     history = "history",
     payments = "payments",
+    editTracks = "edit-tracks",
+    protocolHandler = "protocolHandler",
 }
 
 export const routes: Route[] = [
@@ -167,5 +169,13 @@ export const routes: Route[] = [
     {
         path: RoutePath.history,
         title: "History",
-    }
+    },
+    {
+        path: RoutePath.protocolHandler,
+        title: "Protocol handler",
+    },
+    {
+        path: RoutePath.editTracks,
+        title: "Edit tracks",
+    },
 ];

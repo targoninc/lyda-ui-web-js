@@ -1,144 +1,125 @@
-import { compute, create, nullElement, Signal, signal, when } from "@targoninc/jess";
-import { FormTemplates } from "../generic/FormTemplates.ts";
+import { compute, create, nullElement, signal, when } from "@targoninc/jess";
 import { notify } from "../../Classes/Ui.ts";
 import { Permissions } from "@targoninc/lyda-shared/src/Enums/Permissions";
 import { permissions } from "../../state.ts";
-import { currency } from "../../Classes/Helpers/Num.ts";
 import { LogTemplates } from "./LogTemplates.ts";
 import { DashboardTemplates } from "./DashboardTemplates.ts";
-import { button, SelectOption, toggle } from "@targoninc/jess-components";
-import { RoyaltyInfo } from "@targoninc/lyda-shared/src/Models/RoyaltyInfo";
+import { button, toggle } from "@targoninc/jess-components";
 import { RoyaltyMonth } from "@targoninc/lyda-shared/src/Models/RoyaltyMonth";
 import { NotificationType } from "../../Enums/NotificationType.ts";
 import { Api } from "../../Api/Api.ts";
+import { GenericTemplates, vertical } from "../generic/GenericTemplates.ts";
+import { MonthIdentifier } from "../../Classes/Helpers/Date.ts";
+import { currency } from "../../Classes/Helpers/Num.ts";
 
 export class RoyaltyTemplates {
-    static royaltyCalculator(royaltyInfo: RoyaltyInfo, refresh: () => void) {
-        const months = royaltyInfo.calculatableMonths.map((m: any) => {
-            return <SelectOption>{
-                id: (m.year * 100 + m.month).toString(),
-                name: m.year + "-" + m.month + (m.calculated ? " (calculated)" : ""),
-            };
-        });
-        const selectedState = signal<string>(months[0]?.id ?? null);
-        const selectedMonth = compute(id => royaltyInfo.calculatableMonths.find(m => (m.year * 100 + m.month).toString() === id), selectedState);
-        const hasEarnings = compute(month => month?.hasEarnings ?? false, selectedMonth);
-        const isApproved = compute(month => month?.approved ?? false, selectedMonth);
-        const earnings = compute(month => currency((month?.earnings ?? 0) / 100), selectedMonth);
-        const artistRoyalties = compute(month => currency((month?.artistRoyalties ?? 0) / 100), selectedMonth);
-        const trackRoyalties = compute(month => currency((month?.trackRoyalties ?? 0) / 100), selectedMonth);
-
+    static royaltyCalculator(month: Partial<RoyaltyMonth>, monthIdentifier: MonthIdentifier, refresh: () => void) {
         return create("div")
             .classes("flex-v")
             .children(
-                RoyaltyTemplates.royaltyActions(months, selectedState, selectedMonth, hasEarnings, isApproved, refresh),
-                when(hasEarnings, create("div")
+                RoyaltyTemplates.royaltyActions(monthIdentifier, month.hasEarnings ?? false, month.approved ?? false, refresh),
+                when(month.hasEarnings ?? false, create("div")
                     .classes("flex-v")
                     .children(
-                        LogTemplates.signalProperty("Earnings", earnings),
-                        LogTemplates.signalProperty("Artist royalties", artistRoyalties),
-                        LogTemplates.signalProperty("Track royalties", trackRoyalties),
-                    ).build())
+                        LogTemplates.property("Earnings", currency((month.earnings ?? 0) / 100, "USD")),
+                        LogTemplates.property("Artist royalties", currency((month.artistRoyalties ?? 0) / 100, "USD")),
+                        LogTemplates.property("Track royalties", currency((month.trackRoyalties ?? 0) / 100, "USD")),
+                    ).build()),
             ).build();
     }
 
-    private static royaltyActions(months: SelectOption[], selectedState: Signal<string>, selectedMonth: Signal<RoyaltyMonth | undefined>,
-                                  hasEarnings: Signal<boolean>, isApproved: Signal<any>, refresh: () => void) {
+    private static royaltyActions(monthIdentifier: MonthIdentifier,
+                                  hasEarnings: boolean, isApproved: boolean, refresh: () => void) {
         return create("div")
             .classes("flex-v")
             .children(
                 create("div")
                     .classes("flex", "align-children")
                     .children(
-                        FormTemplates.dropDownField("Month", signal(months), selectedState),
+                        create("span")
+                            .text(`Available actions for ${monthIdentifier.year}-${monthIdentifier.month}:`)
+                            .build(),
+                        button({
+                            text: "Calculate earnings",
+                            icon: { icon: "account_balance" },
+                            classes: ["positive"],
+                            onclick: async () => {
+                                await Api.calculateEarnings(monthIdentifier);
+                                notify("Earnings calculated", NotificationType.success);
+                                refresh();
+                            },
+                        }),
+                        when(hasEarnings, button({
+                            text: "Calculate royalties",
+                            icon: { icon: "calculate" },
+                            classes: ["positive"],
+                            onclick: async () => {
+                                await Api.calculateRoyalties(monthIdentifier);
+                                notify("Royalties calculated", NotificationType.success);
+                                refresh();
+                            },
+                        })),
+                        when(hasEarnings, toggle({
+                            text: "Royalties approved and visible",
+                            checked: isApproved,
+                            onchange: async (v) => {
+                                await Api.setRoyaltyActivation(monthIdentifier, v);
+                                notify("Switched approval status", NotificationType.success);
+                                refresh();
+                            },
+                        })),
                     ).build(),
-                compute(month => {
-                    if (!month) {
-                        return nullElement();
-                    }
-
-                    return create("div")
-                        .classes("flex", "align-children")
-                        .children(
-                            create("span")
-                                .text(`Available actions for ${month.year}-${month.month}:`)
-                                .build(),
-                            button({
-                                text: "Calculate earnings",
-                                icon: { icon: "account_balance" },
-                                classes: ["positive"],
-                                onclick: async () => {
-                                    await Api.calculateEarnings(month);
-                                    notify("Earnings calculated", NotificationType.success);
-                                    refresh();
-                                },
-                            }),
-                            when(hasEarnings, button({
-                                text: "Calculate royalties",
-                                icon: { icon: "calculate" },
-                                classes: ["positive"],
-                                onclick: async () => {
-                                    await Api.calculateRoyalties(month);
-                                    notify("Royalties calculated", NotificationType.success);
-                                    refresh();
-                                }
-                            })),
-                            when(hasEarnings, toggle({
-                                text: "Royalties approved and visible",
-                                checked: isApproved,
-                                onchange: async (v) => {
-                                    await Api.setRoyaltyActivation(month, v);
-                                    notify("Switched approval status", NotificationType.success);
-                                    refresh();
-                                }
-                            }))
-                        ).build();
-                }, selectedMonth),
             ).build();
     }
 
     static royaltyManagement() {
-        const royaltyInfo = signal<any>(null);
+        const monthOffset = signal(0);
+        const selectableMonths = signal(Array.from({ length: 12 }, (_, i) => {
+            const d = new Date();
+            d.setDate(1);
+            d.setMonth(d.getMonth() - i);
+            return { year: d.getFullYear(), month: d.getMonth() + 1 };
+        }));
+        const selectedMonth = compute((mo, sm) => sm.at(-Math.abs(mo) - 1)!, monthOffset, selectableMonths);
+        const month = signal<Partial<RoyaltyMonth> | null>(null);
         const refresh = () => {
-            Api.getRoyaltyInfo().then(res => {
+            Api.getRoyaltyCalculationInfo(selectedMonth.value).then(res => {
                 if (res) {
-                    royaltyInfo.value = res;
+                    month.value = res;
                 }
             });
         };
+        selectedMonth.subscribe(refresh);
         refresh();
+        const canCalculateRoyalties = compute(p => p.some(p => p.name === Permissions.canCalculateRoyalties), permissions);
 
         return create("div")
             .classes("flex-v")
             .children(
-                compute(r => r ? RoyaltyTemplates.royaltyOverview(r, refresh) : nullElement(), royaltyInfo),
+                compute(sm => GenericTemplates.combinedSelector(sm.map(m => `${m.year}-${m.month}`).reverse(), i => {
+                    monthOffset.value = i;
+                }), selectableMonths),
+                when(canCalculateRoyalties, vertical(
+                    compute((rm, sm) => rm ? RoyaltyTemplates.royaltyOverview(rm, sm, refresh) : nullElement(), month, selectedMonth),
+                ).build()),
             ).build();
     }
 
-    static royaltyOverview(royaltyInfo: RoyaltyInfo, refresh: () => void) {
-        if (!royaltyInfo.calculatableMonths) {
-            return nullElement();
-        }
-
-        const canCalculateRoyalties = compute(p => p.some(p => p.name === Permissions.canCalculateRoyalties), permissions);
-
+    static royaltyOverview(royaltyMonth: Partial<RoyaltyMonth>, monthIdentifier: MonthIdentifier, refresh: () => void) {
         return create("div")
+            .classes("card", "flex-v")
             .children(
-                when(canCalculateRoyalties, create("div")
-                    .classes("card", "flex-v")
-                    .children(
-                        create("h2")
-                            .text("Royalty overview")
-                            .build(),
-                        RoyaltyTemplates.royaltyCalculator(royaltyInfo, refresh),
-                    ).build())
+                create("h2")
+                    .text("Royalty overview")
+                    .build(),
+                RoyaltyTemplates.royaltyCalculator(royaltyMonth, monthIdentifier, refresh),
             ).build();
     }
 
     static royaltyManagementPage() {
         return DashboardTemplates.pageNeedingPermissions(
             [Permissions.canCalculateRoyalties],
-            RoyaltyTemplates.royaltyManagement()
+            RoyaltyTemplates.royaltyManagement(),
         );
     }
 }

@@ -17,9 +17,9 @@ import {
     TypeOrSignal,
     when,
 } from "@targoninc/jess";
-import { Util } from "../../Classes/Util.ts";
+import { getPlayIcon, Util } from "../../Classes/Util.ts";
 import { navigate } from "../../Routing/Router.ts";
-import { currentTrackId, playingHere } from "../../state.ts";
+import { currentTrackId, loadingAudio, playingHere } from "../../state.ts";
 import { PillOption } from "../../Models/PillOption.ts";
 import { dayFromValue } from "../../Classes/Helpers/Date.ts";
 import { PlayManager } from "../../Streaming/PlayManager.ts";
@@ -121,10 +121,10 @@ export class GenericTemplates {
         ).build();
     }
 
-    static logoutButton() {
+    static logoutButton(classes: string[] = []) {
         return button({
             text: "Log out",
-            classes: ["hideOnSmallBreakpoint", "negative"],
+            classes: ["negative", ...classes],
             icon: { icon: "logout" },
             onclick: async () => {
                 await AuthActions.logOut();
@@ -231,7 +231,7 @@ export class GenericTemplates {
         });
     }
 
-    static pill(p: PillOption, pillState: Signal<any>, extraClasses: string[] = []) {
+    static pill(p: PillOption, pillState: Signal<any> = signal(null), extraClasses: string[] = []) {
         const selectedState = compute((s): string => (s === p.value ? "active" : "_"), pillState);
 
         return button({
@@ -541,10 +541,6 @@ export class GenericTemplates {
         ).build();
     }
 
-    static containerWithSpinner(className: string) {
-        return create("div").classes(className).children(GenericTemplates.loadingSpinner()).build();
-    }
-
     static loadingSpinner() {
         return create("div").classes("spinner").children().build();
     }
@@ -555,17 +551,21 @@ export class GenericTemplates {
         title: StringOrSignal = "",
         classes: StringOrSignal[] = [],
     ) {
-        return create("button").classes("round-button", "jess", ...classes).onclick(onclick).title(title).children(
-            icon({
-                ...iconConfig,
-                classes: ["round-button-icon", "align-center", "inline-icon", "svg", "nopointer"],
-            }),
-        ).build();
+        return create("button")
+            .classes("round-button", "jess", ...classes)
+            .onclick(onclick)
+            .title(title)
+            .children(
+                icon({
+                    ...iconConfig,
+                    classes: ["round-button-icon", "align-center", "inline-icon", "svg", "nopointer", ...(iconConfig.classes ?? [])],
+                }),
+            ).build();
     }
 
     static playButton(trackId: number, start: Function) {
         const isPlaying = compute((c, p) => c === trackId && p, currentTrackId, playingHere);
-        const icon = compute(p => (p ? Icons.PAUSE : Icons.PLAY), isPlaying);
+        const icon = getPlayIcon(isPlaying, loadingAudio);
         const onclick = async () => {
             if (isPlaying.value) {
                 await PlayManager.pauseAsync(trackId);
@@ -644,7 +644,7 @@ export class GenericTemplates {
         return create("img").classes("corner-check", ...extraClasses).title(title).src(Icons.CHECK).build();
     }
 
-    static giftIcon(title = "") {
+    static giftIcon(title: StringOrSignal = "") {
         return GenericTemplates.icon("featured_seasonal_and_gifts", true, ["gift-icon"], title);
     }
 

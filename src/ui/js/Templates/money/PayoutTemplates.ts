@@ -1,5 +1,5 @@
 import { compute, create, nullElement, signal, when } from "@targoninc/jess";
-import { GenericTemplates } from "../generic/GenericTemplates.ts";
+import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
 import { Time } from "../../Classes/Helpers/Time.ts";
 import { currency } from "../../Classes/Helpers/Num.ts";
 import { permissions } from "../../state.ts";
@@ -27,7 +27,7 @@ export class PayoutTemplates {
             Api.getPayouts(skip.value, filter)
                 .then(e => payouts.value = e ?? [])
                 .finally(() => loading.value = false);
-        }
+        };
         const loading = signal(false);
         load();
 
@@ -37,7 +37,7 @@ export class PayoutTemplates {
                 create("h1")
                     .text("Payout history")
                     .build(),
-                compute(p => {
+                compute(_ => {
                     return GenericTemplates.searchWithFilter(payouts, PayoutTemplates.payout, skip, loading, load);
                 }, permissions),
             ).build();
@@ -58,14 +58,14 @@ export class PayoutTemplates {
                     .classes("text-small")
                     .text(Time.agoUpdating(new Date(p.created_at)))
                     .build(),
-            ).build()
+            ).build();
     }
 
     static artistRoyaltyActions() {
         const royaltyInfo = signal<RoyaltyInfo | null>(null);
         Api.getRoyaltyInfo().then(ri => royaltyInfo.value = ri);
-        const hasPayableRoyalties = compute(ri => ri && ri.available && ri.available >= 0.5, royaltyInfo);
-        const paypalMailExists$ = compute(ri => ri && ri.paypalMail !== null, royaltyInfo);
+        const hasPayableRoyalties = compute(ri => ri && ri.personal.available && ri.personal.available >= 0.5, royaltyInfo);
+        const paypalMailExists$ = compute(ri => ri && ri.personal.paypalMail !== null, royaltyInfo);
 
         return create("div")
             .classes("flex-v", "card")
@@ -110,7 +110,7 @@ export class PayoutTemplates {
                                     },
                                 })),
                                 when(paypalMailExists$, button({
-                                    text: compute(ri => ri ? `Request payout to ${anonymize(ri.paypalMail, 2, 8)}` : "", royaltyInfo),
+                                    text: compute(ri => ri ? `Request payout to ${anonymize(ri.personal.paypalMail, 2, 8)}` : "", royaltyInfo),
                                     icon: { icon: "mintmark" },
                                     classes: ["positive"],
                                     onclick: async () => {
@@ -135,31 +135,69 @@ export class PayoutTemplates {
                     .classes("card", "secondary", "flex-v")
                     .children(
                         create("h1")
-                            .text(currency(royaltyInfo.available))
-                            .title(royaltyInfo.available < 0.5 ? "You need at least 50ct to request a payment" : "")
+                            .text(currency(royaltyInfo.personal.available))
+                            .title(royaltyInfo.personal.available < 0.5 ? "You need at least 50ct to request a payment" : "")
                             .build(),
                         create("span")
                             .text("Available")
                             .build(),
                         create("span")
                             .classes("text-small")
-                            .text(currency(royaltyInfo.totalRoyalties) + " Total royalties")
+                            .text(currency(royaltyInfo.personal.totalRoyalties) + " Total royalties")
                             .build(),
                         create("span")
                             .classes("text-small")
-                            .text(currency(royaltyInfo.paidTotal) + " paid out")
+                            .text(currency(royaltyInfo.personal.paidTotal) + " paid out")
                             .build(),
                         create("span")
                             .classes("text-small")
-                            .text(currency(royaltyInfo.meanTrackRoyalty) + " average track royalty")
+                            .text(currency(royaltyInfo.personal.meanTrackRoyalty) + " median track royalty")
                             .build(),
                     ).build(),
                 create("div")
                     .classes("flex-v")
                     .children(
-                        ChartTemplates.boxPlotChart([royaltyInfo.trackRoyaltyValues], "Average track royalty", "averageTrackRoyaltyChart"),
+                        ChartTemplates.boxPlotChart(royaltyInfo.personal.trackRoyaltyValues, "Average track royalty", "averageTrackRoyaltyChart"),
                     ).build(),
             ).build();
+    }
+
+    static globalRoyaltyInfo(royaltyInfo: RoyaltyInfo) {
+        return vertical(
+            horizontal(
+                GenericTemplates.pill({
+                    icon: "attach_money",
+                    text: `${currency(royaltyInfo.global.totalRoyalties)} total royalties`,
+                }),
+                GenericTemplates.pill({
+                    icon: "account_balance",
+                    text: `${currency(royaltyInfo.global.paidTotal)} paid out`,
+                }),
+                GenericTemplates.pill({
+                    icon: "bar_chart",
+                    text: `${currency(royaltyInfo.global.meanTrackRoyalty)} median track royalty`,
+                }),
+            ).build(),
+            horizontal(
+                GenericTemplates.pill({
+                    icon: "group",
+                    text: `${royaltyInfo.global.counts.users} users`,
+                }),
+                GenericTemplates.pill({
+                    icon: "audio_file",
+                    text: `${royaltyInfo.global.counts.tracks} tracks`,
+                }),
+                GenericTemplates.pill({
+                    icon: "album",
+                    text: `${royaltyInfo.global.counts.albums} albums`,
+                }),
+                GenericTemplates.pill({
+                    icon: "playlist_play",
+                    text: `${royaltyInfo.global.counts.playlists} playlists`,
+                }),
+            ).build(),
+            ChartTemplates.boxPlotChart(royaltyInfo.global.trackRoyaltyValues, "Average track royalty", "averageTrackRoyaltyChart"),
+        ).build();
     }
 
     static dataExport() {

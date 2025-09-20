@@ -1,6 +1,6 @@
 import { IStreamClient } from "./IStreamClient.ts";
 import { ApiRoutes } from "../Api/ApiRoutes.ts";
-import { currentQuality, currentTrackId, volume } from "../state.ts";
+import { currentQuality, currentTrackId, loadingAudio, volume } from "../state.ts";
 import { initializeClient } from "./InitializeClient.ts";
 
 export class StreamClient implements IStreamClient {
@@ -154,11 +154,13 @@ export class StreamClient implements IStreamClient {
     }
 
     private async loadAndDecode(): Promise<void> {
-        if (!this.ctx) throw new Error("AudioContext not initialized");
+        if (!this.ctx) {
+            throw new Error("AudioContext not initialized");
+        }
 
         const url = this.buildUrl();
         const res = await fetch(url, {
-            credentials: 'include'
+            credentials: "include",
         });
 
         if (!res.ok || !res.body) {
@@ -172,6 +174,8 @@ export class StreamClient implements IStreamClient {
         const reader = res.body.getReader();
         const chunks: Uint8Array[] = [];
         let received = 0;
+        currentTrackId.value = this.id;
+        loadingAudio.value = true;
 
         while (true) {
             const { done, value } = await reader.read();
@@ -199,6 +203,11 @@ export class StreamClient implements IStreamClient {
         const buf = await this.ctx.decodeAudioData(arrayBuffer.slice(0));
         this.buffer = buf;
         this.duration = buf.duration;
+
+        // Track selection might've changed during loading
+        if (currentTrackId.value === this.id) {
+            loadingAudio.value = false;
+        }
     }
 
     private startFromOffset(offsetSeconds: number): void {

@@ -1,8 +1,8 @@
 import { GenericTemplates, horizontal } from "../generic/GenericTemplates.ts";
-import { AnyNode, compute, create, signal, when } from "@targoninc/jess";
-import { currentTrackId, currentUser, manualQueue, playingFrom, playingHere } from "../../state.ts";
+import { AnyNode, compute, create, Signal, signal, when } from "@targoninc/jess";
+import { currentTrackId, currentUser, loadingAudio, manualQueue, playingFrom, playingHere } from "../../state.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
-import { Util } from "../../Classes/Util.ts";
+import { getPlayIcon, Util } from "../../Classes/Util.ts";
 import { Time } from "../../Classes/Helpers/Time.ts";
 import { TrackTemplates } from "./TrackTemplates.ts";
 import { DefaultImages } from "../../Enums/DefaultImages.ts";
@@ -42,21 +42,14 @@ export class MusicTemplates {
             .classes("flex")
             .children(
                 create("div")
-                    .classes(
-                        `feed-${type}`,
-                        "flex",
-                        "padded",
-                        "rounded",
-                        "fullWidth",
-                        "card",
-                        playingClass
-                    )
+                    .classes(`feed-${type}`, "flex", "padded", "rounded", "fullWidth", "card", "align-children", playingClass)
                     .id(item.id)
                     .styles("max-width", "100%")
                     .children(
+                        MusicTemplates.playButton(type, item.id, () => startItem(type, item)),
                         MusicTemplates.cover(type, item, "inline-cover"),
                         create("div")
-                            .classes("flex-v", "flex-grow", "no-gap")
+                            .classes("flex", "flex-grow", "no-gap", "space-outwards")
                             .children(
                                 create("div")
                                     .classes("flex")
@@ -67,56 +60,24 @@ export class MusicTemplates {
                                                 create("div")
                                                     .classes("flex")
                                                     .children(
-                                                        MusicTemplates.title(
-                                                            type,
-                                                            item.title,
-                                                            item.id,
-                                                            icons
-                                                        ),
-                                                        item.collab
-                                                            ? TrackTemplates.collabIndicator(
-                                                                  item.collab
-                                                              )
-                                                            : null,
-                                                        item.repost
-                                                            ? TrackTemplates.repostIndicator(
-                                                                  item.repost
-                                                              )
-                                                            : null
-                                                    )
-                                                    .build(),
+                                                        MusicTemplates.title(type, item.title, item.id, icons),
+                                                        item.collab ? TrackTemplates.collabIndicator(item.collab) : null,
+                                                        item.repost ? TrackTemplates.repostIndicator(item.repost) : null,
+                                                    ).build(),
                                                 create("div")
                                                     .classes("flex")
                                                     .children(
-                                                        UserTemplates.userLink(
-                                                            UserWidgetContext.card,
-                                                            item.user!
-                                                        ),
+                                                        UserTemplates.userLink(UserWidgetContext.card, item.user!),
                                                         create("span")
-                                                            .classes(
-                                                                "date",
-                                                                "text-small",
-                                                                "nopointer",
-                                                                "color-dim",
-                                                                "align-center"
-                                                            )
+                                                            .classes("date", "text-small", "nopointer", "color-dim", "align-center")
                                                             .text(Time.ago(item.created_at))
                                                             .build()
-                                                    )
-                                                    .build()
-                                            )
-                                            .build()
-                                    )
-                                    .build(),
+                                                    ).build()
+                                            ).build()
+                                    ).build(),
                                 create("div")
                                     .classes("flex", "space-outwards", "align-children")
                                     .children(
-                                        create("div")
-                                            .classes("flex", "align-children")
-                                            .children(
-                                                ...MusicTemplates.itemSpecificItems(type, item)
-                                            )
-                                            .build(),
                                         horizontal(
                                             when(
                                                 type === EntityType.track,
@@ -124,12 +85,9 @@ export class MusicTemplates {
                                             ),
                                             InteractionTemplates.interactions(type, item)
                                         ).classes("align-children")
-                                    )
-                                    .build()
-                            )
-                            .build()
-                    )
-                    .build()
+                                    ).build()
+                            ).build()
+                    ).build()
             ).build();
     }
 
@@ -173,7 +131,7 @@ export class MusicTemplates {
         const coverLoading = signal(false);
         const start = async () => startItem(type, item, { startCallback });
         const isOwnItem = compute(u => u?.id === item.user_id, currentUser);
-        const playButtonContexts = ["inline-cover", "card-cover", "queue-cover"];
+        const playButtonContexts = ["card-cover", "queue-cover"];
         const onlyShowOnHover = compute(
             id => coverContext !== "cover" && id !== item.id,
             currentTrackId
@@ -207,17 +165,7 @@ export class MusicTemplates {
                             "flex"
                         )
                         .children(
-                            GenericTemplates.deleteIconButton("delete-image-button", () =>
-                                MediaActions.deleteMedia(
-                                    fileType,
-                                    item.id,
-                                    imageState,
-                                    coverLoading
-                                )
-                            ),
-                            GenericTemplates.uploadIconButton("replace-image-button", () =>
-                                TrackActions.replaceCover(item.id, true, imageState, coverLoading)
-                            ),
+                            MusicTemplates.entityCoverButtons(fileType, item, imageState, coverLoading),
                             when(coverLoading, GenericTemplates.loadingSpinner())
                         )
                         .build()
@@ -230,6 +178,22 @@ export class MusicTemplates {
                         .build()
                 )
             ).build();
+    }
+
+    static entityCoverButtons(fileType: MediaFileType, item: Track | Playlist | Album, imageState: Signal<string>, coverLoading: Signal<boolean>) {
+        return horizontal(
+            GenericTemplates.deleteIconButton("delete-image-button", () =>
+                MediaActions.deleteMedia(
+                    fileType,
+                    item.id,
+                    imageState,
+                    coverLoading,
+                ),
+            ),
+            GenericTemplates.uploadIconButton("replace-image-button", () =>
+                TrackActions.replaceCover(item.id, true, imageState, coverLoading),
+            ),
+        );
     }
 
     static playButton(type: EntityType, itemId: number, start: Function) {
@@ -245,7 +209,6 @@ export class MusicTemplates {
             playingFrom,
             playingHere
         );
-        const icon = compute(p => (p ? Icons.PAUSE : Icons.PLAY), isPlaying);
         const onclick = async () => {
             if (playingHere.value && currentTrackId.value === itemId) {
                 await PlayManager.pauseAsync(currentTrackId.value);
@@ -253,12 +216,14 @@ export class MusicTemplates {
                 start();
             }
         };
+        const isLoading = compute((id, loading) => id === itemId && loading, currentTrackId, loadingAudio);
+        const icon = getPlayIcon(isPlaying, isLoading);
 
         return GenericTemplates.roundIconButton(
             {
                 icon,
                 isUrl: true,
-                classes: ["inline-icon", "svgInverted"],
+                classes: [compute((l): string => l ? "spinner-animation" : "_", isLoading)],
             },
             onclick
         );

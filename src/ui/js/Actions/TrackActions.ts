@@ -72,7 +72,7 @@ export class TrackActions {
         }, Icons.WARNING);
     }
 
-    static async newComment(content: Signal<string>, comments: Signal<Comment[]>, track_id: number, parentCommentId: number|null = null) {
+    static async newComment(content: Signal<string>, comments: Signal<Comment[]>, track_id: number, parentCommentId: number | null = null) {
         if (!content.value || content.value === "") {
             return;
         }
@@ -103,7 +103,7 @@ export class TrackActions {
             created_at: nowUtc,
             potentially_harmful: false,
             hidden: false,
-            canEdit: true
+            canEdit: true,
         };
         comments.value = [...comments.value, comment];
         content.value = "";
@@ -199,7 +199,7 @@ export class TrackActions {
         // Update the position property of all tracks
         tracks.value = currentTracks.map((track, index) => ({
             ...track,
-            position: index
+            position: index,
         }));
     }
 
@@ -262,5 +262,30 @@ export class TrackActions {
             Util.removeModal();
         };
         createModal([TrackEditTemplates.editTrackModal(track, confirmCallback2, cancelCallback2)], "track-edit");
+    }
+
+    static async downloadTrack(track: Track) {
+        const res = await Api.getTrackAudio(track.id);
+
+        let blob: Blob | null = null;
+        const fileName: string = `${track.artistname?.length > 0 ? track.artistname : track.user?.displayname} - ${track.title || "track"}.mp3`;
+        console.log(`Downloading ${fileName}`, res);
+
+        if (res instanceof Blob) {
+            blob = res;
+        }
+
+        if (!blob) {
+            return;
+        }
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
     }
 }

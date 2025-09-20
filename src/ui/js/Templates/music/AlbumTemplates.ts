@@ -1,16 +1,16 @@
 import { Icons } from "../../Enums/Icons.ts";
 import { AlbumActions } from "../../Actions/AlbumActions.ts";
 import { Time } from "../../Classes/Helpers/Time.ts";
-import { GenericTemplates } from "../generic/GenericTemplates.ts";
+import { GenericTemplates, horizontal } from "../generic/GenericTemplates.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { TrackTemplates } from "./TrackTemplates.ts";
 import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
 import { Images } from "../../Enums/Images.ts";
-import { Util } from "../../Classes/Util.ts";
+import { getPlayIcon, Util } from "../../Classes/Util.ts";
 import { createModal, Ui } from "../../Classes/Ui.ts";
 import { AnyNode, compute, create, InputType, nullElement, signal, Signal, when } from "@targoninc/jess";
 import { navigate, Route } from "../../Routing/Router.ts";
-import { currentTrackId, currentUser, playingFrom, playingHere } from "../../state.ts";
+import { currentTrackId, currentUser, loadingAudio, playingFrom, playingHere } from "../../state.ts";
 import { PageTemplates } from "../PageTemplates.ts";
 import { RoutePath } from "../../Routing/routes.ts";
 import { button, input, textarea, toggle } from "@targoninc/jess-components";
@@ -402,6 +402,7 @@ export class AlbumTemplates {
         Api.getAlbumById(parseInt(params.id)).then(async res => {
             if (res) {
                 data.value = res;
+                document.title = res.album.title;
                 return;
             }
             data.value = {
@@ -429,73 +430,69 @@ export class AlbumTemplates {
     }
 
     static audioActions(album: Album, canEdit: boolean) {
-        const isPlaying = compute((p, pHere) => p && p.type === "album" && p.id === album.id && pHere, playingFrom, playingHere);
+        const isPlaying = compute((p, pHere) => (p && p.type === "album" && p.id === album.id && pHere) ?? false, playingFrom, playingHere);
         const duration = album.tracks!.reduce((acc, t) => acc + (t.track?.length ?? 0), 0);
         const hasTracks = album.tracks!.length > 0;
-        const playIcon = compute(p => p ? Icons.PAUSE : Icons.PLAY, isPlaying);
+        const playIcon = getPlayIcon(isPlaying, loadingAudio);
         const playText = compute((p): string => p ? "Pause" : "Play", isPlaying);
 
-        return create("div")
-            .classes("audio-actions", "flex")
-            .children(
-                when(currentUser, create("div")
-                    .classes("flex")
-                    .children(
-                        when(hasTracks, button({
-                            text: playText,
-                            icon: {
-                                icon: playIcon,
-                                classes: ["inline-icon", "svg", "nopointer"],
-                                adaptive: true,
-                                isUrl: true,
-                            },
-                            classes: ["secondary"],
-                            attributes: ["duration", duration.toString()],
-                            id: album.id,
-                            disabled: !hasTracks,
-                            onclick: async () => {
-                                const current = currentTrackId.value;
-                                const trackInAlbum = album.tracks!.find((track) => track.track_id === current);
-                                if (trackInAlbum) {
-                                    await AlbumActions.startTrackInAlbum(album, trackInAlbum.track_id, true);
-                                } else {
-                                    const firstTrack = album.tracks![0];
-                                    await AlbumActions.startTrackInAlbum(album, firstTrack.track_id, true);
-                                }
-                            },
-                        })),
-                        MusicTemplates.addListToQueueButton(album),
-                        button({
-                            text: "Add to playlist",
-                            icon: {
-                                icon: Icons.PLAYLIST_ADD,
-                                classes: ["inline-icon", "svg", "nopointer"],
-                                adaptive: true,
-                                isUrl: true,
-                            },
-                            classes: ["secondary"],
-                            onclick: async () => {
-                                await PlaylistActions.openAddToPlaylistModal(album, "album");
-                            },
-                        }),
-                    ).build()),
-                when(canEdit, button({
-                    text: "Edit",
-                    icon: { icon: "edit" },
-                    classes: ["positive"],
+        return horizontal(
+            when(currentUser, horizontal(
+                when(hasTracks, button({
+                    text: playText,
+                    icon: {
+                        icon: playIcon,
+                        classes: ["inline-icon", "svg", "nopointer"],
+                        adaptive: true,
+                        isUrl: true,
+                    },
+                    classes: ["special", "bigger-input", "rounded-max"],
+                    attributes: ["duration", duration.toString()],
+                    id: album.id,
+                    disabled: !hasTracks,
                     onclick: async () => {
-                        createModal([AlbumTemplates.editAlbumModal(album)], "edit-album");
+                        const current = currentTrackId.value;
+                        const trackInAlbum = album.tracks!.find((track) => track.track_id === current);
+                        if (trackInAlbum) {
+                            await AlbumActions.startTrackInAlbum(album, trackInAlbum.track_id, true);
+                        } else {
+                            const firstTrack = album.tracks![0];
+                            await AlbumActions.startTrackInAlbum(album, firstTrack.track_id, true);
+                        }
                     },
                 })),
-                when(canEdit, button({
-                    text: "Delete",
-                    icon: { icon: "delete" },
-                    classes: ["negative"],
-                    onclick: async () => {
-                        await Ui.getConfirmationModal("Delete album", "Are you sure you want to delete this album?", "Yes", "No", () => AlbumActions.deleteAlbum(album.id), () => {
-                        }, Icons.WARNING);
+                MusicTemplates.addListToQueueButton(album),
+                button({
+                    text: "Add to playlist",
+                    icon: {
+                        icon: Icons.PLAYLIST_ADD,
+                        classes: ["inline-icon", "svg", "nopointer"],
+                        adaptive: true,
+                        isUrl: true,
                     },
-                })),
-            ).build();
+                    classes: ["secondary"],
+                    onclick: async () => {
+                        await PlaylistActions.openAddToPlaylistModal(album, "album");
+                    },
+                }),
+            ).build()),
+            when(canEdit, button({
+                text: "Edit",
+                icon: { icon: "edit" },
+                classes: ["positive"],
+                onclick: async () => {
+                    createModal([AlbumTemplates.editAlbumModal(album)], "edit-album");
+                },
+            })),
+            when(canEdit, button({
+                text: "Delete",
+                icon: { icon: "delete" },
+                classes: ["negative"],
+                onclick: async () => {
+                    await Ui.getConfirmationModal("Delete album", "Are you sure you want to delete this album?", "Yes", "No", () => AlbumActions.deleteAlbum(album.id), () => {
+                    }, Icons.WARNING);
+                },
+            })),
+        ).build();
     }
 }

@@ -1,4 +1,4 @@
-import {chartColor} from "../state.ts";
+import { chartColor } from "../state.ts";
 
 export class ChartOptions {
     static get defaultOptions() {

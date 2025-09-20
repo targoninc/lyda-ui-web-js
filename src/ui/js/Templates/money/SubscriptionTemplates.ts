@@ -1,14 +1,16 @@
-import {compute, signal, Signal, create, when, signalMap} from "@targoninc/jess";
-import {currency} from "../Classes/Helpers/Num.ts";
-import {getSubscriptionLink, SubscriptionActions} from "../Actions/SubscriptionActions.ts";
-import {GenericTemplates} from "./generic/GenericTemplates.ts";
-import {Time} from "../Classes/Helpers/Time.ts";
-import {RoutePath} from "../Routing/routes.ts";
-import {navigate} from "../Routing/Router.ts";
-import { button } from "@targoninc/jess-components";
-import {AvailableSubscription} from "@targoninc/lyda-shared/src/Models/db/finance/AvailableSubscription";
-import {Subscription} from "@targoninc/lyda-shared/src/Models/db/finance/Subscription";
-import {SubscriptionStatus} from "@targoninc/lyda-shared/src/Enums/SubscriptionStatus";
+import { compute, create, Signal, signal, signalMap, when } from "@targoninc/jess";
+import { button, heading } from "@targoninc/jess-components";
+import { AvailableSubscription } from "@targoninc/lyda-shared/src/Models/db/finance/AvailableSubscription";
+import { Subscription } from "@targoninc/lyda-shared/src/Models/db/finance/Subscription";
+import { SubscriptionStatus } from "@targoninc/lyda-shared/src/Enums/SubscriptionStatus";
+import { getSubscriptionLink, SubscriptionActions } from "../../Actions/SubscriptionActions.ts";
+import { GenericTemplates, vertical } from "../generic/GenericTemplates.ts";
+import { navigate } from "../../Routing/Router.ts";
+import { RoutePath } from "../../Routing/routes.ts";
+import { currency } from "../../Classes/Helpers/Num.ts";
+import { Time } from "../../Classes/Helpers/Time.ts";
+import { t } from "../../../locales";
+import { currentUser } from "../../state.ts";
 
 export class SubscriptionTemplates {
     static page() {
@@ -21,26 +23,35 @@ export class SubscriptionTemplates {
         const currency = "USD";
         const selectedOption = signal<number | null>(null);
         const optionsLoading = compute(o => o.length === 0, options);
+        const hasGiftedSubscriptions = compute(u => (u?.giftedSubscriptions?.length ?? 0) > 0, currentUser);
 
         return create("div")
-            .classes("flex-v")
+            .classes("flex-v", "card")
             .children(
-                create("h1")
-                    .text("Lyda subscription")
-                    .build(),
+                heading({
+                    level: 1,
+                    text: t("LYDA_SUBSCRIPTION"),
+                }),
                 when(currentSubscription, create("span")
                     .classes("color-dim")
-                    .text("You do not have an active subscription. Choose any of the options below to start. All prices are in USD.")
+                    .text(t("NO_ACTIVE_SUBSCRIPTION"))
                     .build(), true),
-                create("h2")
-                    .text("Your benefits")
-                    .build(),
+                heading({
+                    level: 2,
+                    text: t("YOUR_BENEFITS"),
+                }),
                 SubscriptionTemplates.subscriptionBenefits(),
                 when(optionsLoading, GenericTemplates.loadingSpinner()),
                 signalMap(options, create("div").classes("flex"),
                     (option) => SubscriptionTemplates.option(currentSubscription, selectedOption, currency, option)),
+                when(hasGiftedSubscriptions, vertical(
+                    heading({
+                        level: 2,
+                        text: t("SUBSCRIPTIONS_GIFTED"),
+                    }),
+                ).build()),
                 button({
-                    text: "Payment history",
+                    text: t("PAYMENT_HISTORY"),
                     icon: {icon: "receipt"},
                     onclick: () => navigate(RoutePath.payments)
                 }),
@@ -107,7 +118,7 @@ export class SubscriptionTemplates {
                                     .classes("limitToContentWidth", "flex")
                                     .text(option.name)
                                     .children(
-                                        when(gifted, GenericTemplates.giftIcon("This subscription has been gifted to you"))
+                                        when(gifted, GenericTemplates.giftIcon(t("GIFTED_SUBSCRIPTION"))),
                                     ).build(),
                                 create("span")
                                     .text(option.description)
@@ -141,7 +152,7 @@ export class SubscriptionTemplates {
                             .children(
                                 when(active, GenericTemplates.inlineLink(link, "Manage on PayPal")),
                                 create("div")
-                                    .classes("flex", "small-gap")
+                                    .classes("flex", "small-gap", "align-children")
                                     .children(
                                         when(active, button({
                                             classes: ["negative"],
@@ -157,8 +168,9 @@ export class SubscriptionTemplates {
                                             }
                                         })),
                                         when(enabled, button({
-                                            classes: ["special", selectedClass],
+                                            classes: ["special", selectedClass, "rounded-max"],
                                             text: buttonText,
+                                            disabled: isSelectedOption,
                                             id: option.id,
                                             onclick: async () => {
                                                 selectedOption.value = option.id;
@@ -166,7 +178,7 @@ export class SubscriptionTemplates {
                                             }
                                         })),
                                         when(isSelectedOption, button({
-                                            classes: [selectedClass],
+                                            classes: [selectedClass, "cancel-button", "rounded-max"],
                                             text: "Cancel",
                                             id: option.id,
                                             onclick: async () => {
