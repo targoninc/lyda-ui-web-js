@@ -31,6 +31,7 @@ import { GenericTemplates, horizontal, tabSelected, vertical } from "./generic/G
 import { heading } from "@targoninc/jess-components";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 import { SubscriptionTemplates } from "./money/SubscriptionTemplates.ts";
+import { t } from "../../locales";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, (route: Route, params: Record<string, string>) => Promise<AnyElement> | AnyElement> = {
@@ -94,9 +95,9 @@ export class PageTemplates {
         const name = params["name"] ?? user?.username;
 
         if (!user) {
-            notify("You need to be logged in to view your library", NotificationType.error);
+            notify(`${t("LOGIN_TO_VIEW_LIBRARY")}`, NotificationType.error);
             return create("div")
-                .text("You need to be logged in to view your library")
+                .text(t("LOGIN_TO_VIEW_LIBRARY"))
                 .build();
         }
 
@@ -115,16 +116,16 @@ export class PageTemplates {
         const user = currentUser.value;
 
         if (!user) {
-            notify("You need to be logged in to view playlists", NotificationType.error);
+            notify(`${t("LOGIN_TO_VIEW_PLAYLISTS")}`, NotificationType.error);
             return create("div")
-                .text("You need to be logged in to view playlists")
+                .text(t("LOGIN_TO_VIEW_PLAYLISTS"))
                 .build();
         }
 
         const playlist = await Api.getPlaylistById(playlistId);
         if (!playlist) {
             return create("div")
-                .text("Playlist not found")
+                .text(t("PLAYLIST_NOT_FOUND"))
                 .build();
         }
 
@@ -133,7 +134,7 @@ export class PageTemplates {
     }
 
     static async statisticsPage() {
-        const tabs = ["Your statistics", "Global"];
+        const tabs = [`${t("YOUR_STATISTICS")}`, `${t("GLOBAL")}`];
         const selectedTab = signal(0);
 
         return create("div")
@@ -163,7 +164,7 @@ export class PageTemplates {
         const track = await Api.getTrackById(trackId, code);
         if (!track) {
             return create("div")
-                .text("Track not found")
+                .text(t("TRACK_NOT_FOUND"))
                 .build();
         }
 
@@ -177,7 +178,7 @@ export class PageTemplates {
 
         if (!trackPage) {
             return create("div")
-                .text("Failed to load track")
+                .text(t("FAILED_LOADING_TRACK"))
                 .build();
         }
 
@@ -186,8 +187,10 @@ export class PageTemplates {
 
     static logoutPage() {
         AuthActions.logOutWithRedirect().then();
+
         return create("div")
-            .text("Logging out...").build();
+            .text(t("LOGGING_OUT"))
+            .build();
     }
 
     static faqPage() {
@@ -229,13 +232,13 @@ export class PageTemplates {
     }
 
     static notFoundPage() {
-        const randomUserWidget = signal(create("span").text("loading...").build());
+        const randomUserWidget = signal(create("span").text(t("LOADING")).build());
         const user = signal<User|null>(null);
 
         Api.getRandomUser()
             .then(async data => user.value = data)
             .catch(() => randomUserWidget.value = create("span")
-                .text("Failed to load random user")
+                .text(t("FAILED_LOADING_RANDOM_USER"))
                 .build());
 
         return create("div")
@@ -246,10 +249,10 @@ export class PageTemplates {
                     .text("404")
                     .build(),
                 create("h2")
-                    .text("Nothing here 👀")
+                    .text(t("NOTHING_HERE"))
                     .build(),
                 create("span")
-                    .text("If you were trying to find a user, here's a random one:")
+                    .text(t("RANDOM_USER"))
                     .build(),
                 when(user, create("div")
                     .classes("flex")
@@ -263,9 +266,9 @@ export class PageTemplates {
         const user = currentUser.value;
 
         if (!user) {
-            notify("You need to be logged in to see unapproved tracks", NotificationType.error);
+            notify(`${t("LOGIN_TO_VIEW_UNAPPROVED_TRACKS")}`, NotificationType.error);
             return create("div")
-                .text("You need to be logged in to see unapproved tracks")
+                .text(t("LOGIN_TO_VIEW_UNAPPROVED_TRACKS"))
                 .build();
         }
 
@@ -281,9 +284,9 @@ export class PageTemplates {
         const user = currentUser.value;
 
         if (!user) {
-            notify("You can only subscribe if you have an account already", NotificationType.warning);
+            notify(`${t("CAN_ONLY_SUBSCRIBE_WITH_ACCOUNT")}`, NotificationType.warning);
             return create("div")
-                .text("You need to be logged in to subscribe")
+                .text(t("LOGIN_TO_SUBSCRIBE"))
                 .build();
         }
 
@@ -297,7 +300,7 @@ export class PageTemplates {
             return vertical(
                 heading({
                     level: 1,
-                    text: "Link could not be found",
+                    text: t("LINK_NOT_FOUND"),
                     classes: ["error"],
                 }),
             ).build();
@@ -312,7 +315,7 @@ export class PageTemplates {
             horizontal(
                 heading({
                     level: 1,
-                    text: "Opening link...",
+                    text: `${t("OPENING_LINK")}...`,
                 }),
                 GenericTemplates.loadingSpinner(),
             ).classes("align-children"),
