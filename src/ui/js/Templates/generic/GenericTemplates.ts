@@ -647,8 +647,12 @@ export class GenericTemplates {
         });
     }
 
-    static checkInCorner(title = "", extraClasses: string[] = []) {
-        return create("img").classes("corner-check", ...extraClasses).title(title).src(Icons.CHECK).build();
+    static checkInCorner(title: StringOrSignal = "", extraClasses: string[] = []) {
+        return create("img")
+            .classes("corner-check", ...extraClasses)
+            .title(title)
+            .src(Icons.CHECK)
+            .build();
     }
 
     static giftIcon(title: StringOrSignal = "") {

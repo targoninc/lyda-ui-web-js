@@ -112,4 +112,10 @@ export const en = {
     BENEFIT_ARTISTS_EARN_MONEY: "Artists earn money through you",
     BENEFIT_NO_ADS: "No ads",
     BENEFIT_COMMENT_ON_TRACKS: "Comment on tracks",
+    SWITCH_PLAN: "Switch plan",
+    SUBSCRIBE: "Subscribe",
+    SUBSCRIPTION_ACTIVE: "This subscription is active",
+    WAITING_FOR_PAYMENT_CONFIRMATION: "Waiting for confirmation from payment provider",
+    PENDING: "Pending",
+    MANAGE_ON_PAYPAL: "Manage on PayPal",
 } satisfies BaseTranslation;

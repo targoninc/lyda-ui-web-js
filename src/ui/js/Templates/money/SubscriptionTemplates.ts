@@ -101,13 +101,13 @@ export class SubscriptionTemplates {
         const previousId = compute(s => s && s.previous_subscription, currentSubscription);
         const startSubClass = compute(p => "startSubscription_" + option.id + "_" + p, previousId);
         const optionMessage = signal("Available payment providers:");
-        const buttonText = compute((a): string => a ? "Switch plan" : "Subscribe", currentSubscription);
+        const buttonText = compute((a): string => a ? `${t("SWITCH_PLAN")}` : `${t("SUBSCRIBE")}`, currentSubscription);
         const link = compute(sub => getSubscriptionLink(sub), currentSubscription);
 
         return create("div")
             .classes("flex-v", "card", "relative", "subscription-option", selectedClass, activeClass, pendingClass)
             .children(
-                when(active, GenericTemplates.checkInCorner("This subscription is active")),
+                when(active, GenericTemplates.checkInCorner(t("SUBSCRIPTION_ACTIVE"))),
                 create("div")
                     .classes("flex-v", "space-outwards")
                     .children(
@@ -142,22 +142,22 @@ export class SubscriptionTemplates {
                                     ).build(),
                                 when(pending, create("span")
                                     .classes("text-small", "text-positive")
-                                    .title("Waiting for confirmation from payment provider")
-                                    .text("Pending")
+                                    .title(t("WAITING_FOR_PAYMENT_CONFIRMATION"))
+                                    .text(t("PENDING"))
                                     .build()),
                                 when(active, SubscriptionTemplates.subscribedFor(createdAt))
                             ).build(),
                         create("div")
                             .classes("flex-v", startSubClass)
                             .children(
-                                when(active, GenericTemplates.inlineLink(link, "Manage on PayPal")),
+                                when(active, GenericTemplates.inlineLink(link, t("MANAGE_ON_PAYPAL"))),
                                 create("div")
                                     .classes("flex", "small-gap", "align-children")
                                     .children(
                                         when(active, button({
                                             classes: ["negative"],
                                             id: option.id,
-                                            text: "Cancel",
+                                            text: t("CANCEL"),
                                             onclick: async () => {
                                                 const currentSub = currentSubscription.value;
                                                 if (!currentSub) {
@@ -179,7 +179,7 @@ export class SubscriptionTemplates {
                                         })),
                                         when(isSelectedOption, button({
                                             classes: [selectedClass, "cancel-button", "rounded-max"],
-                                            text: "Cancel",
+                                            text: t("CANCEL"),
                                             id: option.id,
                                             onclick: async () => {
                                                 selectedOption.value = null;

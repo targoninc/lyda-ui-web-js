@@ -112,4 +112,10 @@ export const de: Translation = {
     BENEFIT_ARTISTS_EARN_MONEY: "Künstler verdienen Geld durch dich",
     BENEFIT_NO_ADS: "Keine Werbung",
     BENEFIT_COMMENT_ON_TRACKS: "Songs kommentieren",
+    MANAGE_ON_PAYPAL: "Auf PayPal verwalten",
+    PENDING: "Ausstehend",
+    SUBSCRIBE: "Abonnieren",
+    SUBSCRIPTION_ACTIVE: "Abonnement aktiv",
+    SWITCH_PLAN: "Plan wechseln",
+    WAITING_FOR_PAYMENT_CONFIRMATION: "Warte auf Zahlungsbestätigung",
 };
