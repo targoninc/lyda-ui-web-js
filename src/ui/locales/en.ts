@@ -155,4 +155,5 @@ export const en = {
     NEW_VERSION_AVAILABLE: "New version available",
     RELEASE_DATE: "Release date",
     RELOAD: "Reload",
+    SECTION_HAS_ERRORS: "This section has errors",
 } satisfies BaseTranslation;

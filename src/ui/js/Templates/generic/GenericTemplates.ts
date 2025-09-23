@@ -100,7 +100,7 @@ export class GenericTemplates {
                     icon({
                         icon: "warning",
                         classes: ["error", "has-title"],
-                        title: "This section has errors",
+                        title: t("SECTION_HAS_ERRORS"),
                     }),
                 ).build(),
             ),
