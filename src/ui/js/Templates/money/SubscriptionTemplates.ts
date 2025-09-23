@@ -66,14 +66,14 @@ export class SubscriptionTemplates {
                 create("div")
                     .classes("scrolling", "flex")
                     .children(
-                        GenericTemplates.benefit("Listen in higher quality", "hearing"),
-                        GenericTemplates.benefit("Artists earn money through you", "attach_money"),
-                        GenericTemplates.benefit("No ads", "ad_group_off"),
-                        GenericTemplates.benefit("Comment on tracks", "comment"),
-                        GenericTemplates.benefit("Listen in higher quality", "hearing"),
-                        GenericTemplates.benefit("Artists earn money through you", "attach_money"),
-                        GenericTemplates.benefit("No ads", "ad_group_off"),
-                        GenericTemplates.benefit("Comment on tracks", "comment"),
+                        GenericTemplates.benefit(t("BENEFIT_LISTEN_HIGHER_QUALITY"), "hearing"),
+                        GenericTemplates.benefit(t("BENEFIT_ARTISTS_EARN_MONEY"), "attach_money"),
+                        GenericTemplates.benefit(t("BENEFIT_NO_ADS"), "ad_group_off"),
+                        GenericTemplates.benefit(t("BENEFIT_COMMENT_ON_TRACKS"), "comment"),
+                        GenericTemplates.benefit(t("BENEFIT_LISTEN_HIGHER_QUALITY"), "hearing"),
+                        GenericTemplates.benefit(t("BENEFIT_ARTISTS_EARN_MONEY"), "attach_money"),
+                        GenericTemplates.benefit(t("BENEFIT_NO_ADS"), "ad_group_off"),
+                        GenericTemplates.benefit(t("BENEFIT_COMMENT_ON_TRACKS"), "comment"),
                     ).build()
             ).build();
     }

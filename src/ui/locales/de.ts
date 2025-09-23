@@ -108,4 +108,8 @@ export const de: Translation = {
     NEXT_CENTURY: "Nächstes Jahrhundert",
     GIFTED_SUBSCRIPTION: "Dieses Abonnement wurde Dir geschenkt",
     PAYMENT_HISTORY: "Vergangene Zahlungen",
+    BENEFIT_LISTEN_HIGHER_QUALITY: "Höre in höherer Qualität",
+    BENEFIT_ARTISTS_EARN_MONEY: "Künstler verdienen Geld durch dich",
+    BENEFIT_NO_ADS: "Keine Werbung",
+    BENEFIT_COMMENT_ON_TRACKS: "Songs kommentieren",
 };

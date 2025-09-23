@@ -108,4 +108,8 @@ export const en = {
     LYDA_SUBSCRIPTION: "Lyda subscription",
     NO_ACTIVE_SUBSCRIPTION: "You do not have an active subscription. Choose any of the options below to start. All prices are in USD.",
     PAYMENT_HISTORY: "Payment history",
+    BENEFIT_LISTEN_HIGHER_QUALITY: "Listen in higher quality",
+    BENEFIT_ARTISTS_EARN_MONEY: "Artists earn money through you",
+    BENEFIT_NO_ADS: "No ads",
+    BENEFIT_COMMENT_ON_TRACKS: "Comment on tracks",
 } satisfies BaseTranslation;

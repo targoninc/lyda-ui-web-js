@@ -38,7 +38,7 @@ export class GenericTemplates {
         icon$: StringOrSignal,
         adaptive = false,
         classes: StringOrSignal[] = [],
-        title = "",
+        title: StringOrSignal = "",
         onclick: Function | undefined = undefined,
     ) {
         const urlIndicators = [window.location.origin, "http", "data:", "blob:"];
@@ -584,8 +584,15 @@ export class GenericTemplates {
         );
     }
 
-    static benefit(benefit: string, icon: string) {
-        return create("div").classes("benefit-item").children(GenericTemplates.icon(icon, true), create("span").text(benefit).build()).build();
+    static benefit(benefit: StringOrSignal, icon: string) {
+        return create("div")
+            .classes("benefit-item")
+            .children(
+                GenericTemplates.icon(icon, true),
+                create("span")
+                    .text(benefit)
+                    .build(),
+            ).build();
     }
 
     static modalCancelButton(modal: AnyElement | null = null) {
