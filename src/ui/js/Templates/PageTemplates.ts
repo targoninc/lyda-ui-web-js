@@ -101,7 +101,7 @@ export class PageTemplates {
                 .build();
         }
 
-        document.title = "Library - " + name;
+        document.title = `${t("LIBRARY")} - ${name}`;
         const library = await Api.getLibrary(name);
 
         if (!library) {
