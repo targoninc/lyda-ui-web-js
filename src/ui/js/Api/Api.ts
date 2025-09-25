@@ -35,6 +35,7 @@ import { PaymentHistory } from "@targoninc/lyda-shared/src/Models/db/finance/Pay
 import { Payout } from "@targoninc/lyda-shared/src/Models/db/finance/Payout";
 import { Permission } from "@targoninc/lyda-shared/src/Models/db/lyda/Permission.ts";
 import { RoyaltyMonth } from "@targoninc/lyda-shared/src/Models/RoyaltyMonth";
+import { ActionLog } from "@targoninc/lyda-shared/dist/Models/db/lyda/ActionLog";
 
 export class Api {
     //region Interactions
@@ -69,7 +70,7 @@ export class Api {
 
     //region logs
     static async getActionLogs() {
-        return get<any[]>(ApiRoutes.getActionLogs);
+        return get<ActionLog[]>(ApiRoutes.getActionLogs);
     }
 
     static async getLogs(filter: any) {

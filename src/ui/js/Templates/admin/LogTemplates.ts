@@ -2,7 +2,7 @@ import { Time } from "../../Classes/Helpers/Time.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { GenericTemplates } from "../generic/GenericTemplates.ts";
 import { copy } from "../../Classes/Util.ts";
-import { AnyElement, compute, create, signal, Signal, signalMap, when } from "@targoninc/jess";
+import { AnyElement, compute, create, signal, Signal, signalMap, StringOrSignal, when } from "@targoninc/jess";
 import { Api } from "../../Api/Api.ts";
 import { truncateText } from "../../Classes/Helpers/CustomText.ts";
 import { DashboardTemplates } from "./DashboardTemplates.ts";
@@ -11,6 +11,9 @@ import { button, toggle } from "@targoninc/jess-components";
 import { Log } from "@targoninc/lyda-shared/src/Models/db/lyda/Log";
 import { LogLevel } from "@targoninc/lyda-shared/src/Enums/LogLevel";
 import { PillOption } from "../../Models/PillOption.ts";
+import { ActionLog } from "@targoninc/lyda-shared/dist/Models/db/lyda/ActionLog";
+import { t } from "../../../locales";
+import { sortByProperty } from "../../Classes/Helpers/Sorting.ts";
 
 export class LogTemplates {
     static actionLogsPage() {
@@ -21,7 +24,7 @@ export class LogTemplates {
     }
 
     static actionLogsView() {
-        const actionLogs = signal<any[]>([]);
+        const actionLogs = signal<ActionLog[]>([]);
         Api.getActionLogs().then(res => {
             if (res) {
                 actionLogs.value = res;
@@ -31,13 +34,18 @@ export class LogTemplates {
         return LogTemplates.actionLogs(actionLogs);
     }
 
-    static actionLogs(logs: Signal<any[]>) {
+    static actionLogs(logs: Signal<ActionLog[]>) {
+        const currentSortProperty = signal<keyof ActionLog | null>(null);
+        const sorted = compute((l, c) => {
+            return sortByProperty(c, l);
+        }, logs, currentSortProperty);
+
         return create("table")
             .classes("logs")
             .attributes("cellspacing", "0", "cellpadding", "0")
             .children(
-                LogTemplates.logsTableHeader(),
-                signalMap(logs, create("tbody"), l => LogTemplates.actionLogEntry(l)),
+                LogTemplates.actionLogsTableHeader(currentSortProperty),
+                signalMap(sorted, create("tbody"), l => LogTemplates.actionLogEntry(l)),
             ).build();
     }
 
@@ -67,48 +75,73 @@ export class LogTemplates {
             ).build();
     }
 
-    private static logsTableHeader() {
+    private static actionLogsTableHeader(currentSortHeader: Signal<keyof ActionLog | null>) {
         return create("thead")
             .children(
                 create("tr")
                     .classes("log")
                     .children(
-                        GenericTemplates.tableHeader("Timestamp", "log-timestamp"),
-                        GenericTemplates.tableHeader("User", "log-user"),
-                        GenericTemplates.tableHeader("Action Name", "log-action-name"),
-                        GenericTemplates.tableHeader("Actioned User", "log-user"),
-                        GenericTemplates.tableHeader("Properties", "log-properties"),
+                        GenericTemplates.tableHeader<ActionLog>("Timestamp", "created_at", currentSortHeader),
+                        GenericTemplates.tableHeader<ActionLog>("User", "user_id", currentSortHeader),
+                        GenericTemplates.tableHeader<ActionLog>("Action Name", "action_name", currentSortHeader),
+                        GenericTemplates.tableHeader<ActionLog>("Actioned User", "actioned_user_id", currentSortHeader),
+                        GenericTemplates.tableHeader<ActionLog>("Properties", "additional_info", currentSortHeader),
                     ).build(),
             ).build();
     }
 
     static logs(data: Log[]) {
-        const headers = ["Timestamp", "Host", "Log Level", "Message", "Stack", "Properties"];
-        const headerDefinitions = headers.map(h => ({
-            title: h,
-            className: h.toLowerCase().replaceAll(" ", "-"),
-        }));
-        const logLevelMap: Record<number, string> = {
-            [LogLevel.debug]: "Debug",
-            [LogLevel.success]: "Success",
-            [LogLevel.info]: "Info",
-            [LogLevel.warning]: "Warning",
-            [LogLevel.error]: "Error",
-            [LogLevel.critical]: "Critical",
-            [LogLevel.unknown]: "Unknown",
+        const headers: { title: StringOrSignal, property: keyof Log }[] = [
+            {
+                title: t("TIMESTAMP"),
+                property: "time",
+            },
+            {
+                title: t("HOST"),
+                property: "host",
+            },
+            {
+                title: t("LOG_LEVEL"),
+                property: "logLevel",
+            },
+            {
+                title: t("MESSAGE"),
+                property: "message",
+            },
+            {
+                title: t("STACK"),
+                property: "stack",
+            },
+            {
+                title: t("PROPERTIES"),
+                property: "properties",
+            },
+        ];
+        const logLevelMap: Record<number, [StringOrSignal, string]> = {
+            [LogLevel.debug]: [t("DEBUG"), "debug"],
+            [LogLevel.success]: [t("SUCCESS"), "success"],
+            [LogLevel.info]: [t("INFO"), "info"],
+            [LogLevel.warning]: [t("WARNING"), "warning"],
+            [LogLevel.error]: [t("ERROR"), "error"],
+            [LogLevel.critical]: [t("CRITICAL"), "critical"],
+            [LogLevel.unknown]: [t("UNKNOWN"), "unknown"],
         };
+        const logs = signal(data);
+        const sortBy$ = signal<keyof Log | null>("time");
+        const filtered = compute(sortByProperty, sortBy$, logs);
 
         return GenericTemplates.tableBody(
-            GenericTemplates.tableHeaders(headerDefinitions),
-            create("tbody")
-                .children(
-                    ...data.map(l => LogTemplates.logEntry(logLevelMap, l))
-                ).build(),
+            GenericTemplates.tableHeaders(headers, sortBy$),
+            signalMap(
+                filtered,
+                create("tbody"),
+                l => LogTemplates.logEntry(logLevelMap, l),
+            ),
         );
     }
 
-    private static logEntry(logLevelMap: Record<number, string>, l: Log) {
-        const type = logLevelMap[l.logLevel].toLowerCase();
+    private static logEntry(logLevelMap: Record<number, [StringOrSignal, string]>, l: Log) {
+        const type = logLevelMap[l.logLevel][1];
         const ago = Time.agoUpdating(new Date(l.time), true);
         const timestamp = compute(t => Time.toTimeString(l.time) + " | " + t, ago);
 
@@ -125,7 +158,7 @@ export class LogTemplates {
                     .build(),
                 create("td")
                     .classes("log-level")
-                    .text(logLevelMap[l.logLevel])
+                    .text(logLevelMap[l.logLevel][0])
                     .build(),
                 create("td")
                     .classes("log-message", type, "color-dim", "text-small")
@@ -252,7 +285,7 @@ export class LogTemplates {
                     .children(
                         LogTemplates.logFilters(filterState),
                         button({
-                            text: "Refresh",
+                            text: t("REFRESH"),
                             icon: { icon: "refresh" },
                             classes: ["positive"],
                             onclick: async () => {
@@ -261,7 +294,7 @@ export class LogTemplates {
                             }
                         }),
                         toggle({
-                            text: "Auto-refresh",
+                            text: t("AUTO_REFRESH"),
                             id: "auto-refresh",
                             checked: refreshOnInterval,
                             onchange: (v) => {
@@ -276,27 +309,27 @@ export class LogTemplates {
     static logFilters(pillState: Signal<LogLevel>) {
         const filterMap: Record<string, Partial<PillOption>> = {
             debug: {
-                text: "Debug",
+                text: t("DEBUG"),
                 icon: "bug_report",
                 value: LogLevel.debug
             },
             success: {
-                text: "Success",
+                text: t("SUCCESS"),
                 icon: "check",
                 value: LogLevel.success
             },
             info: {
-                text: "Info",
+                text: t("INFO"),
                 icon: "info",
                 value: LogLevel.info
             },
             warnings: {
-                text: "Warnings",
+                text: t("WARNING"),
                 icon: "warning",
                 value: LogLevel.warning
             },
             errors: {
-                text: "Errors",
+                text: t("ERROR"),
                 icon: "report",
                 value: LogLevel.error
             },

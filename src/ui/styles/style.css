@@ -826,17 +826,24 @@ textarea.fullWidth {
 }
 
 .table-header {
+    font-weight: normal;
+    opacity: .75;
+}
+
+.table-header.sorted {
     font-weight: bold;
-    padding: var(--inline-padding);
-    border-radius: var(--border-radius);
-    background: var(--blue-dark);
-    border: 1px solid var(--blue);
+    color: var(--blue);
+    opacity: 1;
 }
 
 th {
     text-wrap: nowrap;
     padding: var(--base-padding) !important;
     background: var(--color-6);
+}
+
+th.sortable {
+    cursor: pointer;
 }
 
 th, td {
