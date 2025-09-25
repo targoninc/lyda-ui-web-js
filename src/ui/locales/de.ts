@@ -1,6 +1,9 @@
 import { Translation } from "./index.ts";
 
 export const de: Translation = {
+    COPY_STACK: "Stack kopieren",
+    FILTER_BY_USER_ID: "Nach Nutzer-ID filtern",
+    POTENTIALLY_HARMFUL: "Möglicherweise verletzend",
     ACTION_LOGS: "Aktionsprotokolle",
     AUTO_REFRESH: "Automatisch aktualisieren",
     CRITICAL: "Kritisch",

@@ -170,7 +170,7 @@ export class LogTemplates {
                     .classes("log-stack")
                     .children(
                         button({
-                            text: "Copy stack",
+                            text: t("COPY_STACK"),
                             icon: {icon: "content_copy"},
                             onclick: () => copy(l.stack)
                         }),
@@ -192,7 +192,7 @@ export class LogTemplates {
             .styles("position", "relative")
             .children(
                 button({
-                    text: "Info",
+                    text: t("INFO"),
                     icon: { icon: "info" },
                     onclick: () => {
                         shown.value = !shown.value;
