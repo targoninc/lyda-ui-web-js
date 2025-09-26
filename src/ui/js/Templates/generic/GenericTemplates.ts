@@ -32,13 +32,14 @@ import { SearchResult } from "@targoninc/lyda-shared/src/Models/SearchResult";
 import { Filter } from "@targoninc/lyda-shared/src/Models/Filter";
 import { ProgressState } from "@targoninc/lyda-shared/src/Enums/ProgressState";
 import { ProgressPart } from "../../Models/ProgressPart.ts";
+import { t } from "../../../locales";
 
 export class GenericTemplates {
     static icon(
         icon$: StringOrSignal,
         adaptive = false,
         classes: StringOrSignal[] = [],
-        title = "",
+        title: StringOrSignal = "",
         onclick: Function | undefined = undefined,
     ) {
         const urlIndicators = [window.location.origin, "http", "data:", "blob:"];
@@ -99,7 +100,7 @@ export class GenericTemplates {
                     icon({
                         icon: "warning",
                         classes: ["error", "has-title"],
-                        title: "This section has errors",
+                        title: t("SECTION_HAS_ERRORS"),
                     }),
                 ).build(),
             ),
@@ -123,7 +124,7 @@ export class GenericTemplates {
 
     static logoutButton(classes: string[] = []) {
         return button({
-            text: "Log out",
+            text: t("LOG_OUT"),
             classes: ["negative", ...classes],
             icon: { icon: "logout" },
             onclick: async () => {
@@ -133,7 +134,10 @@ export class GenericTemplates {
     }
 
     static lock() {
-        return create("img").classes("inline-icon", "svg", "nopointer").attributes("src", Icons.LOCK, "title", "Private").build();
+        return create("img")
+            .classes("inline-icon", "svg", "nopointer")
+            .attributes("src", Icons.LOCK, "title", t("PRIVATE"))
+            .build();
     }
 
     static title(title: HtmlPropertyValue, icons = []) {
@@ -141,28 +145,52 @@ export class GenericTemplates {
     }
 
     static missingPermission() {
-        return create("div").classes("flex-v").children(
-            create("span").classes("warning").text("Nothing for you here, unfortunately.").build(),
-            button({
-                text: "Go explore somewhere else",
-                onclick: () => navigate(RoutePath.explore),
-                icon: { icon: "explore" },
-            }),
-        ).build();
+        return create("div")
+            .classes("flex-v")
+            .children(
+                create("span")
+                    .classes("warning")
+                    .text(t("NOTHING_FOR_YOU_HERE"))
+                    .build(),
+                button({
+                    text: t("GO_EXPLORE_SOMEWHERE_ELSE"),
+                    onclick: () => navigate(RoutePath.explore),
+                    icon: { icon: "explore" },
+                }),
+            ).build();
     }
 
     static tableBody(...children: AnyNode[]) {
         return create("table").classes("fixed-bar-content").attributes("cellspacing", "0", "cellpadding", "0").children(...children).build();
     }
 
-    static tableHeaders(headerDefinitions: { title: string; className?: string }[]) {
+    static tableHeaders<T>(headerDefinitions: {
+        title: StringOrSignal;
+        property?: string
+    }[], currentSortProperty: Signal<keyof T | null> = signal<keyof T | null>(null)) {
         return create("thead").children(
-            create("tr").classes("log").children(...headerDefinitions.map(h => GenericTemplates.tableHeader(h.title, h.className))).build(),
+            create("tr")
+                .classes("log")
+                .children(
+                    ...headerDefinitions.map(h => GenericTemplates.tableHeader<T>(h.title, h.property as keyof T, currentSortProperty)),
+                ).build(),
         ).build();
     }
 
-    static tableHeader(title: string, type?: string) {
-        return create("th").classes(type ?? "_").children(create("span").classes("table-header").text(title).build()).build();
+    static tableHeader<T = any>(title: StringOrSignal, property: keyof T, currentSortProperty: Signal<keyof T | null>) {
+        return create("th")
+            .classes(`log-property-${property as string}`, "sortable")
+            .onclick(() => {
+                if (property) {
+                    currentSortProperty.value = property;
+                }
+            })
+            .children(
+                create("span")
+                    .classes("table-header", compute((s): string => s === property ? "sorted" : "normal", currentSortProperty))
+                    .text(title)
+                    .build(),
+            ).build();
     }
 
     static text(text: HtmlPropertyValue, extraClasses: string[] = []) {
@@ -202,7 +230,7 @@ export class GenericTemplates {
 
     static newAlbumButton(classes: string[] = []) {
         return button({
-            text: "New album",
+            text: t("NEW_ALBUM"),
             icon: { icon: "forms_add_on" },
             classes,
             onclick: async () => {
@@ -213,7 +241,7 @@ export class GenericTemplates {
 
     static newPlaylistButton(classes: string[] = []) {
         return button({
-            text: "New playlist",
+            text: t("NEW_PLAYLIST"),
             icon: { icon: "playlist_add" },
             classes,
             onclick: async () => {
@@ -224,7 +252,7 @@ export class GenericTemplates {
 
     static newTrackButton(classes: string[] = []) {
         return button({
-            text: "Upload",
+            text: t("UPLOAD"),
             icon: { icon: "upload" },
             classes,
             onclick: () => navigate(RoutePath.upload),
@@ -249,14 +277,19 @@ export class GenericTemplates {
     }
 
     static verifiedWithDate(date: Date) {
-        return create("div").classes("flex", "noflexwrap", "small-gap", "align-children").children(
-            icon({
-                icon: "new_releases",
-                adaptive: true,
-                classes: ["text-positive"],
-            }),
-            create("span").classes("text-positive").text("Verified on " + Util.formatDate(date)).build(),
-        ).build();
+        return create("div")
+            .classes("flex", "noflexwrap", "small-gap", "align-children")
+            .children(
+                icon({
+                    icon: "new_releases",
+                    adaptive: true,
+                    classes: ["text-positive"],
+                }),
+                create("span")
+                    .classes("text-positive")
+                    .text(t("VERIFIED_ON", Util.formatDate(date)))
+                    .build(),
+            ).build();
     }
 
     static pills(
@@ -265,15 +298,21 @@ export class GenericTemplates {
         extraClasses: string[] = [],
         loadingState: Signal<boolean> | null = null,
     ) {
-        return create("div").classes("flex", "pill-container", ...extraClasses).children(
-            ...options.map(p => {
-                return GenericTemplates.pill(p, pillState);
-            }),
-            when(
-                loadingState,
-                create("img").src(Icons.SPINNER).alt("Loading...").classes("spinner-animation", "icon", "align-center", "nopointer").build(),
-            ),
-        ).build();
+        return create("div")
+            .classes("flex", "pill-container", ...extraClasses)
+            .children(
+                ...options.map(p => {
+                    return GenericTemplates.pill(p, pillState);
+                }),
+                when(
+                    loadingState,
+                    create("img")
+                        .src(Icons.SPINNER)
+                        .alt(t("LOADING"))
+                        .classes("spinner-animation", "icon", "align-center", "nopointer")
+                        .build(),
+                ),
+            ).build();
     }
 
     static deleteIconButton(id: HtmlPropertyValue, callback: Function, extraClasses: string[] = []) {
@@ -285,7 +324,7 @@ export class GenericTemplates {
                 callback();
             },
             icon: { icon: "delete" },
-            title: "Delete",
+            title: t("DELETE"),
             text: "",
         });
     }
@@ -299,7 +338,7 @@ export class GenericTemplates {
                 callback();
             },
             icon: { icon: "upload" },
-            title: "Upload",
+            title: t("UPLOAD"),
             text: "",
         });
     }
@@ -308,7 +347,7 @@ export class GenericTemplates {
         return create("div").classes("card").build();
     }
 
-    static notification(type: NotificationType = NotificationType.success, text = "Success!") {
+    static notification(type: NotificationType = NotificationType.success, text: HtmlPropertyValue = t("SUCCESS")) {
         return create("div").classes("notification", type).text(text).build();
     }
 
@@ -325,7 +364,7 @@ export class GenericTemplates {
         const fileButton = button({
             text: text,
             onclick: () => {
-                text.value = "Choosing file...";
+                text.value = `${t("CHOOSING_FILE")}`;
                 input.click();
             },
         }) as HTMLButtonElement;
@@ -335,7 +374,7 @@ export class GenericTemplates {
                 const accepts = accept.split(",");
                 const extension = fileName.substring(fileName.lastIndexOf(".") + 1);
                 if (!accepts.includes(extension)) {
-                    text.value = "Not supported type.";
+                    text.value = `${t("NOT_SUPPORTED_TYPE")}`;
                     return;
                 }
             }
@@ -396,13 +435,13 @@ export class GenericTemplates {
             create("p").text(text).build(),
             create("div").classes("flex").children(
                 button({
-                    text: confirmText ?? "Confirm",
+                    text: confirmText ?? t("CONFIRM"),
                     onclick: confirmCallback,
                     classes: ["positive"],
                     icon: { icon: "check" },
                 }),
                 button({
-                    text: cancelText ?? "Cancel",
+                    text: cancelText ?? t("CANCEL"),
                     onclick: cancelCallback,
                     classes: ["negative"],
                     icon: { icon: "close" },
@@ -429,7 +468,7 @@ export class GenericTemplates {
         return horizontal(
             GenericTemplates.graphic("no_track_found.svg"),
             create("span")
-                .text("No tracks found")
+                .text(t("NO_TRACKS_FOUND"))
                 .build(),
         ).classes("align-children")
          .build();
@@ -463,13 +502,13 @@ export class GenericTemplates {
             }),
             create("div").classes("flex").children(
                 button({
-                    text: confirmText ?? "Confirm",
+                    text: confirmText ?? t("CONFIRM"),
                     onclick: confirmCallback,
                     classes: ["positive"],
                     icon: { icon: "check" },
                 }),
                 button({
-                    text: cancelText ?? "Cancel",
+                    text: cancelText ?? t("CANCEL"),
                     onclick: cancelCallback,
                     classes: ["negative"],
                     icon: { icon: "close" },
@@ -506,13 +545,13 @@ export class GenericTemplates {
             }),
             create("div").classes("flex").children(
                 button({
-                    text: confirmText ?? "Confirm",
+                    text: confirmText ?? t("CONFIRM"),
                     onclick: confirmCallback,
                     classes: ["positive"],
                     icon: { icon: "check" },
                 }),
                 button({
-                    text: cancelText ?? "Cancel",
+                    text: cancelText ?? t("CANCEL"),
                     onclick: cancelCallback,
                     classes: ["negative"],
                     icon: { icon: "close" },
@@ -584,8 +623,15 @@ export class GenericTemplates {
         );
     }
 
-    static benefit(benefit: string, icon: string) {
-        return create("div").classes("benefit-item").children(GenericTemplates.icon(icon, true), create("span").text(benefit).build()).build();
+    static benefit(benefit: StringOrSignal, icon: string) {
+        return create("div")
+            .classes("benefit-item")
+            .children(
+                GenericTemplates.icon(icon, true),
+                create("span")
+                    .text(benefit)
+                    .build(),
+            ).build();
     }
 
     static modalCancelButton(modal: AnyElement | null = null) {
@@ -640,8 +686,12 @@ export class GenericTemplates {
         });
     }
 
-    static checkInCorner(title = "", extraClasses: string[] = []) {
-        return create("img").classes("corner-check", ...extraClasses).title(title).src(Icons.CHECK).build();
+    static checkInCorner(title: StringOrSignal = "", extraClasses: string[] = []) {
+        return create("img")
+            .classes("corner-check", ...extraClasses)
+            .title(title)
+            .src(Icons.CHECK)
+            .build();
     }
 
     static giftIcon(title: StringOrSignal = "") {
@@ -721,8 +771,10 @@ export class GenericTemplates {
                         },
                     });
                 }),
-                create("span").text(compute(e => e.length + " results", results)).build(),
-                when(docsLink, GenericTemplates.inlineLink(docsLink ?? "", "Docs", true)),
+                create("span")
+                    .text(compute(e => `${t("N_RESULTS", e.length)}`, results))
+                    .build(),
+                when(docsLink, GenericTemplates.inlineLink(docsLink ?? "", t("DOCS"), true)),
             ).build(),
             signalMap(filteredResults, create("div").classes("flex-v", "fixed-bar-content"), entryFunction),
         ).build();
@@ -768,7 +820,9 @@ export class GenericTemplates {
                     retryable,
                     create("div").classes("progress-section-retry", "flex", "small-gap").children(
                         GenericTemplates.icon("refresh", true, [state]),
-                        create("span").classes("progress-section-part-text").text("Retry").onclick(() => (retryFunction.value ? retryFunction.value() : () => {
+                        create("span")
+                            .classes("progress-section-part-text")
+                            .text(t("RETRY")).onclick(() => (retryFunction.value ? retryFunction.value() : () => {
                         })).build(),
                     ).build(),
                 ),
@@ -791,7 +845,7 @@ export class GenericTemplates {
         return input<string>({
             type: InputType.date,
             name: "release_date",
-            label: "Release Date",
+            label: t("RELEASE_DATE"),
             placeholder: "YYYY-MM-DD",
             value: compute(s => dayFromValue(s.release_date), state),
             onchange: v => {
@@ -803,10 +857,16 @@ export class GenericTemplates {
     static updateAvailable(version: string) {
         return create("div").classes("update-available").children(
             create("div").classes("card", "flex-v").children(
-                create("span").classes("text-large").text(`Update available (v${version})`).build(),
-                create("span").classes("text-small").text("A new version of Lyda is available.").build(),
+                create("span")
+                    .classes("text-large")
+                    .text(t("UPDATE_AVAILABLE_VERSION", version))
+                    .build(),
+                create("span")
+                    .classes("text-small")
+                    .text(t("NEW_VERSION_AVAILABLE"))
+                    .build(),
                 button({
-                    text: "Reload",
+                    text: t("RELOAD"),
                     onclick: () => {
                         // @ts-expect-error because it works on firefox
                         window.location.reload(true);

@@ -44,6 +44,7 @@ import { Api } from "../../Api/Api.ts";
 import { TrackCollaborator } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
 import { TrackEditTemplates } from "../music/TrackEditTemplates.ts";
 import { CollaboratorType } from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType.ts";
+import { t } from "../../../locales";
 
 export class UserTemplates {
     static userWidget(
@@ -313,7 +314,7 @@ export class UserTemplates {
                 adaptive: true,
                 classes: ["svg"],
             },
-            text: noText ? "" : compute((f): string => (f ? "Unfollow" : "Follow"), following),
+            text: noText ? "" : compute((f): string => (f ? `${t("UNFOLLOW")}` : `${t("FOLLOW")}`), following),
             onclick: async () => {
                 await TrackActions.toggleFollow(user_id, following);
             },
@@ -323,7 +324,8 @@ export class UserTemplates {
     static followsBackIndicator() {
         return create("span")
             .classes("padded-inline", "rounded-max", "text-small", "invertedTextWithBackground")
-            .text("Follows you").build();
+            .text(t("FOLLOWS_YOU"))
+            .build();
     }
 
     static profileTrackList(entityType: EntityType, tracks: Track[], isOwnProfile: boolean) {
@@ -354,7 +356,7 @@ export class UserTemplates {
         const hasTracks = compute(t => t.length > 0, unapprovedTracks);
 
         return when(hasTracks, button({
-            text: compute(t => `${t.length} unapproved tracks`, unapprovedTracks),
+            text: compute(tracks => `${t("UNAPPROVED_TRACKS", tracks.length)}`, unapprovedTracks),
             icon: { icon: "order_approve" },
             onclick: () => navigate(RoutePath.unapprovedTracks),
         }));
@@ -373,7 +375,7 @@ export class UserTemplates {
                user.value = u;
                document.title = u?.displayname ?? "";
                if (!user && isOwnProfile) {
-                   notify("You need to be logged in to see your profile", NotificationType.error);
+                   notify(`${t("LOGIN_TO_VIEW_PROFILE")}`, NotificationType.error);
                    return;
                }
            })
@@ -394,7 +396,10 @@ export class UserTemplates {
                         .build(),
                     true,
                 ),
-                when(notFound, vertical(create("span").text("User not found")).build()),
+                when(notFound, vertical(
+                    create("span")
+                        .text(t("USER_NOT_FOUND")),
+                ).build()),
             ).build();
     }
 
@@ -418,7 +423,7 @@ export class UserTemplates {
     }
 
     static profileTabs(user: User, isOwnProfile: boolean) {
-        const tabs = ["Tracks", "Albums", "Playlists", "Reposts", "Listening History"];
+        const tabs = [`${t("TRACKS")}`, `${t("ALBUMS")}`, `${t("PLAYLISTS")}`, `${t("REPOSTS")}`, `${t("LISTENING_HISTORY")}`];
         const urlTabs = tabs.map(t => t.toLowerCase().replace(/\s/g, "-"));
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -471,18 +476,18 @@ export class UserTemplates {
                             .children(
                                 button({
                                     classes: ["positive"],
-                                    text: "Create",
+                                    text: t("CREATE"),
                                     icon: { icon: "add" },
                                     onclick: UiActions.openCreateMenu,
                                 }),
                                 button({
-                                    text: "Edit tracks",
+                                    text: t("EDIT_TRACKS"),
                                     icon: { icon: "edit_note" },
                                     onclick: () => navigate(RoutePath.editTracks),
                                     classes: ["hideOnMidBreakpoint"],
                                 }),
                                 button({
-                                    text: "Statistics",
+                                    text: t("STATISTICS"),
                                     icon: { icon: "finance" },
                                     onclick: () => navigate(RoutePath.statistics),
                                 }),
@@ -493,7 +498,7 @@ export class UserTemplates {
                             .classes("flex")
                             .children(
                                 button({
-                                    text: "Settings",
+                                    text: t("SETTINGS"),
                                     icon: { icon: "settings" },
                                     onclick: () => navigate(RoutePath.settings),
                                 }),
@@ -511,7 +516,7 @@ export class UserTemplates {
                 create("img")
                     .attributes("src", Icons.VERIFIED)
                     .attributes("alt", "Verified")
-                    .attributes("title", "Verified")
+                    .attributes("title", t("VERIFIED"))
                     .build(),
             ).build();
     }
@@ -556,8 +561,7 @@ export class UserTemplates {
                         .children(
                             UserTemplates.bannerDeleteButton(user, userBanner, bannerLoading),
                             UserTemplates.bannerReplaceButton(user, userBanner, bannerLoading),
-                        )
-                        .build(),
+                        ).build(),
                 ),
                 when(
                     bannerLoading,
@@ -673,12 +677,10 @@ export class UserTemplates {
                         .children(
                             GenericTemplates.icon("warning", true, ["warning"]),
                             create("span")
-                                .text(
-                                    "Your primary email is not verified. Please verify it to ensure you can recover your account.",
-                                )
+                                .text(t("PRIMARY_EMAIL_NOT_VERIFIED"))
                                 .build(),
                             button({
-                                text: "Go to settings",
+                                text: t("GO_TO_SETTINGS"),
                                 icon: { icon: "settings" },
                                 classes: ["positive"],
                                 onclick: () => navigate(RoutePath.settings),
@@ -711,7 +713,7 @@ export class UserTemplates {
                     })),
                     when(menuShown, vertical(
                         when(verified, button({
-                            text: "Verify",
+                            text: t("VERIFY"),
                             icon: { icon: "verified" },
                             classes: ["positive"],
                             onclick: async () => {
@@ -720,7 +722,7 @@ export class UserTemplates {
                             },
                         }), true),
                         when(verified, button({
-                            text: "Unverify",
+                            text: t("UNVERIFY"),
                             icon: { icon: "close" },
                             classes: ["negative"],
                             onclick: async () => {
@@ -804,7 +806,7 @@ export class UserTemplates {
         const albumsContainer = UserTemplates.listCards(EntityType.album, albums, false);
         const playlistsContainer = UserTemplates.listCards(EntityType.playlist, playlists, false);
 
-        const tabs = ["Tracks", "Albums", "Playlists"];
+        const tabs = [`${t("TRACKS")}`, `${t("ALBUMS")}`, `${t("PLAYLISTS")}`];
         const tabContents = [tracksContainer, albumsContainer, playlistsContainer];
         const tabSelector = GenericTemplates.combinedSelector(
             tabs,
@@ -819,7 +821,7 @@ export class UserTemplates {
         return create("div")
             .classes("flex-v")
             .children(
-                GenericTemplates.title("Your liked music"),
+                GenericTemplates.title(t("YOUR_LIKED_MUSIC")),
                 tabSelector,
                 tracksContainer,
                 albumsContainer,
@@ -830,7 +832,11 @@ export class UserTemplates {
     static libraryTracks(tracks: Track[]) {
         let children;
         if (tracks.length === 0) {
-            children = [create("span").text("Like some tracks to see them here").build()];
+            children = [
+                create("span")
+                    .text(t("LIKE_TRACKS_TO_SEE"))
+                    .build(),
+            ];
         } else {
             children = tracks.map((track: Track) => MusicTemplates.feedEntry(EntityType.track, track));
         }
@@ -844,7 +850,11 @@ export class UserTemplates {
         const update = (playlists: Playlist[]) => {
             let children;
             if (playlists.length === 0) {
-                children = [create("span").text("Like some playlists to see them here").build()];
+                children = [
+                    create("span")
+                        .text(t("LIKE_PLAYLISTS_TO_SEE"))
+                        .build(),
+                ];
             } else {
                 children = playlists.map((playlist: Playlist) => PlaylistTemplates.playlistCard(playlist));
             }
@@ -927,7 +937,7 @@ export class UserTemplates {
 
         return button({
             icon: { icon: "edit_note" },
-            text: "Edit description",
+            text: t("EDIT_DESCRIPTION"),
             onclick: async (e: Event) => {
                 e.preventDefault();
                 UserActions.editDescription(descState.value, (newDescription: string) => {
@@ -945,16 +955,19 @@ export class UserTemplates {
     static notPublicLibrary(name: string) {
         return create("div")
             .classes("card", "rounded", "padded", "flex-v")
-            .children(create("span").classes("text").text(`Liked content from user "${name}" is not public`).build()).build();
+            .children(
+                create("span")
+                    .classes("text")
+                    .text(t("LIBRARY_NOT_PUBLIC", name))
+                    .build(),
+            ).build();
     }
 
     private static userPreview(user: User, context: UserWidgetContext) {
         return create("div")
             .classes(
                 context === UserWidgetContext.player ? "popout-above" : "popout-below",
-                "user-preview",
-                "flex-v",
-                "small-gap",
+                "user-preview", "flex-v", "small-gap",
             )
             .children(
                 UserTemplates.profileHeader(

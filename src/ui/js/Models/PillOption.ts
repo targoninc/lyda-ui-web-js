@@ -1,5 +1,7 @@
+import { StringOrSignal } from "@targoninc/jess";
+
 export interface PillOption {
-    text: string;
+    text: StringOrSignal;
     value?: any;
     icon?: string;
     onclick?: Function;

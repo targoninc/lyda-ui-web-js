@@ -7,6 +7,8 @@ import { button, input, toggle } from "@targoninc/jess-components";
 import { Permissions } from "@targoninc/lyda-shared/src/Enums/Permissions";
 import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import { Api } from "../../Api/Api.ts";
+import { ModerationFilter } from "../../Models/ModerationFilter.ts";
+import { t } from "../../../locales";
 
 export class ModerationCommentsTemplates {
     static commentModerationPage() {
@@ -18,22 +20,24 @@ export class ModerationCommentsTemplates {
 
     static commentListWithFilter() {
         const commentsList = signal<AnyElement>(create("div").build());
-        const filterState = signal({
+        const filterState = signal<ModerationFilter>({
             potentiallyHarmful: true,
             user_id: null,
             offset: 0,
             limit: 100
         });
         const loading = signal(false);
-        filterState.subscribe(async (newFilter) => {
+
+        const update = async (newFilter: ModerationFilter) => {
             commentsList.value = create("div").build();
-            Api.getModerationComments(newFilter, loading, async (comments: Comment[]) => {
+            const comments = await Api.getModerationComments(newFilter, loading);
+            if (comments) {
                 commentsList.value = ModerationCommentsTemplates.moderatableCommentsList(comments);
-            });
-        });
-        Api.getModerationComments(filterState.value, loading, async (comments: Comment[]) => {
-            commentsList.value = ModerationCommentsTemplates.moderatableCommentsList(comments);
-        });
+            }
+        }
+
+        filterState.subscribe(update);
+        update(filterState.value).then();
 
         return create("div")
             .classes("flex-v")
@@ -43,14 +47,11 @@ export class ModerationCommentsTemplates {
                     .children(
                         ModerationCommentsTemplates.commentFilters(filterState),
                         button({
-                            text: "Refresh",
+                            text: t("REFRESH"),
                             icon: { icon: "refresh" },
                             classes: ["positive"],
                             onclick: async () => {
-                                commentsList.value = create("div").build();
-                                Api.getModerationComments(filterState.value, loading, async (comments: Comment[]) => {
-                                    commentsList.value = ModerationCommentsTemplates.moderatableCommentsList(comments);
-                                });
+                                await update(filterState.value);
                             }
                         })
                     ).build(),
@@ -64,12 +65,13 @@ export class ModerationCommentsTemplates {
         const userId = compute(f => f.user_id, filter);
         const offset = compute(f => f.offset, filter);
         const limit = compute(f => f.limit, filter);
+        // TODO: Implement
 
         return create("div")
             .classes("flex", "align-children")
             .children(
                 toggle({
-                    text: "Potentially harmful",
+                    text: t("POTENTIALLY_HARMFUL"),
                     checked: potentiallyHarmful,
                     onchange: (v) => {
                         filter.value = { ...filter.value, potentiallyHarmful: v };
@@ -81,7 +83,7 @@ export class ModerationCommentsTemplates {
                         input<number>({
                             type: InputType.number,
                             name: "user_id",
-                            placeholder: "Filter by user ID",
+                            placeholder: t("FILTER_BY_USER_ID"),
                             value: userId,
                             onchange: (v: number|null) => {
                                 if (v === 0) {
@@ -138,7 +140,7 @@ export class ModerationCommentsTemplates {
                             text: "Potentially harmful",
                             checked: comment.potentially_harmful,
                             onchange: async (v) => {
-                                await CommentActions.setPotentiallyHarmful(comment.id, v);
+                                await Api.setPotentiallyHarmful(comment.id, v);
                                 comments.value = comments.value.map(c => {
                                     if (c.id === comment.id) {
                                         c.potentially_harmful = v;
@@ -151,7 +153,7 @@ export class ModerationCommentsTemplates {
                             text: "Hidden",
                             checked: comment.hidden,
                             onchange: async (v) => {
-                                await CommentActions.setHidden(comment.id, v);
+                                await Api.setHidden(comment.id, v);
                                 comments.value = comments.value.map(c => {
                                     if (c.id === comment.id) {
                                         c.hidden = v;

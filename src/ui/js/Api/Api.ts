@@ -35,6 +35,9 @@ import { PaymentHistory } from "@targoninc/lyda-shared/src/Models/db/finance/Pay
 import { Payout } from "@targoninc/lyda-shared/src/Models/db/finance/Payout";
 import { Permission } from "@targoninc/lyda-shared/src/Models/db/lyda/Permission.ts";
 import { RoyaltyMonth } from "@targoninc/lyda-shared/src/Models/RoyaltyMonth";
+import { ActionLog } from "@targoninc/lyda-shared/dist/Models/db/lyda/ActionLog";
+import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
+import { ModerationFilter } from "../Models/ModerationFilter.ts";
 
 export class Api {
     //region Interactions
@@ -69,7 +72,7 @@ export class Api {
 
     //region logs
     static async getActionLogs() {
-        return get<any[]>(ApiRoutes.getActionLogs);
+        return get<ActionLog[]>(ApiRoutes.getActionLogs);
     }
 
     static async getLogs(filter: any) {
@@ -701,23 +704,14 @@ export class Api {
     //endregion
 
     //region Comments
-    static getModerationComments(
-        filter: {
-            potentiallyHarmful: boolean;
-            user_id: number | null;
-            offset: number;
-            limit: number;
-        },
+    static async getModerationComments(
+        filter: ModerationFilter,
         loading: Signal<boolean>,
-        callback: (data: Comment[]) => Promise<void> | void
     ) {
         loading.value = true;
-        get<Comment[]>(ApiRoutes.getModerationComments, filter).then(async res => {
-            loading.value = false;
-            if (res) {
-                await callback(res);
-            }
-        });
+        const res = await get<Comment[]>(ApiRoutes.getModerationComments, filter);
+        loading.value = false;
+        return res;
     }
 
     static async setPotentiallyHarmful(id: number, v: boolean) {

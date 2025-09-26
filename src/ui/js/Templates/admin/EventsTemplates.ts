@@ -1,20 +1,21 @@
-import {create, when, compute, signal} from "@targoninc/jess";
-import {copy} from "../../Classes/Util.ts";
-import {GenericTemplates} from "../generic/GenericTemplates.ts";
-import {Time} from "../../Classes/Helpers/Time.ts";
-import {notify} from "../../Classes/Ui.ts";
-import {DashboardTemplates} from "./DashboardTemplates.ts";
+import { compute, create, signal, when } from "@targoninc/jess";
+import { copy } from "../../Classes/Util.ts";
+import { GenericTemplates, horizontal } from "../generic/GenericTemplates.ts";
+import { Time } from "../../Classes/Helpers/Time.ts";
+import { notify } from "../../Classes/Ui.ts";
+import { DashboardTemplates } from "./DashboardTemplates.ts";
 import { button } from "@targoninc/jess-components";
-import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
-import {PaypalWebhook} from "@targoninc/lyda-shared/src/Models/db/finance/PaypalWebhook";
+import { Permissions } from "@targoninc/lyda-shared/src/Enums/Permissions";
+import { PaypalWebhook } from "@targoninc/lyda-shared/src/Models/db/finance/PaypalWebhook";
 import { NotificationType } from "../../Enums/NotificationType.ts";
 import { Api } from "../../Api/Api.ts";
+import { t } from "../../../locales";
 
 export class EventsTemplates {
     static eventsPage() {
         return DashboardTemplates.pageNeedingPermissions(
             [Permissions.canTriggerEventHandling],
-            EventsTemplates.eventsPageInternal()
+            EventsTemplates.eventsPageInternal(),
         );
     }
 
@@ -24,9 +25,9 @@ export class EventsTemplates {
         const load = (filter?: any) => {
             loading.value = true;
             Api.getEvents(skip.value, filter)
-                .then(e => events.value = e ?? [])
-                .finally(() => loading.value = false);
-        }
+               .then(e => events.value = e ?? [])
+               .finally(() => loading.value = false);
+        };
         const loading = signal(false);
         load();
 
@@ -68,38 +69,38 @@ export class EventsTemplates {
                             .classes("flex", "align-children", "text-large")
                             .children(
                                 GenericTemplates.roundIconButton({
-                                    icon: "data_object"
-                                }, () => copy(JSON.stringify(JSON.parse(event.content), null, 2)), "Copy content"),
+                                    icon: "data_object",
+                                }, () => copy(JSON.stringify(JSON.parse(event.content), null, 2)), t("COPY_CONTENT")),
                                 when(typeIconMap[event.type], GenericTemplates.icon(typeIconMap[event.type], true)),
                                 create("span")
                                     .text(event.type)
                                     .build(),
                                 button({
-                                    text: "Trigger",
-                                    icon: {icon: "start"},
+                                    text: t("TRIGGER"),
+                                    icon: { icon: "start" },
                                     classes: ["positive"],
                                     onclick: () => {
                                         Api.triggerEventHandling(event.id).then(() => {
-                                            notify("Event triggered", NotificationType.success);
+                                            notify(`${t("EVENT_TRIGGERED")}`, NotificationType.success);
                                         }).catch(e => {
-                                            notify("Failed to trigger event: " + e, NotificationType.error);
+                                            notify(`${t("FAILED_EVENT_TRIGGER")}`, NotificationType.error);
                                         });
-                                    }
+                                    },
                                 }),
                             ).build(),
                         create("div")
                             .classes("flex", "align-children")
                             .children(
                                 GenericTemplates.roundIconButton({
-                                    icon: "content_copy"
-                                }, () => copy(event.id), "Copy ID"),
+                                    icon: "content_copy",
+                                }, () => copy(event.id), t("COPY_ID")),
                                 create("span")
                                     .classes("text-small")
                                     .text("E | " + event.id)
                                     .build(),
                                 GenericTemplates.roundIconButton({
-                                    icon: "content_copy"
-                                }, () => copy(resourceId), "Copy resource ID"),
+                                    icon: "content_copy",
+                                }, () => copy(resourceId), t("COPY_RESOURCE_ID")),
                                 create("span")
                                     .classes("text-small")
                                     .text("R | " + resourceId)
@@ -109,31 +110,29 @@ export class EventsTemplates {
                             .classes("flex", "align-children")
                             .children(
                                 GenericTemplates.roundIconButton({
-                                    icon: "fingerprint"
-                                }, () => copy(referenceId), "Copy reference ID"),
+                                    icon: "fingerprint",
+                                }, () => copy(referenceId), t("COPY_REFERENCE_ID")),
                                 create("span")
                                     .classes("text-small")
                                     .text(referenceId)
-                                    .build()
+                                    .build(),
                             ).build()),
                     ).build(),
                 create("div")
                     .classes("flex-v")
                     .children(
-                        create("div")
-                            .classes("flex", "no-gap")
-                            .children(
-                                create("span")
-                                    .classes("text-small")
-                                    .text(compute(t => `Received ${t}`, Time.agoUpdating(event.received_at)))
-                                    .title(new Date(event.received_at).toLocaleDateString())
-                                    .build(),
-                                create("span")
-                                    .classes("text-small")
-                                    .text(compute(t => `, Updated ${t}`, Time.agoUpdating(event.updated_at)))
-                                    .title(new Date(event.updated_at).toLocaleDateString())
-                                    .build(),
-                            ).build(),
+                        horizontal(
+                            create("span")
+                                .classes("text-small")
+                                .text(compute(time => `${t("RECEIVED_AT", time)}`, Time.agoUpdating(event.received_at)))
+                                .title(new Date(event.received_at).toLocaleDateString())
+                                .build(),
+                            create("span")
+                                .classes("text-small")
+                                .text(compute(time => `${t("UPDATED_AT", time)}`, Time.agoUpdating(event.updated_at)))
+                                .title(new Date(event.updated_at).toLocaleDateString())
+                                .build(),
+                        ).build(),
                     ).build(),
             ).build();
     }

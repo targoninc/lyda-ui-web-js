@@ -165,7 +165,7 @@ export class TotpTemplates {
                             return;
                         }
 
-                        await Ui.getTextInputModal("Delete TOTP method", "Enter the code from this TOTP method to delete it", "", "Delete", "Cancel", async (token: string) => {
+                        await Ui.getTextInputModal(t("DELETE_TOTP"), t("ENTER_CODE_TOTP"), "", t("DELETE"), t("CANCEL"), async (token: string) => {
                             loading.value = true;
                             await Api.deleteTotpMethod(method.id, token).then(() => {
                                 Api.getUserById().then(u => {
