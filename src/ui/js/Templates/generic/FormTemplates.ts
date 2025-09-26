@@ -15,8 +15,8 @@ export class FormTemplates {
             ).build();
     }
 
-    static dropDownField(title: string, options: TypeOrSignal<SelectOption[]>, selectedValue: Signal<string>) {
-        const optionsState = options.constructor === Signal ? (options as Signal<SelectOption[]>) : signal(options as SelectOption[]);
+    static dropDownField(title: string, options: TypeOrSignal<SelectOption<string>[]>, selectedValue: Signal<string>) {
+        const optionsState = options.constructor === Signal ? (options as Signal<SelectOption<string>[]>) : signal(options as SelectOption<string>[]);
 
         return create("div")
             .classes("flex-v", "small-gap")
@@ -25,7 +25,7 @@ export class FormTemplates {
                     .text(title)
                     .build(),
                 searchableSelect({
-                    options: optionsState as Signal<SelectOption[]>,
+                    options: optionsState as Signal<SelectOption<string>[]>,
                     value: selectedValue,
                     onchange: (v) => {
                         selectedValue.value = v;

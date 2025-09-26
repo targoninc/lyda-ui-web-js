@@ -7,6 +7,7 @@ import { button } from "@targoninc/jess-components";
 import { Statistic } from "@targoninc/lyda-shared/src/Models/Statistic";
 import { Api } from "../../Api/Api.ts";
 import { BoxPlotValues } from "@targoninc/lyda-shared/dist/Models/BoxPlotValues";
+import {t} from "../../../locales";
 
 Chart.register(...registerables);
 
@@ -95,8 +96,11 @@ export class ChartTemplates {
                 create("h4").classes("chart-title").text(title).build(),
                 create("div")
                     .classes("flex", "align-center", "chart")
-                    .children(create("span").text("No data yet").build())
-                    .build(),
+                    .children(
+                        create("span")
+                            .text(t("NO_DATA_YET"))
+                            .build()
+                    ).build(),
             ).build();
     }
 
@@ -176,25 +180,25 @@ export interface PaginatedBarChartOptions {
 function getNextByTimeType(timeType?: "year" | "month" | "day" | string) {
     switch (timeType) {
         case "year":
-            return "Next decade";
+            return `${t("NEXT_DECADE")}`;
         case "month":
-            return "Next year";
+            return `${t("NEXT_YEAR")}`;
         case "day":
-            return "Next month";
+            return `${t("NEXT_MONTH")}`;
         default:
-            return "Next";
+            return `${t("NEXT")}`;
     }
 }
 
 function getPreviousByTimeType(timeType?: "year" | "month" | "day" | string) {
     switch (timeType) {
         case "year":
-            return "Previous decade";
+            return `${t("PREVIOUS_DECADE")}`;
         case "month":
-            return "Previous year";
+            return `${t("PREVIOUS_YEAR")}`;
         case "day":
-            return "Previous month";
+            return `${t("PREVIOUS_MONTH")}`;
         default:
-            return "Previous";
+            return `${t("PREVIOUS")}`;
     }
 }

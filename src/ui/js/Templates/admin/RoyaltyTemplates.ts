@@ -11,6 +11,7 @@ import { Api } from "../../Api/Api.ts";
 import { GenericTemplates, vertical } from "../generic/GenericTemplates.ts";
 import { MonthIdentifier } from "../../Classes/Helpers/Date.ts";
 import { currency } from "../../Classes/Helpers/Num.ts";
+import {t} from "../../../locales";
 
 export class RoyaltyTemplates {
     static royaltyCalculator(month: Partial<RoyaltyMonth>, monthIdentifier: MonthIdentifier, refresh: () => void) {
@@ -21,9 +22,9 @@ export class RoyaltyTemplates {
                 when(month.hasEarnings ?? false, create("div")
                     .classes("flex-v")
                     .children(
-                        LogTemplates.property("Earnings", currency((month.earnings ?? 0) / 100, "USD")),
-                        LogTemplates.property("Artist royalties", currency((month.artistRoyalties ?? 0) / 100, "USD")),
-                        LogTemplates.property("Track royalties", currency((month.trackRoyalties ?? 0) / 100, "USD")),
+                        LogTemplates.property(t("EARNINGS"), currency((month.earnings ?? 0) / 100, "USD")),
+                        LogTemplates.property(t("ARTIST_ROYALTIES"), currency((month.artistRoyalties ?? 0) / 100, "USD")),
+                        LogTemplates.property(t("TRACK_ROYALTIES"), currency((month.trackRoyalties ?? 0) / 100, "USD")),
                     ).build()),
             ).build();
     }
@@ -37,34 +38,34 @@ export class RoyaltyTemplates {
                     .classes("flex", "align-children")
                     .children(
                         create("span")
-                            .text(`Available actions for ${monthIdentifier.year}-${monthIdentifier.month}:`)
+                            .text(t("AVAILABLE_ACTIONS_FOR_MONTH", monthIdentifier))
                             .build(),
                         button({
-                            text: "Calculate earnings",
+                            text: t("CALCULATE_EARNINGS"),
                             icon: { icon: "account_balance" },
                             classes: ["positive"],
                             onclick: async () => {
                                 await Api.calculateEarnings(monthIdentifier);
-                                notify("Earnings calculated", NotificationType.success);
+                                notify(`${t("EARNINGS_CALCULATED")}`, NotificationType.success);
                                 refresh();
                             },
                         }),
                         when(hasEarnings, button({
-                            text: "Calculate royalties",
+                            text: t("CALCULATE_ROYALTIES"),
                             icon: { icon: "calculate" },
                             classes: ["positive"],
                             onclick: async () => {
                                 await Api.calculateRoyalties(monthIdentifier);
-                                notify("Royalties calculated", NotificationType.success);
+                                notify(`${t("ROYALTIES_CALCULATED")}`, NotificationType.success);
                                 refresh();
                             },
                         })),
                         when(hasEarnings, toggle({
-                            text: "Royalties approved and visible",
+                            text: t("ROYALTIES_APPROVED"),
                             checked: isApproved,
                             onchange: async (v) => {
                                 await Api.setRoyaltyActivation(monthIdentifier, v);
-                                notify("Switched approval status", NotificationType.success);
+                                notify(`${t("ROYALTIES_APPROVAL_SWITCHED")}`, NotificationType.success);
                                 refresh();
                             },
                         })),
@@ -110,7 +111,7 @@ export class RoyaltyTemplates {
             .classes("card", "flex-v")
             .children(
                 create("h2")
-                    .text("Royalty overview")
+                    .text(t("ROYALTY_OVERVIEW"))
                     .build(),
                 RoyaltyTemplates.royaltyCalculator(royaltyMonth, monthIdentifier, refresh),
             ).build();

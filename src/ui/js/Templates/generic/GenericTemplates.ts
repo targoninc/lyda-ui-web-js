@@ -161,7 +161,11 @@ export class GenericTemplates {
     }
 
     static tableBody(...children: AnyNode[]) {
-        return create("table").classes("fixed-bar-content").attributes("cellspacing", "0", "cellpadding", "0").children(...children).build();
+        return create("table")
+            .classes("fixed-bar-content")
+            .attributes("cellspacing", "0", "cellpadding", "0")
+            .children(...children)
+            .build();
     }
 
     static tableHeaders<T>(headerDefinitions: {
@@ -636,7 +640,7 @@ export class GenericTemplates {
 
     static modalCancelButton(modal: AnyElement | null = null) {
         return button({
-            text: "Cancel",
+            text: t("CANCEL"),
             onclick: () => Util.removeModal(modal),
             classes: ["negative"],
             icon: { icon: "close" },
@@ -726,14 +730,14 @@ export class GenericTemplates {
         return create("div").classes("flex-v").children(
             create("div").classes("flex", "align-children", "fixed-bar").children(
                 button({
-                    text: "Refresh",
+                    text: t("REFRESH"),
                     icon: { icon: "refresh" },
                     classes: ["positive"],
                     disabled: loading,
                     onclick: () => load(filter.value),
                 }),
                 button({
-                    text: "Previous page",
+                    text: t("PREVIOUS_PAGE"),
                     icon: { icon: "skip_previous" },
                     disabled: compute((l, s) => l || s <= 0, loading, skip),
                     onclick: () => {
@@ -741,7 +745,7 @@ export class GenericTemplates {
                     },
                 }),
                 button({
-                    text: "Next page",
+                    text: t("NEXT_PAGE"),
                     icon: { icon: "skip_next" },
                     disabled: compute((l, e) => l || e.length < 100, loading, results),
                     onclick: () => {
@@ -751,7 +755,7 @@ export class GenericTemplates {
                 input<string>({
                     type: InputType.text,
                     name: "filter",
-                    placeholder: "Filter",
+                    placeholder: t("FILTER"),
                     value: localSearch,
                     onchange: (newValue: string) => (localSearch.value = newValue),
                 }),

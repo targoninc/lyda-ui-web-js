@@ -17,6 +17,7 @@ import { anonymize } from "../../Classes/Helpers/CustomText.ts";
 import { ChartTemplates } from "../generic/ChartTemplates.ts";
 import { yearAndMonthByOffset } from "../../Classes/Helpers/Date.ts";
 import { downloadFile } from "../../Classes/Util.ts";
+import {t} from "../../../locales";
 
 export class PayoutTemplates {
     static payoutsPage() {
@@ -35,7 +36,7 @@ export class PayoutTemplates {
             .classes("flex-v")
             .children(
                 create("h1")
-                    .text("Payout history")
+                    .text(t("PAYOUT_HISTORY"))
                     .build(),
                 compute(_ => {
                     return GenericTemplates.searchWithFilter(payouts, PayoutTemplates.payout, skip, loading, load);
@@ -75,7 +76,7 @@ export class PayoutTemplates {
                     .classes("flex")
                     .children(
                         button({
-                            text: "Payout history",
+                            text: t("PAYOUT_HISTORY"),
                             icon: { icon: "account_balance" },
                             onclick: () => navigate(RoutePath.payouts),
                         }),
@@ -83,38 +84,38 @@ export class PayoutTemplates {
                             .classes("flex")
                             .children(
                                 when(paypalMailExists$, button({
-                                    text: "Set PayPal mail",
+                                    text: t("SET_PAYPAL_MAIL"),
                                     icon: { icon: "mail" },
                                     classes: ["positive"],
                                     onclick: async () => {
-                                        await Ui.getTextInputModal("Set PayPal mail", "The account you will receive payments with", "", "Save", "Cancel", async (address: string) => {
+                                        await Ui.getTextInputModal(t("SET_PAYPAL_MAIL"), t("ACCOUNT_RECEIVE_PAYMENTS"), "", t("SAVE"), t("CANCEL"), async (address: string) => {
                                             await Api.updateUserSetting(UserSettings.paypalMail, address);
-                                            notify("PayPal mail set", NotificationType.success);
+                                            notify(t("PAYPAL_MAIL_SET"), NotificationType.success);
                                             paypalMailExists$.value = true;
                                         }, () => {
                                         }, "mail");
                                     },
                                 }), true),
                                 when(paypalMailExists$, button({
-                                    text: "Remove PayPal mail",
-                                    title: "You won't be able to receive payments until you set a mail address again",
+                                    text: t("REMOVE_PAYPAL_MAIL"),
+                                    title: t("WONT_RECEIVE_PAYMENTS_WITHOUT_MAIL"),
                                     icon: { icon: "unsubscribe" },
                                     classes: ["negative"],
                                     onclick: async () => {
-                                        await Ui.getConfirmationModal("Remove PayPal mail", "Are you sure you want to remove your paypal mail? You'll have to add it again manually.", "Yes", "No", async () => {
+                                        await Ui.getConfirmationModal(t("REMOVE_PAYPAL_MAIL"), t("SURE_DELETE_PAYPAL_MAIL"), t("YES"), t("NO"), async () => {
                                             await Api.updateUserSetting(UserSettings.paypalMail, "");
-                                            notify("PayPal mail removed", NotificationType.success);
+                                            notify(`${t("PAYPAL_MAIL_REMOVED")}`, NotificationType.success);
                                             paypalMailExists$.value = false;
                                         }, () => {
                                         }, "warning");
                                     },
                                 })),
                                 when(paypalMailExists$, button({
-                                    text: compute(ri => ri ? `Request payout to ${anonymize(ri.personal.paypalMail, 2, 8)}` : "", royaltyInfo),
+                                    text: compute(ri => ri ? `${t("REQUEST_PAYOUT_TO", anonymize(ri.personal.paypalMail, 2, 8))}` : "", royaltyInfo),
                                     icon: { icon: "mintmark" },
                                     classes: ["positive"],
                                     onclick: async () => {
-                                        await Ui.getConfirmationModal("Request payment", "Are you sure you want to request a payment?", "Yes", "No", async () => {
+                                        await Ui.getConfirmationModal(t("REQUEST_PAYOUT"), t("SURE_REQUEST_PAYOUT"), t("YES"), t("NO"), async () => {
                                             await Api.requestPayout();
                                             notify("Payment requested", NotificationType.success);
                                             reload();

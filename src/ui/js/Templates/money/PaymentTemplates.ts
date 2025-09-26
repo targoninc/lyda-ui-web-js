@@ -6,6 +6,7 @@ import {permissions} from "../../state.ts";
 import {copy} from "../../Classes/Util.ts";
 import {PaymentHistory} from "@targoninc/lyda-shared/src/Models/db/finance/PaymentHistory";
 import { Api } from "../../Api/Api.ts";
+import {t} from "../../../locales";
 
 export class PaymentTemplates {
     static paymentsPage() {
@@ -24,7 +25,7 @@ export class PaymentTemplates {
             .classes("flex-v")
             .children(
                 create("h1")
-                    .text("Payment history")
+                    .text(t("PAYMENT_HISTORY"))
                     .build(),
                 compute(p => {
                     return GenericTemplates.searchWithFilter(payments, PaymentTemplates.payment, skip, loading, load);
@@ -48,11 +49,11 @@ export class PaymentTemplates {
                             .children(
                                 create("span")
                                     .classes("text-small")
-                                    .text(`${currency(p.fees, p.currency)} fees by payment provider`)
+                                    .text(t("FEES_BY_PAYMENT_PROVIDER", currency(p.fees, p.currency)))
                                     .build(),
                                 create("span")
                                     .classes("text-small", "clickable")
-                                    .text(`External transaction ID: ${p.external_id}`)
+                                    .text(t("EXTERNAL_TRANSACTION_ID", p.external_id))
                                     .onclick(() => copy(p.external_id))
                                     .build(),
                             ).build()

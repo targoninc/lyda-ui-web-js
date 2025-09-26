@@ -212,7 +212,7 @@ export class LogTemplates {
         return compute(v => LogTemplates.property(key, v), value);
     }
 
-    static property(key: string, value: any): AnyElement {
+    static property(key: StringOrSignal, value: any): AnyElement {
         if (value === null) {
             value = "null";
         }

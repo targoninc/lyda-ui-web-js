@@ -10,6 +10,7 @@ import {button} from "@targoninc/jess-components";
 import {Notification} from "@targoninc/lyda-shared/src/Models/db/lyda/Notification";
 import {NotificationPart} from "@targoninc/lyda-shared/src/Models/NotifcationPart";
 import {Api} from "../Api/Api.ts";
+import {t} from "../../locales";
 
 export class NotificationTemplates {
     static notificationInList(notification: Notification) {
@@ -122,7 +123,7 @@ export class NotificationTemplates {
                 signalMap(notifications, create("div").classes("flex-v", "nogap"), notif => NotificationTemplates.notificationInList(notif)),
                 when(hasNotifs, create("div")
                     .classes("text-center", "padded")
-                    .text("No notifications")
+                    .text(t("NO_NOTIFICATIONS"))
                     .build(), true)
             ).build());
     }
