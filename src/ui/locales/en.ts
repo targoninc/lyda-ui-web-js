@@ -212,4 +212,10 @@ export const en = {
     COPY_STACK: "Copy stack",
     POTENTIALLY_HARMFUL: "Potentially harmful",
     FILTER_BY_USER_ID: "Filter by user ID",
+    NO_COMMENTS: "No comments",
+    OPEN_TRACK: "Open track",
+    DELETE_COMMENT: "Delete comment",
+    HIDDEN: "Hidden",
+    PERMISSIONS: "Permissions",
+    LAST_LOGIN: "Last login",
 } satisfies BaseTranslation;

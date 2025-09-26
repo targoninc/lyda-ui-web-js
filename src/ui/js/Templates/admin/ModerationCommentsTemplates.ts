@@ -102,7 +102,7 @@ export class ModerationCommentsTemplates {
                 .classes("card", "flex-v")
                 .children(
                     create("span")
-                        .text("No comments")
+                        .text(t("NO_COMMENTS"))
                         .build()
                 ).build();
         }
@@ -121,7 +121,7 @@ export class ModerationCommentsTemplates {
                     .classes("flex", "align-children")
                     .children(
                         button({
-                            text: "Open track",
+                            text: t("OPEN_TRACK"),
                             icon: { icon: "open_in_new" },
                             classes: ["positive"],
                             onclick: async () => {
@@ -129,7 +129,7 @@ export class ModerationCommentsTemplates {
                             }
                         }),
                         button({
-                            text: "Delete comment",
+                            text: t("DELETE_COMMENT"),
                             icon: { icon: "delete" },
                             classes: ["negative"],
                             onclick: async () => {
@@ -137,7 +137,7 @@ export class ModerationCommentsTemplates {
                             }
                         }),
                         toggle({
-                            text: "Potentially harmful",
+                            text: t("POTENTIALLY_HARMFUL"),
                             checked: comment.potentially_harmful,
                             onchange: async (v) => {
                                 await Api.setPotentiallyHarmful(comment.id, v);
@@ -150,7 +150,7 @@ export class ModerationCommentsTemplates {
                             }
                         }),
                         toggle({
-                            text: "Hidden",
+                            text: t("HIDDEN"),
                             checked: comment.hidden,
                             onchange: async (v) => {
                                 await Api.setHidden(comment.id, v);

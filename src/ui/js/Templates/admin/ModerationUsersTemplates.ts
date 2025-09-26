@@ -1,4 +1,4 @@
-import { compute, create, signal, Signal, when } from "@targoninc/jess";
+import { compute, create, signal, Signal, signalMap, when } from "@targoninc/jess";
 import { GenericTemplates } from "../generic/GenericTemplates.ts";
 import { Permissions } from "@targoninc/lyda-shared/src/Enums/Permissions";
 import { DashboardTemplates } from "./DashboardTemplates.ts";
@@ -7,6 +7,8 @@ import { button, checkbox } from "@targoninc/jess-components";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { Permission } from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
 import { Api } from "../../Api/Api.ts";
+import { t } from "../../../locales";
+import {sortByProperty} from "../../Classes/Helpers/Sorting.ts";
 
 export class ModerationUsersTemplates {
     static usersPage() {
@@ -35,7 +37,7 @@ export class ModerationUsersTemplates {
                     .classes("flex", "align-children", "fixed-bar")
                     .children(
                         button({
-                            text: "Refresh",
+                            text: t("REFRESH"),
                             icon: { icon: "refresh" },
                             classes: ["positive"],
                             onclick: async () => {
@@ -45,21 +47,26 @@ export class ModerationUsersTemplates {
                         })
                     )
                     .build(),
-                compute(u => ModerationUsersTemplates.usersList(u), users)
+                ModerationUsersTemplates.usersList(users),
             ).build();
     }
 
-    static usersList(users: User[]) {
+    static usersList(users: Signal<User[]>) {
+        const sortBy$ = signal<keyof User | null>(null);
+        const filtered = compute(sortByProperty, sortBy$, users);
+
         return GenericTemplates.tableBody(
-            GenericTemplates.tableHeaders([
-                { title: "Username" },
-                { title: "Display name" },
-                { title: "Permissions" },
-                { title: "Last login" },
-            ]),
-            create("tbody")
-                .children(...users.map(u => ModerationUsersTemplates.user(u)))
-                .build()
+            GenericTemplates.tableHeaders<User>([
+                { title: t("USER_NAME"), property: "username" },
+                { title: t("DISPLAY_NAME"), property: "displayname" },
+                { title: t("PERMISSIONS"), property: "permissions" },
+                { title: t("LAST_LOGIN"), property: "last_login" },
+            ], sortBy$),
+            signalMap(
+                filtered,
+                create("tbody"),
+                u => ModerationUsersTemplates.user(u)
+            ),
         );
     }
 
