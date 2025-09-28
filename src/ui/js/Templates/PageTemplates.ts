@@ -199,34 +199,34 @@ export class PageTemplates {
             .children(
                 create("h3")
                     .classes("question")
-                    .text("Can I use Lyda without a subscription?")
+                    .text(t("QUESTION_CAN_USE_WITHOUT_SUB"))
                     .build(),
                 create("p")
                     .classes("answer")
-                    .text("Yes, you can. However, the features are very limited and streaming quality will be limited to 92kbps (audible artifacts). However, you can still buy songs and download them.")
+                    .text(t("ANSWER_CAN_USE_WITHOUT_SUB"))
                     .build(),
                 create("h3")
                     .classes("question")
-                    .text("How can I cancel my subscription?")
+                    .text(t("QUESTION_CANCEL_SUB"))
                     .build(),
                 create("p")
                     .classes("answer", "flex")
                     .children(
                         create("span")
-                            .text("You can manage your subscription"),
-                        GenericTemplates.inlineLink(() => navigate(RoutePath.subscribe), "here"),
+                            .text(t("ANSWER_CANCEL_SUB")),
+                        GenericTemplates.inlineLink(() => navigate(RoutePath.subscribe), t("ANSWER_CANCEL_SUB_HERE")),
                     ).build(),
                 create("h3")
                     .classes("question")
-                    .text("How are artist royalties calculated?")
+                    .text(t("QUESTION_ROYALTY_CALCULATION"))
                     .build(),
                 create("p")
                     .classes("answer", "flex")
                     .children(
                         create("span")
-                            .text("Instead of the pro rata model that other platforms like Spotify use, we distribute your subscription earnings among the artists of the tracks you actually listened to every month."),
+                            .text(t("ANSWER_ROYALTY_CALCULATION_PART_1")),
                         create("span")
-                            .text("This is especially beneficial for smaller artists, as it relies on the relative percentages of your generated plays, not the absolute count of them."),
+                            .text(t("ANSWER_ROYALTY_CALCULATION_PART_2")),
                     ).build(),
             ).build();
     }

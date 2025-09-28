@@ -154,7 +154,7 @@ export class SettingsTemplates {
                     .children(
                         input(<InputConfig<string>>{
                             type: InputType.text,
-                            label: t("USER_NAME"),
+                            label: t("USERNAME"),
                             name: "username",
                             required: true,
                             value: user.username,

@@ -6,6 +6,7 @@ import { navigate } from "../Routing/Router.ts";
 import { AnyElement, compute, create, HtmlPropertyValue, signal, Signal, StringOrSignal } from "@targoninc/jess";
 import { RoutePath } from "../Routing/routes.ts";
 import { button } from "@targoninc/jess-components";
+import { t } from "../../locales";
 
 export class MenuTemplates {
     static genericMenu(title: HtmlPropertyValue, menuItems: any[], onClose: () => void) {
@@ -49,7 +50,7 @@ export class MenuTemplates {
                 horizontal(
                     GenericTemplates.title(title),
                     button({
-                        text: "Close",
+                        text: t("CLOSE"),
                         icon: { icon: "close" },
                         onclick: onClose,
                     }),
@@ -71,7 +72,6 @@ export class MenuTemplates {
     }
 
     static createMenu() {
-        const title = "Create something new";
         let modal: AnyElement;
         let listener: (this: Document, ev: KeyboardEvent) => void = () => {};
         const cleanup = () => {
@@ -81,7 +81,7 @@ export class MenuTemplates {
 
         const items = [
             {
-                text: "New Album",
+                text: t("NEW_ALBUM"),
                 icon: "forms_add_on",
                 action: async () => {
                     cleanup();
@@ -89,7 +89,7 @@ export class MenuTemplates {
                 }
             },
             {
-                text: "New Track",
+                text: t("NEW_TRACK"),
                 icon: "upload",
                 action: async () => {
                     cleanup();
@@ -97,7 +97,7 @@ export class MenuTemplates {
                 }
             },
             {
-                text: "New Playlist",
+                text: t("NEW_PLAYLIST"),
                 icon: "playlist_add",
                 action: async () => {
                     cleanup();
@@ -105,7 +105,7 @@ export class MenuTemplates {
                 }
             }
         ];
-        const out = MenuTemplates.genericMenu(title, items, cleanup);
+        const out = MenuTemplates.genericMenu(t("CREATE_SOMETHING_NEW"), items, cleanup);
         modal = out.modal;
         listener = out.eventListener;
         return modal;

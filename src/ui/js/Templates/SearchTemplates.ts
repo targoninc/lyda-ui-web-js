@@ -9,6 +9,7 @@ import { button } from "@targoninc/jess-components";
 import { SearchContext } from "@targoninc/lyda-shared/src/Enums/SearchContext";
 import { SearchResult } from "@targoninc/lyda-shared/src/Models/SearchResult";
 import { get } from "../Api/ApiClient.ts";
+import { t } from "../../locales";
 
 export class SearchTemplates {
     static search(context: SearchContext) {
@@ -98,7 +99,7 @@ export class SearchTemplates {
                     "close",
                     true,
                     ["inline-icon", "svg", "clear-icon", "clickable"],
-                    "Clear search",
+                    t("CLEAR_SEARCH"),
                     () => {
                         currentSearch.value = "";
                         resultsShown.value = false;
@@ -106,7 +107,7 @@ export class SearchTemplates {
                 ),
                 create("input")
                     .classes("jess", "search-input")
-                    .placeholder("Search")
+                    .placeholder(t("SEARCH"))
                     .value(currentSearch)
                     .onclick(() => {
                         resultsShown.value = true;
@@ -245,7 +246,7 @@ export class SearchTemplates {
                             .children(
                                 button({
                                     icon: { icon: "manage_search" },
-                                    text: "Open search",
+                                    text: t("OPEN_SEARCH"),
                                     classes: ["positive"],
                                     onclick: () => {
                                         resultsShown.value = false;
@@ -258,7 +259,7 @@ export class SearchTemplates {
                             exactMatches.length > 0,
                             create("span")
                                 .classes("search-result-header")
-                                .text("Exact Matches")
+                                .text(t("EXACT_MATCHES"))
                                 .build()
                         ),
                         ...exactMatches.map(result => {
@@ -273,7 +274,7 @@ export class SearchTemplates {
                             partialMatches.length > 0,
                             create("span")
                                 .classes("search-result-header")
-                                .text("Partial Matches")
+                                .text(t("PARTIAL_MATCHES"))
                                 .build()
                         ),
                         ...partialMatches.map(result => {
@@ -318,7 +319,7 @@ export class SearchTemplates {
                                 .children(
                                     create("span")
                                         .classes("color-dim")
-                                        .text("Nothing here. Try a different search?")
+                                        .text(t("NO_SEARCH_RESULTS"))
                                         .build()
                                 )
                                 .build()
@@ -422,24 +423,20 @@ export class SearchTemplates {
                                             .classes("search-result-display")
                                             .text(display)
                                             .build()
-                                    )
-                                    .build(),
+                                    ).build(),
                                 create("span")
                                     .classes("search-result-subtitle", "text-xsmall")
                                     .text(subtitle)
                                     .build()
-                            )
-                            .build()
-                    )
-                    .build(),
+                            ).build()
+                    ).build(),
                 create("span")
                     .classes(
                         "search-result-type",
                         "hideOnSmallBreakpoint",
                         "padded-inline",
                         searchResult.type
-                    )
-                    .text(searchResult.type)
+                    ).text(searchResult.type)
                     .build()
             ).build();
         return elementReference;

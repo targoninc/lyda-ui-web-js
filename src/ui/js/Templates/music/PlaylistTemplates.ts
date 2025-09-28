@@ -20,30 +20,23 @@ import { InteractionTemplates } from "../InteractionTemplates.ts";
 import { loadingAudio, playingFrom, playingHere } from "../../state.ts";
 import { MusicTemplates } from "./MusicTemplates.ts";
 import { Api } from "../../Api/Api.ts";
+import { t } from "../../../locales";
 
 export class PlaylistTemplates {
     static addTrackToPlaylistModal(track: Track, playlists: Playlist[]) {
-        if (playlists.some(p => !p.tracks)) {
-            return create("div").text("No playlists found").build();
+        if (playlists.some(p => !p.tracks) || playlists.length === 0) {
+            return create("div").text(t("NO_PLAYLISTS_FOUND")).build();
         }
 
         const checkedPlaylists = signal(playlists.filter(p => p.tracks!.some(t => t.track_id === track.id)).map(p => p.id));
-        let playlistList: AnyElement[] = [];
-        if (playlists.length === 0) {
-            playlistList.push(create("span")
-                .classes("nopointer")
-                .text("No playlists found")
-                .build());
-        } else {
-            playlistList = playlists.map((playlist) => {
-                if (!playlist.tracks) {
-                    console.warn("Playlist has no tracks: ", playlist);
-                    return nullElement();
-                }
+        const playlistList: AnyElement[] = playlists.map((playlist) => {
+            if (!playlist.tracks) {
+                console.warn("Playlist has no tracks: ", playlist);
+                return nullElement();
+            }
 
-                return PlaylistTemplates.playlistInAddList(playlist, checkedPlaylists);
-            }) as AnyElement[];
-        }
+            return PlaylistTemplates.playlistInAddList(playlist, checkedPlaylists);
+        }) as AnyElement[];
 
         return create("div")
             .classes("flex-v")
@@ -57,10 +50,9 @@ export class PlaylistTemplates {
                             .attributes("src", Icons.PLAYLIST_ADD)
                             .build(),
                         create("h5")
-                            .text(`Add ${track.title} to playlist`)
+                            .text(t("ADD_TITLE_TO_PLAYLIST", track.title))
                             .build(),
-                    )
-                    .build(),
+                    ).build(),
                 create("div")
                     .classes("check-list")
                     .children(...playlistList)
@@ -69,7 +61,7 @@ export class PlaylistTemplates {
                     .classes("flex")
                     .children(
                         button({
-                            text: compute(p => `Add to ${p.length} playlists`, checkedPlaylists),
+                            text: compute(p => `${t("ADD_TO_N_PLAYLISTS", p.length)}`, checkedPlaylists),
                             disabled: compute(p => p.length === 0, checkedPlaylists),
                             onclick: async () => PlaylistActions.addTrackToPlaylists(track.id, checkedPlaylists.value),
                             icon: { icon: "playlist_add" },
@@ -86,7 +78,7 @@ export class PlaylistTemplates {
         if (playlists.length === 0) {
             playlistList.push(create("span")
                 .classes("nopointer")
-                .text("No playlists found")
+                .text(t("NO_PLAYLISTS_FOUND"))
                 .build());
         } else {
             playlistList = playlists.map((playlist: Playlist) => PlaylistTemplates.playlistInAddList(playlist, checkedPlaylists));
@@ -104,7 +96,7 @@ export class PlaylistTemplates {
                             .attributes("src", Icons.PLAYLIST_ADD)
                             .build(),
                         create("h5")
-                            .text(`Add ${album.title} to playlist`)
+                            .text(t("ADD_TITLE_TO_PLAYLIST", album.title))
                             .build(),
                     ).build(),
                 create("div")
@@ -115,7 +107,7 @@ export class PlaylistTemplates {
                     .classes("flex")
                     .children(
                         button({
-                            text: compute(p => `Add to ${p.length} playlists`, checkedPlaylists),
+                            text: compute(p => `${t("ADD_TO_N_PLAYLISTS", p.length)}`, checkedPlaylists),
                             disabled: compute(p => p.length === 0, checkedPlaylists),
                             onclick: async () => PlaylistActions.addAlbumToPlaylists(album.id, checkedPlaylists.value),
                             icon: { icon: "playlist_add" },
@@ -170,7 +162,7 @@ export class PlaylistTemplates {
                             adaptive: true,
                         }),
                         create("span")
-                            .text("New playlist")
+                            .text(t("NEW_PLAYLIST"))
                             .build(),
                     ).build(),
                 create("div")
@@ -181,8 +173,8 @@ export class PlaylistTemplates {
                             type: InputType.text,
                             required: true,
                             name: "name",
-                            label: "Name",
-                            placeholder: "Playlist name",
+                            label: t("NAME"),
+                            placeholder: t("PLAYLIST_NAME"),
                             value: name,
                             onchange: (v) => {
                                 playlist.value = { ...playlist.value, title: v };
@@ -190,8 +182,8 @@ export class PlaylistTemplates {
                         }),
                         textarea({
                             name: "description",
-                            label: "Description",
-                            placeholder: "My cool playlist",
+                            label: t("DESCRIPTION"),
+                            placeholder: t("EXAMPLE_PLAYLIST_NAME"),
                             value: description,
                             onchange: (v) => {
                                 playlist.value = { ...playlist.value, description: v };
@@ -199,8 +191,8 @@ export class PlaylistTemplates {
                         }),
                         toggle({
                             name: "visibility",
-                            label: "Private",
-                            text: "Private",
+                            label: t("PRIVATE"),
+                            text: t("PRIVATE"),
                             checked: visibility,
                             onchange: (v) => {
                                 playlist.value = { ...playlist.value, visibility: v ? "private" : "public" };
@@ -211,7 +203,7 @@ export class PlaylistTemplates {
                     .classes("flex")
                     .children(
                         button({
-                            text: "Create playlist",
+                            text: t("CREATE"),
                             disabled,
                             onclick: async () => {
                                 await Api.createNewPlaylist(playlist.value);
@@ -232,21 +224,22 @@ export class PlaylistTemplates {
         if (isOwnProfile) {
             children = [
                 create("p")
-                    .text("Put your favorite tunes into a playlist:")
+                    .text(t("PUT_FAV_TUNES_INTO_PLAYLIST"))
                     .build(),
                 GenericTemplates.newPlaylistButton(["secondary"]),
             ];
         } else {
             children = [
                 create("p")
-                    .text("No playlists on this profile.")
+                    .text(t("NO_PLAYLISTS_FOUND"))
                     .build(),
             ];
         }
 
         return create("div")
             .classes("card", "flex-v")
-            .children(...children).build();
+            .children(...children)
+            .build();
     }
 
     static playlistCard(playlist: Playlist, isSecondary: boolean = false) {
@@ -365,7 +358,7 @@ export class PlaylistTemplates {
                                     .children(
                                         create("span")
                                             .classes("date", "text-small")
-                                            .text("Created " + Util.formatDate(playlist.created_at))
+                                            .text(t("CREATED_AT", Util.formatDate(playlist.created_at)))
                                             .build(),
                                     ).build(),
                                 InteractionTemplates.interactions(EntityType.playlist, playlist),
@@ -383,7 +376,7 @@ export class PlaylistTemplates {
         const isPlaying = compute((p, pHere) => (p && p.type === "playlist" && p.id === playlist.id && pHere) ?? false, playingFrom, playingHere);
         const duration = playlist.tracks.reduce((acc, t) => acc + (t.track?.length ?? 0), 0);
         const playIcon = getPlayIcon(isPlaying, loadingAudio);
-        const playText = compute((p): string => p ? "Pause" : "Play", isPlaying);
+        const playText = compute((p): string => p ? `${t("PAUSE")}` : `${t("PLAY")}`, isPlaying);
 
         let actions: AnyNode[] = [];
         if (user) {
@@ -412,11 +405,11 @@ export class PlaylistTemplates {
         return horizontal(
             ...actions,
             when(canEdit, button({
-                text: "Delete",
+                text: t("DELETE"),
                 icon: { icon: "delete" },
                 classes: ["negative"],
                 onclick: async () => {
-                    await Ui.getConfirmationModal("Delete playlist", "Are you sure you want to delete this playlist?", "Yes", "No", () => PlaylistActions.deletePlaylist(playlist.id), () => {
+                    await Ui.getConfirmationModal(t("DELETE_PLAYLIST"), t("SURE_DELETE_PLAYLIST"), t("YES"), t("NO"), () => PlaylistActions.deletePlaylist(playlist.id), () => {
                     }, Icons.WARNING);
                 },
             })),

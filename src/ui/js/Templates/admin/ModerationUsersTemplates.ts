@@ -8,7 +8,7 @@ import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { Permission } from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
 import { Api } from "../../Api/Api.ts";
 import { t } from "../../../locales";
-import {sortByProperty} from "../../Classes/Helpers/Sorting.ts";
+import { sortByProperty } from "../../Classes/Helpers/Sorting.ts";
 
 export class ModerationUsersTemplates {
     static usersPage() {
@@ -57,7 +57,7 @@ export class ModerationUsersTemplates {
 
         return GenericTemplates.tableBody(
             GenericTemplates.tableHeaders<User>([
-                { title: t("USER_NAME"), property: "username" },
+                { title: t("USERNAME"), property: "username" },
                 { title: t("DISPLAY_NAME"), property: "displayname" },
                 { title: t("PERMISSIONS"), property: "permissions" },
                 { title: t("LAST_LOGIN"), property: "last_login" },

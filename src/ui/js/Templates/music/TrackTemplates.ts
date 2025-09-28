@@ -44,13 +44,17 @@ import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import { InteractionTemplates } from "../InteractionTemplates.ts";
 import { get } from "../../Api/ApiClient.ts";
 import { UploadableTrack } from "../../Models/UploadableTrack.ts";
+import { t } from "../../../locales";
 
 export class TrackTemplates {
     static collabIndicator(collab: TrackCollaborator): any {
         return create("div")
             .classes("pill", "padded-inline", "flex", "rounded-max", "bordered")
             .children(
-                create("div").classes("align-center", "text-small", "nopointer").text(collab.collab_type?.name).build(),
+                create("div")
+                    .classes("align-center", "text-small", "nopointer")
+                    .text(collab.collab_type?.name)
+                    .build(),
             ).build();
     }
 
@@ -58,25 +62,30 @@ export class TrackTemplates {
         let children;
         if (isOwnProfile) {
             children = [
-                create("p").text("Share what you make:").build(),
+                create("p")
+                    .text(t("SHARE_WHAT_YOU_MAKE"))
+                    .build(),
                 GenericTemplates.newTrackButton(["secondary"]),
             ];
         } else {
-            children = [create("p").text("No tracks on this profile.").build()];
+            children = [create("p").text(t("NO_TRACKS_FOUND")).build()];
         }
 
         return create("div")
             .classes("card", "flex-v")
-            .children(...children).build();
+            .children(...children)
+            .build();
     }
 
     static noRepostsYet(isOwnProfile: boolean) {
         let children;
         if (isOwnProfile) {
             children = [
-                create("p").text("Find some good stuff to share:").build(),
+                create("p")
+                    .text(t("FIND_GOOD_STUFF_TO_SHARE"))
+                    .build(),
                 button({
-                    text: "Explore",
+                    text: t("EXPLORE"),
                     icon: {
                         icon: "explore",
                     },
@@ -85,12 +94,13 @@ export class TrackTemplates {
                 }),
             ];
         } else {
-            children = [create("p").text("No reposts on this profile.").build()];
+            children = [create("p").text(t("NO_REPOSTS_FOUND")).build()];
         }
 
         return create("div")
             .classes("card", "flex-v")
-            .children(...children).build();
+            .children(...children)
+            .build();
     }
 
     static trackCover(track: Track, coverType: string, startCallback: Function | null = null) {
@@ -121,8 +131,7 @@ export class TrackTemplates {
                     .alt(track.title)
                     .onclick(() => {
                         Ui.showImageModal(imageState);
-                    })
-                    .build(),
+                    }).build(),
                 when(
                     isOwnTrack,
                     create("div")
@@ -131,17 +140,15 @@ export class TrackTemplates {
                             coverType === "cover" ? "showOnParentHover" : "_",
                             "centeredInParent",
                             "flex",
-                        )
-                        .children(
-                            GenericTemplates.deleteIconButton("delete-image-button", () =>
-                                MediaActions.deleteMedia(MediaFileType.trackCover, track.id, imageState, coverLoading),
-                            ),
-                            GenericTemplates.uploadIconButton("replace-image-button", () =>
-                                TrackActions.replaceCover(track.id, true, imageState, coverLoading),
-                            ),
-                            when(coverLoading, GenericTemplates.loadingSpinner()),
-                        )
-                        .build(),
+                        ).children(
+                        GenericTemplates.deleteIconButton("delete-image-button", () =>
+                            MediaActions.deleteMedia(MediaFileType.trackCover, track.id, imageState, coverLoading),
+                        ),
+                        GenericTemplates.uploadIconButton("replace-image-button", () =>
+                            TrackActions.replaceCover(track.id, true, imageState, coverLoading),
+                        ),
+                        when(coverLoading, GenericTemplates.loadingSpinner()),
+                    ).build(),
                 ),
                 when(
                     coverType !== "cover",
@@ -151,8 +158,7 @@ export class TrackTemplates {
                             "hidden",
                             coverType !== "cover" ? "showOnParentHover" : "_",
                             alwaysShowClass,
-                        )
-                        .children(GenericTemplates.playButton(track.id, start))
+                        ).children(GenericTemplates.playButton(track.id, start))
                         .build(),
                 ),
             ).build();
@@ -193,7 +199,7 @@ export class TrackTemplates {
     }
 
     static feedFilters(filterState: Signal<string>) {
-        const tabs = ["All", "Originals", "Reposts"];
+        const tabs = [`${t("ALL")}`, `${t("ORIGINALS")}`, `${t("REPOSTS")}`];
 
         return GenericTemplates.combinedSelector(
             tabs,
@@ -207,7 +213,8 @@ export class TrackTemplates {
     static trackList(trackList: any[]) {
         return create("div")
             .classes("flex-v", "reverse", "track-list")
-            .children(...trackList).build();
+            .children(...trackList)
+            .build();
     }
 
     static paginationControls(pageState: Signal<number>) {
@@ -231,14 +238,14 @@ export class TrackTemplates {
             .classes("flex")
             .children(
                 button({
-                    text: "Previous page",
+                    text: t("PREVIOUS_PAGE"),
                     icon: { icon: "arrow_left" },
                     onclick: previousCallback,
                     disabled: currentPage === 1,
                     classes: ["previousPage"],
                 }),
                 button({
-                    text: "Next page",
+                    text: t("NEXT_PAGE"),
                     icon: { icon: "arrow_right" },
                     onclick: nextCallback,
                     disabled: currentPage === Infinity,
@@ -258,7 +265,7 @@ export class TrackTemplates {
                     "flex",
                     "nogap",
                 )
-                .title("Still processing, please check back later.")
+                .title(t("STILL_PROCESSING_CHECK_LATER"))
                 .build();
         }
 
@@ -408,10 +415,8 @@ export class TrackTemplates {
                                         InteractionTemplates.interactions(EntityType.track, track),
                                     ),
                                 ).classes("align-children-end"),
-                            )
-                            .build(),
-                    )
-                    .build(),
+                            ).build(),
+                    ).build(),
             ).build();
     }
 
@@ -426,7 +431,7 @@ export class TrackTemplates {
             .classes("flex")
             .children(
                 button({
-                    text: "Up",
+                    text: t("UP"),
                     icon: { icon: "keyboard_arrow_up" },
                     classes: ["align-children"],
                     disabled: compute(p => p[0].track_id === track.id, tracks),
@@ -435,7 +440,7 @@ export class TrackTemplates {
                     },
                 }),
                 button({
-                    text: "Down",
+                    text: t("DOWN"),
                     icon: { icon: "keyboard_arrow_down" },
                     classes: ["align-children"],
                     disabled: compute(p => p[p.length - 1].track_id === track.id, tracks),
@@ -444,7 +449,7 @@ export class TrackTemplates {
                     },
                 }),
                 button({
-                    text: "Remove",
+                    text: t("REMOVE"),
                     icon: { icon: "close" },
                     classes: ["negative", "align-children"],
                     onclick: async () => {
@@ -469,8 +474,11 @@ export class TrackTemplates {
                     noTracks,
                     create("div")
                         .classes("card")
-                        .children(create("span").text(`This ${type} has no tracks.`).build())
-                        .build(),
+                        .children(
+                            create("span")
+                                .text(t("NO_TRACKS_FOUND"))
+                                .build(),
+                        ).build(),
                 ),
                 signalMap(tracks, create("div").classes("flex-v"), (track, i) => {
                     let parent = horizontal().classes("fullWidth");
@@ -486,8 +494,7 @@ export class TrackTemplates {
                             parent
                                 .children(TrackTemplates.trackInList(track, canEdit, list, tracks, type, startCallback))
                                 .build(),
-                        )
-                        .build();
+                        ).build();
                 }),
             ).build();
     }
@@ -581,11 +588,11 @@ export class TrackTemplates {
                             .children(
                                 create("span")
                                     .classes("date", "text-small")
-                                    .text("Uploaded " + Util.formatDate(track.created_at))
+                                    .text(t("UPLOADED_AT", Util.formatDate(track.created_at)))
                                     .build(),
                                 create("span")
                                     .classes("playcount", "text-small")
-                                    .text(track.plays + " plays")
+                                    .text(t("PLAYS_AMOUNT", track.plays))
                                     .build(),
                             ).build(),
                     ).build(),
@@ -607,7 +614,7 @@ export class TrackTemplates {
                                                 currentUser,
                                                 horizontal(
                                                     button({
-                                                        text: "Add to playlist",
+                                                        text: t("ADD_TO_PLAYLIST"),
                                                         icon: { icon: "playlist_add" },
                                                         onclick: async () => {
                                                             await PlaylistActions.openAddToPlaylistModal(track, "track");
@@ -649,7 +656,9 @@ export class TrackTemplates {
         return create("div")
             .classes("flex-v", "track-contained-list")
             .children(
-                create("h2").text("In Albums").build(),
+                create("h2")
+                    .text(t("IN_ALBUMS"))
+                    .build(),
                 create("div")
                     .classes("flex")
                     .children(...albumCards)
@@ -669,7 +678,9 @@ export class TrackTemplates {
         return create("div")
             .classes("flex-v", "track-contained-list")
             .children(
-                create("h2").text("In Playlists").build(),
+                create("h2")
+                    .text(t("IN_PLAYLISTS"))
+                    .build(),
                 create("div")
                     .classes("flex")
                     .children(...playlistCards)
@@ -679,7 +690,7 @@ export class TrackTemplates {
 
     public static addToQueueButton(track: Track) {
         const inQueue = compute(q => q.includes(track.id), manualQueue);
-        const text = compute((q: boolean): string => (q ? "Unqueue" : "Queue"), inQueue);
+        const text = compute((q: boolean): string => (q ? `${t("UNQUEUE")}` : `${t("QUEUE")}`), inQueue);
         const icon = compute((q: boolean): string => (q ? "remove" : "switch_access_shortcut_add"), inQueue);
         const queueClass = compute((q: boolean): string => (q ? "negative" : "_"), inQueue);
 
@@ -696,7 +707,7 @@ export class TrackTemplates {
 
     static playButton(track: Track) {
         const isPlaying = compute((id, ph) => id === track.id && ph, currentTrackId, playingHere);
-        const text = compute((p): string => (p ? "Pause" : "Play"), isPlaying);
+        const text = compute((p): string => (p ? `${t("PAUSE")}` : `${t("PLAY")}`), isPlaying);
         const icon = getPlayIcon(isPlaying, loadingAudio);
 
         return button({
@@ -739,7 +750,7 @@ export class TrackTemplates {
                     horizontal(
                         UserTemplates.userWidget(data.user, [], [], UserWidgetContext.card),
                         create("span")
-                            .text("Requested you to be")
+                            .text(t("REQUESTED_YOU_TO_BE"))
                             .build(),
                         create("span")
                             .classes("warning")
@@ -754,7 +765,7 @@ export class TrackTemplates {
             ),
             horizontal(
                 button({
-                    text: "Approve",
+                    text: t("APPROVE"),
                     icon: {
                         icon: "check",
                     },
@@ -767,7 +778,7 @@ export class TrackTemplates {
                     classes: ["positive"],
                 }),
                 button({
-                    text: "Deny",
+                    text: t("DENY"),
                     icon: {
                         icon: "close",
                     },
@@ -789,18 +800,19 @@ export class TrackTemplates {
     static unapprovedTracks(tracks: TrackCollaborator[]) {
         const trackList = tracks.map((track: TrackCollaborator) => {
             if (!track.collab_type) {
-                throw new Error(`Track Collab type is not set for unapproved track with ID ${track.track_id}`);
+                throw new Error(`Track collab type is not set for unapproved track with ID ${track.track_id}`);
             }
             return TrackTemplates.toBeApprovedTrack(track.collab_type, track);
         });
         return create("div")
             .classes("flex-v")
-            .children(...trackList).build();
+            .children(...trackList)
+            .build();
     }
 
     static copyPrivateLinkButton(id: number, code: string) {
         return button({
-            text: "Copy private link",
+            text: t("COPY_PRIVATE_LINK"),
             icon: { icon: "link" },
             classes: ["special"],
             onclick: async () => copy(window.location.origin + "/track/" + id + "/" + code),

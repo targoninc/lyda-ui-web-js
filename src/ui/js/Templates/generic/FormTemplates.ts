@@ -15,7 +15,7 @@ export class FormTemplates {
             ).build();
     }
 
-    static dropDownField(title: string, options: TypeOrSignal<SelectOption<string>[]>, selectedValue: Signal<string>) {
+    static dropDownField(title: StringOrSignal, options: TypeOrSignal<SelectOption<string>[]>, selectedValue: Signal<string>) {
         const optionsState = options.constructor === Signal ? (options as Signal<SelectOption<string>[]>) : signal(options as SelectOption<string>[]);
 
         return create("div")
@@ -40,7 +40,7 @@ export class FormTemplates {
             .children(GenericTemplates.checkbox(name, checked, text, required, onchange)).build();
     }
 
-    static textField(title: string, name: string, placeholder: string, type = "text", value: StringOrSignal = "", required = false, onchange: Function = (val: string) => {
+    static textField(title: StringOrSignal, name: StringOrSignal, placeholder: StringOrSignal, type = "text", value: StringOrSignal = "", required = false, onchange: Function = (val: string) => {
     }, autofocus = false, onkeydown: Function = () => {
     }, classes: StringOrSignal[] = []) {
         return input<string>({

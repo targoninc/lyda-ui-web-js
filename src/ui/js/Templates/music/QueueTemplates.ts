@@ -23,6 +23,7 @@ import { UserTemplates } from "../account/UserTemplates.ts";
 import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
 import { DragActions } from "../../Actions/DragActions.ts";
 import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
+import { t } from "../../../locales";
 
 export class QueueTemplates {
     static queueItem(track: Track, index: number, isManual: boolean) {
@@ -85,7 +86,7 @@ export class QueueTemplates {
             .classes("flex")
             .children(
                 button({
-                    text: "Up",
+                    text: t("UP"),
                     icon: { icon: "keyboard_arrow_up" },
                     classes: ["align-children"],
                     disabled: index === 0,
@@ -94,7 +95,7 @@ export class QueueTemplates {
                     },
                 }),
                 button({
-                    text: "Down",
+                    text: t("DOWN"),
                     icon: { icon: "keyboard_arrow_down" },
                     classes: ["align-children"],
                     disabled: compute(q => index === (q.length - 1), manualQueue),
@@ -103,7 +104,7 @@ export class QueueTemplates {
                     },
                 }),
                 button({
-                    text: "Remove",
+                    text: t("REMOVE"),
                     icon: { icon: "close" },
                     classes: ["negative", "align-children"],
                     onclick: async () => {
@@ -129,7 +130,7 @@ export class QueueTemplates {
                         }),
                         create("span")
                             .classes("align-center", "nopointer")
-                            .text("Queue")
+                            .text(t("QUEUE"))
                             .build(),
                     ).build(),
             ).build();
@@ -159,12 +160,12 @@ export class QueueTemplates {
         }, currentUser);
 
         return vertical(
-            compute((q) => QueueTemplates.queueList(q.map(i => i.track_id).slice(0, q.length - 1), "History"), history),
-            compute(id => QueueTemplates.queueList([id], "Current track", false, true), currentTrackId),
-            compute((q) => QueueTemplates.queueList(q, "Manual queue", true), manualQueue),
-            compute((q) => QueueTemplates.queueList(q, "Context queue"), contextQueue),
+            compute((q) => QueueTemplates.queueList(q.map(i => i.track_id).slice(0, q.length - 1), t("HISTORY")), history),
+            compute(id => QueueTemplates.queueList([id], t("CURRENT_TRACK"), false, true), currentTrackId),
+            compute((q) => QueueTemplates.queueList(q, t("MANUAL_QUEUE"), true), manualQueue),
+            compute((q) => QueueTemplates.queueList(q, t("CONTEXT_QUEUE")), contextQueue),
             when(playFromAutoEnabled, vertical(
-                compute((q) => QueueTemplates.queueList(q, "Auto queue"), autoQueue),
+                compute((q) => QueueTemplates.queueList(q, t("AUTO_QUEUE")), autoQueue),
             ).build()),
             create("div")
                 .classes("queue-spacer")
@@ -172,7 +173,7 @@ export class QueueTemplates {
         ).classes("fullWidth", ...classes).build();
     }
 
-    static queueList(q: number[], text: string, isManual: boolean = false, isCurrent: boolean = false) {
+    static queueList(q: number[], text: StringOrSignal, isManual: boolean = false, isCurrent: boolean = false) {
         if (q.length === 0) {
             return nullElement();
         }

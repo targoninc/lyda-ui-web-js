@@ -6,11 +6,12 @@ import { PayoutTemplates } from "./money/PayoutTemplates.ts";
 import { RoyaltyInfo } from "@targoninc/lyda-shared/src/Models/RoyaltyInfo.ts";
 import { Api } from "../Api/Api.ts";
 import { horizontal, vertical } from "./generic/GenericTemplates.ts";
+import { t } from "../../locales";
 
 export class StatisticTemplates {
     static playCountByMonthChart() {
         return ChartTemplates.paginatedBarChart({
-            title: "Play count by month",
+            title: `${t("PLAYCOUNT_BY_MONTH")}`,
             endpoint: ApiRoutes.getPlayCountByMonth,
             timeType: "month"
         });
@@ -18,7 +19,7 @@ export class StatisticTemplates {
 
     static royaltiesByMonthChart() {
         return ChartTemplates.paginatedBarChart({
-            title: "Royalties by month",
+            title: `${t("ROYALTIES_BY_MONTH")}`,
             endpoint: ApiRoutes.getRoyaltiesByMonth,
             timeType: "month"
         });
@@ -26,7 +27,7 @@ export class StatisticTemplates {
 
     static globalPlayCountByMonthChart() {
         return ChartTemplates.paginatedBarChart({
-            title: "Play count by month",
+            title: `${t("PLAYCOUNT_BY_MONTH")}`,
             endpoint: ApiRoutes.getGlobalPlayCountByMonth,
             timeType: "month",
         });
@@ -34,7 +35,7 @@ export class StatisticTemplates {
 
     static globalRoyaltiesByMonthChart() {
         return ChartTemplates.paginatedBarChart({
-            title: "Royalties by month",
+            title: `${t("ROYALTIES_BY_MONTH")}`,
             endpoint: ApiRoutes.getGlobalRoyaltiesByMonth,
             timeType: "month",
         });
@@ -42,23 +43,23 @@ export class StatisticTemplates {
 
     static likesByTrackChart(trackNames: string[], likeCounts: number[]) {
         if (trackNames.length === 0) {
-            return ChartTemplates.noData("Likes by track");
+            return ChartTemplates.noData(t("LIKES_BY_TRACK"));
         }
-        return ChartTemplates.barChart(trackNames, likeCounts, "Likes", "Likes by track", "likesByTrackChart");
+        return ChartTemplates.barChart(trackNames, likeCounts, `${t("LIKES")}`, `${t("LIKES_BY_TRACK")}`, "likesByTrackChart");
     }
 
     static royaltiesByTrackChart(labels: string[], values: number[]) {
         if (labels.length === 0) {
-            return ChartTemplates.noData("Royalties by track");
+            return ChartTemplates.noData(t("ROYALTIES_BY_TRACK"));
         }
-        return ChartTemplates.barChart(labels, values, "Royalties", "Royalties by track", "royaltiesByTrackChart");
+        return ChartTemplates.barChart(labels, values, `${t("ROYALTIES")}`, `${t("ROYALTIES_BY_TRACK")}`, "royaltiesByTrackChart");
     }
 
     static playCountByTrackChart(trackNames: string[], playCounts: number[]) {
         if (trackNames.length === 0) {
-            return ChartTemplates.noData("Play count by track");
+            return ChartTemplates.noData(t("PLAYCOUNT_BY_TRACK"));
         }
-        return ChartTemplates.barChart(trackNames, playCounts, "Plays", "Play count by track", "playCountByTrackChart");
+        return ChartTemplates.barChart(trackNames, playCounts, `${t("PLAYS")}`, `${t("PLAYCOUNT_BY_TRACK")}`, "playCountByTrackChart");
     }
 
     static async allStats() {

@@ -1,6 +1,7 @@
 import { create } from "@targoninc/jess";
 import { GenericTemplates } from "./generic/GenericTemplates.ts";
 import { roadMapItemIcons, RoadmapItemStatus } from "@targoninc/lyda-shared/src/Enums/RoadmapItemStatus";
+import { t } from "../../locales";
 
 let index = 0;
 
@@ -12,10 +13,11 @@ export class RoadmapTemplates {
             .classes("flex-v")
             .children(
                 create("h1")
-                    .text("Feature Roadmap")
+                    .text(t("FEATURE_ROADMAP"))
                     .build(),
                 RoadmapTemplates.roadmapItem(RoadmapItemStatus.todo, "2025-2026", "Stripe payments + payouts"),
                 RoadmapTemplates.roadmapItem(RoadmapItemStatus.todo, "2025", "Buying music"),
+                RoadmapTemplates.roadmapItem(RoadmapItemStatus.inProgress, "2025", "Localization"),
                 RoadmapTemplates.roadmapItem(RoadmapItemStatus.inProgress, "2025", "UX improvements and bugfixes"),
                 RoadmapTemplates.roadmapItem(RoadmapItemStatus.done, "2025", "MFA"),
                 RoadmapTemplates.roadmapItem(RoadmapItemStatus.done, "2025", "Royalty payouts"),

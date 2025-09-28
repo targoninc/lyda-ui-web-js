@@ -233,7 +233,7 @@ export class AlbumTemplates {
                 textarea({
                     name: "description",
                     label: t("DESCRIPTION"),
-                    placeholder: t("MY_COOL_ALBUM"),
+                    placeholder: t("EXAMPLE_ALBUM_NAME"),
                     value: description,
                     onchange: (v) => {
                         album.value = { ...album.value, description: v };

@@ -50,6 +50,7 @@ import { SearchResult } from "@targoninc/lyda-shared/src/Models/SearchResult";
 import { currentUser } from "../../state.ts";
 import { MusicTemplates } from "./MusicTemplates.ts";
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
+import { t } from "../../../locales";
 
 export class TrackEditTemplates {
     static uploadPage() {
@@ -88,7 +89,7 @@ export class TrackEditTemplates {
 
     static openEditPageButton(track: Track) {
         return button({
-            text: "Edit",
+            text: t("EDIT"),
             icon: { icon: "edit" },
             onclick: async () => {
                 TrackActions.getTrackEditModal(track);
@@ -98,7 +99,7 @@ export class TrackEditTemplates {
 
     static addToAlbumsButton(track: Track) {
         return button({
-            text: "Add to albums",
+            text: t("ADD_TO_ALBUMS"),
             icon: { icon: "forms_add_on" },
             onclick: async () => {
                 await AlbumActions.openAddToAlbumModal(track);
@@ -112,37 +113,51 @@ export class TrackEditTemplates {
             release_date: new Date(track.release_date),
         });
 
-        return create("div").classes("flex-v").children(
-            create("div").classes("flex").children(
-                create("img").classes("icon", "svg").styles("width", "30px", "height", "auto").attributes("src", Icons.PEN).build(),
-                create("h2").text("Edit track").build(),
-            ).build(),
-            create("p").text("Edit the track details below").build(),
-            TrackEditTemplates.upDownButtons(state, true),
-            TrackEditTemplates.trackEdit(state, signal<string[]>([])),
-            create("div").classes("flex").children(
-                button({
-                    text: "Save",
-                    icon: { icon: "check" },
-                    classes: ["positive"],
-                    onclick: () => {
-                        confirmCallback(state.value);
-                    },
-                }),
-                button({
-                    text: "Cancel",
-                    icon: { icon: "close" },
-                    classes: ["negative"],
-                    onclick: cancelCallback,
-                }),
-            ).build(),
-        ).build();
+        return create("div")
+            .classes("flex-v")
+            .children(
+                create("div")
+                    .classes("flex")
+                    .children(
+                        create("img")
+                            .classes("icon", "svg")
+                            .styles("width", "30px", "height", "auto")
+                            .attributes("src", Icons.PEN)
+                            .build(),
+                        create("h2")
+                            .text(t("EDIT_TRACK"))
+                            .build(),
+                    ).build(),
+                create("p")
+                    .text(t("EDIT_TRACK_DETAILS_BELOW"))
+                    .build(),
+                TrackEditTemplates.upDownButtons(state, true),
+                TrackEditTemplates.trackEdit(state, signal<string[]>([])),
+                create("div")
+                    .classes("flex")
+                    .children(
+                        button({
+                            text: t("SAVE"),
+                            icon: { icon: "check" },
+                            classes: ["positive"],
+                            onclick: () => {
+                                confirmCallback(state.value);
+                            },
+                        }),
+                        button({
+                            text: t("CANCEL"),
+                            icon: { icon: "close" },
+                            classes: ["negative"],
+                            onclick: cancelCallback,
+                        }),
+                    ).build(),
+            ).build();
     }
 
     static upDownButtons(state: Signal<any>, uploadEnabled = false) {
         const buttons = [
             button({
-                text: "Download Info",
+                text: t("DOWNLOAD_INFO"),
                 icon: { icon: "file_save" },
                 onclick: () => {
                     const json = JSON.stringify(state.value);
@@ -154,7 +169,7 @@ export class TrackEditTemplates {
         if (uploadEnabled) {
             buttons.push(
                 button({
-                    text: "Upload Info",
+                    text: t("UPLOAD_INFO"),
                     icon: { icon: "upload_file" },
                     onclick: () => {
                         const fileInput = document.createElement("input");
@@ -174,7 +189,10 @@ export class TrackEditTemplates {
             );
         }
 
-        return create("div").classes("flex").children(...buttons).build();
+        return create("div")
+            .classes("flex")
+            .children(...buttons)
+            .build();
     }
 
     static uploadInfo(uploadInfo: Signal<UploadInfo[]>) {
@@ -186,9 +204,15 @@ export class TrackEditTemplates {
     }
 
     static uploadInfoItem(info: UploadInfo) {
-        return create("div").classes("flex-v").children(
-            create("span").id("upload-info-" + info.type).classes("upload-info-item", ...(info.classes ?? [])).text(info.value).build(),
-        ).build();
+        return create("div")
+            .classes("flex-v")
+            .children(
+                create("span")
+                    .id("upload-info-" + info.type)
+                    .classes("upload-info-item", ...(info.classes ?? []))
+                    .text(info.value)
+                    .build(),
+            ).build();
     }
 
     static uploadButton(
@@ -206,7 +230,7 @@ export class TrackEditTemplates {
                 { section: "terms", field: "termsOfService" },
             ];
             if (requiredProps.some(p => !s[p.field])) {
-                newErrors.push("Missing required fields");
+                newErrors.push(`${t("MISSING_REQUIRED_FIELDS")}`);
                 const errorProps = requiredProps.filter(p => !s[p.field]);
                 errorSections.value = errorProps.map(p => p.section);
                 errorFields.value = errorProps.map(p => p.field);
@@ -224,12 +248,10 @@ export class TrackEditTemplates {
         return vertical(
             horizontal(
                 button({
-                    text: "Upload",
+                    text: t("UPLOAD"),
                     disabled,
                     classes: [buttonClass, "special", "bigger-input", "rounded-max"],
-                    onclick: e => {
-                        new AudioUpload(e, state, progressState);
-                    },
+                    onclick: e => new AudioUpload(e, state, progressState),
                     icon: { icon: "upload" },
                 }),
                 GenericTemplates.progressSectionPart(progressState),
@@ -241,7 +263,7 @@ export class TrackEditTemplates {
     static filesSection(isNewTrack = false, state: Signal<UploadableTrack>, errorSections: Signal<string[]>) {
         return create("div").classes("flex-v").children(
             TrackEditTemplates.sectionCard(
-                "Audio",
+                t("AUDIO"),
                 errorSections,
                 "audio",
                 [TrackEditTemplates.audioFile(isNewTrack, state)],
@@ -249,7 +271,7 @@ export class TrackEditTemplates {
                 ["flex-grow"],
             ),
             TrackEditTemplates.sectionCard(
-                "Artwork",
+                t("ARTWORK"),
                 errorSections,
                 "artwork",
                 [TrackEditTemplates.coverFile(state), TrackEditTemplates.imagePreview("cover-file")],
@@ -262,10 +284,15 @@ export class TrackEditTemplates {
     static trackEdit(state: Signal<UploadableTrack>, errorSections: Signal<string[]>) {
         const isPrivate = compute(s => s.visibility === "private", state);
 
-        return create("div").classes("flex-v").children(
-            TrackEditTemplates.trackDetails(errorSections, isPrivate, state),
-            create("div").classes("flex-v").children(TrackEditTemplates.monetizationSection(errorSections, state)).build(),
-        ).build();
+        return create("div")
+            .classes("flex-v")
+            .children(
+                TrackEditTemplates.trackDetails(errorSections, isPrivate, state),
+                create("div")
+                    .classes("flex-v")
+                    .children(TrackEditTemplates.monetizationSection(errorSections, state))
+                    .build(),
+            ).build();
     }
 
     private static trackDetails(
@@ -274,7 +301,7 @@ export class TrackEditTemplates {
         state: Signal<UploadableTrack>,
     ) {
         return TrackEditTemplates.sectionCard(
-            "Track Details",
+            t("TRACK_DETAILS"),
             errorSections,
             "info",
             [
@@ -295,25 +322,27 @@ export class TrackEditTemplates {
     }
 
     private static visibilityToggle(isPrivate: Signal<boolean>, state: Signal<UploadableTrack>) {
-        return create("div").classes("flex").children(
-            toggle({
-                name: "visibility",
-                label: "Private",
-                text: "Private",
-                checked: isPrivate,
-                onchange: v => {
-                    state.value = {
-                        ...state.value,
-                        visibility: v ? "private" : "public",
-                    };
-                },
-            }),
-        ).build();
+        return create("div")
+            .classes("flex")
+            .children(
+                toggle({
+                    name: "visibility",
+                    label: t("PRIVATE"),
+                    text: t("PRIVATE"),
+                    checked: isPrivate,
+                    onchange: v => {
+                        state.value = {
+                            ...state.value,
+                            visibility: v ? "private" : "public",
+                        };
+                    },
+                }),
+            ).build();
     }
 
     private static monetizationSection(errorSections: Signal<string[]>, state: Signal<UploadableTrack>) {
         return TrackEditTemplates.sectionCard(
-            "Monetization",
+            t("MONETIZATION"),
             errorSections,
             "monetization",
             [
@@ -328,13 +357,13 @@ export class TrackEditTemplates {
         return input<number>({
             type: InputType.number,
             name: "price",
-            label: "Minimum track price in USD",
-            placeholder: "1$",
+            label: t("MINIMUM_TRACK_PRICE_USD"),
+            placeholder: t("ONE_DOLLAR"),
             value: compute(s => s.price ?? 0, state),
             validators: [
                 v => {
                     if (v < 0) {
-                        return ["Minimum track price must be a positive number"];
+                        return [`${t("MINIMUM_TRACK_PRICE_MUST_BE_NUMBER")}`];
                     }
                 },
             ],
@@ -349,8 +378,8 @@ export class TrackEditTemplates {
             type: InputType.text,
             required: true,
             name: "title",
-            label: "Title*",
-            placeholder: "Track title",
+            label: t("TITLE_STAR"),
+            placeholder: t("TRACK_TITLE"),
             value: compute(s => s.title ?? "", state),
             validators: TrackValidators.titleValidators,
             onchange: v => {
@@ -363,8 +392,8 @@ export class TrackEditTemplates {
         return input<string>({
             type: InputType.text,
             name: "credits",
-            label: "Collaborators",
-            placeholder: "John Music, Alice Frequency",
+            label: t("COLLABORATORS"),
+            placeholder: t("EXAMPLE_COLLABORATORS"),
             validators: TrackValidators.creditsValidators,
             value: compute(s => s.credits ?? "", state),
             onchange: v => {
@@ -376,8 +405,8 @@ export class TrackEditTemplates {
     private static descriptionInput(state: Signal<UploadableTrack>) {
         return textarea({
             name: "description",
-            label: "Description",
-            placeholder: "My cool track",
+            label: t("DESCRIPTION"),
+            placeholder: t("EXAMPLE_TRACK_NAME"),
             validators: TrackValidators.descriptionValidators,
             value: compute(s => s.description ?? "", state),
             onchange: v => {
@@ -390,8 +419,8 @@ export class TrackEditTemplates {
         return input<string>({
             type: InputType.text,
             name: "upc",
-            label: "UPC",
-            placeholder: "00888072469600",
+            label: t("UPC"),
+            placeholder: t("EXAMPLE_UPC"),
             validators: TrackValidators.upcValidators,
             value: compute(s => s.upc ?? "", state),
             onchange: v => {
@@ -401,7 +430,10 @@ export class TrackEditTemplates {
     }
 
     static genreInput(parentState: Signal<UploadableTrack>) {
-        const genres = Object.values(Genre).map((genre: string) => ({ name: genre, id: genre })) as SelectOption[];
+        const genres = Object.values(Genre).map((genre: string) => ({
+            name: genre,
+            id: genre,
+        })) as SelectOption<string>[];
         const value = compute(p => p.genre ?? "other", parentState);
         value.subscribe((v, changed) => {
             if (!changed) {
@@ -413,15 +445,15 @@ export class TrackEditTemplates {
                 genre: v,
             };
         });
-        return FormTemplates.dropDownField("Genre", signal(genres), value);
+        return FormTemplates.dropDownField(t("GENRE"), signal(genres), value);
     }
 
     private static isrcInput(state: Signal<UploadableTrack>) {
         return input<string>({
             type: InputType.text,
             name: "isrc",
-            label: "ISRC",
-            placeholder: "QZNWX2227540",
+            label: t("ISRC"),
+            placeholder: t("EXAMPLE_ISRC"),
             validators: TrackValidators.isrcValidators,
             value: compute(s => s.isrc ?? "", state),
             onchange: v => {
@@ -434,8 +466,8 @@ export class TrackEditTemplates {
         return input<string>({
             type: InputType.text,
             name: "artistname",
-            label: "Artist display name",
-            placeholder: "My other alias",
+            label: t("ARTIST_DISPLAY_NAME"),
+            placeholder: t("EXAMPLE_ARTIST_DISPLAY_NAME"),
             validators: TrackValidators.artistnameValidators,
             value: compute(s => s.artistname ?? "", state),
             onchange: v => {
@@ -451,36 +483,34 @@ export class TrackEditTemplates {
     ) {
         const isPrivate = compute(s => s.visibility === "private", state);
 
-        return create("div").classes("flex").children(
-            TrackEditTemplates.trackDetails(errorSections, isPrivate, state),
-            create("div").classes("flex-v").children(
-                TrackEditTemplates.filesSection(true, state, errorSections),
-                TrackEditTemplates.monetizationSection(errorSections, state),
-                enableTos
-                    ? TrackEditTemplates.sectionCard(
-                        "Copyright",
-                        errorSections,
-                        "terms",
-                        [
-                            checkbox({
-                                name: "termsOfService",
-                                text: "I have all the necessary rights to distribute this content*",
-                                checked: compute(s => s.termsOfService, state),
-                                required: true,
-                                onchange: () => {
-                                    const old = state.value;
-                                    state.value = {
-                                        ...old,
-                                        termsOfService: !old.termsOfService,
-                                    };
-                                },
-                            }),
-                        ],
-                        "gavel",
-                    )
-                    : null,
-            ).build(),
-        ).build();
+        return create("div")
+            .classes("flex")
+            .children(
+                TrackEditTemplates.trackDetails(errorSections, isPrivate, state),
+                create("div")
+                    .classes("flex-v")
+                    .children(
+                        TrackEditTemplates.filesSection(true, state, errorSections),
+                        TrackEditTemplates.monetizationSection(errorSections, state),
+                        enableTos
+                            ? TrackEditTemplates.sectionCard(t("COPYRIGHT"), errorSections, "terms",
+                                [
+                                    checkbox({
+                                        name: "termsOfService",
+                                        text: t("I_HAVE_ALL_NECESSARY_RIGHTS"),
+                                        checked: compute(s => s.termsOfService, state),
+                                        required: true,
+                                        onchange: () => {
+                                            const old = state.value;
+                                            state.value = {
+                                                ...old,
+                                                termsOfService: !old.termsOfService,
+                                            };
+                                        },
+                                    }),
+                                ], "gavel") : null,
+                    ).build(),
+            ).build();
     }
 
     static sectionCard(
@@ -493,13 +523,16 @@ export class TrackEditTemplates {
     ) {
         const hasError = compute((e: string[]) => e.includes(id), errorSections);
 
-        return create("div").classes("border-card", "flex-v", ...classes).children(GenericTemplates.cardLabel(title, icon, hasError), ...children).build();
+        return create("div")
+            .classes("border-card", "flex-v", ...classes)
+            .children(GenericTemplates.cardLabel(title, icon, hasError), ...children)
+            .build();
     }
 
     static audioFile(canOverwriteTitle = false, parentState: Signal<UploadableTrack>) {
         return FormTemplates.fileField(
-            "Audio File*",
-            "Choose audio file",
+            t("AUDIO_FILE"),
+            t("CHOOSE_AUDIO_FILE"),
             "audio-file",
             "audio/*",
             true,
@@ -526,8 +559,8 @@ export class TrackEditTemplates {
 
     static coverFile(parentState: Signal<UploadableTrack>) {
         return FormTemplates.fileField(
-            "Cover File",
-            "Choose image file",
+            t("COVER_FILE"),
+            t("CHOOSE_IMAGE_FILE"),
             "cover-file",
             "image/*",
             false,
@@ -547,24 +580,29 @@ export class TrackEditTemplates {
     }
 
     static imagePreview(name: HtmlPropertyValue) {
-        return create("img").id(name + "-preview").classes("image-preview", "hidden").build();
+        return create("img")
+            .id(name + "-preview")
+            .classes("image-preview", "hidden")
+            .build();
     }
 
     static monetizationInfo() {
-        return create("span").text("This track will be monetized through streaming subscriptions and available for buying.").build();
+        return create("span")
+            .text(t("TRACK_WILL_BE_MONETIZED"))
+            .build();
     }
 
     static deleteTrackButton(trackId: number) {
         return button({
-            text: "Delete",
+            text: t("DELETE"),
             icon: { icon: "delete" },
             classes: ["negative"],
             onclick: async () => {
                 await Ui.getConfirmationModal(
-                    "Delete track",
-                    "Are you sure you want to delete this track?",
-                    "Yes",
-                    "No",
+                    t("DELETE_TRACK"),
+                    t("SURE_DELETE_TRACK"),
+                    t("YES"),
+                    t("NO"),
                     () => TrackActions.deleteTrack(trackId),
                     () => {},
                     Icons.WARNING,
@@ -596,7 +634,7 @@ export class TrackEditTemplates {
             .classes("flex-v", "small-gap")
             .children(
                 when(hasLus, create("label")
-                    .text("Linked Users")
+                    .text(t("LINKED_USERS"))
                     .build()),
                 vertical(
                     signalMap(linkedUserState, horizontal(), collaborator => {
@@ -643,7 +681,7 @@ export class TrackEditTemplates {
         const loading = signal(false);
 
         return button({
-            text: "Replace Audio",
+            text: t("REPLACE_AUDIO"),
             icon: { icon: "upload" },
             disabled: loading,
             onclick: async () => {
@@ -659,7 +697,7 @@ export class TrackEditTemplates {
         const loading = signal(false);
 
         return button({
-            text: "Download Audio",
+            text: t("DOWNLOAD_AUDIO"),
             icon: { icon: "download" },
             disabled: loading,
             onclick: async () => {
@@ -711,7 +749,7 @@ export class TrackEditTemplates {
                 t => ({
                     name: t.name,
                     id: t.id.toString(),
-                } as SelectOption),
+                } as SelectOption<string>),
             );
         }, collabTypes);
 
@@ -746,13 +784,15 @@ export class TrackEditTemplates {
         );
 
         return create("div").classes("flex-v").children(
-            create("p").text("Linking a user will send a request to them for approval first").build(),
+            create("p")
+                .text(t("LINKING_USER_WILL_REQUEST_APPROVAL"))
+                .build(),
             horizontal(
                 input({
                     id: "addUserSearch",
                     name: "addUserSearch",
                     type: InputType.text,
-                    placeholder: "Search for a user",
+                    placeholder: t("SEARCH_FOR_USER"),
                     value: "",
                     debounce: 200,
                     onchange: async search => {
@@ -763,30 +803,35 @@ export class TrackEditTemplates {
                         }
                     },
                 }),
-                create("div").classes("flex").children(
-                    button({
-                        text: "Add",
-                        disabled: disabled,
-                        onclick: async () => {
-                            const user = users.value.find(u => u.id === selectedState.value);
-                            if (!user) {
-                                return;
-                            }
+                create("div")
+                    .classes("flex")
+                    .children(
+                        button({
+                            text: t("ADD"),
+                            disabled: disabled,
+                            onclick: async () => {
+                                const user = users.value.find(u => u.id === selectedState.value);
+                                if (!user) {
+                                    return;
+                                }
 
-                            addUser(user.subtitle?.substring(1) ?? "");
-                        },
-                        icon: {
-                            icon: "person_add",
-                        },
-                        classes: ["positive"],
-                    }),
-                ).build(),
+                                addUser(user.subtitle?.substring(1) ?? "");
+                            },
+                            icon: {
+                                icon: "person_add",
+                            },
+                            classes: ["positive"],
+                        }),
+                    ).build(),
             ),
-            create("div").classes("flex-v").styles("max-height", "200px", "overflow", "auto", "flex-wrap", "nowrap").children(
-                signalMap(users, create("div").classes("flex-v"), user =>
-                    GenericTemplates.addUserLinkSearchResult(user, selectedState),
-                ),
-            ).build(),
+            create("div")
+                .classes("flex-v")
+                .styles("max-height", "200px", "overflow", "auto", "flex-wrap", "nowrap")
+                .children(
+                    signalMap(users, create("div").classes("flex-v"), user =>
+                        GenericTemplates.addUserLinkSearchResult(user, selectedState),
+                    ),
+                ).build(),
         ).build();
     }
 
@@ -823,7 +868,7 @@ export class TrackEditTemplates {
                 ).classes("align-end"),
                 horizontal(
                     create("span")
-                        .text("Cover")
+                        .text(t("ARTWORK"))
                         .build(),
                     MusicTemplates.entityCoverButtons(MediaFileType.trackCover, track, imageState, coverLoading),
                     when(coverLoading, GenericTemplates.loadingSpinner()),
@@ -831,13 +876,13 @@ export class TrackEditTemplates {
                 when(changed, horizontal(
                     create("span")
                         .classes("warning")
-                        .text("Unsaved changes")
+                        .text(t("UNSAVED_CHANGES"))
                         .build(),
                     button({
                         disabled: loading,
                         classes: ["positive"],
                         icon: { icon: "save" },
-                        text: "Save",
+                        text: t("SAVE"),
                         onclick: async () => Api.updateTrackFull(state.value).then(() => {
                             Api.getTrackById(track.id).then(t => {
                                 tracks.value = tracks.value.map(t2 => {
@@ -852,7 +897,7 @@ export class TrackEditTemplates {
                     button({
                         disabled: loading,
                         icon: { icon: "undo" },
-                        text: "Revert",
+                        text: t("REVERT"),
                         onclick: () => state.value = track as UploadableTrack,
                     }),
                 ).classes("align-end", "align-children").build()),
@@ -868,7 +913,7 @@ export class TrackEditTemplates {
         return vertical(
             heading({
                 level: 1,
-                text: "Edit tracks",
+                text: t("EDIT_TRACKS"),
             }),
             signalMap(tracks, vertical(), t => TrackEditTemplates.editableTrackInList(t, tracks)),
         ).build();

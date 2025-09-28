@@ -42,7 +42,7 @@ export class InteractionTemplates {
         interactionType: InteractionType, metadata: InteractionMetadata<T>, config: InteractionConfig, entity: T, showCount = true) {
         const count$ = signal(metadata.count ?? 0);
         const interacted$ = signal(metadata.interacted ?? false);
-        //const list$ = signal(metadata.list); TODO: Not yet used...figure out if we want to display the list of interactions right where the count is or elsewhere (probably the second option)
+        //const list$ = signal(metadata.list); TODO: Load the list dynamically and display it in a popup
 
         const icon$ = compute(i => i ? config.icons.interacted : config.icons.default, interacted$);
         const stateClass$ = compute((s: boolean): string => s ? "active" : "_", interacted$);

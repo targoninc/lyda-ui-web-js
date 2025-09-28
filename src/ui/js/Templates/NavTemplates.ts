@@ -1,17 +1,18 @@
-import {Icons} from "../Enums/Icons.ts";
-import {UserTemplates} from "./account/UserTemplates.ts";
-import {UserActions} from "../Actions/UserActions.ts";
-import {GenericTemplates} from "./generic/GenericTemplates.ts";
-import {SearchTemplates} from "./SearchTemplates.ts";
-import {navigate, reload} from "../Routing/Router.ts";
-import {create, when, StringOrSignal, compute, Signal, signal} from "@targoninc/jess";
-import {router} from "../../main.ts";
-import {currentUser} from "../state.ts";
-import {RoutePath} from "../Routing/routes.ts";
-import {NotificationTemplates} from "./NotificationTemplates.ts";
+import { Icons } from "../Enums/Icons.ts";
+import { UserTemplates } from "./account/UserTemplates.ts";
+import { UserActions } from "../Actions/UserActions.ts";
+import { GenericTemplates } from "./generic/GenericTemplates.ts";
+import { SearchTemplates } from "./SearchTemplates.ts";
+import { navigate, reload } from "../Routing/Router.ts";
+import { compute, create, Signal, StringOrSignal, when } from "@targoninc/jess";
+import { router } from "../../main.ts";
+import { currentUser } from "../state.ts";
+import { RoutePath } from "../Routing/routes.ts";
+import { NotificationTemplates } from "./NotificationTemplates.ts";
 import { button } from "@targoninc/jess-components";
-import {SearchContext} from "@targoninc/lyda-shared/src/Enums/SearchContext";
-import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
+import { SearchContext } from "@targoninc/lyda-shared/src/Enums/SearchContext";
+import { UserWidgetContext } from "../Enums/UserWidgetContext.ts";
+import { t } from "../../locales";
 
 export class NavTemplates {
     static navTop(burgerMenuOpen: Signal<boolean>) {
@@ -27,9 +28,9 @@ export class NavTemplates {
                 create("div")
                     .classes("flex", "flex-grow")
                     .children(
-                        NavTemplates.navButton(RoutePath.library, "Library", "category"),
-                        NavTemplates.navButton(RoutePath.following, "Feed", "rss_feed"),
-                        NavTemplates.navButton(RoutePath.explore, "Explore", "explore"),
+                        NavTemplates.navButton(RoutePath.library, t("LIBRARY"), "category"),
+                        NavTemplates.navButton(RoutePath.following, t("FEED"), "rss_feed"),
+                        NavTemplates.navButton(RoutePath.explore, t("EXPLORE"), "explore"),
                         SearchTemplates.search(SearchContext.navBar),
                     ).build(),
                 when(currentUser, NavTemplates.accountSection()),
@@ -51,7 +52,7 @@ export class NavTemplates {
             .classes("burger-menu", "flexOnMidBreakpoint", "flex", "clickable")
             .onclick(() => open.value = true)
             .children(
-                GenericTemplates.icon(Icons.BURGER, true, ["nopointer", "icon", "svg", "align-center"], "Open Menu")
+                GenericTemplates.icon(Icons.BURGER, true, ["nopointer", "icon", "svg", "align-center"], t("OPEN_MENU")),
             ).build();
     }
 
@@ -72,22 +73,22 @@ export class NavTemplates {
                                     .build(),
                             ).build(),
                     ).build(),
-                NavTemplates.navButtonInBurger(RoutePath.following, "Library", "category", async () => {
+                NavTemplates.navButtonInBurger(RoutePath.following, t("LIBRARY"), "category", async () => {
                     open.value = false;
                     navigate(RoutePath.library);
                 }),
-                NavTemplates.navButtonInBurger(RoutePath.following, "Feed", "rss_feed", async () => {
+                NavTemplates.navButtonInBurger(RoutePath.following, t("FEED"), "rss_feed", async () => {
                     open.value = false;
                     navigate(RoutePath.following);
                 }),
-                NavTemplates.navButtonInBurger(RoutePath.following, "Explore", "explore", async () => {
+                NavTemplates.navButtonInBurger(RoutePath.following, t("EXPLORE"), "explore", async () => {
                     open.value = false;
                     navigate(RoutePath.explore);
                 }),
             ).build();
     }
 
-    static navButton(pageRoute: RoutePath, text: string, icon: StringOrSignal) {
+    static navButton(pageRoute: RoutePath, text: StringOrSignal, icon: StringOrSignal) {
         const active = compute(r => r && r.path === pageRoute, router.currentRoute);
         const activeClass = compute((a): string => a ? "active" : "_", active);
 
@@ -104,7 +105,7 @@ export class NavTemplates {
         });
     }
 
-    static navButtonInBurger(id: string, text: string, icon: string, clickFunc: Function) {
+    static navButtonInBurger(id: string, text: StringOrSignal, icon: string, clickFunc: Function) {
         const active = compute(r => r && r.path === id, router.currentRoute);
         const activeClass = compute((a): string => a ? "active" : "_", active);
 
@@ -139,7 +140,7 @@ export class NavTemplates {
             .classes("widest-fill-right")
             .children(
                 button({
-                    text: "Log in",
+                    text: t("LOGIN"),
                     icon: { icon: "login" },
                     classes: ["special"],
                     disabled: compute((r) => (r && r.path === "login") as boolean, router.currentRoute),

@@ -1,14 +1,15 @@
-import {GenericTemplates} from "./generic/GenericTemplates.ts";
-import {Icons} from "../Enums/Icons.ts";
-import {TrackActions} from "../Actions/TrackActions.ts";
-import {UserTemplates} from "./account/UserTemplates.ts";
-import {Time} from "../Classes/Helpers/Time.ts";
-import {Images} from "../Enums/Images.ts";
-import {Util} from "../Classes/Util.ts";
-import { compute, create, Signal, when, signalMap, signal, AnyElement, InputType } from "@targoninc/jess";
-import { textarea, button, input } from "@targoninc/jess-components";
-import {Comment} from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
-import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
+import { GenericTemplates } from "./generic/GenericTemplates.ts";
+import { Icons } from "../Enums/Icons.ts";
+import { TrackActions } from "../Actions/TrackActions.ts";
+import { UserTemplates } from "./account/UserTemplates.ts";
+import { Time } from "../Classes/Helpers/Time.ts";
+import { Images } from "../Enums/Images.ts";
+import { Util } from "../Classes/Util.ts";
+import { AnyElement, compute, create, InputType, Signal, signal, signalMap, when } from "@targoninc/jess";
+import { button, input, textarea } from "@targoninc/jess-components";
+import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
+import { UserWidgetContext } from "../Enums/UserWidgetContext.ts";
+import { t } from "../../locales";
 
 export class CommentTemplates {
     static commentListFullWidth(track_id: number, comments: Signal<Comment[]>, showComments: Signal<boolean>) {
@@ -23,7 +24,7 @@ export class CommentTemplates {
                     .children(
                         when(hasComments, create("span")
                             .classes("text", "no-comments")
-                            .text("No comments yet")
+                            .text(t("NO_COMMENTS"))
                             .build(), true),
                         when(hasComments, signalMap(nestedComments, create("div").classes("flex-v", "comment-list"),
                             (comment: Comment) => CommentTemplates.commentInList(comment, comments))),
@@ -44,13 +45,13 @@ export class CommentTemplates {
                         textarea({
                             classes: ["comment-box-input"],
                             name: "comment-box-input",
-                            placeholder: "New comment...",
+                            placeholder: t("NEW_COMMENT"),
                             value: newComment,
                             attributes: ["track_id", track_id.toString()],
                             onchange: v => newComment.value = v,
                         }),
                         button({
-                            text: "Post",
+                            text: t("POST"),
                             icon: { icon: "send" },
                             classes: ["positive"],
                             onclick: () => TrackActions.newComment(newComment, comments, track_id)
@@ -93,7 +94,7 @@ export class CommentTemplates {
                             .classes("flex")
                             .children(
                                 when(comment.canEdit, button({
-                                    text: "Delete",
+                                    text: t("DELETE"),
                                     icon: { icon: "delete" },
                                     classes: ["negative"],
                                     onclick: () => TrackActions.deleteComment(comment.id, comments)
@@ -115,15 +116,13 @@ export class CommentTemplates {
             .classes("flex")
             .children(
                 when(len > 0, button({
-                    text: compute((r): string => {
-                        return `${len} repl${len === 1 ? "y" : "ies"} ${r ? "shown" : "hidden"}`;
-                    }, repliesShown),
+                    text: compute((r): string => `${t("REPLIES_SHOWN_HIDDEN", len, r)}`, repliesShown),
                     disabled: len === 0,
                     icon: {icon: compute((s): string => s ? "visibility" : "visibility_off", repliesShown)},
                     onclick: () => repliesShown.value = !repliesShown.value
                 })),
                 button({
-                    text: "Reply",
+                    text: t("REPLY"),
                     icon: {icon: compute((r): string => r ? "close" : "reply", replyInputShown)},
                     classes: ["positive"],
                     onclick: () => replyInputShown.value = !replyInputShown.value
@@ -132,7 +131,7 @@ export class CommentTemplates {
                     type: InputType.text,
                     name: "reply-input",
                     label: "",
-                    placeholder: "Reply to " + comment.user!.username + "...",
+                    placeholder: t("REPLY_TO_NAME", comment.user!.username),
                     value: newComment,
                     attributes: ["track_id", comment.track_id.toString()],
                     onchange: v => {
@@ -140,7 +139,7 @@ export class CommentTemplates {
                     }
                 })),
                 when(replyInputShown, button({
-                    text: "Post",
+                    text: t("POST"),
                     icon: {icon: "send"},
                     classes: ["positive"],
                     onclick: () => TrackActions.newComment(newComment, comments, comment.track_id, comment.id)
@@ -163,7 +162,7 @@ export class CommentTemplates {
                             GenericTemplates.icon(Icons.WARNING, true),
                             create("i")
                                 .classes("text", "comment_content", "text-small", "fullWidth")
-                                .text("This comment has been hidden. Click to show anyway.")
+                                .text(t("COMMENT_IS_HIDDEN"))
                                 .build()
                         ).build(), true),
                     when(contentShown, create("span")
@@ -178,23 +177,5 @@ export class CommentTemplates {
                 .text(comment.content)
                 .build();
         }
-    }
-
-    static commentButton(showButton: boolean, comments: Signal<Comment[]>, showComments: Signal<boolean> = signal(false)) {
-        const count = compute(c => c.length ? c.length.toString() : "0", comments);
-
-        return create("div")
-            .children(
-                when(showButton, button({
-                    text: count,
-                    classes: ["wide-round-button"],
-                    icon: {
-                        icon: "comment",
-                        adaptive: true,
-                        classes: ["inline-icon", "svg", "nopointer"],
-                    },
-                    onclick: () => showComments.value = !showComments.value
-                }))
-            ).build();
     }
 }
