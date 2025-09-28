@@ -5,6 +5,7 @@ import { SelectOption } from "@targoninc/jess-components";
 import { LydaCache } from "../js/Cache/LydaCache.ts";
 import { CacheItem } from "../js/Cache/CacheItem.ts";
 import { Api } from "../js/Api/Api.ts";
+import { ga } from "./ga.ts";
 
 export type TranslationFunction = (...args: any[]) => void;
 export type TranslationValue = string | TranslationFunction;
@@ -17,16 +18,19 @@ export type Translation = Record<TranslationKey, TranslationValue>;
 export enum Language {
     en = "en",
     de = "de",
+    ga = "ga",
 }
 
 export const LanguageOptions: SelectOption<Language>[] = [
     { id: Language.en, name: "English" },
     { id: Language.de, name: "Deutsch" },
+    { id: Language.ga, name: "Gaeilge" },
 ];
 
 const translations: Record<Language, Translation> = {
     [Language.en]: en,
     [Language.de]: de,
+    [Language.ga]: ga,
 };
 
 const url = new URL(window.location.href);
