@@ -16,12 +16,13 @@ import { playingHere } from "../state.ts";
 import { Api } from "../Api/Api.ts";
 import { startItem } from "./MusicActions.ts";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
+import { t } from "../../locales";
 
 export class PlaylistActions {
     static async openAddToPlaylistModal(objectToBeAdded: Album | Track, type: "track" | "album") {
         const playlists = await Api.getPlaylistsByUserId(objectToBeAdded.user_id);
         if (!playlists || playlists.length === 0) {
-            notify("You have no playlists yet, create one first");
+            notify(`${t("NO_PLAYLISTS_YET")}`);
             return;
         }
 
@@ -66,7 +67,7 @@ export class PlaylistActions {
             const file = fileTarget.files![0];
             try {
                 await MediaUploader.upload(MediaFileType.playlistCover, id, file);
-                notify("Cover updated", NotificationType.success);
+                notify(`${t("COVER_UPLOADED")}`, NotificationType.success);
                 await Util.updateImage(URL.createObjectURL(file), oldSrc);
             } catch (e: any) {
                 notify(e.toString(), NotificationType.error);

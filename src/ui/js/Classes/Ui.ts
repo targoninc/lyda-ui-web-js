@@ -9,6 +9,7 @@ import { navigate } from "../Routing/Router.ts";
 import { currentUser, navInitialized, openMenus } from "../state.ts";
 import { NotificationType } from "../Enums/NotificationType.ts";
 import { Theme } from "@targoninc/lyda-shared/src/Enums/Theme";
+import { t } from "../../locales";
 
 export class Ui {
     static async initializeNavBar() {
@@ -41,7 +42,7 @@ export class Ui {
             LydaCache.set("page/" + page, new CacheItem(pageContent));
             return pageContent;
         } else {
-            notify("Could not load page.", NotificationType.error);
+            notify(`${t("COULD_NOT_LOAD_PAGE")}`, NotificationType.error);
             throw new Error(`No content for page ${page}.`);
         }
     }

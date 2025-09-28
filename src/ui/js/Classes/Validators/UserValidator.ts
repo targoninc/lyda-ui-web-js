@@ -1,4 +1,5 @@
-import {AuthData} from "../../Templates/LandingPageTemplates.ts";
+import { AuthData } from "../../Templates/LandingPageTemplates.ts";
+import { t } from "../../../locales";
 
 const regexps: Record<string, RegExp> = {
     whitespace: new RegExp(/\s/g)
@@ -6,66 +7,66 @@ const regexps: Record<string, RegExp> = {
 
 export class UserValidator {
     static validateRegistration(state: AuthData, touchedFields: Set<string>): string[] {
-        let errors = new Set<string>();
+        const errors = new Set<string>();
         if (!state.username) {
-            errors.add("Username missing");
+            errors.add(`${t("ERROR_USERNAME_MISSING")}`);
         }
         if (state.username.match(regexps.whitespace)) {
-            errors.add("Username can't contain whitespace");
+            errors.add(`${t("ERROR_USERNAME_CONTAINS_WHITESPACE")}`);
         }
         if (!state.email) {
-            errors.add("Email missing");
+            errors.add(`${t("ERROR_EMAIL_MISSING")}`);
         }
         if (state.email.match(regexps.whitespace)) {
-            errors.add("Username can't contain whitespace");
+            errors.add(`${t("ERROR_EMAIL_CONTAINS_WHITESPACE")}`);
         }
         if (!state.password) {
-            errors.add("Password missing");
+            errors.add(`${t("ERROR_PASSWORD_MISSING")}`);
         }
         if (!state.password2) {
-            errors.add("Repeat password missing");
+            errors.add(`${t("ERROR_PASSWORD_REPEAT_MISSING")}`);
         }
         if (state.password !== state.password2 && touchedFields.has("password2") && touchedFields.has("password")) {
-            errors.add("Passwords do not match");
+            errors.add(`${t("ERROR_PASSWORDS_DO_NOT_MATCH")}`);
         }
         if (state.password.length > 64) {
-            errors.add("Password must be shorter than 64 characters");
+            errors.add(`${t("ERROR_PASSWORD_TOO_LONG")}`);
         }
         if (!state.termsOfService) {
-            errors.add("You must agree to the Terms of Service and Privacy Policy");
+            errors.add(`${t("ERROR_TERMS_OF_SERVICE_AND_PRIVACY_POLICY")}`);
         }
         return [...errors];
     }
 
     static validateLogin(state: any): string[] {
-        let errors = new Set<string>();
+        const errors = new Set<string>();
         if (!state.email) {
-            errors.add("E-Mail address missing");
+            errors.add(`${t("ERROR_EMAIL_MISSING")}`);
         }
         if (!state.password) {
-            errors.add("Password missing");
+            errors.add(`${t("ERROR_PASSWORD_MISSING")}`);
         }
         return [...errors];
     }
 
     static validatePasswordReset(state: any): string[] {
-        let errors = new Set<string>();
+        const errors = new Set<string>();
         if (!state.password) {
-            errors.add("Password missing");
+            errors.add(`${t("ERROR_PASSWORD_MISSING")}`);
         }
         if (!state.password2) {
-            errors.add("Repeat password missing");
+            errors.add(`${t("ERROR_PASSWORD_REPEAT_MISSING")}`);
         }
         if (state.password !== state.password2) {
-            errors.add("Passwords do not match");
+            errors.add(`${t("ERROR_PASSWORDS_DO_NOT_MATCH")}`);
         }
         return [...errors];
     }
 
     static validateEmailCheck(state: any): string[] {
-        let errors = new Set<string>();
+        const errors = new Set<string>();
         if (!state.email) {
-            errors.add("E-Mail address missing");
+            errors.add(`${t("ERROR_EMAIL_MISSING")}`);
         }
         return [...errors];
     }

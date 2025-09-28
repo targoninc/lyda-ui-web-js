@@ -16,6 +16,7 @@ import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { Api } from "../Api/Api.ts";
+import { t } from "../../locales";
 
 export class TrackActions {
     static async savePlay(id: number) {
@@ -46,7 +47,7 @@ export class TrackActions {
     }
 
     static async deleteComment(commentId: number, comments: Signal<Comment[]>) {
-        await Ui.getConfirmationModal("Delete comment", "Are you sure you want to delete this comment?", "Yes", "No", async () => {
+        await Ui.getConfirmationModal(t("DELETE_COMMENT"), t("SURE_DELETE_COMMENT"), t("YES"), t("NO"), async () => {
             const success = await Api.deleteComment(commentId);
 
             if (!success) {
@@ -77,7 +78,7 @@ export class TrackActions {
             return;
         }
         if (content.value.length > 1000) {
-            notify("Comment is too long", NotificationType.error);
+            notify(`${t("ERROR_MUST_BE_SHORTER_N", 1000)}`, NotificationType.error);
             return;
         }
 
@@ -136,10 +137,10 @@ export class TrackActions {
 
             try {
                 await MediaUploader.upload(MediaFileType.trackCover, id, file);
-                notify("Cover updated", NotificationType.success);
+                notify(`${t("COVER_UPLOADED")}`, NotificationType.success);
                 await Util.updateImage(URL.createObjectURL(file), oldSrc.value);
             } catch (e) {
-                notify("Failed to upload cover", NotificationType.error);
+                notify(`${t("FAILED_UPLOADING_COVER")}`, NotificationType.error);
             }
             loading.value = false;
         };
@@ -164,10 +165,10 @@ export class TrackActions {
             }
             try {
                 await MediaUploader.upload(MediaFileType.audio, id, file);
-                notify("Audio updated", NotificationType.success);
+                notify(`${t("AUDIO_UPLOADED")}`, NotificationType.success);
                 onSuccess();
             } catch (e) {
-                notify("Failed to upload audio", NotificationType.error);
+                notify(`${t("FAILED_UPLOADING_AUDIO")}`, NotificationType.error);
             }
             loading.value = false;
         };
@@ -204,7 +205,7 @@ export class TrackActions {
     }
 
     static async removeTrackFromList(tracks: Signal<ListTrack[]>, list: Playlist | Album, type: string, track: ListTrack) {
-        await Ui.getConfirmationModal("Remove track from " + type, `Are you sure you want to remove this track from "${list.title}"?`, "Yes", "No", async () => {
+        await Ui.getConfirmationModal(t("REMOVE_TRACK"), t("SURE_REMOVE_TRACK_FROM", list.title), t("YES"), t("NO"), async () => {
             let success;
             if (type === "album") {
                 success = await Api.removeTrackFromAlbums(track.track_id, [list.id]);
@@ -255,7 +256,7 @@ export class TrackActions {
         const confirmCallback2 = async (newTrack: Track) => {
             Util.removeModal();
             await Api.updateTrackFull(newTrack);
-            notify("Track updated", NotificationType.success);
+            notify(`${t("TRACK_UPDATED")}`, NotificationType.success);
             reload();
         };
         const cancelCallback2 = () => {

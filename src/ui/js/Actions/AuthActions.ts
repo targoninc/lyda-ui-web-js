@@ -1,11 +1,12 @@
-import { Ui} from "../Classes/Ui.ts";
-import {LydaCache} from "../Cache/LydaCache.ts";
-import {Icons} from "../Enums/Icons.ts";
-import {PlayManager} from "../Streaming/PlayManager.ts";
-import {navigate} from "../Routing/Router.ts";
+import { Ui } from "../Classes/Ui.ts";
+import { LydaCache } from "../Cache/LydaCache.ts";
+import { Icons } from "../Enums/Icons.ts";
+import { PlayManager } from "../Streaming/PlayManager.ts";
+import { navigate } from "../Routing/Router.ts";
 import { currentTrackId, navInitialized } from "../state.ts";
-import {RoutePath} from "../Routing/routes.ts";
+import { RoutePath } from "../Routing/routes.ts";
 import { Api } from "../Api/Api.ts";
+import { t } from "../../locales";
 
 export class AuthActions {
     static resetUiState() {
@@ -37,7 +38,7 @@ export class AuthActions {
     static async loginLogout() {
         const user = LydaCache.get("user");
         if (user.content) {
-            await Ui.getConfirmationModal("Log out", "Are you sure you want to log out?", "Yes", "No", AuthActions.logOut, () => {
+            await Ui.getConfirmationModal(t("LOG_OUT"), t("SURE_LOGOUT"), t("YES"), t("NO"), AuthActions.logOut, () => {
             }, Icons.WARNING);
         } else {
             navigate(RoutePath.login);

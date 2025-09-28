@@ -1,11 +1,12 @@
-import {notify, Ui} from "../Classes/Ui.ts";
-import {Images} from "../Enums/Images.ts";
-import {Icons} from "../Enums/Icons.ts";
-import {Signal} from "@targoninc/jess";
-import {updateImagesWithSource} from "../Classes/Util.ts";
-import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
+import { notify, Ui } from "../Classes/Ui.ts";
+import { Images } from "../Enums/Images.ts";
+import { Icons } from "../Enums/Icons.ts";
+import { Signal } from "@targoninc/jess";
+import { updateImagesWithSource } from "../Classes/Util.ts";
+import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
+import { NotificationType } from "../Enums/NotificationType.ts";
 import { Api } from "../Api/Api.ts";
+import { t } from "../../locales";
 
 export class MediaActions {
     static async deleteMedia(type: MediaFileType, referenceId: number, image: Signal<string>, loading: Signal<boolean>) {
@@ -19,11 +20,11 @@ export class MediaActions {
         };
         const defaultImage = defaultImageForTypes[type];
 
-        await Ui.getConfirmationModal("Remove image", "Are you sure you want to remove this image?", "Yes", "No", async () => {
+        await Ui.getConfirmationModal(t("REMOVE_IMAGE"), t("SURE_REMOVE_IMAGE"), t("YES"), t("NO"), async () => {
             loading.value = true;
             await Api.deleteMedia(type, referenceId);
             loading.value = false;
-            notify("Image removed", NotificationType.success);
+            notify(`${t("IMAGE_REMOVED")}`, NotificationType.success);
             updateImagesWithSource(defaultImage, image.value);
             image.value = defaultImage;
         }, () => {

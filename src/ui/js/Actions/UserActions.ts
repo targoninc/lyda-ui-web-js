@@ -13,6 +13,7 @@ import { NotificationType } from "../Enums/NotificationType.ts";
 import { StreamingQuality } from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
 import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import { Theme } from "@targoninc/lyda-shared/src/Enums/Theme";
+import { t } from "../../locales";
 
 export class UserActions {
     static async replaceUserImage(
@@ -43,7 +44,7 @@ export class UserActions {
                 updateImagesWithSource(newSrc, imageSignal.value);
                 imageSignal.value = newSrc;
             } catch (e: any) {
-                notify(`Failed to upload ${type}: ${e}`, NotificationType.error);
+                notify(`${t("FAILED_UPLOAD_ERROR")}`, NotificationType.error);
                 return;
             } finally {
                 loading.value = false;
@@ -144,11 +145,11 @@ export class UserActions {
 
     static editDescription(currentDescription: string, successCallback: Function) {
         Ui.getTextAreaInputModal(
-            "Edit description",
-            "Enter your new description",
+            t("EDIT_DESCRIPTION"),
+            t("ENTER_NEW_DESCRIPTION"),
             currentDescription,
-            "Save",
-            "Cancel",
+            t("SAVE"),
+            t("CANCEL"),
             async (description: string) => {
                 if (await Api.updateUser({ description })) {
                     successCallback(description);
@@ -161,11 +162,11 @@ export class UserActions {
 
     static editDisplayname(currentDisplayname: string, successCallback: Function) {
         Ui.getTextInputModal(
-            "Edit displayname",
-            "Enter your new displayname",
+            t("EDIT_DISPLAYNAME"),
+            t("ENTER_NEW_DISPLAYNAME"),
             currentDisplayname,
-            "Save",
-            "Cancel",
+            t("SAVE"),
+            t("CANCEL"),
             async (displayname: string) => {
                 if (await Api.updateUser({ displayname })) {
                     successCallback(displayname);
@@ -178,11 +179,11 @@ export class UserActions {
 
     static editUsername(currentUsername: string, successCallback: Function) {
         Ui.getTextInputModal(
-            "Edit username",
-            "Enter your new username",
+            t("EDIT_USERNAME"),
+            t("ENTER_NEW_USERNAME"),
             currentUsername,
-            "Save",
-            "Cancel",
+            t("SAVE"),
+            t("CANCEL"),
             async (username: string) => {
                 if (await Api.updateUser({ username })) {
                     successCallback(username);

@@ -1,11 +1,11 @@
-import {PlayManager} from "../Streaming/PlayManager.ts";
-import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
-import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
-import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
-import {QueueManager} from "../Streaming/QueueManager.ts";
-import {notify} from "../Classes/Ui.ts";
-import {NotificationType} from "../Enums/NotificationType.ts";
+import { PlayManager } from "../Streaming/PlayManager.ts";
+import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType";
+import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import { QueueManager } from "../Streaming/QueueManager.ts";
+import { notify } from "../Classes/Ui.ts";
+import { NotificationType } from "../Enums/NotificationType.ts";
 import { contextQueue } from "../state.ts";
 
 export async function startItem(type: EntityType, item: Track | Album | Playlist, options: {
@@ -40,7 +40,7 @@ export async function startItem(type: EntityType, item: Track | Album | Playlist
     const track = options.trackId ? item.tracks!.find(t => t.track_id === options.trackId) : item.tracks!.at(0);
 
     if (!track) {
-        notify(`This ${type} does not contain the requested track`, NotificationType.error);
+        notify(`This does not contain the requested track - should never happen!`, NotificationType.error);
         return;
     }
 

@@ -15,12 +15,13 @@ import { playingHere } from "../state.ts";
 import { Api } from "../Api/Api.ts";
 import { startItem } from "./MusicActions.ts";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
+import { t } from "../../locales";
 
 export class AlbumActions {
     static async openAddToAlbumModal(track: Track) {
         const albums = await Api.getAlbumsByUserId(track.user_id);
         if (!albums || albums.length === 0) {
-            notify("You have no albums yet, create one first");
+            notify(`${t("NO_ALBUMS_YET")}`);
             return;
         }
         createModal([await AlbumTemplates.addToAlbumModal(track, albums)], "add-to-album");
@@ -65,7 +66,7 @@ export class AlbumActions {
             const file = fileTarget.files![0];
             try {
                 await MediaUploader.upload(MediaFileType.albumCover, id, file);
-                notify("Cover updated", NotificationType.success);
+                notify(`${t("COVER_UPLOADED")}`, NotificationType.success);
                 await Util.updateImage(URL.createObjectURL(file), oldSrc);
             } catch (e: any) {
                 notify(e.toString(), NotificationType.error);
