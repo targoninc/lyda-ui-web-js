@@ -40,6 +40,9 @@ if (!param) {
     guessedLang = navigator.language.split("-").at(0);
 }
 const defaultLanguage = (param ?? guessedLang ?? Language.en) as Language;
+if (!Object.values(Language).includes(defaultLanguage)) {
+    guessedLang = Language.en;
+}
 
 export const language = signal(defaultLanguage);
 language.subscribe((lang, changed) => {
