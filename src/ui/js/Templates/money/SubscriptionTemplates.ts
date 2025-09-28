@@ -100,7 +100,7 @@ export class SubscriptionTemplates {
         const createdAt = compute(s => s && new Date(s.created_at), currentSubscription);
         const previousId = compute(s => s && s.previous_subscription, currentSubscription);
         const startSubClass = compute(p => "startSubscription_" + option.id + "_" + p, previousId);
-        const optionMessage = signal("Available payment providers:");
+        const optionMessage = signal(`${t("AVAILABLE_PAYMENT_PROVIDERS")}`);
         const buttonText = compute((a): string => a ? `${t("SWITCH_PLAN")}` : `${t("SUBSCRIBE")}`, currentSubscription);
         const link = compute(sub => getSubscriptionLink(sub), currentSubscription);
 
@@ -197,7 +197,7 @@ export class SubscriptionTemplates {
     }
 
     static subscribedFor(created_at: Signal<Date | null>) {
-        const subscribedAgo = compute(c => "Subscribed " + Time.ago(c ?? new Date()), created_at);
+        const subscribedAgo = compute(c => `${t("SUBSCRIBED_AGO", Time.ago(c ?? new Date()))}`, created_at);
 
         return create("div")
             .classes("flex-v")

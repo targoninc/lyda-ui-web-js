@@ -25,6 +25,7 @@ import { QueueManager } from "../../Streaming/QueueManager.ts";
 import { Api } from "../../Api/Api.ts";
 import { navigate } from "../../Routing/Router.ts";
 import { RoutePath } from "../../Routing/routes.ts";
+import { t } from "../../../locales";
 
 export class MusicTemplates {
     static feedEntry(type: EntityType, item: Track | Playlist | Album) {
@@ -91,32 +92,6 @@ export class MusicTemplates {
             ).build();
     }
 
-    private static itemSpecificItems(type: EntityType, item: Track | Playlist | Album) {
-        const items = [];
-
-        switch (type) {
-            case EntityType.track:
-                if ((item as Track).processed) {
-                    items.push(
-                        TrackTemplates.waveform(
-                            item as Track,
-                            JSON.parse((item as Track).loudness_data)
-                        )
-                    );
-                } else {
-                    items.push(TrackTemplates.waveform(item as Track, []));
-                }
-                items.push(
-                    create("span")
-                        .classes("nopointer", "text-small", "align-center")
-                        .text(Time.format((item as Track).length))
-                        .build()
-                );
-        }
-
-        return items;
-    }
-
     static cover(
         type: EntityType,
         item: Track | Playlist | Album,
@@ -153,8 +128,7 @@ export class MusicTemplates {
                     .alt(item.title)
                     .onclick(() => {
                         Ui.showImageModal(imageState);
-                    })
-                    .build(),
+                    }).build(),
                 when(
                     isOwnItem,
                     create("div")
@@ -163,12 +137,10 @@ export class MusicTemplates {
                             coverContext === "cover" ? "showOnParentHover" : "_",
                             "centeredInParent",
                             "flex"
-                        )
-                        .children(
+                        ).children(
                             MusicTemplates.entityCoverButtons(fileType, item, imageState, coverLoading),
                             when(coverLoading, GenericTemplates.loadingSpinner())
-                        )
-                        .build()
+                    ).build()
                 ),
                 when(
                     playButtonContexts.includes(coverContext),
@@ -268,7 +240,9 @@ export class MusicTemplates {
         return create("div")
             .classes("fullHeight")
             .children(
-                when(feedVisible, create("span").text("Log in to see this feed").build(), true),
+                when(feedVisible, create("span")
+                    .text(t("LOGIN_TO_SEE_FEED"))
+                    .build(), true),
                 when(
                     feedVisible,
                     TrackTemplates.trackListWithPagination(
@@ -286,7 +260,7 @@ export class MusicTemplates {
             q => list.tracks && list.tracks.every(t => q.includes(t.track_id)),
             manualQueue
         );
-        const text = compute((q): string => (q ? "Unqueue" : "Queue"), allTracksInQueue);
+        const text = compute((q): string => (q ? `${t("UNQUEUE")}` : `${t("QUEUE")}`), allTracksInQueue);
         const icon = compute((q): string => (q ? Icons.UNQUEUE : Icons.QUEUE), allTracksInQueue);
         const buttonClass = compute(
             (q): string => (q ? "audio-queueremove" : "audio-queueadd"),

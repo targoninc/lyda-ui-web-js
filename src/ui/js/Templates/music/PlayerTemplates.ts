@@ -35,6 +35,7 @@ import { MusicTemplates } from "./MusicTemplates.ts";
 import { StreamingQuality } from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
 import { InteractionType } from "@targoninc/lyda-shared/src/Enums/InteractionType.ts";
+import { t } from "../../../locales";
 
 export const PLAYCHECK_INTERVAL = 200;
 
@@ -46,12 +47,12 @@ export class PlayerTemplates {
         const positionPercent = compute(
             (p, isCurrent) => (isCurrent ? `${p.relative * 100}%` : "0%"),
             currentTrackPosition,
-            isCurrentTrack
+            isCurrentTrack,
         );
         const bufferPercent = compute(
             (p, isCurrent) => (isCurrent ? `${p * 100}%` : "0%"),
             currentlyBuffered,
-            isCurrentTrack
+            isCurrentTrack,
         );
 
         return create("div")
@@ -67,7 +68,7 @@ export class PlayerTemplates {
                                 adaptive: true,
                             },
                             PlayManager.playPreviousFromQueues,
-                            "Previous"
+                            t("PREVIOUS"),
                         ),
                         PlayerTemplates.roundPlayButton(track),
                         GenericTemplates.roundIconButton(
@@ -76,25 +77,23 @@ export class PlayerTemplates {
                                 adaptive: true,
                             },
                             PlayManager.playNextFromQueues,
-                            "Next"
+                            t("NEXT"),
                         ),
                         PlayerTemplates.loopModeButton(),
                         create("div")
                             .classes("flex", "align-center", "hideOnMidBreakpoint")
                             .children(InteractionTemplates.interactions(EntityType.track, track))
                             .build(),
-                        await PlayerTemplates.moreMenu(track)
-                    )
-                    .build(),
+                        await PlayerTemplates.moreMenu(track),
+                    ).build(),
                 create("div")
                     .classes(
                         "audio-player-controls",
                         "fullWidth",
                         "flex",
                         "rounded",
-                        "align-children"
-                    )
-                    .id(track.id)
+                        "align-children",
+                    ).id(track.id)
                     .attributes("duration", track.length)
                     .children(
                         create("audio")
@@ -103,9 +102,8 @@ export class PlayerTemplates {
                             .build(),
                         PlayerTemplates.currentTrackTime(),
                         PlayerTemplates.trackScrubbar(track, bufferPercent, positionPercent),
-                        PlayerTemplates.totalTrackTime(track)
-                    )
-                    .build()
+                        PlayerTemplates.totalTrackTime(track),
+                    ).build(),
             ).build();
     }
 
@@ -116,12 +114,12 @@ export class PlayerTemplates {
         const positionPercent = compute(
             (p, isCurrent) => (isCurrent ? `${p.relative * 100}%` : "0%"),
             currentTrackPosition,
-            isCurrentTrack
+            isCurrentTrack,
         );
         const bufferPercent = compute(
             (p, isCurrent) => (isCurrent ? `${p * 100}%` : "0%"),
             currentlyBuffered,
-            isCurrentTrack
+            isCurrentTrack,
         );
 
         return create("div")
@@ -139,7 +137,7 @@ export class PlayerTemplates {
                                     adaptive: true,
                                 },
                                 PlayManager.playPreviousFromQueues,
-                                "Previous"
+                                t("PREVIOUS"),
                             ),
                             PlayerTemplates.roundPlayButton(track),
                             GenericTemplates.roundIconButton(
@@ -148,24 +146,22 @@ export class PlayerTemplates {
                                     adaptive: true,
                                 },
                                 PlayManager.playNextFromQueues,
-                                "Next"
+                                t("NEXT"),
                             ),
                         ).classes("align-children"),
                         InteractionTemplates.interactions(EntityType.track, track, {
                             showCount: false,
                             overrideActions: [InteractionType.like],
-                        })
-                    )
-                    .build(),
+                        }),
+                    ).build(),
                 create("div")
                     .classes(
                         "audio-player-controls",
                         "fullWidth",
                         "flex",
                         "rounded",
-                        "align-children"
-                    )
-                    .id(track.id)
+                        "align-children",
+                    ).id(track.id)
                     .attributes("duration", track.length)
                     .children(
                         create("audio")
@@ -174,8 +170,8 @@ export class PlayerTemplates {
                             .build(),
                         PlayerTemplates.currentTrackTime(true),
                         PlayerTemplates.trackScrubbar(track, bufferPercent, positionPercent),
-                        PlayerTemplates.totalTrackTime(track, true)
-                    ).build()
+                        PlayerTemplates.totalTrackTime(track, true),
+                    ).build(),
             ).build();
     }
 
@@ -189,7 +185,7 @@ export class PlayerTemplates {
             async () => {
                 PlayManager.togglePlayAsync(track.id).then();
             },
-            "Play/Pause",
+            t("PLAY_PAUSE"),
             ["special", "bigger-input", "rounded-max"],
         );
     }
@@ -203,13 +199,14 @@ export class PlayerTemplates {
     private static totalTrackTime(track: Track, mobilePlayer = false) {
         return create("span")
             .classes("audio-player-time-total", "nopointer", "align-center", mobilePlayer ? "_" : "hideOnMidBreakpoint")
-            .text(Time.format(track.length)).build();
+            .text(Time.format(track.length))
+            .build();
     }
 
     private static trackScrubbar(
         track: Track,
         bufferPercent: Signal<string>,
-        positionPercent: Signal<string>
+        positionPercent: Signal<string>,
     ) {
         return create("div")
             .classes("audio-player-scrubber", "flex-grow", "flex", "rounded", "padded-inline")
@@ -238,7 +235,7 @@ export class PlayerTemplates {
                     .id(track.id)
                     .classes("audio-player-scrubhead", "rounded", "nopointer")
                     .styles("left", positionPercent)
-                    .build()
+                    .build(),
             ).build();
     }
 
@@ -259,8 +256,8 @@ export class PlayerTemplates {
                     async () => {
                         PlayManager.toggleMute(track.id);
                     },
-                    "Mute/Unmute",
-                    ["loudness-button"]
+                    t("MUTE_UNMUTE"),
+                    ["loudness-button"],
                 ),
                 create("div")
                     .classes("loudness-bar", "rounded", "padded", "relative", "hidden")
@@ -285,9 +282,8 @@ export class PlayerTemplates {
                             .classes("audio-player-loudnesshead", "rounded", "nopointer")
                             .styles("bottom", volumePercent)
                             .id(track.id)
-                            .build()
-                    )
-                    .build()
+                            .build(),
+                    ).build(),
             ).build();
     }
 
@@ -304,9 +300,9 @@ export class PlayerTemplates {
                 when(
                     playingElsewhere,
                     heading({
-                        text: "Playing on another instance of Lyda",
+                        text: t("PLAYING_ON_OTHER_INSTANCE"),
                         level: 2,
-                    })
+                    }),
                 ),
                 when(
                     playingElsewhere,
@@ -319,17 +315,17 @@ export class PlayerTemplates {
                                 } else {
                                     Ui.showImageModal(cover);
                                 }
-                            })
+                            }),
                         ).classes("hideOnSmallBreakpoint"),
                         when(playerExpanded, await PlayerTemplates.smallPlayerLayout(track), true),
-                        await PlayerTemplates.bigPlayerLayout(track, trackUser)
+                        await PlayerTemplates.bigPlayerLayout(track, trackUser),
                     )
                         .classes("fullWidth")
                         .build(),
-                    true
+                    true,
                 ),
                 QueueTemplates.queuePopout(),
-                await PlayerTemplates.playerPopout(track)
+                await PlayerTemplates.playerPopout(track),
             ).build();
     }
 
@@ -342,7 +338,7 @@ export class PlayerTemplates {
                 create("div")
                     .classes("flex", "hideOnMidBreakpoint")
                     .children(PlayerTemplates.loudnessControl(track), QueueTemplates.queueButton())
-                    .build()
+                    .build(),
             ).build();
     }
 
@@ -351,12 +347,12 @@ export class PlayerTemplates {
         const positionPercent = compute(
             (p, isCurrent) => (isCurrent ? `${p.relative * 100}%` : "0%"),
             currentTrackPosition,
-            isCurrentTrack
+            isCurrentTrack,
         );
         const bufferPercent = compute(
             (p, isCurrent) => (isCurrent ? `${p * 100}%` : "0%"),
             currentlyBuffered,
-            isCurrentTrack
+            isCurrentTrack,
         );
 
         return create("div")
@@ -365,23 +361,22 @@ export class PlayerTemplates {
                 vertical(PlayerTemplates.roundPlayButton(track)).classes("align-center"),
                 vertical(
                     MusicTemplates.title(EntityType.track, track.title, track.id, PlayerTemplates.trackIcons(track)),
-                    PlayerTemplates.trackScrubbar(track, bufferPercent, positionPercent)
-                )
-                    .classes("flex-grow", "no-gap")
-                    .build(),
+                    PlayerTemplates.trackScrubbar(track, bufferPercent, positionPercent),
+                ).classes("flex-grow", "no-gap")
+                 .build(),
                 vertical(
                     GenericTemplates.roundIconButton(
                         {
                             icon: compute(
                                 (p): string => (p ? "keyboard_arrow_down" : "keyboard_arrow_up"),
-                                playerExpanded
+                                playerExpanded,
                             ),
                             adaptive: true,
                         },
                         async () => (playerExpanded.value = !playerExpanded.value),
-                        "Toggle expanded player"
-                    )
-                ).classes("align-center")
+                        t("TOGGLE_EXPANDED_PLAYER"),
+                    ),
+                ).classes("align-center"),
             ).build();
     }
 
@@ -416,11 +411,9 @@ export class PlayerTemplates {
                         })
                         .children(
                             create("img").classes("tiny-cover").src(img$),
-                            create("span").classes("text-small").text(name)
-                        )
-                        .build()
-                )
-                .build()
+                            create("span").classes("text-small").text(name),
+                        ).build(),
+                ).build(),
         );
     }
 
@@ -458,7 +451,7 @@ export class PlayerTemplates {
         return vertical(
             MusicTemplates.title(EntityType.track, track.title, track.id, PlayerTemplates.trackIcons(track)),
             UserTemplates.userLink(UserWidgetContext.player, trackUser),
-            horizontal(PlayerTemplates.noSubscriptionInfo(), PlayerTemplates.playingFrom())
+            horizontal(PlayerTemplates.noSubscriptionInfo(), PlayerTemplates.playingFrom()),
         )
             .classes("align-center", "no-gap").build();
     }
@@ -478,8 +471,8 @@ export class PlayerTemplates {
                     async () => {
                         menuShown.value = !menuShown.value;
                     },
-                    "Open menu",
-                    ["showOnMidBreakpoint", activeClass]
+                    t("OPEN_MENU"),
+                    ["showOnMidBreakpoint", activeClass],
                 ),
                 when(
                     menuShown,
@@ -487,10 +480,9 @@ export class PlayerTemplates {
                         .classes("flex", "popout-above", "absolute-align-right", "card")
                         .children(
                             InteractionTemplates.interactions(EntityType.track, track),
-                            QueueTemplates.queueButton()
-                        )
-                        .build()
-                )
+                            QueueTemplates.queueButton(),
+                        ).build(),
+                ),
             ).build();
     }
 
@@ -510,7 +502,7 @@ export class PlayerTemplates {
             async () => {
                 await PlayManager.nextLoopMode();
             },
-            "Change loop mode"
+            t("CHANGE_LOOP_MODE"),
         );
     }
 
@@ -521,10 +513,10 @@ export class PlayerTemplates {
         if (track.has_cover) {
             cover.value = Util.getTrackCover(track.id);
         }
-        const tabs: any[] = ["Player", "Queue"];
+        const tabs: any[] = [`${t("PLAYER")}`, `${t("QUEUE")}`];
         const tabContents = [
             await PlayerTemplates.mobilePlayerTab(track, cover, trackUser),
-            QueueTemplates.fullQueueList()
+            QueueTemplates.fullQueueList(),
         ];
 
         return create("div")
@@ -542,9 +534,9 @@ export class PlayerTemplates {
                         isUrl: false,
                     }, () => {
                         playerExpanded.value = false;
-                    })
+                    }),
                 ).classes("align-children", "space-outwards", "mobile-player"),
-                ...tabContents
+                ...tabContents,
             ).build();
     }
 
@@ -569,12 +561,11 @@ export class PlayerTemplates {
                     .classes("flex", "hideOnMidBreakpoint")
                     .children(
                         PlayerTemplates.loudnessControl(track),
-                        QueueTemplates.queueButton()
-                    )
-                    .build()
-            )
+                        QueueTemplates.queueButton(),
+                    ).build(),
+            ),
         ).classes("space-outwards", "mobile-player")
-        .styles("flex-grow", "1")
-        .build();
+         .styles("flex-grow", "1")
+         .build();
     }
 }

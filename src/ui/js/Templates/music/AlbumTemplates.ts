@@ -22,6 +22,7 @@ import { ListTrack } from "@targoninc/lyda-shared/src/Models/ListTrack";
 import { InteractionTemplates } from "../InteractionTemplates.ts";
 import { MusicTemplates } from "./MusicTemplates.ts";
 import { Api } from "../../Api/Api.ts";
+import { t } from "../../../locales";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
@@ -34,7 +35,7 @@ export class AlbumTemplates {
         if (albums.length === 0) {
             albumList.push(create("span")
                 .classes("nopointer")
-                .text("No albums found")
+                .text(t("NO_ALBUMS_FOUND"))
                 .build());
         } else {
             albumList = await Promise.all(albums.map(async (album: Album) => {
@@ -46,7 +47,7 @@ export class AlbumTemplates {
                 return await AlbumTemplates.albumInAddList(album, checkedAlbums);
             })) as AnyNode[];
         }
-        const buttonText = compute((ch: number[]) => `Add to ${ch.length} albums`, checkedAlbums);
+        const buttonText = compute((ch: number[]) => `${t("ADD_TO_N_ALBUMS", ch.length)}`, checkedAlbums);
 
         return create("div")
             .classes("flex-v")
@@ -60,10 +61,9 @@ export class AlbumTemplates {
                             .attributes("src", Icons.ALBUM_ADD)
                             .build(),
                         create("h5")
-                            .text(`Add ${track.title} to album`)
+                            .text(t("ADD_TITLE_TO_ALBUM", track.title))
                             .build(),
-                    )
-                    .build(),
+                    ).build(),
                 create("div")
                     .classes("check-list")
                     .children(
@@ -82,7 +82,7 @@ export class AlbumTemplates {
                             },
                         }),
                         button({
-                            text: "Cancel",
+                            text: t("CANCEL"),
                             classes: ["negative"],
                             icon: { icon: "close" },
                             onclick: Util.removeModal,
@@ -136,7 +136,7 @@ export class AlbumTemplates {
                             .attributes("src", Icons.ALBUM_ADD)
                             .build(),
                         create("h2")
-                            .text("New album")
+                            .text(t("NEW_ALBUM"))
                             .build(),
                     )
                     .build(),
@@ -145,7 +145,7 @@ export class AlbumTemplates {
                     .classes("flex")
                     .children(
                         button({
-                            text: "Create album",
+                            text: t("CREATE"),
                             disabled,
                             onclick: async () => {
                                 await Api.createNewAlbum(album.value);
@@ -175,7 +175,7 @@ export class AlbumTemplates {
                             .attributes("src", Icons.ALBUM_ADD)
                             .build(),
                         create("h2")
-                            .text("Edit album")
+                            .text(t("EDIT_ALBUM"))
                             .build(),
                     ).build(),
                 AlbumTemplates.albumInputs(state),
@@ -183,7 +183,7 @@ export class AlbumTemplates {
                     .classes("flex")
                     .children(
                         button({
-                            text: "Update",
+                            text: t("UPDATE"),
                             disabled: loading,
                             classes: ["positive"],
                             icon: { icon: "save" },
@@ -213,8 +213,8 @@ export class AlbumTemplates {
                     type: InputType.text,
                     required: true,
                     name: "name",
-                    label: "Name",
-                    placeholder: "Album name",
+                    label: t("NAME"),
+                    placeholder: t("ALBUM_NAME"),
                     value: name,
                     onchange: (v) => {
                         album.value = { ...album.value, title: v };
@@ -223,8 +223,8 @@ export class AlbumTemplates {
                 input<string>({
                     type: InputType.text,
                     name: "upc",
-                    label: "UPC",
-                    placeholder: "12-digit number",
+                    label: t("UPC"),
+                    placeholder: t("TWELVE_DIGIT_NUMBER"),
                     value: upc,
                     onchange: (v) => {
                         album.value = { ...album.value, upc: v };
@@ -232,8 +232,8 @@ export class AlbumTemplates {
                 }),
                 textarea({
                     name: "description",
-                    label: "Description",
-                    placeholder: "My cool album",
+                    label: t("DESCRIPTION"),
+                    placeholder: t("MY_COOL_ALBUM"),
                     value: description,
                     onchange: (v) => {
                         album.value = { ...album.value, description: v };
@@ -242,8 +242,8 @@ export class AlbumTemplates {
                 GenericTemplates.releaseDateInput(album),
                 toggle({
                     name: "visibility",
-                    label: "Private",
-                    text: "Private",
+                    label: t("PRIVATE"),
+                    text: t("PRIVATE"),
                     checked: visibility,
                     onchange: (v) => {
                         album.value = { ...album.value, visibility: v ? "private" : "public" };
@@ -257,21 +257,22 @@ export class AlbumTemplates {
         if (isOwnProfile) {
             children = [
                 create("p")
-                    .text("Share an album you made:")
+                    .text(t("SHARE_AN_ALBUM_YOU_MADE"))
                     .build(),
                 GenericTemplates.newAlbumButton(["secondary"]),
             ];
         } else {
             children = [
                 create("p")
-                    .text("No albums here.")
+                    .text(t("NO_ALBUMS_FOUND"))
                     .build(),
             ];
         }
 
         return create("div")
             .classes("card", "flex-v")
-            .children(...children).build();
+            .children(...children)
+            .build();
     }
 
     static albumCard(album: Album, isSecondary = false) {
@@ -378,7 +379,7 @@ export class AlbumTemplates {
                                     .children(
                                         create("span")
                                             .classes("date", "text-small")
-                                            .text("Released " + Util.formatDate(album.release_date))
+                                            .text(t("RELEASED_AT", Util.formatDate(album.release_date)))
                                             .build(),
                                     ).build(),
                                 InteractionTemplates.interactions(EntityType.album, album),
@@ -463,7 +464,7 @@ export class AlbumTemplates {
                 })),
                 MusicTemplates.addListToQueueButton(album),
                 button({
-                    text: "Add to playlist",
+                    text: t("ADD_TO_PLAYLIST"),
                     icon: {
                         icon: Icons.PLAYLIST_ADD,
                         classes: ["inline-icon", "svg", "nopointer"],
@@ -477,7 +478,7 @@ export class AlbumTemplates {
                 }),
             ).build()),
             when(canEdit, button({
-                text: "Edit",
+                text: t("EDIT"),
                 icon: { icon: "edit" },
                 classes: ["positive"],
                 onclick: async () => {
@@ -485,11 +486,11 @@ export class AlbumTemplates {
                 },
             })),
             when(canEdit, button({
-                text: "Delete",
+                text: t("DELETE"),
                 icon: { icon: "delete" },
                 classes: ["negative"],
                 onclick: async () => {
-                    await Ui.getConfirmationModal("Delete album", "Are you sure you want to delete this album?", "Yes", "No", () => AlbumActions.deleteAlbum(album.id), () => {
+                    await Ui.getConfirmationModal(t("DELETE_ALBUM"), t("SURE_DELETE_ALBUM"), t("YES"), t("NO"), () => AlbumActions.deleteAlbum(album.id), () => {
                     }, Icons.WARNING);
                 },
             })),

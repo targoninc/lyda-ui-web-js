@@ -17,7 +17,7 @@ import { anonymize } from "../../Classes/Helpers/CustomText.ts";
 import { ChartTemplates } from "../generic/ChartTemplates.ts";
 import { yearAndMonthByOffset } from "../../Classes/Helpers/Date.ts";
 import { downloadFile } from "../../Classes/Util.ts";
-import {t} from "../../../locales";
+import { t } from "../../../locales";
 
 export class PayoutTemplates {
     static payoutsPage() {
@@ -117,7 +117,7 @@ export class PayoutTemplates {
                                     onclick: async () => {
                                         await Ui.getConfirmationModal(t("REQUEST_PAYOUT"), t("SURE_REQUEST_PAYOUT"), t("YES"), t("NO"), async () => {
                                             await Api.requestPayout();
-                                            notify("Payment requested", NotificationType.success);
+                                            notify(`${t("PAYMENT_REQUESTED")}`, NotificationType.success);
                                             reload();
                                         }, () => {
                                         }, "wallet");
@@ -137,28 +137,28 @@ export class PayoutTemplates {
                     .children(
                         create("h1")
                             .text(currency(royaltyInfo.personal.available))
-                            .title(royaltyInfo.personal.available < 0.5 ? "You need at least 50ct to request a payment" : "")
+                            .title(royaltyInfo.personal.available < 0.5 ? `${t("PAYOUT_THRESHOLD_NOT_MET", currency(0.5, "USD"))}` : "")
                             .build(),
                         create("span")
                             .text("Available")
                             .build(),
                         create("span")
                             .classes("text-small")
-                            .text(currency(royaltyInfo.personal.totalRoyalties) + " Total royalties")
+                            .text(t("TOTAL_ROYALTIES", currency(royaltyInfo.personal.totalRoyalties)))
                             .build(),
                         create("span")
                             .classes("text-small")
-                            .text(currency(royaltyInfo.personal.paidTotal) + " paid out")
+                            .text(t("PAID_OUT", currency(royaltyInfo.personal.paidTotal)))
                             .build(),
                         create("span")
                             .classes("text-small")
-                            .text(currency(royaltyInfo.personal.meanTrackRoyalty) + " median track royalty")
+                            .text(t("MEDIAN_TRACK_ROYALTY", currency(royaltyInfo.personal.meanTrackRoyalty)))
                             .build(),
                     ).build(),
                 create("div")
                     .classes("flex-v")
                     .children(
-                        ChartTemplates.boxPlotChart(royaltyInfo.personal.trackRoyaltyValues, "Average track royalty", "averageTrackRoyaltyChart"),
+                        ChartTemplates.boxPlotChart(royaltyInfo.personal.trackRoyaltyValues, `${t("AVERAGE_TRACK_ROYALTY")}`, "averageTrackRoyaltyChart"),
                     ).build(),
             ).build();
     }
@@ -168,36 +168,36 @@ export class PayoutTemplates {
             horizontal(
                 GenericTemplates.pill({
                     icon: "attach_money",
-                    text: `${currency(royaltyInfo.global.totalRoyalties)} total royalties`,
+                    text: t("TOTAL_ROYALTIES", currency(royaltyInfo.global.totalRoyalties)),
                 }),
                 GenericTemplates.pill({
                     icon: "account_balance",
-                    text: `${currency(royaltyInfo.global.paidTotal)} paid out`,
+                    text: t("PAID_OUT", currency(royaltyInfo.global.paidTotal)),
                 }),
                 GenericTemplates.pill({
                     icon: "bar_chart",
-                    text: `${currency(royaltyInfo.global.meanTrackRoyalty)} median track royalty`,
+                    text: t("MEDIAN_TRACK_ROYALTY", currency(royaltyInfo.global.meanTrackRoyalty)),
                 }),
             ).build(),
             horizontal(
                 GenericTemplates.pill({
                     icon: "group",
-                    text: `${royaltyInfo.global.counts.users} users`,
+                    text: `${t("AMOUNT_USERS", royaltyInfo.global.counts.users)}`,
                 }),
                 GenericTemplates.pill({
                     icon: "audio_file",
-                    text: `${royaltyInfo.global.counts.tracks} tracks`,
+                    text: t("AMOUNT_TRACKS", royaltyInfo.global.counts.tracks),
                 }),
                 GenericTemplates.pill({
                     icon: "album",
-                    text: `${royaltyInfo.global.counts.albums} albums`,
+                    text: t("AMOUNT_ALBUMS", royaltyInfo.global.counts.albums),
                 }),
                 GenericTemplates.pill({
                     icon: "playlist_play",
-                    text: `${royaltyInfo.global.counts.playlists} playlists`,
+                    text: t("AMOUNT_PLAYLISTS", royaltyInfo.global.counts.playlists),
                 }),
             ).build(),
-            ChartTemplates.boxPlotChart(royaltyInfo.global.trackRoyaltyValues, "Average track royalty", "averageTrackRoyaltyChart"),
+            ChartTemplates.boxPlotChart(royaltyInfo.global.trackRoyaltyValues, `${t("AVERAGE_TRACK_ROYALTY")}`, "averageTrackRoyaltyChart"),
         ).build();
     }
 
@@ -214,17 +214,17 @@ export class PayoutTemplates {
                     .classes("flex-v")
                     .children(
                         create("h1")
-                            .text("Royalty data export")
+                            .text(t("ROYALTY_DATA_EXPORT"))
                             .build(),
                         create("span")
-                            .text(compute(m => `Month: ${m.year}-${m.month}`, month))
+                            .text(compute(m => `${t("MONTH", m)}`, month))
                             .build(),
                         create("div")
                             .classes("flex")
                             .children(
                                 GenericTemplates.combinedSelector(types, (i: number) => selectedTypeIndex.value = i, 0),
                                 button({
-                                    text: "Download",
+                                    text: t("DOWNLOAD"),
                                     icon: { icon: "download" },
                                     onclick: async () => {
                                         const royalties = await Api.getRoyaltiesForExport(month.value, types[selectedTypeIndex.value]);
@@ -243,12 +243,12 @@ export class PayoutTemplates {
                     .classes("flex")
                     .children(
                         button({
-                            text: "Previous",
+                            text: t("PREVIOUS"),
                             icon: { icon: "skip_previous" },
                             onclick: () => offset.value += 1,
                         }),
                         button({
-                            text: "Next",
+                            text: t("NEXT"),
                             icon: { icon: "skip_next" },
                             disabled: compute(o => o <= 0, offset),
                             onclick: () => {
@@ -258,7 +258,7 @@ export class PayoutTemplates {
                             },
                         }),
                         button({
-                            text: "Current",
+                            text: t("CURRENT"),
                             icon: { icon: "today" },
                             onclick: () => offset.value = 0,
                         }),
