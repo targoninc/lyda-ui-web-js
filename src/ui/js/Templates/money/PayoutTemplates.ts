@@ -46,7 +46,7 @@ export class PayoutTemplates {
 
     static payout(p: Payout) {
         return create("div")
-            .classes("flex", "card", "space-outwards")
+            .classes("flex", "card", "space-between")
             .children(
                 create("div")
                     .classes("flex-v", p.status !== PaymentStatus.failed ? "positive" : "negative")

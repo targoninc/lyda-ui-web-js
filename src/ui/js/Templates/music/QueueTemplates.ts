@@ -44,7 +44,7 @@ export class QueueTemplates {
         };
 
         const base = create("div")
-            .classes("queue-item", "flex", "fullWidth", "small-gap", "rounded", "padded-small", "space-outwards", playingClass);
+            .classes("queue-item", "flex", "fullWidth", "small-gap", "rounded", "padded-small", "space-between", playingClass);
 
         if (isManual) {
             base.attributes("draggable", "true")

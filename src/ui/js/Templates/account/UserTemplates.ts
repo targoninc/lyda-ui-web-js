@@ -469,7 +469,7 @@ export class UserTemplates {
             when(
                 isOwnProfile,
                 create("div")
-                    .classes("flex", "fullWidth", "space-outwards")
+                    .classes("flex", "fullWidth", "space-between")
                     .children(
                         create("div")
                             .classes("flex")

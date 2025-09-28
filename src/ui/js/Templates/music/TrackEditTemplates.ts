@@ -902,7 +902,7 @@ export class TrackEditTemplates {
                     }),
                 ).classes("align-end", "align-children").build()),
             ),
-        ).classes("card", "space-outwards")
+        ).classes("card", "space-between")
          .build();
     }
 

@@ -180,7 +180,7 @@ export class TrackTemplates {
             .classes("flex-v", "fullHeight")
             .children(
                 create("div")
-                    .classes("flex", "space-outwards")
+                    .classes("flex", "space-between")
                     .children(
                         TrackTemplates.paginationControls(pageState),
                         type === "following" ? TrackTemplates.feedFilters(filterState) : null,
@@ -389,7 +389,7 @@ export class TrackTemplates {
                         when(canEdit, GenericTemplates.verticalDragIndicator()),
                         TrackTemplates.smallListTrackCover(track, startCallback),
                         create("div")
-                            .classes("flex", "align-children", "flex-grow", "space-outwards")
+                            .classes("flex", "align-children", "flex-grow", "space-between")
                             .children(
                                 vertical(
                                     horizontal(
@@ -792,7 +792,7 @@ export class TrackTemplates {
                 }),
                 when(loading, GenericTemplates.loadingSpinner()),
             ),
-        ).classes("card", "collab", "space-outwards", "align-children")
+        ).classes("card", "collab", "space-between", "align-children")
          .id(data.track_id)
          .build();
     }

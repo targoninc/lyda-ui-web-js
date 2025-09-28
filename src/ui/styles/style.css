@@ -633,7 +633,7 @@ details > *:not(summary) {
     margin-left: 2em;
 }
 
-.space-outwards {
+.space-between {
     justify-content: space-between;
 }
 

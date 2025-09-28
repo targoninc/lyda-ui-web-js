@@ -109,7 +109,7 @@ export class ModerationUsersTemplates {
                     );
 
                     return create("div")
-                        .classes("flex", "space-outwards")
+                        .classes("flex", "space-between")
                         .children(
                             ModerationUsersTemplates.permissionCheckbox(
                                 p,

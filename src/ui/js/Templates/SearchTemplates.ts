@@ -393,7 +393,7 @@ export class SearchTemplates {
         elementReference = create(context === SearchContext.navBar ? "div" : "button")
             .classes(
                 "search-result",
-                "space-outwards",
+                "space-between",
                 "padded",
                 "flex",
                 searchResult.type,

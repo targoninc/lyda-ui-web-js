@@ -54,7 +54,7 @@ export class MenuTemplates {
                         icon: { icon: "close" },
                         onclick: onClose,
                     }),
-                ),
+                ).classes("space-between"),
                 ...menuItems.map((menuItem, itemIndex) => MenuTemplates.menuItem(menuItem.text, menuItem.action, menuItem.icon, selectedIndex, itemIndex))
             ).build();
     }

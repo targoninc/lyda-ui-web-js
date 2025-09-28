@@ -1,12 +1,12 @@
-import {create, compute, signal} from "@targoninc/jess";
-import {GenericTemplates} from "../generic/GenericTemplates.ts";
-import {Time} from "../../Classes/Helpers/Time.ts";
-import {currency} from "../../Classes/Helpers/Num.ts";
-import {permissions} from "../../state.ts";
-import {copy} from "../../Classes/Util.ts";
-import {PaymentHistory} from "@targoninc/lyda-shared/src/Models/db/finance/PaymentHistory";
+import { compute, create, signal } from "@targoninc/jess";
+import { GenericTemplates } from "../generic/GenericTemplates.ts";
+import { Time } from "../../Classes/Helpers/Time.ts";
+import { currency } from "../../Classes/Helpers/Num.ts";
+import { permissions } from "../../state.ts";
+import { copy } from "../../Classes/Util.ts";
+import { PaymentHistory } from "@targoninc/lyda-shared/src/Models/db/finance/PaymentHistory";
 import { Api } from "../../Api/Api.ts";
-import {t} from "../../../locales";
+import { t } from "../../../locales";
 
 export class PaymentTemplates {
     static paymentsPage() {
@@ -35,7 +35,7 @@ export class PaymentTemplates {
 
     static payment(p: PaymentHistory) {
         return create("div")
-            .classes("flex", "card", "space-outwards")
+            .classes("flex", "card", "space-between")
             .children(
                 create("div")
                     .classes("flex-v", p.succeeded ? "positive" : "negative")

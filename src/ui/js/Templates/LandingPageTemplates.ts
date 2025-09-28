@@ -487,7 +487,7 @@ export class LandingPageTemplates {
                     .classes("flex-v")
                     .children(
                         create("div")
-                            .classes("flex", "space-outwards")
+                            .classes("flex", "space-between")
                             .children(
                                 input<string>({
                                     type: InputType.text,
@@ -937,7 +937,7 @@ export class LandingPageTemplates {
                         }),
                         horizontal(
                             create("div")
-                                .classes("flex", "space-outwards")
+                                .classes("flex", "space-between")
                                 .children(
                                     input<string>({
                                         type: InputType.text,

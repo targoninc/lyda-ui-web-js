@@ -60,7 +60,7 @@ export class EventsTemplates {
         const referenceId = (relevantReferenceIdMap[event.type] ?? (() => null))(event);
 
         return create("div")
-            .classes("card", "flex", "space-outwards")
+            .classes("card", "flex", "space-between")
             .children(
                 create("div")
                     .classes("flex-v")

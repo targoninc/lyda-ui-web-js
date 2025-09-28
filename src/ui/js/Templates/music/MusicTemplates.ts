@@ -50,7 +50,7 @@ export class MusicTemplates {
                         MusicTemplates.playButton(type, item.id, () => startItem(type, item)),
                         MusicTemplates.cover(type, item, "inline-cover"),
                         create("div")
-                            .classes("flex", "flex-grow", "no-gap", "space-outwards")
+                            .classes("flex", "flex-grow", "no-gap", "space-between")
                             .children(
                                 create("div")
                                     .classes("flex")
@@ -77,7 +77,7 @@ export class MusicTemplates {
                                             ).build()
                                     ).build(),
                                 create("div")
-                                    .classes("flex", "space-outwards", "align-children")
+                                    .classes("flex", "space-between", "align-children")
                                     .children(
                                         horizontal(
                                             when(

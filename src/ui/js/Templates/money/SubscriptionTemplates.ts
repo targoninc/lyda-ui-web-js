@@ -109,7 +109,7 @@ export class SubscriptionTemplates {
             .children(
                 when(active, GenericTemplates.checkInCorner(t("SUBSCRIPTION_ACTIVE"))),
                 create("div")
-                    .classes("flex-v", "space-outwards")
+                    .classes("flex-v", "space-between")
                     .children(
                         create("div")
                             .classes("flex-v", "no-gap")

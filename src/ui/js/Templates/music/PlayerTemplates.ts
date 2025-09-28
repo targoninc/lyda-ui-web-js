@@ -127,7 +127,7 @@ export class PlayerTemplates {
             .id("player_" + track.id)
             .children(
                 create("div")
-                    .classes("flex", "space-outwards", "align-children")
+                    .classes("flex", "space-between", "align-children")
                     .children(
                         PlayerTemplates.loopModeButton(),
                         horizontal(
@@ -535,7 +535,7 @@ export class PlayerTemplates {
                     }, () => {
                         playerExpanded.value = false;
                     }),
-                ).classes("align-children", "space-outwards", "mobile-player"),
+                ).classes("align-children", "space-between", "mobile-player"),
                 ...tabContents,
             ).build();
     }
@@ -564,7 +564,7 @@ export class PlayerTemplates {
                         QueueTemplates.queueButton(),
                     ).build(),
             ),
-        ).classes("space-outwards", "mobile-player")
+        ).classes("space-between", "mobile-player")
          .styles("flex-grow", "1")
          .build();
     }
