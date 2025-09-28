@@ -29,7 +29,13 @@ const translations: Record<Language, Translation> = {
     [Language.de]: de,
 };
 
-const defaultLanguage = Language.en;
+const url = new URL(window.location.href);
+const param = url.searchParams.get("lang");
+let guessedLang;
+if (!param) {
+    guessedLang = navigator.language.split("-").at(0);
+}
+const defaultLanguage = (param ?? guessedLang ?? Language.en) as Language;
 
 export const language = signal(defaultLanguage);
 language.subscribe((lang, changed) => {

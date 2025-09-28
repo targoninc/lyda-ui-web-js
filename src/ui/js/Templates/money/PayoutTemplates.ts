@@ -117,7 +117,7 @@ export class PayoutTemplates {
                                     onclick: async () => {
                                         await Ui.getConfirmationModal(t("REQUEST_PAYOUT"), t("SURE_REQUEST_PAYOUT"), t("YES"), t("NO"), async () => {
                                             await Api.requestPayout();
-                                            notify(`${t("PAYMENT_REQUESTED")}`, NotificationType.success);
+                                            notify(`${t("PAYOUT_REQUESTED")}`, NotificationType.success);
                                             reload();
                                         }, () => {
                                         }, "wallet");
@@ -148,7 +148,7 @@ export class PayoutTemplates {
                             .build(),
                         create("span")
                             .classes("text-small")
-                            .text(t("PAID_OUT", currency(royaltyInfo.personal.paidTotal)))
+                            .text(t("PAID_OUT_AMOUNT", currency(royaltyInfo.personal.paidTotal)))
                             .build(),
                         create("span")
                             .classes("text-small")
@@ -172,7 +172,7 @@ export class PayoutTemplates {
                 }),
                 GenericTemplates.pill({
                     icon: "account_balance",
-                    text: t("PAID_OUT", currency(royaltyInfo.global.paidTotal)),
+                    text: t("PAID_OUT_AMOUNT", currency(royaltyInfo.global.paidTotal)),
                 }),
                 GenericTemplates.pill({
                     icon: "bar_chart",
