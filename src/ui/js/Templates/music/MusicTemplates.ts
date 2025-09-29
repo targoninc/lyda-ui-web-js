@@ -203,7 +203,7 @@ export class MusicTemplates {
     }
 
     static feed(type: FeedType, options: any = {}) {
-        const feedMap: Record<FeedType, string> = {
+        const endpointMap: Record<FeedType, string> = {
             following: ApiRoutes.followingFeed,
             explore: ApiRoutes.exploreFeed,
             history: ApiRoutes.historyFeed,
@@ -211,7 +211,6 @@ export class MusicTemplates {
             profileTracks: ApiRoutes.profileTracksFeed,
             profileReposts: ApiRoutes.profileRepostsFeed,
         };
-        const endpoint = feedMap[type];
         const pageState = signal(1);
         const tracksState = signal<Track[]>([]);
         const search = signal(type === FeedType.following ? "all" : "");
@@ -223,7 +222,7 @@ export class MusicTemplates {
             const offset = (pageNumber - 1) * pageSize;
             const params = { offset, filter };
             loadingState.value = true;
-            const res = await Api.getFeed(endpoint, Object.assign(params, options));
+            const res = await Api.getFeed(endpointMap[type], Object.assign(params, options));
             const newTracks = res ?? [];
 
             if (newTracks && newTracks.length === 0 && pageNumber > 1) {
@@ -237,7 +236,8 @@ export class MusicTemplates {
         };
         pageState.subscribe(update);
         search.subscribe(update);
-        const feedVisible = compute(u => u || type === FeedType.explore, currentUser);
+        const publicFeedTypes = [FeedType.explore, FeedType.profileTracks, FeedType.profileReposts];
+        const feedVisible = compute(u => u || publicFeedTypes.includes(type), currentUser);
         setTimeout(() => update());
 
         return create("div")

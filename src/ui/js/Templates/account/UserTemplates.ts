@@ -421,7 +421,7 @@ export class UserTemplates {
             when(
                 tabSelected(currentIndex, 0),
                 MusicTemplates.feed(FeedType.profileTracks, {
-                    userId: user.id,
+                    id: user.id,
                 }),
             ),
             when(
@@ -435,13 +435,13 @@ export class UserTemplates {
             when(
                 tabSelected(currentIndex, 3),
                 MusicTemplates.feed(FeedType.profileReposts, {
-                    userId: user.id,
+                    id: user.id,
                 }),
             ),
             when(
                 tabSelected(currentIndex, 4),
                 MusicTemplates.feed(FeedType.history, {
-                    userId: user.id,
+                    id: user.id,
                 }),
             ),
         ).build();
