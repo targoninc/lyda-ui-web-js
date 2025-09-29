@@ -3,7 +3,7 @@ import { GenericTemplates } from "./GenericTemplates.ts";
 import { create, HtmlPropertyValue, InputType, signal, Signal, StringOrSignal, TypeOrSignal } from "@targoninc/jess";
 
 export class FormTemplates {
-    static fileField(title: string, text: string, name: string, accept: string, required = false, onchange = (v: string, files: FileList | null) => {}) {
+    static fileField(title: StringOrSignal, text: string, name: string, accept: string, required = false, onchange = (v: string, files: FileList | null) => {}) {
         return create("div")
             .classes("flex-v", "small-gap")
             .children(

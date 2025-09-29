@@ -560,7 +560,7 @@ export class TrackEditTemplates {
     static coverFile(parentState: Signal<UploadableTrack>) {
         return FormTemplates.fileField(
             t("COVER_FILE"),
-            t("CHOOSE_IMAGE_FILE"),
+            `${t("CHOOSE_IMAGE_FILE")}`,
             "cover-file",
             "image/*",
             false,

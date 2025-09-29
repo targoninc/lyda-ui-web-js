@@ -14,7 +14,7 @@ import { TrackEditTemplates } from "./TrackEditTemplates.ts";
 import { CustomText } from "../../Classes/Helpers/CustomText.ts";
 import { CommentTemplates } from "../CommentTemplates.ts";
 import { navigate } from "../../Routing/Router.ts";
-import { compute, create, Signal, signal, signalMap, when } from "@targoninc/jess";
+import { compute, create, InputType, nullElement, Signal, signal, signalMap, when } from "@targoninc/jess";
 import {
     currentTrackId,
     currentTrackPosition,
@@ -29,7 +29,7 @@ import { MediaActions } from "../../Actions/MediaActions.ts";
 import { RoutePath } from "../../Routing/routes.ts";
 import { DefaultImages } from "../../Enums/DefaultImages.ts";
 import { MusicTemplates } from "./MusicTemplates.ts";
-import { button } from "@targoninc/jess-components";
+import { button, input } from "@targoninc/jess-components";
 import { TrackCollaborator } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
@@ -172,19 +172,27 @@ export class TrackTemplates {
         tracksState: Signal<Track[]>,
         pageState: Signal<number>,
         type: string,
-        filterState: Signal<string>,
+        search: Signal<string>,
     ) {
         const empty = compute(t => t.length === 0, tracksState);
 
         return create("div")
             .classes("flex-v", "fullHeight")
             .children(
-                create("div")
-                    .classes("flex", "space-between")
-                    .children(
+                horizontal(
+                    horizontal(
                         TrackTemplates.paginationControls(pageState),
-                        type === "following" ? TrackTemplates.feedFilters(filterState) : null,
-                    )
+                        input({
+                            type: InputType.text,
+                            validators: [],
+                            name: "tracks-filter",
+                            placeholder: t("SEARCH"),
+                            onchange: value => search.value = value,
+                            value: search,
+                        }),
+                    ),
+                    type === "following" ? TrackTemplates.feedFilters(search) : nullElement(),
+                ).classes("space-between")
                     .build(),
                 compute(
                     list =>

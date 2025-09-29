@@ -329,28 +329,6 @@ export class UserTemplates {
             .build();
     }
 
-    static profileTrackList(entityType: EntityType, tracks: Track[], isOwnProfile: boolean) {
-        let children = [];
-        if (tracks.length === 0) {
-            return TrackTemplates.noTracksUploadedYet(isOwnProfile);
-        } else {
-            children = tracks.reverse().map(track => MusicTemplates.feedEntry(entityType, track));
-        }
-
-        return TrackTemplates.trackList(children);
-    }
-
-    static profileRepostList(entityType: EntityType, tracks: Track[], isOwnProfile: boolean) {
-        let children = [];
-        if (tracks.length === 0) {
-            return TrackTemplates.noRepostsYet(isOwnProfile);
-        } else {
-            children = tracks.reverse().map(track => MusicTemplates.feedEntry(entityType, track));
-        }
-
-        return TrackTemplates.trackList(children);
-    }
-
     static unapprovedTracksLink() {
         const unapprovedTracks = signal<any[]>([]);
         Api.getUnapprovedTracks().then(tracks => (unapprovedTracks.value = tracks ?? []));
@@ -780,7 +758,7 @@ export class UserTemplates {
                 type: InputType.text,
                 validators: [],
                 name: "albums-filter",
-                placeholder: `Filter ${type}s`,
+                placeholder: t("SEARCH"),
                 onchange: value => search.value = value,
                 value: search,
             }),
@@ -793,17 +771,6 @@ export class UserTemplates {
                 return vertical();
             }, filteredAlbums),
         ).build();
-    }
-
-    static playlistCards(playlists: Playlist[], isOwnProfile: boolean) {
-        let children = [];
-        if (playlists.length === 0) {
-            return PlaylistTemplates.noPlaylistsYet(isOwnProfile);
-        } else {
-            children = playlists.map((playlist: Playlist) => PlaylistTemplates.playlistCard(playlist));
-        }
-
-        return PlaylistTemplates.playlistCardsContainer(children);
     }
 
     static libraryPage(albums: Album[], playlists: Playlist[], tracks: Track[]) {
@@ -847,28 +814,6 @@ export class UserTemplates {
         }
 
         return TrackTemplates.trackList(children);
-    }
-
-    static libraryPlaylists(playlists: Playlist[]) {
-        const template = signal(create("div").build());
-
-        const update = (playlists: Playlist[]) => {
-            let children;
-            if (playlists.length === 0) {
-                children = [
-                    create("span")
-                        .text(t("LIKE_PLAYLISTS_TO_SEE"))
-                        .build(),
-                ];
-            } else {
-                children = playlists.map((playlist: Playlist) => PlaylistTemplates.playlistCard(playlist));
-            }
-
-            template.value = PlaylistTemplates.playlistCardsContainer(children);
-        };
-        update(playlists);
-
-        return template;
     }
 
     static username(user: User, isOwnProfile: boolean) {

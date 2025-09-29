@@ -214,14 +214,14 @@ export class MusicTemplates {
         const endpoint = feedMap[type];
         const pageState = signal(1);
         const tracksState = signal<Track[]>([]);
-        const filterState = signal("all");
+        const search = signal(type === FeedType.following ? "all" : "");
         const loadingState = signal(false);
         const pageSize = 10;
         const update = async () => {
             const pageNumber = pageState.value;
-            const filter = filterState.value;
+            const filter = search.value;
             const offset = (pageNumber - 1) * pageSize;
-            const params = type === "following" ? { offset, filter } : { offset };
+            const params = { offset, filter };
             loadingState.value = true;
             const res = await Api.getFeed(endpoint, Object.assign(params, options));
             const newTracks = res ?? [];
@@ -236,7 +236,7 @@ export class MusicTemplates {
             loadingState.value = false;
         };
         pageState.subscribe(update);
-        filterState.subscribe(update);
+        search.subscribe(update);
         const feedVisible = compute(u => u || type === FeedType.explore, currentUser);
         setTimeout(() => update());
 
@@ -252,7 +252,7 @@ export class MusicTemplates {
                         tracksState,
                         pageState,
                         type,
-                        filterState
+                        search,
                     )
                 )
             ).build();

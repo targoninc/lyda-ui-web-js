@@ -469,16 +469,11 @@ export class Api {
     }
 
     static async getTracksByUser(name: string, id: number | null = null) {
-        return get<Track[]>(ApiRoutes.getTracksByUserId, {
+        return get<Track[]>(ApiRoutes.profileTracksFeed, {
             id,
             name,
-        });
-    }
-
-    static async getRepostsByUser(name: string, id: number | null = null) {
-        return get<Track[]>(ApiRoutes.getTracksByUserId, {
-            id,
-            name,
+            offset: 0,
+            limit: 100,
         });
     }
 
