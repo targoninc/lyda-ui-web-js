@@ -67,20 +67,13 @@ export class ApiRoutes {
     // region Tracks
     private static tracks = ApiRoutes.base + "/tracks";
     static getTrackById = ApiRoutes.tracks + "/byId";
-    static getTracksByUserId = ApiRoutes.tracks + "/byUserId";
     static getTrackAudio = ApiRoutes.tracks + "/audio";
     static getTrackCollabTypes = ApiRoutes.tracks + "/collabTypes";
     static getUnapprovedCollabs = ApiRoutes.tracks + "/unapprovedCollabs";
     static createTrack = ApiRoutes.tracks + "/create";
-    static getRepostsByUserId = ApiRoutes.tracks + "/repostsByUserId";
 
     private static tracksActions = ApiRoutes.tracks + "/actions";
-    static likeTrack = ApiRoutes.tracksActions + "/like";
-    static unlikeTrack = ApiRoutes.tracksActions + "/unlike";
-    static repostTrack = ApiRoutes.tracksActions + "/repost";
-    static unrepostTrack = ApiRoutes.tracksActions + "/unrepost";
     static deleteTrack = ApiRoutes.tracksActions + "/delete";
-    static updateTrack = ApiRoutes.tracksActions + "/update";
     static updateTrackFull = ApiRoutes.tracksActions + "/updateFull";
     static saveTrackPlay = ApiRoutes.tracksActions + "/savePlay";
     static removeCollaborator = ApiRoutes.tracksActions + "/removeCollaborator";
@@ -93,6 +86,8 @@ export class ApiRoutes {
     static exploreFeed = ApiRoutes.feeds + "/explore";
     static historyFeed = ApiRoutes.feeds + "/history";
     static autoQueueFeed = ApiRoutes.feeds + "/autoQueue";
+    static profileTracksFeed = ApiRoutes.feeds + "/profileTracks";
+    static profileRepostsFeed = ApiRoutes.feeds + "/profileTracks";
     // endregion
 
     // region Albums
@@ -107,8 +102,6 @@ export class ApiRoutes {
     static addTrackToAlbums = ApiRoutes.albumActions + "/addTrack";
     static removeTrackFromAlbums = ApiRoutes.albumActions + "/removeTrack";
     static reorderAlbumTracks = ApiRoutes.albumActions + "/reorderTracks";
-    static likeAlbum = ApiRoutes.albumActions + "/like";
-    static unlikeAlbum = ApiRoutes.albumActions + "/unlike";
     // endregion
 
     // region Playlists
@@ -123,8 +116,6 @@ export class ApiRoutes {
     static addAlbumToPlaylists = ApiRoutes.playlistActions + "/addAlbum";
     static removeTrackFromPlaylists = ApiRoutes.playlistActions + "/removeTrack";
     static reorderPlaylistTracks = ApiRoutes.playlistActions + "/reorderTracks";
-    static likePlaylist = ApiRoutes.playlistActions + "/like";
-    static unlikePlaylist = ApiRoutes.playlistActions + "/unlike";
     // endregion
 
     // region Comments

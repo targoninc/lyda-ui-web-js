@@ -26,6 +26,7 @@ import { Api } from "../../Api/Api.ts";
 import { navigate } from "../../Routing/Router.ts";
 import { RoutePath } from "../../Routing/routes.ts";
 import { t } from "../../../locales";
+import { FeedType } from "@targoninc/lyda-shared/dist/Enums/FeedType";
 
 export class MusicTemplates {
     static feedEntry(type: EntityType, item: Track | Playlist | Album) {
@@ -201,12 +202,14 @@ export class MusicTemplates {
         );
     }
 
-    static feed(type: string, options: any = {}) {
-        const feedMap: Record<string, string> = {
+    static feed(type: FeedType, options: any = {}) {
+        const feedMap: Record<FeedType, string> = {
             following: ApiRoutes.followingFeed,
             explore: ApiRoutes.exploreFeed,
             history: ApiRoutes.historyFeed,
             autoQueue: ApiRoutes.autoQueueFeed,
+            profileTracks: ApiRoutes.profileTracksFeed,
+            profileReposts: ApiRoutes.profileRepostsFeed,
         };
         const endpoint = feedMap[type];
         const pageState = signal(1);
@@ -234,7 +237,7 @@ export class MusicTemplates {
         };
         pageState.subscribe(update);
         filterState.subscribe(update);
-        const feedVisible = compute(u => u || type === "explore", currentUser);
+        const feedVisible = compute(u => u || type === FeedType.explore, currentUser);
         setTimeout(() => update());
 
         return create("div")

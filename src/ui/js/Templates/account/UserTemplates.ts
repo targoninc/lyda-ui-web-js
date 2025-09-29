@@ -45,6 +45,7 @@ import { TrackCollaborator } from "@targoninc/lyda-shared/src/Models/db/lyda/Tra
 import { TrackEditTemplates } from "../music/TrackEditTemplates.ts";
 import { CollaboratorType } from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType.ts";
 import { t } from "../../../locales";
+import { FeedType } from "@targoninc/lyda-shared/dist/Enums/FeedType";
 
 export class UserTemplates {
     static userWidget(
@@ -441,7 +442,9 @@ export class UserTemplates {
             GenericTemplates.combinedSelector(tabs, (i: number) => (currentIndex.value = i), currentIndex.value),
             when(
                 tabSelected(currentIndex, 0),
-                UserTemplates.profileTab(EntityType.track, Api.getTracksByUser, user, isOwnProfile, UserTemplates.profileTrackList),
+                MusicTemplates.feed(FeedType.profileTracks, {
+                    userId: user.id,
+                }),
             ),
             when(
                 tabSelected(currentIndex, 1),
@@ -453,11 +456,13 @@ export class UserTemplates {
             ),
             when(
                 tabSelected(currentIndex, 3),
-                UserTemplates.profileTab(EntityType.track, Api.getRepostsByUser, user, isOwnProfile, UserTemplates.profileRepostList),
+                MusicTemplates.feed(FeedType.profileReposts, {
+                    userId: user.id,
+                }),
             ),
             when(
                 tabSelected(currentIndex, 4),
-                MusicTemplates.feed("history", {
+                MusicTemplates.feed(FeedType.history, {
                     userId: user.id,
                 }),
             ),

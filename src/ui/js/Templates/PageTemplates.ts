@@ -32,12 +32,13 @@ import { heading } from "@targoninc/jess-components";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 import { SubscriptionTemplates } from "./money/SubscriptionTemplates.ts";
 import { t } from "../../locales";
+import { FeedType } from "@targoninc/lyda-shared/dist/Enums/FeedType";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, (route: Route, params: Record<string, string>) => Promise<AnyElement> | AnyElement> = {
-        [RoutePath.explore]: () => MusicTemplates.feed("explore"),
-        [RoutePath.following]: () => MusicTemplates.feed("following"),
-        [RoutePath.history]: () => MusicTemplates.feed("history"),
+        [RoutePath.explore]: () => MusicTemplates.feed(FeedType.explore),
+        [RoutePath.following]: () => MusicTemplates.feed(FeedType.following),
+        [RoutePath.history]: () => MusicTemplates.feed(FeedType.history),
         [RoutePath.album]: AlbumTemplates.albumPage,
         [RoutePath.playlist]: this.playlistPage,
         [RoutePath.profile]: UserTemplates.profile,
