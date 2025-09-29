@@ -494,7 +494,7 @@ export const de: Translation = {
     DOCS: "Dokumentation",
     GO_EXPLORE_SOMEWHERE_ELSE: "Woanders erkunden gehen",
     LIBRARY: "Lieblingsinhalte",
-    LOG_OUT: "Abmelden1",
+    LOG_OUT: "Abmelden",
     NEW_ALBUM: "Neues Album",
     NEW_PLAYLIST: "Neue Playlist",
     NEW_VERSION_AVAILABLE: "Neue Version verfügbar",
