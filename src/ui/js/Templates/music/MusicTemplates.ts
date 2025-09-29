@@ -26,7 +26,7 @@ import { Api } from "../../Api/Api.ts";
 import { navigate } from "../../Routing/Router.ts";
 import { RoutePath } from "../../Routing/routes.ts";
 import { t } from "../../../locales";
-import { FeedType } from "@targoninc/lyda-shared/dist/Enums/FeedType";
+import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 
 export class MusicTemplates {
     static feedEntry(type: EntityType, item: Track | Playlist | Album) {

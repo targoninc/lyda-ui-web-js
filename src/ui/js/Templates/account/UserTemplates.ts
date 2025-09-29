@@ -45,7 +45,7 @@ import { TrackCollaborator } from "@targoninc/lyda-shared/src/Models/db/lyda/Tra
 import { TrackEditTemplates } from "../music/TrackEditTemplates.ts";
 import { CollaboratorType } from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType.ts";
 import { t } from "../../../locales";
-import { FeedType } from "@targoninc/lyda-shared/dist/Enums/FeedType";
+import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 
 export class UserTemplates {
     static userWidget(

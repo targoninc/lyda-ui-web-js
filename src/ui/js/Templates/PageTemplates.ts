@@ -30,9 +30,9 @@ import { Api } from "../Api/Api.ts";
 import { GenericTemplates, horizontal, tabSelected, vertical } from "./generic/GenericTemplates.ts";
 import { heading } from "@targoninc/jess-components";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
+import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 import { SubscriptionTemplates } from "./money/SubscriptionTemplates.ts";
 import { t } from "../../locales";
-import { FeedType } from "@targoninc/lyda-shared/dist/Enums/FeedType";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, (route: Route, params: Record<string, string>) => Promise<AnyElement> | AnyElement> = {
