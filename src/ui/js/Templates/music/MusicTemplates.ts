@@ -212,7 +212,7 @@ export class MusicTemplates {
             profileReposts: ApiRoutes.profileRepostsFeed,
         };
         const pageState = signal(1);
-        const tracksState = signal<Track[]>([]);
+        const tracks$ = signal<Track[]>([]);
         const search = signal(type === FeedType.following ? "all" : "");
         const loadingState = signal(false);
         const pageSize = 10;
@@ -231,7 +231,7 @@ export class MusicTemplates {
                 return;
             }
 
-            tracksState.value = newTracks;
+            tracks$.value = newTracks;
             loadingState.value = false;
         };
         pageState.subscribe(update);
@@ -239,6 +239,7 @@ export class MusicTemplates {
         const publicFeedTypes = [FeedType.explore, FeedType.profileTracks, FeedType.profileReposts];
         const feedVisible = compute(u => u || publicFeedTypes.includes(type), currentUser);
         setTimeout(() => update());
+        const nextDisabled = compute(t => t.length < pageSize, tracks$);
 
         return create("div")
             .classes("fullHeight")
@@ -248,12 +249,7 @@ export class MusicTemplates {
                     .build(), true),
                 when(
                     feedVisible,
-                    TrackTemplates.trackListWithPagination(
-                        tracksState,
-                        pageState,
-                        type,
-                        search,
-                    )
+                    TrackTemplates.trackListWithPagination(tracks$, pageState, type, search, nextDisabled),
                 )
             ).build();
     }

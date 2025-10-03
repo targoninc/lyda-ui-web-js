@@ -7,7 +7,7 @@ import { button } from "@targoninc/jess-components";
 import { Statistic } from "@targoninc/lyda-shared/src/Models/Statistic";
 import { Api } from "../../Api/Api.ts";
 import { BoxPlotValues } from "@targoninc/lyda-shared/dist/Models/BoxPlotValues";
-import {t} from "../../../locales";
+import { t } from "../../../locales";
 
 Chart.register(...registerables);
 
@@ -161,7 +161,6 @@ export class ChartTemplates {
                             icon: { icon: "arrow_right" },
                             onclick: () => (skip.value = Math.max(0, skip.value - take.value)),
                             disabled: compute(s => s <= 0, skip),
-                            classes: ["previousPage"],
                         }),
                     )
                     .build(),

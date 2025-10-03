@@ -173,6 +173,7 @@ export class TrackTemplates {
         pageState: Signal<number>,
         type: string,
         search: Signal<string>,
+        nextDisabled: Signal<boolean>,
     ) {
         const empty = compute(t => t.length === 0, tracksState);
 
@@ -181,7 +182,7 @@ export class TrackTemplates {
             .children(
                 horizontal(
                     horizontal(
-                        TrackTemplates.paginationControls(pageState),
+                        TrackTemplates.paginationControls(pageState, nextDisabled),
                         input({
                             type: InputType.text,
                             validators: [],
@@ -190,10 +191,10 @@ export class TrackTemplates {
                             onchange: value => search.value = value,
                             value: search,
                         }),
-                    ),
+                    ).classes("align-children"),
                     type === "following" ? TrackTemplates.feedFilters(search) : nullElement(),
                 ).classes("space-between")
-                    .build(),
+                 .build(),
                 compute(
                     list =>
                         TrackTemplates.trackList(
@@ -202,7 +203,7 @@ export class TrackTemplates {
                     tracksState,
                 ),
                 when(empty, GenericTemplates.noTracks()),
-                TrackTemplates.paginationControls(pageState),
+                TrackTemplates.paginationControls(pageState, nextDisabled),
             ).build();
     }
 
@@ -225,54 +226,24 @@ export class TrackTemplates {
             .build();
     }
 
-    static paginationControls(pageState: Signal<number>) {
-        const previousCallback = () => {
-            pageState.value = pageState.value - 1;
-        };
-        const nextCallback = () => {
-            pageState.value = pageState.value + 1;
-        };
+    static paginationControls(pageState: Signal<number>, nextDisabled: Signal<boolean>) {
+        const previousCallback = () => pageState.value = pageState.value - 1;
+        const nextCallback = () => pageState.value = pageState.value + 1;
 
-        const controls = signal(TrackTemplates.#paginationControls(pageState.value, previousCallback, nextCallback));
-        pageState.subscribe(newPage => {
-            controls.value = TrackTemplates.#paginationControls(newPage, previousCallback, nextCallback);
-        });
-
-        return controls;
+        return compute((newPage, nd) => TrackTemplates.#paginationControls(newPage, previousCallback, nextCallback, nd), pageState, nextDisabled);
     }
 
-    static #paginationControls(currentPage: number, previousCallback: Function, nextCallback: Function) {
-        return create("div")
-            .classes("flex")
-            .children(
-                button({
-                    text: t("PREVIOUS_PAGE"),
-                    icon: { icon: "arrow_left" },
-                    onclick: previousCallback,
-                    disabled: currentPage === 1,
-                    classes: ["previousPage"],
-                }),
-                button({
-                    text: t("NEXT_PAGE"),
-                    icon: { icon: "arrow_right" },
-                    onclick: nextCallback,
-                    disabled: currentPage === Infinity,
-                }),
-            ).build();
+    static #paginationControls(currentPage: number, previousCallback: Function, nextCallback: Function, nextDisabled = false) {
+        return horizontal(
+            GenericTemplates.roundIconButton({ icon: "arrow_back_ios_new" }, previousCallback, "", [currentPage === 1 ? "disabled" : "_"]),
+            GenericTemplates.roundIconButton({ icon: "arrow_forward_ios" }, nextCallback, "", [(currentPage === Infinity || nextDisabled) ? "disabled" : "_"]),
+        ).build();
     }
 
     static waveform(track: Track, loudnessData: number[], small = false) {
         if (!track.processed) {
             return create("div")
-                .classes(
-                    "waveform",
-                    small ? "waveform-small" : "_",
-                    "processing-box",
-                    "rounded-max",
-                    "relative",
-                    "flex",
-                    "nogap",
-                )
+                .classes("waveform", small ? "waveform-small" : "_", "processing-box", "rounded-max", "relative", "flex", "nogap")
                 .title(t("STILL_PROCESSING_CHECK_LATER"))
                 .build();
         }
