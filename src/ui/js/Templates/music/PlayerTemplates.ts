@@ -438,7 +438,7 @@ export class PlayerTemplates {
             .onclick(e => {
                 if (e.button === 0) {
                     e.preventDefault();
-                    navigate(RoutePath.settings);
+                    navigate(`${RoutePath.settings}#streaming-quality`);
                 }
             }).build();
     }
