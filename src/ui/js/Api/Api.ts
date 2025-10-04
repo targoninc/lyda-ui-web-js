@@ -424,8 +424,12 @@ export class Api {
         return post(ApiRoutes.updateAlbum, album);
     }
 
-    static async getAlbumsByUserId(userId: number): Promise<Album[] | null> {
-        return await get<Album[]>(ApiRoutes.getAlbumsByUserId, { id: userId });
+    static async getAlbumsByUserId(userId: number, offset: number = 0, filter: string = ""): Promise<Album[] | null> {
+        return await get<Album[]>(ApiRoutes.getAlbumsByUserId, {
+            id: userId,
+            offset,
+            filter,
+        });
     }
 
     static async createNewAlbum(album: Partial<Album>): Promise<boolean> {
@@ -641,9 +645,11 @@ export class Api {
         }>(ApiRoutes.getPlaylistById, { id });
     }
 
-    static async getPlaylistsByUserId(userId: number): Promise<Playlist[] | null> {
+    static async getPlaylistsByUserId(userId: number, offset: number = 0, filter: string = ""): Promise<Playlist[] | null> {
         return await get<Playlist[]>(ApiRoutes.getPlaylistsByUserId, {
             id: userId,
+            offset,
+            filter,
         });
     }
 

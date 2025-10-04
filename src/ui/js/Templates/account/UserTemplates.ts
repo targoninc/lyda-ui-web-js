@@ -426,11 +426,15 @@ export class UserTemplates {
             ),
             when(
                 tabSelected(currentIndex, 1),
-                UserTemplates.profileTab(EntityType.album, Api.getAlbumsByUser, user, isOwnProfile, UserTemplates.listCards),
+                MusicTemplates.cardFeed(EntityType.album, {
+                    id: user.id,
+                }),
             ),
             when(
                 tabSelected(currentIndex, 2),
-                UserTemplates.profileTab(EntityType.playlist, Api.getPlaylistsByUser, user, isOwnProfile, UserTemplates.listCards),
+                MusicTemplates.cardFeed(EntityType.playlist, {
+                    id: user.id,
+                }),
             ),
             when(
                 tabSelected(currentIndex, 3),
