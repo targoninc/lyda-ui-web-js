@@ -694,10 +694,7 @@ export class UserTemplates {
                 when(verified, UserTemplates.verificationBadge()),
                 !isOwnProfile && currentUser.value ? UserTemplates.followButton(Util.isFollowing(user), user.id) : null,
                 horizontal(
-                    when(hasPermissionToVerify, button({
-                        icon: { icon: "more_horiz" },
-                        onclick: () => menuShown.value = !menuShown.value,
-                    })),
+                    when(hasPermissionToVerify, GenericTemplates.roundIconButton({ icon: "settings_account_box" }, () => menuShown.value = !menuShown.value, "User options")),
                     when(menuShown, vertical(
                         when(verified, button({
                             text: t("VERIFY"),
