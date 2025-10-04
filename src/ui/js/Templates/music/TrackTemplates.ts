@@ -204,7 +204,7 @@ export class TrackTemplates {
                         })),
                     ).classes("align-children"),
                     type === "following" ? TrackTemplates.feedFilters(search) : nullElement(),
-                ).classes("space-between")
+                ).classes("space-between", "align-children")
                  .build(),
                 compute(
                     list =>
