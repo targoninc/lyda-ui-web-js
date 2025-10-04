@@ -237,6 +237,7 @@ export class MusicTemplates {
         pageState.subscribe(update);
         search.subscribe(update);
         const publicFeedTypes = [FeedType.explore, FeedType.profileTracks, FeedType.profileReposts];
+        const searchableFeedTypes = [FeedType.profileTracks, FeedType.profileReposts, FeedType.history];
         const feedVisible = compute(u => u || publicFeedTypes.includes(type), currentUser);
         setTimeout(() => update());
         const nextDisabled = compute(t => t.length < pageSize, tracks$);
@@ -249,7 +250,7 @@ export class MusicTemplates {
                     .build(), true),
                 when(
                     feedVisible,
-                    TrackTemplates.trackListWithPagination(tracks$, pageState, type, search, nextDisabled),
+                    TrackTemplates.trackListWithPagination(tracks$, pageState, type, search, nextDisabled, searchableFeedTypes.includes(type)),
                 )
             ).build();
     }

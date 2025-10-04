@@ -14,7 +14,17 @@ import { TrackEditTemplates } from "./TrackEditTemplates.ts";
 import { CustomText } from "../../Classes/Helpers/CustomText.ts";
 import { CommentTemplates } from "../CommentTemplates.ts";
 import { navigate } from "../../Routing/Router.ts";
-import { compute, create, InputType, nullElement, Signal, signal, signalMap, when } from "@targoninc/jess";
+import {
+    compute,
+    create,
+    InputType,
+    nullElement,
+    Signal,
+    signal,
+    signalMap,
+    TypeOrSignal,
+    when,
+} from "@targoninc/jess";
 import {
     currentTrackId,
     currentTrackPosition,
@@ -174,6 +184,7 @@ export class TrackTemplates {
         type: string,
         search: Signal<string>,
         nextDisabled: Signal<boolean>,
+        hasSearch: TypeOrSignal<boolean>,
     ) {
         const empty = compute(t => t.length === 0, tracksState);
 
@@ -183,14 +194,14 @@ export class TrackTemplates {
                 horizontal(
                     horizontal(
                         TrackTemplates.paginationControls(pageState, nextDisabled),
-                        input({
+                        when(hasSearch, input({
                             type: InputType.text,
                             validators: [],
                             name: "tracks-filter",
                             placeholder: t("SEARCH"),
                             onchange: value => search.value = value,
                             value: search,
-                        }),
+                        })),
                     ).classes("align-children"),
                     type === "following" ? TrackTemplates.feedFilters(search) : nullElement(),
                 ).classes("space-between")
