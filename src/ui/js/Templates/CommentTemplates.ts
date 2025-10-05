@@ -1,4 +1,4 @@
-import { GenericTemplates, horizontal } from "./generic/GenericTemplates.ts";
+import { GenericTemplates, horizontal, vertical } from "./generic/GenericTemplates.ts";
 import { Icons } from "../Enums/Icons.ts";
 import { TrackActions } from "../Actions/TrackActions.ts";
 import { UserTemplates } from "./account/UserTemplates.ts";
@@ -54,9 +54,9 @@ export class CommentTemplates {
                             text: t("POST"),
                             icon: { icon: "send" },
                             classes: ["positive"],
-                            onclick: () => TrackActions.newComment(newComment, comments, track_id)
+                            onclick: () => TrackActions.newComment(newComment, comments, track_id),
                         }),
-                    ).build())
+                    ).build()),
             ).build();
     }
 
@@ -71,81 +71,82 @@ export class CommentTemplates {
         const replyInputShown = signal(false);
         const repliesShown = signal(false);
         const newComment = signal("");
+        const menuShown$ = signal(false);
 
         return create("div")
-            .classes("comment-in-list", "flex-v", "small-gap")
+            .classes("comment-in-list", "flex-v", "small-gap", (comment.parent_id ?? 0) === 0 ? "tight-border-card" : "_")
             .id(comment.id)
             .attributes("parent_id", comment.parent_id)
             .children(
                 create("div")
                     .classes("flex-v", "small-gap")
                     .children(
+                        vertical(
+                            horizontal(
+                                UserTemplates.userLink(UserWidgetContext.comment, comment.user),
+                                CommentTemplates.commentContent(comment),
+                            ),
+                            create("span")
+                                .classes("text", "text-small", "color-dim")
+                                .text(Time.agoUpdating(new Date(comment.created_at)))
+                                .build(),
+                        ).classes("no-gap"),
                         horizontal(
-                            UserTemplates.userLink(UserWidgetContext.comment, comment.user),
-                            CommentTemplates.commentContent(comment),
-                        ),
-                        create("span")
-                            .classes("text", "text-small", "color-dim")
-                            .text(Time.agoUpdating(new Date(comment.created_at)))
-                            .build(),
-                    ).build(),
-                create("div")
-                    .classes("flex")
-                    .children(
-                        create("div")
-                            .classes("flex")
-                            .children(
-                                when(comment.canEdit, button({
+                            when(Util.isLoggedIn(), CommentTemplates.commentReplySection(repliesShown, replyInputShown, comment, newComment, comments)),
+                            when(comment.canEdit, horizontal(
+                                GenericTemplates.textButton(
+                                    "More",
+                                    () => menuShown$.value = !menuShown$.value,
+                                    "more_horiz",
+                                ),
+                                GenericTemplates.menu(menuShown$, button({
                                     text: t("DELETE"),
                                     icon: { icon: "delete" },
                                     classes: ["negative"],
-                                    onclick: () => TrackActions.deleteComment(comment.id, comments)
-                                }))
-                            ).build(),
-                        when(Util.isLoggedIn(), CommentTemplates.commentReplySection(repliesShown, replyInputShown, comment, newComment, comments)),
+                                    onclick: () => TrackActions.deleteComment(comment.id, comments),
+                                })),
+                            ).build()),
+                        ).classes("align-children"),
                     ).build(),
                 when(repliesShown, create("div")
                     .classes("comment-children", "flex-v")
                     .children(...(comment.comments?.map(c => CommentTemplates.commentInList(c, comments)) ?? []))
-                    .build())
+                    .build()),
             ).build();
     }
 
     private static commentReplySection(repliesShown: Signal<boolean>, replyInputShown: Signal<boolean>, comment: Comment, newComment: Signal<string>, comments: Signal<Comment[]>) {
         const len = comment.comments?.length ?? 0;
 
-        return create("div")
-            .classes("flex")
-            .children(
-                button({
-                    text: t("REPLY"),
-                    icon: {icon: compute((r): string => r ? "close" : "reply", replyInputShown)},
-                    classes: ["positive"],
-                    onclick: () => replyInputShown.value = !replyInputShown.value
-                }),
-                when(replyInputShown, input<string>({
-                    type: InputType.text,
-                    name: "reply-input",
-                    label: "",
-                    placeholder: t("REPLY_TO_NAME", comment.user!.username),
-                    value: newComment,
-                    attributes: ["track_id", comment.track_id.toString()],
-                    onchange: v => {
-                        newComment.value = v;
-                    }
-                })),
-                when(replyInputShown, button({
-                    text: t("POST"),
-                    icon: {icon: "send"},
-                    classes: ["positive"],
-                    onclick: () => TrackActions.newComment(newComment, comments, comment.track_id, comment.id)
-                })),
-                when(len > 0, GenericTemplates.textButton(
-                    compute((r): string => `${t("REPLIES_SHOWN_HIDDEN", len, r)}`, repliesShown),
-                    () => repliesShown.value = !repliesShown.value,
-                    compute((s): string => s ? "visibility" : "visibility_off", repliesShown)),
-                ),
-            ).build();
+        return horizontal(
+            GenericTemplates.textButton(
+                t("REPLY"),
+                () => replyInputShown.value = !replyInputShown.value,
+                compute((r): string => r ? "close" : "reply", replyInputShown),
+            ),
+            when(replyInputShown, input<string>({
+                type: InputType.text,
+                name: "reply-input",
+                label: "",
+                placeholder: t("REPLY_TO_NAME", comment.user!.username),
+                value: newComment,
+                attributes: ["track_id", comment.track_id.toString()],
+                onchange: v => {
+                    newComment.value = v;
+                },
+            })),
+            when(replyInputShown, button({
+                text: t("POST"),
+                icon: { icon: "send" },
+                classes: ["positive"],
+                onclick: () => TrackActions.newComment(newComment, comments, comment.track_id, comment.id),
+            })),
+            when(len > 0, GenericTemplates.textButton(
+                compute((r): string => `${t("REPLIES_SHOWN_HIDDEN", len, r)}`, repliesShown),
+                () => repliesShown.value = !repliesShown.value,
+                compute((s): string => s ? "visibility" : "visibility_off", repliesShown)),
+            ),
+        ).build();
     }
 
     static commentContent(comment: Comment) {
@@ -153,7 +154,7 @@ export class CommentTemplates {
             const contentShown = signal(false);
 
             return create("div")
-                .classes("text", "comment_content", "flex", "noflexwrap")
+                .classes("text", "flex", "noflexwrap", "flex-grow")
                 .children(
                     when(contentShown, create("div")
                         .classes("color-dim", "flex", "noflexwrap", "fullWidth")
@@ -162,19 +163,19 @@ export class CommentTemplates {
                         }).children(
                             GenericTemplates.icon(Icons.WARNING, true),
                             create("i")
-                                .classes("text", "comment_content", "fullWidth")
+                                .classes("text", "fullWidth")
                                 .text(t("COMMENT_IS_HIDDEN"))
-                                .build()
+                                .build(),
                         ).build(), true),
                     when(contentShown, create("span")
                         .onclick(() => {
                             contentShown.value = !contentShown.value;
                         }).text(comment.content)
-                        .build())
+                        .build()),
                 ).build();
         } else {
             return create("span")
-                .classes("text", "comment_content")
+                .classes("text", "flex-grow")
                 .text(comment.content)
                 .build();
         }

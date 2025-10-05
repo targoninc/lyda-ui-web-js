@@ -591,15 +591,19 @@ button.unread:before {
     color: var(--orange);
 }
 
-.card, .border-card {
+.card, .border-card, .tight-border-card {
     padding: 20px;
     border-radius: var(--border-radius);
     position: relative;
 }
 
-.border-card {
+.border-card, .tight-border-card {
     background: var(--color-6);
     border: 1px solid var(--color-7);
+}
+
+.tight-border-card {
+    padding: 10px;
 }
 
 .card.active {

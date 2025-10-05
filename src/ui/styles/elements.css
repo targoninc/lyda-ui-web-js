@@ -554,17 +554,24 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     height: var(--font-size-xlarge);
 }
 
-.comment_content {
-    max-width: 300px;
-}
-
 .notification-text * {
     max-width: 300px;
     display: block;
 }
 
+.text-button {
+    padding: var(--jessc-input-padding-y) var(--jessc-input-padding-x);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+}
+
+.text-button:hover {
+    background: var(--color-7);
+    text-decoration: none !important;
+}
+
 .comment-children {
-    margin-left: 34px;
+    margin-left: 3em;
 }
 
 .upload-info-item.error {
