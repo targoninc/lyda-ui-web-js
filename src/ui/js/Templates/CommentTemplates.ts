@@ -1,4 +1,4 @@
-import { GenericTemplates } from "./generic/GenericTemplates.ts";
+import { GenericTemplates, horizontal } from "./generic/GenericTemplates.ts";
 import { Icons } from "../Enums/Icons.ts";
 import { TrackActions } from "../Actions/TrackActions.ts";
 import { UserTemplates } from "./account/UserTemplates.ts";
@@ -80,7 +80,10 @@ export class CommentTemplates {
                 create("div")
                     .classes("flex-v", "small-gap")
                     .children(
-                        CommentTemplates.commentContent(comment),
+                        horizontal(
+                            UserTemplates.userLink(UserWidgetContext.comment, comment.user),
+                            CommentTemplates.commentContent(comment),
+                        ),
                         create("span")
                             .classes("text", "text-small", "color-dim")
                             .text(Time.agoUpdating(new Date(comment.created_at)))
@@ -89,7 +92,6 @@ export class CommentTemplates {
                 create("div")
                     .classes("flex")
                     .children(
-                        UserTemplates.userWidget(comment.user, ["comment_id", comment.id], [], UserWidgetContext.comment),
                         create("div")
                             .classes("flex")
                             .children(
@@ -151,7 +153,7 @@ export class CommentTemplates {
             const contentShown = signal(false);
 
             return create("div")
-                .classes("text", "comment_content", "text-small", "flex", "noflexwrap", "fullWidth")
+                .classes("text", "comment_content", "flex", "noflexwrap")
                 .children(
                     when(contentShown, create("div")
                         .classes("color-dim", "flex", "noflexwrap", "fullWidth")
@@ -160,7 +162,7 @@ export class CommentTemplates {
                         }).children(
                             GenericTemplates.icon(Icons.WARNING, true),
                             create("i")
-                                .classes("text", "comment_content", "text-small", "fullWidth")
+                                .classes("text", "comment_content", "fullWidth")
                                 .text(t("COMMENT_IS_HIDDEN"))
                                 .build()
                         ).build(), true),
@@ -172,7 +174,7 @@ export class CommentTemplates {
                 ).build();
         } else {
             return create("span")
-                .classes("text", "comment_content", "text-small", "fullWidth")
+                .classes("text", "comment_content")
                 .text(comment.content)
                 .build();
         }

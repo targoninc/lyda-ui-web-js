@@ -555,7 +555,6 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .comment_content {
-    font-size: var(--font-size-small);
     max-width: 300px;
 }
 
