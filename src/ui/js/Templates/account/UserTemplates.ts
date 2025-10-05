@@ -155,20 +155,19 @@ export class UserTemplates {
                 )
                 .build(),
             when(previewShown, UserTemplates.userPreview(user, context)),
-        )
-            .onmouseover(() => {
-                if (timeout) clearTimeout(timeout);
-                timeout = setTimeout(() => {
-                    previewShown.value = true;
-                }, 500);
-            })
-            .onmouseleave(() => {
-                if (timeout) clearTimeout(timeout);
-                timeout = setTimeout(() => {
-                    previewShown.value = false;
-                }, 100);
-            })
-            .classes("relative");
+        ).onmouseover(() => {
+            if (timeout) clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                previewShown.value = true;
+            }, 500);
+        })
+         .onmouseleave(() => {
+             if (timeout) clearTimeout(timeout);
+             timeout = setTimeout(() => {
+                 previewShown.value = false;
+             }, 100);
+         })
+         .classes("relative");
     }
 
     static editableLinkedUser(

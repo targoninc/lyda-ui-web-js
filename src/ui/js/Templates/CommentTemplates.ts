@@ -115,12 +115,6 @@ export class CommentTemplates {
         return create("div")
             .classes("flex")
             .children(
-                when(len > 0, button({
-                    text: compute((r): string => `${t("REPLIES_SHOWN_HIDDEN", len, r)}`, repliesShown),
-                    disabled: len === 0,
-                    icon: {icon: compute((s): string => s ? "visibility" : "visibility_off", repliesShown)},
-                    onclick: () => repliesShown.value = !repliesShown.value
-                })),
                 button({
                     text: t("REPLY"),
                     icon: {icon: compute((r): string => r ? "close" : "reply", replyInputShown)},
@@ -143,7 +137,12 @@ export class CommentTemplates {
                     icon: {icon: "send"},
                     classes: ["positive"],
                     onclick: () => TrackActions.newComment(newComment, comments, comment.track_id, comment.id)
-                }))
+                })),
+                when(len > 0, GenericTemplates.textButton(
+                    compute((r): string => `${t("REPLIES_SHOWN_HIDDEN", len, r)}`, repliesShown),
+                    () => repliesShown.value = !repliesShown.value,
+                    compute((s): string => s ? "visibility" : "visibility_off", repliesShown)),
+                ),
             ).build();
     }
 
