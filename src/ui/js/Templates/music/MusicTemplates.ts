@@ -215,25 +215,25 @@ export class MusicTemplates {
         const pageState = signal(1);
         const tracks$ = signal<Track[]>([]);
         const search = signal(type === FeedType.following ? "all" : "");
-        const loadingState = signal(false);
+        const loading$ = signal(false);
         const pageSize = 10;
         const update = async () => {
             const pageNumber = pageState.value;
             const filter = search.value;
             const offset = (pageNumber - 1) * pageSize;
             const params = { offset, filter };
-            loadingState.value = true;
+            loading$.value = true;
             const res = await Api.getFeed(endpointMap[type], Object.assign(params, options));
             const newTracks = res ?? [];
 
             if (newTracks && newTracks.length === 0 && pageNumber > 1) {
                 pageState.value -= 1;
-                loadingState.value = false;
+                loading$.value = false;
                 return;
             }
 
             tracks$.value = newTracks;
-            loadingState.value = false;
+            loading$.value = false;
         };
         pageState.subscribe(update);
         search.subscribe(update);
@@ -251,7 +251,10 @@ export class MusicTemplates {
                     .build(), true),
                 when(
                     feedVisible,
-                    TrackTemplates.trackListWithPagination(tracks$, pageState, type, search, nextDisabled, searchableFeedTypes.includes(type)),
+                    vertical(
+                        when(loading$, GenericTemplates.loadingSpinner()),
+                        when(loading$, TrackTemplates.trackListWithPagination(tracks$, pageState, type, search, nextDisabled, searchableFeedTypes.includes(type)), true),
+                    ).build(),
                 ),
             ).build();
     }
@@ -295,7 +298,8 @@ export class MusicTemplates {
         return create("div")
             .classes("fullHeight")
             .children(
-                MusicTemplates.cardList(entities$, page$, type, search$, nextDisabled, searchableFeedTypes.includes(type)),
+                when(loading$, GenericTemplates.loadingSpinner()),
+                when(loading$, MusicTemplates.cardList(entities$, page$, type, search$, nextDisabled, searchableFeedTypes.includes(type)), true),
             ).build();
     }
 
