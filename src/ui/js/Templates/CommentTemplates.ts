@@ -105,7 +105,7 @@ export class CommentTemplates {
                                     classes: ["negative"],
                                     onclick: () => TrackActions.deleteComment(comment.id, comments),
                                 })),
-                            ).build()),
+                            ).classes("relative").build()),
                         ).classes("align-children"),
                     ).build(),
                 when(repliesShown, create("div")
