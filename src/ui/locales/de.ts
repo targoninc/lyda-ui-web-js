@@ -488,7 +488,7 @@ export const de: Translation = {
     LOGIN_TO_VIEW_PLAYLISTS: "Du kannst Playlists nur mit einem Account sehen",
     LOGIN_TO_VIEW_LIBRARY: "Du kannst Bibliotheken nur mit einem Account sehen",
     N_RESULTS: count => `${count} Ergebnisse`,
-    NO_TRACKS_FOUND: "Keine Tracks gefunden",
+    NOTHING_FOUND: "Nichts gefunden",
     CHOOSING_FILE: "Wähle Datei aus...",
     CONFIRM: "Bestätigen",
     DOCS: "Dokumentation",

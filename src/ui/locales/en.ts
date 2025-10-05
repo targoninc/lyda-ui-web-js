@@ -148,7 +148,7 @@ export const en = {
     NOT_SUPPORTED_TYPE: "Not supported type",
     LIBRARY: "Library",
     CONFIRM: "Confirm",
-    NO_TRACKS_FOUND: "No tracks found",
+    NOTHING_FOUND: "Nothing found",
     N_RESULTS: count => `${count} results`,
     DOCS: "Docs",
     RETRY: "Retry",

@@ -78,7 +78,7 @@ export class TrackTemplates {
                 GenericTemplates.newTrackButton(["secondary"]),
             ];
         } else {
-            children = [create("p").text(t("NO_TRACKS_FOUND")).build()];
+            children = [create("p").text(t("NOTHING_FOUND")).build()];
         }
 
         return create("div")
@@ -466,7 +466,7 @@ export class TrackTemplates {
                         .classes("card")
                         .children(
                             create("span")
-                                .text(t("NO_TRACKS_FOUND"))
+                                .text(t("NOTHING_FOUND"))
                                 .build(),
                         ).build(),
                 ),

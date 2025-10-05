@@ -472,7 +472,7 @@ export class GenericTemplates {
         return horizontal(
             GenericTemplates.graphic("nothing_found.svg"),
             create("span")
-                .text(t("NO_TRACKS_FOUND"))
+                .text(t("NOTHING_FOUND"))
                 .build(),
         ).classes("align-children")
          .build();
