@@ -463,14 +463,14 @@ export class GenericTemplates {
 
     static graphic(imageUrl: string) {
         return create("img")
-            .classes("graphic")
+            .classes("graphic", "svg")
             .attributes("src", `/img/graphics/${imageUrl}`)
             .build();
     }
 
     static noTracks() {
         return horizontal(
-            GenericTemplates.graphic("no_track_found.svg"),
+            GenericTemplates.graphic("nothing_found.svg"),
             create("span")
                 .text(t("NO_TRACKS_FOUND"))
                 .build(),
