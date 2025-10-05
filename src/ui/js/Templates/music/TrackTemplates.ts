@@ -512,18 +512,6 @@ export class TrackTemplates {
         if (!trackUser) {
             throw new Error(`Track ${track.id} has no user`);
         }
-        const editActions = [];
-        if (trackData.canEdit) {
-            editActions.push(TrackEditTemplates.addToAlbumsButton(track));
-            if (isPrivate) {
-                editActions.push(TrackTemplates.copyPrivateLinkButton(track.id, track.secretcode));
-            }
-            editActions.push(TrackEditTemplates.replaceAudioButton(track));
-            editActions.push(TrackEditTemplates.downloadAudioButton(track));
-            editActions.push(TrackEditTemplates.openEditPageButton(track));
-            editActions.push(TrackEditTemplates.deleteTrackButton(track.id));
-        }
-
         const description = create("span")
             .id("track-description")
             .classes("description", "break-lines", "card")
@@ -544,6 +532,7 @@ export class TrackTemplates {
         get<Comment[]>(ApiRoutes.getCommentsByTrackId, { track_id: track.id }).then(c => {
             comments.value = c ?? [];
         });
+        const menuShown$ = signal(false);
 
         return create("div")
             .classes("single-page", "noflexwrap", "padded-large", "rounded-large", "flex-v")
@@ -600,24 +589,40 @@ export class TrackTemplates {
                                         horizontal(
                                             TrackTemplates.playButton(track),
                                             InteractionTemplates.interactions(EntityType.track, track),
-                                            when(
-                                                currentUser,
-                                                horizontal(
-                                                    button({
-                                                        text: t("ADD_TO_PLAYLIST"),
-                                                        icon: { icon: "playlist_add" },
-                                                        onclick: async () => {
-                                                            await PlaylistActions.openAddToPlaylistModal(track, "track");
-                                                        },
-                                                    }),
-                                                    TrackTemplates.addToQueueButton(track),
-                                                ).build(),
-                                            ),
-                                        ).build(),
+                                        ).classes("align-children")
+                                         .build(),
                                     ).build(),
                             ).build(),
                     ).build(),
-                horizontal(...editActions),
+                horizontal(
+                    when(
+                        currentUser,
+                        horizontal(
+                            button({
+                                text: t("ADD_TO_PLAYLIST"),
+                                icon: { icon: "playlist_add" },
+                                onclick: async () => {
+                                    await PlaylistActions.openAddToPlaylistModal(track, "track");
+                                },
+                            }),
+                            TrackTemplates.addToQueueButton(track),
+                        ).build(),
+                    ),
+                    horizontal(
+                        when(isPrivate, TrackTemplates.copyPrivateLinkButton(track.id, track.secretcode)),
+                        GenericTemplates.roundIconButton(
+                            { icon: "more_horiz" },
+                            () => menuShown$.value = !menuShown$.value,
+                            "Show menu"),
+                        GenericTemplates.menu(compute(s => s && trackData.canEdit, menuShown$),
+                            TrackEditTemplates.addToAlbumsButton(track),
+                            TrackEditTemplates.replaceAudioButton(track),
+                            TrackEditTemplates.downloadAudioButton(track),
+                            TrackEditTemplates.openEditPageButton(track),
+                            TrackEditTemplates.deleteTrackButton(track.id),
+                        ),
+                    ).classes("relative"),
+                ).classes("align-children"),
                 when(track.description.length > 0, description),
                 CommentTemplates.commentListFullWidth(track.id, comments, showComments),
                 TrackTemplates.inAlbumsList(track),
@@ -804,7 +809,6 @@ export class TrackTemplates {
         return button({
             text: t("COPY_PRIVATE_LINK"),
             icon: { icon: "link" },
-            classes: ["special"],
             onclick: async () => copy(window.location.origin + "/track/" + id + "/" + code),
         });
     }

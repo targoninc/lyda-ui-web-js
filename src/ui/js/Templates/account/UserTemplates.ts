@@ -713,7 +713,7 @@ export class UserTemplates {
                                 verified.value = false;
                             },
                         })),
-                    ).classes("popout-below", "card", "absolute-align-left").build()),
+                    ).classes("popout-below", "borderless", "absolute-align-left").build()),
                 ).classes("relative"),
                 when(isFollowed, UserTemplates.followsBackIndicator()),
             ).build();

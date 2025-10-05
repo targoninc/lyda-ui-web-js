@@ -901,6 +901,14 @@ export class GenericTemplates {
                     .build(),
             ).build();
     }
+
+    static menu(shown: Signal<boolean>, ...children: (AnyElement | Signal<AnyElement>)[]) {
+        return when(shown, vertical(
+                ...children,
+            ).classes("popout-below", "card", "absolute-align-left")
+             .build(),
+        );
+    }
 }
 
 export function vertical(...children: (AnyNode | Signal<AnyNode> | Signal<AnyElement>)[]) {
