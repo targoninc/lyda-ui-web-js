@@ -226,7 +226,7 @@ export class LandingPageTemplates {
                                     if (value.trim().length === 6) {
                                         step.value = "verify-mfa";
                                     }
-                                }, true,
+                                }, true, () => {}, ["bigger-input"],
                             ),
                         ),
                         horizontal(
