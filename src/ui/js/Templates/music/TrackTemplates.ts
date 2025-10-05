@@ -5,7 +5,6 @@ import { PlayManager } from "../../Streaming/PlayManager.ts";
 import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
 import { Time } from "../../Classes/Helpers/Time.ts";
 import { QueueManager } from "../../Streaming/QueueManager.ts";
-import { AlbumTemplates } from "./AlbumTemplates.ts";
 import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
 import { PlaylistTemplates } from "./PlaylistTemplates.ts";
 import { DragActions } from "../../Actions/DragActions.ts";
@@ -39,7 +38,7 @@ import { MediaActions } from "../../Actions/MediaActions.ts";
 import { RoutePath } from "../../Routing/routes.ts";
 import { DefaultImages } from "../../Enums/DefaultImages.ts";
 import { MusicTemplates } from "./MusicTemplates.ts";
-import { button, input } from "@targoninc/jess-components";
+import { button, heading, input } from "@targoninc/jess-components";
 import { TrackCollaborator } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
@@ -179,17 +178,18 @@ export class TrackTemplates {
     }
 
     static trackListWithPagination(
-        tracksState: Signal<Track[]>,
+        tracks$: Signal<Track[]>,
         pageState: Signal<number>,
         type: string,
+        loading$: Signal<boolean>,
         search: Signal<string>,
         nextDisabled: Signal<boolean>,
         hasSearch: TypeOrSignal<boolean>,
     ) {
-        const empty = compute(t => t.length === 0, tracksState);
+        const empty = compute((t, l) => t.length === 0 && !l, tracks$, loading$);
 
         return create("div")
-            .classes("flex-v", "fullHeight")
+            .classes("flex-v", "fullHeight", "fullWidth")
             .children(
                 horizontal(
                     horizontal(
@@ -199,6 +199,7 @@ export class TrackTemplates {
                             validators: [],
                             name: "tracks-filter",
                             placeholder: t("SEARCH"),
+                            debounce: 200,
                             onchange: value => search.value = value,
                             value: search,
                         })),
@@ -206,12 +207,13 @@ export class TrackTemplates {
                     type === "following" ? TrackTemplates.feedFilters(search) : nullElement(),
                 ).classes("space-between", "align-children")
                  .build(),
+                when(loading$, GenericTemplates.loadingSpinner()),
                 compute(
                     list =>
                         TrackTemplates.trackList(
                             list.reverse().map(track => MusicTemplates.feedEntry(EntityType.track, track)),
                         ),
-                    tracksState,
+                    tracks$,
                 ),
                 when(empty, GenericTemplates.noTracks()),
                 TrackTemplates.paginationControls(pageState, nextDisabled),
@@ -644,20 +646,18 @@ export class TrackTemplates {
             return create("div").classes("flex-v", "track-contained-list").build();
         }
 
-        const albumCards = track.albums.map((album: Album) => {
-            return AlbumTemplates.albumCard(album, true);
-        });
-
         return create("div")
             .classes("flex-v", "track-contained-list")
             .children(
-                create("h2")
-                    .text(t("IN_ALBUMS"))
-                    .build(),
+                heading({
+                    text: t("IN_ALBUMS"),
+                    level: 2,
+                }),
                 create("div")
                     .classes("flex")
-                    .children(...albumCards)
-                    .build(),
+                    .children(
+                        ...track.albums.map(a => MusicTemplates.cardItem(EntityType.album, a, true)),
+                    ).build(),
             ).build();
     }
 

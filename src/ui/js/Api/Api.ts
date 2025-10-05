@@ -11,7 +11,6 @@ import { ListTrack } from "@targoninc/lyda-shared/src/Models/ListTrack";
 import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import { CollaboratorType } from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
 import { TrackCollaborator } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
-import { Library } from "@targoninc/lyda-shared/dist/Models/Library";
 import { RoyaltyInfo } from "@targoninc/lyda-shared/src/Models/RoyaltyInfo";
 import { get, post } from "./ApiClient.ts";
 import { Notification } from "@targoninc/lyda-shared/src/Models/db/lyda/Notification.ts";
@@ -391,10 +390,6 @@ export class Api {
         return await get(ApiRoutes.exportUser);
     }
 
-    static async getLibrary(name: string) {
-        return await get<Library>(ApiRoutes.getLibrary, { name });
-    }
-
     static async getRoyaltyInfo(): Promise<RoyaltyInfo | null> {
         return await get<RoyaltyInfo>(ApiRoutes.getRoyaltyInfo);
     }
@@ -409,13 +404,6 @@ export class Api {
     //endregion
 
     //region Albums
-    static async getAlbumsByUser(name: string, id: number | null = null) {
-        return get<Album[]>(ApiRoutes.getAlbumsByUserId, {
-            id,
-            name,
-        });
-    }
-
     static async getAlbumById(id: number) {
         return get<{ album: Album, canEdit: boolean }>(ApiRoutes.getAlbumById, { id });
     }
@@ -424,9 +412,19 @@ export class Api {
         return post(ApiRoutes.updateAlbum, album);
     }
 
-    static async getAlbumsByUserId(userId: number, offset: number = 0, filter: string = ""): Promise<Album[] | null> {
+    static async getAlbumsByUserId(userId: number, name: string = "", offset: number = 0, filter: string = ""): Promise<Album[] | null> {
         return await get<Album[]>(ApiRoutes.getAlbumsByUserId, {
             id: userId,
+            name,
+            offset,
+            filter,
+        });
+    }
+
+    static async getLikedAlbums(userId: number, name: string = "", offset: number = 0, filter: string = ""): Promise<Album[] | null> {
+        return await get<Album[]>(ApiRoutes.likedAlbumsFeed, {
+            id: userId,
+            name,
             offset,
             filter,
         });
@@ -645,9 +643,19 @@ export class Api {
         }>(ApiRoutes.getPlaylistById, { id });
     }
 
-    static async getPlaylistsByUserId(userId: number, offset: number = 0, filter: string = ""): Promise<Playlist[] | null> {
+    static async getPlaylistsByUserId(userId: number, name: string = "", offset: number = 0, filter: string = ""): Promise<Playlist[] | null> {
         return await get<Playlist[]>(ApiRoutes.getPlaylistsByUserId, {
             id: userId,
+            name,
+            offset,
+            filter,
+        });
+    }
+
+    static async getLikedPlaylists(userId: number, name: string = "", offset: number = 0, filter: string = ""): Promise<Playlist[] | null> {
+        return await get<Playlist[]>(ApiRoutes.likedPlaylistsFeed, {
+            id: userId,
+            name,
             offset,
             filter,
         });

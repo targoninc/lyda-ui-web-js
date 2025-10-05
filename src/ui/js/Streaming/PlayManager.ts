@@ -31,6 +31,7 @@ import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import { get } from "../Api/ApiClient.ts";
 import { IStreamClient } from "./IStreamClient.ts";
 import { PLAYCHECK_INTERVAL } from "../Templates/music/PlayerTemplates.ts";
+import { TrackList } from "../Models/TrackList.ts";
 
 export class PlayManager {
     static async playCheck(track: Track) {
@@ -108,12 +109,12 @@ export class PlayManager {
         return streamClients.value[id];
     }
 
-    static playFrom(type: string, name: string, id: number, entity?: Album | Playlist) {
+    static playFrom(type: string, name: string, id: number, entity?: Album | Playlist | TrackList) {
         playingFrom.value = {
             type,
             name,
             id,
-            entity
+            entity: entity as (Album | Playlist),
         };
         LydaCache.set("playingFrom", new CacheItem(playingFrom.value));
     }

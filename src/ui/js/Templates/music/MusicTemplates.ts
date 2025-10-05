@@ -28,6 +28,7 @@ import { RoutePath } from "../../Routing/routes.ts";
 import { t } from "../../../locales";
 import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 import { TrackList } from "../../Models/TrackList.ts";
+import { CardFeedType, entityTypeByCardFeedType } from "../../Enums/CardFeedType.ts";
 
 export class MusicTemplates {
     static feedEntry(type: EntityType, item: Track | Playlist | Album) {
@@ -211,6 +212,7 @@ export class MusicTemplates {
             [FeedType.autoQueue]: ApiRoutes.autoQueueFeed,
             [FeedType.profileTracks]: ApiRoutes.profileTracksFeed,
             [FeedType.profileReposts]: ApiRoutes.profileRepostsFeed,
+            [FeedType.likedTracks]: ApiRoutes.likedTracksFeed,
         };
         const pageState = signal(1);
         const tracks$ = signal<Track[]>([]);
@@ -238,7 +240,7 @@ export class MusicTemplates {
         pageState.subscribe(update);
         search.subscribe(update);
         const publicFeedTypes = [FeedType.explore, FeedType.profileTracks, FeedType.profileReposts];
-        const searchableFeedTypes = [FeedType.profileTracks, FeedType.profileReposts, FeedType.history];
+        const searchableFeedTypes = [FeedType.profileTracks, FeedType.profileReposts, FeedType.history, FeedType.likedTracks];
         const feedVisible = compute(u => u || publicFeedTypes.includes(type), currentUser);
         setTimeout(() => update());
         const nextDisabled = compute(t => t.length < pageSize, tracks$);
@@ -251,21 +253,17 @@ export class MusicTemplates {
                     .build(), true),
                 when(
                     feedVisible,
-                    vertical(
-                        when(loading$, GenericTemplates.loadingSpinner()),
-                        when(loading$, TrackTemplates.trackListWithPagination(tracks$, pageState, type, search, nextDisabled, searchableFeedTypes.includes(type)), true),
-                    ).build(),
+                    TrackTemplates.trackListWithPagination(tracks$, pageState, type, loading$, search, nextDisabled, searchableFeedTypes.includes(type)),
                 ),
             ).build();
     }
 
-    static cardFeed(type: EntityType, options: Record<string, any> = {}) {
-        const fetchFunction: Record<EntityType, Function> = {
-            [EntityType.album]: Api.getAlbumsByUserId,
-            [EntityType.playlist]: Api.getPlaylistsByUserId,
-            [EntityType.track]: () => {
-                throw new Error("Not implemented");
-            },
+    static cardFeed(type: CardFeedType, options: Record<string, any> = {}) {
+        const fetchFunction: Record<CardFeedType, Function> = {
+            [CardFeedType.profileAlbums]: Api.getAlbumsByUserId,
+            [CardFeedType.profilePlaylists]: Api.getPlaylistsByUserId,
+            [CardFeedType.likedAlbums]: Api.getLikedAlbums,
+            [CardFeedType.likedPlaylists]: Api.getLikedPlaylists,
         };
         const page$ = signal(1);
         const entities$ = signal<TrackList[]>([]);
@@ -277,7 +275,7 @@ export class MusicTemplates {
             const filter = search$.value;
             const offset = (pageNumber - 1) * pageSize;
             loading$.value = true;
-            const res = await fetchFunction[type](options.id, offset, filter);
+            const res = await fetchFunction[type](options.id, options.name, offset, filter);
             const newTracks = res ?? [];
 
             if (newTracks && newTracks.length === 0 && pageNumber > 1) {
@@ -291,20 +289,18 @@ export class MusicTemplates {
         };
         page$.subscribe(update);
         search$.subscribe(update);
-        const searchableFeedTypes = [EntityType.playlist, EntityType.album];
         setTimeout(() => update());
         const nextDisabled = compute(t => t.length < pageSize, entities$);
 
         return create("div")
-            .classes("fullHeight")
+            .classes("fullHeight", "fullWidth")
             .children(
-                when(loading$, GenericTemplates.loadingSpinner()),
-                when(loading$, MusicTemplates.cardList(entities$, page$, type, search$, nextDisabled, searchableFeedTypes.includes(type)), true),
+                MusicTemplates.cardListWithPagination(entities$, page$, type, loading$, search$, nextDisabled, true),
             ).build();
     }
 
-    static cardList(entities$: Signal<TrackList[]>, page$: Signal<number>, type: EntityType, search$: Signal<string>, nextDisabled: Signal<boolean>, hasSearch: TypeOrSignal<boolean>) {
-        const empty = compute(t => t.length === 0, entities$);
+    static cardListWithPagination(entities$: Signal<TrackList[]>, page$: Signal<number>, type: CardFeedType, loading$: Signal<boolean>, search$: Signal<string>, nextDisabled: Signal<boolean>, hasSearch: TypeOrSignal<boolean>) {
+        const empty = compute((t, l) => t.length === 0 && !l, entities$, loading$);
 
         return create("div")
             .classes("flex-v", "fullHeight")
@@ -317,16 +313,18 @@ export class MusicTemplates {
                             validators: [],
                             name: "list-filter",
                             placeholder: t("SEARCH"),
+                            debounce: 200,
                             onchange: value => search$.value = value,
                             value: search$,
                         })),
                     ).classes("align-children"),
                 ).classes("space-between")
                  .build(),
+                when(loading$, GenericTemplates.loadingSpinner()),
                 compute(
                     list =>
                         horizontal(
-                            ...list.reverse().map(list => MusicTemplates.cardItem(type, list)),
+                            ...list.reverse().map(list => MusicTemplates.cardItem(entityTypeByCardFeedType[type], list)),
                         ).build(),
                     entities$,
                 ),
@@ -351,10 +349,10 @@ export class MusicTemplates {
                 vertical(
                     MusicTemplates.cover(type, list, "card-cover"),
                     horizontal(
-                        InteractionTemplates.interactions(EntityType.album, list, {
+                        InteractionTemplates.interactions(type, list, {
                             showCount: false,
                         }),
-                        MusicTemplates.title(EntityType.album, list.title, list.id, icons),
+                        MusicTemplates.title(type, list.title, list.id, icons),
                     ).classes("align-children"),
                 ),
             ).build();

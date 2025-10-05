@@ -17,7 +17,6 @@ export class ApiRoutes {
     static userPermissions = ApiRoutes.user + "/permissions";
     static randomUser = ApiRoutes.user + "/random";
     static userExists = ApiRoutes.user + "/exists";
-    static getLibrary = ApiRoutes.user + "/library";
     static exportUser = ApiRoutes.user + "/export";
 
     private static userActions = ApiRoutes.user + "/actions";
@@ -81,13 +80,14 @@ export class ApiRoutes {
     static approveCollab = ApiRoutes.tracksActions + "/approveCollab";
     static denyCollab = ApiRoutes.tracksActions + "/denyCollab";
 
-    private static feeds = ApiRoutes.tracks + "/feeds";
-    static followingFeed = ApiRoutes.feeds + "/following";
-    static exploreFeed = ApiRoutes.feeds + "/explore";
-    static historyFeed = ApiRoutes.feeds + "/history";
-    static autoQueueFeed = ApiRoutes.feeds + "/autoQueue";
-    static profileTracksFeed = ApiRoutes.feeds + "/profileTracks";
-    static profileRepostsFeed = ApiRoutes.feeds + "/profileReposts";
+    private static trackFeed = ApiRoutes.tracks + "/feeds";
+    static followingFeed = ApiRoutes.trackFeed + "/following";
+    static exploreFeed = ApiRoutes.trackFeed + "/explore";
+    static historyFeed = ApiRoutes.trackFeed + "/history";
+    static autoQueueFeed = ApiRoutes.trackFeed + "/autoQueue";
+    static profileTracksFeed = ApiRoutes.trackFeed + "/profileTracks";
+    static profileRepostsFeed = ApiRoutes.trackFeed + "/profileReposts";
+    static likedTracksFeed = ApiRoutes.trackFeed + "/liked";
     // endregion
 
     // region Albums
@@ -102,6 +102,9 @@ export class ApiRoutes {
     static addTrackToAlbums = ApiRoutes.albumActions + "/addTrack";
     static removeTrackFromAlbums = ApiRoutes.albumActions + "/removeTrack";
     static reorderAlbumTracks = ApiRoutes.albumActions + "/reorderTracks";
+
+    private static albumFeed = ApiRoutes.albums + "/feeds";
+    static likedAlbumsFeed = ApiRoutes.albumFeed + "/liked";
     // endregion
 
     // region Playlists
@@ -116,6 +119,9 @@ export class ApiRoutes {
     static addAlbumToPlaylists = ApiRoutes.playlistActions + "/addAlbum";
     static removeTrackFromPlaylists = ApiRoutes.playlistActions + "/removeTrack";
     static reorderPlaylistTracks = ApiRoutes.playlistActions + "/reorderTracks";
+
+    private static playlistFeed = ApiRoutes.playlists + "/feeds";
+    static likedPlaylistsFeed = ApiRoutes.playlistFeed + "/liked";
     // endregion
 
     // region Comments

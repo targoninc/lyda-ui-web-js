@@ -1,5 +1,6 @@
-import {PlayManager} from "./PlayManager.ts";
-import {currentTrackId, playingElsewhere, playingHere} from "../state.ts";
+import { PlayManager } from "./PlayManager.ts";
+import { currentTrackId, playingElsewhere, playingHere } from "../state.ts";
+import { getId } from "../Classes/Helpers/IDs.ts";
 
 export enum StreamingEvent {
     trackStart = "track-start",
@@ -9,9 +10,6 @@ export enum StreamingEvent {
 
 export const broadCastChannel = new BroadcastChannel("lyda-streaming");
 
-function getId() {
-    return Math.random().toString(36).substring(7);
-}
 let lastSentId: string;
 
 export class StreamingBroadcaster {

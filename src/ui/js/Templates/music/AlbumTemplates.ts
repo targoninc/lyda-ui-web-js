@@ -252,29 +252,6 @@ export class AlbumTemplates {
             ).build();
     }
 
-    static noAlbumsYet(isOwnProfile: boolean) {
-        let children;
-        if (isOwnProfile) {
-            children = [
-                create("p")
-                    .text(t("SHARE_AN_ALBUM_YOU_MADE"))
-                    .build(),
-                GenericTemplates.newAlbumButton(["secondary"]),
-            ];
-        } else {
-            children = [
-                create("p")
-                    .text(t("NO_ALBUMS_FOUND"))
-                    .build(),
-            ];
-        }
-
-        return create("div")
-            .classes("card", "flex-v")
-            .children(...children)
-            .build();
-    }
-
     static albumCard(album: Album, isSecondary = false) {
         if (!album.user) {
             throw new Error(`Album has no user: ${album.id}`);
@@ -318,13 +295,6 @@ export class AlbumTemplates {
             .styles("height", "var(--font-size-large)")
             .src(coverState)
             .alt(album.title).build();
-    }
-
-    static albumCardsContainer(children: AnyNode[]) {
-        return create("div")
-            .classes("albums", "flex")
-            .children(...children)
-            .build();
     }
 
     private static albumPageDisplay(album: Album, canEdit: boolean) {

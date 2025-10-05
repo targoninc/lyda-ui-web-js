@@ -7,8 +7,9 @@ import { QueueManager } from "../Streaming/QueueManager.ts";
 import { notify } from "../Classes/Ui.ts";
 import { NotificationType } from "../Enums/NotificationType.ts";
 import { contextQueue } from "../state.ts";
+import { TrackList } from "../Models/TrackList.ts";
 
-export async function startItem(type: EntityType, item: Track | Album | Playlist, options: {
+export async function startItem(type: EntityType, item: Track | Album | Playlist | TrackList, options: {
     startCallback?: Function | null,
     trackId?: number
 } = {}) {

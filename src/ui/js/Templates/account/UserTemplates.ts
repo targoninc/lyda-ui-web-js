@@ -1,12 +1,9 @@
 import { getAvatar, target, Util } from "../../Classes/Util.ts";
 import { TrackActions } from "../../Actions/TrackActions.ts";
-import { TrackTemplates } from "../music/TrackTemplates.ts";
 import { UserActions } from "../../Actions/UserActions.ts";
 import { GenericTemplates, horizontal, tabSelected, vertical } from "../generic/GenericTemplates.ts";
-import { AlbumTemplates } from "../music/AlbumTemplates.ts";
 import { Icons as Icons } from "../../Enums/Icons.ts";
 import { Links } from "../../Enums/Links.ts";
-import { PlaylistTemplates } from "../music/PlaylistTemplates.ts";
 import { CustomText, truncateText } from "../../Classes/Helpers/CustomText.ts";
 import { Images } from "../../Enums/Images.ts";
 import { navigate, Route } from "../../Routing/Router.ts";
@@ -16,7 +13,6 @@ import {
     create,
     DomNode,
     HtmlPropertyValue,
-    InputType,
     nullElement,
     Signal,
     signal,
@@ -29,16 +25,13 @@ import { notify, Ui } from "../../Classes/Ui.ts";
 import { MediaActions } from "../../Actions/MediaActions.ts";
 import { RoutePath } from "../../Routing/routes.ts";
 import { MusicTemplates } from "../music/MusicTemplates.ts";
-import { button, icon, input } from "@targoninc/jess-components";
+import { button, icon } from "@targoninc/jess-components";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
-import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType";
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import { Permissions } from "@targoninc/lyda-shared/src/Enums/Permissions";
 import { Badge } from "@targoninc/lyda-shared/src/Models/db/lyda/Badge";
-import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
-import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import { NotificationType } from "../../Enums/NotificationType.ts";
 import { Api } from "../../Api/Api.ts";
 import { TrackCollaborator } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
@@ -46,6 +39,7 @@ import { TrackEditTemplates } from "../music/TrackEditTemplates.ts";
 import { CollaboratorType } from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType.ts";
 import { t } from "../../../locales";
 import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
+import { CardFeedType } from "../../Enums/CardFeedType.ts";
 
 export class UserTemplates {
     static userWidget(
@@ -368,10 +362,9 @@ export class UserTemplates {
                         UserTemplates.userActionsContainer(isOwnProfile),
                         compute(u => (u ? UserTemplates.profileHeader(u, isOwnProfile) : nullElement()), user),
                         compute((u, i) => (u ? UserTemplates.profileInfo(u, i) : nullElement()), user, isOwnProfile),
-                        compute((u, i) => (u ? UserTemplates.profileTabs(u, i) : nullElement()), user, isOwnProfile),
-                    )
-                        .classes("noflexwrap")
-                        .build(),
+                        compute((u) => (u ? UserTemplates.profileTabs(u) : nullElement()), user),
+                    ).classes("noflexwrap")
+                     .build(),
                     true,
                 ),
                 when(notFound, vertical(
@@ -400,7 +393,7 @@ export class UserTemplates {
         ).build();
     }
 
-    static profileTabs(user: User, isOwnProfile: boolean) {
+    static profileTabs(user: User) {
         const tabs = [`${t("TRACKS")}`, `${t("ALBUMS")}`, `${t("PLAYLISTS")}`, `${t("REPOSTS")}`, `${t("LISTENING_HISTORY")}`];
         const urlTabs = tabs.map(t => t.toLowerCase().replace(/\s/g, "-"));
 
@@ -425,13 +418,13 @@ export class UserTemplates {
             ),
             when(
                 tabSelected(currentIndex, 1),
-                MusicTemplates.cardFeed(EntityType.album, {
+                MusicTemplates.cardFeed(CardFeedType.profileAlbums, {
                     id: user.id,
                 }),
             ),
             when(
                 tabSelected(currentIndex, 2),
-                MusicTemplates.cardFeed(EntityType.playlist, {
+                MusicTemplates.cardFeed(CardFeedType.profilePlaylists, {
                     id: user.id,
                 }),
             ),
@@ -739,47 +732,13 @@ export class UserTemplates {
             .classes("icon", "badge", "svg", ...addClasses).build();
     }
 
-    static listCards(type: EntityType, list: (Album | Playlist)[], isOwnProfile: boolean) {
-        if (list.length === 0) {
-            return AlbumTemplates.noAlbumsYet(isOwnProfile);
-        }
-
-        const search = signal("");
-        const filteredAlbums = compute(s => {
-            const ls = s.toLowerCase();
-            return list.filter(a => a.title.toLowerCase().includes(ls)
-                || a.user?.displayname?.toLowerCase().includes(ls)
-                || a.user?.username?.toLowerCase().includes(ls),
-            );
-        }, search);
-
-        return vertical(
-            input({
-                type: InputType.text,
-                validators: [],
-                name: "albums-filter",
-                placeholder: t("SEARCH"),
-                onchange: value => search.value = value,
-                value: search,
-            }),
-            compute(a => {
-                if (type === EntityType.playlist) {
-                    return PlaylistTemplates.playlistCardsContainer((a as Playlist[]).map((entity) => PlaylistTemplates.playlistCard(entity)));
-                } else if (type === EntityType.album) {
-                    return AlbumTemplates.albumCardsContainer((a as Album[]).map((entity) => AlbumTemplates.albumCard(entity)));
-                }
-                return vertical();
-            }, filteredAlbums),
-        ).build();
-    }
-
-    static libraryPage(albums: Album[], playlists: Playlist[], tracks: Track[]) {
-        const tracksContainer = UserTemplates.libraryTracks(tracks);
-        const albumsContainer = UserTemplates.listCards(EntityType.album, albums, false);
-        const playlistsContainer = UserTemplates.listCards(EntityType.playlist, playlists, false);
-
+    static libraryPage(name: string) {
         const tabs = [`${t("TRACKS")}`, `${t("ALBUMS")}`, `${t("PLAYLISTS")}`];
-        const tabContents = [tracksContainer, albumsContainer, playlistsContainer];
+        const tabContents = [
+            MusicTemplates.feed(FeedType.likedTracks, { name }),
+            MusicTemplates.cardFeed(CardFeedType.likedAlbums, { name }),
+            MusicTemplates.cardFeed(CardFeedType.likedPlaylists, { name }),
+        ];
         const tabSelector = GenericTemplates.combinedSelector(
             tabs,
             (i: number) => {
@@ -790,30 +749,11 @@ export class UserTemplates {
             0,
         );
 
-        return create("div")
-            .classes("flex-v")
-            .children(
+        return vertical(
                 GenericTemplates.title(t("YOUR_LIKED_MUSIC")),
                 tabSelector,
-                tracksContainer,
-                albumsContainer,
-                playlistsContainer,
+            ...tabContents,
             ).build();
-    }
-
-    static libraryTracks(tracks: Track[]) {
-        let children;
-        if (tracks.length === 0) {
-            children = [
-                create("span")
-                    .text(t("LIKE_TRACKS_TO_SEE"))
-                    .build(),
-            ];
-        } else {
-            children = tracks.map((track: Track) => MusicTemplates.feedEntry(EntityType.track, track));
-        }
-
-        return TrackTemplates.trackList(children);
     }
 
     static username(user: User, isOwnProfile: boolean) {
@@ -900,17 +840,6 @@ export class UserTemplates {
                 });
             },
         });
-    }
-
-    static notPublicLibrary(name: string) {
-        return create("div")
-            .classes("card", "rounded", "padded", "flex-v")
-            .children(
-                create("span")
-                    .classes("text")
-                    .text(t("LIBRARY_NOT_PUBLIC", name))
-                    .build(),
-            ).build();
     }
 
     private static userPreview(user: User, context: UserWidgetContext) {

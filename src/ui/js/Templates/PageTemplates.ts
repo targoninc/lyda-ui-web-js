@@ -103,13 +103,7 @@ export class PageTemplates {
         }
 
         document.title = `${t("LIBRARY")} - ${name}`;
-        const library = await Api.getLibrary(name);
-
-        if (!library) {
-            return UserTemplates.notPublicLibrary(name);
-        }
-
-        return UserTemplates.libraryPage(library.albums, library.playlists, library.tracks);
+        return UserTemplates.libraryPage(name);
     }
 
     static async playlistPage(route: Route, params: Record<string, string>) {
