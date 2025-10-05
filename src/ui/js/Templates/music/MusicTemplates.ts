@@ -303,7 +303,7 @@ export class MusicTemplates {
         const empty = compute((t, l) => t.length === 0 && !l, entities$, loading$);
 
         return create("div")
-            .classes("flex-v", "fullHeight", "fullWidth")
+            .classes("flex-v", "fullWidth")
             .children(
                 horizontal(
                     horizontal(
