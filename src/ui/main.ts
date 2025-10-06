@@ -5,7 +5,7 @@ import { LydaCache } from "./js/Cache/LydaCache.ts";
 import { PlayManager } from "./js/Streaming/PlayManager.ts";
 import { UiActions } from "./js/Actions/UiActions.ts";
 import { Ui } from "./js/Classes/Ui.ts";
-import { Util } from "./js/Classes/Util.ts";
+import { getUserSettingValue, Util } from "./js/Classes/Util.ts";
 import { RoutePath, routes } from "./js/Routing/routes.js";
 import { GenericTemplates } from "./js/Templates/generic/GenericTemplates.ts";
 import {
@@ -24,6 +24,7 @@ import { TrackPosition } from "@targoninc/lyda-shared/src/Models/TrackPosition";
 import { QueueManager } from "./js/Streaming/QueueManager.ts";
 import { initializeMediaSessionCallbacks } from "./js/Classes/Helpers/MediaSession.ts";
 import { Api } from "./js/Api/Api.ts";
+import { language } from "./locales";
 
 const pageContainer = document.querySelector(".page-container");
 if (!pageContainer) {
@@ -84,6 +85,8 @@ if (currentUser.value) {
     if (tmpHistory) {
         history.value = tmpHistory;
     }
+
+    language.value = getUserSettingValue(currentUser.value, "language");
 }
 
 KeyBinds.initiate();
