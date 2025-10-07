@@ -13,6 +13,7 @@ import { PlayManager } from "./Streaming/PlayManager.ts";
 import { IStreamClient } from "./Streaming/IStreamClient.ts";
 import { Language, language } from "../locales";
 import { getUserSettingValue } from "./Classes/Util.ts";
+import { Api } from "./Api/Api.ts";
 
 export const navInitialized = signal(false);
 
@@ -36,6 +37,7 @@ volume.subscribe((newValue, changed) => {
         return;
     }
     LydaCache.set("volume", new CacheItem(newValue));
+    Api.updateUserSetting("volume", newValue.toString()).then();
 });
 
 export const muted = signal<boolean>(false);
@@ -109,6 +111,7 @@ export const currentUser = signal<User|null>(null);
 currentUser.subscribe(u => {
     if (u) {
         language.value = getUserSettingValue<Language>(u, "language");
+        volume.value = parseFloat(getUserSettingValue<string>(u, "volume") ?? "0.25");
     }
 });
 
