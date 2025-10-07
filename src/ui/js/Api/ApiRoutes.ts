@@ -13,7 +13,6 @@ export class ApiRoutes {
 
     private static user = ApiRoutes.base + "/user";
     static getUser = ApiRoutes.user + "/get";
-    static userSettings = ApiRoutes.user + "/settings";
     static userPermissions = ApiRoutes.user + "/permissions";
     static randomUser = ApiRoutes.user + "/random";
     static userExists = ApiRoutes.user + "/exists";
@@ -36,6 +35,7 @@ export class ApiRoutes {
     static deleteUser = ApiRoutes.userActions + "/delete";
     static sendActivationEmail = ApiRoutes.userActions + "/send-activation-email";
     static setUserPermission = ApiRoutes.userActions + "/set-permission";
+    static trackClientError = ApiRoutes.userActions + "/track-client-error";
 
     static toggleInteraction = ApiRoutes.base + "/toggleInteraction";
     // endregion

@@ -17,7 +17,7 @@ import { Api } from "../../Api/Api.ts";
 import { currentUser } from "../../state.ts";
 import { navigate } from "../../Routing/Router.ts";
 import { RoutePath } from "../../Routing/routes.ts";
-import { MfaOption } from "@targoninc/lyda-shared/dist/Enums/MfaOption";
+import { MfaOption } from "@targoninc/lyda-shared/src/Enums/MfaOption";
 import { button, error, errorList, heading, input } from "@targoninc/jess-components";
 import { sendMfaRequest } from "../../Classes/Helpers/Mfa.ts";
 import { FormTemplates } from "../generic/FormTemplates.ts";

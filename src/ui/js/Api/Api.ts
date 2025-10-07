@@ -37,6 +37,7 @@ import { RoyaltyMonth } from "@targoninc/lyda-shared/src/Models/RoyaltyMonth";
 import { ActionLog } from "@targoninc/lyda-shared/dist/Models/db/lyda/ActionLog";
 import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import { ModerationFilter } from "../Models/ModerationFilter.ts";
+import { ClientError } from "@targoninc/lyda-shared/dist/Models/db/lyda/ClientError";
 
 export class Api {
     //region Interactions
@@ -756,4 +757,7 @@ export class Api {
     }
 
     //endregion
+    static async trackClientError(error: ClientError) {
+        await post(ApiRoutes.trackClientError, error);
+    }
 }

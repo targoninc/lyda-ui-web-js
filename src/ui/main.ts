@@ -24,6 +24,9 @@ import { TrackPosition } from "@targoninc/lyda-shared/src/Models/TrackPosition";
 import { QueueManager } from "./js/Streaming/QueueManager.ts";
 import { initializeMediaSessionCallbacks } from "./js/Classes/Helpers/MediaSession.ts";
 import { Api } from "./js/Api/Api.ts";
+import { initializeGlobalErrorHandler } from "./js/Classes/Helpers/ErrorHandler.ts";
+
+initializeGlobalErrorHandler();
 
 const pageContainer = document.querySelector(".page-container");
 if (!pageContainer) {
