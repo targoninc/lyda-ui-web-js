@@ -115,7 +115,9 @@ loopMode.subscribe((newMode, changed) => {
         return;
     }
     LydaCache.set(UserSettings.loopMode, new CacheItem(newMode));
-    Api.updateUserSetting(UserSettings.loopMode, newMode).then();
+    if (newMode) {
+        Api.updateUserSetting(UserSettings.loopMode, newMode).then();
+    }
 });
 
 export const currentUser = signal<User|null>(null);
