@@ -31,12 +31,12 @@
         "@sgratzl/chartjs-chart-boxplot": "^4.4.4",
         "@targoninc/jess": "^0.0.20",
         "@targoninc/jess-components": "^0.0.33",
-        "@targoninc/lyda-shared": "^0.0.31",
+        "@targoninc/lyda-shared": "^0.0.35",
         "@types/bun": "^1.2.23",
         "chart.js": "^4.5.0",
         "dotenv": "^17.2.2",
         "express": "^5.1.0",
         "typescript": "^5.9.2"
     },
-    "version": "0.0.430"
+    "version": "0.0.431"
 }

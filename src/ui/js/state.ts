@@ -14,6 +14,7 @@ import { IStreamClient } from "./Streaming/IStreamClient.ts";
 import { Language, language } from "../locales";
 import { getUserSettingValue } from "./Classes/Util.ts";
 import { Api } from "./Api/Api.ts";
+import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
 
 export const navInitialized = signal(false);
 
@@ -31,13 +32,13 @@ export const currentQuality = signal("h");
 
 export const trackInfo = signal<Record<number, { track: Track }>>({});
 
-export const volume = signal(LydaCache.get<number>("volume").content ?? 0.25);
+export const volume = signal(LydaCache.get<number>(UserSettings.volume).content ?? 0.25);
 volume.subscribe((newValue, changed) => {
     if (!changed) {
         return;
     }
-    LydaCache.set("volume", new CacheItem(newValue));
-    Api.updateUserSetting("volume", newValue.toString()).then();
+    LydaCache.set(UserSettings.volume, new CacheItem(newValue));
+    Api.updateUserSetting(UserSettings.volume, newValue.toString()).then();
 });
 
 export const muted = signal<boolean>(false);
@@ -107,21 +108,23 @@ playingHere.subscribe((p, changed) => {
 
 export const openMenus = signal<string[]>([]);
 
-export const currentUser = signal<User|null>(null);
-currentUser.subscribe(u => {
-    if (u) {
-        language.value = getUserSettingValue<Language>(u, "language");
-        volume.value = parseFloat(getUserSettingValue<string>(u, "volume") ?? "0.25");
-    }
-});
-
 export const loopMode = signal<LoopMode>(LoopMode.off);
-loopMode.value = LydaCache.get<LoopMode>("loopMode").content ?? LoopMode.off;
+loopMode.value = LydaCache.get<LoopMode>(UserSettings.loopMode).content ?? LoopMode.off;
 loopMode.subscribe((newMode, changed) => {
     if (!changed) {
         return;
     }
-    LydaCache.set("loopMode", new CacheItem(newMode));
+    LydaCache.set(UserSettings.loopMode, new CacheItem(newMode));
+    Api.updateUserSetting(UserSettings.loopMode, newMode).then();
+});
+
+export const currentUser = signal<User|null>(null);
+currentUser.subscribe(u => {
+    if (u) {
+        language.value = getUserSettingValue<Language>(u, UserSettings.language);
+        volume.value = parseFloat(getUserSettingValue<string>(u, UserSettings.volume) ?? "0.25");
+        loopMode.value = getUserSettingValue<LoopMode>(u, UserSettings.loopMode);
+    }
 });
 
 export const currentSecretCode = signal<string>("");
