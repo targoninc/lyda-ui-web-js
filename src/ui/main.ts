@@ -2,29 +2,20 @@ import { navigate, Route, Router } from "./js/Routing/Router.ts";
 import { PageTemplates } from "./js/Templates/PageTemplates.ts";
 import { KeyBinds } from "./js/Classes/KeyBindHandler.ts";
 import { LydaCache } from "./js/Cache/LydaCache.ts";
-import { PlayManager } from "./js/Streaming/PlayManager.ts";
 import { UiActions } from "./js/Actions/UiActions.ts";
 import { Ui } from "./js/Classes/Ui.ts";
 import { Util } from "./js/Classes/Util.ts";
 import { RoutePath, routes } from "./js/Routing/routes.js";
 import { GenericTemplates } from "./js/Templates/generic/GenericTemplates.ts";
-import {
-    contextQueue,
-    currentTrackId,
-    currentTrackPosition,
-    currentUser,
-    history,
-    permissions,
-    playingFrom,
-} from "./js/state.ts";
+import { contextQueue, currentUser, history, permissions, playingFrom } from "./js/state.ts";
 import { StreamingBroadcaster } from "./js/Streaming/StreamingBroadcaster.ts";
 import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom";
 import { ListeningHistory } from "@targoninc/lyda-shared/dist/Models/db/lyda/ListeningHistory";
-import { TrackPosition } from "@targoninc/lyda-shared/src/Models/TrackPosition";
 import { QueueManager } from "./js/Streaming/QueueManager.ts";
 import { initializeMediaSessionCallbacks } from "./js/Classes/Helpers/MediaSession.ts";
 import { Api } from "./js/Api/Api.ts";
 import { initializeGlobalErrorHandler } from "./js/Classes/Helpers/ErrorHandler.ts";
+import { PlayerTemplates } from "./js/Templates/music/PlayerTemplates.ts";
 
 initializeGlobalErrorHandler();
 
@@ -34,6 +25,14 @@ if (!pageContainer) {
 }
 pageContainer.appendChild(GenericTemplates.loadingSpinner());
 currentUser.value = await Util.getUserAsync(null, false);
+
+const footer = document.querySelector("footer");
+if (!footer) {
+    throw new Error("No footer found");
+}
+footer.innerHTML = "";
+const player = await PlayerTemplates.player();
+footer.appendChild(player);
 
 export const router = new Router(routes, async (route: Route, params: any) => {
     const page = route.path.replace("/", "") as RoutePath;
@@ -64,18 +63,6 @@ export const router = new Router(routes, async (route: Route, params: any) => {
 if (currentUser.value) {
     Api.getPermissions().then(res => permissions.value = res ?? []);
     QueueManager.fillAutoQueue().then();
-
-    const currentTrackPositionTmp = LydaCache.get<TrackPosition>("currentTrackPosition").content;
-    if (currentTrackPositionTmp) {
-        currentTrackPosition.value = currentTrackPositionTmp;
-    }
-
-    const currentTrackIdTmp = LydaCache.get<number>("currentTrackId").content;
-    if (currentTrackIdTmp) {
-        currentTrackId.value = currentTrackIdTmp;
-        await PlayManager.initializeTrackAsync(currentTrackIdTmp);
-        await PlayManager.stopAllAsync();
-    }
 
     const playingFromTmp = LydaCache.get<PlayingFrom|null>("playingFrom").content;
     if (playingFromTmp) {

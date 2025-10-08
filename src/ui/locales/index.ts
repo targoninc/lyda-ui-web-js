@@ -6,6 +6,7 @@ import { LydaCache } from "../js/Cache/LydaCache.ts";
 import { CacheItem } from "../js/Cache/CacheItem.ts";
 import { Api } from "../js/Api/Api.ts";
 import { ga } from "./ga.ts";
+import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
 
 export type TranslationFunction = (...args: any[]) => void;
 export type TranslationValue = string | TranslationFunction;
@@ -49,8 +50,8 @@ language.subscribe((lang, changed) => {
     if (!changed) {
         return;
     }
-    LydaCache.set("language", new CacheItem(lang));
-    Api.updateUserSetting("language", lang).then();
+    LydaCache.set(UserSettings.language, new CacheItem(lang));
+    Api.updateUserSetting(UserSettings.language, lang).then();
 });
 
 export function getTranslation(lookup: TranslationKey | string, lang: Language) {

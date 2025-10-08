@@ -15,30 +15,33 @@ import { Language, language } from "../locales";
 import { getUserSettingValue } from "./Classes/Util.ts";
 import { Api } from "./Api/Api.ts";
 import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
+import { UserCacheKey } from "@targoninc/lyda-shared/src/Enums/UserCacheKey";
+import { StreamingQuality } from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
 
 export const navInitialized = signal(false);
 
 export const streamClients = signal<Record<number, IStreamClient>>({});
 
-export const currentTrackId = signal(LydaCache.get<number>("currentTrackId").content ?? 0);
+export const currentTrackId = signal(LydaCache.get<number>(UserCacheKey.lastTrackId).content ?? 0);
 currentTrackId.subscribe((id, changed) => {
     if (!changed) {
         return;
     }
-    LydaCache.set("currentTrackId", new CacheItem(id));
+    LydaCache.set(UserCacheKey.lastTrackId, new CacheItem(id));
+    Api.setCacheKey(UserCacheKey.lastTrackId, id.toString()).then();
 });
 
-export const currentQuality = signal("h");
+export const currentQuality = signal(StreamingQuality.high);
 
 export const trackInfo = signal<Record<number, { track: Track }>>({});
 
-export const volume = signal(LydaCache.get<number>(UserSettings.volume).content ?? 0.25);
+export const volume = signal(LydaCache.get<number>(UserCacheKey.volume).content ?? 0.25);
 volume.subscribe((newValue, changed) => {
     if (!changed) {
         return;
     }
-    LydaCache.set(UserSettings.volume, new CacheItem(newValue));
-    Api.updateUserSetting(UserSettings.volume, newValue.toString()).then();
+    LydaCache.set(UserCacheKey.volume, new CacheItem(newValue));
+    Api.setCacheKey(UserCacheKey.volume, newValue.toString()).then();
 });
 
 export const muted = signal<boolean>(false);
@@ -78,7 +81,7 @@ currentTrackPosition.subscribe((p, changed) => {
     if (!changed) {
         return;
     }
-    LydaCache.set("currentTrackPosition", new CacheItem(p));
+    LydaCache.set(UserCacheKey.lastTrackPosition, new CacheItem(p));
 
     if (currentTrackId.value) {
         PlayManager.getTrackData(currentTrackId.value).then(d => {
@@ -109,23 +112,57 @@ playingHere.subscribe((p, changed) => {
 export const openMenus = signal<string[]>([]);
 
 export const loopMode = signal<LoopMode>(LoopMode.off);
-loopMode.value = LydaCache.get<LoopMode>(UserSettings.loopMode).content ?? LoopMode.off;
+loopMode.value = LydaCache.get<LoopMode>(UserCacheKey.loopMode).content ?? LoopMode.off;
 loopMode.subscribe((newMode, changed) => {
     if (!changed) {
         return;
     }
-    LydaCache.set(UserSettings.loopMode, new CacheItem(newMode));
+    LydaCache.set(UserCacheKey.loopMode, new CacheItem(newMode));
     if (newMode) {
-        Api.updateUserSetting(UserSettings.loopMode, newMode).then();
+        Api.setCacheKey(UserCacheKey.loopMode, newMode).then();
     }
 });
 
 export const currentUser = signal<User|null>(null);
+let cacheFetched = false;
 currentUser.subscribe(u => {
     if (u) {
-        language.value = getUserSettingValue<Language>(u, UserSettings.language);
-        volume.value = parseFloat(getUserSettingValue<string>(u, UserSettings.volume) ?? "0.25");
-        loopMode.value = getUserSettingValue<LoopMode>(u, UserSettings.loopMode);
+        language.value = getUserSettingValue<Language>(u, UserSettings.language) ?? language.value;
+
+        if (!cacheFetched) {
+            cacheFetched = true;
+            Api.getUserCache().then(cache => {
+                if (!cache) {
+                    return;
+                }
+
+                for (const entry of cache) {
+                    switch (entry.key as UserCacheKey) {
+                        case UserCacheKey.volume:
+                            //volume.value = parseFloat(entry.value ?? volume.value.toString());
+                            break;
+                        case UserCacheKey.loopMode:
+                            loopMode.value = entry.value ?? loopMode.value;
+                            break;
+                        case UserCacheKey.lastTrackId:
+                            currentTrackId.value = Number(entry.value ?? "0");
+
+                            if (currentTrackId.value !== 0) {
+                                PlayManager.initializeTrackAsync(currentTrackId.value).then(async () => {
+                                    await PlayManager.stopAllAsync();
+                                });
+                            }
+                            break;
+                        case UserCacheKey.lastTrackPosition:
+                            currentTrackPosition.value = JSON.parse(entry.value ?? JSON.stringify(currentTrackPosition.value));
+                            break;
+                        case UserCacheKey.playingFrom:
+                            playingFrom.value = JSON.parse(entry.value ?? JSON.stringify(playingFrom.value));
+                            break;
+                    }
+                }
+            });
+        }
     }
 });
 

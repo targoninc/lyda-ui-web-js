@@ -7,7 +7,7 @@ import { UserTemplates } from "../account/UserTemplates.ts";
 import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
 import { Ui } from "../../Classes/Ui.ts";
 import { getPlayIcon, Util } from "../../Classes/Util.ts";
-import { compute, create, Signal, signal, when } from "@targoninc/jess";
+import { compute, computeAsync, create, nullElement, Signal, signal, when } from "@targoninc/jess";
 import { navigate } from "../../Routing/Router.ts";
 import {
     currentlyBuffered,
@@ -21,6 +21,7 @@ import {
     playingElsewhere,
     playingFrom,
     playingHere,
+    trackInfo,
     volume,
 } from "../../state.ts";
 import { RoutePath } from "../../Routing/routes.ts";
@@ -40,7 +41,7 @@ import { t } from "../../../locales";
 export const PLAYCHECK_INTERVAL = 200;
 
 export class PlayerTemplates {
-    static async bigAudioPlayer(track: Track) {
+    static bigAudioPlayer(track: Track) {
         PlayManager.addStreamClientIfNotExists(track.id, track.length);
         setInterval(async () => await PlayManager.playCheck(track), PLAYCHECK_INTERVAL);
         const isCurrentTrack = compute(id => id === track.id, currentTrackId);
@@ -84,7 +85,7 @@ export class PlayerTemplates {
                             .classes("flex", "align-center", "hideOnMidBreakpoint")
                             .children(InteractionTemplates.interactions(EntityType.track, track))
                             .build(),
-                        await PlayerTemplates.moreMenu(track),
+                        PlayerTemplates.moreMenu(track),
                     ).build(),
                 create("div")
                     .classes(
@@ -107,7 +108,7 @@ export class PlayerTemplates {
             ).build();
     }
 
-    static async mobileAudioPlayer(track: Track) {
+    static mobileAudioPlayer(track: Track) {
         PlayManager.addStreamClientIfNotExists(track.id, track.length);
         setInterval(async () => await PlayManager.playCheck(track), PLAYCHECK_INTERVAL);
         const isCurrentTrack = compute(id => id === track.id, currentTrackId);
@@ -287,7 +288,23 @@ export class PlayerTemplates {
             ).build();
     }
 
-    static async player(track: Track, trackUser: User) {
+    static async player() {
+        const currentTrack = await computeAsync(async id => {
+            let t = trackInfo.value[id] as { track: Track } | null;
+            if (!t) {
+                t = await PlayManager.getTrackData(currentTrackId.value);
+            }
+
+            return t;
+        }, currentTrackId);
+
+        return create("div")
+            .children(
+                compute(t => t ? this.#player(t.track, t.track.user!) : nullElement(), currentTrack),
+            ).build();
+    }
+
+    static #player(track: Track, trackUser: User) {
         const cover = signal(Images.DEFAULT_COVER_TRACK);
         if (track.has_cover) {
             cover.value = Util.getTrackCover(track.id);
@@ -317,24 +334,23 @@ export class PlayerTemplates {
                                 }
                             }),
                         ).classes("hideOnSmallBreakpoint"),
-                        when(playerExpanded, await PlayerTemplates.smallPlayerLayout(track), true),
-                        await PlayerTemplates.bigPlayerLayout(track, trackUser),
-                    )
-                        .classes("fullWidth")
-                        .build(),
+                        when(playerExpanded, PlayerTemplates.smallPlayerLayout(track), true),
+                        PlayerTemplates.bigPlayerLayout(track, trackUser),
+                    ).classes("fullWidth")
+                     .build(),
                     true,
                 ),
                 QueueTemplates.queuePopout(),
-                await PlayerTemplates.playerPopout(track),
+                PlayerTemplates.playerPopout(track),
             ).build();
     }
 
-    private static async bigPlayerLayout(track: Track, trackUser: User) {
+    private static bigPlayerLayout(track: Track, trackUser: User) {
         return create("div")
             .classes("flex", "flex-grow", "hideOnSmallBreakpoint")
             .children(
-                await PlayerTemplates.trackInfo(track, trackUser),
-                await PlayerTemplates.bigAudioPlayer(track),
+                PlayerTemplates.trackInfo(track, trackUser),
+                PlayerTemplates.bigAudioPlayer(track),
                 create("div")
                     .classes("flex", "hideOnMidBreakpoint")
                     .children(PlayerTemplates.loudnessControl(track), QueueTemplates.queueButton())
@@ -342,7 +358,7 @@ export class PlayerTemplates {
             ).build();
     }
 
-    private static async smallPlayerLayout(track: Track) {
+    private static smallPlayerLayout(track: Track) {
         const isCurrentTrack = compute(id => id === track.id, currentTrackId);
         const positionPercent = compute(
             (p, isCurrent) => (isCurrent ? `${p.relative * 100}%` : "0%"),
@@ -447,7 +463,7 @@ export class PlayerTemplates {
         return track.visibility === "private" ? [GenericTemplates.lock()] : [];
     }
 
-    static async trackInfo(track: Track, trackUser: User) {
+    static trackInfo(track: Track, trackUser: User) {
         return vertical(
             MusicTemplates.title(EntityType.track, track.title, track.id, PlayerTemplates.trackIcons(track)),
             UserTemplates.userLink(UserWidgetContext.player, trackUser),
@@ -456,7 +472,7 @@ export class PlayerTemplates {
             .classes("align-center", "no-gap").build();
     }
 
-    private static async moreMenu(track: Track) {
+    private static moreMenu(track: Track) {
         const menuShown = signal(false);
         const activeClass = compute((m: boolean): string => (m ? "active" : "_"), menuShown);
 
@@ -506,7 +522,7 @@ export class PlayerTemplates {
         );
     }
 
-    private static async playerPopout(track: Track) {
+    private static playerPopout(track: Track) {
         const vClass = compute((v): string => (v ? "visible" : "hide"), playerExpanded);
         const trackUser = track.user!;
         const cover = signal(Images.DEFAULT_COVER_TRACK);
@@ -515,7 +531,7 @@ export class PlayerTemplates {
         }
         const tabs: any[] = [`${t("PLAYER")}`, `${t("QUEUE")}`];
         const tabContents = [
-            await PlayerTemplates.mobilePlayerTab(track, cover, trackUser),
+            PlayerTemplates.mobilePlayerTab(track, cover, trackUser),
             QueueTemplates.fullQueueList(),
         ];
 
@@ -540,7 +556,7 @@ export class PlayerTemplates {
             ).build();
     }
 
-    private static async mobilePlayerTab(track: Track, cover: Signal<string>, trackUser: User) {
+    private static mobilePlayerTab(track: Track, cover: Signal<string>, trackUser: User) {
         return vertical(
             vertical(
                 horizontal(
@@ -553,10 +569,10 @@ export class PlayerTemplates {
                         }
                     }),
                 ).classes("align-center"),
-                horizontal(await PlayerTemplates.trackInfo(track, trackUser)),
+                horizontal(PlayerTemplates.trackInfo(track, trackUser)),
             ),
             vertical(
-                await PlayerTemplates.mobileAudioPlayer(track),
+                PlayerTemplates.mobileAudioPlayer(track),
                 create("div")
                     .classes("flex", "hideOnMidBreakpoint")
                     .children(

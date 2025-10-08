@@ -38,6 +38,7 @@ import { ActionLog } from "@targoninc/lyda-shared/dist/Models/db/lyda/ActionLog"
 import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import { ModerationFilter } from "../Models/ModerationFilter.ts";
 import { ClientError } from "@targoninc/lyda-shared/dist/Models/db/lyda/ClientError";
+import { KeyValue } from "@targoninc/lyda-shared/dist/Models/KeyValue";
 
 export class Api {
     //region Interactions
@@ -402,6 +403,18 @@ export class Api {
         });
     }
 
+    static async trackClientError(error: ClientError) {
+        await post(ApiRoutes.trackClientError, error);
+    }
+
+    static async getUserCache(): Promise<KeyValue[] | null> {
+        return await get<KeyValue[]>(ApiRoutes.getUserCache);
+    }
+
+    static async setCacheKey(key: string, value: string) {
+        await post(ApiRoutes.updateCacheKey, { key, value });
+    }
+
     //endregion
 
     //region Albums
@@ -757,7 +770,4 @@ export class Api {
     }
 
     //endregion
-    static async trackClientError(error: ClientError) {
-        await post(ApiRoutes.trackClientError, error);
-    }
 }
