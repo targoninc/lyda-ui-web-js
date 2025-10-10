@@ -290,9 +290,13 @@ export class PlayerTemplates {
 
     static async player() {
         const currentTrack = await computeAsync(async id => {
+            if (!id) {
+                return null;
+            }
+
             let t = trackInfo.value[id] as { track: Track } | null;
             if (!t) {
-                t = await PlayManager.getTrackData(currentTrackId.value);
+                t = await PlayManager.getTrackData(id);
             }
 
             return t;
