@@ -419,8 +419,9 @@ export class TrackEditTemplates {
         return input<string>({
             type: InputType.text,
             name: "upc",
-            label: t("UPC"),
             placeholder: t("EXAMPLE_UPC"),
+            infoText: t("UPC"),
+            infoLink: "https://docs.lyda.app/terms/upc",
             validators: TrackValidators.upcValidators,
             value: compute(s => s.upc ?? "", state),
             onchange: v => {
@@ -452,8 +453,9 @@ export class TrackEditTemplates {
         return input<string>({
             type: InputType.text,
             name: "isrc",
-            label: t("ISRC"),
             placeholder: t("EXAMPLE_ISRC"),
+            infoText: t("ISRC"),
+            infoLink: "https://docs.lyda.app/terms/isrc",
             validators: TrackValidators.isrcValidators,
             value: compute(s => s.isrc ?? "", state),
             onchange: v => {

@@ -101,6 +101,10 @@ a {
     text-decoration: none;
 }
 
+a:hover {
+    text-decoration: underline;
+}
+
 .text-xsmall {
     font-size: var(--font-size-xsmall);
 }
