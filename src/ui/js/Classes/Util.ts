@@ -342,3 +342,7 @@ export function downloadFile(fileName: string, content: string) {
 export function getPlayIcon(isPlaying: Signal<boolean>, isLoading: Signal<boolean>) {
     return compute((p, l) => (p ? Icons.PAUSE : (l ? Icons.SPINNER : Icons.PLAY)), isPlaying, isLoading);
 }
+
+export function isDev() {
+    return window.location.href.includes("localhost");
+}

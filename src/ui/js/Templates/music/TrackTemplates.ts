@@ -610,7 +610,7 @@ export class TrackTemplates {
                             TrackTemplates.addToQueueButton(track),
                         ).build(),
                     ),
-                    horizontal(
+                    when(Util.isLoggedIn(), horizontal(
                         when(isPrivate, TrackTemplates.copyPrivateLinkButton(track.id, track.secretcode)),
                         GenericTemplates.roundIconButton(
                             { icon: "more_horiz" },
@@ -623,7 +623,7 @@ export class TrackTemplates {
                             TrackEditTemplates.openEditPageButton(track),
                             TrackEditTemplates.deleteTrackButton(track.id),
                         ),
-                    ).classes("relative"),
+                    ).classes("relative", "align-children").build()),
                 ).classes("align-children"),
                 when(track.description.length > 0, description),
                 CommentTemplates.commentListFullWidth(track.id, comments, showComments),
