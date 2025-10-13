@@ -39,6 +39,8 @@ import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import { ModerationFilter } from "../Models/ModerationFilter.ts";
 import { ClientError } from "@targoninc/lyda-shared/dist/Models/db/lyda/ClientError";
 import { KeyValue } from "@targoninc/lyda-shared/dist/Models/KeyValue";
+import { CreateOrderRequest } from "@targoninc/lyda-shared/src/Models/CreateOrderRequest";
+import { CaptureOrderRequest } from "@targoninc/lyda-shared/src/Models/CaptureOrderRequest";
 
 export class Api {
     //region Interactions
@@ -770,4 +772,15 @@ export class Api {
     }
 
     //endregion
+
+    // region Orders
+    static async createOrder(request: CreateOrderRequest) {
+        return await post<string>(ApiRoutes.createOrder, request);
+    }
+
+    static async captureOrder(request: CaptureOrderRequest) {
+        return await post<string>(ApiRoutes.captureOrder, request);
+    }
+
+    // endregion
 }

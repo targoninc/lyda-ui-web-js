@@ -193,4 +193,10 @@ export class ApiRoutes {
     static requestMfaCode = ApiRoutes.mfa + "/request";
     static mfaOptions = ApiRoutes.mfa + "/options";
     // endregion
+
+    // region Orders
+    private static orders = ApiRoutes.base + "/orders";
+    static createOrder = ApiRoutes.orders + "/create";
+    static captureOrder = ApiRoutes.orders + "/capture";
+    // endregion
 }

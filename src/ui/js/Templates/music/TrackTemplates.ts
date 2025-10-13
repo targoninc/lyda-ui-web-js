@@ -1,6 +1,6 @@
 import { TrackActions } from "../../Actions/TrackActions.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
-import { copy, getPlayIcon, Util } from "../../Classes/Util.ts";
+import { copy, getPlayIcon, isDev, Util } from "../../Classes/Util.ts";
 import { PlayManager } from "../../Streaming/PlayManager.ts";
 import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
 import { Time } from "../../Classes/Helpers/Time.ts";
@@ -54,6 +54,15 @@ import { InteractionTemplates } from "../InteractionTemplates.ts";
 import { get } from "../../Api/ApiClient.ts";
 import { UploadableTrack } from "../../Models/UploadableTrack.ts";
 import { t } from "../../../locales";
+import { loadScript } from "@paypal/paypal-js";
+import {
+    CreateOrderActions,
+    CreateOrderData,
+    OnApproveActions,
+    OnApproveData,
+} from "@paypal/paypal-js/types/components/buttons";
+import { Api } from "../../Api/Api.ts";
+import { PaymentProvider } from "@targoninc/lyda-shared/src/Enums/PaymentProvider";
 
 export class TrackTemplates {
     static collabIndicator(collab: TrackCollaborator): any {
@@ -65,51 +74,6 @@ export class TrackTemplates {
                     .text(collab.collab_type?.name)
                     .build(),
             ).build();
-    }
-
-    static noTracksUploadedYet(isOwnProfile: boolean) {
-        let children;
-        if (isOwnProfile) {
-            children = [
-                create("p")
-                    .text(t("SHARE_WHAT_YOU_MAKE"))
-                    .build(),
-                GenericTemplates.newTrackButton(["secondary"]),
-            ];
-        } else {
-            children = [create("p").text(t("NOTHING_FOUND")).build()];
-        }
-
-        return create("div")
-            .classes("card", "flex-v")
-            .children(...children)
-            .build();
-    }
-
-    static noRepostsYet(isOwnProfile: boolean) {
-        let children;
-        if (isOwnProfile) {
-            children = [
-                create("p")
-                    .text(t("FIND_GOOD_STUFF_TO_SHARE"))
-                    .build(),
-                button({
-                    text: t("EXPLORE"),
-                    icon: {
-                        icon: "explore",
-                    },
-                    classes: ["positive"],
-                    onclick: () => navigate(RoutePath.explore),
-                }),
-            ];
-        } else {
-            children = [create("p").text(t("NO_REPOSTS_FOUND")).build()];
-        }
-
-        return create("div")
-            .classes("card", "flex-v")
-            .children(...children)
-            .build();
     }
 
     static trackCover(track: Track, coverType: string, startCallback: Function | null = null) {
@@ -610,6 +574,7 @@ export class TrackTemplates {
                             TrackTemplates.addToQueueButton(track),
                         ).build(),
                     ),
+                    when(isDev(), TrackTemplates.buyButton(track)),
                     when(Util.isLoggedIn(), horizontal(
                         when(isPrivate, TrackTemplates.copyPrivateLinkButton(track.id, track.secretcode)),
                         GenericTemplates.roundIconButton(
@@ -811,5 +776,71 @@ export class TrackTemplates {
             icon: { icon: "link" },
             onclick: async () => copy(window.location.origin + "/track/" + id + "/" + code),
         });
+    }
+
+    private static buyButton(track: Track) {
+        const id = `buy-button-track-${track.id}`;
+        const chosenPrice = signal(track.price);
+
+        async function initPaypal(selector: string) {
+            let paypal;
+            try {
+                paypal = await loadScript({ clientId: "AUw6bB-HQTIfqy5fhk-s5wZOaEQdaCIjRnCyIC3WDCRxVKc9Qvz1c6xLw7etCit1CD1qSHY5Pv-3xgQN" });
+            } catch (error) {
+                console.error("failed to load the PayPal JS SDK script", error);
+            }
+
+            if (paypal) {
+                try {
+                    if (paypal.Buttons) {
+                        const actualPrice = chosenPrice.value ?? track.price;
+                        await paypal.Buttons({
+                            createOrder: async (data: CreateOrderData, actions: CreateOrderActions) => {
+                                try {
+                                    const id = await Api.createOrder({
+                                        type: "track",
+                                        paymentProvider: PaymentProvider.paypal,
+                                        entityId: track.id as unknown as bigint,
+                                        priceInUsd: actualPrice,
+                                    });
+
+                                    if (!id) {
+                                        throw new Error("Could not create order");
+                                    }
+
+                                    return id;
+                                } catch (error) {
+                                    console.error(error);
+                                    throw error;
+                                }
+                            },
+                            onApprove: async (data: OnApproveData, actions: OnApproveActions) => {
+                                console.log(data.orderID);
+                                await Api.captureOrder({
+                                    orderId: data.orderID,
+                                });
+                            },
+                            style: {
+                                layout: "horizontal",
+                                color: "gold",
+                                shape: "pill",
+                                label: "paypal",
+                            },
+                        }).render(selector);
+                    }
+                } catch (error) {
+                    console.error("failed to render the PayPal Buttons", error);
+                }
+            }
+        }
+
+        setTimeout(async () => {
+            await initPaypal(`#${id}`);
+        }, 100);
+
+        return horizontal()
+            .id(id)
+            .classes("align-children")
+            .build();
     }
 }

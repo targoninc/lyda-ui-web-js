@@ -29,7 +29,7 @@ const refetch = async <T>(
 
         console.error(text);
         notify(
-            `API call failed: ${text.substring(0, 100) + (text.length > 100) ? "..." : ""}`,
+            `${text.substring(0, 100) + ((text.length > 100) ? "..." : "")}`,
             NotificationType.error
         );
         throw new Error(text);
