@@ -509,4 +509,5 @@ export const en = {
     ENTER_NEW_DISPLAYNAME: "Enter your new displayname",
     EDIT_USERNAME: "Edit username",
     ENTER_NEW_USERNAME: "Enter your new username",
+    IMPRINT: "Imprint, Terms of Service and Privacy Policy",
 } satisfies BaseTranslation;

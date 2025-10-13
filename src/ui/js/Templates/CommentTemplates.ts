@@ -93,7 +93,7 @@ export class CommentTemplates {
                         ).classes("no-gap"),
                         horizontal(
                             when(Util.isLoggedIn(), CommentTemplates.commentReplySection(repliesShown, replyInputShown, comment, newComment, comments)),
-                            when(comment.canEdit, horizontal(
+                            when(Util.isLoggedIn() && comment.canEdit, horizontal(
                                 GenericTemplates.textButton(
                                     "More",
                                     () => menuShown$.value = !menuShown$.value,

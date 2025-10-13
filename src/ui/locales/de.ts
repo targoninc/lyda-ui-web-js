@@ -507,5 +507,6 @@ export const de: Translation = {
     SUCCESS: "Erfolg",
     UPDATE_AVAILABLE_VERSION: version => `Update verfügbar (v${version})`,
     VERIFIED_ON: date => `Am ${date} verifiziert`,
-    SECTION_HAS_ERRORS: "Diese Sektion hat Fehler"
+    SECTION_HAS_ERRORS: "Diese Sektion hat Fehler",
+    IMPRINT: "Impressum, Servicebedingungen und Datenschutzerklärung",
 };

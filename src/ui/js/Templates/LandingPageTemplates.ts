@@ -26,7 +26,6 @@ export class LandingPageTemplates {
                     .build(),
                 LandingPageTemplates.lydaBenefits(),
                 create("p")
-                    .styles("max-width", "300px")
                     .children(
                         create("span")
                             .text(t("LANDER_PARAGRAPH_1"))
@@ -34,7 +33,6 @@ export class LandingPageTemplates {
                     ).build(),
                 create("p")
                     .classes("color-dim")
-                    .styles("max-width", "300px")
                     .children(
                         create("span")
                             .text(t("LANDER_PARAGRAPH_2"))
@@ -42,7 +40,6 @@ export class LandingPageTemplates {
                     ).build(),
                 create("p")
                     .classes("color-dim")
-                    .styles("max-width", "300px")
                     .children(
                         create("span")
                             .text(t("LANDER_ROADMAP"))
@@ -51,18 +48,21 @@ export class LandingPageTemplates {
                     ).build(),
                 create("p")
                     .classes("color-dim")
-                    .styles("max-width", "300px")
                     .children(
                         create("span")
                             .text(t("LANDER_FAQ"))
                             .build(),
                         GenericTemplates.inlineLink(() => navigate(RoutePath.faq), t("FAQ_INLINE")),
                     ).build(),
+                create("p")
+                    .classes("color-dim")
+                    .children(
+                        GenericTemplates.inlineLink("https://www.targoninc.com/tos", t("IMPRINT"), true),
+                    ).build(),
             ).build();
     }
 
     static lydaBenefits() {
-        // Add back marquee when we have more benefits
         return create("div")
             .classes("marquee")
             .children(
