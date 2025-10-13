@@ -19,7 +19,7 @@ export class LandingPageTemplates {
 
     static landingPageInfo() {
         return create("div")
-            .classes("flex-v")
+            .classes("flex-v", "fullWidth")
             .children(
                 create("h2")
                     .text(t("LANDER_QUESTION"))
