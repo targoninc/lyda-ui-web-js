@@ -510,4 +510,5 @@ export const en = {
     EDIT_USERNAME: "Edit username",
     ENTER_NEW_USERNAME: "Enter your new username",
     IMPRINT: "Imprint, Terms of Service and Privacy Policy",
+    PAYMENT_INFO: "Payment Info",
 } satisfies BaseTranslation;

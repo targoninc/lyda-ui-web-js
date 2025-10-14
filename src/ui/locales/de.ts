@@ -509,4 +509,5 @@ export const de: Translation = {
     VERIFIED_ON: date => `Am ${date} verifiziert`,
     SECTION_HAS_ERRORS: "Diese Sektion hat Fehler",
     IMPRINT: "Impressum, Servicebedingungen und Datenschutzerklärung",
+    PAYMENT_INFO: "Zahlungsinformationen",
 };

@@ -40,6 +40,7 @@ import { NotificationType } from "../../Enums/NotificationType.ts";
 import { TotpTemplates } from "./TotpTemplates.ts";
 import { WebauthnTemplates } from "./WebauthnTemplates.ts";
 import { Language, language, LanguageOptions, t } from "../../../locales";
+import { debounce } from "../../Classes/Helpers/Debounce.ts";
 
 export class SettingsTemplates {
     static settingsPage(route: Route, params: Record<string, string>) {
@@ -72,6 +73,7 @@ export class SettingsTemplates {
                 SettingsTemplates.accountSection(user),
                 SettingsTemplates.totpSection(),
                 WebauthnTemplates.devicesSection(),
+                SettingsTemplates.paymentSection(),
                 SettingsTemplates.themeSection(getUserSettingValue<Theme>(user, UserSettings.theme)),
                 SettingsTemplates.languageSection(),
                 SettingsTemplates.qualitySection(getUserSettingValue<StreamingQuality>(user, UserSettings.streamingQuality) ?? "m"),
@@ -398,7 +400,8 @@ export class SettingsTemplates {
                                             window.location.reload();
                                         });
                                     },
-                                    () => {},
+                                    () => {
+                                    },
                                     "delete",
                                 ).then();
                             },
@@ -658,7 +661,8 @@ export class SettingsTemplates {
                                                 (e, i) => i !== index.value,
                                             );
                                         },
-                                        () => {},
+                                        () => {
+                                        },
                                         "delete",
                                     );
                                 },
@@ -699,22 +703,23 @@ export class SettingsTemplates {
                             async (name: string) => {
                                 loading.value = true;
                                 await Api.addTotpMethod(name)
-                                         .then(res => {
-                                             if (!res) {
-                                                 return;
-                                             }
-                                             Api.getUserById().then(u => {
-                                                 currentUser.value = u;
-                                             });
-                                             createModal(
-                                                 [
-                                                     TotpTemplates.verifyTotpAddModal(res.secret, res.qrDataUrl),
-                                                 ],
-                                                 "add-modal-verify",
-                                             );
-                                         })
-                                         .finally(() => (loading.value = false));
-                            }, () => {}, "qr_code",
+                                    .then(res => {
+                                        if (!res) {
+                                            return;
+                                        }
+                                        Api.getUserById().then(u => {
+                                            currentUser.value = u;
+                                        });
+                                        createModal(
+                                            [
+                                                TotpTemplates.verifyTotpAddModal(res.secret, res.qrDataUrl),
+                                            ],
+                                            "add-modal-verify",
+                                        );
+                                    })
+                                    .finally(() => (loading.value = false));
+                            }, () => {
+                            }, "qr_code",
                         );
                     },
                 }),
@@ -735,5 +740,32 @@ export class SettingsTemplates {
             const url = new URL(window.location.href);
             await copy(`${url.origin}${url.pathname}#${id}`);
         });
+    }
+
+    private static paymentSection() {
+        const loading = signal(false);
+        const user = currentUser.value;
+        if (!user) {
+            return create("div").build();
+        }
+
+        return create("div")
+            .classes("flex-v", "card")
+            .children(
+                SettingsTemplates.sectionHeading(t("PAYMENT_INFO")),
+                input<string>({
+                    type: InputType.text,
+                    name: "paypalMail",
+                    label: "PayPal account E-Mail address",
+                    value: getUserSettingValue(user, UserSettings.paypalMail),
+                    onchange: value => {
+                        debounce("paypalMail", () => {
+                            loading.value = true;
+                            Api.updateUserSetting(UserSettings.paypalMail, value)
+                                .finally(() => loading.value = false);
+                        }, 1000);
+                    },
+                }),
+            );
     }
 }

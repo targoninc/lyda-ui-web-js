@@ -12,6 +12,7 @@ import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import { Api } from "../Api/Api.ts";
 import { Icons } from "../Enums/Icons.ts";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
+import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
 
 export class Util {
     static capitalizeFirstLetter(string: string) {
@@ -281,14 +282,14 @@ export function finalizeLogin(step: Signal<string>, user: User) {
     }
 }
 
-export function getUserSettingValue<T>(user: User, key: string) {
+export function getUserSettingValue<T>(user: User, key: UserSettings) {
     const val = user.settings?.find(s => s.key === key)?.value;
     if (val === "true") return true as T;
     if (val === "false") return false as T;
     return val as T;
 }
 
-export function userHasSettingValue(user: User, key: string, value: string|boolean) {
+export function userHasSettingValue(user: User, key: UserSettings, value: string|boolean) {
     return getUserSettingValue(user, key) === value;
 }
 
