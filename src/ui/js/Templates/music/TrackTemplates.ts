@@ -787,7 +787,6 @@ export class TrackTemplates {
             try {
                 paypal = await loadScript({
                     clientId: "AUw6bB-HQTIfqy5fhk-s5wZOaEQdaCIjRnCyIC3WDCRxVKc9Qvz1c6xLw7etCit1CD1qSHY5Pv-3xgQN",
-                    environment: "production",
                 });
             } catch (error) {
                 console.error("failed to load the PayPal JS SDK script", error);
@@ -799,28 +798,28 @@ export class TrackTemplates {
                         const actualPrice = chosenPrice.value ?? track.price;
                         await paypal.Buttons({
                             createOrder: async (data: CreateOrderData, actions: CreateOrderActions) => {
-                                try {
-                                    const id = await Api.createOrder({
-                                        type: "track",
-                                        paymentProvider: PaymentProvider.paypal,
-                                        entityId: track.id as unknown as bigint,
-                                        priceInUsd: actualPrice,
-                                    });
-
-                                    if (!id) {
-                                        throw new Error("Could not create order");
-                                    }
-
-                                    return id;
-                                } catch (error) {
-                                    console.error(error);
-                                    throw error;
-                                }
+                                return actions.order.create({
+                                    purchase_units: [{
+                                        amount: {
+                                            value: actualPrice.toFixed(2)
+                                        }
+                                    }]
+                                })
                             },
                             onApprove: async (data: OnApproveData, actions: OnApproveActions) => {
                                 console.log(data.orderID);
-                                await Api.captureOrder({
-                                    orderId: data.orderID,
+                                return actions.order.capture().then(async function(details: any) {
+                                    console.log('Transaction completed by ' + details.payer.name.given_name);
+
+                                    await Api.createOrder({
+                                        type: "track",
+                                        orderId: data.orderID,
+                                        paymentProvider: PaymentProvider.paypal,
+                                        entityId: track.id,
+                                        priceInUsd: actualPrice,
+                                    });
+
+                                    return details;
                                 });
                             },
                             style: {
