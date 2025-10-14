@@ -35,6 +35,10 @@ const refetch = async <T>(
         throw new Error(text);
     }
 
+    if (!text.startsWith("{") && !text.startsWith("[")) {
+        return text as T;
+    }
+
     try {
         return JSON.parse(text) as T;
     } catch (e: any) {

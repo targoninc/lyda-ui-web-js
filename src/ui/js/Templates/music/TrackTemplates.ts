@@ -785,7 +785,10 @@ export class TrackTemplates {
         async function initPaypal(selector: string) {
             let paypal;
             try {
-                paypal = await loadScript({ clientId: "AUw6bB-HQTIfqy5fhk-s5wZOaEQdaCIjRnCyIC3WDCRxVKc9Qvz1c6xLw7etCit1CD1qSHY5Pv-3xgQN" });
+                paypal = await loadScript({
+                    clientId: "AUw6bB-HQTIfqy5fhk-s5wZOaEQdaCIjRnCyIC3WDCRxVKc9Qvz1c6xLw7etCit1CD1qSHY5Pv-3xgQN",
+                    environment: "production",
+                });
             } catch (error) {
                 console.error("failed to load the PayPal JS SDK script", error);
             }
