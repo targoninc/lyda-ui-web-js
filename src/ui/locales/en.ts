@@ -1,5 +1,6 @@
 import { BaseTranslation } from "./index.ts";
 import { MonthIdentifier } from "../js/Classes/Helpers/Date.ts";
+import { currency } from "../js/Classes/Helpers/Num.ts";
 
 export const en = {
     UPLOAD: "Upload",
@@ -511,4 +512,12 @@ export const en = {
     ENTER_NEW_USERNAME: "Enter your new username",
     IMPRINT: "Imprint, Terms of Service and Privacy Policy",
     PAYMENT_INFO: "Payment Info",
+    BUY: "Buy",
+    BUY_ITEM: "Buy item",
+    AMOUNT_IN_USD: "Amount in USD",
+    AMOUNT_MUST_BE_BETWEEN: (min, max) => `Amount must be between ${min} and ${max}`,
+    BUY_ITEM_INFO_TEXT: "Buying this item will support the artist(s) and help them create more content. Includes lossless audio download.",
+    BUY_ITEM_DELETE_WARNING: "If this item is deleted, you won't have access to it anymore. Be sure to download it after buying so you do not lose access.",
+    CHOOSE_CHECKOUT_OPTION: amount => `Choose checkout option (${currency(amount)})`,
+    CONTINUE_TO_CHECKOUT: "Continue to checkout",
 } satisfies BaseTranslation;

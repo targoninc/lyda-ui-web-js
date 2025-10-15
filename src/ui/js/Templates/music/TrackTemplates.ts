@@ -14,6 +14,7 @@ import { CustomText } from "../../Classes/Helpers/CustomText.ts";
 import { CommentTemplates } from "../CommentTemplates.ts";
 import { navigate } from "../../Routing/Router.ts";
 import {
+    AnyElement,
     compute,
     create,
     InputType,
@@ -32,7 +33,7 @@ import {
     manualQueue,
     playingHere,
 } from "../../state.ts";
-import { Ui } from "../../Classes/Ui.ts";
+import { createModal, Ui } from "../../Classes/Ui.ts";
 import { ApiRoutes } from "../../Api/ApiRoutes.ts";
 import { MediaActions } from "../../Actions/MediaActions.ts";
 import { RoutePath } from "../../Routing/routes.ts";
@@ -63,6 +64,8 @@ import {
 } from "@paypal/paypal-js/types/components/buttons";
 import { Api } from "../../Api/Api.ts";
 import { PaymentProvider } from "@targoninc/lyda-shared/src/Enums/PaymentProvider";
+import { FormTemplates } from "../generic/FormTemplates.ts";
+import { currency } from "../../Classes/Helpers/Num.ts";
 
 export class TrackTemplates {
     static collabIndicator(collab: TrackCollaborator): any {
@@ -76,7 +79,7 @@ export class TrackTemplates {
             ).build();
     }
 
-    static trackCover(track: Track, coverType: string, startCallback: Function | null = null) {
+    static trackCover(track: Track, coverType: "cover" | "small-cover", startCallback: Function | null = null) {
         const imageState = signal(DefaultImages[EntityType.track]);
         if (track.has_cover) {
             imageState.value = Util.getImage(track.id, MediaFileType.trackCover);
@@ -468,7 +471,7 @@ export class TrackTemplates {
         const track$ = signal(track as Track | UploadableTrack);
 
         toAppend.push(TrackTemplates.collaboratorSection(track$, linkedUserState));
-        const icons = [];
+        const icons: AnyElement[] = [];
         const isPrivate = track.visibility === "private";
         if (isPrivate) {
             icons.push(GenericTemplates.lock());
@@ -506,15 +509,7 @@ export class TrackTemplates {
                 create("div")
                     .classes("flex-v", "nogap")
                     .children(
-                        create("div")
-                            .classes("flex")
-                            .children(
-                                create("span")
-                                    .classes("text-xxlarge")
-                                    .text(track.title)
-                                    .build(),
-                                ...icons,
-                            ).build(),
+                        MusicTemplates.title(EntityType.track, track.title, track.id, icons, "text-xxlarge", false),
                         UserTemplates.userWidget({
                             ...trackUser,
                             displayname:
@@ -574,7 +569,66 @@ export class TrackTemplates {
                             TrackTemplates.addToQueueButton(track),
                         ).build(),
                     ),
-                    when(isDev(), TrackTemplates.buyButton(track)),
+                    when(isDev(), button({
+                        icon: { icon: "attach_money" },
+                        text: t("BUY"),
+                        onclick: () => {
+                            const amount = signal<number | null>(null);
+                            const amountValid = compute(a => {
+                                return a !== null && a >= track.price && a <= track.price * 100;
+                            }, amount);
+                            let modal: AnyElement | null = null;
+                            const onClose = () => modal ? Util.removeModal(modal) : undefined;
+                            const inCheckout = signal(false);
+                            const bought = signal(false);
+
+                            modal = createModal([
+                                vertical(
+                                    horizontal(
+                                        GenericTemplates.title(t("BUY_ITEM")),
+                                        button({
+                                            text: t("CLOSE"),
+                                            icon: { icon: "close" },
+                                            onclick: onClose,
+                                        }),
+                                    ).classes("space-between"),
+                                    horizontal(
+                                        TrackTemplates.trackCover(track, "small-cover"),
+                                        MusicTemplates.title(EntityType.track, track.title, track.id, icons, "text-large", false),
+                                    ).classes("align-children"),
+                                    create("p")
+                                        .text(t("BUY_ITEM_INFO_TEXT"))
+                                        .build(),
+                                    create("p")
+                                        .text(t("BUY_ITEM_DELETE_WARNING"))
+                                        .build(),
+                                    create("hr"),
+                                    horizontal(
+                                        when(inCheckout, horizontal(
+                                            create("span")
+                                                .classes("text-xxlarge", "align-end")
+                                                .styles("line-height", "1")
+                                                .text("$")
+                                                .build(),
+                                            FormTemplates.moneyField(t("AMOUNT_IN_USD"), "amount", currency(track.price) + "+", amount, false, val => amount.value = val, track.price, track.price * 100, 0.10, ["bigger-input"]),
+                                        ).build(), true),
+                                        when(inCheckout, button({
+                                            text: t("CONTINUE_TO_CHECKOUT"),
+                                            icon: { icon: "shopping_cart" },
+                                            classes: ["rounded-max", "text-xlarge", "align-end", "positive"],
+                                            disabled: compute(v => !v, amountValid),
+                                            onclick: async () => inCheckout.value = true,
+                                        }), true),
+                                        TrackTemplates.buyButton(track, amount, inCheckout, () => bought.value = true),
+                                    ).classes("space-between"),
+                                    when(compute(a => a !== null && a > track.price * 100, amount), create("span")
+                                        .classes("warning")
+                                        .text(t("AMOUNT_MUST_BE_BETWEEN", currency(track.price), currency(track.price * 100)))
+                                        .build()),
+                                ).styles("max-width", "500px"),
+                            ], "buy-track");
+                        },
+                    })),
                     when(Util.isLoggedIn(), horizontal(
                         when(isPrivate, TrackTemplates.copyPrivateLinkButton(track.id, track.secretcode)),
                         GenericTemplates.roundIconButton(
@@ -778,9 +832,10 @@ export class TrackTemplates {
         });
     }
 
-    private static buyButton(track: Track) {
+    private static buyButton(track: Track, amount: Signal<number | null>, inCheckout: Signal<boolean>, onSuccess: () => void) {
         const id = `buy-button-track-${track.id}`;
         const chosenPrice = signal(track.price);
+        const visibleClass = compute((v): string => v ? "visible" : "hidden", inCheckout);
 
         async function initPaypal(selector: string) {
             let paypal;
@@ -801,23 +856,24 @@ export class TrackTemplates {
                                 return actions.order.create({
                                     purchase_units: [{
                                         amount: {
-                                            value: actualPrice.toFixed(2)
-                                        }
-                                    }]
-                                })
+                                            value: actualPrice.toFixed(2),
+                                        },
+                                    }],
+                                });
                             },
                             onApprove: async (data: OnApproveData, actions: OnApproveActions) => {
                                 console.log(data.orderID);
                                 return actions.order.capture().then(async function(details: any) {
-                                    console.log('Transaction completed by ' + details.payer.name.given_name);
+                                    console.log("Transaction completed by " + details.payer.name.given_name);
 
                                     await Api.createOrder({
                                         type: "track",
                                         orderId: data.orderID,
                                         paymentProvider: PaymentProvider.paypal,
                                         entityId: track.id,
-                                        priceInUsd: actualPrice,
                                     });
+
+                                    onSuccess();
 
                                     return details;
                                 });
@@ -827,6 +883,7 @@ export class TrackTemplates {
                                 color: "gold",
                                 shape: "pill",
                                 label: "paypal",
+                                tagline: false,
                             },
                         }).render(selector);
                     }
@@ -836,13 +893,25 @@ export class TrackTemplates {
             }
         }
 
-        setTimeout(async () => {
-            await initPaypal(`#${id}`);
-        }, 100);
+        setTimeout(() => initPaypal(`#${id}`).then(), 100);
 
-        return horizontal()
-            .id(id)
-            .classes("align-children")
-            .build();
+        return vertical()
+            .classes(visibleClass)
+            .children(
+                horizontal(
+                    GenericTemplates.roundIconButton({
+                        icon: "arrow_back_ios_new",
+                        adaptive: true,
+                    }, () => inCheckout.value = false, "Go back", ["align-children"]),
+                    heading({
+                        text: compute(a => `${t("CHOOSE_CHECKOUT_OPTION", a)}`, amount),
+                        level: 3,
+                    }),
+                ).classes("align-children"),
+                horizontal()
+                    .classes("align-children", "flex-grow")
+                    .styles("max-width", "300px")
+                    .id(id),
+            ).build();
     }
 }

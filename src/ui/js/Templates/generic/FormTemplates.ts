@@ -57,4 +57,19 @@ export class FormTemplates {
             classes
         });
     }
+
+    static moneyField(title: StringOrSignal, name: StringOrSignal, placeholder: StringOrSignal, value: TypeOrSignal<number | null> = 0, required = false, onchange: (value: number) => void = (val: number) => {
+    }, min: number = -Infinity, max: number = Infinity, step: number = 0.01, classes: StringOrSignal[] = []) {
+        return input<number>({
+            type: InputType.number,
+            label: title,
+            name,
+            placeholder,
+            value,
+            required,
+            onchange,
+            attributes: ["autocomplete", name, "min", min.toString(), "max", max.toString(), "step", step.toString()],
+            classes,
+        });
+    }
 }

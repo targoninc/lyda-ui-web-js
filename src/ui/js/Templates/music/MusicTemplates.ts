@@ -389,7 +389,7 @@ export class MusicTemplates {
         });
     }
 
-    static title(type: EntityType, title: string, id: number, icons: AnyNode[] = [], textSize: string = "text-large") {
+    static title(type: EntityType, title: string, id: number, icons: AnyNode[] = [], textSize: string = "text-large", goToEntity = true) {
         let baseRoute = RoutePath.track;
         switch (type) {
             case EntityType.album:
@@ -404,9 +404,9 @@ export class MusicTemplates {
             .classes("flex")
             .children(
                 create("span")
-                    .classes("clickable", textSize, "pointer")
+                    .classes(...(goToEntity ? ["clickable", "pointer"] : ["_"]), textSize)
                     .text(title)
-                    .onclick(() => navigate(`${baseRoute}/${id}`))
+                    .onclick(() => goToEntity ? navigate(`${baseRoute}/${id}`) : null)
                     .build(),
                 ...icons,
             ).build();

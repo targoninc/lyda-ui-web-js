@@ -195,4 +195,5 @@ export function createModal(children: AnyNode[], modalId: string) {
 
     document.body.appendChild(modal);
     Util.initializeModalRemove(modal);
+    return modal;
 }
