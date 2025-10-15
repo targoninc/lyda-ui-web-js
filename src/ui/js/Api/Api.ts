@@ -768,6 +768,7 @@ export class Api {
         return await get<Blob>(ApiRoutes.getTrackAudio, {
             id,
             quality: "source",
+            download: true,
         });
     }
 

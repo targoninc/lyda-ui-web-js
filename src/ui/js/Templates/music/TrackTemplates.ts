@@ -1,6 +1,6 @@
 import { TrackActions } from "../../Actions/TrackActions.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
-import { copy, getPlayIcon, isDev, Util } from "../../Classes/Util.ts";
+import { copy, getPlayIcon, Util } from "../../Classes/Util.ts";
 import { PlayManager } from "../../Streaming/PlayManager.ts";
 import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
 import { Time } from "../../Classes/Helpers/Time.ts";
@@ -569,7 +569,7 @@ export class TrackTemplates {
                             TrackTemplates.addToQueueButton(track),
                         ).build(),
                     ),
-                    when(isDev(), button({
+                    when(trackData.canBuy, button({
                         icon: { icon: "attach_money" },
                         text: t("BUY"),
                         onclick: () => {
@@ -580,7 +580,7 @@ export class TrackTemplates {
                             let modal: AnyElement | null = null;
                             const onClose = () => modal ? Util.removeModal(modal) : undefined;
                             const inCheckout = signal(false);
-                            const bought = signal(true);
+                            const bought = signal(false);
 
                             modal = createModal([
                                 vertical(
@@ -654,7 +654,7 @@ export class TrackTemplates {
                         GenericTemplates.menu(compute(s => s && trackData.canEdit, menuShown$),
                             TrackEditTemplates.addToAlbumsButton(track),
                             TrackEditTemplates.replaceAudioButton(track),
-                            TrackEditTemplates.downloadAudioButton(track),
+                            when(trackData.canDownload, TrackEditTemplates.downloadAudioButton(track)),
                             TrackEditTemplates.openEditPageButton(track),
                             TrackEditTemplates.deleteTrackButton(track.id),
                         ),
