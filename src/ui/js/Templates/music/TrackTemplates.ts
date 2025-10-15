@@ -580,7 +580,7 @@ export class TrackTemplates {
                             let modal: AnyElement | null = null;
                             const onClose = () => modal ? Util.removeModal(modal) : undefined;
                             const inCheckout = signal(false);
-                            const bought = signal(false);
+                            const bought = signal(true);
 
                             modal = createModal([
                                 vertical(
@@ -592,39 +592,55 @@ export class TrackTemplates {
                                             onclick: onClose,
                                         }),
                                     ).classes("space-between"),
-                                    horizontal(
-                                        TrackTemplates.trackCover(track, "small-cover"),
-                                        MusicTemplates.title(EntityType.track, track.title, track.id, icons, "text-large", false),
-                                    ).classes("align-children"),
-                                    create("p")
-                                        .text(t("BUY_ITEM_INFO_TEXT"))
-                                        .build(),
-                                    create("p")
-                                        .text(t("BUY_ITEM_DELETE_WARNING"))
-                                        .build(),
-                                    create("hr"),
-                                    horizontal(
-                                        when(inCheckout, horizontal(
-                                            create("span")
-                                                .classes("text-xxlarge", "align-end")
-                                                .styles("line-height", "1")
-                                                .text("$")
-                                                .build(),
-                                            FormTemplates.moneyField(t("AMOUNT_IN_USD"), "amount", currency(track.price) + "+", amount, false, val => amount.value = val, track.price, track.price * 100, 0.10, ["bigger-input"]),
-                                        ).build(), true),
-                                        when(inCheckout, button({
-                                            text: t("CONTINUE_TO_CHECKOUT"),
-                                            icon: { icon: "shopping_cart" },
-                                            classes: ["rounded-max", "text-xlarge", "align-end", "positive"],
-                                            disabled: compute(v => !v, amountValid),
-                                            onclick: async () => inCheckout.value = true,
-                                        }), true),
-                                        TrackTemplates.buyButton(track, amount, inCheckout, () => bought.value = true),
-                                    ).classes("space-between"),
-                                    when(compute(a => a !== null && a > track.price * 100, amount), create("span")
-                                        .classes("warning")
-                                        .text(t("AMOUNT_MUST_BE_BETWEEN", currency(track.price), currency(track.price * 100)))
-                                        .build()),
+                                    when(bought, vertical(
+                                        horizontal(
+                                            TrackTemplates.trackCover(track, "small-cover"),
+                                            MusicTemplates.title(EntityType.track, track.title, track.id, icons, "text-large", false),
+                                        ).classes("align-children"),
+                                        create("p")
+                                            .text(t("BUY_ITEM_INFO_TEXT"))
+                                            .build(),
+                                        create("p")
+                                            .text(t("BUY_ITEM_DELETE_WARNING"))
+                                            .build(),
+                                        create("hr"),
+                                        horizontal(
+                                            when(inCheckout, horizontal(
+                                                create("span")
+                                                    .classes("text-xxlarge", "align-end")
+                                                    .styles("line-height", "1")
+                                                    .text("$")
+                                                    .build(),
+                                                FormTemplates.moneyField(t("AMOUNT_IN_USD"), "amount", currency(track.price) + "+", amount, false, val => amount.value = val, track.price, track.price * 100, 0.10, ["bigger-input"]),
+                                            ).build(), true),
+                                            when(inCheckout, button({
+                                                text: t("CONTINUE_TO_CHECKOUT"),
+                                                icon: { icon: "shopping_cart" },
+                                                classes: ["rounded-max", "text-xlarge", "align-end", "positive"],
+                                                disabled: compute(v => !v, amountValid),
+                                                onclick: async () => inCheckout.value = true,
+                                            }), true),
+                                            TrackTemplates.buyButton(track, amount, inCheckout, () => bought.value = true),
+                                        ).classes("space-between"),
+                                        when(compute(a => a !== null && a > track.price * 100, amount), create("span")
+                                            .classes("warning")
+                                            .text(t("AMOUNT_MUST_BE_BETWEEN", currency(track.price), currency(track.price * 100)))
+                                            .build()),
+                                    ).build(), true),
+                                    when(bought, vertical(
+                                        horizontal(
+                                            heading({
+                                                level: 2,
+                                                text: t("TRACK_BOUGHT"),
+                                            }),
+                                        ).classes("align-children", "card", "text-large", "animated-background"),
+                                        create("p")
+                                            .text(t("TRACK_BOUGHT_INFO"))
+                                            .build(),
+                                        horizontal(
+                                            TrackEditTemplates.downloadAudioButton(track, ["rounded-max", "special", "text-xlarge"]),
+                                        ).classes("space-between", "align-children"),
+                                    ).build()),
                                 ).styles("max-width", "500px"),
                             ], "buy-track");
                         },

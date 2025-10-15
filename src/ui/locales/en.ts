@@ -520,4 +520,6 @@ export const en = {
     BUY_ITEM_DELETE_WARNING: "If this item is deleted, you won't have access to it anymore. Be sure to download it after buying so you do not lose access.",
     CHOOSE_CHECKOUT_OPTION: amount => `Choose checkout option (${currency(amount)})`,
     CONTINUE_TO_CHECKOUT: "Continue to checkout",
+    TRACK_BOUGHT: "Track bought",
+    TRACK_BOUGHT_INFO: "You have successfully bought this track. You can now download it and listen offline!",
 } satisfies BaseTranslation;

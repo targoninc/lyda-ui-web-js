@@ -695,13 +695,14 @@ export class TrackEditTemplates {
         });
     }
 
-    static downloadAudioButton(track: Track) {
+    static downloadAudioButton(track: Track, classes: StringOrSignal[] = []) {
         const loading = signal(false);
 
         return button({
             text: t("DOWNLOAD_AUDIO"),
             icon: { icon: "download" },
             disabled: loading,
+            classes,
             onclick: async () => {
                 if (loading.value) {
                     return;

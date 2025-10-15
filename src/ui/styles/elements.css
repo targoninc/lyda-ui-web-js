@@ -129,12 +129,16 @@
 .animated-background {
     background: url("/img/graphics/email-box.webp") no-repeat center center !important;
     background-size: cover;
-    margin-top: -20px !important;
     border-radius: var(--border-radius) var(--border-radius) 0 0;
 }
 
 .animated-background h1 {
     font-weight: bold;
+}
+
+.animated-background.email-special-box {
+
+    margin-top: -20px !important;
 }
 
 .email-special-box {
