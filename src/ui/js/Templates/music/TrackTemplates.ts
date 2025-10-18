@@ -502,6 +502,7 @@ export class TrackTemplates {
             comments.value = c ?? [];
         });
         const menuShown$ = signal(false);
+        const hasMenu = Util.isLoggedIn() && (trackData.canEdit || trackData.canDownload);
 
         return create("div")
             .classes("single-page", "noflexwrap", "padded-large", "rounded-large", "flex-v")
@@ -645,13 +646,13 @@ export class TrackTemplates {
                             ], "buy-track");
                         },
                     })),
-                    when(Util.isLoggedIn(), horizontal(
+                    when(hasMenu, horizontal(
                         when(isPrivate, TrackTemplates.copyPrivateLinkButton(track.id, track.secretcode)),
                         GenericTemplates.roundIconButton(
                             { icon: "more_horiz" },
                             () => menuShown$.value = !menuShown$.value,
                             "Show menu"),
-                        GenericTemplates.menu(compute(s => s && trackData.canEdit, menuShown$),
+                        GenericTemplates.menu(compute(s => s, menuShown$),
                             TrackEditTemplates.addToAlbumsButton(track),
                             TrackEditTemplates.replaceAudioButton(track),
                             when(trackData.canDownload, TrackEditTemplates.downloadAudioButton(track)),
