@@ -90,6 +90,7 @@ export class ApiRoutes {
     static profileTracksFeed = ApiRoutes.trackFeed + "/profileTracks";
     static profileRepostsFeed = ApiRoutes.trackFeed + "/profileReposts";
     static likedTracksFeed = ApiRoutes.trackFeed + "/liked";
+    static boughtTracksFeed = ApiRoutes.trackFeed + "/bought";
     // endregion
 
     // region Albums

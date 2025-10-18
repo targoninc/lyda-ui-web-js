@@ -103,7 +103,7 @@ export class PageTemplates {
         }
 
         document.title = `${t("LIBRARY")} - ${name}`;
-        return UserTemplates.libraryPage(name);
+        return UserTemplates.libraryPage(name, user.username === name);
     }
 
     static async playlistPage(route: Route, params: Record<string, string>) {

@@ -732,13 +732,19 @@ export class UserTemplates {
             .classes("icon", "badge", "svg", ...addClasses).build();
     }
 
-    static libraryPage(name: string) {
+    static libraryPage(name: string, isSelf: boolean) {
         const tabs = [`${t("TRACKS")}`, `${t("ALBUMS")}`, `${t("PLAYLISTS")}`];
         const tabContents = [
             MusicTemplates.feed(FeedType.likedTracks, { name }),
             MusicTemplates.cardFeed(CardFeedType.likedAlbums, { name }),
             MusicTemplates.cardFeed(CardFeedType.likedPlaylists, { name }),
         ];
+
+        if (isSelf) {
+            tabs.push(`${t("BOUGHT")}`);
+            tabContents.push(MusicTemplates.feed(FeedType.boughtTracks));
+        }
+
         const tabSelector = GenericTemplates.combinedSelector(
             tabs,
             (i: number) => {

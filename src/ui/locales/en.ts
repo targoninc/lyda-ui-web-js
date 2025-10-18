@@ -522,4 +522,5 @@ export const en = {
     CONTINUE_TO_CHECKOUT: "Continue to checkout",
     TRACK_BOUGHT: "Track bought",
     TRACK_BOUGHT_INFO: "You have successfully bought this track. You can now download it and listen offline!",
+    BOUGHT: "Bought",
 } satisfies BaseTranslation;

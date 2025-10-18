@@ -213,6 +213,7 @@ export class MusicTemplates {
             [FeedType.profileTracks]: ApiRoutes.profileTracksFeed,
             [FeedType.profileReposts]: ApiRoutes.profileRepostsFeed,
             [FeedType.likedTracks]: ApiRoutes.likedTracksFeed,
+            [FeedType.boughtTracks]: ApiRoutes.boughtTracksFeed,
         };
         const pageState = signal(1);
         const tracks$ = signal<Track[]>([]);
@@ -240,7 +241,7 @@ export class MusicTemplates {
         pageState.subscribe(update);
         search.subscribe(update);
         const publicFeedTypes = [FeedType.explore, FeedType.profileTracks, FeedType.profileReposts];
-        const searchableFeedTypes = [FeedType.profileTracks, FeedType.profileReposts, FeedType.history, FeedType.likedTracks];
+        const searchableFeedTypes = [FeedType.profileTracks, FeedType.profileReposts, FeedType.history, FeedType.likedTracks, FeedType.boughtTracks];
         const feedVisible = compute(u => u || publicFeedTypes.includes(type), currentUser);
         setTimeout(() => update());
         const nextDisabled = compute(t => t.length < pageSize, tracks$);
