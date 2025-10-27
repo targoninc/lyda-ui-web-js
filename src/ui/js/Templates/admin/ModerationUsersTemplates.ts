@@ -56,6 +56,7 @@ export class ModerationUsersTemplates {
         const filtered = compute(sortByProperty, sortBy$, users);
 
         return TableTemplates.table(
+            true,
             TableTemplates.tableHeaders<User>([
                 { title: t("USERNAME"), property: "username" },
                 { title: t("DISPLAY_NAME"), property: "displayname" },

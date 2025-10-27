@@ -132,6 +132,7 @@ export class LogTemplates {
         const filtered = compute(sortByProperty, sortBy$, logs);
 
         return TableTemplates.table(
+            true,
             TableTemplates.tableHeaders(headers, sortBy$),
             signalMap(
                 filtered,
