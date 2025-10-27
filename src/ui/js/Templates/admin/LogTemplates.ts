@@ -14,6 +14,7 @@ import { PillOption } from "../../Models/PillOption.ts";
 import { ActionLog } from "@targoninc/lyda-shared/dist/Models/db/lyda/ActionLog";
 import { t } from "../../../locales";
 import { sortByProperty } from "../../Classes/Helpers/Sorting.ts";
+import { TableTemplates } from "../generic/TableTemplates.ts";
 
 export class LogTemplates {
     static actionLogsPage() {
@@ -81,11 +82,11 @@ export class LogTemplates {
                 create("tr")
                     .classes("log")
                     .children(
-                        GenericTemplates.tableHeader<ActionLog>("Timestamp", "created_at", currentSortHeader),
-                        GenericTemplates.tableHeader<ActionLog>("User", "user_id", currentSortHeader),
-                        GenericTemplates.tableHeader<ActionLog>("Action Name", "action_name", currentSortHeader),
-                        GenericTemplates.tableHeader<ActionLog>("Actioned User", "actioned_user_id", currentSortHeader),
-                        GenericTemplates.tableHeader<ActionLog>("Properties", "additional_info", currentSortHeader),
+                        TableTemplates.tableHeader<ActionLog>("Timestamp", "created_at", currentSortHeader),
+                        TableTemplates.tableHeader<ActionLog>("User", "user_id", currentSortHeader),
+                        TableTemplates.tableHeader<ActionLog>("Action Name", "action_name", currentSortHeader),
+                        TableTemplates.tableHeader<ActionLog>("Actioned User", "actioned_user_id", currentSortHeader),
+                        TableTemplates.tableHeader<ActionLog>("Properties", "additional_info", currentSortHeader),
                     ).build(),
             ).build();
     }
@@ -130,8 +131,8 @@ export class LogTemplates {
         const sortBy$ = signal<keyof Log | null>("time");
         const filtered = compute(sortByProperty, sortBy$, logs);
 
-        return GenericTemplates.tableBody(
-            GenericTemplates.tableHeaders(headers, sortBy$),
+        return TableTemplates.table(
+            TableTemplates.tableHeaders(headers, sortBy$),
             signalMap(
                 filtered,
                 create("tbody"),

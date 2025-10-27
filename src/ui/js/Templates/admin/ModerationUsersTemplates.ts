@@ -1,5 +1,4 @@
 import { compute, create, signal, Signal, signalMap, when } from "@targoninc/jess";
-import { GenericTemplates } from "../generic/GenericTemplates.ts";
 import { Permissions } from "@targoninc/lyda-shared/src/Enums/Permissions";
 import { DashboardTemplates } from "./DashboardTemplates.ts";
 import { Time } from "../../Classes/Helpers/Time.ts";
@@ -9,6 +8,7 @@ import { Permission } from "@targoninc/lyda-shared/src/Models/db/lyda/Permission
 import { Api } from "../../Api/Api.ts";
 import { t } from "../../../locales";
 import { sortByProperty } from "../../Classes/Helpers/Sorting.ts";
+import { TableTemplates } from "../generic/TableTemplates.ts";
 
 export class ModerationUsersTemplates {
     static usersPage() {
@@ -55,8 +55,8 @@ export class ModerationUsersTemplates {
         const sortBy$ = signal<keyof User | null>(null);
         const filtered = compute(sortByProperty, sortBy$, users);
 
-        return GenericTemplates.tableBody(
-            GenericTemplates.tableHeaders<User>([
+        return TableTemplates.table(
+            TableTemplates.tableHeaders<User>([
                 { title: t("USERNAME"), property: "username" },
                 { title: t("DISPLAY_NAME"), property: "displayname" },
                 { title: t("PERMISSIONS"), property: "permissions" },

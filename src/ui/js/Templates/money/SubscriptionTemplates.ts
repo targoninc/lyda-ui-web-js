@@ -14,7 +14,8 @@ import { currentUser } from "../../state.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { Util } from "../../Classes/Util.ts";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
-import { table } from "../generic/TableTemplates.ts";
+import { TableTemplates } from "../generic/TableTemplates.ts";
+import { sortByProperty } from "../../Classes/Helpers/Sorting.ts";
 
 export class SubscriptionTemplates {
     static page() {
@@ -29,6 +30,8 @@ export class SubscriptionTemplates {
         const optionsLoading = compute(o => o.length === 0, options);
         const giftedSubs = compute(u => u?.giftedSubscriptions ?? [], currentUser);
         const hasGiftedSubscriptions = compute(s => (s?.length ?? 0) > 0, giftedSubs);
+        const sortBy$ = signal<keyof Subscription | null>(null);
+        const filtered = compute(sortByProperty, sortBy$, giftedSubs);
 
         return create("div")
             .classes("flex-v", "card")
@@ -54,7 +57,17 @@ export class SubscriptionTemplates {
                         level: 2,
                         text: t("SUBSCRIPTIONS_GIFTED"),
                     }),
-                    compute(subs => table([t("RECEIVER"), t("DATE")], subs.map(sub => SubscriptionTemplates.giftedSubscription(sub))), giftedSubs),
+                    TableTemplates.table(
+                        TableTemplates.tableHeaders<Subscription>([
+                            { title: t("RECEIVER"), property: "user_id" },
+                            { title: t("DATE"), property: "created_at" },
+                        ], sortBy$),
+                        signalMap(
+                            filtered,
+                            create("tbody"),
+                            sub => SubscriptionTemplates.giftedSubscription(sub),
+                        ),
+                    ),
                 ).build()),
                 button({
                     text: t("PAYMENT_HISTORY"),
@@ -219,11 +232,11 @@ export class SubscriptionTemplates {
         const user = signal<User | null>(null);
         Util.getUserAsync(giftedSub.user_id).then(u => user.value = u);
 
-        return [
+        return TableTemplates.tr("td", [
             UserTemplates.userWidget(user),
             create("span")
                 .text(Time.agoUpdating(giftedSub.created_at))
-                .build(),
-        ];
+                .build()
+        ]);
     }
 }
