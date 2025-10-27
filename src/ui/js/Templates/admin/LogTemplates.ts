@@ -1,8 +1,18 @@
 import { Time } from "../../Classes/Helpers/Time.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
-import { GenericTemplates } from "../generic/GenericTemplates.ts";
+import { GenericTemplates, text, vertical } from "../generic/GenericTemplates.ts";
 import { copy } from "../../Classes/Util.ts";
-import { AnyElement, compute, create, signal, Signal, signalMap, StringOrSignal, when } from "@targoninc/jess";
+import {
+    AnyElement,
+    compute,
+    create,
+    nullElement,
+    signal,
+    Signal,
+    signalMap,
+    StringOrSignal,
+    when,
+} from "@targoninc/jess";
 import { Api } from "../../Api/Api.ts";
 import { truncateText } from "../../Classes/Helpers/CustomText.ts";
 import { DashboardTemplates } from "./DashboardTemplates.ts";
@@ -20,7 +30,7 @@ export class LogTemplates {
     static actionLogsPage() {
         return DashboardTemplates.pageNeedingPermissions(
             [Permissions.canViewActionLogs],
-            LogTemplates.actionLogsView()
+            LogTemplates.actionLogsView(),
         );
     }
 
@@ -41,54 +51,37 @@ export class LogTemplates {
             return sortByProperty(c, l);
         }, logs, currentSortProperty);
 
-        return create("table")
-            .classes("logs")
-            .attributes("cellspacing", "0", "cellpadding", "0")
-            .children(
-                LogTemplates.actionLogsTableHeader(currentSortProperty),
-                signalMap(sorted, create("tbody"), l => LogTemplates.actionLogEntry(l)),
-            ).build();
+        return TableTemplates.table(
+            false,
+            TableTemplates.tableHeaders<ActionLog>([
+                { title: t("TIMESTAMP"), property: "created_at" },
+                { title: t("USER"), property: "user_id" },
+                { title: t("ACTION_NAME"), property: "action_name" },
+                { title: t("ACTIONED_USER"), property: "actioned_user_id" },
+                { title: t("PROPERTIES"), property: "additional_info" },
+            ], currentSortProperty),
+            signalMap(sorted, create("tbody"), l => LogTemplates.actionLogEntry(l)),
+        );
     }
 
     private static actionLogEntry(l: any) {
-        return create("tr")
-            .classes("log", l.type)
-            .children(
-                create("td")
-                    .classes("log-timestamp")
-                    .text(Time.ago(l.createdAt))
-                    .build(),
-                create("td")
-                    .classes("log-user")
-                    .children(
-                        UserTemplates.userWidget(l.user),
-                    ).build(),
-                create("td")
-                    .classes("log-action-name")
-                    .text(l.actionName)
-                    .build(),
-                create("td")
-                    .classes("log-user")
-                    .children(
-                        UserTemplates.userWidget(l.actioned_user),
-                    ).build(),
+        return TableTemplates.tr({
+            classes: ["log", l.type],
+            cellClasses: [
+                "log-timestamp",
+                "log-user",
+                "log-action-name",
+                "log-user",
+                "log-properties-cell",
+            ],
+            data: [
+                create("span").text(Time.ago(l.createdAt)),
+                UserTemplates.userWidget(l.user),
+                create("span").text(l.actionName),
+                UserTemplates.userWidget(l.actioned_user),
                 LogTemplates.properties(l.additional_info),
-            ).build();
-    }
-
-    private static actionLogsTableHeader(currentSortHeader: Signal<keyof ActionLog | null>) {
-        return create("thead")
-            .children(
-                create("tr")
-                    .classes("log")
-                    .children(
-                        TableTemplates.tableHeader<ActionLog>("Timestamp", "created_at", currentSortHeader),
-                        TableTemplates.tableHeader<ActionLog>("User", "user_id", currentSortHeader),
-                        TableTemplates.tableHeader<ActionLog>("Action Name", "action_name", currentSortHeader),
-                        TableTemplates.tableHeader<ActionLog>("Actioned User", "actioned_user_id", currentSortHeader),
-                        TableTemplates.tableHeader<ActionLog>("Properties", "additional_info", currentSortHeader),
-                    ).build(),
-            ).build();
+            ],
+        });
     }
 
     static logs(data: Log[]) {
@@ -147,67 +140,54 @@ export class LogTemplates {
         const ago = Time.agoUpdating(new Date(l.time), true);
         const timestamp = compute(t => Time.toTimeString(l.time) + " | " + t, ago);
 
-        return create("tr")
-            .classes("log", type)
-            .children(
-                create("td")
-                    .classes("log-timestamp")
-                    .text(timestamp)
-                    .build(),
-                create("td")
-                    .classes("log-host", "color-dim")
-                    .text(l.host)
-                    .build(),
-                create("td")
-                    .classes("log-level")
-                    .text(logLevelMap[l.logLevel][0])
-                    .build(),
-                create("td")
-                    .classes("log-message", type, "color-dim", "text-small")
-                    .title(l.message)
-                    .text(truncateText(l.message, 200))
-                    .onclick(() => copy(l.message))
-                    .build(),
-                create("td")
-                    .classes("log-stack")
-                    .children(
-                        button({
-                            text: t("COPY_STACK"),
-                            icon: {icon: "content_copy"},
-                            onclick: () => copy(l.stack)
-                        }),
-                    ).build(),
+        return TableTemplates.tr({
+            classes: ["log", type],
+            cellClasses: [
+                "log-timestamp",
+                ["log-host", "color-dim"],
+                "log-level",
+                ["log-message", type, "color-dim", "text-small"],
+                "log-stack",
+            ],
+            data: [
+                text(timestamp),
+                text(l.host),
+                text(logLevelMap[l.logLevel].at(0)),
+                text(truncateText(l.message, 200)),
+                button({
+                    text: t("COPY_STACK"),
+                    icon: { icon: "content_copy" },
+                    onclick: () => copy(l.stack),
+                }),
                 LogTemplates.properties(l.properties),
-            ).build();
+            ],
+        });
     }
 
     static properties(data: any) {
         if (Object.keys(data).length === 0) {
-            return create("td")
-                .classes("log-properties")
-                .build();
+            return nullElement();
         }
         const shown = signal(false);
 
-        return create("td")
-            .classes("flex-v")
-            .styles("position", "relative")
-            .children(
-                button({
-                    text: t("INFO"),
-                    icon: { icon: "info" },
-                    onclick: () => {
-                        shown.value = !shown.value;
-                    }
-                }),
-                when(shown, create("div")
-                    .classes("flex-v", "card", "popout-below", "log-properties")
-                    .children(
-                        ...Object.keys(data).map(k => {
-                            return LogTemplates.property(k, data[k]);
-                        })
-                    ).build()),
-            ).build();
+        return vertical(
+            button({
+                text: t("INFO"),
+                icon: { icon: "info" },
+                onclick: () => {
+                    shown.value = !shown.value;
+                },
+            }),
+            when(shown, create("div")
+                .classes("flex-v", "card", "popout-below", "log-properties")
+                .children(
+                    ...Object.keys(data).map(k => {
+                        return LogTemplates.property(k, data[k]);
+                    }),
+                ).build(),
+            ),
+        ).styles("position", "relative")
+         .build();
     }
 
     static signalProperty(key: string, value: Signal<any>): Signal<HTMLElement | SVGElement> {
@@ -238,8 +218,8 @@ export class LogTemplates {
                         .children(
                             ...Object.keys(value).map((k: string) => {
                                 return LogTemplates.property(k, value[k]) as any;
-                            })
-                        ).build()
+                            }),
+                        ).build(),
                 ).build();
         }
 
@@ -250,14 +230,14 @@ export class LogTemplates {
                     .classes("property-key")
                     .text(key)
                     .build() : null,
-                valueChild
+                valueChild,
             ).build();
     }
 
     static logsPage() {
         return DashboardTemplates.pageNeedingPermissions(
             [Permissions.canViewLogs],
-            LogTemplates.logsView()
+            LogTemplates.logsView(),
         );
     }
 
@@ -293,7 +273,7 @@ export class LogTemplates {
                             onclick: async () => {
                                 logs.value = [];
                                 refresh().then();
-                            }
+                            },
                         }),
                         toggle({
                             text: t("AUTO_REFRESH"),
@@ -301,10 +281,10 @@ export class LogTemplates {
                             checked: refreshOnInterval,
                             onchange: (v) => {
                                 refreshOnInterval.value = v;
-                            }
+                            },
                         }),
                     ).build(),
-                compute(l => LogTemplates.logs(l), logs)
+                compute(l => LogTemplates.logs(l), logs),
             ).build();
     }
 
@@ -313,27 +293,27 @@ export class LogTemplates {
             debug: {
                 text: t("DEBUG"),
                 icon: "bug_report",
-                value: LogLevel.debug
+                value: LogLevel.debug,
             },
             success: {
                 text: t("SUCCESS"),
                 icon: "check",
-                value: LogLevel.success
+                value: LogLevel.success,
             },
             info: {
                 text: t("INFO"),
                 icon: "info",
-                value: LogLevel.info
+                value: LogLevel.info,
             },
             warnings: {
                 text: t("WARNING"),
                 icon: "warning",
-                value: LogLevel.warning
+                value: LogLevel.warning,
             },
             errors: {
                 text: t("ERROR"),
                 icon: "report",
-                value: LogLevel.error
+                value: LogLevel.error,
             },
         };
         const options = Object.keys(filterMap).map(k => {
@@ -341,7 +321,7 @@ export class LogTemplates {
                 ...filterMap[k],
                 onclick: () => {
                     pillState.value = filterMap[k].value;
-                }
+                },
             };
         }) as PillOption[];
 

@@ -525,4 +525,7 @@ export const en = {
     BOUGHT: "Bought",
     RECEIVER: "Receiver",
     DATE: "Date",
+    USER: "User",
+    ACTION_NAME: "Action name",
+    ACTIONED_USER: "Actioned user",
 } satisfies BaseTranslation;

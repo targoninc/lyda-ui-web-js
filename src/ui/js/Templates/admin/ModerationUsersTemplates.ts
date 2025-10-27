@@ -9,6 +9,7 @@ import { Api } from "../../Api/Api.ts";
 import { t } from "../../../locales";
 import { sortByProperty } from "../../Classes/Helpers/Sorting.ts";
 import { TableTemplates } from "../generic/TableTemplates.ts";
+import { text, vertical } from "../generic/GenericTemplates.ts";
 
 export class ModerationUsersTemplates {
     static usersPage() {
@@ -75,28 +76,26 @@ export class ModerationUsersTemplates {
         const permissionsOpen = signal(false);
         const permissions = signal(u.permissions ?? []);
 
-        return create("tr")
-            .children(
-                create("td").text(u.username).build(),
-                create("td").text(u.displayname).build(),
-                create("td")
-                    .classes("relative")
-                    .children(
-                        button({
-                            text: compute(p => p.length.toString(), permissions),
-                            onclick: () => (permissionsOpen.value = !permissionsOpen.value),
-                            icon: { icon: "lock_open" },
-                        }),
-                        when(
-                            permissionsOpen,
-                            ModerationUsersTemplates.permissionsPopup(permissions, u)
-                        )
-                    )
-                    .build(),
-                create("td")
-                    .text(u.lastlogin ? Time.agoUpdating(new Date(u.lastlogin)) : "")
-                    .build()
-            ).build();
+        return TableTemplates.tr({
+            cellClasses: [
+                [],
+                [],
+                ["relative"],
+            ],
+            data: [
+                text(u.username),
+                text(u.displayname),
+                vertical(
+                    button({
+                        text: compute(p => p.length.toString(), permissions),
+                        onclick: () => (permissionsOpen.value = !permissionsOpen.value),
+                        icon: { icon: "lock_open" },
+                    }),
+                    when(permissionsOpen, ModerationUsersTemplates.permissionsPopup(permissions, u)),
+                ),
+                text(u.lastlogin ? Time.agoUpdating(new Date(u.lastlogin)) : ""),
+            ],
+        });
     }
 
     private static permissionsPopup(permissions: Signal<Permission[]>, u: User) {

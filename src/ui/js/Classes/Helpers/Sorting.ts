@@ -25,6 +25,10 @@ export function sortByProperty<T>(c: keyof T | null, l: T[]) {
             return new Date(bProp as string).getTime() - new Date(aProp as string).getTime();
         }
 
+        if (!aProp || !bProp) {
+            return aProp ? 1 : bProp ? -1 : 0;
+        }
+
         return (aProp as string).localeCompare(bProp as string);
     });
 }

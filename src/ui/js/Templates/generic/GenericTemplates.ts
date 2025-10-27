@@ -885,3 +885,7 @@ export function horizontal(...children: (AnyNode | Signal<AnyNode> | Signal<AnyE
 export const tabSelected = (current: Signal<number>, i: number) => {
     return compute(c => c === i, current);
 };
+
+export function text(text: StringOrSignal | undefined | null) {
+    return create("span").text(text);
+}

@@ -58,6 +58,7 @@ export class SubscriptionTemplates {
                         text: t("SUBSCRIPTIONS_GIFTED"),
                     }),
                     TableTemplates.table(
+                        false,
                         TableTemplates.tableHeaders<Subscription>([
                             { title: t("RECEIVER"), property: "user_id" },
                             { title: t("DATE"), property: "created_at" },
@@ -232,11 +233,13 @@ export class SubscriptionTemplates {
         const user = signal<User | null>(null);
         Util.getUserAsync(giftedSub.user_id).then(u => user.value = u);
 
-        return TableTemplates.tr("td", [
-            UserTemplates.userWidget(user),
-            create("span")
-                .text(Time.agoUpdating(giftedSub.created_at))
-                .build()
-        ]);
+        return TableTemplates.tr({
+            data: [
+                UserTemplates.userWidget(user),
+                create("span")
+                    .text(Time.agoUpdating(giftedSub.created_at))
+                    .build(),
+            ],
+        });
     }
 }

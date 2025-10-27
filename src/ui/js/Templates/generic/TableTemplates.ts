@@ -38,12 +38,28 @@ export class TableTemplates {
             ).build();
     }
 
-    static tr(type: "th" | "td", children: (AnyNode | Signal<AnyElement>)[]) {
+    static tr(opts: TableRowOptions) {
+
+
         return create("tr")
-            .children(...children.map(c =>
-                create(type)
+            .classes(...(opts.classes ?? []))
+            .children(...opts.data.map((c, i) => {
+                let cellClasses = opts.cellClasses.at(i) ?? [];
+                if (cellClasses.constructor !== Array) {
+                    cellClasses = [cellClasses as StringOrSignal];
+                }
+
+                return create(opts.type ?? "td")
+                    .classes(...cellClasses)
                     .children(c)
-                    .build(),
-            )).build();
+                    .build();
+            })).build();
     }
+}
+
+export interface TableRowOptions {
+    type?: "th" | "td",
+    classes?: StringOrSignal[],
+    cellClasses: (StringOrSignal | StringOrSignal[])[],
+    data: (AnyNode | Signal<AnyElement>)[],
 }
