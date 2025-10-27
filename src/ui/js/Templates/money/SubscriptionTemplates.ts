@@ -11,11 +11,15 @@ import { currency } from "../../Classes/Helpers/Num.ts";
 import { Time } from "../../Classes/Helpers/Time.ts";
 import { t } from "../../../locales";
 import { currentUser } from "../../state.ts";
+import { UserTemplates } from "../account/UserTemplates.ts";
+import { Util } from "../../Classes/Util.ts";
+import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import { table } from "../generic/TableTemplates.ts";
 
 export class SubscriptionTemplates {
     static page() {
         const options = signal<AvailableSubscription[]>([]);
-        const currentSubscription = signal<Subscription|null>(null);
+        const currentSubscription = signal<Subscription | null>(null);
         SubscriptionActions.loadSubscriptionOptions().then(res => {
             options.value = res.options;
             currentSubscription.value = res.currentSubscription;
@@ -23,7 +27,8 @@ export class SubscriptionTemplates {
         const currency = "USD";
         const selectedOption = signal<number | null>(null);
         const optionsLoading = compute(o => o.length === 0, options);
-        const hasGiftedSubscriptions = compute(u => (u?.giftedSubscriptions?.length ?? 0) > 0, currentUser);
+        const giftedSubs = compute(u => u?.giftedSubscriptions ?? [], currentUser);
+        const hasGiftedSubscriptions = compute(s => (s?.length ?? 0) > 0, giftedSubs);
 
         return create("div")
             .classes("flex-v", "card")
@@ -49,11 +54,12 @@ export class SubscriptionTemplates {
                         level: 2,
                         text: t("SUBSCRIPTIONS_GIFTED"),
                     }),
+                    compute(subs => table([t("RECEIVER"), t("DATE")], subs.map(sub => SubscriptionTemplates.giftedSubscription(sub))), giftedSubs),
                 ).build()),
                 button({
                     text: t("PAYMENT_HISTORY"),
-                    icon: {icon: "receipt"},
-                    onclick: () => navigate(RoutePath.payments)
+                    icon: { icon: "receipt" },
+                    onclick: () => navigate(RoutePath.payments),
                 }),
             ).build();
     }
@@ -74,7 +80,7 @@ export class SubscriptionTemplates {
                         GenericTemplates.benefit(t("SUB_BENEFIT_ARTISTS_EARN_MONEY"), "attach_money"),
                         GenericTemplates.benefit(t("SUB_BENEFIT_NO_ADS"), "ad_group_off"),
                         GenericTemplates.benefit(t("SUB_BENEFIT_COMMENT_ON_TRACKS"), "comment"),
-                    ).build()
+                    ).build(),
             ).build();
     }
 
@@ -84,7 +90,7 @@ export class SubscriptionTemplates {
             .children(
                 create("div")
                     .id(button_id)
-                    .build()
+                    .build(),
             ).build();
     }
 
@@ -145,7 +151,7 @@ export class SubscriptionTemplates {
                                     .title(t("WAITING_FOR_PAYMENT_CONFIRMATION"))
                                     .text(t("PENDING"))
                                     .build()),
-                                when(active, SubscriptionTemplates.subscribedFor(createdAt))
+                                when(active, SubscriptionTemplates.subscribedFor(createdAt)),
                             ).build(),
                         create("div")
                             .classes("flex-v", startSubClass)
@@ -165,7 +171,7 @@ export class SubscriptionTemplates {
                                                     return;
                                                 }
                                                 await SubscriptionActions.cancelSubscriptionWithConfirmationAsync(currentSub.id);
-                                            }
+                                            },
                                         })),
                                         when(enabled, button({
                                             classes: ["special", selectedClass, "rounded-max"],
@@ -175,7 +181,7 @@ export class SubscriptionTemplates {
                                             onclick: async () => {
                                                 selectedOption.value = option.id;
                                                 await SubscriptionActions.startSubscription(option.id, option.plan_id, optionMessage);
-                                            }
+                                            },
                                         })),
                                         when(isSelectedOption, button({
                                             classes: [selectedClass, "cancel-button", "rounded-max"],
@@ -183,16 +189,16 @@ export class SubscriptionTemplates {
                                             id: option.id,
                                             onclick: async () => {
                                                 selectedOption.value = null;
-                                            }
+                                            },
                                         })),
                                     ).build(),
                                 when(isSelectedOption, create("span")
                                     .classes("color-dim")
                                     .text(optionMessage)
                                     .build()),
-                                when(isSelectedOption, SubscriptionTemplates.paypalButton("paypal-button-" + option.id))
-                            ).build()
-                    ).build()
+                                when(isSelectedOption, SubscriptionTemplates.paypalButton("paypal-button-" + option.id)),
+                            ).build(),
+                    ).build(),
             ).build();
     }
 
@@ -205,7 +211,19 @@ export class SubscriptionTemplates {
                 create("span")
                     .classes("text-positive")
                     .text(subscribedAgo)
-                    .build()
+                    .build(),
             ).build();
+    }
+
+    private static giftedSubscription(giftedSub: Subscription) {
+        const user = signal<User | null>(null);
+        Util.getUserAsync(giftedSub.user_id).then(u => user.value = u);
+
+        return [
+            UserTemplates.userWidget(user),
+            create("span")
+                .text(Time.agoUpdating(giftedSub.created_at))
+                .build(),
+        ];
     }
 }

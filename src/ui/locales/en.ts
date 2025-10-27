@@ -523,4 +523,6 @@ export const en = {
     TRACK_BOUGHT: "Track bought",
     TRACK_BOUGHT_INFO: "You have successfully bought this track. You can now download it and listen offline!",
     BOUGHT: "Bought",
+    RECEIVER: "Receiver",
+    DATE: "Date",
 } satisfies BaseTranslation;
