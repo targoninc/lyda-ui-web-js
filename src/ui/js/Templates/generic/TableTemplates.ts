@@ -44,7 +44,7 @@ export class TableTemplates {
         return create("tr")
             .classes(...(opts.classes ?? []))
             .children(...opts.data.map((c, i) => {
-                let cellClasses = opts.cellClasses.at(i) ?? [];
+                let cellClasses = opts.cellClasses?.at(i) ?? [];
                 if (cellClasses.constructor !== Array) {
                     cellClasses = [cellClasses as StringOrSignal];
                 }
