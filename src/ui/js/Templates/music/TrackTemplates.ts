@@ -256,7 +256,7 @@ export class TrackTemplates {
 
                     return create("div")
                         .classes("waveform-bar", "nopointer", index % 2 === 0 ? "even" : "odd", barClass)
-                        .styles("height", loudness * 100 + "%")
+                        .styles("height", (Math.pow(loudness, 4)) * 100 + "%")
                         .build();
                 }),
             ).build();

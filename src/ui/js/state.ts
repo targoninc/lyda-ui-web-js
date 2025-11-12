@@ -18,6 +18,8 @@ import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import { UserCacheKey } from "@targoninc/lyda-shared/src/Enums/UserCacheKey";
 import { StreamingQuality } from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
 
+const footer = document.querySelector("footer");
+
 export const navInitialized = signal(false);
 
 export const streamClients = signal<Record<number, IStreamClient>>({});
@@ -29,7 +31,17 @@ currentTrackId.subscribe((id, changed) => {
     }
     LydaCache.set(UserCacheKey.lastTrackId, new CacheItem(id));
     Api.setCacheKey(UserCacheKey.lastTrackId, id.toString()).then();
+    if (!id) {
+        footer?.classList.add("hidden");
+    } else {
+        footer?.classList.remove("hidden");
+    }
 });
+if (!currentTrackId.value) {
+    footer?.classList.add("hidden");
+} else {
+    footer?.classList.remove("hidden");
+}
 
 export const currentQuality = signal(StreamingQuality.high);
 
@@ -186,7 +198,6 @@ export const queueVisible = signal(false);
 
 export const playerExpanded = signal(false);
 playerExpanded.subscribe((expanded) => {
-    const footer = document.querySelector("footer");
     if (expanded) {
         footer?.classList.add("no-padding");
     } else {
