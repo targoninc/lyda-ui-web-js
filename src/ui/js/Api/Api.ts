@@ -41,6 +41,7 @@ import { ClientError } from "@targoninc/lyda-shared/dist/Models/db/lyda/ClientEr
 import { KeyValue } from "@targoninc/lyda-shared/dist/Models/KeyValue";
 import { CreateOrderRequest } from "@targoninc/lyda-shared/src/Models/CreateOrderRequest";
 import { CaptureOrderRequest } from "@targoninc/lyda-shared/src/Models/CaptureOrderRequest";
+import { Transaction } from "../Templates/money/TransactionTemplates.ts";
 
 export class Api {
     //region Interactions
@@ -98,6 +99,13 @@ export class Api {
 
     static async getPayouts(skip: number, filter: any = {}) {
         return get<Payout[]>(ApiRoutes.getPayouts, {
+            skip,
+            ...filter,
+        });
+    }
+
+    static async getTransactions(skip: number, filter: any = {}) {
+        return get<Transaction[]>(ApiRoutes.getTransactions, {
             skip,
             ...filter,
         });

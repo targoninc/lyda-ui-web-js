@@ -34,6 +34,7 @@ export enum RoutePath {
     payments = "payments",
     editTracks = "edit-tracks",
     protocolHandler = "protocolHandler",
+    transactions = "transactions",
 }
 
 export const routes: Route[] = [
@@ -177,5 +178,9 @@ export const routes: Route[] = [
     {
         path: RoutePath.editTracks,
         title: "Edit tracks",
+    },
+    {
+        path: RoutePath.transactions,
+        title: "Transactions",
     },
 ];

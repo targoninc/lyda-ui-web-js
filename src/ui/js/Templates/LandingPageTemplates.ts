@@ -1,4 +1,4 @@
-import { GenericTemplates } from "./generic/GenericTemplates.ts";
+import { GenericTemplates, vertical } from "./generic/GenericTemplates.ts";
 import { navigate } from "../Routing/Router.ts";
 import { RoutePath } from "../Routing/routes.ts";
 import { create } from "@targoninc/jess";
@@ -7,14 +7,12 @@ import { AuthTemplates } from "./account/AuthTemplates.ts";
 
 export class LandingPageTemplates {
     static newLandingPage() {
-        return create("div")
-            .classes("flex-v")
-            .children(
-                create("div")
-                    .classes("flex", "auth-box", "card")
-                    .children(AuthTemplates.registrationLoginBox())
-                    .build(),
-            ).build();
+        return vertical(
+            create("div")
+                .classes("flex", "auth-box", "card")
+                .children(AuthTemplates.registrationLoginBox())
+                .build(),
+        ).build();
     }
 
     static landingPageInfo() {

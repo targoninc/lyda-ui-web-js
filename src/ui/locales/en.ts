@@ -528,4 +528,6 @@ export const en = {
     USER: "User",
     ACTION_NAME: "Action name",
     ACTIONED_USER: "Actioned user",
+    PAYMENT_PROCESSOR: "Payment processor",
+    ITEM: "Item",
 } satisfies BaseTranslation;

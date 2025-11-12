@@ -33,6 +33,7 @@ import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 import { SubscriptionTemplates } from "./money/SubscriptionTemplates.ts";
 import { t } from "../../locales";
+import { TransactionTemplates } from "./money/TransactionTemplates.ts";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, (route: Route, params: Record<string, string>) => Promise<AnyElement> | AnyElement> = {
@@ -62,6 +63,7 @@ export class PageTemplates {
         [RoutePath.payments]: PaymentTemplates.paymentsPage,
         [RoutePath.editTracks]: TrackEditTemplates.batchEditTracksPage,
         [RoutePath.protocolHandler]: PageTemplates.protocolHandlerPage,
+        [RoutePath.transactions]: TransactionTemplates.page,
 
         // admin pages
         [RoutePath.admin]: DashboardTemplates.dashboardPage,
@@ -89,6 +91,7 @@ export class PageTemplates {
         RoutePath.users,
         RoutePath.events,
         RoutePath.editTracks,
+        RoutePath.transactions,
     ];
 
     static async libraryPage(route: Route, params: Record<string, string>) {
