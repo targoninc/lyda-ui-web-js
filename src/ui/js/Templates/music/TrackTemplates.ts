@@ -504,6 +504,7 @@ export class TrackTemplates {
         const menuShown$ = signal(false);
         const hasMenu = Util.isLoggedIn() && (trackData.canEdit || trackData.canDownload);
         const backgroundImage = compute(c => trackData.canDownload ? `url(${c})` : "none", coverFile);
+        const bought = trackData.canDownload && !trackData.canEdit;
 
         return create("div")
             .classes("single-page", "rounded-large", "relative")
@@ -513,10 +514,14 @@ export class TrackTemplates {
                     .styles("background-image", backgroundImage)
                     .build()),
                 vertical(
-                    create("div")
-                        .classes("flex-v", "nogap")
-                        .children(
-                            MusicTemplates.title(EntityType.track, track.title, track.id, icons, "text-xxlarge", false),
+                    vertical(
+                        MusicTemplates.title(EntityType.track, track.title, track.id, icons, "text-xxlarge", false),
+                        horizontal(
+                            when(trackData.canDownload, GenericTemplates.pill({
+                                icon: "order_approve",
+                                onclick: () => {},
+                                text: t("BOUGHT"),
+                            })),
                             UserTemplates.userWidget({
                                 ...trackUser,
                                 displayname:
@@ -524,24 +529,23 @@ export class TrackTemplates {
                                         ? track.artistname.trim()
                                         : trackUser.displayname,
                             }, [], [], UserWidgetContext.singlePage),
-                        ).build(),
+                        ).classes("align-children"),
+                    ).classes("nogap"),
                     ...toAppend,
                     create("div")
                         .classes("track-title-container", "flex-v", "small-gap")
                         .children(
                             create("span").classes("collaborators").text(track.credits).build(),
-                            create("div")
-                                .classes("flex")
-                                .children(
-                                    create("span")
-                                        .classes("date", "text-small")
-                                        .text(t("UPLOADED_AT", Util.formatDate(track.created_at)))
-                                        .build(),
-                                    create("span")
-                                        .classes("playcount", "text-small")
-                                        .text(t("PLAYS_AMOUNT", track.plays))
-                                        .build(),
-                                ).build(),
+                            horizontal(
+                                create("span")
+                                    .classes("date", "text-small")
+                                    .text(t("UPLOADED_AT", Util.formatDate(track.created_at)))
+                                    .build(),
+                                create("span")
+                                    .classes("playcount", "text-small")
+                                    .text(t("PLAYS_AMOUNT", track.plays))
+                                    .build(),
+                            ).classes("align-children"),
                         ).build(),
                     create("div")
                         .classes("track-info-container", "flex", "align-bottom")
@@ -674,7 +678,7 @@ export class TrackTemplates {
                     TrackTemplates.inAlbumsList(track),
                     await TrackTemplates.inPlaylistsList(track),
                 ).classes("noflexwrap", "padded-large")
-                    .styles("min-height", "80dvh", "position", "inherit")
+                 .styles("min-height", "80dvh", "position", "inherit"),
             ).build();
     }
 
