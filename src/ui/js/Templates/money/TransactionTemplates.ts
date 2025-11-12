@@ -1,11 +1,13 @@
 import { TableTemplates } from "../generic/TableTemplates.ts";
 import { t } from "../../../locales";
-import { horizontal, text, vertical } from "../generic/GenericTemplates.ts";
+import { GenericTemplates, horizontal, text, vertical } from "../generic/GenericTemplates.ts";
 import { create, Signal, signal, signalMap } from "@targoninc/jess";
 import { Api } from "../../Api/Api.ts";
 import { Time } from "../../Classes/Helpers/Time.ts";
 import { Transaction } from "@targoninc/lyda-shared/dist/Models/Transaction";
 import { currency } from "../../Classes/Helpers/Num.ts";
+import { navigate } from "../../Routing/Router.ts";
+import { RoutePath } from "../../Routing/routes.ts";
 
 export class TransactionTemplates {
     static transactions(transactions: Signal<Transaction[]>) {
@@ -31,7 +33,7 @@ export class TransactionTemplates {
             data: [
                 TransactionTemplates.amount(t),
                 text(t.paymentProcessor),
-                text(t.item_name),
+                TransactionTemplates.itemName(t),
                 text(Time.agoUpdating(t.date)),
             ]
         });
@@ -48,6 +50,19 @@ export class TransactionTemplates {
         return horizontal(
             text(currency(t.total))
         ).classes("positive");
+    }
+
+    static itemName(t: Transaction) {
+        switch (t.item_type) {
+            case "subscription":
+                return GenericTemplates.inlineLink(() => navigate(RoutePath.subscribe), t.item_name);
+            case "track":
+                return GenericTemplates.inlineLink(() => navigate(`${RoutePath.track}/${t.item_id}`), t.item_name);
+            case "album":
+                return GenericTemplates.inlineLink(() => navigate(`${RoutePath.album}/${t.item_id}`), t.item_name);
+        }
+
+        return text(t.item_name);
     }
 
     static page() {
