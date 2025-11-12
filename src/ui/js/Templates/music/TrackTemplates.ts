@@ -517,7 +517,7 @@ export class TrackTemplates {
                     vertical(
                         MusicTemplates.title(EntityType.track, track.title, track.id, icons, "text-xxlarge", false),
                         horizontal(
-                            when(trackData.canDownload, GenericTemplates.pill({
+                            when(bought, GenericTemplates.pill({
                                 icon: "order_approve",
                                 onclick: () => {},
                                 text: t("BOUGHT"),
