@@ -503,170 +503,178 @@ export class TrackTemplates {
         });
         const menuShown$ = signal(false);
         const hasMenu = Util.isLoggedIn() && (trackData.canEdit || trackData.canDownload);
+        const backgroundImage = compute(c => trackData.canDownload ? `url(${c})` : "none", coverFile);
 
         return create("div")
-            .classes("single-page", "noflexwrap", "padded-large", "rounded-large", "flex-v")
+            .classes("single-page", "rounded-large", "relative")
             .children(
-                create("div")
-                    .classes("flex-v", "nogap")
-                    .children(
-                        MusicTemplates.title(EntityType.track, track.title, track.id, icons, "text-xxlarge", false),
-                        UserTemplates.userWidget({
-                            ...trackUser,
-                            displayname:
-                                track.artistname && track.artistname.trim().length > 0
-                                    ? track.artistname.trim()
-                                    : trackUser.displayname,
-                        }, [], [], UserWidgetContext.singlePage),
-                    ).build(),
-                ...toAppend,
-                create("div")
-                    .classes("track-title-container", "flex-v", "small-gap")
-                    .children(
-                        create("span").classes("collaborators").text(track.credits).build(),
-                        create("div")
-                            .classes("flex")
-                            .children(
-                                create("span")
-                                    .classes("date", "text-small")
-                                    .text(t("UPLOADED_AT", Util.formatDate(track.created_at)))
-                                    .build(),
-                                create("span")
-                                    .classes("playcount", "text-small")
-                                    .text(t("PLAYS_AMOUNT", track.plays))
-                                    .build(),
-                            ).build(),
-                    ).build(),
-                create("div")
-                    .classes("track-info-container", "flex", "align-bottom")
-                    .children(
-                        TrackTemplates.trackCover(track, "cover"),
-                        create("div")
-                            .classes("flex-v")
-                            .children(
-                                TrackTemplates.waveform(track, track.processed ? JSON.parse(track.loudness_data) : []),
-                                create("div")
-                                    .classes("flex-v")
-                                    .children(
-                                        horizontal(
-                                            TrackTemplates.playButton(track),
-                                            InteractionTemplates.interactions(EntityType.track, track),
-                                        ).classes("align-children")
-                                         .build(),
-                                    ).build(),
-                            ).build(),
-                    ).build(),
-                horizontal(
-                    when(
-                        currentUser,
-                        horizontal(
-                            button({
-                                text: t("ADD_TO_PLAYLIST"),
-                                icon: { icon: "playlist_add" },
-                                onclick: async () => {
-                                    await PlaylistActions.openAddToPlaylistModal(track, "track");
-                                },
-                            }),
-                            TrackTemplates.addToQueueButton(track),
+                when(trackData.canDownload, create("div")
+                    .classes("page-background-image")
+                    .styles("background-image", backgroundImage)
+                    .build()),
+                vertical(
+                    create("div")
+                        .classes("flex-v", "nogap")
+                        .children(
+                            MusicTemplates.title(EntityType.track, track.title, track.id, icons, "text-xxlarge", false),
+                            UserTemplates.userWidget({
+                                ...trackUser,
+                                displayname:
+                                    track.artistname && track.artistname.trim().length > 0
+                                        ? track.artistname.trim()
+                                        : trackUser.displayname,
+                            }, [], [], UserWidgetContext.singlePage),
                         ).build(),
-                    ),
-                    when(trackData.canBuy, button({
-                        icon: { icon: "attach_money" },
-                        text: t("BUY"),
-                        onclick: () => {
-                            const amount = signal<number | null>(null);
-                            const amountValid = compute(a => {
-                                return a !== null && a >= track.price && a <= track.price * 100;
-                            }, amount);
-                            let modal: AnyElement | null = null;
-                            const onClose = () => modal ? Util.removeModal(modal) : undefined;
-                            const inCheckout = signal(false);
-                            const bought = signal(false);
-
-                            modal = createModal([
-                                vertical(
-                                    horizontal(
-                                        GenericTemplates.title(t("BUY_ITEM")),
-                                        button({
-                                            text: t("CLOSE"),
-                                            icon: { icon: "close" },
-                                            onclick: onClose,
-                                        }),
-                                    ).classes("space-between"),
-                                    when(bought, vertical(
-                                        horizontal(
-                                            TrackTemplates.trackCover(track, "small-cover"),
-                                            MusicTemplates.title(EntityType.track, track.title, track.id, icons, "text-large", false),
-                                        ).classes("align-children"),
-                                        create("p")
-                                            .text(t("BUY_ITEM_INFO_TEXT"))
-                                            .build(),
-                                        create("p")
-                                            .text(t("BUY_ITEM_DELETE_WARNING"))
-                                            .build(),
-                                        create("hr"),
-                                        horizontal(
-                                            when(inCheckout, horizontal(
-                                                create("span")
-                                                    .classes("text-xxlarge", "align-end")
-                                                    .styles("line-height", "1")
-                                                    .text("$")
-                                                    .build(),
-                                                FormTemplates.moneyField(t("AMOUNT_IN_USD"), "amount", currency(track.price) + "+", amount, false, val => amount.value = val, track.price, track.price * 100, 0.10, ["bigger-input"]),
-                                            ).build(), true),
-                                            when(inCheckout, button({
-                                                text: t("CONTINUE_TO_CHECKOUT"),
-                                                icon: { icon: "shopping_cart" },
-                                                classes: ["rounded-max", "text-xlarge", "align-end", "positive"],
-                                                disabled: compute(v => !v, amountValid),
-                                                onclick: async () => inCheckout.value = true,
-                                            }), true),
-                                            TrackTemplates.buyButton(track, amount, inCheckout, () => bought.value = true),
-                                        ).classes("space-between"),
-                                        when(compute(a => a !== null && a > track.price * 100, amount), create("span")
-                                            .classes("warning")
-                                            .text(t("AMOUNT_MUST_BE_BETWEEN", currency(track.price), currency(track.price * 100)))
-                                            .build()),
-                                    ).build(), true),
-                                    when(bought, vertical(
-                                        horizontal(
-                                            heading({
-                                                level: 2,
-                                                text: t("TRACK_BOUGHT"),
-                                            }),
-                                        ).classes("align-children", "card", "text-large", "animated-background"),
-                                        create("p")
-                                            .text(t("TRACK_BOUGHT_INFO"))
-                                            .build(),
-                                        horizontal(
-                                            TrackEditTemplates.downloadAudioButton(track, ["rounded-max", "special", "text-xlarge"]),
-                                        ).classes("space-between", "align-children"),
-                                    ).build()),
-                                ).styles("max-width", "500px"),
-                            ], "buy-track");
-                        },
-                    })),
-                    when(hasMenu, horizontal(
-                        when(isPrivate, TrackTemplates.copyPrivateLinkButton(track.id, track.secretcode)),
-                        GenericTemplates.roundIconButton(
-                            { icon: "more_horiz" },
-                            () => menuShown$.value = !menuShown$.value,
-                            "Show menu"),
-                        GenericTemplates.menu(compute(s => s, menuShown$),
-                            when(trackData.canDownload, TrackEditTemplates.downloadAudioButton(track)),
-                            when(trackData.canEdit, vertical(
-                                TrackEditTemplates.addToAlbumsButton(track),
-                                TrackEditTemplates.replaceAudioButton(track),
-                                TrackEditTemplates.openEditPageButton(track),
-                                TrackEditTemplates.deleteTrackButton(track.id),
-                            ).build()),
+                    ...toAppend,
+                    create("div")
+                        .classes("track-title-container", "flex-v", "small-gap")
+                        .children(
+                            create("span").classes("collaborators").text(track.credits).build(),
+                            create("div")
+                                .classes("flex")
+                                .children(
+                                    create("span")
+                                        .classes("date", "text-small")
+                                        .text(t("UPLOADED_AT", Util.formatDate(track.created_at)))
+                                        .build(),
+                                    create("span")
+                                        .classes("playcount", "text-small")
+                                        .text(t("PLAYS_AMOUNT", track.plays))
+                                        .build(),
+                                ).build(),
+                        ).build(),
+                    create("div")
+                        .classes("track-info-container", "flex", "align-bottom")
+                        .children(
+                            TrackTemplates.trackCover(track, "cover"),
+                            create("div")
+                                .classes("flex-v")
+                                .children(
+                                    TrackTemplates.waveform(track, track.processed ? JSON.parse(track.loudness_data) : []),
+                                    create("div")
+                                        .classes("flex-v")
+                                        .children(
+                                            horizontal(
+                                                TrackTemplates.playButton(track),
+                                                InteractionTemplates.interactions(EntityType.track, track),
+                                            ).classes("align-children")
+                                             .build(),
+                                        ).build(),
+                                ).build(),
+                        ).build(),
+                    horizontal(
+                        when(
+                            currentUser,
+                            horizontal(
+                                button({
+                                    text: t("ADD_TO_PLAYLIST"),
+                                    icon: { icon: "playlist_add" },
+                                    onclick: async () => {
+                                        await PlaylistActions.openAddToPlaylistModal(track, "track");
+                                    },
+                                }),
+                                TrackTemplates.addToQueueButton(track),
+                            ).build(),
                         ),
-                    ).classes("relative", "align-children").build()),
-                ).classes("align-children"),
-                when(track.description.length > 0, description),
-                CommentTemplates.commentListFullWidth(track.id, comments, showComments),
-                TrackTemplates.inAlbumsList(track),
-                await TrackTemplates.inPlaylistsList(track),
+                        when(trackData.canBuy, button({
+                            icon: { icon: "attach_money" },
+                            text: t("BUY"),
+                            onclick: () => {
+                                const amount = signal<number | null>(null);
+                                const amountValid = compute(a => {
+                                    return a !== null && a >= track.price && a <= track.price * 100;
+                                }, amount);
+                                let modal: AnyElement | null = null;
+                                const onClose = () => modal ? Util.removeModal(modal) : undefined;
+                                const inCheckout = signal(false);
+                                const bought = signal(false);
+
+                                modal = createModal([
+                                    vertical(
+                                        horizontal(
+                                            GenericTemplates.title(t("BUY_ITEM")),
+                                            button({
+                                                text: t("CLOSE"),
+                                                icon: { icon: "close" },
+                                                onclick: onClose,
+                                            }),
+                                        ).classes("space-between"),
+                                        when(bought, vertical(
+                                            horizontal(
+                                                TrackTemplates.trackCover(track, "small-cover"),
+                                                MusicTemplates.title(EntityType.track, track.title, track.id, icons, "text-large", false),
+                                            ).classes("align-children"),
+                                            create("p")
+                                                .text(t("BUY_ITEM_INFO_TEXT"))
+                                                .build(),
+                                            create("p")
+                                                .text(t("BUY_ITEM_DELETE_WARNING"))
+                                                .build(),
+                                            create("hr"),
+                                            horizontal(
+                                                when(inCheckout, horizontal(
+                                                    create("span")
+                                                        .classes("text-xxlarge", "align-end")
+                                                        .styles("line-height", "1")
+                                                        .text("$")
+                                                        .build(),
+                                                    FormTemplates.moneyField(t("AMOUNT_IN_USD"), "amount", currency(track.price) + "+", amount, false, val => amount.value = val, track.price, track.price * 100, 0.10, ["bigger-input"]),
+                                                ).build(), true),
+                                                when(inCheckout, button({
+                                                    text: t("CONTINUE_TO_CHECKOUT"),
+                                                    icon: { icon: "shopping_cart" },
+                                                    classes: ["rounded-max", "text-xlarge", "align-end", "positive"],
+                                                    disabled: compute(v => !v, amountValid),
+                                                    onclick: async () => inCheckout.value = true,
+                                                }), true),
+                                                TrackTemplates.buyButton(track, amount, inCheckout, () => bought.value = true),
+                                            ).classes("space-between"),
+                                            when(compute(a => a !== null && a > track.price * 100, amount), create("span")
+                                                .classes("warning")
+                                                .text(t("AMOUNT_MUST_BE_BETWEEN", currency(track.price), currency(track.price * 100)))
+                                                .build()),
+                                        ).build(), true),
+                                        when(bought, vertical(
+                                            horizontal(
+                                                heading({
+                                                    level: 2,
+                                                    text: t("TRACK_BOUGHT"),
+                                                }),
+                                            ).classes("align-children", "card", "text-large", "animated-background"),
+                                            create("p")
+                                                .text(t("TRACK_BOUGHT_INFO"))
+                                                .build(),
+                                            horizontal(
+                                                TrackEditTemplates.downloadAudioButton(track, ["rounded-max", "special", "text-xlarge"]),
+                                            ).classes("space-between", "align-children"),
+                                        ).build()),
+                                    ).styles("max-width", "500px"),
+                                ], "buy-track");
+                            },
+                        })),
+                        when(hasMenu, horizontal(
+                            when(isPrivate, TrackTemplates.copyPrivateLinkButton(track.id, track.secretcode)),
+                            GenericTemplates.roundIconButton(
+                                { icon: "more_horiz" },
+                                () => menuShown$.value = !menuShown$.value,
+                                "Show menu"),
+                            GenericTemplates.menu(compute(s => s, menuShown$),
+                                when(trackData.canDownload, TrackEditTemplates.downloadAudioButton(track)),
+                                when(trackData.canEdit, vertical(
+                                    TrackEditTemplates.addToAlbumsButton(track),
+                                    TrackEditTemplates.replaceAudioButton(track),
+                                    TrackEditTemplates.openEditPageButton(track),
+                                    TrackEditTemplates.deleteTrackButton(track.id),
+                                ).build()),
+                            ),
+                        ).classes("relative", "align-children").build()),
+                    ).classes("align-children"),
+                    when(track.description.length > 0, description),
+                    CommentTemplates.commentListFullWidth(track.id, comments, showComments),
+                    TrackTemplates.inAlbumsList(track),
+                    await TrackTemplates.inPlaylistsList(track),
+                ).classes("noflexwrap", "padded-large")
+                    .styles("min-height", "80dvh", "position", "inherit")
             ).build();
     }
 

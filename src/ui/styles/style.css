@@ -743,6 +743,7 @@ details > *:not(summary) {
 
 .rounded-large {
     border-radius: var(--large-border-radius);
+    overflow: hidden;
 }
 
 .rounded-50 {
