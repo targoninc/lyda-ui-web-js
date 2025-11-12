@@ -1,7 +1,7 @@
 import { TableTemplates } from "../generic/TableTemplates.ts";
 import { t } from "../../../locales";
 import { GenericTemplates, horizontal, text, vertical } from "../generic/GenericTemplates.ts";
-import { create, Signal, signal, signalMap } from "@targoninc/jess";
+import { compute, create, Signal, signal, signalMap, StringOrSignal } from "@targoninc/jess";
 import { Api } from "../../Api/Api.ts";
 import { Time } from "../../Classes/Helpers/Time.ts";
 import { Transaction } from "@targoninc/lyda-shared/dist/Models/Transaction";
@@ -11,19 +11,33 @@ import { RoutePath } from "../../Routing/routes.ts";
 
 export class TransactionTemplates {
     static transactions(transactions: Signal<Transaction[]>) {
-        return TableTemplates.table(
-            false,
-            TableTemplates.tableHeaders<Transaction>([
-                { title: t("AMOUNT_IN_USD"), property: "total" },
-                { title: t("PAYMENT_PROCESSOR"), property: "paymentProcessor" },
-                { title: t("ITEM"), property: "item_name" },
-                { title: t("DATE"), property: "date" },
-            ]),
-            signalMap(
-                transactions,
-                create("tbody"),
-                t => TransactionTemplates.transaction(t)
+        return vertical(
+            horizontal(
+                compute(trans => TransactionTemplates.amountCard(
+                    trans.filter(tr => tr.direction === "in")
+                        .reduce((a, b) => a + (b.total - b.fees - b.tax), 0),
+                    t("TOTAL_RECEIVED"),
+                ), transactions),
+                compute(trans => TransactionTemplates.amountCard(
+                    trans.filter(tr => tr.direction === "out")
+                        .reduce((a, b) => a + b.total, 0),
+                    t("TOTAL_PAID"),
+                ), transactions),
             ),
+            TableTemplates.table(
+                false,
+                TableTemplates.tableHeaders<Transaction>([
+                    { title: t("AMOUNT_IN_USD"), property: "total" },
+                    { title: t("PAYMENT_PROCESSOR"), property: "paymentProcessor" },
+                    { title: t("ITEM"), property: "item_name" },
+                    { title: t("DATE"), property: "date" },
+                ]),
+                signalMap(
+                    transactions,
+                    create("tbody"),
+                    t => TransactionTemplates.transaction(t)
+                ),
+            )
         )
     }
 
@@ -80,5 +94,12 @@ export class TransactionTemplates {
         return vertical(
             TransactionTemplates.transactions(trans$)
         ).build();
+    }
+
+    private static amountCard(amount: number, label: StringOrSignal) {
+        return vertical(
+            text(currency(amount)).classes("text-xxlarge"),
+            text(label),
+        ).classes("card", "nogap").build();
     }
 }
