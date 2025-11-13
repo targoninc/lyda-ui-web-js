@@ -134,6 +134,15 @@ loopMode.subscribe((newMode, changed) => {
         Api.setCacheKey(UserCacheKey.loopMode, newMode).then();
     }
 });
+export const shuffling = signal(false);
+shuffling.value = LydaCache.get<boolean>(UserCacheKey.shuffling).content ?? false;
+shuffling.subscribe((p, changed) => {
+    if (!changed) {
+        return;
+    }
+    LydaCache.set(UserCacheKey.shuffling, new CacheItem(p));
+    Api.setCacheKey(UserCacheKey.shuffling, p.toString()).then();
+});
 
 export const currentUser = signal<User|null>(null);
 let cacheFetched = false;

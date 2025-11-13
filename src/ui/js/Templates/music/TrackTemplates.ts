@@ -532,41 +532,31 @@ export class TrackTemplates {
                         ).classes("align-children"),
                     ).classes("nogap"),
                     ...toAppend,
-                    create("div")
-                        .classes("track-title-container", "flex-v", "small-gap")
-                        .children(
-                            create("span").classes("collaborators").text(track.credits).build(),
-                            horizontal(
-                                create("span")
-                                    .classes("date", "text-small")
-                                    .text(t("UPLOADED_AT", Util.formatDate(track.created_at)))
-                                    .build(),
-                                create("span")
-                                    .classes("playcount", "text-small")
-                                    .text(t("PLAYS_AMOUNT", track.plays))
-                                    .build(),
-                            ).classes("align-children"),
-                        ).build(),
+                    vertical(
+                        create("span").classes("collaborators").text(track.credits).build(),
+                        horizontal(
+                            create("span")
+                                .classes("date", "text-small")
+                                .text(t("UPLOADED_AT", Util.formatDate(track.created_at)))
+                                .build(),
+                            create("span")
+                                .classes("playcount", "text-small")
+                                .text(t("PLAYS_AMOUNT", track.plays))
+                                .build(),
+                        ).classes("align-children"),
+                    ).classes("small-gap"),
                     create("div")
                         .classes("track-info-container", "flex", "align-bottom")
                         .children(
                             TrackTemplates.trackCover(track, "cover"),
-                            create("div")
-                                .classes("flex-v")
-                                .children(
-                                    TrackTemplates.waveform(track, track.processed ? JSON.parse(track.loudness_data) : []),
-                                    create("div")
-                                        .classes("flex-v")
-                                        .children(
-                                            horizontal(
-                                                TrackTemplates.playButton(track),
-                                                InteractionTemplates.interactions(EntityType.track, track),
-                                            ).classes("align-children")
-                                             .build(),
-                                        ).build(),
-                                ).build(),
+                            horizontal(
+                                TrackTemplates.playButton(track),
+                                TrackTemplates.waveform(track, track.processed ? JSON.parse(track.loudness_data) : []),
+                            ).classes("align-children", "padded-large", "bordered", "glass", "rounded-max")
+                             .styles("padding-right", "30px"),
                         ).build(),
                     horizontal(
+                        InteractionTemplates.interactions(EntityType.track, track),
                         when(
                             currentUser,
                             horizontal(
