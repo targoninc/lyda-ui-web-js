@@ -1,6 +1,27 @@
 import { Translation } from "./index.ts";
 
 export const de: Translation = {
+    ACTIONED_USER: "",
+    ACTION_NAME: "Aktion",
+    AMOUNT_IN_USD: "Menge in USD",
+    AMOUNT_MUST_BE_BETWEEN: (min, max) => `Muss zwischen ${min} und ${max} liegen`,
+    BOUGHT: "Gekauft",
+    BUY: "Kaufen",
+    BUY_ITEM: "Inhalt kaufen",
+    BUY_ITEM_DELETE_WARNING: "Wenn dieser Inhalt gelöscht wird, wirst du keinen Zugriff mehr auf ihn haben. Lade ihn nach dem Kauf direkt runter, damit du den Zugang nicht verlierst.",
+    BUY_ITEM_INFO_TEXT: "Diesen Inhalt zu kaufen unterstützt die Künstler. Enthält verlustfreien Audiodownload.",
+    CHOOSE_CHECKOUT_OPTION: amount => `Wähle Zahlungsmethode (${amount})`,
+    CONTINUE_TO_CHECKOUT: "Weiter zur Zahlung",
+    DATE: "Datum",
+    ITEM: "Inhalt",
+    PAYMENT_PROCESSOR: "Zahlungsdienstleister",
+    RECEIVER: "Empfänger",
+    TOGGLE_SHUFFLE: "Zufällige Wiedergabe",
+    TOTAL_PAID: "Gesamt bezahlt",
+    TOTAL_RECEIVED: "Gesamt erhalten",
+    TRACK_BOUGHT: "Track gekauft",
+    TRACK_BOUGHT_INFO: "Du hast erfolgreich diesen Track gekauft. Du kannst ihn nun herunterladen und offline hören!",
+    USER: "Nutzer",
     EDIT_DISPLAYNAME: "Anzeigename bearbeiten",
     EDIT_USERNAME: "Benutzername bearbeiten",
     ENTER_NEW_DESCRIPTION: "Neue Beschreibung eingeben",
@@ -509,5 +530,5 @@ export const de: Translation = {
     VERIFIED_ON: date => `Am ${date} verifiziert`,
     SECTION_HAS_ERRORS: "Diese Sektion hat Fehler",
     IMPRINT: "Impressum, Servicebedingungen und Datenschutzerklärung",
-    PAYMENT_INFO: "Zahlungsinformationen",
+    PAYMENT_INFO: "Zahlungsinformationen"
 };
