@@ -67,3 +67,7 @@ button.inert {
 .interaction-count.active {
     color: var(--green-dark);
 }
+
+.border-card, .tight-border-card {
+    background: var(--color-9);
+}

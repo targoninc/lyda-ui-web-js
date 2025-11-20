@@ -300,19 +300,10 @@ export class UserTemplates {
         if (following.constructor !== Signal) {
             following = signal(following as boolean);
         }
+        const text = noText ? "" : compute((f): string => (f ? `${t("UNFOLLOW")}` : `${t("FOLLOW")}`), following);
 
-        return button({
-            icon: {
-                icon: compute(f => (f ? Icons.UNFOLLOW : Icons.FOLLOW), following),
-                isUrl: true,
-                adaptive: true,
-                classes: ["svg"],
-            },
-            text: noText ? "" : compute((f): string => (f ? `${t("UNFOLLOW")}` : `${t("FOLLOW")}`), following),
-            onclick: async () => {
-                await TrackActions.toggleFollow(user_id, following);
-            },
-        });
+        return GenericTemplates.textButton(text, async () => TrackActions.toggleFollow(user_id, following),
+            compute(f => (f ? Icons.UNFOLLOW : Icons.FOLLOW), following));
     }
 
     static followsBackIndicator() {
