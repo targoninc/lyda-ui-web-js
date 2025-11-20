@@ -193,6 +193,7 @@ export class MusicTemplates {
         };
         const isLoading = compute((id, loading) => id === itemId && loading, currentTrackId, loadingAudio);
         const icon = getPlayIcon(isPlaying, isLoading);
+        const disabledClass = compute((l): string => l ? "disabled" : "_", loadingAudio);
 
         return GenericTemplates.roundIconButton(
             {
@@ -201,6 +202,8 @@ export class MusicTemplates {
                 classes: [compute((l): string => l ? "spinner-animation" : "_", isLoading)],
             },
             onclick,
+            t("PLAY_PAUSE"),
+            [disabledClass],
         );
     }
 

@@ -137,7 +137,19 @@ export class Icons {
         return Icons.ICON("check");
     }
 
+    /**
+     * Maybe we need an AI feature at some point lmao
+     * @constructor
+     */
     static get STARS() {
         return Icons.ICON("stars");
+    }
+
+    static get SHUFFLE_ON() {
+        return Icons.ICON("shuffle_on");
+    }
+
+    static get SHUFFLE_OFF() {
+        return Icons.ICON("shuffle_off");
     }
 }

@@ -318,20 +318,12 @@ export class PlayManager {
     }
 
     static async nextLoopMode() {
-        switch (loopMode.value) {
-            case LoopMode.off:
-                loopMode.value = LoopMode.single;
-                break;
-            case LoopMode.single:
-                loopMode.value = LoopMode.context;
-                break;
-            case LoopMode.context:
-                loopMode.value = LoopMode.off;
-                break;
-        }
-
-        const streamClient = PlayManager.getStreamClient(currentTrackId.value);
-        streamClient.setLoop(loopMode.value === LoopMode.single);
+        const nextModes: Record<LoopMode, LoopMode> = {
+            off: LoopMode.single,
+            single: LoopMode.context,
+            context: LoopMode.off,
+        };
+        loopMode.value = nextModes[loopMode.value];
     }
 
     static async scrubTo(id: number, value: number) {

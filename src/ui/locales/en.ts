@@ -306,6 +306,7 @@ export const en = {
     TOGGLE_EXPANDED_PLAYER: "Toggle expanded player",
     OPEN_MENU: "Open menu",
     CHANGE_LOOP_MODE: "Change loop mode",
+    TOGGLE_SHUFFLE: "Toggle shuffle",
     PLAYER: "Player",
     NO_PLAYLISTS_FOUND: "No playlists found",
     ADD_TITLE_TO_PLAYLIST: title => `Add ${title} to playlist`,

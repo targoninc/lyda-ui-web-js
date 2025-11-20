@@ -21,6 +21,7 @@ import {
     playingElsewhere,
     playingFrom,
     playingHere,
+    shuffling,
     trackInfo,
     volume,
 } from "../../state.ts";
@@ -63,6 +64,7 @@ export class PlayerTemplates {
                 create("div")
                     .classes("flex", "align-center", "align-children")
                     .children(
+                        PlayerTemplates.shuffleButton(),
                         GenericTemplates.roundIconButton(
                             {
                                 icon: "skip_previous",
@@ -177,6 +179,8 @@ export class PlayerTemplates {
     }
 
     private static roundPlayButton(track: Track) {
+        const disabledClass = compute((l): string => l ? "disabled" : "_", loadingAudio);
+
         return GenericTemplates.roundIconButton(
             {
                 icon: getPlayIcon(playingHere, loadingAudio),
@@ -187,7 +191,7 @@ export class PlayerTemplates {
                 PlayManager.togglePlayAsync(track.id).then();
             },
             t("PLAY_PAUSE"),
-            ["special", "bigger-input", "rounded-max"],
+            ["special", "bigger-input", "rounded-max", disabledClass],
         );
     }
 
@@ -519,10 +523,20 @@ export class PlayerTemplates {
                 adaptive: true,
                 isUrl: true,
             },
-            async () => {
-                await PlayManager.nextLoopMode();
-            },
+            PlayManager.nextLoopMode,
             t("CHANGE_LOOP_MODE"),
+        );
+    }
+
+    static shuffleButton() {
+        return GenericTemplates.roundIconButton(
+            {
+                icon: compute(s => s ? Icons.SHUFFLE_ON : Icons.SHUFFLE_OFF, shuffling),
+                adaptive: true,
+                isUrl: true,
+            },
+            () => shuffling.value = !shuffling.value,
+            t("TOGGLE_SHUFFLE"),
         );
     }
 

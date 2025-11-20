@@ -978,11 +978,13 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 .tab:first-child {
     border-top-left-radius: 999px;
     border-bottom-left-radius: 999px;
+    padding-left: 1em;
 }
 
 .tab:last-child {
     border-top-right-radius: 999px;
     border-bottom-right-radius: 999px;
+    padding-right: 1em;
 }
 
 .royalty-info-text {
