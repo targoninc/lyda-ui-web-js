@@ -300,10 +300,6 @@
     align-items: center;
 }
 
-.stats-indicator.positive:not(.inert) {
-    border-color: var(--green);
-}
-
 .text-positive {
     color: var(--green) !important;
 }
