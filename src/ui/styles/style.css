@@ -1041,6 +1041,10 @@ td:last-child, th:last-child {
     display: flex !important;
 }
 
+.blurOnParentHover {
+    transition: filter .5s ease;
+}
+
 *:hover > .blurOnParentHover {
     filter: brightness(0.3) blur(1px);
 }
