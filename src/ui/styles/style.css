@@ -467,8 +467,8 @@ button.positive.active {
 }
 
 button.inert {
-    border-color: var(--color-7);
-    background-color: var(--color-7);
+    border-color: var(--color-9);
+    background-color: var(--color-6);
     pointer-events: none;
 }
 

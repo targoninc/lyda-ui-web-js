@@ -95,3 +95,11 @@ button.inert {
 .mobile-menu-close {
     background: var(--jessc-interactive-background);
 }
+
+.interaction-count {
+    background: var(--color-9);
+}
+
+.interaction-count.active {
+    color: var(--green-dark);
+}

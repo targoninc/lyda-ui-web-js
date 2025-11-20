@@ -58,7 +58,7 @@ export class InteractionTemplates {
                 }, () => toggleInteraction(entityType, interactionType, config, entity.id, interacted$, count$), interactionType,
                     ["positive", stateClass$, "stats-indicator", inertClass]),
                 when(metadata.count !== undefined && metadata.count !== null && showCount, create("span")
-                    .classes("interaction-count")
+                    .classes("interaction-count", stateClass$)
                     .text(count$ as HtmlPropertyValue)
                     .build()),
             ).build();
