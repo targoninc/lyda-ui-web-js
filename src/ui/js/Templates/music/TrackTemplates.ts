@@ -216,8 +216,8 @@ export class TrackTemplates {
 
     static #paginationControls(currentPage: number, previousCallback: Function, nextCallback: Function, nextDisabled = false) {
         return horizontal(
-            GenericTemplates.roundIconButton({ icon: "arrow_back_ios_new" }, previousCallback, "", [currentPage === 1 ? "disabled" : "_"]),
-            GenericTemplates.roundIconButton({ icon: "arrow_forward_ios" }, nextCallback, "", [(currentPage === Infinity || nextDisabled) ? "disabled" : "_"]),
+            GenericTemplates.roundIconButton({ icon: "arrow_back_ios_new" }, previousCallback, "", [currentPage === 1 ? "disabled" : "_", "pagination-button"]),
+            GenericTemplates.roundIconButton({ icon: "arrow_forward_ios" }, nextCallback, "", [(currentPage === Infinity || nextDisabled) ? "disabled" : "_", "pagination-button"]),
         ).build();
     }
 
