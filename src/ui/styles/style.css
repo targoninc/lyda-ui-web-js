@@ -395,6 +395,10 @@ input, textarea, select {
     height: max-content;
 }
 
+input.round-input, textarea.round-input, select.round-input {
+    border-radius: 999px;
+}
+
 input:focus-visible, textarea:focus-visible, select:focus-visible {
     border-color: var(--jessc-interactive-border-focused);
     background: var(--jessc-interactive-background-hover);

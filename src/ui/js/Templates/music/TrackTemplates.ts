@@ -167,6 +167,7 @@ export class TrackTemplates {
                             name: "tracks-filter",
                             placeholder: t("SEARCH"),
                             debounce: 200,
+                            classes: ["round-input"],
                             onchange: value => search.value = value,
                             value: search,
                         })),
