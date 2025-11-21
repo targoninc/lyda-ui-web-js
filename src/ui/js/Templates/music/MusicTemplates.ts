@@ -31,6 +31,7 @@ import { TrackList } from "../../Models/TrackList.ts";
 import { CardFeedType, entityTypeByCardFeedType } from "../../Enums/CardFeedType.ts";
 import { FeedItem } from "../../Models/FeedItem.ts";
 import { Visibility } from "@targoninc/lyda-shared/src/Enums/Visibility";
+import { truncateText } from "../../Classes/Helpers/CustomText.ts";
 
 export class MusicTemplates {
     static feedEntry(type: EntityType, item: FeedItem, feedType: FeedType) {
@@ -410,7 +411,7 @@ export class MusicTemplates {
             .children(
                 create("span")
                     .classes(...(goToEntity ? ["clickable", "pointer"] : ["_"]), textSize)
-                    .text(title)
+                    .text(truncateText(title, 80))
                     .onclick(() => goToEntity ? navigate(`${baseRoute}/${id}`) : null)
                     .build(),
                 ...icons,
