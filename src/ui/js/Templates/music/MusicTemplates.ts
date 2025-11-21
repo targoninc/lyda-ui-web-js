@@ -60,27 +60,23 @@ export class MusicTemplates {
                             .classes("flex", "flex-grow", "no-gap", "space-between")
                             .children(
                                 create("div")
-                                    .classes("flex")
+                                    .classes("flex-v", "flex-grow", "no-gap")
                                     .children(
                                         create("div")
-                                            .classes("flex-v", "flex-grow", "no-gap")
+                                            .classes("flex")
                                             .children(
-                                                create("div")
-                                                    .classes("flex")
-                                                    .children(
-                                                        MusicTemplates.title(type, item.title, item.id, icons),
-                                                        item.collab ? TrackTemplates.collabIndicator(item.collab) : null,
-                                                        item.repost ? TrackTemplates.repostIndicator(item.repost) : null,
-                                                    ).build(),
-                                                create("div")
-                                                    .classes("flex")
-                                                    .children(
-                                                        UserTemplates.userLink(UserWidgetContext.card, item.user!),
-                                                        create("span")
-                                                            .classes("date", "text-small", "nopointer", "color-dim", "align-center")
-                                                            .text(Time.ago(item.created_at))
-                                                            .build(),
-                                                    ).build(),
+                                                MusicTemplates.title(type, item.title, item.id, icons),
+                                                item.collab ? TrackTemplates.collabIndicator(item.collab) : null,
+                                                item.repost ? TrackTemplates.repostIndicator(item.repost) : null,
+                                            ).build(),
+                                        create("div")
+                                            .classes("flex")
+                                            .children(
+                                                UserTemplates.userLink(UserWidgetContext.card, item.user!),
+                                                create("span")
+                                                    .classes("date", "text-small", "nopointer", "color-dim", "align-center")
+                                                    .text(Time.ago(item.created_at))
+                                                    .build(),
                                             ).build(),
                                     ).build(),
                                 create("div")
