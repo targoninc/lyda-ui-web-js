@@ -1,6 +1,6 @@
 import { Icons } from "../../Enums/Icons.ts";
 import { AlbumActions } from "../../Actions/AlbumActions.ts";
-import { GenericTemplates, horizontal } from "../generic/GenericTemplates.ts";
+import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { TrackTemplates } from "./TrackTemplates.ts";
 import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
@@ -308,20 +308,18 @@ export class AlbumTemplates {
                                     .alt(album.title)
                                     .build(),
                             ).build(),
-                        create("div")
-                            .classes("flex-v")
-                            .children(
-                                AlbumTemplates.audioActions(album, canEdit),
-                                create("div")
-                                    .classes("album-title-container", "flex-v", "small-gap")
-                                    .children(
-                                        create("span")
-                                            .classes("date", "text-small")
-                                            .text(t("RELEASED_AT", Util.formatDate(album.release_date)))
-                                            .build(),
-                                    ).build(),
-                                InteractionTemplates.interactions(EntityType.album, album),
-                            ).build(),
+                        vertical(
+                            AlbumTemplates.audioActions(album, canEdit),
+                            create("div")
+                                .classes("album-title-container", "flex-v", "small-gap")
+                                .children(
+                                    create("span")
+                                        .classes("date", "text-small")
+                                        .text(t("RELEASED_AT", Util.formatDate(album.release_date)))
+                                        .build(),
+                                ).build(),
+                            InteractionTemplates.interactions(EntityType.album, album),
+                        ),
                     ).build(),
                 TrackTemplates.tracksInList(noTracks, tracks, canEdit, album, "album", startCallback),
             ).build();
@@ -414,7 +412,7 @@ export class AlbumTemplates {
                         await PlaylistActions.openAddToPlaylistModal(album, "album");
                     },
                 }),
-            ).build()),
+            ).classes("align-children").build()),
             when(canEdit, button({
                 text: t("EDIT"),
                 icon: { icon: "edit" },
