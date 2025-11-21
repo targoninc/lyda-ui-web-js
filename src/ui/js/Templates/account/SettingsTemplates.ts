@@ -231,6 +231,11 @@ export class SettingsTemplates {
                     "collaboration",
                     getUserSettingValue(user, UserSettings.notificationCollaboration),
                 ),
+                SettingsTemplates.notificationToggle(
+                    t("NOTIFS_SALE"),
+                    "sale",
+                    getUserSettingValue(user, UserSettings.notificationSale),
+                ),
             ).build();
     }
 
