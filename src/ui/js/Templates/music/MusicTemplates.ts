@@ -411,6 +411,7 @@ export class MusicTemplates {
             .children(
                 create("span")
                     .classes(...(goToEntity ? ["clickable", "pointer"] : ["_"]), textSize)
+                    .title(title)
                     .text(truncateText(title, 80))
                     .onclick(() => goToEntity ? navigate(`${baseRoute}/${id}`) : null)
                     .build(),
