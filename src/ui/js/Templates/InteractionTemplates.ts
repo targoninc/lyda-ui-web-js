@@ -9,7 +9,7 @@ import { Icons } from "../Enums/Icons.ts";
 import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import { currentUser } from "../state.ts";
-import { Visibility } from "@targoninc/lyda-shared/dist/Enums/Visibility";
+import { Visibility } from "@targoninc/lyda-shared/src/Enums/Visibility";
 import { Api } from "../Api/Api.ts";
 import { InteractionOptions } from "../Models/InteractionOptions.ts";
 
@@ -47,7 +47,7 @@ export class InteractionTemplates {
         const icon$ = compute(i => i ? config.icons.interacted : config.icons.default, interacted$);
         const stateClass$ = compute((s: boolean): string => s ? "active" : "_", interacted$);
         const inertClass = config.toggleable ? "_" : "inert";
-        const disabledClass$ = compute((u): string => (!u || (entity.visibility === "private" && inertClass !== "inert")) ? "disabled" : "_", currentUser);
+        const disabledClass$ = compute((u): string => (!u || (entity.visibility === Visibility.private && inertClass !== "inert")) ? "disabled" : "_", currentUser);
 
         return create("div")
             .classes("flex", "align-children", disabledClass$)

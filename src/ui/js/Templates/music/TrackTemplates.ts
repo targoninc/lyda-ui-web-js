@@ -61,11 +61,14 @@ import {
     CreateOrderData,
     OnApproveActions,
     OnApproveData,
+// @ts-expect-error bc idek
 } from "@paypal/paypal-js/types/components/buttons";
 import { Api } from "../../Api/Api.ts";
 import { PaymentProvider } from "@targoninc/lyda-shared/src/Enums/PaymentProvider";
 import { FormTemplates } from "../generic/FormTemplates.ts";
 import { currency } from "../../Classes/Helpers/Num.ts";
+import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
+import { FeedItem } from "../../Models/FeedItem.ts";
 
 export class TrackTemplates {
     static collabIndicator(collab: TrackCollaborator): any {
@@ -145,15 +148,15 @@ export class TrackTemplates {
     }
 
     static trackListWithPagination(
-        tracks$: Signal<Track[]>,
+        items$: Signal<FeedItem[]>,
         pageState: Signal<number>,
-        type: string,
+        type: FeedType,
         loading$: Signal<boolean>,
         search: Signal<string>,
         nextDisabled: Signal<boolean>,
         hasSearch: TypeOrSignal<boolean>,
     ) {
-        const empty = compute((t, l) => t.length === 0 && !l, tracks$, loading$);
+        const empty = compute((t, l) => t.length === 0 && !l, items$, loading$);
 
         return create("div")
             .classes("flex-v", "fullHeight", "fullWidth")
@@ -172,16 +175,16 @@ export class TrackTemplates {
                             value: search,
                         })),
                     ).classes("align-children"),
-                    type === "following" ? TrackTemplates.feedFilters(search) : nullElement(),
+                    type === FeedType.following ? TrackTemplates.feedFilters(search) : nullElement(),
                 ).classes("space-between", "align-children")
                  .build(),
                 when(loading$, GenericTemplates.loadingSpinner()),
                 compute(
                     list =>
                         TrackTemplates.trackList(
-                            list.reverse().map(track => MusicTemplates.feedEntry(EntityType.track, track)),
+                            list.reverse().map(track => MusicTemplates.feedEntry(EntityType.track, track, type)),
                         ),
-                    tracks$,
+                    items$,
                 ),
                 when(empty, GenericTemplates.noTracks()),
                 TrackTemplates.paginationControls(pageState, nextDisabled),

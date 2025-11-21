@@ -1,6 +1,5 @@
 import { Icons } from "../../Enums/Icons.ts";
 import { AlbumActions } from "../../Actions/AlbumActions.ts";
-import { Time } from "../../Classes/Helpers/Time.ts";
 import { GenericTemplates, horizontal } from "../generic/GenericTemplates.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { TrackTemplates } from "./TrackTemplates.ts";
@@ -23,6 +22,7 @@ import { InteractionTemplates } from "../InteractionTemplates.ts";
 import { MusicTemplates } from "./MusicTemplates.ts";
 import { Api } from "../../Api/Api.ts";
 import { t } from "../../../locales";
+import { Visibility } from "@targoninc/lyda-shared/src/Enums/Visibility";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
@@ -118,7 +118,7 @@ export class AlbumTemplates {
             upc: "",
             description: "",
             release_date: new Date(),
-            visibility: "private",
+            visibility: Visibility.private,
         });
         const disabled = compute((s) => {
             return !s.title || s.title === "";
@@ -246,41 +246,9 @@ export class AlbumTemplates {
                     text: t("PRIVATE"),
                     checked: visibility,
                     onchange: (v) => {
-                        album.value = { ...album.value, visibility: v ? "private" : "public" };
+                        album.value = { ...album.value, visibility: v ? Visibility.private : Visibility.public };
                     },
                 }),
-            ).build();
-    }
-
-    static albumCard(album: Album, isSecondary = false) {
-        if (!album.user) {
-            throw new Error(`Album has no user: ${album.id}`);
-        }
-
-        const icons = [];
-        if (album.visibility === "private") {
-            icons.push(GenericTemplates.lock());
-        }
-
-        return create("div")
-            .classes("album-card", "padded", "flex-v", "small-gap", isSecondary ? "secondary" : "_")
-            .children(
-                create("div")
-                    .classes("flex")
-                    .children(
-                        MusicTemplates.cover(EntityType.album, album, "card-cover"),
-                        create("div")
-                            .classes("flex-v", "small-gap")
-                            .children(
-                                MusicTemplates.title(EntityType.album, album.title, album.id, icons),
-                                UserTemplates.userWidget(album.user, [], [], UserWidgetContext.card),
-                                create("span")
-                                    .classes("date", "text-small", "nopointer", "color-dim")
-                                    .text(Time.ago(album.release_date))
-                                    .build(),
-                            ).build(),
-                    ).build(),
-                InteractionTemplates.interactions(EntityType.album, album),
             ).build();
     }
 

@@ -21,6 +21,7 @@ import { loadingAudio, playingFrom, playingHere } from "../../state.ts";
 import { MusicTemplates } from "./MusicTemplates.ts";
 import { Api } from "../../Api/Api.ts";
 import { t } from "../../../locales";
+import { Visibility } from "@targoninc/lyda-shared/src/Enums/Visibility.ts";
 
 export class PlaylistTemplates {
     static addTrackToPlaylistModal(track: Track, playlists: Playlist[]) {
@@ -147,7 +148,7 @@ export class PlaylistTemplates {
         });
         const name = compute(s => s.title ?? "", playlist);
         const description = compute(s => s.description ?? "", playlist);
-        const visibility = compute(s => s.visibility === "private", playlist);
+        const visibility = compute(s => s.visibility === Visibility.private, playlist);
         const disabled = compute(s => {
             return !s.title || s.title === "";
         }, playlist);
@@ -195,7 +196,7 @@ export class PlaylistTemplates {
                             text: t("PRIVATE"),
                             checked: visibility,
                             onchange: (v) => {
-                                playlist.value = { ...playlist.value, visibility: v ? "private" : "public" };
+                                playlist.value = { ...playlist.value, visibility: v ? Visibility.private : Visibility.public };
                             },
                         }),
                     ).build(),
@@ -244,7 +245,7 @@ export class PlaylistTemplates {
 
     static playlistCard(playlist: Playlist, isSecondary: boolean = false) {
         const icons = [];
-        if (playlist.visibility === "private") {
+        if (playlist.visibility === Visibility.private) {
             icons.push(GenericTemplates.lock());
         }
         const coverState = signal(Images.DEFAULT_COVER_PLAYLIST);

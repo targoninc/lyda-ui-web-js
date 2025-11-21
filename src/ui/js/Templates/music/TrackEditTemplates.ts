@@ -51,6 +51,7 @@ import { currentUser } from "../../state.ts";
 import { MusicTemplates } from "./MusicTemplates.ts";
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
 import { t } from "../../../locales";
+import { Visibility } from "@targoninc/lyda-shared/src/Enums/Visibility.ts";
 
 export class TrackEditTemplates {
     static uploadPage() {
@@ -333,7 +334,7 @@ export class TrackEditTemplates {
                     onchange: v => {
                         state.value = {
                             ...state.value,
-                            visibility: v ? "private" : "public",
+                            visibility: v ? Visibility.private : Visibility.public,
                         };
                     },
                 }),
@@ -534,7 +535,7 @@ export class TrackEditTemplates {
     static audioFile(canOverwriteTitle = false, parentState: Signal<UploadableTrack>) {
         return FormTemplates.fileField(
             t("AUDIO_FILE"),
-            t("CHOOSE_AUDIO_FILE"),
+            `${t("CHOOSE_AUDIO_FILE")}`,
             "audio-file",
             "audio/*",
             true,

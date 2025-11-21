@@ -1,5 +1,4 @@
 import { LydaCache } from "../Cache/LydaCache.ts";
-import { CacheItem } from "../Cache/CacheItem.ts";
 import { StreamingUpdater } from "./StreamingUpdater.ts";
 import { QueueManager } from "./QueueManager.ts";
 import { TrackActions } from "../Actions/TrackActions.ts";
@@ -31,7 +30,7 @@ import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import { get } from "../Api/ApiClient.ts";
 import { IStreamClient } from "./IStreamClient.ts";
 import { PLAYCHECK_INTERVAL } from "../Templates/music/PlayerTemplates.ts";
-import { TrackList } from "../Models/TrackList.ts";
+import { FeedItem } from "../Models/FeedItem.ts";
 
 export class PlayManager {
     static async playCheck(track: Track) {
@@ -109,19 +108,17 @@ export class PlayManager {
         return streamClients.value[id];
     }
 
-    static playFrom(type: string, name: string, id: number, entity?: Album | Playlist | TrackList) {
+    static playFrom(type: string, name: string = type, id?: number, entity?: FeedItem) {
         playingFrom.value = {
             type,
             name,
             id,
             entity: entity as (Album | Playlist),
         };
-        LydaCache.set("playingFrom", new CacheItem(playingFrom.value));
     }
 
     static clearPlayFrom() {
         playingFrom.value = null;
-        LydaCache.set("playingFrom", new CacheItem(playingFrom.value));
     }
 
     static getPlayingFrom() {

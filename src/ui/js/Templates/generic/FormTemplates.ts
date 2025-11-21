@@ -27,9 +27,7 @@ export class FormTemplates {
                 searchableSelect({
                     options: optionsState as Signal<SelectOption<string>[]>,
                     value: selectedValue,
-                    onchange: (v) => {
-                        selectedValue.value = v;
-                    }
+                    onchange: (v) => selectedValue.value = v
                 })
             ).build();
     }

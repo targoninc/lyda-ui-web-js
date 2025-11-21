@@ -41,7 +41,8 @@ import { ClientError } from "@targoninc/lyda-shared/dist/Models/db/lyda/ClientEr
 import { KeyValue } from "@targoninc/lyda-shared/dist/Models/KeyValue";
 import { CreateOrderRequest } from "@targoninc/lyda-shared/src/Models/CreateOrderRequest";
 import { CaptureOrderRequest } from "@targoninc/lyda-shared/src/Models/CaptureOrderRequest";
-import { Transaction } from "../Templates/money/TransactionTemplates.ts";
+import { FeedItem } from "../Models/FeedItem.ts";
+import { Transaction } from "@targoninc/lyda-shared/dist/Models/Transaction";
 
 export class Api {
     //region Interactions
@@ -491,7 +492,7 @@ export class Api {
 
     //region Tracks
     static async getFeed(endpoint: string, params: any = {}) {
-        return get<Track[]>(endpoint, params);
+        return get<FeedItem[]>(endpoint, params);
     }
 
     static async getTracksByUser(name: string, id: number | null = null) {

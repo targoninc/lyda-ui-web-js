@@ -29,9 +29,11 @@ import { t } from "../../../locales";
 import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 import { TrackList } from "../../Models/TrackList.ts";
 import { CardFeedType, entityTypeByCardFeedType } from "../../Enums/CardFeedType.ts";
+import { FeedItem } from "../../Models/FeedItem.ts";
+import { Visibility } from "@targoninc/lyda-shared/src/Enums/Visibility";
 
 export class MusicTemplates {
-    static feedEntry(type: EntityType, item: Track | Playlist | Album) {
+    static feedEntry(type: EntityType, item: FeedItem, feedType: FeedType) {
         const icons = [];
         const isPrivate = item.visibility === "private";
         if (isPrivate) {
@@ -50,7 +52,9 @@ export class MusicTemplates {
                     .id(item.id)
                     .styles("max-width", "100%")
                     .children(
-                        MusicTemplates.playButton(type, item.id, () => startItem(type, item)),
+                        MusicTemplates.playButton(type, item.id, () => startItem(type, item, {
+                            startedFrom: feedType
+                        })),
                         MusicTemplates.cover(type, item, "inline-cover"),
                         create("div")
                             .classes("flex", "flex-grow", "no-gap", "space-between")
@@ -97,7 +101,7 @@ export class MusicTemplates {
 
     static cover(
         type: EntityType,
-        item: Track | TrackList | Playlist | Album,
+        item: FeedItem,
         coverContext: string,
         startCallback: Function | null = null,
     ) {
@@ -155,7 +159,7 @@ export class MusicTemplates {
             ).build();
     }
 
-    static entityCoverButtons(fileType: MediaFileType, item: Track | TrackList | Playlist | Album, imageState: Signal<string>, coverLoading: Signal<boolean>) {
+    static entityCoverButtons(fileType: MediaFileType, item: FeedItem, imageState: Signal<string>, coverLoading: Signal<boolean>) {
         return horizontal(
             GenericTemplates.deleteIconButton("delete-image-button", () =>
                 MediaActions.deleteMedia(
@@ -219,7 +223,7 @@ export class MusicTemplates {
             [FeedType.boughtTracks]: ApiRoutes.boughtTracksFeed,
         };
         const pageState = signal(1);
-        const tracks$ = signal<Track[]>([]);
+        const tracks$ = signal<FeedItem[]>([]);
         const search = signal(type === FeedType.following ? "all" : "");
         const loading$ = signal(false);
         const pageSize = 10;
@@ -344,7 +348,7 @@ export class MusicTemplates {
         }
 
         const icons = [];
-        if (list.visibility === "private") {
+        if (list.visibility === Visibility.private) {
             icons.push(GenericTemplates.lock());
         }
 
