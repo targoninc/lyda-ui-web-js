@@ -107,6 +107,10 @@ export class NotificationTemplates {
                         notifsVisible.value = !notifsVisible.value;
                         if (notifsVisible.value) {
                             await Api.markNotificationsAsRead(newestTimestamp);
+                            notifications.value = notifications.value.map(n => ({
+                                ...n,
+                                is_read: true
+                            }));
                         }
                     },
                     text: "",
