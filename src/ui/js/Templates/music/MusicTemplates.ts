@@ -46,51 +46,52 @@ export class MusicTemplates {
         );
 
         return create("div")
-            .classes("flex")
+            .classes(`feed-${type}`, "flex", "padded", "rounded", "fullWidth", "card", "align-children", playingClass)
+            .id(item.id)
+            .styles("max-width", "100%")
+            .ondblclick(async () => {
+                await startItem(type, item, {
+                    startedFrom: feedType,
+                });
+            })
             .children(
+                MusicTemplates.playButton(type, item.id, () => startItem(type, item, {
+                    startedFrom: feedType,
+                })),
+                MusicTemplates.cover(type, item, "inline-cover"),
                 create("div")
-                    .classes(`feed-${type}`, "flex", "padded", "rounded", "fullWidth", "card", "align-children", playingClass)
-                    .id(item.id)
-                    .styles("max-width", "100%")
+                    .classes("flex", "flex-grow", "no-gap", "space-between")
                     .children(
-                        MusicTemplates.playButton(type, item.id, () => startItem(type, item, {
-                            startedFrom: feedType
-                        })),
-                        MusicTemplates.cover(type, item, "inline-cover"),
                         create("div")
-                            .classes("flex", "flex-grow", "no-gap", "space-between")
+                            .classes("flex-v", "flex-grow", "no-gap")
                             .children(
                                 create("div")
-                                    .classes("flex-v", "flex-grow", "no-gap")
+                                    .classes("flex")
                                     .children(
-                                        create("div")
-                                            .classes("flex")
-                                            .children(
-                                                MusicTemplates.title(type, item.title, item.id, icons),
-                                                item.collab ? TrackTemplates.collabIndicator(item.collab) : null,
-                                                item.repost ? TrackTemplates.repostIndicator(item.repost) : null,
-                                            ).build(),
-                                        create("div")
-                                            .classes("flex")
-                                            .children(
-                                                UserTemplates.userLink(UserWidgetContext.card, item.user!),
-                                                create("span")
-                                                    .classes("date", "text-small", "nopointer", "color-dim", "align-center")
-                                                    .text(Time.ago(item.created_at))
-                                                    .build(),
-                                            ).build(),
+                                        MusicTemplates.title(type, item.title, item.id, icons),
+                                        item.collab ? TrackTemplates.collabIndicator(item.collab) : null,
+                                        item.repost ? TrackTemplates.repostIndicator(item.repost) : null,
                                     ).build(),
                                 create("div")
-                                    .classes("flex", "space-between", "align-children")
+                                    .classes("flex")
                                     .children(
-                                        horizontal(
-                                            when(
-                                                type === EntityType.track,
-                                                TrackTemplates.addToQueueButton(item as Track),
-                                            ),
-                                            InteractionTemplates.interactions(type, item),
-                                        ).classes("align-children"),
+                                        UserTemplates.userLink(UserWidgetContext.card, item.user!),
+                                        create("span")
+                                            .classes("date", "text-small", "nopointer", "color-dim", "align-center")
+                                            .text(Time.ago(item.created_at))
+                                            .build(),
                                     ).build(),
+                            ).build(),
+                        create("div")
+                            .classes("flex", "space-between", "align-children")
+                            .children(
+                                horizontal(
+                                    when(
+                                        type === EntityType.track,
+                                        TrackTemplates.addToQueueButton(item as Track),
+                                    ),
+                                    InteractionTemplates.interactions(type, item),
+                                ).classes("align-children"),
                             ).build(),
                     ).build(),
             ).build();

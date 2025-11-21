@@ -255,7 +255,8 @@ nav, footer, .fixed-bar, .modal-overlay, .modal, .card, .user-preview, .glass {
 }
 
 .card {
-    background: var(--background-light-glass);
+    background: var(--color-3);
+    border: 1px solid var(--color-6);
 }
 
 footer {
@@ -344,7 +345,7 @@ h3 {
     align-items: center;
     border: 1px solid var(--color-5);
     border-width: 0 0 0 .5em;
-    background: var(--color-3);
+    background: var(--color-6);
 }
 
 .card-label.error {
@@ -605,15 +606,15 @@ button.unread:before {
     color: var(--orange);
 }
 
-.card, .border-card, .tight-border-card {
+.card, .tight-border-card {
     padding: 20px;
     border-radius: var(--border-radius);
     position: relative;
 }
 
-.border-card, .tight-border-card {
-    background: var(--color-6);
-    border: 1px solid var(--color-7);
+.tight-border-card {
+    background: var(--color-3);
+    border: 1px solid var(--color-6);
 }
 
 .tight-border-card {

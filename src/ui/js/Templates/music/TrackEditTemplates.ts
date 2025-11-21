@@ -527,7 +527,7 @@ export class TrackEditTemplates {
         const hasError = compute((e: string[]) => e.includes(id), errorSections);
 
         return create("div")
-            .classes("border-card", "flex-v", ...classes)
+            .classes("card", "flex-v", ...classes)
             .children(GenericTemplates.cardLabel(title, icon, hasError), ...children)
             .build();
     }

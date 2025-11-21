@@ -1301,7 +1301,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .queue-spacer {
-    height: 50dvh;
+    height: 20dvh;
 }
 
 .question {

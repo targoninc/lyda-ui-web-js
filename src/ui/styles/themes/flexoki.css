@@ -51,10 +51,6 @@ button.positive:hover {
     filter: var(--filter-5);
 }
 
-.border-card {
-    background: var(--color-9);
-}
-
 .tab {
     background: var(--color-9);
 }
