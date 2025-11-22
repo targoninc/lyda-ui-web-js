@@ -534,4 +534,5 @@ export const en = {
     ITEM: "Item",
     TOTAL_RECEIVED: "Total received",
     TOTAL_PAID: "Total paid",
+    EST_TOTAL: amt => `Estimated total: ${amt}`,
 } satisfies BaseTranslation;

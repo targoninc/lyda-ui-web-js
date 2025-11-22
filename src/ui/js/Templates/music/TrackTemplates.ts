@@ -586,6 +586,7 @@ export class TrackTemplates {
                                 const onClose = () => modal ? Util.removeModal(modal) : undefined;
                                 const inCheckout = signal(false);
                                 const bought = signal(false);
+                                const estTotal = compute(a => (a ?? track.price) * 1.19, amount);
 
                                 modal = createModal([
                                     vertical(
@@ -610,13 +611,16 @@ export class TrackTemplates {
                                                 .build(),
                                             create("hr"),
                                             horizontal(
-                                                when(inCheckout, horizontal(
+                                                when(inCheckout, vertical(
+                                                    horizontal(
+                                                        create("span")
+                                                            .classes("text-xxlarge", "align-end")
+                                                            .styles("line-height", "1")
+                                                            .text("$"),
+                                                        FormTemplates.moneyField(t("AMOUNT_IN_USD"), "amount", currency(track.price) + "+", amount, false, val => amount.value = val, track.price, track.price * 100, 0.10, ["bigger-input"]),
+                                                    ),
                                                     create("span")
-                                                        .classes("text-xxlarge", "align-end")
-                                                        .styles("line-height", "1")
-                                                        .text("$")
-                                                        .build(),
-                                                    FormTemplates.moneyField(t("AMOUNT_IN_USD"), "amount", currency(track.price) + "+", amount, false, val => amount.value = val, track.price, track.price * 100, 0.10, ["bigger-input"]),
+                                                        .text(compute(total => `${t("EST_TOTAL", currency(total))}`, estTotal)),
                                                 ).build(), true),
                                                 when(inCheckout, button({
                                                     text: t("CONTINUE_TO_CHECKOUT"),
@@ -625,7 +629,7 @@ export class TrackTemplates {
                                                     disabled: compute(v => !v, amountValid),
                                                     onclick: async () => inCheckout.value = true,
                                                 }), true),
-                                                TrackTemplates.buyButton(track, amount, inCheckout, () => bought.value = true),
+                                                TrackTemplates.buyButton(track, estTotal, inCheckout, () => bought.value = true),
                                             ).classes("space-between"),
                                             when(compute(a => a !== null && a > track.price * 100, amount), create("span")
                                                 .classes("warning")
@@ -857,9 +861,8 @@ export class TrackTemplates {
         });
     }
 
-    private static buyButton(track: Track, amount: Signal<number | null>, inCheckout: Signal<boolean>, onSuccess: () => void) {
+    private static buyButton(track: Track, amount: Signal<number>, inCheckout: Signal<boolean>, onSuccess: () => void) {
         const id = `buy-button-track-${track.id}`;
-        const chosenPrice = signal(track.price);
         const visibleClass = compute((v): string => v ? "visible" : "hidden", inCheckout);
 
         async function initPaypal(selector: string) {
@@ -875,13 +878,12 @@ export class TrackTemplates {
             if (paypal) {
                 try {
                     if (paypal.Buttons) {
-                        const actualPrice = chosenPrice.value ?? track.price;
                         await paypal.Buttons({
                             createOrder: async (data: CreateOrderData, actions: CreateOrderActions) => {
                                 return actions.order.create({
                                     purchase_units: [{
                                         amount: {
-                                            value: actualPrice.toFixed(2),
+                                            value: amount.value.toFixed(2),
                                         },
                                     }],
                                 });

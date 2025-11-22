@@ -151,7 +151,7 @@ export class Util {
             document.addEventListener("click", e => {
                 const foundModal = document.querySelector(".modal");
                 const restrictedTags = ["BUTTON", "INPUT", "TEXTAREA"];
-                if (foundModal && !foundModal.contains(target(e)) && restrictedTags.includes(target(e).tagName)) {
+                if (foundModal && !foundModal.contains(target(e)) && !restrictedTags.includes(target(e).tagName)) {
                     Util.removeModal(modalContainer);
                 } else {
                     Util.initializeModalRemove(modalContainer);
