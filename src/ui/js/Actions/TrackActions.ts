@@ -267,7 +267,13 @@ export class TrackActions {
 
     static async downloadTrack(track: Track) {
         const start = performance.now();
-        const res = await Api.getTrackAudio(track.id);
+        let res;
+        try {
+            res = await Api.getTrackAudio(track.id);
+        } catch (e: any) {
+            notify(e.toString(), NotificationType.error);
+            return;
+        }
         const end = performance.now();
         const diff = end - start;
         console.log(`Download took ${diff}ms`);
