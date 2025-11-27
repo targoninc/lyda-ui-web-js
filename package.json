@@ -33,7 +33,7 @@
         "@targoninc/jess-components": "^0.0.37",
         "@targoninc/lyda-shared": "^0.0.60",
         "@types/bun": "^1.3.0",
-        "chart.js": "^4.5.0",
+        "chart.js": "^4.5.1",
         "dotenv": "^17.2.3",
         "express": "^5.1.0",
         "typescript": "^5.9.3"
