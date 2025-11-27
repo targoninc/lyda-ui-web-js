@@ -266,7 +266,11 @@ export class TrackActions {
     }
 
     static async downloadTrack(track: Track) {
+        const start = performance.now();
         const res = await Api.getTrackAudio(track.id);
+        const end = performance.now();
+        const diff = end - start;
+        console.log(`Download took ${diff}ms`);
 
         let blob: Blob | null = null;
         const fileName: string = `${track.artistname?.length > 0 ? track.artistname : track.user?.displayname} - ${track.title || "track"}.mp3`;

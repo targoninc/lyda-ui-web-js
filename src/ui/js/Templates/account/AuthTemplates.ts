@@ -368,8 +368,7 @@ export class AuthTemplates {
                     .children(
                         GenericTemplates.loadingSpinner(),
                         create("span").text(message).build(),
-                    )
-                    .build(),
+                    ).build(),
             ).build();
     }
 
