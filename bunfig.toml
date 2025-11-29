@@ -2,4 +2,4 @@
 # Only install package versions published at least 7 days ago
 minimumReleaseAge = 604800
 # These packages will bypass the minimum age requirement
-minimumReleaseAgeExcludes = ["@targoninc/jess", "@targoninc/jess-components", "@targoninc/lyda-shared", "@types/bun"]
+minimumReleaseAgeExcludes = ["@jsr/targoninc__jess", "@targoninc/jess-components", "@targoninc/lyda-shared", "@types/bun"]
