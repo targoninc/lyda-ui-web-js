@@ -19,6 +19,8 @@ import { yearAndMonthByOffset } from "../../Classes/Helpers/Date.ts";
 import { downloadFile } from "../../Classes/Util.ts";
 import { t } from "../../../locales";
 
+const AVAILABLE_THRESHOLD_USD = 25;
+
 export class PayoutTemplates {
     static payoutsPage() {
         const payouts = signal<Payout[]>([]);
@@ -65,7 +67,7 @@ export class PayoutTemplates {
     static artistRoyaltyActions() {
         const royaltyInfo = signal<RoyaltyInfo | null>(null);
         Api.getRoyaltyInfo().then(ri => royaltyInfo.value = ri);
-        const hasPayableRoyalties = compute(ri => ri && ri.personal.available && ri.personal.available >= 0.5, royaltyInfo);
+        const hasPayableRoyalties = compute(ri => ri && ri.personal.available && ri.personal.available >= AVAILABLE_THRESHOLD_USD, royaltyInfo);
         const paypalMailExists$ = compute(ri => ri && ri.personal.paypalMail !== null, royaltyInfo);
 
         return create("div")
@@ -137,7 +139,7 @@ export class PayoutTemplates {
                     .children(
                         create("h1")
                             .text(currency(royaltyInfo.personal.available))
-                            .title(royaltyInfo.personal.available < 0.5 ? `${t("PAYOUT_THRESHOLD_NOT_MET", currency(0.5, "USD"))}` : "")
+                            .title(royaltyInfo.personal.available < AVAILABLE_THRESHOLD_USD ? `${t("PAYOUT_THRESHOLD_NOT_MET", currency(AVAILABLE_THRESHOLD_USD, "USD"))}` : "")
                             .build(),
                         create("span")
                             .text("Available")
