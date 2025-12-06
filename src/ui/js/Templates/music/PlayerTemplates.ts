@@ -414,7 +414,7 @@ export class PlayerTemplates {
             playlist: MediaFileType.playlistCover,
         };
         playingFrom.subscribe(pf => {
-            if (pf && pf.entity && pf.entity.has_cover) {
+            if (pf && pf.entity && pf.entity.has_cover && pf.id) {
                 img$.value = Util.getImage(pf.id, typeMap[pf.type]);
             }
         });

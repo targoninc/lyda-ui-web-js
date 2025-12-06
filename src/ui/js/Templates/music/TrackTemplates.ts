@@ -155,6 +155,7 @@ export class TrackTemplates {
         search: Signal<string>,
         nextDisabled: Signal<boolean>,
         hasSearch: TypeOrSignal<boolean>,
+        feedName: string
     ) {
         const empty = compute((t, l) => t.length === 0 && !l, items$, loading$);
 
@@ -182,7 +183,7 @@ export class TrackTemplates {
                 compute(
                     list =>
                         TrackTemplates.trackList(
-                            list.reverse().map(track => MusicTemplates.feedEntry(EntityType.track, track, type)),
+                            list.reverse().map(track => MusicTemplates.feedEntry(EntityType.track, track, type, feedName)),
                         ),
                     items$,
                 ),

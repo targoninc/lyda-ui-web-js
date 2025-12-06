@@ -32,9 +32,10 @@ import { CardFeedType, entityTypeByCardFeedType } from "../../Enums/CardFeedType
 import { FeedItem } from "../../Models/FeedItem.ts";
 import { Visibility } from "@targoninc/lyda-shared/src/Enums/Visibility";
 import { truncateText } from "../../Classes/Helpers/CustomText.ts";
+import { getFeedDisplayName } from "../../Classes/Helpers/FeedNames.ts";
 
 export class MusicTemplates {
-    static feedEntry(type: EntityType, item: FeedItem, feedType: FeedType) {
+    static feedEntry(type: EntityType, item: FeedItem, feedType: FeedType, feedName: string) {
         const icons = [];
         const isPrivate = item.visibility === "private";
         if (isPrivate) {
@@ -51,12 +52,18 @@ export class MusicTemplates {
             .styles("max-width", "100%")
             .ondblclick(async () => {
                 await startItem(type, item, {
-                    startedFrom: feedType,
+                    startedFrom: {
+                        feedType,
+                        name: feedName
+                    },
                 });
             })
             .children(
                 MusicTemplates.playButton(type, item.id, () => startItem(type, item, {
-                    startedFrom: feedType,
+                    startedFrom: {
+                        feedType,
+                        name: feedName
+                    },
                 })),
                 MusicTemplates.cover(type, item, "inline-cover"),
                 create("div")
@@ -259,7 +266,7 @@ export class MusicTemplates {
                     .build(), true),
                 when(
                     feedVisible,
-                    TrackTemplates.trackListWithPagination(tracks$, pageState, type, loading$, search, nextDisabled, searchableFeedTypes.includes(type)),
+                    TrackTemplates.trackListWithPagination(tracks$, pageState, type, loading$, search, nextDisabled, searchableFeedTypes.includes(type), getFeedDisplayName(type, options.name)),
                 ),
             ).build();
     }

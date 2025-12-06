@@ -10,7 +10,10 @@ import { FeedItem } from "../Models/FeedItem.ts";
 
 export async function startItem(startedType: EntityType, item: FeedItem, options: {
     startCallback?: Function | null,
-    startedFrom?: FeedType,
+    startedFrom?: {
+        feedType: FeedType,
+        name: string
+    },
     trackId?: number
 } = {}) {
     if (options.startCallback) {
@@ -29,7 +32,7 @@ export async function startItem(startedType: EntityType, item: FeedItem, options
             }
 
             if (options.startedFrom) {
-                PlayManager.playFrom(options.startedFrom);
+                PlayManager.playFrom(options.startedFrom.feedType, options.startedFrom.name);
             }
 
             PlayManager.addStreamClientIfNotExists(item.id, (item as Track).length);

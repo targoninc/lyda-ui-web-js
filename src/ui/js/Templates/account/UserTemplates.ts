@@ -405,30 +405,35 @@ export class UserTemplates {
                 tabSelected(currentIndex, 0),
                 MusicTemplates.feed(FeedType.profileTracks, {
                     id: user.id,
+                    name: user.displayname
                 }),
             ),
             when(
                 tabSelected(currentIndex, 1),
                 MusicTemplates.cardFeed(CardFeedType.profileAlbums, {
                     id: user.id,
+                    name: user.displayname
                 }),
             ),
             when(
                 tabSelected(currentIndex, 2),
                 MusicTemplates.cardFeed(CardFeedType.profilePlaylists, {
                     id: user.id,
+                    name: user.displayname
                 }),
             ),
             when(
                 tabSelected(currentIndex, 3),
                 MusicTemplates.feed(FeedType.profileReposts, {
                     id: user.id,
+                    name: user.displayname
                 }),
             ),
             when(
                 tabSelected(currentIndex, 4),
                 MusicTemplates.feed(FeedType.history, {
                     id: user.id,
+                    name: user.displayname
                 }),
             ),
         ).build();
