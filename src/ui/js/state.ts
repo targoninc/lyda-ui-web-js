@@ -17,6 +17,7 @@ import { Api } from "./Api/Api.ts";
 import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import { UserCacheKey } from "@targoninc/lyda-shared/src/Enums/UserCacheKey";
 import { StreamingQuality } from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
+import { ApiRoutes } from "./Api/ApiRoutes.ts";
 
 const footer = document.querySelector("footer");
 
@@ -146,6 +147,13 @@ shuffling.subscribe((p, changed) => {
     }
     LydaCache.set(UserCacheKey.shuffling, new CacheItem(p));
     Api.setCacheKey(UserCacheKey.shuffling, p.toString()).then();
+
+    // Handle any potential context queue changes we need to do
+    const pf = playingFrom.value;
+    if (pf && pf.feedType) {
+        const opts = {} // TODO
+        Api.getFeed(`${ApiRoutes.trackFeed}/${pf.feedType}`, opts).then();
+    }
 });
 
 export const currentUser = signal<User|null>(null);

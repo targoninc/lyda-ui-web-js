@@ -31,6 +31,7 @@ import { get } from "../Api/ApiClient.ts";
 import { IStreamClient } from "./IStreamClient.ts";
 import { PLAYCHECK_INTERVAL } from "../Templates/music/PlayerTemplates.ts";
 import { FeedItem } from "../Models/FeedItem.ts";
+import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 
 export class PlayManager {
     static async playCheck(track: Track) {
@@ -108,12 +109,17 @@ export class PlayManager {
         return streamClients.value[id];
     }
 
-    static playFrom(type: string, name: string = type, id?: number, entity?: FeedItem) {
+    static playFrom(type: string, name: string = type, options?: {
+        feedType?: FeedType;
+        id?: number,
+        entity?: FeedItem
+    }) {
         playingFrom.value = {
             type,
             name,
-            id,
-            entity: entity as (Album | Playlist),
+            feedType: options?.feedType,
+            id: options?.id,
+            entity: options?.entity as (Album | Playlist),
         };
     }
 

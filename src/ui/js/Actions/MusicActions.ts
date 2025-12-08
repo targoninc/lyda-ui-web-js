@@ -32,7 +32,9 @@ export async function startItem(startedType: EntityType, item: FeedItem, options
             }
 
             if (options.startedFrom) {
-                PlayManager.playFrom(options.startedFrom.feedType, options.startedFrom.name);
+                PlayManager.playFrom(options.startedFrom.feedType, options.startedFrom.name, {
+                    feedType: options.startedFrom.feedType
+                });
             }
 
             PlayManager.addStreamClientIfNotExists(item.id, (item as Track).length);
@@ -40,7 +42,10 @@ export async function startItem(startedType: EntityType, item: FeedItem, options
             return;
     }
 
-    PlayManager.playFrom(startedType, item.title, item.id, item);
+    PlayManager.playFrom(startedType, item.title, {
+        id: item.id,
+        entity: item
+    });
     QueueManager.setContextQueue(item.tracks!.map(t => t.track_id));
     const track = options.trackId ? item.tracks!.find(t => t.track_id === options.trackId) : item.tracks!.at(0);
 

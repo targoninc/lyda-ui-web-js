@@ -1,4 +1,5 @@
 import { Config } from "../Classes/Config.ts";
+import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 
 export class ApiRoutes {
     static base = Config.apiBaseUrl;
@@ -82,15 +83,15 @@ export class ApiRoutes {
     static approveCollab = ApiRoutes.tracksActions + "/approveCollab";
     static denyCollab = ApiRoutes.tracksActions + "/denyCollab";
 
-    private static trackFeed = ApiRoutes.tracks + "/feeds";
-    static followingFeed = ApiRoutes.trackFeed + "/following";
-    static exploreFeed = ApiRoutes.trackFeed + "/explore";
-    static historyFeed = ApiRoutes.trackFeed + "/history";
-    static autoQueueFeed = ApiRoutes.trackFeed + "/autoQueue";
-    static profileTracksFeed = ApiRoutes.trackFeed + "/profileTracks";
-    static profileRepostsFeed = ApiRoutes.trackFeed + "/profileReposts";
-    static likedTracksFeed = ApiRoutes.trackFeed + "/liked";
-    static boughtTracksFeed = ApiRoutes.trackFeed + "/bought";
+    public static trackFeed = ApiRoutes.tracks + "/feeds";
+    static followingFeed = ApiRoutes.trackFeed + `/${FeedType.following}`;
+    static exploreFeed = ApiRoutes.trackFeed + `/${FeedType.explore}`;
+    static historyFeed = ApiRoutes.trackFeed + `/${FeedType.history}`;
+    static autoQueueFeed = ApiRoutes.trackFeed + `/${FeedType.autoQueue}`;
+    static profileTracksFeed = ApiRoutes.trackFeed + `/${FeedType.profileTracks}`;
+    static profileRepostsFeed = ApiRoutes.trackFeed + `/${FeedType.profileReposts}`;
+    static likedTracksFeed = ApiRoutes.trackFeed + `/${FeedType.likedTracks}`;
+    static boughtTracksFeed = ApiRoutes.trackFeed + `/${FeedType.boughtTracks}`;
     // endregion
 
     // region Albums

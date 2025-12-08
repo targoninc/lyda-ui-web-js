@@ -217,16 +217,6 @@ export class MusicTemplates {
     }
 
     static feed(type: FeedType, options: Record<string, any> = {}) {
-        const endpointMap: Record<FeedType, string> = {
-            [FeedType.following]: ApiRoutes.followingFeed,
-            [FeedType.explore]: ApiRoutes.exploreFeed,
-            [FeedType.history]: ApiRoutes.historyFeed,
-            [FeedType.autoQueue]: ApiRoutes.autoQueueFeed,
-            [FeedType.profileTracks]: ApiRoutes.profileTracksFeed,
-            [FeedType.profileReposts]: ApiRoutes.profileRepostsFeed,
-            [FeedType.likedTracks]: ApiRoutes.likedTracksFeed,
-            [FeedType.boughtTracks]: ApiRoutes.boughtTracksFeed,
-        };
         const pageState = signal(1);
         const tracks$ = signal<FeedItem[]>([]);
         const search = signal(type === FeedType.following ? "all" : "");
@@ -238,7 +228,7 @@ export class MusicTemplates {
             const offset = (pageNumber - 1) * pageSize;
             const params = { offset, filter };
             loading$.value = true;
-            const res = await Api.getFeed(endpointMap[type], Object.assign(params, options));
+            const res = await Api.getFeed(`${ApiRoutes.trackFeed}/${type}`, Object.assign(params, options));
             const newTracks = res ?? [];
 
             if (newTracks && newTracks.length === 0 && pageNumber > 1) {
