@@ -412,24 +412,23 @@ export class AlbumTemplates {
                         await PlaylistActions.openAddToPlaylistModal(album, "album");
                     },
                 }),
+                when(canEdit, button({
+                    text: t("EDIT"),
+                    icon: { icon: "edit" },
+                    onclick: async () => {
+                        createModal([AlbumTemplates.editAlbumModal(album)], "edit-album");
+                    },
+                })),
+                when(canEdit, button({
+                    text: t("DELETE"),
+                    icon: { icon: "delete" },
+                    classes: ["negative"],
+                    onclick: async () => {
+                        await Ui.getConfirmationModal(t("DELETE_ALBUM"), t("SURE_DELETE_ALBUM"), t("YES"), t("NO"), () => AlbumActions.deleteAlbum(album.id), () => {
+                        }, Icons.WARNING);
+                    },
+                })),
             ).classes("align-children").build()),
-            when(canEdit, button({
-                text: t("EDIT"),
-                icon: { icon: "edit" },
-                classes: ["positive"],
-                onclick: async () => {
-                    createModal([AlbumTemplates.editAlbumModal(album)], "edit-album");
-                },
-            })),
-            when(canEdit, button({
-                text: t("DELETE"),
-                icon: { icon: "delete" },
-                classes: ["negative"],
-                onclick: async () => {
-                    await Ui.getConfirmationModal(t("DELETE_ALBUM"), t("SURE_DELETE_ALBUM"), t("YES"), t("NO"), () => AlbumActions.deleteAlbum(album.id), () => {
-                    }, Icons.WARNING);
-                },
-            })),
         ).build();
     }
 }
