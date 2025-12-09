@@ -315,7 +315,7 @@ export class GenericTemplates {
     }
 
     static notification(type: NotificationType = NotificationType.success, text: HtmlPropertyValue = t("SUCCESS")) {
-        return create("div").classes("notification", type).text(text).build();
+        return create("div").classes("notification", "out-of-frame", type).text(text).build();
     }
 
     static fileInput(

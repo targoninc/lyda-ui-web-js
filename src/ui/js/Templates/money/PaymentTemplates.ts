@@ -4,13 +4,13 @@ import { Time } from "../../Classes/Helpers/Time.ts";
 import { currency } from "../../Classes/Helpers/Num.ts";
 import { permissions } from "../../state.ts";
 import { copy } from "../../Classes/Util.ts";
-import { PaymentHistory } from "@targoninc/lyda-shared/src/Models/db/finance/PaymentHistory";
 import { Api } from "../../Api/Api.ts";
 import { t } from "../../../locales";
+import { SubscriptionPayment } from "@targoninc/lyda-shared/dist/Models/db/finance/SubscriptionPayment";
 
 export class PaymentTemplates {
     static paymentsPage() {
-        const payments = signal<PaymentHistory[]>([]);
+        const payments = signal<SubscriptionPayment[]>([]);
         const skip = signal(0);
         const load = (filter?: any) => {
             loading.value = true;
@@ -33,7 +33,7 @@ export class PaymentTemplates {
             ).build();
     }
 
-    static payment(p: PaymentHistory) {
+    static payment(p: SubscriptionPayment) {
         return create("div")
             .classes("flex", "card", "space-between")
             .children(

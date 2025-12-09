@@ -30,7 +30,6 @@ import { AvailableSubscription } from "@targoninc/lyda-shared/src/Models/db/fina
 import { Subscription } from "@targoninc/lyda-shared/src/Models/db/finance/Subscription.ts";
 import { Statistic } from "@targoninc/lyda-shared/src/Models/Statistic";
 import { TypedStatistic } from "@targoninc/lyda-shared/src/Models/TypedStatistic";
-import { PaymentHistory } from "@targoninc/lyda-shared/src/Models/db/finance/PaymentHistory.ts";
 import { Payout } from "@targoninc/lyda-shared/src/Models/db/finance/Payout";
 import { Permission } from "@targoninc/lyda-shared/src/Models/db/lyda/Permission.ts";
 import { RoyaltyMonth } from "@targoninc/lyda-shared/src/Models/RoyaltyMonth";
@@ -43,6 +42,8 @@ import { CreateOrderRequest } from "@targoninc/lyda-shared/src/Models/CreateOrde
 import { CaptureOrderRequest } from "@targoninc/lyda-shared/src/Models/CaptureOrderRequest";
 import { FeedItem } from "../Models/FeedItem.ts";
 import { Transaction } from "@targoninc/lyda-shared/dist/Models/Transaction";
+import { t } from "../../locales";
+import { SubscriptionPayment } from "@targoninc/lyda-shared/dist/Models/db/finance/SubscriptionPayment";
 
 export class Api {
     //region Interactions
@@ -92,7 +93,7 @@ export class Api {
 
     //region Royalties
     static async getPaymentHistory(skip: number, filter: any = {}) {
-        return get<PaymentHistory[]>(ApiRoutes.getPaymentHistory, {
+        return get<SubscriptionPayment[]>(ApiRoutes.getPaymentHistory, {
             skip,
             ...filter,
         });
@@ -455,19 +456,20 @@ export class Api {
         });
     }
 
-    static async createNewAlbum(album: Partial<Album>): Promise<boolean> {
-        return !!(await post(ApiRoutes.newAlbum, album));
+    static async createNewAlbum(album: Partial<Album>) {
+        await post(ApiRoutes.newAlbum, album);
+        notify(t("ALBUM_CREATED"), NotificationType.success);
     }
 
     static async deleteAlbum(id: number): Promise<boolean> {
         await post(ApiRoutes.deleteAlbum, { id });
-        notify("Successfully deleted album", NotificationType.success);
+        notify(t("ALBUM_DELETED"), NotificationType.success);
         return true;
     }
 
     static async addTrackToAlbums(track_id: number, album_ids: number[]): Promise<boolean> {
         await post(ApiRoutes.addTrackToAlbums, { album_ids, track_id });
-        notify("Added track to albums", NotificationType.success);
+        notify(t("TRACK_ADDED_TO_ALBUMS"), NotificationType.success);
         return true;
     }
 
@@ -476,7 +478,7 @@ export class Api {
             album_ids,
             track_id,
         });
-        notify("Removed track from album", NotificationType.success);
+        notify(t("TRACK_REMOVED_FROM_ALBUMS"), NotificationType.success);
         return true;
     }
 
@@ -688,13 +690,13 @@ export class Api {
 
     static async createNewPlaylist(playlist: Partial<Playlist>): Promise<boolean> {
         await post(ApiRoutes.newPlaylist, playlist);
-        notify("Created playlist", NotificationType.success);
+        notify(t("PLAYLIST_CREATED"), NotificationType.success);
         return true;
     }
 
     static async deletePlaylist(id: number): Promise<boolean> {
         await post(ApiRoutes.deletePlaylist, { id });
-        notify("Successfully deleted playlist", NotificationType.success);
+        notify(t("PLAYLIST_DELETED"), NotificationType.success);
         return true;
     }
 
@@ -703,7 +705,7 @@ export class Api {
             playlist_ids,
             track_id,
         });
-        notify("Added track to playlist(s)", NotificationType.success);
+        notify(t("TRACK_ADDED_TO_PLAYLISTS"), NotificationType.success);
         return true;
     }
 
@@ -715,7 +717,7 @@ export class Api {
             playlist_ids,
             track_id,
         });
-        notify("Removed track from playlist", NotificationType.success);
+        notify(t("TRACK_REMOVED_FROM_PLAYLISTS"), NotificationType.success);
         return true;
     }
 
@@ -731,7 +733,7 @@ export class Api {
             playlist_ids,
             album_id,
         });
-        notify("Added album to playlist(s)", NotificationType.success);
+        notify(t("ALBUM_ADDED_TO_PLAYLISTS"), NotificationType.success);
         return true;
     }
 

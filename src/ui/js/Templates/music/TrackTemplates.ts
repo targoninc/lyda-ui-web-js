@@ -565,13 +565,7 @@ export class TrackTemplates {
                         when(
                             currentUser,
                             horizontal(
-                                button({
-                                    text: t("ADD_TO_PLAYLIST"),
-                                    icon: { icon: "playlist_add" },
-                                    onclick: async () => {
-                                        await PlaylistActions.openAddToPlaylistModal(track, "track");
-                                    },
-                                }),
+                                TrackTemplates.addToPlaylistButton(track),
                                 TrackTemplates.addToQueueButton(track),
                             ).build(),
                         ),
@@ -679,6 +673,16 @@ export class TrackTemplates {
                 ).classes("noflexwrap", "padded-large")
                  .styles("min-height", "80dvh", "position", "inherit"),
             ).build();
+    }
+
+    static addToPlaylistButton(track: Track) {
+        return button({
+            text: t("ADD_TO_PLAYLIST"),
+            icon: { icon: "playlist_add" },
+            onclick: async () => {
+                await PlaylistActions.openAddToPlaylistModal(track, "track");
+            },
+        });
     }
 
     static collaboratorSection(

@@ -26,7 +26,7 @@ import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import { t } from "../../../locales";
 
 export class QueueTemplates {
-    static queueItem(track: Track, index: number, isManual: boolean) {
+    static queueItem(track: Track, index: number, isManual: boolean, isCurrent: boolean = false) {
         if (!track.user) {
             throw new Error(`Track ${track.id} has no user`);
         }
@@ -35,7 +35,7 @@ export class QueueTemplates {
             coverState.value = Util.getTrackCover(track.id);
         }
         const playing = compute(id => id === track.id, currentTrackId);
-        const playingClass = compute((p): string => p ? "playing" : "_", playing);
+        const playingClass = compute((p): string => (p && isCurrent) ? "playing" : "_", playing);
 
         const dragData = {
             type: "track",
@@ -183,12 +183,12 @@ export class QueueTemplates {
                 .classes("color-dim", "text-small")
                 .text(text)
                 .build(),
-            ...q.map((id, i) => QueueTemplates.trackAsQueueItem(id, i, isManual)),
+            ...q.map((id, i) => QueueTemplates.trackAsQueueItem(id, i, isManual, isCurrent)),
         ).classes("no-gap", isCurrent ? "current-track" : "_")
          .build();
     }
 
-    static trackAsQueueItem(id: number, i: number, isManual: boolean) {
+    static trackAsQueueItem(id: number, i: number, isManual: boolean, isCurrent: boolean = false) {
         const track = signal<{ track: Track } | null>(null);
         PlayManager.getTrackData(id).then((data: any) => {
             track.value = data;
@@ -203,7 +203,7 @@ export class QueueTemplates {
 
         return vertical(
             parent.children(
-                compute(t => t ? QueueTemplates.queueItem(t.track, i, isManual) : nullElement(), track),
+                compute(t => t ? QueueTemplates.queueItem(t.track, i, isManual, isCurrent) : nullElement(), track),
             ).build(),
         ).classes("relative")
          .build();

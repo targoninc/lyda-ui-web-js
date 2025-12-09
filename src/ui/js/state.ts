@@ -151,8 +151,11 @@ shuffling.subscribe((p, changed) => {
     // Handle any potential context queue changes we need to do
     const pf = playingFrom.value;
     if (pf && pf.feedType) {
-        const opts = {} // TODO
-        Api.getFeed(`${ApiRoutes.trackFeed}/${pf.feedType}`, opts).then();
+        Api.getFeed(`${ApiRoutes.trackFeed}/${pf.feedType}`).then(tracks => {
+            if (tracks && tracks.length > 0) {
+                contextQueue.value = tracks.map(t => t.id);
+            }
+        });
     }
 });
 

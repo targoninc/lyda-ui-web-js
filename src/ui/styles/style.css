@@ -25,6 +25,7 @@
     --color-9: #dcdce0;
     --filter-8: invert(74%) sepia(50%) saturate(854%) hue-rotate(40deg) brightness(94%) contrast(75%);
     --orange: var(--color-1);
+    --orange-dark: color-mix(in oklab, var(--color-1), var(--color-5));
     --color-state: var(--green);
     --blue: #317eef;
     --blue-dark: #2a6ed9;
@@ -553,38 +554,50 @@ button.unread:before {
 
 .notifications {
     position: absolute;
-    right: 50%;
-    transform: translateX(50%);
-    top: 15px;
+    right: 15px;
+    transform: translateY(-50%);
+    top: 50%;
     width: max-content;
     z-index: 99999;
     max-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: end;
 }
 
 .notification {
     background: var(--orange);
-    border: 1px solid var(--orange);
+    border: 1px solid var(--orange-dark);
+    border-left-width: 5px;
     border-radius: var(--border-radius);
     color: var(--color-4);
-    padding: 5px 10px;
+    padding: 10px 20px;
     max-width: 100dvw;
+    font-size: 1.2em;
+    transition: transform .2s ease-in-out;
+    cursor: pointer;
+    transform: translateX(0%);
+}
+
+.notification.out-of-frame {
+    transform: translateX(150%);
 }
 
 .notification.warning {
     background: var(--orange);
-    border: 1px solid var(--orange);
+    border-color: var(--orange-dark);
     color: var(--color-4);
 }
 
 .notification.error {
-    background: var(--red);
-    border: 1px solid var(--red);
+    background: var(--red-dark);
+    border-color: var(--red);
     color: var(--color-5);
 }
 
 .notification.success {
-    background: var(--color-state);
-    border: 1px solid var(--color-state);
+    background: var(--green-dark);
+    border-color: var(--green);
 }
 
 .honeypot {

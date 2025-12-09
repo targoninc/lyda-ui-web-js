@@ -161,6 +161,14 @@ export function notify(textIn: StringOrSignal, type = NotificationType.info, tim
     if (currentNotifications.value.includes(text)) {
         return;
     }
+    const removeNotif = () => {
+        notification.classList.add("out-of-frame");
+        currentNotifications.value = currentNotifications.value.filter(n => n !== text);
+
+        setTimeout(() => {
+            notification.remove();
+        }, 500);
+    }
     currentNotifications.value.push(text);
     const notifications = document.querySelector(".notifications");
     const notification = GenericTemplates.notification(type, text);
@@ -172,10 +180,9 @@ export function notify(textIn: StringOrSignal, type = NotificationType.info, tim
         }
     }
     notifications?.appendChild(notification);
-    setTimeout(() => {
-        notification.remove();
-        currentNotifications.value = currentNotifications.value.filter(n => n !== text);
-    }, time);
+    notification.classList.remove("out-of-frame");
+    notification.addEventListener("click", removeNotif);
+    setTimeout(removeNotif, time);
 }
 
 export function createModal(children: AnyNode[], modalId: string) {

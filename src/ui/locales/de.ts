@@ -1,6 +1,22 @@
 import { Translation } from "./index.ts";
 
 export const de: Translation = {
+    ALBUM_ADDED_TO_PLAYLISTS: "Album zu Playlist(s) hinzugefügt",
+    ALBUM_DELETED: "Album gelöscht",
+    PLAYLIST_DELETED: "Playlist gelöscht",
+    TRACK_ADDED_TO_ALBUMS: "Track zu Alben hinzugefügt",
+    TRACK_ADDED_TO_PLAYLISTS: "Track zu Playlist(s) hinzugefügt",
+    TRACK_REMOVED_FROM_ALBUMS: "Track aus Alben entfernt",
+    TRACK_REMOVED_FROM_PLAYLISTS: "Track aus Playlist(s) entfernt",
+    ALBUM_CREATED: "Album erstellt",
+    BOUGHT_ITEMS: "Gekaufte Inhalte",
+    EST_TOTAL: "Geschätzte Summe",
+    FOLLOWING: "Folgend",
+    LIKED_TRACKS: "Lieblingstracks",
+    NOTIFS_SALE: "Verkaufsbenachrichtigungen",
+    PLAYLIST_CREATED: "Playlist erstellt",
+    PROFILE_REPOSTS: "Profilreposts",
+    PROFILE_TRACKS: "Profiltracks",
     ACTIONED_USER: "",
     ACTION_NAME: "Aktion",
     AMOUNT_IN_USD: "Menge in USD",

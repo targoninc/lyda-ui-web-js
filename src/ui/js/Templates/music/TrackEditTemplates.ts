@@ -52,6 +52,8 @@ import { MusicTemplates } from "./MusicTemplates.ts";
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
 import { t } from "../../../locales";
 import { Visibility } from "@targoninc/lyda-shared/src/Enums/Visibility.ts";
+import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
+import { TrackTemplates } from "./TrackTemplates.ts";
 
 export class TrackEditTemplates {
     static uploadPage() {
@@ -863,7 +865,11 @@ export class TrackEditTemplates {
                     TrackEditTemplates.creditsInput(state),
                     TrackEditTemplates.priceInput(state),
                 ),
-                TrackEditTemplates.visibilityToggle(isPrivate, state),
+                horizontal(
+                    TrackEditTemplates.addToAlbumsButton(track),
+                    TrackTemplates.addToPlaylistButton(track),
+                    TrackEditTemplates.visibilityToggle(isPrivate, state),
+                ).classes("align-children")
             ),
             vertical(
                 horizontal(
@@ -876,6 +882,7 @@ export class TrackEditTemplates {
                         .build(),
                     MusicTemplates.entityCoverButtons(MediaFileType.trackCover, track, imageState, coverLoading),
                     when(coverLoading, GenericTemplates.loadingSpinner()),
+                    MusicTemplates.cover(EntityType.track, track, "inline-cover")
                 ).classes("align-end"),
                 when(changed, horizontal(
                     create("span")
