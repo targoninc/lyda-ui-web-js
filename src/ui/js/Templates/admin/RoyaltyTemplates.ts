@@ -32,7 +32,7 @@ export class RoyaltyTemplates {
 
     private static royaltyActions(monthIdentifier: MonthIdentifier,
                                   hasEarnings: boolean, isApproved: boolean, refresh: () => void) {
-        const activeClass = hasEarnings ? "active" : "";
+        const activeClass = hasEarnings ? "active" : "_";
 
         return create("div")
             .classes("flex-v")
@@ -67,7 +67,7 @@ export class RoyaltyTemplates {
     }
 
     static royaltyManagement() {
-        const monthOffset = signal(0);
+        const monthOffset = signal(10);
         const selectableMonths = signal(Array.from({ length: 12 }, (_, i) => {
             const d = new Date();
             d.setDate(1);
