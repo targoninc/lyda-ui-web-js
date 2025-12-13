@@ -22,7 +22,8 @@ export class RoyaltyTemplates {
                 when(month.hasEarnings ?? false, create("div")
                     .classes("flex-v")
                     .children(
-                        LogTemplates.property(t("EARNINGS"), currency((month.earnings ?? 0) / 100, "USD")),
+                        LogTemplates.property(t("STREAMING_EARNINGS"), currency((month.streamingEarnings ?? 0) / 100, "USD")),
+                        LogTemplates.property(t("SALE_EARNINGS"), currency((month.saleEarnings ?? 0) / 100, "USD")),
                         LogTemplates.property(t("ARTIST_ROYALTIES"), currency((month.artistRoyalties ?? 0) / 100, "USD")),
                         LogTemplates.property(t("TRACK_ROYALTIES"), currency((month.trackRoyalties ?? 0) / 100, "USD")),
                     ).build()),
@@ -31,6 +32,8 @@ export class RoyaltyTemplates {
 
     private static royaltyActions(monthIdentifier: MonthIdentifier,
                                   hasEarnings: boolean, isApproved: boolean, refresh: () => void) {
+        const activeClass = hasEarnings ? "active" : "";
+
         return create("div")
             .classes("flex-v")
             .children(
@@ -41,25 +44,15 @@ export class RoyaltyTemplates {
                             .text(t("AVAILABLE_ACTIONS_FOR_MONTH", monthIdentifier))
                             .build(),
                         button({
-                            text: t("CALCULATE_EARNINGS"),
-                            icon: { icon: "account_balance" },
-                            classes: ["positive"],
-                            onclick: async () => {
-                                await Api.calculateEarnings(monthIdentifier);
-                                notify(`${t("EARNINGS_CALCULATED")}`, NotificationType.success);
-                                refresh();
-                            },
-                        }),
-                        when(hasEarnings, button({
                             text: t("CALCULATE_ROYALTIES"),
-                            icon: { icon: "calculate" },
-                            classes: ["positive"],
+                            icon: { icon: "account_balance" },
+                            classes: [activeClass],
                             onclick: async () => {
                                 await Api.calculateRoyalties(monthIdentifier);
                                 notify(`${t("ROYALTIES_CALCULATED")}`, NotificationType.success);
                                 refresh();
                             },
-                        })),
+                        }),
                         when(hasEarnings, toggle({
                             text: t("ROYALTIES_APPROVED"),
                             checked: isApproved,

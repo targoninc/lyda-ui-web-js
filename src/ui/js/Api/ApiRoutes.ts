@@ -159,7 +159,6 @@ export class ApiRoutes {
     static getRoyaltyInfo = ApiRoutes.royalties + "/info";
     static getRoyaltyCalculationInfo = ApiRoutes.royalties + "/calculationInfo";
     static requestPayout = ApiRoutes.royalties + "/requestPayout";
-    static calculateEarnings = ApiRoutes.royalties + "/calculateEarnings";
     static calculateRoyalties = ApiRoutes.royalties + "/calculate";
     static setRoyaltyActivation = ApiRoutes.royalties + "/setActivation";
     static royaltiesForExport = ApiRoutes.royalties + "/export";

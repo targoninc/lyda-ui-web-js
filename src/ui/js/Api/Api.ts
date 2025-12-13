@@ -139,13 +139,6 @@ export class Api {
         return post(ApiRoutes.requestPayout);
     }
 
-    static async calculateEarnings(month: MonthIdentifier) {
-        return post(ApiRoutes.calculateEarnings, {
-            month: month.month,
-            year: month.year,
-        });
-    }
-
     //endregion
 
     //region Statistics
