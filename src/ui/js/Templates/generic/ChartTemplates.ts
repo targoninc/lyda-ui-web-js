@@ -104,7 +104,7 @@ export class ChartTemplates {
             ).build();
     }
 
-    static async paginatedBarChart(options: PaginatedBarChartOptions) {
+    static paginatedBarChart(options: PaginatedBarChartOptions) {
         const skip = signal(0);
         const take = signal(12);
         const data = signal<Statistic[]>([]);

@@ -5,24 +5,24 @@ import { create, signal, signalMap } from "@targoninc/jess";
 import { Api } from "../Api/Api.ts";
 
 export class StatisticsWrapper {
-    static async getStatistics() {
+    static getStatistics() {
         return [
-            await StatisticTemplates.playCountByMonthChart(),
-            await StatisticTemplates.royaltiesByMonthChart(),
-            await StatisticsWrapper.getRoyaltiesByTrack(),
-            await StatisticsWrapper.getPlayCountByTracks(),
-            await StatisticsWrapper.getLikesByTrack(),
+            StatisticTemplates.playCountByMonthChart(),
+            StatisticTemplates.royaltiesByMonthChart(),
+            StatisticsWrapper.getRoyaltiesByTrack(),
+            StatisticsWrapper.getPlayCountByTracks(),
+            StatisticsWrapper.getLikesByTrack(),
         ];
     }
 
-    static async getGlobalStatistics() {
+    static getGlobalStatistics() {
         return [
-            await StatisticTemplates.globalRoyaltiesByMonthChart(),
-            await StatisticTemplates.globalPlayCountByMonthChart(),
+            StatisticTemplates.globalRoyaltiesByMonthChart(),
+            StatisticTemplates.globalPlayCountByMonthChart(),
         ];
     }
 
-    static async getSingleStat(template: Function, endpoint: string, reverse: boolean = false) {
+    static getSingleStat(template: Function, endpoint: string, reverse: boolean = false) {
         const chart = signal(template([], []));
         Api.getStatistic(endpoint).then((stat) => {
             stat ??= [];
@@ -57,15 +57,15 @@ export class StatisticsWrapper {
         return signalMap(charts, create("div").classes("flex", "fullWidth"), (chart: any) => chart);
     }
 
-    static async getRoyaltiesByTrack() {
+    static getRoyaltiesByTrack() {
         return StatisticsWrapper.getSingleStat(StatisticTemplates.royaltiesByTrackChart, ApiRoutes.getRoyaltiesByTrack);
     }
 
-    static async getPlayCountByTracks() {
+    static getPlayCountByTracks() {
         return StatisticsWrapper.getSingleStat(StatisticTemplates.playCountByTrackChart, ApiRoutes.getPlayCountByTrack);
     }
 
-    static async getLikesByTrack() {
+    static getLikesByTrack() {
         return StatisticsWrapper.getSingleStat(StatisticTemplates.likesByTrackChart, ApiRoutes.getLikesByTrack, true);
     }
 }

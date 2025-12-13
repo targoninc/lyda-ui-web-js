@@ -869,7 +869,7 @@ export class TrackEditTemplates {
                     TrackEditTemplates.addToAlbumsButton(track),
                     TrackTemplates.addToPlaylistButton(track),
                     TrackEditTemplates.visibilityToggle(isPrivate, state),
-                ).classes("align-children")
+                ).classes("align-children"),
             ),
             vertical(
                 horizontal(
@@ -882,7 +882,7 @@ export class TrackEditTemplates {
                         .build(),
                     MusicTemplates.entityCoverButtons(MediaFileType.trackCover, track, imageState, coverLoading),
                     when(coverLoading, GenericTemplates.loadingSpinner()),
-                    MusicTemplates.cover(EntityType.track, track, "inline-cover")
+                    MusicTemplates.cover(EntityType.track, track, "inline-cover"),
                 ).classes("align-end"),
                 when(changed, horizontal(
                     create("span")
@@ -919,13 +919,17 @@ export class TrackEditTemplates {
 
     static batchEditTracksPage() {
         const tracks = signal<Track[]>([]);
-        Api.getTracksByUser(currentUser.value?.username ?? "", currentUser.value?.id).then(t => tracks.value = t ?? []);
+        const loading = signal(true);
+        Api.getTracksByUser(currentUser.value?.username ?? "", currentUser.value?.id)
+           .then(t => tracks.value = t ?? [])
+           .finally(() => loading.value = false);
 
         return vertical(
             heading({
                 level: 1,
                 text: t("EDIT_TRACKS"),
             }),
+            when(loading, GenericTemplates.loadingSpinner()),
             signalMap(tracks, vertical(), t => TrackEditTemplates.editableTrackInList(t, tracks)),
         ).build();
     }

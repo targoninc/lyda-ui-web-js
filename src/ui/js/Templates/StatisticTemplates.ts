@@ -63,18 +63,15 @@ export class StatisticTemplates {
     }
 
     static async allStats() {
-        const stats = await StatisticsWrapper.getStatistics();
-
         return create("div")
             .classes("flex", "fullWidth")
             .children(
-                ...stats,
+                ...StatisticsWrapper.getStatistics(),
                 PayoutTemplates.dataExport(),
             ).build();
     }
 
     static async globalStats() {
-        const stats = await StatisticsWrapper.getGlobalStatistics();
         const royaltyInfo = signal<RoyaltyInfo | null>(null);
         Api.getRoyaltyInfo().then(ri => royaltyInfo.value = ri);
 
@@ -85,7 +82,7 @@ export class StatisticTemplates {
             create("div")
                 .classes("flex", "fullWidth")
                 .children(
-                    ...stats,
+                    ...StatisticsWrapper.getGlobalStatistics(),
                 ).build(),
         ).build();
     }
