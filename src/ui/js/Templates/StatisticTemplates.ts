@@ -62,7 +62,7 @@ export class StatisticTemplates {
         return ChartTemplates.barChart(trackNames, playCounts, `${t("PLAYS")}`, `${t("PLAYCOUNT_BY_TRACK")}`, "playCountByTrackChart");
     }
 
-    static async allStats() {
+    static allStats() {
         return create("div")
             .classes("flex", "fullWidth")
             .children(
@@ -71,7 +71,7 @@ export class StatisticTemplates {
             ).build();
     }
 
-    static async globalStats() {
+    static globalStats() {
         const royaltyInfo = signal<RoyaltyInfo | null>(null);
         Api.getRoyaltyInfo().then(ri => royaltyInfo.value = ri);
 

@@ -131,7 +131,7 @@ export class PageTemplates {
         return await PlaylistTemplates.playlistPage(playlist, user);
     }
 
-    static async statisticsPage() {
+    static statisticsPage() {
         const tabs = [`${t("YOUR_STATISTICS")}`, `${t("GLOBAL")}`];
         const selectedTab = signal(0);
 
@@ -143,13 +143,13 @@ export class PageTemplates {
                     tabSelected(selectedTab, 0),
                     vertical(
                         PayoutTemplates.artistRoyaltyActions(),
-                        await StatisticTemplates.allStats(),
+                        StatisticTemplates.allStats(),
                     ).build(),
                 ),
                 when(
                     tabSelected(selectedTab, 1),
                     vertical(
-                        await StatisticTemplates.globalStats(),
+                        StatisticTemplates.globalStats(),
                     ).build(),
                 ),
             ).build();
