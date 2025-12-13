@@ -28,8 +28,8 @@ export class PayoutTemplates {
         const load = (filter?: any) => {
             loading.value = true;
             Api.getPayouts(skip.value, filter)
-                .then(e => payouts.value = e ?? [])
-                .finally(() => loading.value = false);
+               .then(e => payouts.value = e ?? [])
+               .finally(() => loading.value = false);
         };
         const loading = signal(false);
         load();
@@ -66,7 +66,10 @@ export class PayoutTemplates {
 
     static artistRoyaltyActions() {
         const royaltyInfo = signal<RoyaltyInfo | null>(null);
-        Api.getRoyaltyInfo().then(ri => royaltyInfo.value = ri);
+        const royaltiesLoading = signal(true);
+        Api.getRoyaltyInfo()
+           .then(ri => royaltyInfo.value = ri)
+           .finally(() => royaltiesLoading.value = false);
         const hasPayableRoyalties = compute(ri => ri && ri.personal.available && ri.personal.available >= AVAILABLE_THRESHOLD_USD, royaltyInfo);
         const paypalMailExists$ = compute(ri => ri && ri.personal.paypalMail !== null, royaltyInfo);
 
@@ -74,6 +77,7 @@ export class PayoutTemplates {
             .classes("flex-v", "card")
             .children(
                 compute(ri => ri ? PayoutTemplates.royaltyInfo(ri) : nullElement(), royaltyInfo),
+                when(royaltiesLoading, GenericTemplates.loadingSpinner()),
                 create("div")
                     .classes("flex")
                     .children(
