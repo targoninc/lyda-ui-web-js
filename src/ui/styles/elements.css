@@ -650,8 +650,12 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     --cover-size: 3em;
 }
 
-.cover-container.inline-cover, .cover-container.player-cover {
+.cover-container.inline-cover {
     --cover-size: var(--inline-track-height);
+}
+
+.cover-container.player-cover {
+    --cover-size: 92px;
 }
 
 .cover-container.small-cover {
@@ -801,6 +805,10 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .feed-track {
     border: 1px solid var(--color-7);
+}
+
+.feed-track:hover {
+    border-color: var(--color-5);
 }
 
 .playing {
