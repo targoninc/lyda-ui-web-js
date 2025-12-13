@@ -77,7 +77,7 @@ export async function baseHtml(req: Request) {
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     
     <!-- Styles -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/targoninc/jess-components@0.0.15/src/src/jess-components.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/targoninc/jess-components@0.0.48/src/src/jess-components.css"/>
     <link rel="stylesheet" type="text/css" href="/styles/style.css"/>
     <link rel="stylesheet" type="text/css" href="/styles/elements.css"/>
     <link rel="stylesheet" type="text/css" href="/styles/themes/dark.css"/>

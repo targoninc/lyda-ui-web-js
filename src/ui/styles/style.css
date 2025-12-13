@@ -70,12 +70,13 @@
 
     --jessc-interactive-background: var(--color-6);
     --jessc-interactive-background-hover: var(--color-3);
-    --jessc-interactive-background-active: var(--color-9);
+    --jessc-interactive-background-active: var(--background-playing);
     --jessc-interactive-color: var(--color-5);
     --jessc-interactive-color-active: var(--color-4);
     --jessc-interactive-border: var(--color-7);
     --jessc-interactive-border-focused: var(--blue);
     --jessc-interactive-border-active: var(--blue);
+    --jessc-interactive-border-hover: var(--color-5);
     --jessc-input-padding-x: 0.6em;
 
     --jessc-font: var(--default-font-family);

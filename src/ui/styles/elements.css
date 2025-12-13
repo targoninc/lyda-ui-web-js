@@ -220,11 +220,11 @@
 }
 
 .track-card, .playlist-card, .album-card {
-    background: var(--color-3);
+    background: var(--background-glass);
     display: flex;
     border-radius: var(--border-radius);
     gap: 15px;
-    border: 1px solid transparent;
+    border: 1px solid var(--color-7);
     width: max(var(--card-width), 100%);
     max-width: var(--card-width);
     height: max-content;
@@ -232,10 +232,6 @@
 
 .small-card {
     max-width: var(--card-width);
-}
-
-.track-card.secondary, .playlist-card.secondary, .album-card.secondary {
-    background: var(--color-4);
 }
 
 .track-card:hover {

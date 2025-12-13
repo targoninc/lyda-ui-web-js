@@ -119,12 +119,16 @@ export class NavTemplates {
     }
 
     static accountSection() {
+        const isUploadPage = compute(r => r?.path === 'upload', router.currentRoute);
+        const uploadActiveClass = compute((i): string => i ? "active" : "inactive", isUploadPage);
+
         return create("div")
             .classes("widest-fill-right", "relative")
             .children(
                 button({
-                    classes: ["hideOnMidBreakpoint", "fullHeight"],
+                    classes: ["hideOnMidBreakpoint", "fullHeight", uploadActiveClass],
                     icon: { icon: "upload" },
+                    disabled: isUploadPage,
                     onclick: async (e: MouseEvent) => {
                         e.preventDefault();
                         navigate(RoutePath.upload);
