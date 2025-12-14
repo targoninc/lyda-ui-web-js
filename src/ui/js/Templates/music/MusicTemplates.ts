@@ -364,7 +364,7 @@ export class MusicTemplates {
 
     static addListToQueueButton(list: Playlist | Album) {
         const allTracksInQueue = compute(
-            q => list.tracks && list.tracks.every(t => q.includes(t.track_id)),
+            q => list.tracks && list.tracks.length > 0 && list.tracks.every(t => q.includes(t.track_id)),
             manualQueue,
         );
         const text = compute((q): string => (q ? `${t("UNQUEUE")}` : `${t("QUEUE")}`), allTracksInQueue);
