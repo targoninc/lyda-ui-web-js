@@ -54,7 +54,7 @@ export class MusicTemplates {
                 await startItem(type, item, {
                     startedFrom: {
                         feedType,
-                        name: feedName
+                        name: feedName,
                     },
                 });
             })
@@ -62,7 +62,7 @@ export class MusicTemplates {
                 MusicTemplates.playButton(type, item.id, () => startItem(type, item, {
                     startedFrom: {
                         feedType,
-                        name: feedName
+                        name: feedName,
                     },
                 })),
                 MusicTemplates.cover(type, item, "inline-cover"),
@@ -243,7 +243,13 @@ export class MusicTemplates {
         pageState.subscribe(update);
         search.subscribe(update);
         const publicFeedTypes = [FeedType.explore, FeedType.profileTracks, FeedType.profileReposts];
-        const searchableFeedTypes = [FeedType.profileTracks, FeedType.profileReposts, FeedType.history, FeedType.likedTracks, FeedType.boughtTracks];
+        const searchableFeedTypes = [
+            FeedType.profileTracks,
+            FeedType.profileReposts,
+            FeedType.history,
+            FeedType.likedTracks,
+            FeedType.boughtTracks,
+        ];
         const feedVisible = compute(u => u || publicFeedTypes.includes(type), currentUser);
         setTimeout(() => update());
         const nextDisabled = compute(t => t.length < pageSize, tracks$);
@@ -254,6 +260,7 @@ export class MusicTemplates {
                 when(feedVisible, create("span")
                     .text(t("LOGIN_TO_SEE_FEED"))
                     .build(), true),
+                // TODO: Make separate FeedDisplayImplementations - e.g. separate one for albums + playlists (view all tracks at once) and one for paginated feeds
                 when(
                     feedVisible,
                     TrackTemplates.trackListWithPagination(tracks$, pageState, type, loading$, search, nextDisabled, searchableFeedTypes.includes(type), getFeedDisplayName(type, options.name)),

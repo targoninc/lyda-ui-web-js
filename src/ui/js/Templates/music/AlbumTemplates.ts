@@ -2,7 +2,6 @@ import { Icons } from "../../Enums/Icons.ts";
 import { AlbumActions } from "../../Actions/AlbumActions.ts";
 import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
-import { TrackTemplates } from "./TrackTemplates.ts";
 import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
 import { Images } from "../../Enums/Images.ts";
 import { getPlayIcon, Util } from "../../Classes/Util.ts";
@@ -23,6 +22,7 @@ import { MusicTemplates } from "./MusicTemplates.ts";
 import { Api } from "../../Api/Api.ts";
 import { t } from "../../../locales";
 import { Visibility } from "@targoninc/lyda-shared/src/Enums/Visibility";
+import { TrackTemplates } from "./TrackTemplates.ts";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
