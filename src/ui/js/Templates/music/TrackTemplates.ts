@@ -2,7 +2,7 @@ import { TrackActions } from "../../Actions/TrackActions.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { copy, getPlayIcon, Util } from "../../Classes/Util.ts";
 import { PlayManager } from "../../Streaming/PlayManager.ts";
-import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
+import { GenericTemplates, horizontal, tabSelected, vertical } from "../generic/GenericTemplates.ts";
 import { Time } from "../../Classes/Helpers/Time.ts";
 import { QueueManager } from "../../Streaming/QueueManager.ts";
 import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
@@ -11,7 +11,6 @@ import { DragActions } from "../../Actions/DragActions.ts";
 import { Images } from "../../Enums/Images.ts";
 import { TrackEditTemplates } from "./TrackEditTemplates.ts";
 import { CustomText } from "../../Classes/Helpers/CustomText.ts";
-import { CommentTemplates } from "../CommentTemplates.ts";
 import { navigate } from "../../Routing/Router.ts";
 import {
     AnyElement,
@@ -69,6 +68,7 @@ import { FormTemplates } from "../generic/FormTemplates.ts";
 import { currency } from "../../Classes/Helpers/Num.ts";
 import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 import { FeedItem } from "../../Models/FeedItem.ts";
+import { CommentTemplates } from "../CommentTemplates.ts";
 
 export class TrackTemplates {
     static collabIndicator(collab: TrackCollaborator): any {
@@ -463,7 +463,7 @@ export class TrackTemplates {
             ).build();
     }
 
-    static async trackPage(trackData: any) {
+    static trackPage(trackData: any) {
         if (!trackData.track) {
             console.log(trackData);
             console.error("Invalid track data");
@@ -488,7 +488,7 @@ export class TrackTemplates {
         }
         const description = create("span")
             .id("track-description")
-            .classes("description", "break-lines", "card")
+            .classes("card", "description", "break-lines", "padded")
             .html(CustomText.renderToHtml(track.description))
             .build();
 
@@ -506,10 +506,11 @@ export class TrackTemplates {
         get<Comment[]>(ApiRoutes.getCommentsByTrackId, { track_id: track.id }).then(c => {
             comments.value = c ?? [];
         });
-        const menuShown$ = signal(false);
         const hasMenu = Util.isLoggedIn() && (trackData.canEdit || trackData.canDownload);
         const backgroundImage = compute(c => trackData.canDownload ? `url(${c})` : "none", coverFile);
         const bought = trackData.canDownload && !trackData.canEdit;
+        const selectedTab$ = signal(0);
+        const tabs = [t("COMMENTS"), t("ALBUMS"), t("PLAYLISTS")];
 
         return create("div")
             .classes("single-page", "rounded-large", "relative")
@@ -649,30 +650,46 @@ export class TrackTemplates {
                                 ], "buy-track");
                             },
                         })),
-                        when(hasMenu, horizontal(
-                            when(isPrivate, TrackTemplates.copyPrivateLinkButton(track.id, track.secretcode)),
-                            GenericTemplates.roundIconButton(
-                                { icon: "more_horiz" },
-                                () => menuShown$.value = !menuShown$.value,
-                                "Show menu"),
-                            GenericTemplates.menu(compute(s => s, menuShown$),
-                                when(trackData.canDownload, TrackEditTemplates.downloadAudioButton(track)),
-                                when(trackData.canEdit, vertical(
-                                    TrackEditTemplates.addToAlbumsButton(track),
-                                    TrackEditTemplates.replaceAudioButton(track),
-                                    TrackEditTemplates.openEditPageButton(track),
-                                    TrackEditTemplates.deleteTrackButton(track.id),
-                                ).build()),
-                            ),
-                        ).classes("relative", "align-children").build()),
+                        when(hasMenu, TrackTemplates.trackMenu(isPrivate, track, trackData)),
                     ).classes("align-children"),
                     when(track.description.length > 0, description),
-                    CommentTemplates.commentListFullWidth(track.id, comments, showComments),
-                    TrackTemplates.inAlbumsList(track),
-                    await TrackTemplates.inPlaylistsList(track),
+                    GenericTemplates.combinedSelector(tabs, (newTabIndex) => selectedTab$.value = newTabIndex, 0),
+                    when(
+                        tabSelected(selectedTab$, 0),
+                        CommentTemplates.commentListFullWidth(track.id, comments, showComments),
+                    ),
+                    when(
+                        tabSelected(selectedTab$, 1),
+                        TrackTemplates.inAlbumsList(track),
+                    ),
+                    when(
+                        tabSelected(selectedTab$, 2),
+                        TrackTemplates.inPlaylistsList(track),
+                    ),
                 ).classes("noflexwrap", "padded-large")
                  .styles("min-height", "80dvh", "position", "inherit"),
             ).build();
+    }
+
+    private static trackMenu(isPrivate: boolean, track: Track, trackData: any) {
+        const menuShown$ = signal(false);
+
+        return horizontal(
+            when(isPrivate, TrackTemplates.copyPrivateLinkButton(track.id, track.secretcode)),
+            GenericTemplates.roundIconButton(
+                { icon: "more_horiz" },
+                () => menuShown$.value = !menuShown$.value,
+                "Show menu"),
+            GenericTemplates.menu(compute(s => s, menuShown$),
+                when(trackData.canDownload, TrackEditTemplates.downloadAudioButton(track)),
+                when(trackData.canEdit, vertical(
+                    TrackEditTemplates.addToAlbumsButton(track),
+                    TrackEditTemplates.replaceAudioButton(track),
+                    TrackEditTemplates.openEditPageButton(track),
+                    TrackEditTemplates.deleteTrackButton(track.id),
+                ).build()),
+            ),
+        ).classes("relative", "align-children").build();
     }
 
     static addToPlaylistButton(track: Track) {
@@ -714,7 +731,7 @@ export class TrackTemplates {
             ).build();
     }
 
-    static async inPlaylistsList(track: Track) {
+    static inPlaylistsList(track: Track) {
         if (!track.playlists || track.playlists.length === 0) {
             return create("div").classes("flex-v", "track-contained-list").build();
         }

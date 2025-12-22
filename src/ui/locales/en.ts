@@ -169,6 +169,7 @@ export const en = {
     ALBUMS: "Albums",
     PLAYLISTS: "Playlists",
     REPOSTS: "Reposts",
+    COMMENTS: "Comments",
     LISTENING_HISTORY: "Listening history",
     CREATE: "Create",
     ALBUM_CREATED: "Album created",
