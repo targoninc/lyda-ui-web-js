@@ -54,9 +54,10 @@ export class PlayManager {
     }
 
     static async playNextFromQueues() {
-        const queue = QueueManager.getManualQueue();
-        const nextTrackId = queue[0];
+        const manualQueue = QueueManager.getManualQueue();
+        const nextTrackId = manualQueue[0];
         if (nextTrackId !== undefined) {
+            // Prioritize manual queue
             await PlayManager.safeStartAsync(nextTrackId);
             QueueManager.removeFromManualQueue(nextTrackId);
         } else {
@@ -65,24 +66,35 @@ export class PlayManager {
             if (contextQueue.length > 0) {
                 let nextTrackId = QueueManager.getNextTrackInContextQueue(currentTrackId.value);
                 if (nextTrackId !== undefined && nextTrackId !== null) {
+                    // Play next track in context queue
                     await PlayManager.safeStartAsync(nextTrackId);
                 } else {
+                    // End of context queue reached
                     if (loopingContext) {
+                        // Play from the start
                         nextTrackId = QueueManager.getContextQueue()[0];
                         await PlayManager.safeStartAsync(nextTrackId);
                     } else {
-                        await PlayManager.playNextInAutoQueue();
+                        // Clear the context queue and play from the auto queue
+                        QueueManager.clearContextQueue();
+                        PlayManager.clearPlayFrom();
+                        await PlayManager.playNextInAutoQueueOrStop();
                     }
                 }
             } else {
-                const user = await Util.getUserAsync();
-                const autoQueue = QueueManager.getAutoQueue();
-                if (autoQueue.length > 0 && user && userHasSettingValue(user, UserSettings.playFromAutoQueue, true)) {
-                    await PlayManager.playNextInAutoQueue();
-                } else {
-                    await PlayManager.stopAllAsync();
-                }
+                // Context queue is empty, play from auto queue
+                await PlayManager.playNextInAutoQueueOrStop();
             }
+        }
+    }
+
+    private static async playNextInAutoQueueOrStop() {
+        const user = await Util.getUserAsync();
+        const autoQueue = QueueManager.getAutoQueue();
+        if (autoQueue.length > 0 && user && userHasSettingValue(user, UserSettings.playFromAutoQueue, true)) {
+            await PlayManager.playNextInAutoQueue();
+        } else {
+            await PlayManager.stopAllAsync();
         }
     }
 
