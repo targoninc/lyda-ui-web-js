@@ -13,7 +13,7 @@ import {
     currentlyBuffered,
     currentQuality,
     currentTrackId,
-    currentTrackPosition,
+    currentTrackPosition, currentUser,
     loadingAudio,
     loopMode,
     muted,
@@ -442,7 +442,12 @@ export class PlayerTemplates {
     }
 
     static noSubscriptionInfo() {
+        const noSubscription = compute(u => !u || !u.subscription, currentUser);
         const text = compute((q): string => {
+            if (noSubscription) {
+                return "96kbps";
+            }
+
             switch (q) {
                 case StreamingQuality.low:
                     return "96kbps";
