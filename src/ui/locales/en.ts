@@ -209,6 +209,7 @@ export const en = {
     RECEIVED_AT: t => `Received ${t}`,
     UPDATED_AT: t => `Updated ${t}`,
     ACTION_LOGS: "Action logs",
+    TRANSACTIONS: "Transactions",
     TIMESTAMP: "Timestamp",
     HOST: "Host",
     LOG_LEVEL: "Log level",

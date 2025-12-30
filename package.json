@@ -29,14 +29,14 @@
     "dependencies": {
         "@paypal/paypal-js": "^9.0.1",
         "@sgratzl/chartjs-chart-boxplot": "^4.4.5",
-        "@targoninc/jess": "npm:@jsr/targoninc__jess@^0.0.26",
-        "@targoninc/jess-components": "^0.0.45",
+        "@targoninc/jess": "^0.0.29",
+        "@targoninc/jess-components": "^0.0.50",
         "@targoninc/lyda-shared": "^0.0.63",
         "@types/bun": "^1.3.3",
+        "@typescript/native-preview": "^7.0.0-dev.20251230.1",
         "chart.js": "^4.5.1",
         "dotenv": "^17.2.3",
-        "express": "^5.1.0",
-        "typescript": "^5.9.3"
+        "express": "^5.1.0"
     },
-    "version": "0.0.504"
+    "version": "0.0.505"
 }

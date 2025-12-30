@@ -43,8 +43,8 @@ export class DashboardTemplates {
                             icon: { icon: "content_paste_search" },
                         })),
                         when(hasPermission(Permissions.canViewPayments), button({
-                            text: t("PAYMENTS"),
-                            onclick: () => navigate(RoutePath.payouts),
+                            text: t("TRANSACTIONS"),
+                            onclick: () => navigate(RoutePath.transactions),
                             icon: { icon: "payments" },
                         })),
                         when(hasPermission(Permissions.canCalculateRoyalties), button({
