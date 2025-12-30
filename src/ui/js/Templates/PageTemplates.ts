@@ -15,7 +15,6 @@ import { LogTemplates } from "./admin/LogTemplates.ts";
 import { RoyaltyTemplates } from "./admin/RoyaltyTemplates.ts";
 import { PayoutTemplates } from "./money/PayoutTemplates.ts";
 import { MusicTemplates } from "./music/MusicTemplates.ts";
-import { PaymentTemplates } from "./money/PaymentTemplates.ts";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { TrackEditTemplates } from "./music/TrackEditTemplates.ts";
 import { navigate, Route } from "../Routing/Router.ts";
@@ -59,8 +58,6 @@ export class PageTemplates {
         [RoutePath.verifyEmail]: LandingPageTemplates.newLandingPage,
         [RoutePath.search]: SearchTemplates.searchPage,
         [RoutePath.roadmap]: RoadmapTemplates.roadmapPage,
-        [RoutePath.payouts]: PayoutTemplates.payoutsPage,
-        [RoutePath.payments]: PaymentTemplates.paymentsPage,
         [RoutePath.editTracks]: TrackEditTemplates.batchEditTracksPage,
         [RoutePath.protocolHandler]: PageTemplates.protocolHandlerPage,
         [RoutePath.transactions]: TransactionTemplates.page,

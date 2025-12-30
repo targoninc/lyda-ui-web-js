@@ -71,9 +71,9 @@ export class SubscriptionTemplates {
                     ),
                 ).build()),
                 button({
-                    text: t("PAYMENT_HISTORY"),
-                    icon: { icon: "receipt" },
-                    onclick: () => navigate(RoutePath.payments),
+                    text: t("TRANSACTIONS"),
+                    icon: { icon: "payments" },
+                    onclick: () => navigate(RoutePath.transactions),
                 }),
             ).build();
     }
@@ -240,6 +240,7 @@ export class SubscriptionTemplates {
                     .text(Time.agoUpdating(giftedSub.created_at))
                     .build(),
             ],
+            cellClasses: []
         });
     }
 }

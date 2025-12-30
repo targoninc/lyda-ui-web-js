@@ -22,48 +22,6 @@ import { t } from "../../../locales";
 const AVAILABLE_THRESHOLD_USD = 25;
 
 export class PayoutTemplates {
-    static payoutsPage() {
-        const payouts = signal<Payout[]>([]);
-        const skip = signal(0);
-        const load = (filter?: any) => {
-            loading.value = true;
-            Api.getPayouts(skip.value, filter)
-               .then(e => payouts.value = e ?? [])
-               .finally(() => loading.value = false);
-        };
-        const loading = signal(false);
-        load();
-
-        return create("div")
-            .classes("flex-v")
-            .children(
-                create("h1")
-                    .text(t("PAYOUT_HISTORY"))
-                    .build(),
-                compute(_ => {
-                    return GenericTemplates.searchWithFilter(payouts, PayoutTemplates.payout, skip, loading, load);
-                }, permissions),
-            ).build();
-    }
-
-    static payout(p: Payout) {
-        return create("div")
-            .classes("flex", "card", "space-between")
-            .children(
-                create("div")
-                    .classes("flex-v", p.status !== PaymentStatus.failed ? "positive" : "negative")
-                    .children(
-                        create("span")
-                            .text(currency(p.amount_ct / 100, "USD"))
-                            .build(),
-                    ).build(),
-                create("span")
-                    .classes("text-small")
-                    .text(Time.agoUpdating(new Date(p.created_at)))
-                    .build(),
-            ).build();
-    }
-
     static artistRoyaltyActions() {
         const royaltyInfo = signal<RoyaltyInfo | null>(null);
         const royaltiesLoading = signal(true);
@@ -82,9 +40,9 @@ export class PayoutTemplates {
                     .classes("flex")
                     .children(
                         button({
-                            text: t("PAYOUT_HISTORY"),
-                            icon: { icon: "account_balance" },
-                            onclick: () => navigate(RoutePath.payouts),
+                            text: t("TRANSACTIONS"),
+                            icon: { icon: "payments" },
+                            onclick: () => navigate(RoutePath.transactions),
                         }),
                         when(hasPayableRoyalties, create("div")
                             .classes("flex")

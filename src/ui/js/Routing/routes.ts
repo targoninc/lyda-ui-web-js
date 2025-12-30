@@ -29,9 +29,7 @@ export enum RoutePath {
     admin = "admin",
     faq = "faq",
     users = "users",
-    payouts = "payouts",
     history = "history",
-    payments = "payments",
     editTracks = "edit-tracks",
     protocolHandler = "protocolHandler",
     transactions = "transactions",
@@ -158,14 +156,6 @@ export const routes: Route[] = [
     {
         path: RoutePath.users,
         title: "Users",
-    },
-    {
-        path: RoutePath.payouts,
-        title: "Payouts",
-    },
-    {
-        path: RoutePath.payments,
-        title: "Payments",
     },
     {
         path: RoutePath.history,
