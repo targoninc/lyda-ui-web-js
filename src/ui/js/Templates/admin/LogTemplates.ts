@@ -154,11 +154,7 @@ export class LogTemplates {
                 text(l.host),
                 text(logLevelMap[l.logLevel].at(0)),
                 text(truncateText(l.message, 200)),
-                button({
-                    text: t("COPY_STACK"),
-                    icon: { icon: "content_copy" },
-                    onclick: () => copy(l.stack),
-                }),
+                GenericTemplates.textButton(t("COPY_STACK"), () => copy(l.stack), "content_copy"),
                 LogTemplates.properties(l.properties),
             ],
         });
