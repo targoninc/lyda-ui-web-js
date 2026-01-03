@@ -445,8 +445,8 @@ export class PlayerTemplates {
 
     static noSubscriptionInfo() {
         const noSubscription = compute(u => !u || !u.subscription, currentUser);
-        const text = compute((q): string => {
-            if (noSubscription) {
+        const text = compute((q, n): string => {
+            if (n) {
                 return "96kbps";
             }
 
@@ -460,7 +460,7 @@ export class PlayerTemplates {
                 default:
                     return "???kbps";
             }
-        }, currentQuality);
+        }, currentQuality, noSubscription);
 
         return create("a")
             .classes("page-link", "color-dim", "text-small")
