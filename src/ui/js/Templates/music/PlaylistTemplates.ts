@@ -1,8 +1,6 @@
 import { Icons } from "../../Enums/Icons.ts";
 import { GenericTemplates, horizontal } from "../generic/GenericTemplates.ts";
 import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
-import { Time } from "../../Classes/Helpers/Time.ts";
-import { TrackTemplates } from "./TrackTemplates.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { Images } from "../../Enums/Images.ts";
 import { getPlayIcon, Util } from "../../Classes/Util.ts";
@@ -22,6 +20,7 @@ import { MusicTemplates } from "./MusicTemplates.ts";
 import { Api } from "../../Api/Api.ts";
 import { t } from "../../../locales";
 import { Visibility } from "@targoninc/lyda-shared/src/Enums/Visibility.ts";
+import { Time } from "../../Classes/Helpers/Time.ts";
 
 export class PlaylistTemplates {
     static addTrackToPlaylistModal(track: Track, playlists: Playlist[]) {
@@ -196,7 +195,10 @@ export class PlaylistTemplates {
                             text: t("PRIVATE"),
                             checked: visibility,
                             onchange: (v) => {
-                                playlist.value = { ...playlist.value, visibility: v ? Visibility.private : Visibility.public };
+                                playlist.value = {
+                                    ...playlist.value,
+                                    visibility: v ? Visibility.private : Visibility.public,
+                                };
                             },
                         }),
                     ).build(),
@@ -220,64 +222,6 @@ export class PlaylistTemplates {
             ).build();
     }
 
-    static noPlaylistsYet(isOwnProfile: boolean) {
-        let children;
-        if (isOwnProfile) {
-            children = [
-                create("p")
-                    .text(t("PUT_FAV_TUNES_INTO_PLAYLIST"))
-                    .build(),
-                GenericTemplates.newPlaylistButton(["secondary"]),
-            ];
-        } else {
-            children = [
-                create("p")
-                    .text(t("NO_PLAYLISTS_FOUND"))
-                    .build(),
-            ];
-        }
-
-        return create("div")
-            .classes("card", "flex-v")
-            .children(...children)
-            .build();
-    }
-
-    static playlistCard(playlist: Playlist, isSecondary: boolean = false) {
-        const icons = [];
-        if (playlist.visibility === Visibility.private) {
-            icons.push(GenericTemplates.lock());
-        }
-        const coverState = signal(Images.DEFAULT_COVER_PLAYLIST);
-        if (playlist.has_cover) {
-            coverState.value = Util.getPlaylistCover(playlist.id);
-        }
-        if (!playlist.user) {
-            throw new Error(`Playlist ${playlist.id} has no user`);
-        }
-
-        return create("div")
-            .classes("playlist-card", "padded", "flex-v", "small-gap", isSecondary ? "secondary" : "_")
-            .children(
-                create("div")
-                    .classes("flex")
-                    .children(
-                        MusicTemplates.cover(EntityType.playlist, playlist, "card-cover"),
-                        create("div")
-                            .classes("flex-v", "small-gap")
-                            .children(
-                                MusicTemplates.title(EntityType.playlist, playlist.title, playlist.id, icons),
-                                UserTemplates.userWidget(playlist.user, [], [], UserWidgetContext.card),
-                                create("span")
-                                    .classes("date", "text-small", "nopointer", "color-dim")
-                                    .text(Time.ago(playlist.created_at))
-                                    .build(),
-                            ).build(),
-                    ).build(),
-                InteractionTemplates.interactions(EntityType.playlist, playlist),
-            ).build();
-    }
-
     static smallPlaylistCover(playlist: Playlist) {
         const coverState = signal(Images.DEFAULT_COVER_PLAYLIST);
         if (playlist.has_cover) {
@@ -289,13 +233,6 @@ export class PlaylistTemplates {
             .styles("height", "var(--font-size-large)")
             .src(coverState)
             .alt(playlist.title)
-            .build();
-    }
-
-    static playlistCardsContainer(children: AnyNode[]) {
-        return create("div")
-            .classes("playlists", "flex")
-            .children(...children)
             .build();
     }
 
@@ -311,15 +248,12 @@ export class PlaylistTemplates {
             throw new Error(`Playlist ${playlist.id} has no user`);
         }
 
-        async function startCallback(trackId: number) {
-            await PlaylistActions.startTrackInPlaylist(playlist, trackId);
-        }
-
         const coverLoading = signal(false);
         const coverState = signal(Images.DEFAULT_COVER_PLAYLIST);
         if (playlist.has_cover) {
             coverState.value = Util.getPlaylistCover(playlist.id);
         }
+        const duration = playlist.tracks.reduce((acc, t) => acc + (t.track?.length ?? 0), 0);
 
         return create("div")
             .classes("single-page", "noflexwrap", "padded-large", "rounded-large", "flex-v")
@@ -354,18 +288,20 @@ export class PlaylistTemplates {
                             .classes("flex-v")
                             .children(
                                 PlaylistTemplates.audioActions(playlist, user, data.canEdit),
-                                create("div")
-                                    .classes("playlist-title-container", "flex-v", "small-gap")
-                                    .children(
-                                        create("span")
-                                            .classes("date", "text-small")
-                                            .text(t("CREATED_AT", Util.formatDate(playlist.created_at)))
-                                            .build(),
-                                    ).build(),
+                                horizontal(
+                                    create("span")
+                                        .classes("date", "text-small")
+                                        .text(t("CREATED_AT", Util.formatDate(playlist.created_at)))
+                                        .build(),
+                                    create("span")
+                                        .classes("date", "text-small")
+                                        .text(Time.format(duration))
+                                        .build(),
+                                ).build(),
                                 InteractionTemplates.interactions(EntityType.playlist, playlist),
                             ).build(),
                     ).build(),
-                TrackTemplates.tracksInList(noTracks, tracks, data.canEdit, playlist, "playlist", startCallback),
+                MusicTemplates.tracksInList(noTracks, tracks, data.canEdit, playlist, "playlist"),
             ).build();
     }
 
@@ -375,7 +311,6 @@ export class PlaylistTemplates {
         }
 
         const isPlaying = compute((p, pHere) => (p && p.type === "playlist" && p.id === playlist.id && pHere) ?? false, playingFrom, playingHere);
-        const duration = playlist.tracks.reduce((acc, t) => acc + (t.track?.length ?? 0), 0);
         const playIcon = getPlayIcon(isPlaying, loadingAudio);
         const playText = compute((p): string => p ? `${t("PAUSE")}` : `${t("PLAY")}`, isPlaying);
 
@@ -390,13 +325,12 @@ export class PlaylistTemplates {
                         adaptive: true,
                         isUrl: true,
                     },
-                    attributes: ["duration", duration.toString()],
                     id: playlist.id,
                     classes: ["special", "bigger-input", "rounded-max"],
                     disabled: playlist.tracks?.length === 0,
                     onclick: async () => {
                         const firstTrack = playlist.tracks![0];
-                        await PlaylistActions.startTrackInPlaylist(playlist, firstTrack.track_id, true);
+                        await PlaylistActions.startTrackInPlaylist(playlist, firstTrack.track!, true);
                     },
                 }),
                 MusicTemplates.addListToQueueButton(playlist),

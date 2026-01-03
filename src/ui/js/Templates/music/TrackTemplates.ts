@@ -6,7 +6,6 @@ import { GenericTemplates, horizontal, tabSelected, vertical } from "../generic/
 import { Time } from "../../Classes/Helpers/Time.ts";
 import { QueueManager } from "../../Streaming/QueueManager.ts";
 import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
-import { PlaylistTemplates } from "./PlaylistTemplates.ts";
 import { DragActions } from "../../Actions/DragActions.ts";
 import { Images } from "../../Enums/Images.ts";
 import { TrackEditTemplates } from "./TrackEditTemplates.ts";
@@ -20,7 +19,6 @@ import {
     nullElement,
     Signal,
     signal,
-    signalMap,
     TypeOrSignal,
     when,
 } from "@targoninc/jess";
@@ -67,8 +65,9 @@ import { PaymentProvider } from "@targoninc/lyda-shared/src/Enums/PaymentProvide
 import { FormTemplates } from "../generic/FormTemplates.ts";
 import { currency } from "../../Classes/Helpers/Num.ts";
 import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
-import { FeedItem } from "../../Models/FeedItem.ts";
 import { CommentTemplates } from "../CommentTemplates.ts";
+import { AlbumActions } from "../../Actions/AlbumActions.ts";
+import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom.ts";
 
 export class TrackTemplates {
     static collabIndicator(collab: TrackCollaborator): any {
@@ -148,14 +147,13 @@ export class TrackTemplates {
     }
 
     static trackListWithPagination(
-        items$: Signal<FeedItem[]>,
+        items$: Signal<Track[]>,
         pageState: Signal<number>,
-        type: FeedType,
+        newPlayingFrom: PlayingFrom,
         loading$: Signal<boolean>,
         search: Signal<string>,
         nextDisabled: Signal<boolean>,
         hasSearch: TypeOrSignal<boolean>,
-        feedName: string
     ) {
         const empty = compute((t, l) => t.length === 0 && !l, items$, loading$);
 
@@ -176,14 +174,14 @@ export class TrackTemplates {
                             value: search,
                         })),
                     ).classes("align-children"),
-                    type === FeedType.following ? TrackTemplates.feedFilters(search) : nullElement(),
+                    newPlayingFrom.type === FeedType.following ? TrackTemplates.feedFilters(search) : nullElement(),
                 ).classes("space-between", "align-children")
                  .build(),
                 when(loading$, GenericTemplates.loadingSpinner()),
                 compute(
                     list =>
                         TrackTemplates.trackList(
-                            list.reverse().map(track => MusicTemplates.feedEntry(EntityType.track, track, type, feedName)),
+                            list.reverse().map(track => MusicTemplates.feedEntry(track, newPlayingFrom)),
                         ),
                     items$,
                 ),
@@ -289,7 +287,6 @@ export class TrackTemplates {
         list: Album | Playlist,
         tracks: Signal<ListTrack[]>,
         type: "album" | "playlist",
-        startCallback: Function | null = null,
     ) {
         const icons = [];
         const track = listTrack.track;
@@ -336,19 +333,20 @@ export class TrackTemplates {
 
         const playingClass = compute((id): string => (id === track.id ? "playing" : "_"), currentTrackId);
 
+        const startCallback = async () => {
+            if (type === "album") {
+                await AlbumActions.startTrackInAlbum(list as Album, track);
+            } else if (type === "playlist") {
+                await PlaylistActions.startTrackInPlaylist(list as Playlist, track);
+            }
+        }
+
         return item
             .children(
                 create("div")
                     .classes("feed-track", "flex", "padded", "rounded", "fullWidth", "card", "noflexwrap", playingClass)
                     .styles("max-width", "100%")
-                    .ondblclick(async () => {
-                        if (!startCallback) {
-                            PlayManager.addStreamClientIfNotExists(track.id, track.length);
-                            await PlayManager.startAsync(track.id);
-                        } else {
-                            await startCallback(track.id);
-                        }
-                    })
+                    .ondblclick(startCallback)
                     .children(
                         when(canEdit, GenericTemplates.verticalDragIndicator()),
                         TrackTemplates.smallListTrackCover(track, startCallback),
@@ -419,46 +417,6 @@ export class TrackTemplates {
                     onclick: async () => {
                         await TrackActions.removeTrackFromList(tracks, list, type, listTrack);
                     },
-                }),
-            ).build();
-    }
-
-    static tracksInList(
-        noTracks: Signal<boolean>,
-        tracks: Signal<ListTrack[]>,
-        canEdit: boolean,
-        list: Album | Playlist,
-        type: "album" | "playlist",
-        startCallback: (trackId: number) => Promise<void>,
-    ) {
-        return create("div")
-            .classes("flex-v")
-            .children(
-                when(
-                    noTracks,
-                    create("div")
-                        .classes("card")
-                        .children(
-                            create("span")
-                                .text(t("NOTHING_FOUND"))
-                                .build(),
-                        ).build(),
-                ),
-                signalMap(tracks, create("div").classes("flex-v"), (track, i) => {
-                    let parent = horizontal().classes("fullWidth");
-                    if (canEdit) {
-                        parent = GenericTemplates.dragTargetInList(async (data: any) => {
-                            await TrackActions.reorderTrack(type, list.id, data.id, tracks, i);
-                        }, i.toString()).classes("fullWidth");
-                    }
-
-                    return create("div")
-                        .classes("flex-v", "relative")
-                        .children(
-                            parent
-                                .children(TrackTemplates.trackInList(track, canEdit, list, tracks, type, startCallback))
-                                .build(),
-                        ).build();
                 }),
             ).build();
     }
@@ -736,10 +694,6 @@ export class TrackTemplates {
             return create("div").classes("flex-v", "track-contained-list").build();
         }
 
-        const playlistCards = track.playlists.map(playlist => {
-            return PlaylistTemplates.playlistCard(playlist, true);
-        });
-
         return create("div")
             .classes("flex-v", "track-contained-list")
             .children(
@@ -748,8 +702,9 @@ export class TrackTemplates {
                     .build(),
                 create("div")
                     .classes("flex")
-                    .children(...playlistCards)
-                    .build(),
+                    .children(
+                        ...track.playlists.map(p => MusicTemplates.cardItem(EntityType.playlist, p, true)),
+                    ).build(),
             ).build();
     }
 

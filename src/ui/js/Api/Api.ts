@@ -40,7 +40,6 @@ import { ClientError } from "@targoninc/lyda-shared/dist/Models/db/lyda/ClientEr
 import { KeyValue } from "@targoninc/lyda-shared/dist/Models/KeyValue";
 import { CreateOrderRequest } from "@targoninc/lyda-shared/src/Models/CreateOrderRequest";
 import { CaptureOrderRequest } from "@targoninc/lyda-shared/src/Models/CaptureOrderRequest";
-import { FeedItem } from "../Models/FeedItem.ts";
 import { Transaction } from "@targoninc/lyda-shared/dist/Models/Transaction";
 import { t } from "../../locales";
 import { SubscriptionPayment } from "@targoninc/lyda-shared/dist/Models/db/finance/SubscriptionPayment";
@@ -487,7 +486,7 @@ export class Api {
 
     //region Tracks
     static async getFeed(endpoint: string, params: any = {}) {
-        return get<FeedItem[]>(endpoint, params);
+        return get<Track[]>(endpoint, params);
     }
 
     static async getTracksByUser(name: string, id: number | null = null) {

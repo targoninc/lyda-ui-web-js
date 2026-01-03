@@ -150,8 +150,8 @@ shuffling.subscribe((p, changed) => {
 
     // Handle any potential context queue changes we need to do
     const pf = playingFrom.value;
-    if (pf && pf.feedType) {
-        Api.getFeed(`${ApiRoutes.trackFeed}/${pf.feedType}`).then(tracks => {
+    if (pf && pf.type && !["album", "playlist"].includes(pf.type)) {
+        Api.getFeed(`${ApiRoutes.trackFeed}/${pf.type}`).then(tracks => {
             if (tracks && tracks.length > 0) {
                 contextQueue.value = tracks.map(t => t.id);
             }

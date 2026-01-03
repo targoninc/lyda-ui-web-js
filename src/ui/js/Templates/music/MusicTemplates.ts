@@ -1,5 +1,5 @@
 import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
-import { AnyNode, compute, create, InputType, Signal, signal, TypeOrSignal, when } from "@targoninc/jess";
+import { AnyNode, compute, create, InputType, Signal, signal, signalMap, TypeOrSignal, when } from "@targoninc/jess";
 import { currentTrackId, currentUser, loadingAudio, manualQueue, playingFrom, playingHere } from "../../state.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { getPlayIcon, Util } from "../../Classes/Util.ts";
@@ -33,9 +33,13 @@ import { FeedItem } from "../../Models/FeedItem.ts";
 import { Visibility } from "@targoninc/lyda-shared/src/Enums/Visibility";
 import { truncateText } from "../../Classes/Helpers/CustomText.ts";
 import { getFeedDisplayName } from "../../Classes/Helpers/FeedNames.ts";
+import { ListTrack } from "@targoninc/lyda-shared/src/Models/ListTrack";
+import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom.ts";
+import { AlbumActions } from "../../Actions/AlbumActions.ts";
+import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
 
 export class MusicTemplates {
-    static feedEntry(type: EntityType, item: FeedItem, feedType: FeedType, feedName: string) {
+    static feedEntry(item: Track, newPlayingFrom: PlayingFrom) {
         const icons = [];
         const isPrivate = item.visibility === "private";
         if (isPrivate) {
@@ -47,25 +51,15 @@ export class MusicTemplates {
         );
 
         return create("div")
-            .classes(`feed-${type}`, "flex", "padded", "rounded", "fullWidth", "card", "align-children", playingClass)
+            .classes(`feed-track`, "flex", "padded", "rounded", "fullWidth", "card", "align-children", playingClass)
             .id(item.id)
             .styles("max-width", "100%")
             .ondblclick(async () => {
-                await startItem(type, item, {
-                    startedFrom: {
-                        feedType,
-                        name: feedName,
-                    },
-                });
+                await startItem(item as Track, newPlayingFrom);
             })
             .children(
-                MusicTemplates.playButton(type, item.id, () => startItem(type, item, {
-                    startedFrom: {
-                        feedType,
-                        name: feedName,
-                    },
-                })),
-                MusicTemplates.cover(type, item, "inline-cover"),
+                MusicTemplates.playButton(EntityType.track, item.id, () => startItem(item, newPlayingFrom)),
+                MusicTemplates.cover(EntityType.track, item, "inline-cover"),
                 create("div")
                     .classes("flex", "flex-grow", "no-gap", "space-between")
                     .children(
@@ -75,7 +69,7 @@ export class MusicTemplates {
                                 create("div")
                                     .classes("flex")
                                     .children(
-                                        MusicTemplates.title(type, item.title, item.id, icons),
+                                        MusicTemplates.title(EntityType.track, item.title, item.id, icons),
                                         item.collab ? TrackTemplates.collabIndicator(item.collab) : null,
                                         item.repost ? TrackTemplates.repostIndicator(item.repost) : null,
                                     ).build(),
@@ -93,11 +87,8 @@ export class MusicTemplates {
                             .classes("flex", "space-between", "align-children")
                             .children(
                                 horizontal(
-                                    when(
-                                        type === EntityType.track,
-                                        TrackTemplates.addToQueueButton(item as Track),
-                                    ),
-                                    InteractionTemplates.interactions(type, item),
+                                    TrackTemplates.addToQueueButton(item as Track),
+                                    InteractionTemplates.interactions(EntityType.track, item),
                                 ).classes("align-children"),
                             ).build(),
                     ).build(),
@@ -108,7 +99,7 @@ export class MusicTemplates {
         type: EntityType,
         item: FeedItem,
         coverContext: string,
-        startCallback: Function | null = null,
+        onclickOverride: Function | null = null,
     ) {
         const imageState = signal(DefaultImages[type]);
         const fileType = `${type}Cover` as MediaFileType;
@@ -116,7 +107,13 @@ export class MusicTemplates {
             imageState.value = Util.getImage(item.id, fileType);
         }
         const coverLoading = signal(false);
-        const start = async () => startItem(type, item, { startCallback });
+        const start = async () => {
+            if (onclickOverride) {
+                await onclickOverride();
+            } else {
+                await startItem(item as Track);
+            }
+        }
         const isOwnItem = compute(u => u?.id === item.user_id, currentUser);
         const playButtonContexts = ["card-cover", "queue-cover"];
         const onlyShowOnHover = compute(
@@ -216,9 +213,9 @@ export class MusicTemplates {
         );
     }
 
-    static feed(type: FeedType, options: Record<string, any> = {}) {
+    static trackFeed(type: FeedType, options: Record<string, any> = {}) {
         const pageState = signal(1);
-        const tracks$ = signal<FeedItem[]>([]);
+        const tracks$ = signal<Track[]>([]);
         const search = signal(type === FeedType.following ? "all" : "");
         const loading$ = signal(false);
         const pageSize = 10;
@@ -263,8 +260,50 @@ export class MusicTemplates {
                 // TODO: Make separate FeedDisplayImplementations - e.g. separate one for albums + playlists (view all tracks at once) and one for paginated feeds
                 when(
                     feedVisible,
-                    TrackTemplates.trackListWithPagination(tracks$, pageState, type, loading$, search, nextDisabled, searchableFeedTypes.includes(type), getFeedDisplayName(type, options.name)),
+                    TrackTemplates.trackListWithPagination(tracks$, pageState, {
+                        type,
+                        name: getFeedDisplayName(type, options.name),
+                    }, loading$, search, nextDisabled, searchableFeedTypes.includes(type)),
                 ),
+            ).build();
+    }
+
+    static tracksInList(
+        noTracks: Signal<boolean>,
+        tracks: Signal<ListTrack[]>,
+        canEdit: boolean,
+        list: Album | Playlist,
+        type: "album" | "playlist",
+    ) {
+        return create("div")
+            .classes("flex-v")
+            .children(
+                when(
+                    noTracks,
+                    create("div")
+                        .classes("card")
+                        .children(
+                            create("span")
+                                .text(t("NOTHING_FOUND"))
+                                .build(),
+                        ).build(),
+                ),
+                signalMap(tracks, create("div").classes("flex-v"), (track, i) => {
+                    let parent = horizontal().classes("fullWidth");
+                    if (canEdit) {
+                        parent = GenericTemplates.dragTargetInList(async (data: any) => {
+                            await TrackActions.reorderTrack(type, list.id, data.id, tracks, i);
+                        }, i.toString()).classes("fullWidth");
+                    }
+
+                    return create("div")
+                        .classes("flex-v", "relative")
+                        .children(
+                            parent
+                                .children(TrackTemplates.trackInList(track, canEdit, list, tracks, type))
+                                .build(),
+                        ).build();
+                }),
             ).build();
     }
 
@@ -358,7 +397,14 @@ export class MusicTemplates {
             .classes(`${type}-card`, "padded", "flex-v", "small-gap", isSecondary ? "secondary" : "_")
             .children(
                 vertical(
-                    MusicTemplates.cover(type, list, "card-cover"),
+                    MusicTemplates.cover(type, list, "card-cover", async () => {
+                        const firstTrack = list.tracks![0];
+                        if (type === "album") {
+                            await AlbumActions.startTrackInAlbum(list as Album, firstTrack.track!, true);
+                        } else if (type === "playlist") {
+                            await PlaylistActions.startTrackInPlaylist(list as Playlist, firstTrack.track!, true);
+                        }
+                    }),
                     horizontal(
                         InteractionTemplates.interactions(type, list, {
                             showCount: false,

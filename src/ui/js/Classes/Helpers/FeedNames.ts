@@ -21,6 +21,6 @@ export function getFeedDisplayName(type: FeedType, userName?: string): string {
             return `${t("PROFILE_REPOSTS", userName)}`;
         default:
             console.error(`Unknown feed type ${type}`);
-            return type;
+            return null;
     }
 }

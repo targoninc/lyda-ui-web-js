@@ -403,7 +403,7 @@ export class UserTemplates {
             GenericTemplates.combinedSelector(tabs, (i: number) => (currentIndex.value = i), currentIndex.value),
             when(
                 tabSelected(currentIndex, 0),
-                MusicTemplates.feed(FeedType.profileTracks, {
+                MusicTemplates.trackFeed(FeedType.profileTracks, {
                     id: user.id,
                     name: user.displayname
                 }),
@@ -424,14 +424,14 @@ export class UserTemplates {
             ),
             when(
                 tabSelected(currentIndex, 3),
-                MusicTemplates.feed(FeedType.profileReposts, {
+                MusicTemplates.trackFeed(FeedType.profileReposts, {
                     id: user.id,
                     name: user.displayname
                 }),
             ),
             when(
                 tabSelected(currentIndex, 4),
-                MusicTemplates.feed(FeedType.history, {
+                MusicTemplates.trackFeed(FeedType.history, {
                     id: user.id,
                     name: user.displayname
                 }),
@@ -731,14 +731,14 @@ export class UserTemplates {
     static libraryPage(name: string, isSelf: boolean) {
         const tabs = [`${t("TRACKS")}`, `${t("ALBUMS")}`, `${t("PLAYLISTS")}`];
         const tabContents = [
-            MusicTemplates.feed(FeedType.likedTracks, { name }),
+            MusicTemplates.trackFeed(FeedType.likedTracks, { name }),
             MusicTemplates.cardFeed(CardFeedType.likedAlbums, { name }),
             MusicTemplates.cardFeed(CardFeedType.likedPlaylists, { name }),
         ];
 
         if (isSelf) {
             tabs.push(`${t("BOUGHT")}`);
-            tabContents.push(MusicTemplates.feed(FeedType.boughtTracks));
+            tabContents.push(MusicTemplates.trackFeed(FeedType.boughtTracks));
         }
 
         const tabSelector = GenericTemplates.combinedSelector(

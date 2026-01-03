@@ -112,9 +112,9 @@ export class Time {
         return state;
     }
 
-    static format(time: number): string {
-        const minutes = Math.floor(time / 60);
-        const seconds = Math.floor(time - minutes * 60);
+    static format(timeInSeconds: number): string {
+        const minutes = Math.floor(timeInSeconds / 60);
+        const seconds = Math.floor(timeInSeconds - minutes * 60);
         return minutes + ":" + seconds.toString().padStart(2, "0");
     }
 

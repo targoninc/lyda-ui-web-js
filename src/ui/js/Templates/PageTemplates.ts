@@ -36,9 +36,9 @@ import { TransactionTemplates } from "./money/TransactionTemplates.ts";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, (route: Route, params: Record<string, string>) => Promise<AnyElement> | AnyElement> = {
-        [RoutePath.explore]: () => MusicTemplates.feed(FeedType.explore),
-        [RoutePath.following]: () => MusicTemplates.feed(FeedType.following),
-        [RoutePath.history]: () => MusicTemplates.feed(FeedType.history),
+        [RoutePath.explore]: () => MusicTemplates.trackFeed(FeedType.explore),
+        [RoutePath.following]: () => MusicTemplates.trackFeed(FeedType.following),
+        [RoutePath.history]: () => MusicTemplates.trackFeed(FeedType.history),
         [RoutePath.album]: AlbumTemplates.albumPage,
         [RoutePath.playlist]: this.playlistPage,
         [RoutePath.profile]: UserTemplates.profile,

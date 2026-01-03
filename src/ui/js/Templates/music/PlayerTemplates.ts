@@ -13,7 +13,8 @@ import {
     currentlyBuffered,
     currentQuality,
     currentTrackId,
-    currentTrackPosition, currentUser,
+    currentTrackPosition,
+    currentUser,
     loadingAudio,
     loopMode,
     muted,
@@ -97,7 +98,6 @@ export class PlayerTemplates {
                         "rounded",
                         "align-children",
                     ).id(track.id)
-                    .attributes("duration", track.length)
                     .children(
                         create("audio")
                             .id("audio_" + track.id)
@@ -165,7 +165,6 @@ export class PlayerTemplates {
                         "rounded",
                         "align-children",
                     ).id(track.id)
-                    .attributes("duration", track.length)
                     .children(
                         create("audio")
                             .id("audio_" + track.id)
@@ -409,13 +408,13 @@ export class PlayerTemplates {
         const type = compute(pf => pf?.type, playingFrom);
         const name = compute(pf => pf?.name ?? "", playingFrom);
         const img$ = signal(Images.DEFAULT_COVER_ALBUM);
-        const typeMap: Record<string, MediaFileType> = {
+        const typeMap: Record<"album" | "playlist", MediaFileType> = {
             album: MediaFileType.albumCover,
             playlist: MediaFileType.playlistCover,
         };
         playingFrom.subscribe(pf => {
-            if (pf && pf.entity && pf.entity.has_cover && pf.id) {
-                img$.value = Util.getImage(pf.id, typeMap[pf.type]);
+            if (pf && pf.entity && pf.entity.has_cover && pf.id && ["album", "playlist"].includes(pf.type ?? "")) {
+                img$.value = Util.getImage(pf.id, typeMap[pf.type as "album" | "playlist"]);
             }
         });
 
@@ -434,7 +433,10 @@ export class PlayerTemplates {
                             }
                         })
                         .children(
-                            create("img").classes("tiny-cover").src(img$),
+                            when(img$, create("img")
+                                .classes("tiny-cover")
+                                .src(img$)
+                                .build()),
                             create("span").classes("text-small").text(name),
                         ).build(),
                 ).build(),

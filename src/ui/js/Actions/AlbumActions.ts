@@ -14,7 +14,6 @@ import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts
 import { playingHere } from "../state.ts";
 import { Api } from "../Api/Api.ts";
 import { startItem } from "./MusicActions.ts";
-import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 import { t } from "../../locales";
 
 export class AlbumActions {
@@ -77,7 +76,7 @@ export class AlbumActions {
         fileInput.click();
     }
 
-    static async startTrackInAlbum(album: Album, trackId: number, stopIfPlaying = false) {
+    static async startTrackInAlbum(album: Album, track: Track, stopIfPlaying = false) {
         const playingFrom = PlayManager.getPlayingFrom();
         const isPlaying =
             playingFrom &&
@@ -92,8 +91,11 @@ export class AlbumActions {
                 throw new Error(`Invalid album (${album.id}), has no tracks.`);
             }
 
-            await startItem(EntityType.album, album, {
-                trackId
+            await startItem(track, {
+                entity: album,
+                type: "album",
+                id: album.id,
+                name: album.title
             });
         }
     }

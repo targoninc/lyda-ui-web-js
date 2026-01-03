@@ -22,7 +22,7 @@ import { MusicTemplates } from "./MusicTemplates.ts";
 import { Api } from "../../Api/Api.ts";
 import { t } from "../../../locales";
 import { Visibility } from "@targoninc/lyda-shared/src/Enums/Visibility";
-import { TrackTemplates } from "./TrackTemplates.ts";
+import { Time } from "../../Classes/Helpers/Time.ts";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
@@ -274,10 +274,7 @@ export class AlbumTemplates {
         const albumUser = album.user!;
         const noTracks = signal(album.tracks?.length === 0);
         const tracks = signal<ListTrack[]>(album.tracks ?? []);
-
-        async function startCallback(trackId: number) {
-            await AlbumActions.startTrackInAlbum(album, trackId);
-        }
+        const duration = album.tracks!.reduce((acc, t) => acc + (t.track?.length ?? 0), 0);
 
         return create("div")
             .classes("single-page", "noflexwrap", "padded-large", "rounded-large", "flex-v")
@@ -310,18 +307,20 @@ export class AlbumTemplates {
                             ).build(),
                         vertical(
                             AlbumTemplates.audioActions(album, canEdit),
-                            create("div")
-                                .classes("album-title-container", "flex-v", "small-gap")
-                                .children(
-                                    create("span")
-                                        .classes("date", "text-small")
-                                        .text(t("RELEASED_AT", Util.formatDate(album.release_date)))
-                                        .build(),
-                                ).build(),
+                            horizontal(
+                                create("span")
+                                    .classes("date", "text-small")
+                                    .text(t("RELEASED_AT", Util.formatDate(album.release_date)))
+                                    .build(),
+                                create("span")
+                                    .classes("date", "text-small")
+                                    .text(Time.format(duration))
+                                    .build(),
+                            ).build(),
                             InteractionTemplates.interactions(EntityType.album, album),
                         ),
                     ).build(),
-                TrackTemplates.tracksInList(noTracks, tracks, canEdit, album, "album", startCallback),
+                MusicTemplates.tracksInList(noTracks, tracks, canEdit, album, "album"),
             ).build();
     }
 
@@ -368,7 +367,6 @@ export class AlbumTemplates {
 
     static audioActions(album: Album, canEdit: boolean) {
         const isPlaying = compute((p, pHere) => (p && p.type === "album" && p.id === album.id && pHere) ?? false, playingFrom, playingHere);
-        const duration = album.tracks!.reduce((acc, t) => acc + (t.track?.length ?? 0), 0);
         const hasTracks = album.tracks!.length > 0;
         const playIcon = getPlayIcon(isPlaying, loadingAudio);
         const playText = compute((p): string => p ? "Pause" : "Play", isPlaying);
@@ -384,17 +382,16 @@ export class AlbumTemplates {
                         isUrl: true,
                     },
                     classes: ["special", "bigger-input", "rounded-max"],
-                    attributes: ["duration", duration.toString()],
                     id: album.id,
                     disabled: !hasTracks,
                     onclick: async () => {
                         const current = currentTrackId.value;
                         const trackInAlbum = album.tracks!.find((track) => track.track_id === current);
                         if (trackInAlbum) {
-                            await AlbumActions.startTrackInAlbum(album, trackInAlbum.track_id, true);
+                            await AlbumActions.startTrackInAlbum(album, trackInAlbum.track!, true);
                         } else {
                             const firstTrack = album.tracks![0];
-                            await AlbumActions.startTrackInAlbum(album, firstTrack.track_id, true);
+                            await AlbumActions.startTrackInAlbum(album, firstTrack.track!, true);
                         }
                     },
                 })),

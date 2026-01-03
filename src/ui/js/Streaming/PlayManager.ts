@@ -121,15 +121,13 @@ export class PlayManager {
         return streamClients.value[id];
     }
 
-    static playFrom(type: string, name: string = type, options?: {
-        feedType?: FeedType;
+    static playFrom(type: FeedType | "album" | "playlist", name: string = type, options?: {
         id?: number,
         entity?: FeedItem
     }) {
         playingFrom.value = {
             type,
             name,
-            feedType: options?.feedType,
             id: options?.id,
             entity: options?.entity as (Album | Playlist),
         };
