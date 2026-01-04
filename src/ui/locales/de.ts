@@ -1,6 +1,8 @@
 import { Translation } from "./index.ts";
 
 export const de: Translation = {
+    COMMENTS: "Kommentare",
+    TRANSACTIONS: "Transaktionen",
     ALBUM_ADDED_TO_PLAYLISTS: "Album zu Playlist(s) hinzugefügt",
     ALBUM_DELETED: "Album gelöscht",
     PLAYLIST_DELETED: "Playlist gelöscht",
@@ -131,6 +133,7 @@ export const de: Translation = {
     COPY_PRIVATE_LINK: "Privaten Link kopieren",
     COVER_FILE: "Cover-Bild",
     CREATED_AT: date => `Erstellt am ${date}`,
+    DURATION: time => `Länge ${time}`,
     CREATE_SOMETHING_NEW: "Erstelle etwas Neues",
     CURRENT: "Heute",
     CURRENT_TRACK: "Aktueller Titel",

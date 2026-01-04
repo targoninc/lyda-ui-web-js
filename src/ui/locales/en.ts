@@ -304,6 +304,7 @@ export const en = {
     EXAMPLE_ALBUM_NAME: "My cool album",
     SHARE_AN_ALBUM_YOU_MADE: "Share an album you made:",
     RELEASED_AT: date => `Released ${date}`,
+    DURATION: time => `Duration ${time}`,
     ADD_TO_PLAYLIST: "Add to playlist",
     EDIT: "Edit",
     DELETE_ALBUM: "Delete album",

@@ -23,6 +23,7 @@ import { Api } from "../../Api/Api.ts";
 import { t } from "../../../locales";
 import { Visibility } from "@targoninc/lyda-shared/src/Enums/Visibility";
 import { Time } from "../../Classes/Helpers/Time.ts";
+import { CustomText } from "../../Classes/Helpers/CustomText.ts";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
@@ -288,6 +289,16 @@ export class AlbumTemplates {
                             .build(),
                         UserTemplates.userWidget(albumUser, [], [], UserWidgetContext.singlePage),
                     ).build(),
+                horizontal(
+                    create("span")
+                        .classes("date", "text-small")
+                        .text(t("RELEASED_AT", Util.formatDate(album.release_date)))
+                        .build(),
+                    create("span")
+                        .classes("date", "text-small")
+                        .text(t("DURATION", Time.format(duration)))
+                        .build(),
+                ).build(),
                 create("div")
                     .classes("album-info-container", "flex")
                     .children(
@@ -307,19 +318,14 @@ export class AlbumTemplates {
                             ).build(),
                         vertical(
                             AlbumTemplates.audioActions(album, canEdit),
-                            horizontal(
-                                create("span")
-                                    .classes("date", "text-small")
-                                    .text(t("RELEASED_AT", Util.formatDate(album.release_date)))
-                                    .build(),
-                                create("span")
-                                    .classes("date", "text-small")
-                                    .text(Time.format(duration))
-                                    .build(),
-                            ).build(),
                             InteractionTemplates.interactions(EntityType.album, album),
                         ),
                     ).build(),
+                create("span")
+                    .id("track-description")
+                    .classes("card", "description", "break-lines", "padded")
+                    .html(CustomText.renderToHtml(album.description))
+                    .build(),
                 MusicTemplates.tracksInList(noTracks, tracks, canEdit, album, "album"),
             ).build();
     }
