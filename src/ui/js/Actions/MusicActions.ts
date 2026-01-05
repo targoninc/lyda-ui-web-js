@@ -18,6 +18,5 @@ export async function startItem(track: Track, newPlayingFrom?: PlayingFrom) {
         QueueManager.clearContextQueue();
     }
 
-    PlayManager.addStreamClientIfNotExists(track.id, track.length);
-    await PlayManager.startAsync(track.id);
+    await PlayManager.startAtBeginningAsync(track.id);
 }

@@ -90,7 +90,7 @@ export class TrackTemplates {
         const start = async () => {
             if (!startCallback) {
                 PlayManager.addStreamClientIfNotExists(track.id, track.length);
-                await PlayManager.startAsync(track.id);
+                await PlayManager.startAtBeginningAsync(track.id);
             } else {
                 await startCallback(track.id);
             }

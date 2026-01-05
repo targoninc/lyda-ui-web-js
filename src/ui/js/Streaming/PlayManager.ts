@@ -58,7 +58,7 @@ export class PlayManager {
         const nextTrackId = manualQueue[0];
         if (nextTrackId !== undefined) {
             // Prioritize manual queue
-            await PlayManager.safeStartAsync(nextTrackId);
+            await PlayManager.startAtBeginningAsync(nextTrackId);
             QueueManager.removeFromManualQueue(nextTrackId);
         } else {
             const loopingContext = PlayManager.isLoopingContext();
@@ -67,13 +67,13 @@ export class PlayManager {
                 let nextTrackId = QueueManager.getNextTrackInContextQueue(currentTrackId.value);
                 if (nextTrackId !== undefined && nextTrackId !== null) {
                     // Play next track in context queue
-                    await PlayManager.safeStartAsync(nextTrackId);
+                    await PlayManager.startAtBeginningAsync(nextTrackId);
                 } else {
                     // End of context queue reached
                     if (loopingContext) {
                         // Play from the start
                         nextTrackId = QueueManager.getContextQueue()[0];
-                        await PlayManager.safeStartAsync(nextTrackId);
+                        await PlayManager.startAtBeginningAsync(nextTrackId);
                     } else {
                         // Clear the context queue and play from the auto queue
                         QueueManager.clearContextQueue();
@@ -106,7 +106,7 @@ export class PlayManager {
             return;
         }
         history.value = hist;
-        await PlayManager.safeStartAsync(lastTrack.track_id);
+        await PlayManager.startAtBeginningAsync(lastTrack.track_id);
     }
 
     static addStreamClient(id: number, streamClient: IStreamClient) {
@@ -258,7 +258,7 @@ export class PlayManager {
         await StreamingUpdater.updatePlayState();
     }
 
-    static async safeStartAsync(id: number) {
+    static async startAtBeginningAsync(id: number) {
         await PlayManager.startAsync(id);
         if (PlayManager.getCurrentTime(id).relative > .1) {
             await PlayManager.scrubTo(id, 0);
@@ -271,7 +271,7 @@ export class PlayManager {
         if (nextTrackId === undefined) {
             return false;
         }
-        await PlayManager.safeStartAsync(nextTrackId);
+        await PlayManager.startAtBeginningAsync(nextTrackId);
         return true;
     }
 
