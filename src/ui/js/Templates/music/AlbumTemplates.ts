@@ -331,11 +331,6 @@ export class AlbumTemplates {
     }
 
     static albumPage(route: Route, params: Record<string, string>) {
-        if (!currentUser.value) {
-            navigate(RoutePath.explore);
-            return nullElement();
-        }
-
         const data = signal<{ album: Album | null, canEdit: boolean }>({
             album: null,
             canEdit: false,
