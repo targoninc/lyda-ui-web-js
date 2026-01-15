@@ -227,7 +227,7 @@ export class MusicTemplates {
             const params = { offset, filter };
             loading$.value = true;
             const res = await Api.getFeed(`${ApiRoutes.trackFeed}/${type}`, Object.assign(params, {
-                name: user?.username
+                id: user?.id
             }));
             const newTracks = res ?? [];
 
