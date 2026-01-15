@@ -148,7 +148,7 @@ shuffling.subscribe((p, changed) => {
     LydaCache.set(UserCacheKey.shuffling, new CacheItem(p));
     Api.setCacheKey(UserCacheKey.shuffling, p.toString()).then();
 
-    // Handle any potential context queue changes we need to do
+    // TODO: Handle any potential context queue changes we need to do
     const pf = playingFrom.value;
     if (pf && pf.type && !["album", "playlist"].includes(pf.type)) {
         Api.getFeed(`${ApiRoutes.trackFeed}/${pf.type}`).then(tracks => {

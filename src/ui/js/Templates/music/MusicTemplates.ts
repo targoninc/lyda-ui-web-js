@@ -263,6 +263,7 @@ export class MusicTemplates {
                     TrackTemplates.trackListWithPagination(tracks$, pageState, {
                         type,
                         name: getFeedDisplayName(type, options.name),
+                        id: options.id
                     }, loading$, search, nextDisabled, searchableFeedTypes.includes(type)),
                 ),
             ).build();

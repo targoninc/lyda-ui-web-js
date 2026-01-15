@@ -1,14 +1,14 @@
-import { PlayManager } from "../../Streaming/PlayManager.ts";
-import { Icons } from "../../Enums/Icons.ts";
-import { Time } from "../../Classes/Helpers/Time.ts";
-import { Images } from "../../Enums/Images.ts";
-import { QueueTemplates } from "./QueueTemplates.ts";
-import { UserTemplates } from "../account/UserTemplates.ts";
-import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
-import { Ui } from "../../Classes/Ui.ts";
-import { getPlayIcon, Util } from "../../Classes/Util.ts";
-import { compute, computeAsync, create, nullElement, Signal, signal, when } from "@targoninc/jess";
-import { navigate } from "../../Routing/Router.ts";
+import {PlayManager} from "../../Streaming/PlayManager.ts";
+import {Icons} from "../../Enums/Icons.ts";
+import {Time} from "../../Classes/Helpers/Time.ts";
+import {Images} from "../../Enums/Images.ts";
+import {QueueTemplates} from "./QueueTemplates.ts";
+import {UserTemplates} from "../account/UserTemplates.ts";
+import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
+import {Ui} from "../../Classes/Ui.ts";
+import {getPlayIcon, Util} from "../../Classes/Util.ts";
+import {compute, computeAsync, create, nullElement, Signal, signal, when} from "@targoninc/jess";
+import {navigate} from "../../Routing/Router.ts";
 import {
     currentlyBuffered,
     currentQuality,
@@ -26,19 +26,21 @@ import {
     trackInfo,
     volume,
 } from "../../state.ts";
-import { RoutePath } from "../../Routing/routes.ts";
-import { heading } from "@targoninc/jess-components";
-import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
-import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
-import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType";
-import { LoopMode } from "@targoninc/lyda-shared/src/Enums/LoopMode";
-import { InteractionTemplates } from "../InteractionTemplates.ts";
-import { MusicTemplates } from "./MusicTemplates.ts";
-import { StreamingQuality } from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
-import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
-import { InteractionType } from "@targoninc/lyda-shared/src/Enums/InteractionType.ts";
-import { t } from "../../../locales";
+import {RoutePath} from "../../Routing/routes.ts";
+import {heading} from "@targoninc/jess-components";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
+import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
+import {LoopMode} from "@targoninc/lyda-shared/src/Enums/LoopMode";
+import {InteractionTemplates} from "../InteractionTemplates.ts";
+import {MusicTemplates} from "./MusicTemplates.ts";
+import {StreamingQuality} from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
+import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
+import {InteractionType} from "@targoninc/lyda-shared/src/Enums/InteractionType.ts";
+import {t} from "../../../locales";
+import {FeedType} from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
+import {DefaultImages} from "../../Enums/DefaultImages.ts";
 
 export const PLAYCHECK_INTERVAL = 200;
 
@@ -408,13 +410,27 @@ export class PlayerTemplates {
         const type = compute(pf => pf?.type, playingFrom);
         const name = compute(pf => pf?.name ?? "", playingFrom);
         const img$ = signal(Images.DEFAULT_COVER_ALBUM);
-        const typeMap: Record<"album" | "playlist", MediaFileType> = {
+        const typeMap: Record<"album" | "playlist" | FeedType, MediaFileType> = {
             album: MediaFileType.albumCover,
             playlist: MediaFileType.playlistCover,
+            [FeedType.profileTracks]: MediaFileType.userAvatar,
+            [FeedType.profileReposts]: MediaFileType.userAvatar,
+            [FeedType.likedTracks]: MediaFileType.userAvatar,
         };
+        const linkMap: Record<"album" | "playlist" | FeedType, RoutePath> = {
+            album: RoutePath.album,
+            playlist: RoutePath.playlist,
+            [FeedType.profileTracks]: RoutePath.profile,
+            [FeedType.profileReposts]: RoutePath.profile,
+            [FeedType.likedTracks]: RoutePath.profile,
+        }
         playingFrom.subscribe(pf => {
-            if (pf && pf.entity && pf.entity.has_cover && pf.id && ["album", "playlist"].includes(pf.type ?? "")) {
-                img$.value = Util.getImage(pf.id, typeMap[pf.type as "album" | "playlist"]);
+            if (pf && pf.id && !!typeMap[pf.type!]) {
+                if (pf.entity && !pf.entity.has_cover) {
+                    img$.value = DefaultImages.playlist;
+                    return;
+                }
+                img$.value = Util.getImage(pf.id, typeMap[pf.type!]);
             }
         });
 
@@ -429,7 +445,7 @@ export class PlayerTemplates {
                         .onclick(e => {
                             if (e.button === 0) {
                                 e.preventDefault();
-                                navigate(`${type.value}/${id.value}`);
+                                navigate(`${linkMap[type.value!]}/${id.value}`);
                             }
                         })
                         .children(
@@ -437,7 +453,9 @@ export class PlayerTemplates {
                                 .classes("tiny-cover")
                                 .src(img$)
                                 .build()),
-                            create("span").classes("text-small").text(name),
+                            create("span")
+                                .classes("text-small")
+                                .text(name),
                         ).build(),
                 ).build(),
         );
