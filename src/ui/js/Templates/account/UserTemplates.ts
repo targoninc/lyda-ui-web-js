@@ -1,12 +1,12 @@
-import { getAvatar, target, Util } from "../../Classes/Util.ts";
-import { TrackActions } from "../../Actions/TrackActions.ts";
-import { UserActions } from "../../Actions/UserActions.ts";
-import { GenericTemplates, horizontal, tabSelected, vertical } from "../generic/GenericTemplates.ts";
-import { Icons as Icons } from "../../Enums/Icons.ts";
-import { Links } from "../../Enums/Links.ts";
-import { CustomText, truncateText } from "../../Classes/Helpers/CustomText.ts";
-import { Images } from "../../Enums/Images.ts";
-import { navigate, Route } from "../../Routing/Router.ts";
+import {getAvatar, target, Util} from "../../Classes/Util.ts";
+import {TrackActions} from "../../Actions/TrackActions.ts";
+import {UserActions} from "../../Actions/UserActions.ts";
+import {GenericTemplates, horizontal, tabSelected, vertical} from "../generic/GenericTemplates.ts";
+import {Icons as Icons} from "../../Enums/Icons.ts";
+import {Links} from "../../Enums/Links.ts";
+import {CustomText, truncateText} from "../../Classes/Helpers/CustomText.ts";
+import {Images} from "../../Enums/Images.ts";
+import {navigate, Route} from "../../Routing/Router.ts";
 import {
     AnyElement,
     compute,
@@ -19,27 +19,27 @@ import {
     StringOrSignal,
     when,
 } from "@targoninc/jess";
-import { UiActions } from "../../Actions/UiActions.ts";
-import { currentUser, permissions } from "../../state.ts";
-import { notify, Ui } from "../../Classes/Ui.ts";
-import { MediaActions } from "../../Actions/MediaActions.ts";
-import { RoutePath } from "../../Routing/routes.ts";
-import { MusicTemplates } from "../music/MusicTemplates.ts";
-import { button, icon } from "@targoninc/jess-components";
-import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
-import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
-import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType";
-import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType";
-import { Permissions } from "@targoninc/lyda-shared/src/Enums/Permissions";
-import { Badge } from "@targoninc/lyda-shared/src/Models/db/lyda/Badge";
-import { NotificationType } from "../../Enums/NotificationType.ts";
-import { Api } from "../../Api/Api.ts";
-import { TrackCollaborator } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
-import { TrackEditTemplates } from "../music/TrackEditTemplates.ts";
-import { CollaboratorType } from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType.ts";
-import { t } from "../../../locales";
-import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
-import { CardFeedType } from "../../Enums/CardFeedType.ts";
+import {UiActions} from "../../Actions/UiActions.ts";
+import {currentUser, permissions} from "../../state.ts";
+import {notify, Ui} from "../../Classes/Ui.ts";
+import {MediaActions} from "../../Actions/MediaActions.ts";
+import {RoutePath} from "../../Routing/routes.ts";
+import {MusicTemplates} from "../music/MusicTemplates.ts";
+import {button, icon} from "@targoninc/jess-components";
+import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
+import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
+import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
+import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
+import {Badge} from "@targoninc/lyda-shared/src/Models/db/lyda/Badge";
+import {NotificationType} from "../../Enums/NotificationType.ts";
+import {Api} from "../../Api/Api.ts";
+import {TrackCollaborator} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
+import {TrackEditTemplates} from "../music/TrackEditTemplates.ts";
+import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType.ts";
+import {t} from "../../../locales";
+import {FeedType} from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
+import {CardFeedType} from "../../Enums/CardFeedType.ts";
 
 export class UserTemplates {
     static userWidget(
@@ -155,13 +155,13 @@ export class UserTemplates {
                 previewShown.value = true;
             }, 500);
         })
-         .onmouseleave(() => {
-             if (timeout) clearTimeout(timeout);
-             timeout = setTimeout(() => {
-                 previewShown.value = false;
-             }, 100);
-         })
-         .classes("relative");
+            .onmouseleave(() => {
+                if (timeout) clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    previewShown.value = false;
+                }, 100);
+            })
+            .classes("relative");
     }
 
     static editableLinkedUser(
@@ -320,7 +320,7 @@ export class UserTemplates {
 
         return when(hasTracks, button({
             text: compute(tracks => `${t("UNAPPROVED_TRACKS", tracks.length)}`, unapprovedTracks),
-            icon: { icon: "order_approve" },
+            icon: {icon: "order_approve"},
             onclick: () => navigate(RoutePath.unapprovedTracks),
         }));
     }
@@ -334,15 +334,15 @@ export class UserTemplates {
         const base = vertical();
 
         Api.getUserByName(params["name"])
-           .then(u => {
-               user.value = u;
-               document.title = u?.displayname ?? "";
-               if (!user && isOwnProfile) {
-                   notify(`${t("LOGIN_TO_VIEW_PROFILE")}`, NotificationType.error);
-                   return;
-               }
-           })
-           .finally(() => (loading.value = false));
+            .then(u => {
+                user.value = u;
+                document.title = u?.displayname ?? "";
+                if (!user && isOwnProfile) {
+                    notify(`${t("LOGIN_TO_VIEW_PROFILE")}`, NotificationType.error);
+                    return;
+                }
+            })
+            .finally(() => (loading.value = false));
 
         return base
             .children(
@@ -355,7 +355,7 @@ export class UserTemplates {
                         compute((u, i) => (u ? UserTemplates.profileInfo(u, i) : nullElement()), user, isOwnProfile),
                         compute((u) => (u ? UserTemplates.profileTabs(u) : nullElement()), user),
                     ).classes("noflexwrap")
-                     .build(),
+                        .build(),
                     true,
                 ),
                 when(notFound, vertical(
@@ -404,35 +404,35 @@ export class UserTemplates {
             when(
                 tabSelected(currentIndex, 0),
                 MusicTemplates.trackFeed(FeedType.profileTracks, {
-                    id: user.id,
+                    id: user.username,
                     name: user.displayname
                 }),
             ),
             when(
                 tabSelected(currentIndex, 1),
                 MusicTemplates.cardFeed(CardFeedType.profileAlbums, {
-                    id: user.id,
+                    id: user.username,
                     name: user.displayname
                 }),
             ),
             when(
                 tabSelected(currentIndex, 2),
                 MusicTemplates.cardFeed(CardFeedType.profilePlaylists, {
-                    id: user.id,
+                    id: user.username,
                     name: user.displayname
                 }),
             ),
             when(
                 tabSelected(currentIndex, 3),
                 MusicTemplates.trackFeed(FeedType.profileReposts, {
-                    id: user.id,
+                    id: user.username,
                     name: user.displayname
                 }),
             ),
             when(
                 tabSelected(currentIndex, 4),
                 MusicTemplates.trackFeed(FeedType.history, {
-                    id: user.id,
+                    id: user.username,
                     name: user.displayname
                 }),
             ),
@@ -452,18 +452,18 @@ export class UserTemplates {
                                 button({
                                     classes: ["positive"],
                                     text: t("CREATE"),
-                                    icon: { icon: "add" },
+                                    icon: {icon: "add"},
                                     onclick: UiActions.openCreateMenu,
                                 }),
                                 button({
                                     text: t("EDIT_TRACKS"),
-                                    icon: { icon: "edit_note" },
+                                    icon: {icon: "edit_note"},
                                     onclick: () => navigate(RoutePath.editTracks),
                                     classes: ["hideOnMidBreakpoint"],
                                 }),
                                 button({
                                     text: t("STATISTICS"),
-                                    icon: { icon: "finance" },
+                                    icon: {icon: "finance"},
                                     onclick: () => navigate(RoutePath.statistics),
                                 }),
                                 UserTemplates.unapprovedTracksLink(),
@@ -474,7 +474,7 @@ export class UserTemplates {
                             .children(
                                 button({
                                     text: t("SETTINGS"),
-                                    icon: { icon: "settings" },
+                                    icon: {icon: "settings"},
                                     onclick: () => navigate(RoutePath.settings),
                                 }),
                                 GenericTemplates.logoutButton(["hideOnSmallBreakpoint"]),
@@ -656,7 +656,7 @@ export class UserTemplates {
                                 .build(),
                             button({
                                 text: t("GO_TO_SETTINGS"),
-                                icon: { icon: "settings" },
+                                icon: {icon: "settings"},
                                 classes: ["positive"],
                                 onclick: () => navigate(RoutePath.settings),
                             }),
@@ -682,11 +682,11 @@ export class UserTemplates {
                 when(verified, UserTemplates.verificationBadge()),
                 !isOwnProfile && currentUser.value ? UserTemplates.followButton(Util.isFollowing(user), user.id) : null,
                 horizontal(
-                    when(hasPermissionToVerify, GenericTemplates.roundIconButton({ icon: "settings_account_box" }, () => menuShown.value = !menuShown.value, "User options")),
+                    when(hasPermissionToVerify, GenericTemplates.roundIconButton({icon: "settings_account_box"}, () => menuShown.value = !menuShown.value, "User options")),
                     when(menuShown, vertical(
                         when(verified, button({
                             text: t("VERIFY"),
-                            icon: { icon: "verified" },
+                            icon: {icon: "verified"},
                             classes: ["positive"],
                             onclick: async () => {
                                 await Api.verifyUser(user.id);
@@ -695,7 +695,7 @@ export class UserTemplates {
                         }), true),
                         when(verified, button({
                             text: t("UNVERIFY"),
-                            icon: { icon: "close" },
+                            icon: {icon: "close"},
                             classes: ["negative"],
                             onclick: async () => {
                                 await Api.unverifyUser(user.id);
@@ -722,18 +722,27 @@ export class UserTemplates {
         }
 
         return create("img")
-            .attributes("src", Icons.ICON("badges/badge_" + badge.name))
+            .attributes("src", Icons.ICON(`badges/badge_${badge.name}`))
             .attributes("alt", badge.name)
             .attributes("title", badge.description)
             .classes("icon", "badge", "svg", ...addClasses).build();
     }
 
-    static libraryPage(name: string, isSelf: boolean) {
+    static libraryPage(user: Signal<User>, isSelf: boolean) {
         const tabs = [`${t("TRACKS")}`, `${t("ALBUMS")}`, `${t("PLAYLISTS")}`];
         const tabContents = [
-            MusicTemplates.trackFeed(FeedType.likedTracks, { name }),
-            MusicTemplates.cardFeed(CardFeedType.likedAlbums, { name }),
-            MusicTemplates.cardFeed(CardFeedType.likedPlaylists, { name }),
+            MusicTemplates.trackFeed(FeedType.likedTracks, {
+                name: user.value.username,
+                id: user.value.username,
+            }),
+            MusicTemplates.cardFeed(CardFeedType.likedAlbums, {
+                name: user.value.username,
+                id: user.value.username,
+            }),
+            MusicTemplates.cardFeed(CardFeedType.likedPlaylists, {
+                name: user.value.username,
+                id: user.value.username,
+            }),
         ];
 
         if (isSelf) {
@@ -741,21 +750,19 @@ export class UserTemplates {
             tabContents.push(MusicTemplates.trackFeed(FeedType.boughtTracks));
         }
 
-        const tabSelector = GenericTemplates.combinedSelector(
-            tabs,
-            (i: number) => {
-                tabContents.forEach((c, j) => {
-                    c.style.display = i === j ? "flex" : "none";
-                });
-            },
-            0,
-        );
-
         return vertical(
-                GenericTemplates.title(t("YOUR_LIKED_MUSIC")),
-                tabSelector,
-            ...tabContents,
-            ).build();
+            GenericTemplates.title(t("YOUR_LIKED_MUSIC")),
+            GenericTemplates.combinedSelector(
+                tabs,
+                (i: number) => {
+                    tabContents.forEach((c, j) => {
+                        c.style.display = i === j ? "flex" : "none";
+                    });
+                },
+                0,
+            ),
+            ...tabContents
+        ).build();
     }
 
     static username(user: User, isOwnProfile: boolean) {
@@ -828,7 +835,7 @@ export class UserTemplates {
         const descState = signal(currentDescription);
 
         return button({
-            icon: { icon: "edit_note" },
+            icon: {icon: "edit_note"},
             text: t("EDIT_DESCRIPTION"),
             onclick: async (e: Event) => {
                 e.preventDefault();

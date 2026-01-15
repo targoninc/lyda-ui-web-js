@@ -92,18 +92,27 @@ export class PageTemplates {
     ];
 
     static async libraryPage(route: Route, params: Record<string, string>) {
-        const user = currentUser.value;
-        const name = params["name"] ?? user?.username;
+        const selfUser = currentUser.value;
+        const name = params["name"] ?? selfUser?.username;
 
-        if (!user) {
+        if (!selfUser) {
             notify(`${t("LOGIN_TO_VIEW_LIBRARY")}`, NotificationType.error);
             return create("div")
                 .text(t("LOGIN_TO_VIEW_LIBRARY"))
                 .build();
         }
 
-        document.title = `${t("LIBRARY")} - ${name}`;
-        return UserTemplates.libraryPage(name, user.username === name);
+        const user = signal<User>({
+            username: name
+        } as User);
+        if (selfUser.username === name) {
+            user.value = selfUser;
+        } else {
+            Api.getUserByName(name).then(u => user.value = u);
+        }
+
+        document.title = `${t("LIBRARY")} - @${name}`;
+        return UserTemplates.libraryPage(user, selfUser.username === name);
     }
 
     static async playlistPage(route: Route, params: Record<string, string>) {
