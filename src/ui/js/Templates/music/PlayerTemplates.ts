@@ -423,7 +423,14 @@ export class PlayerTemplates {
             [FeedType.profileTracks]: RoutePath.profile,
             [FeedType.profileReposts]: RoutePath.profile,
             [FeedType.likedTracks]: RoutePath.profile,
-        }
+            [FeedType.history]: RoutePath.profile,
+        };
+        const paramsMap: Record<"album" | "playlist" | FeedType, string> = {
+            [FeedType.profileReposts]: `?tab=reposts`,
+            [FeedType.profileTracks]: `?tab=tracks`,
+            [FeedType.likedTracks]: `?tab=liked`,
+            [FeedType.history]: `?tab=history`,
+        };
         playingFrom.subscribe(pf => {
             if (pf && pf.id && !!typeMap[pf.type!]) {
                 if (pf.entity && !pf.entity.has_cover) {
@@ -441,7 +448,7 @@ export class PlayerTemplates {
                 .children(
                     create("a")
                         .classes("page-link", "color-dim", "flex", "align-children", "small-gap")
-                        .href(compute(pf => `/${pf?.type}/${pf?.id}`, playingFrom))
+                        .href(compute(pf => `/${pf?.type}/${pf?.id}${paramsMap[pf?.type!] ?? ""}`, playingFrom))
                         .onclick(e => {
                             if (e.button === 0) {
                                 e.preventDefault();
