@@ -330,7 +330,6 @@ export class UserTemplates {
         const isOwnProfile = compute((u1, u2) => u1?.id === u2?.id, currentUser, user);
         const loading = signal(false);
         const notFound = compute((l, u) => l && !u, loading, user);
-
         const base = vertical();
 
         Api.getUserByName(params["name"])

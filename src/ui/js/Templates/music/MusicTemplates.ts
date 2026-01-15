@@ -225,7 +225,9 @@ export class MusicTemplates {
             const offset = (pageNumber - 1) * pageSize;
             const params = { offset, filter };
             loading$.value = true;
-            const res = await Api.getFeed(`${ApiRoutes.trackFeed}/${type}`, Object.assign(params, options));
+            const res = await Api.getFeed(`${ApiRoutes.trackFeed}/${type}`, Object.assign(params, {
+                name: options.id
+            }));
             const newTracks = res ?? [];
 
             if (newTracks && newTracks.length === 0 && pageNumber > 1) {
