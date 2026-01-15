@@ -108,7 +108,7 @@ export class PageTemplates {
         if (selfUser.username === name) {
             user.value = selfUser;
         } else {
-            Api.getUserByName(name).then(u => user.value = u);
+            Api.getUserByName(name).then(u => u ? user.value = u : null);
         }
 
         document.title = `${t("LIBRARY")} - @${name}`;

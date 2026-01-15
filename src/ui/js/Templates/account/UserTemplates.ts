@@ -402,38 +402,23 @@ export class UserTemplates {
             GenericTemplates.combinedSelector(tabs, (i: number) => (currentIndex.value = i), currentIndex.value),
             when(
                 tabSelected(currentIndex, 0),
-                MusicTemplates.trackFeed(FeedType.profileTracks, {
-                    id: user.username,
-                    name: user.displayname
-                }),
+                MusicTemplates.trackFeed(FeedType.profileTracks, user),
             ),
             when(
                 tabSelected(currentIndex, 1),
-                MusicTemplates.cardFeed(CardFeedType.profileAlbums, {
-                    id: user.username,
-                    name: user.displayname
-                }),
+                MusicTemplates.cardFeed(CardFeedType.profileAlbums, user),
             ),
             when(
                 tabSelected(currentIndex, 2),
-                MusicTemplates.cardFeed(CardFeedType.profilePlaylists, {
-                    id: user.username,
-                    name: user.displayname
-                }),
+                MusicTemplates.cardFeed(CardFeedType.profilePlaylists, user),
             ),
             when(
                 tabSelected(currentIndex, 3),
-                MusicTemplates.trackFeed(FeedType.profileReposts, {
-                    id: user.username,
-                    name: user.displayname
-                }),
+                MusicTemplates.trackFeed(FeedType.profileReposts, user),
             ),
             when(
                 tabSelected(currentIndex, 4),
-                MusicTemplates.trackFeed(FeedType.history, {
-                    id: user.username,
-                    name: user.displayname
-                }),
+                MusicTemplates.trackFeed(FeedType.history, user),
             ),
         ).build();
     }
@@ -730,18 +715,9 @@ export class UserTemplates {
     static libraryPage(user: Signal<User>, isSelf: boolean) {
         const tabs = [`${t("TRACKS")}`, `${t("ALBUMS")}`, `${t("PLAYLISTS")}`];
         const tabContents = [
-            MusicTemplates.trackFeed(FeedType.likedTracks, {
-                name: user.value.username,
-                id: user.value.username,
-            }),
-            MusicTemplates.cardFeed(CardFeedType.likedAlbums, {
-                name: user.value.username,
-                id: user.value.username,
-            }),
-            MusicTemplates.cardFeed(CardFeedType.likedPlaylists, {
-                name: user.value.username,
-                id: user.value.username,
-            }),
+            MusicTemplates.trackFeed(FeedType.likedTracks, user.value),
+            MusicTemplates.cardFeed(CardFeedType.likedAlbums, user.value),
+            MusicTemplates.cardFeed(CardFeedType.likedPlaylists, user.value),
         ];
 
         if (isSelf) {

@@ -37,6 +37,7 @@ import { ListTrack } from "@targoninc/lyda-shared/src/Models/ListTrack";
 import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom.ts";
 import { AlbumActions } from "../../Actions/AlbumActions.ts";
 import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
+import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 
 export class MusicTemplates {
     static feedEntry(item: Track, newPlayingFrom: PlayingFrom) {
@@ -213,7 +214,7 @@ export class MusicTemplates {
         );
     }
 
-    static trackFeed(type: FeedType, options: Record<string, any> = {}) {
+    static trackFeed(type: FeedType, user?: User) {
         const pageState = signal(1);
         const tracks$ = signal<Track[]>([]);
         const search = signal(type === FeedType.following ? "all" : "");
@@ -226,7 +227,7 @@ export class MusicTemplates {
             const params = { offset, filter };
             loading$.value = true;
             const res = await Api.getFeed(`${ApiRoutes.trackFeed}/${type}`, Object.assign(params, {
-                name: options.id
+                name: user?.username
             }));
             const newTracks = res ?? [];
 
@@ -264,8 +265,8 @@ export class MusicTemplates {
                     feedVisible,
                     TrackTemplates.trackListWithPagination(tracks$, pageState, {
                         type,
-                        name: getFeedDisplayName(type, options.name),
-                        id: options.id
+                        name: getFeedDisplayName(type, user?.displayname),
+                        id: user?.username
                     }, loading$, search, nextDisabled, searchableFeedTypes.includes(type)),
                 ),
             ).build();
@@ -310,7 +311,7 @@ export class MusicTemplates {
             ).build();
     }
 
-    static cardFeed(type: CardFeedType, options: Record<string, any> = {}) {
+    static cardFeed(type: CardFeedType, user: User) {
         const fetchFunction: Record<CardFeedType, Function> = {
             [CardFeedType.profileAlbums]: Api.getAlbumsByUserId,
             [CardFeedType.profilePlaylists]: Api.getPlaylistsByUserId,
@@ -327,7 +328,7 @@ export class MusicTemplates {
             const filter = search$.value;
             const offset = (pageNumber - 1) * pageSize;
             loading$.value = true;
-            const res = await fetchFunction[type](options.id, options.name, offset, filter);
+            const res = await fetchFunction[type](user.id, user.username, offset, filter);
             const newTracks = res ?? [];
 
             if (newTracks && newTracks.length === 0 && pageNumber > 1) {
