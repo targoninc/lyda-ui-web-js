@@ -58,7 +58,7 @@ export class DashboardTemplates {
                             icon: { icon: "groups" },
                         })),
                         when(hasPermission(Permissions.canRetriggerContentID), button({
-                            text: t("CONTENT_ID_REPROCESSING"),
+                            text: t("CONTENT_ID"),
                             onclick: () => navigate(RoutePath.contentID),
                             icon: { icon: "fingerprint" },
                         })),

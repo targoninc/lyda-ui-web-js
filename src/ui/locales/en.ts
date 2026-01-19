@@ -561,4 +561,5 @@ export const en = {
     CONTENT_ID_REPROCESSING: "Content ID reprocessing",
     CONTENT_ID_REPROCESSING_DESC: "This action will take a lot of time. Be sure that you want to do this before clicking the button.",
     START_REPROCESSING: "Start reprocessing",
+    CONTENT_ID: "Content ID",
 } satisfies BaseTranslation;
