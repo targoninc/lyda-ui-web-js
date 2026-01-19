@@ -44,6 +44,9 @@ export class ContentIDTemplates {
                         };
                         logs.value = [...logs.value, `${t("TOTAL_TRACKS")}: ${data.count}`];
                         break;
+                    case "log":
+                        logs.value = [...logs.value, data.message];
+                        break;
                     case "progress":
                         const percent = (data.processed / data.total) * 100;
                         progress.value = {
