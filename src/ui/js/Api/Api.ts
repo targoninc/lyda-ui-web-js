@@ -73,6 +73,10 @@ export class Api {
         });
     }
 
+    static async retriggerContentID() {
+        return post(ApiRoutes.retriggerContentID);
+    }
+
     //endregion
 
     //region logs

@@ -6,7 +6,8 @@ import {t} from "../../../locales";
 import {button, heading} from "@targoninc/jess-components";
 import {ProgressPart} from "../../Models/ProgressPart.ts";
 import {ProgressState} from "@targoninc/lyda-shared/src/Enums/ProgressState";
-import {ApiRoutes} from "../../Api/ApiRoutes.ts";
+import { Api } from "../../Api/Api.ts";
+import { eventBus } from "../../Classes/EventBus.ts";
 
 export class ContentIDTemplates {
     static contentIDPage() {
@@ -22,82 +23,71 @@ export class ContentIDTemplates {
             };
             logs.value = [`${t("STARTING")}`];
 
-            const eventSource = new EventSource(ApiRoutes.retriggerContentID, {withCredentials: true});
+            Api.retriggerContentID().then();
 
-            eventSource.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                console.log("Content ID SSE:", data);
+            const subscription = eventBus.subscribe("content_id", (data) => {
+                console.log("Content ID WebSocket Event:", data);
+                const event = data.payload;
 
-                switch (data.status) {
+                switch (data.type.split("content_id:").at(1)) {
                     case "reset_complete":
                         progress.value = {
                             ...progress.value!,
-                            text: data.message,
+                            text: event.message,
                         };
-                        logs.value = [...logs.value, data.message];
+                        logs.value = [...logs.value, event.message];
                         break;
-                    case "total":
+                    case "total_tracks":
                         progress.value = {
                             ...progress.value!,
-                            text: `${t("TOTAL_TRACKS")}: ${data.count}`,
+                            text: `${t("TOTAL_TRACKS")}: ${event.count}`,
                             progress: 0
                         };
-                        logs.value = [...logs.value, `${t("TOTAL_TRACKS")}: ${data.count}`];
+                        logs.value = [...logs.value, `${t("TOTAL_TRACKS")}: ${event.count}`];
                         break;
                     case "log":
-                        logs.value = [...logs.value, data.message];
+                        logs.value = [...logs.value, event.message];
                         break;
                     case "progress":
-                        const percent = (data.processed / data.total) * 100;
+                        const percent = (event.processed / event.total) * 100;
                         progress.value = {
                             ...progress.value!,
-                            text: t("PROCESSED_N_OF_TOTAL", data.processed, data.total, data.currentTrackId),
+                            text: t("PROCESSED_N_OF_TOTAL", event.processed, event.total, event.currentTrackId),
                             progress: percent
                         };
                         break;
                     case "error":
-                        const errorMsg = t("ERROR_TRACK_ID", data.trackId, data.error);
+                        const errorMsg = t("ERROR_TRACK_ID", event.trackId, event.error);
                         logs.value = [...logs.value, errorMsg];
-                        if (data.message) {
-                            if (data.message.includes("Skipped")) {
-                                logs.value = [...logs.value, t("SKIPPED_MISSING_FILES", data.trackId)];
+                        if (event.message) {
+                            if (event.message.includes("Skipped")) {
+                                logs.value = [...logs.value, t("SKIPPED_MISSING_FILES", event.trackId)];
                             } else {
-                                logs.value = [...logs.value, data.message];
+                                logs.value = [...logs.value, event.message];
                             }
                         }
                         break;
                     case "completed":
                         progress.value = {
                             ...progress.value!,
-                            text: data.message,
+                            text: event.message,
                             state: ProgressState.complete,
                             progress: 100
                         };
-                        logs.value = [...logs.value, data.message];
-                        eventSource.close();
+                        logs.value = [...logs.value, event.message];
+                        subscription.unsubscribe();
                         break;
                     case "critical_error":
                         progress.value = {
                             ...progress.value!,
-                            text: data.error,
+                            text: event.error,
                             state: ProgressState.error
                         };
-                        logs.value = [...logs.value, `${t("CRITICAL_ERROR", data.error)}`];
-                        eventSource.close();
+                        logs.value = [...logs.value, `${t("CRITICAL_ERROR", event.error)}`];
+                        subscription.unsubscribe();
                         break;
                 }
-            };
-
-            eventSource.onerror = (err) => {
-                console.error("SSE Error:", err);
-                progress.value = {
-                    ...progress.value!,
-                    text: t("CONNECTION_ERROR"),
-                    state: ProgressState.error
-                };
-                logs.value = [...logs.value, `${t("CONNECTION_ERROR")}`];
-                eventSource.close();
-            };
+            });
         };
 
         const page = vertical(
