@@ -108,8 +108,7 @@ export class ContentIDTemplates {
             }),
             GenericTemplates.progressSectionPart(progress),
             create("div")
-                .classes("flex-v", "card")
-                .styles("margin-top", "20px", "max-height", "400px", "overflow-y", "auto", "padding", "10px", "background", "rgba(0,0,0,0.2)")
+                .classes("flex-v", "card", "content-id-logs")
                 .children(
                     ...logs.value.map(log => create("div")
                         .text(log)
@@ -119,7 +118,7 @@ export class ContentIDTemplates {
 
         // Update logs reactively
         logs.subscribe(l => {
-            const logContainer = page.querySelector(".flex-v.card");
+            const logContainer = page.querySelector(".content-id-logs");
             if (logContainer) {
                 logContainer.innerHTML = "";
                 l.forEach(log => {
