@@ -13,6 +13,7 @@ import { ModerationUsersTemplates } from "./admin/ModerationUsersTemplates.ts";
 import { ModerationCommentsTemplates } from "./admin/ModerationCommentsTemplates.ts";
 import { LogTemplates } from "./admin/LogTemplates.ts";
 import { RoyaltyTemplates } from "./admin/RoyaltyTemplates.ts";
+import { ContentIDTemplates } from "./admin/ContentIDTemplates.ts";
 import { PayoutTemplates } from "./money/PayoutTemplates.ts";
 import { MusicTemplates } from "./music/MusicTemplates.ts";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
@@ -70,6 +71,7 @@ export class PageTemplates {
         [RoutePath.actionLogs]: LogTemplates.actionLogsPage,
         [RoutePath.users]: ModerationUsersTemplates.usersPage,
         [RoutePath.events]: EventsTemplates.eventsPage,
+        [RoutePath.contentID]: ContentIDTemplates.contentIDPage,
     };
     static needLoginPages: RoutePath[] = [
         RoutePath.library,
@@ -87,6 +89,7 @@ export class PageTemplates {
         RoutePath.actionLogs,
         RoutePath.users,
         RoutePath.events,
+        RoutePath.contentID,
         RoutePath.editTracks,
         RoutePath.transactions,
     ];

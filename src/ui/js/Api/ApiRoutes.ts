@@ -82,6 +82,7 @@ export class ApiRoutes {
     static addCollaborator = ApiRoutes.tracksActions + "/addCollaborator";
     static approveCollab = ApiRoutes.tracksActions + "/approveCollab";
     static denyCollab = ApiRoutes.tracksActions + "/denyCollab";
+    static retriggerContentID = ApiRoutes.tracksActions + "/retriggerContentID";
 
     public static trackFeed = ApiRoutes.tracks + "/feeds";
     static followingFeed = ApiRoutes.trackFeed + `/${FeedType.following}`;

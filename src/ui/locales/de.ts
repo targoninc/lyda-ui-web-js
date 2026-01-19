@@ -548,5 +548,15 @@ export const de: Translation = {
     VERIFIED_ON: date => `Am ${date} verifiziert`,
     SECTION_HAS_ERRORS: "Diese Sektion hat Fehler",
     IMPRINT: "Impressum, Servicebedingungen und Datenschutzerklärung",
-    PAYMENT_INFO: "Zahlungsinformationen"
+    PAYMENT_INFO: "Zahlungsinformationen",
+    STARTING: "Starte",
+    TOTAL_TRACKS: "Gesamtanzahl Tracks",
+    PROCESSED_N_OF_TOTAL: (processed, total, currentId) => `Verarbeite ${processed} von ${total} (aktuell: ${currentId})`,
+    ERROR_TRACK_ID: (id, error) => `Fehler beim Verarbeiten von Track-ID ${id}: ${error}`,
+    SKIPPED_MISSING_FILES: id => `Überspringe fehlende Dateien für Track-ID: ${id}`,
+    CRITICAL_ERROR: err => `Kritischer Fehler ist aufgetreten: ${err}`,
+    CONNECTION_ERROR: "Verbindungsfehler",
+    CONTENT_ID_REPROCESSING: "Content ID Wiederverarbeitung",
+    CONTENT_ID_REPROCESSING_DESC: "Diese Aktion wird eine lange Zeit dauern. Stellen Sie sicher, dass Sie dies tun möchten, bevor Sie auf den Button klicken.",
+    START_REPROCESSING: "Starte Wiederverarbeitung",
 };
