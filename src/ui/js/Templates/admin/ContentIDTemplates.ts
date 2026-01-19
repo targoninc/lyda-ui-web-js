@@ -1,4 +1,4 @@
-import {create, signal, StringOrSignal, when} from "@targoninc/jess";
+import { compute, create, signal, StringOrSignal } from "@targoninc/jess";
 import {DashboardTemplates} from "./DashboardTemplates.ts";
 import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
 import {GenericTemplates, vertical} from "../generic/GenericTemplates.ts";
@@ -103,6 +103,7 @@ export class ContentIDTemplates {
             button({
                 text: t("START_REPROCESSING"),
                 onclick: startProcessing,
+                disabled: compute((p) => p !== null && p.state === ProgressState.inProgress, progress),
                 icon: {icon: "play_arrow"},
                 classes: ["positive"]
             }),
