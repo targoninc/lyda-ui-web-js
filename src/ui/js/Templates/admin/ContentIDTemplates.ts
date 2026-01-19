@@ -1,27 +1,37 @@
-import { compute, create, signal, StringOrSignal } from "@targoninc/jess";
-import {DashboardTemplates} from "./DashboardTemplates.ts";
-import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
-import {GenericTemplates, vertical} from "../generic/GenericTemplates.ts";
-import {t} from "../../../locales";
-import {button, heading} from "@targoninc/jess-components";
-import {ProgressPart} from "../../Models/ProgressPart.ts";
-import {ProgressState} from "@targoninc/lyda-shared/src/Enums/ProgressState";
+import { compute, create, signal, signalMap, StringOrSignal } from "@targoninc/jess";
+import { DashboardTemplates } from "./DashboardTemplates.ts";
+import { Permissions } from "@targoninc/lyda-shared/src/Enums/Permissions";
+import { GenericTemplates, vertical } from "../generic/GenericTemplates.ts";
+import { t } from "../../../locales";
+import { button, heading } from "@targoninc/jess-components";
+import { ProgressPart } from "../../Models/ProgressPart.ts";
+import { ProgressState } from "@targoninc/lyda-shared/src/Enums/ProgressState";
 import { Api } from "../../Api/Api.ts";
 import { eventBus } from "../../Classes/EventBus.ts";
+
+interface LogEvent {
+    type: "success" | "error" | "info";
+    message: StringOrSignal;
+    time: Date;
+}
 
 export class ContentIDTemplates {
     static contentIDPage() {
         const progress = signal<ProgressPart | null>(null);
-        const logs = signal<StringOrSignal[]>([]);
+        const logs = signal<LogEvent[]>([]);
 
         const startProcessing = () => {
             progress.value = {
                 icon: "sync",
                 text: t("STARTING"),
                 state: ProgressState.inProgress,
-                progress: 0
+                progress: 0,
             };
-            logs.value = [`${t("STARTING")}`];
+            logs.value = [{
+                time: new Date(),
+                message: t("STARTING"),
+                type: "info",
+            }];
 
             Api.retriggerContentID().then();
 
@@ -35,36 +45,55 @@ export class ContentIDTemplates {
                             ...progress.value!,
                             text: event.message,
                         };
-                        logs.value = [...logs.value, event.message];
+                        logs.value = [...logs.value, {
+                            message: event.message,
+                            time: new Date(),
+                            type: "info",
+                        }];
                         break;
                     case "total_tracks":
                         progress.value = {
                             ...progress.value!,
                             text: `${t("TOTAL_TRACKS")}: ${event.count}`,
-                            progress: 0
+                            progress: 0,
                         };
-                        logs.value = [...logs.value, `${t("TOTAL_TRACKS")}: ${event.count}`];
+                        logs.value = [
+                            ...logs.value,
+                            {
+                                time: new Date(),
+                                message: `${t("TOTAL_TRACKS")}: ${event.count}`,
+                                type: "info",
+                            },
+                        ];
                         break;
                     case "log":
-                        logs.value = [...logs.value, event.message];
+                        logs.value = [
+                            ...logs.value,
+                            {
+                                time: new Date(),
+                                message: event.message,
+                                type: "info",
+                            },
+                        ];
                         break;
                     case "progress":
                         const percent = (event.processed / event.total) * 100;
                         progress.value = {
                             ...progress.value!,
                             text: t("PROCESSED_N_OF_TOTAL", event.processed, event.total, event.currentTrackId),
-                            progress: percent
+                            progress: percent,
                         };
                         break;
                     case "error":
-                        const errorMsg = t("ERROR_TRACK_ID", event.trackId, event.error);
-                        logs.value = [...logs.value, errorMsg];
-                        if (event.message) {
-                            if (event.message.includes("Skipped")) {
-                                logs.value = [...logs.value, t("SKIPPED_MISSING_FILES", event.trackId)];
-                            } else {
-                                logs.value = [...logs.value, event.message];
-                            }
+                        if (event.error) {
+                            logs.value = [
+                                ...logs.value,
+                                {
+                                    time: new Date(),
+                                    message: `Error with track ${event.trackId}: ${event.error}`,
+                                    type: "error",
+                                },
+                            ];
                         }
                         break;
                     case "completed":
@@ -72,18 +101,32 @@ export class ContentIDTemplates {
                             ...progress.value!,
                             text: event.message,
                             state: ProgressState.complete,
-                            progress: 100
+                            progress: 100,
                         };
-                        logs.value = [...logs.value, event.message];
+                        logs.value = [
+                            ...logs.value,
+                            {
+                                time: new Date(),
+                                message: event.message,
+                                type: "success",
+                            },
+                        ];
                         subscription.unsubscribe();
                         break;
                     case "critical_error":
                         progress.value = {
                             ...progress.value!,
                             text: event.error,
-                            state: ProgressState.error
+                            state: ProgressState.error,
                         };
-                        logs.value = [...logs.value, `${t("CRITICAL_ERROR", event.error)}`];
+                        logs.value = [
+                            ...logs.value,
+                            {
+                                time: new Date(),
+                                message: `${t("CRITICAL_ERROR", event.error)}`,
+                                type: "error",
+                            },
+                        ];
                         subscription.unsubscribe();
                         break;
                 }
@@ -91,33 +134,30 @@ export class ContentIDTemplates {
         };
 
         const page = vertical(
-            heading({level: 1, text: t("CONTENT_ID_REPROCESSING")}),
+            heading({ level: 1, text: t("CONTENT_ID_REPROCESSING") }),
             create("p").text(t("CONTENT_ID_REPROCESSING_DESC")),
             button({
                 text: t("START_REPROCESSING"),
                 onclick: startProcessing,
                 disabled: compute((p) => p !== null && p.state === ProgressState.inProgress, progress),
-                icon: {icon: "play_arrow"},
-                classes: ["positive"]
+                icon: { icon: "play_arrow" },
+                classes: ["positive"],
             }),
             GenericTemplates.progressSectionPart(progress),
-            create("div")
-                .classes("flex-v", "card", "content-id-logs")
-                .children(
-                    ...logs.value.map(log => create("div")
-                        .text(log)
-                        .build())
-                )
+            signalMap(logs, vertical().classes("flex-v", "border", "card", "secondary", "content-id-logs"),
+                log => {
+                    return create("div")
+                        .classes("log", log.type)
+                        .text(`[${log.time?.toISOString() ?? new Date().toISOString()}]\t${log.message}`)
+                        .title(log.time.toLocaleString())
+                        .build();
+                }),
         ).build();
 
         // Update logs reactively
         logs.subscribe(l => {
             const logContainer = page.querySelector(".content-id-logs");
             if (logContainer) {
-                logContainer.innerHTML = "";
-                l.forEach(log => {
-                    logContainer.appendChild(create("div").text(log).build());
-                });
                 logContainer.scrollTop = logContainer.scrollHeight;
             }
         });

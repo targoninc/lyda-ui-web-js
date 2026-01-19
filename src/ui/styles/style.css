@@ -1206,17 +1206,3 @@ img.loading:before {
         height: 34px !important;
     }
 }
-
-.content-id-logs {
-    margin-top: var(--large-padding);
-    max-height: 400px;
-    overflow-y: auto;
-    padding: var(--base-padding);
-    background: rgba(var(--color-5-rgb), 0.2);
-}
-
-.content-id-logs > div {
-    font-family: monospace;
-    padding: 2px 0;
-    border-bottom: 1px solid rgba(var(--color-7-rgb), 0.1);
-}

@@ -142,6 +142,23 @@
     font-weight: bold;
 }
 
+.log {
+    font-family: monospace;
+    font-size: var(--font-size-small);
+}
+
+.log.error {
+    color: var(--red);
+}
+
+.log.warning {
+    color: var(--color-1);
+}
+
+.log.success {
+    color: var(--green);
+}
+
 .animated-background {
     background: url("/img/graphics/email-box.webp") no-repeat center center !important;
     background-size: cover;
