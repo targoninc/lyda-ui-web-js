@@ -988,10 +988,8 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     background: var(--color-3);
     padding: var(--base-padding);
     box-sizing: border-box;
-    display: grid;
-    grid-template-columns: 50px 1fr;
-    gap: var(--gap);
     align-items: center;
+    display: flex;
 }
 
 .content-id-match-part.center {
