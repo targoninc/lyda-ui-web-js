@@ -247,8 +247,10 @@ export class ContentIDTemplates {
                                     create("div").classes("content-id-match-part", "card", "secondary").children(
                                         horizontal(
                                             MusicTemplates.cover(EntityType.track, m, "inline-cover"),
-                                            MusicTemplates.title(EntityType.track, m.title, m.id),
-                                            UserTemplates.userWidget(m.user!)
+                                            vertical(
+                                                MusicTemplates.title(EntityType.track, m.title, m.id),
+                                                UserTemplates.userWidget(m.user!)
+                                            )
                                         )
                                     ),
                                     create("div").classes("content-id-match-part", "center", "card", "secondary").children(
