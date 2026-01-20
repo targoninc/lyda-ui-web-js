@@ -238,13 +238,13 @@ export class ContentIDTemplates {
                                 }),
                             ).classes("content-id-match-part"),
                             horizontal(
+                                MusicTemplates.cover(EntityType.track, m.track, "inline-cover"),
                                 vertical(
                                     heading({
                                         level: 3,
                                         text: m.track.title
                                     }),
                                 ),
-                                MusicTemplates.cover(EntityType.track, m.track, "inline-cover"),
                             ).classes("content-id-match-part"),
                         ).classes("card", "secondary");
                     })
