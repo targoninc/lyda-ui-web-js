@@ -976,6 +976,10 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     flex-wrap: nowrap;
 }
 
+.content-id-match-part {
+    width: 33.33%;
+}
+
 .tab {
     background: var(--color-6);
     border: none !important;
