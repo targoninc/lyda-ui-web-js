@@ -970,6 +970,12 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     font-size: var(--font-size-small);
 }
 
+.content-id-logs {
+    max-height: 50dvh;
+    overflow-y: auto;
+    flex-wrap: nowrap;
+}
+
 .tab {
     background: var(--color-6);
     border: none !important;
