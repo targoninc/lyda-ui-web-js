@@ -657,13 +657,24 @@ button.unread:before {
 
 summary {
     cursor: pointer;
-    background: var(--color-7);
-    padding: 0 8px;
+    background: var(--color-6);
+    padding: var(--base-padding);
     border-radius: var(--border-radius);
+    display: list-item;
+}
+
+summary:hover {
+    background: var(--color-7);
+}
+
+details {
+    background: var(--color-3);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--color-7);
 }
 
 details > *:not(summary) {
-    margin-left: 2em;
+    margin-left: 0;
 }
 
 .space-between {

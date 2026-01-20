@@ -3,7 +3,7 @@ import {DashboardTemplates} from "./DashboardTemplates.ts";
 import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
 import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
 import {t} from "../../../locales";
-import {button, heading, toggle} from "@targoninc/jess-components";
+import {button, heading, text, toggle} from "@targoninc/jess-components";
 import {ProgressPart} from "../../Models/ProgressPart.ts";
 import {ProgressState} from "@targoninc/lyda-shared/src/Enums/ProgressState";
 import {Api} from "../../Api/Api.ts";
@@ -213,31 +213,42 @@ export class ContentIDTemplates {
                     text: "Get matches"
                 }),
             ),
-            signalMap(matches, vertical(),
-                match => vertical(
-                    ...match.matches.map(m => {
-                        return create("div").classes("content-id-matches-grid").children(
-                            create("div").classes("content-id-match-part").children(
+            signalMap(matches, vertical().classes("gap"),
+                match => {
+                    return create("details").children(
+                        create("summary").children(
+                            horizontal(
                                 MusicTemplates.cover(EntityType.track, match.track, "inline-cover"),
                                 MusicTemplates.title(EntityType.track, match.track.title, match.track.id),
-                            ),
-                            create("div").classes("content-id-match-part", "center").children(
-                                heading({
-                                    level: 1,
-                                    text: `${(m.similarity * 100).toFixed(1)}%`
+                                text({
+                                    tag: "",
+                                    text: `(${match.matches.length} matches)`,
+                                    classes: ["color-dim", "text-small"]
                                 }),
-                                heading({
-                                    level: 2,
-                                    text: m.heuristic
-                                }),
-                            ),
-                            create("div").classes("content-id-match-part").children(
-                                MusicTemplates.cover(EntityType.track, m.track, "inline-cover"),
-                                MusicTemplates.title(EntityType.track, m.track.title, m.track.id),
-                            ),
-                        ).build();
-                    })
-                ).build()),
+                            ).classes("align-children", "small-gap").build()
+                        ),
+                        vertical(
+                            ...match.matches.map(m => {
+                                return create("div").classes("content-id-matches-grid", "padded-small").children(
+                                    create("div").classes("content-id-match-part", "center", "card").children(
+                                        heading({
+                                            level: 1,
+                                            text: `${(m.similarity * 100).toFixed(1)}%`
+                                        }),
+                                        heading({
+                                            level: 2,
+                                            text: m.heuristic
+                                        }),
+                                    ),
+                                    create("div").classes("content-id-match-part", "card").children(
+                                        MusicTemplates.cover(EntityType.track, m.track, "inline-cover"),
+                                        MusicTemplates.title(EntityType.track, m.track.title, m.track.id),
+                                    ),
+                                ).build();
+                            })
+                        ).classes("gap").build()
+                    ).build();
+                }),
         )
     }
 }

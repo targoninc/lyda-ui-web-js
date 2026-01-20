@@ -978,7 +978,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .content-id-matches-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--layout-gap);
     width: 100%;
 }
