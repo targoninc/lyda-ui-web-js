@@ -213,10 +213,10 @@ export class ContentIDTemplates {
                     text: "Get matches"
                 }),
             ),
-            signalMap(matches, vertical().classes("border", "card"),
+            signalMap(matches, vertical(),
                 match => vertical(
                     ...match.matches.map(m => {
-                        return create("div").classes("card", "secondary", "content-id-matches-grid").children(
+                        return create("div").classes("content-id-matches-grid").children(
                             create("div").classes("content-id-match-part").children(
                                 MusicTemplates.cover(EntityType.track, match.track, "inline-cover"),
                                 MusicTemplates.title(EntityType.track, match.track.title, match.track.id),
