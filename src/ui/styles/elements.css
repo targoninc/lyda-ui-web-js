@@ -976,17 +976,28 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     flex-wrap: nowrap;
 }
 
+.content-id-matches-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--layout-gap);
+    width: 100%;
+}
+
 .content-id-match-part {
-    width: 32.5%;
     background: var(--color-3);
     padding: var(--base-padding);
     box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 50px 1fr;
+    gap: var(--gap);
     align-items: center;
-    height: 100%;
 }
 
-.content-id-match-part:nth-child(2) {
-    justify-content: center;
+.content-id-match-part.center {
+    display: grid;
+    place-items: center;
+    grid-template-columns: 1fr;
+    text-align: center;
 }
 
 .tab {

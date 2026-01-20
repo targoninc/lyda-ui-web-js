@@ -11,7 +11,6 @@ import {eventBus} from "../../Classes/EventBus.ts";
 import {ContentIDMatch} from "../../Models/ContentIDMatch.ts";
 import {MusicTemplates} from "../music/MusicTemplates.ts";
 import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
-import {UserTemplates} from "../account/UserTemplates.ts";
 
 interface LogEvent {
     type: "success" | "error" | "info" | "debug";
@@ -217,17 +216,12 @@ export class ContentIDTemplates {
             signalMap(matches, vertical().classes("border", "card"),
                 match => vertical(
                     ...match.matches.map(m => {
-                        return horizontal(
-                            horizontal(
+                        return create("div").classes("card", "secondary", "content-id-matches-grid").children(
+                            create("div").classes("content-id-match-part").children(
                                 MusicTemplates.cover(EntityType.track, match.track, "inline-cover"),
-                                vertical(
-                                    heading({
-                                        level: 3,
-                                        text: match.track.title
-                                    })
-                                ),
-                            ).classes("content-id-match-part"),
-                            vertical(
+                                MusicTemplates.title(EntityType.track, match.track.title, match.track.id),
+                            ),
+                            create("div").classes("content-id-match-part", "center").children(
                                 heading({
                                     level: 1,
                                     text: `${(m.similarity * 100).toFixed(1)}%`
@@ -236,17 +230,12 @@ export class ContentIDTemplates {
                                     level: 2,
                                     text: m.heuristic
                                 }),
-                            ).classes("content-id-match-part"),
-                            horizontal(
+                            ),
+                            create("div").classes("content-id-match-part").children(
                                 MusicTemplates.cover(EntityType.track, m.track, "inline-cover"),
-                                vertical(
-                                    heading({
-                                        level: 3,
-                                        text: m.track.title
-                                    }),
-                                ),
-                            ).classes("content-id-match-part"),
-                        ).classes("card", "secondary");
+                                MusicTemplates.title(EntityType.track, m.track.title, m.track.id),
+                            ),
+                        ).build();
                     })
                 ).build()),
         )
