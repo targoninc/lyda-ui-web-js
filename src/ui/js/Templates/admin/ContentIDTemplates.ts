@@ -12,6 +12,7 @@ import {ContentIDMatch} from "../../Models/ContentIDMatch.ts";
 import {MusicTemplates} from "../music/MusicTemplates.ts";
 import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import { UserTemplates } from "../account/UserTemplates.ts";
 
 interface LogEvent {
     type: "success" | "error" | "info" | "debug";
@@ -247,7 +248,8 @@ export class ContentIDTemplates {
                                         horizontal(
                                             MusicTemplates.cover(EntityType.track, m, "inline-cover"),
                                             MusicTemplates.title(EntityType.track, m.title, m.id),
-                                        ).classes("align-children")
+                                            UserTemplates.userWidget(m.user!)
+                                        )
                                     ),
                                     create("div").classes("content-id-match-part", "center", "card", "secondary").children(
                                         vertical(
