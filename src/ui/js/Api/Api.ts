@@ -79,7 +79,7 @@ export class Api {
     }
 
     static async getContentIDMatches() {
-        return post<ContentIDMatch[]>(ApiRoutes.contentIDMatches);
+        return get<ContentIDMatch[]>(ApiRoutes.contentIDMatches);
     }
 
     //endregion
