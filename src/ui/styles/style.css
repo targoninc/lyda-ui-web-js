@@ -660,7 +660,11 @@ summary {
     background: var(--color-6);
     padding: var(--base-padding);
     border-radius: var(--border-radius);
-    display: list-item;
+    display: flex;
+}
+
+summary.property-value {
+    display: list-item !important;
 }
 
 summary:hover {
