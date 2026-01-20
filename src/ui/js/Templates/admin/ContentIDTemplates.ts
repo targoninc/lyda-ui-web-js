@@ -221,7 +221,7 @@ export class ContentIDTemplates {
                                 MusicTemplates.cover(EntityType.track, match.track, "inline-cover"),
                                 MusicTemplates.title(EntityType.track, match.track.title, match.track.id),
                                 text({
-                                    tag: "",
+                                    tag: "span",
                                     text: `(${match.matches.length} matches)`,
                                     classes: ["color-dim", "text-small"]
                                 }),
