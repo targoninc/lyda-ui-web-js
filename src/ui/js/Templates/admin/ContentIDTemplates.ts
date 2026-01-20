@@ -195,7 +195,7 @@ export class ContentIDTemplates {
 
     static matchesList() {
         const matches = signal<ContentIDMatch[]>([]);
-        const loading = signal(true);
+        const loading = signal(false);
         const getMatches = () => {
             loading.value = true;
             Api.getContentIDMatches().then(m => {
