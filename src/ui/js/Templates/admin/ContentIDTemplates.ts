@@ -258,6 +258,7 @@ export class ContentIDTemplates {
                                                     create("div").classes("progress-circle").styles(
                                                         "background",
                                                         `conic-gradient(var(--progress-color) ${percent}%, transparent 0%)`,
+                                                        "--progress-color", "var(--color-5)"
                                                     ).children(create("div").classes("progress-circle-overlay")).build(),
                                                     heading({
                                                         level: 2,
@@ -267,7 +268,7 @@ export class ContentIDTemplates {
                                                         level: 2,
                                                         text: mm.heuristic
                                                     }),
-                                                )
+                                                ).classes("align-children", "gap");
                                             })
                                         ),
                                     ),
