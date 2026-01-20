@@ -1,4 +1,4 @@
-import { compute, create, signal, signalMap, StringOrSignal } from "@targoninc/jess";
+import {compute, create, signal, signalMap, StringOrSignal, when} from "@targoninc/jess";
 import { DashboardTemplates } from "./DashboardTemplates.ts";
 import { Permissions } from "@targoninc/lyda-shared/src/Enums/Permissions";
 import { GenericTemplates, vertical } from "../generic/GenericTemplates.ts";
@@ -19,6 +19,7 @@ export class ContentIDTemplates {
     static contentIDPage() {
         const progress = signal<ProgressPart | null>(null);
         const logs = signal<LogEvent[]>([]);
+        const inProgress = compute((p) => p !== null && p.state === ProgressState.inProgress, progress);
 
         const startProcessing = () => {
             progress.value = {
@@ -134,15 +135,26 @@ export class ContentIDTemplates {
         };
 
         const page = vertical(
-            heading({ level: 1, text: t("CONTENT_ID_REPROCESSING") }),
-            create("p").text(t("CONTENT_ID_REPROCESSING_DESC")),
-            button({
+            heading({
+                level: 1,
+                text: t("CONTENT_ID_REPROCESSING")
+            }),
+            create("p")
+                .text(t("CONTENT_ID_REPROCESSING_DESC")),
+            when(inProgress, button({
                 text: t("START_REPROCESSING"),
                 onclick: startProcessing,
-                disabled: compute((p) => p !== null && p.state === ProgressState.inProgress, progress),
                 icon: { icon: "play_arrow" },
                 classes: ["positive"],
-            }),
+            }), true),
+            when(inProgress, button({
+                text: t("CANCEL"),
+                onclick: () => {
+                    eventBus.send({ type: "content_id:stop_requested" });
+                },
+                icon: { icon: "cancel" },
+                classes: ["negative"],
+            })),
             GenericTemplates.progressSectionPart(progress),
             signalMap(logs, vertical().classes("flex-v", "border", "card", "secondary", "content-id-logs"),
                 log => {

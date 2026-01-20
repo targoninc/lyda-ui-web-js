@@ -98,6 +98,14 @@ export class EventBus {
             }
         };
     }
+
+    public send(data: any): void {
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify(data));
+        } else {
+            console.error("EventBus WebSocket is not open. Cannot send message.", data);
+        }
+    }
 }
 
 export const eventBus = EventBus.getInstance();
