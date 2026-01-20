@@ -243,13 +243,13 @@ export class ContentIDTemplates {
                         vertical(
                             ...matchedTracks.map(m => {
                                 return create("div").classes("content-id-matches-grid", "padded-small").children(
-                                    create("div").classes("content-id-match-part", "card").children(
+                                    create("div").classes("content-id-match-part", "card", "secondary").children(
                                         horizontal(
                                             MusicTemplates.cover(EntityType.track, m, "inline-cover"),
                                             MusicTemplates.title(EntityType.track, m.title, m.id),
-                                        )
+                                        ).classes("align-children")
                                     ),
-                                    create("div").classes("content-id-match-part", "center", "card").children(
+                                    create("div").classes("content-id-match-part", "center", "card", "secondary").children(
                                         vertical(
                                             ...m.matches!.map(mm => {
                                                 const percent = (mm.similarity * 100).toFixed(1);
