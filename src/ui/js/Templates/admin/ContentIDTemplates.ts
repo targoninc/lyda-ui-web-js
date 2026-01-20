@@ -250,7 +250,7 @@ export class ContentIDTemplates {
                                             vertical(
                                                 MusicTemplates.title(EntityType.track, m.title, m.id),
                                                 UserTemplates.userWidget(m.user!)
-                                            )
+                                            ).classes("no-gap")
                                         )
                                     ),
                                     create("div").classes("content-id-match-part", "center", "card", "secondary").children(
