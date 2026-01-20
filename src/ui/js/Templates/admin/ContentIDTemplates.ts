@@ -15,12 +15,12 @@ interface LogEvent {
     time: Date;
 }
 
+const progress = signal<ProgressPart | null>(null);
+const logs = signal<LogEvent[]>([]);
+const inProgress = compute((p) => p !== null && p.state === ProgressState.inProgress, progress);
+
 export class ContentIDTemplates {
     static contentIDPage() {
-        const progress = signal<ProgressPart | null>(null);
-        const logs = signal<LogEvent[]>([]);
-        const inProgress = compute((p) => p !== null && p.state === ProgressState.inProgress, progress);
-
         const startProcessing = () => {
             progress.value = {
                 icon: "sync",
