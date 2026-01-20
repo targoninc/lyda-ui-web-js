@@ -257,8 +257,7 @@ export class ContentIDTemplates {
                                                 return horizontal(
                                                     create("div").classes("progress-circle").styles(
                                                         "background",
-                                                        `conic-gradient(var(--progress-color) ${percent}%, transparent 0%)`,
-                                                        "--progress-color", "var(--color-5)"
+                                                        `conic-gradient(var(--color-5) ${percent}%, transparent 0%)`,
                                                     ).children(create("div").classes("progress-circle-overlay")).build(),
                                                     heading({
                                                         level: 2,
