@@ -73,6 +73,7 @@ export class ApiRoutes {
     static getTrackCollabTypes = ApiRoutes.tracks + "/collabTypes";
     static getUnapprovedCollabs = ApiRoutes.tracks + "/unapprovedCollabs";
     static createTrack = ApiRoutes.tracks + "/create";
+    static contentIDMatches = ApiRoutes.tracks + "/contentIDMatches";
 
     private static tracksActions = ApiRoutes.tracks + "/actions";
     static deleteTrack = ApiRoutes.tracksActions + "/delete";

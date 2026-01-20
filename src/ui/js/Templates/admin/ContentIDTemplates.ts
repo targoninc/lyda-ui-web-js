@@ -1,13 +1,16 @@
 import {compute, create, signal, signalMap, StringOrSignal, when} from "@targoninc/jess";
-import { DashboardTemplates } from "./DashboardTemplates.ts";
-import { Permissions } from "@targoninc/lyda-shared/src/Enums/Permissions";
+import {DashboardTemplates} from "./DashboardTemplates.ts";
+import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
 import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
-import { t } from "../../../locales";
+import {t} from "../../../locales";
 import {button, heading, toggle} from "@targoninc/jess-components";
-import { ProgressPart } from "../../Models/ProgressPart.ts";
-import { ProgressState } from "@targoninc/lyda-shared/src/Enums/ProgressState";
-import { Api } from "../../Api/Api.ts";
-import { eventBus } from "../../Classes/EventBus.ts";
+import {ProgressPart} from "../../Models/ProgressPart.ts";
+import {ProgressState} from "@targoninc/lyda-shared/src/Enums/ProgressState";
+import {Api} from "../../Api/Api.ts";
+import {eventBus} from "../../Classes/EventBus.ts";
+import {ContentIDMatch} from "../../Models/ContentIDMatch.ts";
+import {MusicTemplates} from "../music/MusicTemplates.ts";
+import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 
 interface LogEvent {
     type: "success" | "error" | "info" | "debug";
@@ -157,15 +160,15 @@ export class ContentIDTemplates {
                         when(inProgress, button({
                             text: t("START_REPROCESSING"),
                             onclick: startProcessing,
-                            icon: { icon: "play_arrow" },
+                            icon: {icon: "play_arrow"},
                             classes: ["positive"],
                         }), true),
                         when(inProgress, button({
                             text: t("CANCEL"),
                             onclick: () => {
-                                eventBus.send({ type: "content_id:stop_requested" });
+                                eventBus.send({type: "content_id:stop_requested"});
                             },
-                            icon: { icon: "cancel" },
+                            icon: {icon: "cancel"},
                             classes: ["negative"],
                         })),
                         GenericTemplates.progressSectionPart(progress),
@@ -177,7 +180,7 @@ export class ContentIDTemplates {
                         onchange: () => includeDebug.value = !includeDebug.value
                     }),
                 ).classes("space-between"),
-                signalMap(filteredLogs, vertical().classes("flex-v", "border", "card", "secondary", "content-id-logs"),
+                signalMap(filteredLogs, vertical().classes("border", "card", "secondary", "content-id-logs"),
                     log => {
                         return create("div")
                             .classes("log", log.type)
@@ -185,7 +188,62 @@ export class ContentIDTemplates {
                             .title(log.time.toLocaleString())
                             .build();
                     }),
+                ContentIDTemplates.matchesList()
             ).build()
         );
+    }
+
+    static matchesList() {
+        const matches = signal<ContentIDMatch[]>([]);
+        const loading = signal(true);
+        const getMatches = () => {
+            loading.value = true;
+            Api.getContentIDMatches().then(m => {
+                matches.value = m ?? [];
+            }).finally(() => loading.value = false);
+        }
+
+        return vertical(
+            horizontal(
+                button({
+                    onclick: getMatches,
+                    icon: {icon: "play_arrow"},
+                    classes: ["positive"],
+                    disabled: loading,
+                    text: "Get matches"
+                }),
+            ),
+            signalMap(matches, vertical().classes("border", "card"),
+                match => vertical(
+                    ...match.matches.map(m => {
+                        return horizontal(
+                            horizontal(
+                                MusicTemplates.cover(EntityType.track, match.track, "inline-cover"),
+                                heading({
+                                    level: 3,
+                                    text: match.track.title
+                                })
+                            ),
+                            vertical(
+                                heading({
+                                    level: 1,
+                                    text: `${m.similarity * 100}%`
+                                }),
+                                heading({
+                                    level: 2,
+                                    text: m.heuristic
+                                }),
+                            ),
+                            horizontal(
+                                MusicTemplates.cover(EntityType.track, m.track, "inline-cover"),
+                                heading({
+                                    level: 3,
+                                    text: m.track.title
+                                })
+                            ),
+                        ).classes("space-between", "card", "secondary");
+                    })
+                ).build()),
+        )
     }
 }

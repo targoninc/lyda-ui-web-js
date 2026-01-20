@@ -43,6 +43,7 @@ import { CaptureOrderRequest } from "@targoninc/lyda-shared/src/Models/CaptureOr
 import { Transaction } from "@targoninc/lyda-shared/dist/Models/Transaction";
 import { t } from "../../locales";
 import { SubscriptionPayment } from "@targoninc/lyda-shared/dist/Models/db/finance/SubscriptionPayment";
+import {ContentIDMatch} from "../Models/ContentIDMatch.ts";
 
 export class Api {
     //region Interactions
@@ -75,6 +76,10 @@ export class Api {
 
     static async retriggerContentID() {
         return post(ApiRoutes.retriggerContentID);
+    }
+
+    static async getContentIDMatches() {
+        return post<ContentIDMatch[]>(ApiRoutes.contentIDMatches);
     }
 
     //endregion
