@@ -241,8 +241,10 @@ export class ContentIDTemplates {
                                         }),
                                     ),
                                     create("div").classes("content-id-match-part", "card").children(
-                                        MusicTemplates.cover(EntityType.track, m.track, "inline-cover"),
-                                        MusicTemplates.title(EntityType.track, m.track.title, m.track.id),
+                                        horizontal(
+                                            MusicTemplates.cover(EntityType.track, m.track, "inline-cover"),
+                                            MusicTemplates.title(EntityType.track, m.track.title, m.track.id),
+                                        )
                                     ),
                                 ).build();
                             })
