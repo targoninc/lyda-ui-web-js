@@ -1,7 +1,7 @@
 import {compute, create, signal, signalMap, StringOrSignal, when} from "@targoninc/jess";
 import { DashboardTemplates } from "./DashboardTemplates.ts";
 import { Permissions } from "@targoninc/lyda-shared/src/Enums/Permissions";
-import { GenericTemplates, vertical } from "../generic/GenericTemplates.ts";
+import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
 import { t } from "../../../locales";
 import { button, heading } from "@targoninc/jess-components";
 import { ProgressPart } from "../../Models/ProgressPart.ts";
@@ -141,21 +141,23 @@ export class ContentIDTemplates {
             }),
             create("p")
                 .text(t("CONTENT_ID_REPROCESSING_DESC")),
-            when(inProgress, button({
-                text: t("START_REPROCESSING"),
-                onclick: startProcessing,
-                icon: { icon: "play_arrow" },
-                classes: ["positive"],
-            }), true),
-            when(inProgress, button({
-                text: t("CANCEL"),
-                onclick: () => {
-                    eventBus.send({ type: "content_id:stop_requested" });
-                },
-                icon: { icon: "cancel" },
-                classes: ["negative"],
-            })),
-            GenericTemplates.progressSectionPart(progress),
+            horizontal(
+                when(inProgress, button({
+                    text: t("START_REPROCESSING"),
+                    onclick: startProcessing,
+                    icon: { icon: "play_arrow" },
+                    classes: ["positive"],
+                }), true),
+                when(inProgress, button({
+                    text: t("CANCEL"),
+                    onclick: () => {
+                        eventBus.send({ type: "content_id:stop_requested" });
+                    },
+                    icon: { icon: "cancel" },
+                    classes: ["negative"],
+                })),
+                GenericTemplates.progressSectionPart(progress),
+            ),
             signalMap(logs, vertical().classes("flex-v", "border", "card", "secondary", "content-id-logs"),
                 log => {
                     return create("div")
