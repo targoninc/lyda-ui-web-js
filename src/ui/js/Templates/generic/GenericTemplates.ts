@@ -774,7 +774,7 @@ export class GenericTemplates {
                     create("div").classes("progress-circle").styles(
                         "background",
                         compute(
-                            p => `conic-gradient(var(--progress-color) ${p + "%"}, transparent 0%)`,
+                            p => `conic-gradient(var(--progress-color) ${p}%, transparent 0%)`,
                             progress,
                         ),
                     ).children(create("div").classes("progress-circle-overlay")).build(),
