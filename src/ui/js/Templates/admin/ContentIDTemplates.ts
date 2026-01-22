@@ -11,6 +11,8 @@ import {eventBus} from "../../Classes/EventBus.ts";
 import {ContentIDMatch} from "../../Models/ContentIDMatch.ts";
 import {MusicTemplates} from "../music/MusicTemplates.ts";
 import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
+import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import { UserTemplates } from "../account/UserTemplates.ts";
 
 interface LogEvent {
     type: "success" | "error" | "info" | "debug";
@@ -215,6 +217,18 @@ export class ContentIDTemplates {
             ),
             signalMap(matches, vertical().classes("gap"),
                 match => {
+                    const matchedTracks = match.matches.reduce((prev, cur) => {
+                        if (!prev.find(t => t.id === cur.track.id)) {
+                            prev.push(cur.track);
+                        }
+
+                        const track = prev.find(t => t.id === cur.track.id);
+                        track!.matches ??= [];
+                        track!.matches.push(cur);
+
+                        return prev;
+                    }, [] as TrackWithMatches[]);
+
                     return create("details").children(
                         create("summary").children(
                             horizontal(
@@ -228,29 +242,51 @@ export class ContentIDTemplates {
                             ).classes("align-children", "small-gap").build()
                         ),
                         vertical(
-                            ...match.matches.map(m => {
+                            ...matchedTracks.map(m => {
                                 return create("div").classes("content-id-matches-grid", "padded-small").children(
-                                    create("div").classes("content-id-match-part", "center", "card").children(
-                                        heading({
-                                            level: 1,
-                                            text: `${(m.similarity * 100).toFixed(1)}%`
-                                        }),
-                                        heading({
-                                            level: 2,
-                                            text: m.heuristic
-                                        }),
-                                    ),
-                                    create("div").classes("content-id-match-part", "card").children(
+                                    create("div").classes("content-id-match-part", "card", "secondary").children(
                                         horizontal(
-                                            MusicTemplates.cover(EntityType.track, m.track, "inline-cover"),
-                                            MusicTemplates.title(EntityType.track, m.track.title, m.track.id),
+                                            MusicTemplates.cover(EntityType.track, m, "inline-cover"),
+                                            vertical(
+                                                MusicTemplates.title(EntityType.track, m.title, m.id),
+                                                UserTemplates.userWidget(m.user!)
+                                            ).classes("no-gap")
                                         )
+                                    ),
+                                    create("div").classes("content-id-match-part", "center", "card", "secondary").children(
+                                        vertical(
+                                            ...m.matches!.map(mm => {
+                                                const percent = (mm.similarity * 100).toFixed(1);
+
+                                                return horizontal(
+                                                    create("div").classes("progress-circle").styles(
+                                                        "background",
+                                                        `conic-gradient(var(--color-5) ${percent}%, transparent 0%)`,
+                                                    ).children(create("div").classes("progress-circle-overlay")).build(),
+                                                    heading({
+                                                        level: 2,
+                                                        text: `${percent}%`
+                                                    }),
+                                                    heading({
+                                                        level: 2,
+                                                        text: mm.heuristic
+                                                    }),
+                                                ).classes("align-children", "gap");
+                                            })
+                                        ),
                                     ),
                                 ).build();
                             })
-                        ).classes("gap").build()
+                        ).classes("small-gap").build()
                     ).build();
                 }),
         )
     }
+}
+
+interface TrackWithMatches extends Track {
+    matches?: {
+        similarity: number;
+        heuristic: string;
+    }[];
 }
