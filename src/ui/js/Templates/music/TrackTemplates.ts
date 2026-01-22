@@ -486,13 +486,7 @@ export class TrackTemplates {
                                 onclick: () => {},
                                 text: t("BOUGHT"),
                             })),
-                            UserTemplates.userWidget({
-                                ...trackUser,
-                                displayname:
-                                    track.artistname && track.artistname.trim().length > 0
-                                        ? track.artistname.trim()
-                                        : trackUser.displayname,
-                            }, [], [], UserWidgetContext.singlePage),
+                            UserTemplates.userWidget(trackUser, [], [], UserWidgetContext.singlePage, track.artistname),
                         ).classes("align-children"),
                     ).classes("nogap"),
                     ...toAppend,
