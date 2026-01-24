@@ -117,11 +117,12 @@ export class SettingsTemplates {
     }
 
     static accountSection(user: User) {
-        const updatedUser = signal<Partial<User>>({});
-        const saveDisabled = compute((u: Record<string, any>) => {
+        const updatedUser$ = signal<Partial<User>>({});
+        const emails$ = signal<UserEmail[]>(user.emails ?? []);
+        const saveDisabled = compute((u: Record<string, any>, e: UserEmail[]) => {
             const keys = Object.keys(u);
-            return !keys.some(k => u[k] !== user[k as keyof User]);
-        }, updatedUser);
+            return !keys.some(k => u[k] !== user[k as keyof User]) && JSON.stringify(e) === JSON.stringify(user.emails);
+        }, updatedUser$, emails$);
 
         return create("div")
             .classes("card", "flex-v")
@@ -159,9 +160,9 @@ export class SettingsTemplates {
                             label: t("USERNAME"),
                             name: "username",
                             required: true,
-                            value: compute(uu => uu.username ?? user.username, updatedUser),
+                            value: compute(uu => uu.username ?? user.username, updatedUser$),
                             onchange: v => {
-                                updatedUser.value = { ...updatedUser.value, username: v };
+                                updatedUser$.value = { ...updatedUser$.value, username: v };
                             },
                         }),
                         input(<InputConfig<string>>{
@@ -169,20 +170,20 @@ export class SettingsTemplates {
                             label: t("DISPLAY_NAME"),
                             name: "displayname",
                             required: true,
-                            value: compute(uu => uu.displayname ?? user.displayname, updatedUser),
+                            value: compute(uu => uu.displayname ?? user.displayname, updatedUser$),
                             onchange: v => {
-                                updatedUser.value = { ...updatedUser.value, displayname: v };
+                                updatedUser$.value = { ...updatedUser$.value, displayname: v };
                             },
                         }),
                         textarea(<TextareaConfig>{
                             label: t("DESCRIPTION"),
                             name: "description",
-                            value: compute(uu => uu.description ?? user.description, updatedUser),
+                            value: compute(uu => uu.description ?? user.description, updatedUser$),
                             onchange: v => {
-                                updatedUser.value = { ...updatedUser.value, description: v };
+                                updatedUser$.value = { ...updatedUser$.value, description: v };
                             },
                         }),
-                        SettingsTemplates.emailSettings(user.emails, updatedUser),
+                        SettingsTemplates.emailSettings(emails$, updatedUser$),
                     ).build(),
                 horizontal(
                     button(<ButtonConfig>{
@@ -191,8 +192,8 @@ export class SettingsTemplates {
                         text: t("SAVE_CHANGES"),
                         icon: { icon: "save" },
                         onclick: async () => {
-                            if (await Api.updateUser(updatedUser.value)) {
-                                user = { ...user, ...updatedUser.value };
+                            if (await Api.updateUser(updatedUser$.value)) {
+                                user = { ...user, ...updatedUser$.value };
                                 currentUser.value = await Util.getUserAsync(null, false);
                                 reload();
                             }
@@ -203,7 +204,8 @@ export class SettingsTemplates {
                             text: t("REVERT"),
                             icon: { icon: "undo" },
                             onclick: () => {
-                                updatedUser.value = {};
+                                updatedUser$.value = {};
+                                emails$.value = user.emails ?? [];
                             },
                         }),
                         create("span")
@@ -509,8 +511,7 @@ export class SettingsTemplates {
             ).build();
     }
 
-    private static emailSettings(emails: UserEmail[], updatedUser: Signal<Partial<User>>) {
-        const emails$ = signal<UserEmail[]>(emails);
+    private static emailSettings(emails$: Signal<UserEmail[]>, updatedUser: Signal<Partial<User>>) {
         emails$.subscribe(emails => {
             updatedUser.value = { ...updatedUser.value, emails };
         });
