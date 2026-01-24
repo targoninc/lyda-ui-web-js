@@ -184,19 +184,33 @@ export class SettingsTemplates {
                         }),
                         SettingsTemplates.emailSettings(user.emails, updatedUser),
                     ).build(),
-                button(<ButtonConfig>{
-                    disabled: saveDisabled,
-                    classes: ["positive"],
-                    text: t("SAVE_CHANGES"),
-                    icon: { icon: "save" },
-                    onclick: async () => {
-                        if (await Api.updateUser(updatedUser.value)) {
-                            user = { ...user, ...updatedUser.value };
-                            currentUser.value = await Util.getUserAsync(null, false);
-                            reload();
-                        }
-                    },
-                }),
+                horizontal(
+                    button(<ButtonConfig>{
+                        disabled: saveDisabled,
+                        classes: ["positive"],
+                        text: t("SAVE_CHANGES"),
+                        icon: { icon: "save" },
+                        onclick: async () => {
+                            if (await Api.updateUser(updatedUser.value)) {
+                                user = { ...user, ...updatedUser.value };
+                                currentUser.value = await Util.getUserAsync(null, false);
+                                reload();
+                            }
+                        },
+                    }),
+                    when(saveDisabled, horizontal(
+                        button(<ButtonConfig>{
+                            text: t("REVERT"),
+                            icon: { icon: "undo" },
+                            onclick: () => {
+                                updatedUser.value = {};
+                            },
+                        }),
+                        create("span")
+                            .classes("warning", "text-small")
+                            .text(t("UNSAVED_CHANGES"))
+                    ).classes("align-children").build(), true)
+                )
             ).build();
     }
 
