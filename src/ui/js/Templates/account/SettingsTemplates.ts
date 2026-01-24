@@ -217,6 +217,11 @@ export class SettingsTemplates {
                     getUserSettingValue(user, UserSettings.notificationComment),
                 ),
                 SettingsTemplates.notificationToggle(
+                    t("NOTIFS_REPLIES"),
+                    "reply",
+                    getUserSettingValue(user, UserSettings.notificationReply),
+                ),
+                SettingsTemplates.notificationToggle(
                     t("NOTIFS_FOLLOW"),
                     "follow",
                     getUserSettingValue(user, UserSettings.notificationFollow),

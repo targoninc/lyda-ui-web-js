@@ -52,6 +52,7 @@ export const en = {
     QUALITY_HIGH: "high (320kbps)",
     NOTIFS_LIKE: "Like notifications",
     NOTIFS_COMMENT: "Comment notifications",
+    NOTIFS_REPLIES: "Reply notifications",
     NOTIFS_FOLLOW: "Follow notifications",
     NOTIFS_REPOST: "Repost notifications",
     NOTIFS_COLLAB: "Collaboration notifications",

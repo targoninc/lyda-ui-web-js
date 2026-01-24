@@ -1,6 +1,7 @@
 import { Translation } from "./index.ts";
 
 export const de: Translation = {
+    CONTENT_ID: "Content ID",
     COMMENTS: "Kommentare",
     TRANSACTIONS: "Transaktionen",
     ALBUM_ADDED_TO_PLAYLISTS: "Album zu Playlist(s) hinzugefügt",
@@ -398,6 +399,7 @@ export const de: Translation = {
     YOUR_BENEFITS: "Deine Vorteile",
     NOTIFS_COLLAB: "Benachrichtigungen zu Kollaborationen",
     NOTIFS_COMMENT: "Benachrichtigungen zu Kommentaren",
+    NOTIFS_REPLIES: "Benachrichtigungen zu Antworten",
     NOTIFS_FOLLOW: "Benachrichtigungen wenn dir jemand folgt",
     NOTIFS_LIKE: "Benachrichtigungen zu Likes",
     NOTIFS_REPOST: "Benachrichtigungen zu Wiederveröffentlichungen",
@@ -558,5 +560,5 @@ export const de: Translation = {
     CONNECTION_ERROR: "Verbindungsfehler",
     CONTENT_ID_REPROCESSING: "Content ID Wiederverarbeitung",
     CONTENT_ID_REPROCESSING_DESC: "Diese Aktion wird eine lange Zeit dauern. Stellen Sie sicher, dass Sie dies tun möchten, bevor Sie auf den Button klicken.",
-    START_REPROCESSING: "Starte Wiederverarbeitung",
+    START_REPROCESSING: "Starte Wiederverarbeitung"
 };
