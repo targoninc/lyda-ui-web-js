@@ -183,7 +183,7 @@ export class SettingsTemplates {
                                 updatedUser$.value = { ...updatedUser$.value, description: v };
                             },
                         }),
-                        SettingsTemplates.emailSettings(emails$, updatedUser$),
+                        SettingsTemplates.emailSettings(emails$),
                     ).build(),
                 horizontal(
                     button(<ButtonConfig>{
@@ -192,7 +192,10 @@ export class SettingsTemplates {
                         text: t("SAVE_CHANGES"),
                         icon: { icon: "save" },
                         onclick: async () => {
-                            if (await Api.updateUser(updatedUser$.value)) {
+                            if (await Api.updateUser({
+                                ...updatedUser$.value,
+                                emails: emails$.value,
+                            })) {
                                 user = { ...user, ...updatedUser$.value };
                                 currentUser.value = await Util.getUserAsync(null, false);
                                 reload();
@@ -511,10 +514,7 @@ export class SettingsTemplates {
             ).build();
     }
 
-    private static emailSettings(emails$: Signal<UserEmail[]>, updatedUser: Signal<Partial<User>>) {
-        emails$.subscribe(emails => {
-            updatedUser.value = { ...updatedUser.value, emails };
-        });
+    private static emailSettings(emails$: Signal<UserEmail[]>) {
         const primaryEmailIndex = signal(emails$.value.findIndex(e => e.primary));
         primaryEmailIndex.subscribe(index => {
             emails$.value = emails$.value.map((e, i) => {
