@@ -183,8 +183,7 @@ export class SettingsTemplates {
                             },
                         }),
                         SettingsTemplates.emailSettings(user.emails, updatedUser),
-                    )
-                    .build(),
+                    ).build(),
                 button(<ButtonConfig>{
                     disabled: saveDisabled,
                     classes: ["positive"],
@@ -564,6 +563,8 @@ export class SettingsTemplates {
                     name: "email",
                     required: true,
                     value: email.email,
+                    id: `email-input-${index.value}`,
+                    debounce: 500,
                     onchange: v => {
                         emails$.value = emails$.value.map((e, i) => {
                             if (i === index.value) {
@@ -571,6 +572,7 @@ export class SettingsTemplates {
                             }
                             return e;
                         });
+                        document.getElementById(`email-input-${index.value}`)?.focus();
                     },
                 }),
                 create("div")
