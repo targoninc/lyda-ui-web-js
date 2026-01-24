@@ -159,7 +159,7 @@ export class SettingsTemplates {
                             label: t("USERNAME"),
                             name: "username",
                             required: true,
-                            value: user.username,
+                            value: compute(uu => uu.username ?? user.username, updatedUser),
                             onchange: v => {
                                 updatedUser.value = { ...updatedUser.value, username: v };
                             },
@@ -169,7 +169,7 @@ export class SettingsTemplates {
                             label: t("DISPLAY_NAME"),
                             name: "displayname",
                             required: true,
-                            value: user.displayname,
+                            value: compute(uu => uu.displayname ?? user.displayname, updatedUser),
                             onchange: v => {
                                 updatedUser.value = { ...updatedUser.value, displayname: v };
                             },
@@ -177,7 +177,7 @@ export class SettingsTemplates {
                         textarea(<TextareaConfig>{
                             label: t("DESCRIPTION"),
                             name: "description",
-                            value: user.description,
+                            value: compute(uu => uu.description ?? user.description, updatedUser),
                             onchange: v => {
                                 updatedUser.value = { ...updatedUser.value, description: v };
                             },
@@ -514,7 +514,7 @@ export class SettingsTemplates {
         emails$.subscribe(emails => {
             updatedUser.value = { ...updatedUser.value, emails };
         });
-        const primaryEmailIndex = signal(emails.findIndex(e => e.primary));
+        const primaryEmailIndex = signal(emails$.value.findIndex(e => e.primary));
         primaryEmailIndex.subscribe(index => {
             emails$.value = emails$.value.map((e, i) => {
                 e.primary = i === index;
