@@ -204,8 +204,8 @@ export class SettingsTemplates {
                             text: t("REVERT"),
                             icon: { icon: "undo" },
                             onclick: () => {
-                                updatedUser$.value = {};
                                 emails$.value = user.emails ?? [];
+                                updatedUser$.value = {};
                             },
                         }),
                         create("span")
