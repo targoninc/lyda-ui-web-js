@@ -47,6 +47,7 @@ export class UserTemplates {
         extraAttributes: HtmlPropertyValue[] = [],
         extraClasses: StringOrSignal[] = [],
         context: UserWidgetContext = UserWidgetContext.unknown,
+        overrideArtistName?: string | null
     ) {
         const out = signal<AnyElement>(nullElement());
 
@@ -62,7 +63,7 @@ export class UserTemplates {
             if (extraClasses) {
                 base.classes(...extraClasses);
             }
-            out.value = this.userWidgetInternal(context, newUser, base, Util.isFollowing(user));
+            out.value = this.userWidgetInternal(context, newUser, base, Util.isFollowing(user), overrideArtistName);
         };
 
         if (user.constructor === Signal) {
@@ -79,6 +80,7 @@ export class UserTemplates {
         user: User,
         base: DomNode,
         following: boolean | Signal<boolean>,
+        overrideArtistName?: string | null
     ) {
         const maxDisplaynameLength = [UserWidgetContext.singlePage, UserWidgetContext.list].includes(context)
             ? 100
@@ -91,6 +93,9 @@ export class UserTemplates {
             following = signal(following as boolean);
         }
         const showFollowButton = compute(u => u && u.id && u.id !== user.id && !following.value, currentUser);
+        if (overrideArtistName?.trim().length === 0) {
+            overrideArtistName = null;
+        }
 
         return base
             .classes("user-widget", "jess", "round-on-tiny-breakpoint")
@@ -107,7 +112,7 @@ export class UserTemplates {
                 UserTemplates.userIcon(user.id, avatarState),
                 create("span")
                     .classes("text", "align-center", "nopointer", "user-displayname", "hideOnTinyBreakpoint")
-                    .text(truncateText(user.displayname, maxDisplaynameLength))
+                    .text(truncateText(overrideArtistName ?? user.displayname, maxDisplaynameLength))
                     .attributes("data-user-id", user.id)
                     .build(),
                 create("span")
@@ -119,18 +124,20 @@ export class UserTemplates {
             ).build();
     }
 
-    public static userLink(context: UserWidgetContext, user: User) {
+    public static userLink(context: UserWidgetContext, user: User, overrideArtistName?: string | null) {
         const maxDisplaynameLength = [UserWidgetContext.singlePage, UserWidgetContext.list].includes(context)
             ? 100
             : 15;
         const previewShown = signal(false);
         let timeout: any | null = null;
         const avatarState = getAvatar(user);
+        if (overrideArtistName?.trim().length === 0) {
+            overrideArtistName = null;
+        }
 
         return horizontal(
             create("a")
                 .classes("page-link", "color-dim", "flex", "align-children", "small-gap")
-                .attributes("user_id", user.id, "username", user.username)
                 .onclick((e: MouseEvent) => {
                     if (e.button === 0) {
                         e.preventDefault();
@@ -143,11 +150,10 @@ export class UserTemplates {
                     UserTemplates.userIcon(user.id, avatarState),
                     create("span")
                         .classes("text", "align-center", "nopointer", "user-displayname")
-                        .text(truncateText(user.displayname, maxDisplaynameLength))
+                        .text(truncateText(overrideArtistName ?? user.displayname, maxDisplaynameLength))
                         .attributes("data-user-id", user.id)
                         .build(),
-                )
-                .build(),
+                ).build(),
             when(previewShown, UserTemplates.userPreview(user, context)),
         ).onmouseover(() => {
             if (timeout) clearTimeout(timeout);

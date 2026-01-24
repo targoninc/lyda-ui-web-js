@@ -150,7 +150,9 @@ export class Util {
         setTimeout(() => {
             document.addEventListener("click", e => {
                 const foundModal = document.querySelector(".modal");
-                if (foundModal && !foundModal.contains(target(e))) {
+                const blockList = ["button", "input", "textarea", "a"];
+
+                if (foundModal && !foundModal.contains(target(e)) && !blockList.includes(target(e).tagName.toLowerCase())) {
                     Util.removeModal(modalContainer);
                 } else {
                     Util.initializeModalRemove(modalContainer);

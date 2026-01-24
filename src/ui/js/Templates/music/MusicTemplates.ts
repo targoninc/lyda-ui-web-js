@@ -77,7 +77,7 @@ export class MusicTemplates {
                                 create("div")
                                     .classes("flex")
                                     .children(
-                                        UserTemplates.userLink(UserWidgetContext.card, item.user!),
+                                        UserTemplates.userLink(UserWidgetContext.card, item.user!, item.artistname),
                                         create("span")
                                             .classes("date", "text-small", "nopointer", "color-dim", "align-center")
                                             .text(Time.ago(item.created_at))
