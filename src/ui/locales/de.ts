@@ -1,6 +1,7 @@
 import { Translation } from "./index.ts";
 
 export const de: Translation = {
+    INVALID_CREDENTIALS: "Ungültige Anmeldedaten",
     CONTENT_ID: "Content ID",
     COMMENTS: "Kommentare",
     TRANSACTIONS: "Transaktionen",

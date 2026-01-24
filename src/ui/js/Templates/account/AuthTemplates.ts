@@ -332,6 +332,9 @@ export class AuthTemplates {
             } else {
                 step.value = "mfa-select";
             }
+        }).catch(() => {
+            notify(t("INVALID_CREDENTIALS"), NotificationType.error);
+            step.value = "logging-in";
         });
 
         return AuthTemplates.waitingBox(t("CHECKING_FOR_MFA"), t("PLEASE_WAIT"));

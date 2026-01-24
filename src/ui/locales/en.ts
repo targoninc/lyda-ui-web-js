@@ -426,6 +426,7 @@ export const en = {
     EMAIL_NOW_VERIFIED: `This email is now verified!`,
     GO_TO_PROFILE: "Go to profile",
     REGISTERING: "Registering...",
+    INVALID_CREDENTIALS: "Invalid credentials",
     PLEASE_WAIT: "Please wait",
     CHECKING_FOR_MFA: "Checking for MFA...",
     LOGGED_IN_AS_NAME: name => `Logged in as ${name}`,
