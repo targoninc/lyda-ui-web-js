@@ -119,7 +119,7 @@ export class SettingsTemplates {
     static accountSection(user: User) {
         const updatedUser$ = signal<Partial<User>>({});
         const originalMails = structuredClone(user.emails ?? []);
-        const emails$ = signal<UserEmail[]>(originalMails);
+        const emails$ = signal<UserEmail[]>(structuredClone(originalMails));
         const saveDisabled = compute((u: Record<string, any>, e: UserEmail[]) => {
             const keys = Object.keys(u);
             return !keys.some(k => u[k] !== user[k as keyof User]) && JSON.stringify(e) === JSON.stringify(originalMails);
@@ -518,7 +518,7 @@ export class SettingsTemplates {
     private static emailSettings(emails$: Signal<UserEmail[]>) {
         const primaryEmailIndex = signal(emails$.value.findIndex(e => e.primary));
         primaryEmailIndex.subscribe(index => {
-            emails$.value = emails$.value.map((e, i) => {
+            emails$.value = structuredClone(emails$.value).map((e, i) => {
                 e.primary = i === index;
                 return e;
             });
@@ -582,7 +582,7 @@ export class SettingsTemplates {
                     id: `email-input-${index.value}`,
                     debounce: 500,
                     onchange: v => {
-                        emails$.value = emails$.value.map((e, i) => {
+                        emails$.value = structuredClone(emails$.value).map((e, i) => {
                             if (i === index.value) {
                                 e.email = v;
                             }
@@ -685,7 +685,7 @@ export class SettingsTemplates {
                                         t("YES"),
                                         t("NO"),
                                         async () => {
-                                            emails$.value = emails$.value.filter(
+                                            emails$.value = structuredClone(emails$.value).filter(
                                                 (e, i) => i !== index.value,
                                             );
                                         },
