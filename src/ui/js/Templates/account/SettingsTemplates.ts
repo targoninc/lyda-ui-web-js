@@ -118,10 +118,11 @@ export class SettingsTemplates {
 
     static accountSection(user: User) {
         const updatedUser$ = signal<Partial<User>>({});
-        const emails$ = signal<UserEmail[]>(user.emails ?? []);
+        const originalMails = structuredClone(user.emails ?? []);
+        const emails$ = signal<UserEmail[]>(originalMails);
         const saveDisabled = compute((u: Record<string, any>, e: UserEmail[]) => {
             const keys = Object.keys(u);
-            return !keys.some(k => u[k] !== user[k as keyof User]) && JSON.stringify(e) === JSON.stringify(user.emails);
+            return !keys.some(k => u[k] !== user[k as keyof User]) && JSON.stringify(e) === JSON.stringify(originalMails);
         }, updatedUser$, emails$);
 
         return create("div")
@@ -207,7 +208,7 @@ export class SettingsTemplates {
                             text: t("REVERT"),
                             icon: { icon: "undo" },
                             onclick: () => {
-                                emails$.value = user.emails ?? [];
+                                emails$.value = originalMails;
                                 updatedUser$.value = {};
                             },
                         }),
