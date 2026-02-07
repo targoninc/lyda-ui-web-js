@@ -1,28 +1,55 @@
 import { TableTemplates } from "../generic/TableTemplates.ts";
 import { t } from "../../../locales";
-import { GenericTemplates, horizontal, text, vertical } from "../generic/GenericTemplates.ts";
-import { compute, create, Signal, signal, signalMap, StringOrSignal } from "@targoninc/jess";
+import { GenericTemplates, horizontal, tabSelected, text, vertical } from "../generic/GenericTemplates.ts";
+import { compute, create, signal, signalMap, StringOrSignal, when } from "@targoninc/jess";
 import { Api } from "../../Api/Api.ts";
 import { Time } from "../../Classes/Helpers/Time.ts";
 import { Transaction } from "@targoninc/lyda-shared/dist/Models/Transaction";
 import { currency } from "../../Classes/Helpers/Num.ts";
 import { navigate } from "../../Routing/Router.ts";
 import { RoutePath } from "../../Routing/routes.ts";
+import { TransactionInfo } from "@targoninc/lyda-shared/src/Models/TransactionInfo.ts";
 
 export class TransactionTemplates {
-    static transactions(transactions: Signal<Transaction[]>) {
+    static page() {
+        const tabs = [`${t("PERSONAL")}`, `${t("GLOBAL")}`];
+        const selectedTab = signal(0);
+
+        return create("div")
+            .classes("statistics", "flex-v")
+            .children(
+                GenericTemplates.combinedSelector(tabs, i => selectedTab.value = i),
+                when(
+                    tabSelected(selectedTab, 0),
+                    TransactionTemplates.personalTransactions(),
+                ),
+                when(
+                    tabSelected(selectedTab, 1),
+                    TransactionTemplates.globalTransactionInfo(),
+                ),
+            ).build();
+    }
+
+    static personalTransactions() {
+        const skip$ = signal(0);
+        const trans$ = signal<Transaction[]>([]);
+        const loading$ = signal(false);
+        const load = (skip: number) => {
+            loading$.value = true;
+            Api.getTransactions(skip).then(r => {
+                trans$.value = r ?? [];
+            }).finally(() => loading$.value = false);
+        }
+        load(skip$.value);
+        const received = compute(t => t.filter(tr => tr.direction === "in")
+                              .reduce((a, b) => a + (b.total - b.fees - b.tax), 0), trans$);
+        const paid = compute(t => t.filter(tr => tr.direction === "out")
+                                   .reduce((a, b) => a + b.total, 0), trans$);
+
         return vertical(
             horizontal(
-                compute(trans => TransactionTemplates.amountCard(
-                    trans.filter(tr => tr.direction === "in")
-                        .reduce((a, b) => a + (b.total - b.fees - b.tax), 0),
-                    t("TOTAL_RECEIVED"),
-                ), transactions),
-                compute(trans => TransactionTemplates.amountCard(
-                    trans.filter(tr => tr.direction === "out")
-                        .reduce((a, b) => a + b.total, 0),
-                    t("TOTAL_PAID"),
-                ), transactions),
+                compute((r, p) => TransactionTemplates.transactionOverview(r, p), received, paid),
+                when(loading$, GenericTemplates.loadingSpinner())
             ),
             TableTemplates.table(
                 false,
@@ -33,12 +60,34 @@ export class TransactionTemplates {
                     { title: t("DATE"), property: "date" },
                 ]),
                 signalMap(
-                    transactions,
+                    trans$,
                     create("tbody"),
                     t => TransactionTemplates.transaction(t)
                 ),
             )
-        )
+        ).build();
+    }
+
+    private static globalTransactionInfo() {
+        const info$ = signal<TransactionInfo>({ paid: 0, received: 0 });
+        const loading$ = signal(false);
+        Api.getGlobalTransactionInfo().then(r => {
+            info$.value = r ?? { paid: 0, received: 0 };
+        }).finally(() => loading$.value = false);
+        const received = compute(i => i.paid, info$);
+        const paid = compute(i => i.received, info$);
+
+        return vertical(
+            compute((r, p) => TransactionTemplates.transactionOverview(r, p), received, paid),
+            when(loading$, GenericTemplates.loadingSpinner())
+        ).build();
+    }
+
+    static transactionOverview(received: number, paid: number) {
+        return horizontal(
+            TransactionTemplates.amountCard(received, t("TOTAL_RECEIVED")),
+            TransactionTemplates.amountCard(paid, t("TOTAL_PAID")),
+        ).build();
     }
 
     static transaction(t: Transaction) {
@@ -77,23 +126,6 @@ export class TransactionTemplates {
         }
 
         return text(t.item_name);
-    }
-
-    static page() {
-        const skip$ = signal(0);
-        const trans$ = signal<Transaction[]>([]);
-        const loading$ = signal(false);
-        const load = (skip: number) => {
-            loading$.value = true;
-            Api.getTransactions(skip).then(r => {
-                trans$.value = r ?? [];
-            }).finally(() => loading$.value = false);
-        }
-        load(skip$.value);
-
-        return vertical(
-            TransactionTemplates.transactions(trans$)
-        ).build();
     }
 
     private static amountCard(amount: number, label: StringOrSignal) {

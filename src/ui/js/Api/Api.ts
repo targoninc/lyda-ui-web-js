@@ -44,6 +44,7 @@ import { Transaction } from "@targoninc/lyda-shared/dist/Models/Transaction";
 import { t } from "../../locales";
 import { SubscriptionPayment } from "@targoninc/lyda-shared/dist/Models/db/finance/SubscriptionPayment";
 import {ContentIDMatch} from "../Models/ContentIDMatch.ts";
+import { TransactionInfo } from "@targoninc/lyda-shared/src/Models/TransactionInfo.ts";
 
 export class Api {
     //region Interactions
@@ -119,6 +120,10 @@ export class Api {
             skip,
             ...filter,
         });
+    }
+
+    static async getGlobalTransactionInfo() {
+        return get<TransactionInfo>(ApiRoutes.getGlobalTransactionInfo);
     }
 
     static async calculateRoyalties(month: MonthIdentifier) {

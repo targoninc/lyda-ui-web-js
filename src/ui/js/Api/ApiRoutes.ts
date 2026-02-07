@@ -165,6 +165,7 @@ export class ApiRoutes {
     static setRoyaltyActivation = ApiRoutes.royalties + "/setActivation";
     static royaltiesForExport = ApiRoutes.royalties + "/export";
     static getTransactions = ApiRoutes.royalties + "/transactions";
+    static getGlobalTransactionInfo = ApiRoutes.royalties + "/globalTransactionInfo";
     // endregion
 
     // region Search

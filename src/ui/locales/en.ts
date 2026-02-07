@@ -379,6 +379,7 @@ export const en = {
     LINKING_USER_WILL_REQUEST_APPROVAL: "Linking a user will send a request to them for approval first",
     SEARCH_FOR_USER: "Search for a user",
     UNSAVED_CHANGES: "Unsaved changes",
+    PERSONAL: "Personal",
     REVERT: "Revert",
     SHARE_WHAT_YOU_MAKE: "Share what you make:",
     FIND_GOOD_STUFF_TO_SHARE: "Find some good stuff to share:",
