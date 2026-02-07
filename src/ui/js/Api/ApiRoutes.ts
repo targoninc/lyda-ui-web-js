@@ -153,6 +153,7 @@ export class ApiRoutes {
     private static globalStatistics = ApiRoutes.statistics + "/global";
     static getGlobalPlayCountByMonth = ApiRoutes.globalStatistics + "/playCountByMonth";
     static getGlobalRoyaltiesByMonth = ApiRoutes.globalStatistics + "/royaltiesByMonth";
+    static getGlobalSalesByMonth = ApiRoutes.globalStatistics + "/salesByMonth";
     // endregion
 
     // region Royalties

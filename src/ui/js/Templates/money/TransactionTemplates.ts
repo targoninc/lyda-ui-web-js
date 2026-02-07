@@ -9,6 +9,7 @@ import { currency } from "../../Classes/Helpers/Num.ts";
 import { navigate } from "../../Routing/Router.ts";
 import { RoutePath } from "../../Routing/routes.ts";
 import { TransactionInfo } from "@targoninc/lyda-shared/src/Models/TransactionInfo.ts";
+import { StatisticTemplates } from "../StatisticTemplates.ts";
 
 export class TransactionTemplates {
     static page() {
@@ -78,8 +79,11 @@ export class TransactionTemplates {
         const paid = compute(i => i.received, info$);
 
         return vertical(
-            compute((r, p) => TransactionTemplates.transactionOverview(r, p), received, paid),
-            when(loading$, GenericTemplates.loadingSpinner())
+            horizontal(
+                compute((r, p) => TransactionTemplates.transactionOverview(r, p), received, paid),
+                when(loading$, GenericTemplates.loadingSpinner())
+            ),
+            StatisticTemplates.globalSalesByMonthChart()
         ).build();
     }
 

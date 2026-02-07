@@ -485,6 +485,7 @@ export const en = {
     NO_SEARCH_RESULTS: "Nothing here. Try a different search?",
     PLAYCOUNT_BY_MONTH: "Play count by month",
     ROYALTIES_BY_MONTH: "Royalties by month",
+    SALES_BY_MONTH: "Sales by month",
     LIKES_BY_TRACK: "Likes by track",
     LIKES: "Likes",
     ROYALTIES_BY_TRACK: "Royalties by track",

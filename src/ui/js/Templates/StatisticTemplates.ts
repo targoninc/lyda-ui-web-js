@@ -41,6 +41,14 @@ export class StatisticTemplates {
         });
     }
 
+    static globalSalesByMonthChart() {
+        return ChartTemplates.paginatedBarChart({
+            title: `${t("SALES_BY_MONTH")}`,
+            endpoint: ApiRoutes.getGlobalSalesByMonth,
+            timeType: "month",
+        });
+    }
+
     static likesByTrackChart(trackNames: string[], likeCounts: number[]) {
         if (trackNames.length === 0) {
             return ChartTemplates.noData(t("LIKES_BY_TRACK"));
