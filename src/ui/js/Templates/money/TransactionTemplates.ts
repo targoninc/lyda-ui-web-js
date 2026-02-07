@@ -10,25 +10,28 @@ import { navigate } from "../../Routing/Router.ts";
 import { RoutePath } from "../../Routing/routes.ts";
 import { TransactionInfo } from "@targoninc/lyda-shared/src/Models/TransactionInfo.ts";
 import { StatisticTemplates } from "../StatisticTemplates.ts";
+import { heading } from "@targoninc/jess-components";
 
 export class TransactionTemplates {
     static page() {
         const tabs = [`${t("PERSONAL")}`, `${t("GLOBAL")}`];
         const selectedTab = signal(0);
 
-        return create("div")
-            .classes("statistics", "flex-v")
-            .children(
-                GenericTemplates.combinedSelector(tabs, i => selectedTab.value = i),
-                when(
-                    tabSelected(selectedTab, 0),
-                    TransactionTemplates.personalTransactions(),
-                ),
-                when(
-                    tabSelected(selectedTab, 1),
-                    TransactionTemplates.globalTransactionInfo(),
-                ),
-            ).build();
+        return vertical(
+            heading({
+               level: 1,
+               text: t("TRANSACTIONS"),
+            }),
+            GenericTemplates.combinedSelector(tabs, i => selectedTab.value = i),
+            when(
+                tabSelected(selectedTab, 0),
+                TransactionTemplates.personalTransactions(),
+            ),
+            when(
+                tabSelected(selectedTab, 1),
+                TransactionTemplates.globalTransactionInfo(),
+            ),
+        ).build();
     }
 
     static personalTransactions() {
@@ -40,17 +43,17 @@ export class TransactionTemplates {
             Api.getTransactions(skip).then(r => {
                 trans$.value = r ?? [];
             }).finally(() => loading$.value = false);
-        }
+        };
         load(skip$.value);
         const received = compute(t => t.filter(tr => tr.direction === "in")
-                              .reduce((a, b) => a + (b.total - b.fees - b.tax), 0), trans$);
+                                       .reduce((a, b) => a + (b.total - b.fees - b.tax), 0), trans$);
         const paid = compute(t => t.filter(tr => tr.direction === "out")
                                    .reduce((a, b) => a + b.total, 0), trans$);
 
         return vertical(
             horizontal(
                 compute((r, p) => TransactionTemplates.transactionOverview(r, p), received, paid),
-                when(loading$, GenericTemplates.loadingSpinner())
+                when(loading$, GenericTemplates.loadingSpinner()),
             ),
             TableTemplates.table(
                 false,
@@ -63,9 +66,9 @@ export class TransactionTemplates {
                 signalMap(
                     trans$,
                     create("tbody"),
-                    t => TransactionTemplates.transaction(t)
+                    t => TransactionTemplates.transaction(t),
                 ),
-            )
+            ),
         ).build();
     }
 
@@ -81,9 +84,9 @@ export class TransactionTemplates {
         return vertical(
             horizontal(
                 compute((r, p) => TransactionTemplates.transactionOverview(r, p), received, paid),
-                when(loading$, GenericTemplates.loadingSpinner())
+                when(loading$, GenericTemplates.loadingSpinner()),
             ),
-            StatisticTemplates.globalSalesByMonthChart()
+            StatisticTemplates.globalSalesByMonthChart(),
         ).build();
     }
 
@@ -102,7 +105,7 @@ export class TransactionTemplates {
                 text(t.paymentProcessor),
                 TransactionTemplates.itemName(t),
                 text(Time.agoUpdating(t.date)),
-            ]
+            ],
         });
     }
 
@@ -110,12 +113,12 @@ export class TransactionTemplates {
         if (t.direction === "out") {
             return horizontal(
                 text("-"),
-                text(currency(t.total))
+                text(currency(t.total)),
             ).classes("nogap", "error");
         }
 
         return horizontal(
-            text(currency(t.total))
+            text(currency(t.total)),
         ).classes("positive");
     }
 
