@@ -40,7 +40,7 @@ export const routes: Route[] = [
     {
         path: RoutePath.explore,
         title: "Explore",
-        aliases: ["discover", "home", "app", "/"]
+        aliases: ["discover"]
     },
     {
         path: RoutePath.notFound,
@@ -56,6 +56,7 @@ export const routes: Route[] = [
     {
         path: RoutePath.following,
         title: "Following",
+        aliases: ["home", "app", "/"]
     },
     {
         path: RoutePath.roadmap,
