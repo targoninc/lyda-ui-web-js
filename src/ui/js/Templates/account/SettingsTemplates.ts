@@ -41,6 +41,7 @@ import { TotpTemplates } from "./TotpTemplates.ts";
 import { WebauthnTemplates } from "./WebauthnTemplates.ts";
 import { Language, language, LanguageOptions, t } from "../../../locales";
 import { debounce } from "../../Classes/Helpers/Debounce.ts";
+import { TextSize } from "../../Enums/TextSize.ts";
 
 export class SettingsTemplates {
     static settingsPage(route: Route, params: Record<string, string>) {
@@ -213,7 +214,7 @@ export class SettingsTemplates {
                             },
                         }),
                         create("span")
-                            .classes("warning", "text-small")
+                            .classes("warning", TextSize.small)
                             .text(t("UNSAVED_CHANGES"))
                     ).classes("align-children").build(), true)
                 )
@@ -370,7 +371,7 @@ export class SettingsTemplates {
                 SettingsTemplates.sectionHeading(t("STREAMING_QUALITY")),
                 when(noSubscription,
                     create("div")
-                        .classes("text", "text-small", "color-dim")
+                        .classes("text", TextSize.small, "color-dim")
                         .text(t("MEDIUM_HIGH_ONLY_SUBSCRIPTION"))
                         .build()),
                 when(noSubscription, GenericTemplates.inlineLink(() => navigate(RoutePath.subscribe), t("SUBSCRIBE_FOR_HIGHER_QUALITY"))),

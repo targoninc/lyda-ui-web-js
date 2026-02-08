@@ -25,6 +25,7 @@ import { ActionLog } from "@targoninc/lyda-shared/dist/Models/db/lyda/ActionLog"
 import { t } from "../../../locales";
 import { sortByProperty } from "../../Classes/Helpers/Sorting.ts";
 import { TableTemplates } from "../generic/TableTemplates.ts";
+import { TextSize } from "../../Enums/TextSize.ts";
 
 export class LogTemplates {
     static actionLogsPage() {
@@ -146,7 +147,7 @@ export class LogTemplates {
                 "log-timestamp",
                 ["log-host", "color-dim"],
                 "log-level",
-                ["log-message", type, "color-dim", "text-small"],
+                ["log-message", type, "color-dim", TextSize.small],
                 "log-stack",
             ],
             data: [

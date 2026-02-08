@@ -8,6 +8,7 @@ import { Api } from "../../Api/Api.ts";
 import { currentUser } from "../../state.ts";
 import { Util } from "../../Classes/Util.ts";
 import { t } from "../../../locales";
+import { TextSize } from "../../Enums/TextSize.ts";
 
 export class TotpTemplates {
     static qrCode(dataUrl: string) {
@@ -31,10 +32,10 @@ export class TotpTemplates {
             .classes("card", "flex-v")
             .children(
                 create("div")
-                    .classes("flex", "center-items", "text-small")
+                    .classes("flex", "center-items", TextSize.small)
                     .children(
                         create("span")
-                            .classes("text-large")
+                            .classes(TextSize.large)
                             .text(method.name),
                         when(method.verified, GenericTemplates.verifiedWithDate(method.created_at)),
                     ).build(),

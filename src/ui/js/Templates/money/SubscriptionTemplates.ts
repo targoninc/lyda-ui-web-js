@@ -16,6 +16,7 @@ import { Util } from "../../Classes/Util.ts";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { TableTemplates } from "../generic/TableTemplates.ts";
 import { sortByProperty } from "../../Classes/Helpers/Sorting.ts";
+import { TextSize } from "../../Enums/TextSize.ts";
 
 export class SubscriptionTemplates {
     static page() {
@@ -152,16 +153,16 @@ export class SubscriptionTemplates {
                                     .styles("line-height", "1")
                                     .children(
                                         create("span")
-                                            .classes("text-xlarge")
+                                            .classes(TextSize.xLarge)
                                             .text(currency(option.price_per_term, cur))
                                             .build(),
                                         create("span")
-                                            .classes("text-small")
+                                            .classes(TextSize.small)
                                             .text("/" + option.term_type)
                                             .build(),
                                     ).build(),
                                 when(pending, create("span")
-                                    .classes("text-small", "text-positive")
+                                    .classes(TextSize.small, "text-positive")
                                     .title(t("WAITING_FOR_PAYMENT_CONFIRMATION"))
                                     .text(t("PENDING"))
                                     .build()),

@@ -1,10 +1,6 @@
 import { compute, create, nullElement, signal, when } from "@targoninc/jess";
 import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
-import { Time } from "../../Classes/Helpers/Time.ts";
 import { currency } from "../../Classes/Helpers/Num.ts";
-import { permissions } from "../../state.ts";
-import { Payout } from "@targoninc/lyda-shared/src/Models/db/finance/Payout";
-import { PaymentStatus } from "@targoninc/lyda-shared/src/Enums/PaymentStatus";
 import { Api } from "../../Api/Api.ts";
 import { RoyaltyInfo } from "@targoninc/lyda-shared/src/Models/RoyaltyInfo";
 import { button } from "@targoninc/jess-components";
@@ -18,6 +14,7 @@ import { ChartTemplates } from "../generic/ChartTemplates.ts";
 import { yearAndMonthByOffset } from "../../Classes/Helpers/Date.ts";
 import { downloadFile } from "../../Classes/Util.ts";
 import { t } from "../../../locales";
+import { TextSize } from "../../Enums/TextSize.ts";
 
 const AVAILABLE_THRESHOLD_USD = 25;
 
@@ -93,38 +90,34 @@ export class PayoutTemplates {
     }
 
     static royaltyInfo(royaltyInfo: RoyaltyInfo) {
-        return create("div")
-            .classes("flex")
-            .children(
-                create("div")
-                    .classes("card", "secondary", "flex-v")
-                    .children(
-                        create("h1")
-                            .text(currency(royaltyInfo.personal.available))
-                            .title(royaltyInfo.personal.available < AVAILABLE_THRESHOLD_USD ? `${t("PAYOUT_THRESHOLD_NOT_MET", currency(AVAILABLE_THRESHOLD_USD, "USD"))}` : "")
-                            .build(),
-                        create("span")
-                            .text("Available")
-                            .build(),
-                        create("span")
-                            .classes("text-small")
-                            .text(t("TOTAL_ROYALTIES", currency(royaltyInfo.personal.totalRoyalties)))
-                            .build(),
-                        create("span")
-                            .classes("text-small")
-                            .text(t("PAID_OUT_AMOUNT", currency(royaltyInfo.personal.paidTotal)))
-                            .build(),
-                        create("span")
-                            .classes("text-small")
-                            .text(t("MEDIAN_TRACK_ROYALTY", currency(royaltyInfo.personal.meanTrackRoyalty)))
-                            .build(),
-                    ).build(),
-                create("div")
-                    .classes("flex-v")
-                    .children(
-                        ChartTemplates.boxPlotChart(royaltyInfo.personal.trackRoyaltyValues, `${t("AVERAGE_TRACK_ROYALTY")}`, "averageTrackRoyaltyChart"),
-                    ).build(),
-            ).build();
+        return horizontal(
+            create("div")
+                .classes("card", "secondary", "flex-v")
+                .children(
+                    create("h1")
+                        .text(currency(royaltyInfo.personal.available))
+                        .title(royaltyInfo.personal.available < AVAILABLE_THRESHOLD_USD ? `${t("PAYOUT_THRESHOLD_NOT_MET", currency(AVAILABLE_THRESHOLD_USD, "USD"))}` : "")
+                        .build(),
+                    create("span")
+                        .text("Available")
+                        .build(),
+                    create("span")
+                        .classes(TextSize.small)
+                        .text(t("TOTAL_ROYALTIES", currency(royaltyInfo.personal.totalRoyalties)))
+                        .build(),
+                    create("span")
+                        .classes(TextSize.small)
+                        .text(t("PAID_OUT_AMOUNT", currency(royaltyInfo.personal.paidTotal)))
+                        .build(),
+                    create("span")
+                        .classes(TextSize.small)
+                        .text(t("MEDIAN_TRACK_ROYALTY", currency(royaltyInfo.personal.meanTrackRoyalty)))
+                        .build(),
+                ).build(),
+            vertical(
+                ChartTemplates.boxPlotChart(royaltyInfo.personal.trackRoyaltyValues, `${t("AVERAGE_TRACK_ROYALTY")}`, "averageTrackRoyaltyChart"),
+            ).build(),
+        ).build();
     }
 
     static globalRoyaltyInfo(royaltyInfo: RoyaltyInfo) {

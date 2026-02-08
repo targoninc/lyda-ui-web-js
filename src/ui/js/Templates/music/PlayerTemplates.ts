@@ -42,6 +42,7 @@ import { t } from "../../../locales";
 import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 import { DefaultImages } from "../../Enums/DefaultImages.ts";
 import { CoverContext } from "../../Enums/CoverContext.ts";
+import { TextSize } from "../../Enums/TextSize.ts";
 
 export const PLAYCHECK_INTERVAL = 200;
 
@@ -462,7 +463,7 @@ export class PlayerTemplates {
                                 .src(img$)
                                 .build()),
                             create("span")
-                                .classes("text-small")
+                                .classes(TextSize.small)
                                 .text(name),
                         ).build(),
                 ).build(),
@@ -473,23 +474,23 @@ export class PlayerTemplates {
         const noSubscription = compute(u => !u || !u.subscription, currentUser);
         const text = compute((q, n): string => {
             if (n) {
-                return "96kbps";
+                return "64kbps";
             }
 
             switch (q) {
                 case StreamingQuality.low:
-                    return "96kbps";
+                    return "64kbps";
                 case StreamingQuality.medium:
                     return "128kbps";
                 case StreamingQuality.high:
-                    return "320kbps";
+                    return "192kbps";
                 default:
                     return "???kbps";
             }
         }, currentQuality, noSubscription);
 
         return create("a")
-            .classes("page-link", "color-dim", "text-small")
+            .classes("page-link", "color-dim", TextSize.small)
             .text(text)
             .href(RoutePath.settings)
             .onclick(e => {

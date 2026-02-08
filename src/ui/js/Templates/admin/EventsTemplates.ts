@@ -10,6 +10,7 @@ import { PaypalWebhook } from "@targoninc/lyda-shared/src/Models/db/finance/Payp
 import { NotificationType } from "../../Enums/NotificationType.ts";
 import { Api } from "../../Api/Api.ts";
 import { t } from "../../../locales";
+import { TextSize } from "../../Enums/TextSize.ts";
 
 export class EventsTemplates {
     static eventsPage() {
@@ -66,7 +67,7 @@ export class EventsTemplates {
                     .classes("flex-v")
                     .children(
                         create("span")
-                            .classes("flex", "align-children", "text-large")
+                            .classes("flex", "align-children", TextSize.large)
                             .children(
                                 GenericTemplates.roundIconButton({
                                     icon: "data_object",
@@ -95,14 +96,14 @@ export class EventsTemplates {
                                     icon: "content_copy",
                                 }, () => copy(event.id), t("COPY_ID")),
                                 create("span")
-                                    .classes("text-small")
+                                    .classes(TextSize.small)
                                     .text("E | " + event.id)
                                     .build(),
                                 GenericTemplates.roundIconButton({
                                     icon: "content_copy",
                                 }, () => copy(resourceId), t("COPY_RESOURCE_ID")),
                                 create("span")
-                                    .classes("text-small")
+                                    .classes(TextSize.small)
                                     .text("R | " + resourceId)
                                     .build(),
                             ).build(),
@@ -113,7 +114,7 @@ export class EventsTemplates {
                                     icon: "fingerprint",
                                 }, () => copy(referenceId), t("COPY_REFERENCE_ID")),
                                 create("span")
-                                    .classes("text-small")
+                                    .classes(TextSize.small)
                                     .text(referenceId)
                                     .build(),
                             ).build()),
@@ -123,12 +124,12 @@ export class EventsTemplates {
                     .children(
                         horizontal(
                             create("span")
-                                .classes("text-small")
+                                .classes(TextSize.small)
                                 .text(compute(time => `${t("RECEIVED_AT", time)}`, Time.agoUpdating(event.received_at)))
                                 .title(new Date(event.received_at).toLocaleDateString())
                                 .build(),
                             create("span")
-                                .classes("text-small")
+                                .classes(TextSize.small)
                                 .text(compute(time => `${t("UPDATED_AT", time)}`, Time.agoUpdating(event.updated_at)))
                                 .title(new Date(event.updated_at).toLocaleDateString())
                                 .build(),

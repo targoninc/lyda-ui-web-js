@@ -13,6 +13,7 @@ import { button } from "@targoninc/jess-components";
 import { SearchContext } from "@targoninc/lyda-shared/src/Enums/SearchContext";
 import { UserWidgetContext } from "../Enums/UserWidgetContext.ts";
 import { t } from "../../locales";
+import { TextSize } from "../Enums/TextSize.ts";
 
 export class NavTemplates {
     static navTop(burgerMenuOpen: Signal<boolean>) {
@@ -113,7 +114,7 @@ export class NavTemplates {
             text,
             icon: { icon, adaptive: true, classes: ["inline-icon", "svg", "nopointer"] },
             onclick: clickFunc,
-            classes: ["text-xxlarge", "burger-menu-button", activeClass],
+            classes: [TextSize.xxLarge, "burger-menu-button", activeClass],
             id,
         });
     }

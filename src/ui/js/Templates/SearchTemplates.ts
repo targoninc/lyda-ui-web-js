@@ -10,6 +10,7 @@ import { SearchContext } from "@targoninc/lyda-shared/src/Enums/SearchContext";
 import { SearchResult } from "@targoninc/lyda-shared/src/Models/SearchResult";
 import { get } from "../Api/ApiClient.ts";
 import { t } from "../../locales";
+import { TextSize } from "../Enums/TextSize.ts";
 
 export class SearchTemplates {
     static search(context: SearchContext) {
@@ -425,7 +426,7 @@ export class SearchTemplates {
                                             .build()
                                     ).build(),
                                 create("span")
-                                    .classes("search-result-subtitle", "text-xsmall")
+                                    .classes("search-result-subtitle", TextSize.xSmall)
                                     .text(subtitle)
                                     .build()
                             ).build()

@@ -14,6 +14,7 @@ import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { CoverContext } from "../../Enums/CoverContext.ts";
+import { TextSize } from "../../Enums/TextSize.ts";
 
 interface LogEvent {
     type: "success" | "error" | "info" | "debug";
@@ -238,7 +239,7 @@ export class ContentIDTemplates {
                                 text({
                                     tag: "span",
                                     text: `(${match.matches.length} matches)`,
-                                    classes: ["color-dim", "text-small"]
+                                    classes: ["color-dim", TextSize.small]
                                 }),
                             ).classes("align-children", "small-gap").build()
                         ),

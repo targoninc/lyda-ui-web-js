@@ -76,7 +76,7 @@ export class TrackTemplates {
             .classes("pill", "padded-inline", "flex", "rounded-max", "bordered")
             .children(
                 create("div")
-                    .classes("align-center", "text-small", "nopointer")
+                    .classes("align-center", TextSize.small, "nopointer")
                     .text(collab.collab_type?.name)
                     .build(),
             ).build();
@@ -198,7 +198,7 @@ export class TrackTemplates {
                 icon: "redo",
                 adaptive: true,
             },
-            classes: ["special-floating", "rounded-max", "align-center", "text-small"],
+            classes: ["special-floating", "rounded-max", "align-center", TextSize.small],
             onclick: () => navigate(`${RoutePath.profile}/` + repost.user!.username),
         });
     }
@@ -279,7 +279,7 @@ export class TrackTemplates {
                                     horizontal(
                                         MusicTemplates.title(EntityType.track, track.title, track.id, icons),
                                         create("span")
-                                            .classes("nopointer", "text-small", "align-center")
+                                            .classes("nopointer", TextSize.small, "align-center")
                                             .text(Time.format(track.length))
                                             .build(),
                                         GenericTemplates.timestamp(track.created_at),
@@ -413,11 +413,11 @@ export class TrackTemplates {
                         create("span").classes("collaborators").text(track.credits).build(),
                         horizontal(
                             create("span")
-                                .classes("date", "text-small")
+                                .classes("date", TextSize.small)
                                 .text(t("UPLOADED_AT", Util.formatDate(track.created_at)))
                                 .build(),
                             create("span")
-                                .classes("playcount", "text-small")
+                                .classes("playcount", TextSize.small)
                                 .text(t("PLAYS_AMOUNT", track.plays))
                                 .build(),
                         ).classes("align-children"),
@@ -481,7 +481,7 @@ export class TrackTemplates {
                                                 when(inCheckout, vertical(
                                                     horizontal(
                                                         create("span")
-                                                            .classes("text-xxlarge", "align-end")
+                                                            .classes(TextSize.xxLarge, "align-end")
                                                             .styles("line-height", "1")
                                                             .text("$"),
                                                         FormTemplates.moneyField(t("AMOUNT_IN_USD"), "amount", currency(track.price) + "+", amount, false, val => amount.value = val, track.price, track.price * 100, 0.10, ["bigger-input"]),
@@ -492,7 +492,7 @@ export class TrackTemplates {
                                                 when(inCheckout, button({
                                                     text: t("CONTINUE_TO_CHECKOUT"),
                                                     icon: { icon: "shopping_cart" },
-                                                    classes: ["rounded-max", "text-xlarge", "align-end", "positive"],
+                                                    classes: ["rounded-max", TextSize.xLarge, "align-end", "positive"],
                                                     disabled: compute(v => !v, amountValid),
                                                     onclick: async () => inCheckout.value = true,
                                                 }), true),
@@ -509,12 +509,12 @@ export class TrackTemplates {
                                                     level: 2,
                                                     text: t("TRACK_BOUGHT"),
                                                 }),
-                                            ).classes("align-children", "card", "text-large", "animated-background"),
+                                            ).classes("align-children", "card", TextSize.large, "animated-background"),
                                             create("p")
                                                 .text(t("TRACK_BOUGHT_INFO"))
                                                 .build(),
                                             horizontal(
-                                                TrackEditTemplates.downloadAudioButton(track, ["rounded-max", "special", "text-xlarge"]),
+                                                TrackEditTemplates.downloadAudioButton(track, ["rounded-max", "special", TextSize.xLarge]),
                                             ).classes("space-between", "align-children"),
                                         ).build()),
                                     ).styles("max-width", "500px"),

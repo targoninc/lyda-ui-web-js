@@ -257,26 +257,23 @@ export class PlaylistTemplates {
         return create("div")
             .classes("single-page", "noflexwrap", "padded-large", "rounded-large", "flex-v")
             .children(
-                create("div")
-                    .classes("flex-v", "nogap")
-                    .children(
+                vertical(
+                    vertical(
                         MusicTemplates.title(EntityType.playlist, playlist.title, playlist.id, icons, TextSize.xxLarge, false),
                         UserTemplates.userWidget(a_user, [], [], UserWidgetContext.singlePage),
+                    ).classes("nogap").build(),
+                    horizontal(
+                        GenericTemplates.timestamp(playlist.created_at),
+                        create("span")
+                            .classes("date", TextSize.small)
+                            .text(t("DURATION", Time.format(duration)))
+                            .build(),
                     ).build(),
+                ).build(),
                 horizontal(
                     MusicTemplates.cover(EntityType.playlist, playlist, CoverContext.standalone),
                     vertical(
                         PlaylistTemplates.audioActions(playlist, user, data.canEdit),
-                        horizontal(
-                            create("span")
-                                .classes("date", "text-small")
-                                .text(t("CREATED_AT", Util.formatDate(playlist.created_at)))
-                                .build(),
-                            create("span")
-                                .classes("date", "text-small")
-                                .text(Time.format(duration))
-                                .build(),
-                        ).build(),
                         InteractionTemplates.interactions(EntityType.playlist, playlist),
                     ).build(),
                 ).build(),

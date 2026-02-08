@@ -2,7 +2,6 @@ import { GenericTemplates, horizontal, vertical } from "./generic/GenericTemplat
 import { Icons } from "../Enums/Icons.ts";
 import { TrackActions } from "../Actions/TrackActions.ts";
 import { UserTemplates } from "./account/UserTemplates.ts";
-import { Time } from "../Classes/Helpers/Time.ts";
 import { Images } from "../Enums/Images.ts";
 import { Util } from "../Classes/Util.ts";
 import { AnyElement, compute, create, InputType, Signal, signal, signalMap, when } from "@targoninc/jess";
@@ -86,10 +85,7 @@ export class CommentTemplates {
                                 UserTemplates.userLink(UserWidgetContext.comment, comment.user),
                                 CommentTemplates.commentContent(comment),
                             ),
-                            create("span")
-                                .classes("text", "text-small", "color-dim")
-                                .text(Time.agoUpdating(new Date(comment.created_at)))
-                                .build(),
+                            GenericTemplates.timestamp(comment.created_at),
                         ).classes("no-gap"),
                         horizontal(
                             when(Util.isLoggedIn(), CommentTemplates.commentReplySection(repliesShown, replyInputShown, comment, newComment, comments)),

@@ -75,12 +75,10 @@ export class MusicTemplates {
                                         item.collab ? TrackTemplates.collabIndicator(item.collab) : null,
                                         item.repost ? TrackTemplates.repostIndicator(item.repost) : null,
                                     ).build(),
-                                create("div")
-                                    .classes("flex")
-                                    .children(
-                                        UserTemplates.userLink(UserWidgetContext.card, item.user!, item.artistname),
-                                        GenericTemplates.timestamp(item.created_at),
-                                    ).build(),
+                                horizontal(
+                                    UserTemplates.userLink(UserWidgetContext.card, item.user!, item.artistname),
+                                    GenericTemplates.timestamp(item.created_at),
+                                ).classes("align-children").build(),
                             ).build(),
                         create("div")
                             .classes("flex", "space-between", "align-children")

@@ -14,6 +14,8 @@ import { Api } from "../../Api/Api.ts";
 import { PublicKey } from "@targoninc/lyda-shared/dist/Models/db/lyda/PublicKey";
 import { SettingsTemplates } from "./SettingsTemplates.ts";
 import { t } from "../../../locales";
+import { TextSize } from "../../Enums/TextSize.ts";
+import { horizontal, vertical } from "../generic/GenericTemplates.ts";
 
 export class WebauthnTemplates {
     static devicesSection() {
@@ -29,22 +31,20 @@ export class WebauthnTemplates {
                 when(hasCredentials, create("span")
                     .text(t("NO_PASSKEYS"))
                     .build(), true),
-                when(hasCredentials, create("div")
-                    .classes("flex-v")
-                    .children(
-                        signalMap(public_keys, create("div").classes("flex"), key => create("div")
-                            .classes("flex-v", "card")
-                            .children(
-                                create("span")
-                                    .classes("text-large")
-                                    .text(key.name)
-                                    .build(),
-                                create("span")
-                                    .text(compute(time => `${t("CREATED")} ${time}`, Time.agoUpdating(new Date(key.created_at), true)))
-                                    .build(),
-                                WebauthnTemplates.webAuthNActions(loading, key, message),
-                            ).build()),
-                    ).build()),
+                when(hasCredentials, vertical(
+                    signalMap(public_keys, horizontal(), key => create("div")
+                        .classes("flex-v", "card")
+                        .children(
+                            create("span")
+                                .classes(TextSize.large)
+                                .text(key.name)
+                                .build(),
+                            create("span")
+                                .text(compute(time => `${t("CREATED")} ${time}`, Time.agoUpdating(new Date(key.created_at), true)))
+                                .build(),
+                            WebauthnTemplates.webAuthNActions(loading, key, message),
+                        ).build()),
+                ).build()),
                 button({
                     text: t("ADD_PASSKEY"),
                     icon: { icon: "add" },

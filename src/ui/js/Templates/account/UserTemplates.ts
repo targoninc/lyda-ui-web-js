@@ -40,6 +40,7 @@ import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/Collab
 import {t} from "../../../locales";
 import {FeedType} from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 import {CardFeedType} from "../../Enums/CardFeedType.ts";
+import { TextSize } from "../../Enums/TextSize.ts";
 
 export class UserTemplates {
     static userWidget(
@@ -116,7 +117,7 @@ export class UserTemplates {
                     .attributes("data-user-id", user.id)
                     .build(),
                 create("span")
-                    .classes("text", "align-center", "text-xsmall", "nopointer", "user-name", "hideOnSmallBreakpoint")
+                    .classes("text", "align-center", TextSize.xSmall, "nopointer", "user-name", "hideOnSmallBreakpoint")
                     .text("@" + user.username)
                     .attributes("data-user-id", user.id)
                     .build(),
@@ -214,7 +215,7 @@ export class UserTemplates {
                             .classes(
                                 "text",
                                 "align-center",
-                                "text-small",
+                                TextSize.small,
                                 "nopointer",
                                 "user-name",
                                 "hideOnSmallBreakpoint",
@@ -260,7 +261,7 @@ export class UserTemplates {
                             .classes(
                                 "text",
                                 "align-center",
-                                "text-small",
+                                TextSize.small,
                                 "nopointer",
                                 "user-name",
                                 "hideOnSmallBreakpoint",
@@ -314,7 +315,7 @@ export class UserTemplates {
 
     static followsBackIndicator() {
         return create("span")
-            .classes("padded-inline", "rounded-max", "text-small", "invertedTextWithBackground")
+            .classes("padded-inline", "rounded-max", TextSize.small, "invertedTextWithBackground")
             .text(t("FOLLOWS_YOU"))
             .build();
     }

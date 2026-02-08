@@ -11,6 +11,7 @@ import { RoutePath } from "../../Routing/routes.ts";
 import { TransactionInfo } from "@targoninc/lyda-shared/src/Models/TransactionInfo.ts";
 import { StatisticTemplates } from "../StatisticTemplates.ts";
 import { heading } from "@targoninc/jess-components";
+import { TextSize } from "../../Enums/TextSize.ts";
 
 export class TransactionTemplates {
     static page() {
@@ -137,7 +138,7 @@ export class TransactionTemplates {
 
     private static amountCard(amount: number, label: StringOrSignal) {
         return vertical(
-            text(currency(amount)).classes("text-xxlarge"),
+            text(currency(amount)).classes(TextSize.xxLarge),
             text(label),
         ).classes("card", "nogap").build();
     }

@@ -34,6 +34,7 @@ import { ProgressState } from "@targoninc/lyda-shared/src/Enums/ProgressState";
 import { ProgressPart } from "../../Models/ProgressPart.ts";
 import { t } from "../../../locales";
 import { Time } from "../../Classes/Helpers/Time.ts";
+import { TextSize } from "../../Enums/TextSize.ts";
 
 export class GenericTemplates {
     static icon(
@@ -142,7 +143,15 @@ export class GenericTemplates {
     }
 
     static title(title: HtmlPropertyValue, icons = []) {
-        return create("div").classes("flex", "nopointer").children(create("span").classes("clickable", "text-large").text(title).build(), ...icons).build();
+        return create("div")
+            .classes("flex", "nopointer")
+            .children(
+                create("span")
+                    .classes("clickable", TextSize.large)
+                    .text(title)
+                    .build(),
+                ...icons,
+            ).build();
     }
 
     static missingPermission() {
@@ -826,11 +835,11 @@ export class GenericTemplates {
         return create("div").classes("update-available").children(
             create("div").classes("card", "flex-v").children(
                 create("span")
-                    .classes("text-large")
+                    .classes(TextSize.large)
                     .text(t("UPDATE_AVAILABLE_VERSION", version))
                     .build(),
                 create("span")
-                    .classes("text-small")
+                    .classes(TextSize.small)
                     .text(t("NEW_VERSION_AVAILABLE"))
                     .build(),
                 button({
@@ -890,8 +899,9 @@ export class GenericTemplates {
 
     static timestamp(timestamp: Date | string | number) {
         return create("span")
-            .classes("date", "text-small", "nopointer", "color-dim", "align-center")
-            .text(Time.ago(timestamp))
+            .classes("date", TextSize.small, "color-dim")
+            .title(Util.formatDate(new Date(timestamp)))
+            .text(Time.agoUpdating(timestamp))
             .build();
     }
 }

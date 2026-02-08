@@ -2,6 +2,7 @@ import { create } from "@targoninc/jess";
 import { GenericTemplates } from "./generic/GenericTemplates.ts";
 import { roadMapItemIcons, RoadmapItemStatus } from "@targoninc/lyda-shared/src/Enums/RoadmapItemStatus";
 import { t } from "../../locales";
+import { TextSize } from "../Enums/TextSize.ts";
 
 let index = 0;
 
@@ -34,7 +35,7 @@ export class RoadmapTemplates {
             .styles("animation-delay", `calc(.1s * ${index})`)
             .children(
                 create("div")
-                    .classes("flex", "align-children", status != RoadmapItemStatus.done ? "text-large" : "_")
+                    .classes("flex", "align-children", status != RoadmapItemStatus.done ? TextSize.large : "_")
                     .children(
                         RoadmapTemplates.itemStatus(status),
                         create("span")

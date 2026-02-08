@@ -24,6 +24,7 @@ import { Visibility } from "@targoninc/lyda-shared/src/Enums/Visibility";
 import { Time } from "../../Classes/Helpers/Time.ts";
 import { CustomText } from "../../Classes/Helpers/CustomText.ts";
 import { CoverContext } from "../../Enums/CoverContext.ts";
+import { TextSize } from "../../Enums/TextSize.ts";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
@@ -276,12 +277,9 @@ export class AlbumTemplates {
                         UserTemplates.userWidget(albumUser, [], [], UserWidgetContext.singlePage),
                     ).build(),
                 horizontal(
+                    GenericTemplates.timestamp(album.release_date),
                     create("span")
-                        .classes("date", "text-small")
-                        .text(t("RELEASED_AT", Util.formatDate(album.release_date)))
-                        .build(),
-                    create("span")
-                        .classes("date", "text-small")
+                        .classes("date", TextSize.small)
                         .text(t("DURATION", Time.format(duration)))
                         .build(),
                 ).build(),

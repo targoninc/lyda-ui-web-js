@@ -13,6 +13,7 @@ import { Api } from "../Api/Api.ts";
 import { Icons } from "../Enums/Icons.ts";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
+import { language, localeByLanguage } from "../../locales";
 
 export class Util {
     static capitalizeFirstLetter(string: string) {
@@ -94,7 +95,9 @@ export class Util {
         if (date.constructor === String) {
             date = new Date(date);
         }
-        return (date as Date).toLocaleDateString();
+        return (date as Date).toLocaleDateString(localeByLanguage[language.value], {
+            dateStyle: "long",
+        });
     }
 
     static async getUserAsync(id: number | null = null, allowCache = true) {

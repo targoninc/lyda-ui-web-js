@@ -22,6 +22,12 @@ export enum Language {
     ga = "ga",
 }
 
+export const localeByLanguage: Record<Language, string> = {
+    [Language.en]: "en-US",
+    [Language.de]: "de-DE",
+    [Language.ga]: "ga-IE",
+}
+
 export const LanguageOptions: SelectOption<Language>[] = [
     { id: Language.en, name: "English" },
     { id: Language.de, name: "Deutsch" },

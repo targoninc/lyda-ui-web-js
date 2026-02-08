@@ -182,7 +182,7 @@ export class QueueTemplates {
 
         return vertical(
             create("span")
-                .classes("color-dim", "text-small")
+                .classes("color-dim", TextSize.small)
                 .text(text)
                 .build(),
             ...q.map((id, i) => QueueTemplates.trackAsQueueItem(id, i, isManual, isCurrent)),
