@@ -919,11 +919,13 @@ export class TrackTemplates {
             signalMap(
                 buyers$,
                 vertical(),
-                sale => horizontal(
-                    TransactionTemplates.amount("in", sale.amount_ct / 100),
-                    GenericTemplates.timestamp(sale.created_at),
-                    UserTemplates.userWidget(sale.user!, [], [], UserWidgetContext.singlePage)
-                ).classes("align-children").build()
+                sale => vertical(
+                    UserTemplates.userWidget(sale.user!, [], [], UserWidgetContext.singlePage),
+                    horizontal(
+                        TransactionTemplates.amount("in", sale.amount_ct / 100),
+                        GenericTemplates.timestamp(sale.created_at),
+                    )
+                ).classes("align-children", "card").build()
             )
         ).build();
     }
