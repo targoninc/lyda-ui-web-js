@@ -535,6 +535,7 @@ export const en = {
     ENTER_NEW_USERNAME: "Enter your new username",
     IMPRINT: "Imprint, Terms of Service and Privacy Policy",
     PAYMENT_INFO: "Payment Info",
+    COPY_LINK: "Copy link",
     BUY: "Buy",
     BUY_ITEM: "Buy item",
     AMOUNT_IN_USD: "Amount in USD",

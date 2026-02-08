@@ -215,9 +215,9 @@ export class SettingsTemplates {
                         }),
                         create("span")
                             .classes("warning", TextSize.small)
-                            .text(t("UNSAVED_CHANGES"))
-                    ).classes("align-children").build(), true)
-                )
+                            .text(t("UNSAVED_CHANGES")),
+                    ).classes("align-children").build(), true),
+                ),
             ).build();
     }
 
@@ -732,21 +732,21 @@ export class SettingsTemplates {
                             async (name: string) => {
                                 loading.value = true;
                                 await Api.addTotpMethod(name)
-                                    .then(res => {
-                                        if (!res) {
-                                            return;
-                                        }
-                                        Api.getUserById().then(u => {
-                                            currentUser.value = u;
-                                        });
-                                        createModal(
-                                            [
-                                                TotpTemplates.verifyTotpAddModal(res.secret, res.qrDataUrl),
-                                            ],
-                                            "add-modal-verify",
-                                        );
-                                    })
-                                    .finally(() => (loading.value = false));
+                                         .then(res => {
+                                             if (!res) {
+                                                 return;
+                                             }
+                                             Api.getUserById().then(u => {
+                                                 currentUser.value = u;
+                                             });
+                                             createModal(
+                                                 [
+                                                     TotpTemplates.verifyTotpAddModal(res.secret, res.qrDataUrl),
+                                                 ],
+                                                 "add-modal-verify",
+                                             );
+                                         })
+                                         .finally(() => (loading.value = false));
                             }, () => {
                             }, "qr_code",
                         );
@@ -765,10 +765,11 @@ export class SettingsTemplates {
                 text,
                 id,
             }),
-        ).onclick(async () => {
-            const url = new URL(window.location.href);
-            await copy(`${url.origin}${url.pathname}#${id}`);
-        });
+            GenericTemplates.icon("link", true, ["showOnParentHover", "clickable", TextSize.xxLarge], t("COPY_LINK"), async () => {
+                const url = new URL(window.location.href);
+                await copy(`${url.origin}${url.pathname}#${id}`);
+            }),
+        ).classes("align-children");
     }
 
     private static paymentSection() {
@@ -791,7 +792,7 @@ export class SettingsTemplates {
                         debounce("paypalMail", () => {
                             loading.value = true;
                             Api.updateUserSetting(UserSettings.paypalMail, value)
-                                .finally(() => loading.value = false);
+                               .finally(() => loading.value = false);
                         }, 1000);
                     },
                 }),
