@@ -924,8 +924,8 @@ export class TrackTemplates {
                     horizontal(
                         TransactionTemplates.amount("in", sale.amount_ct / 100),
                         GenericTemplates.timestamp(sale.created_at),
-                    )
-                ).classes("align-children", "card").build()
+                    ).classes("align-children")
+                ).classes("card").build()
             )
         ).build();
     }
