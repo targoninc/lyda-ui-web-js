@@ -108,8 +108,25 @@ export class MusicTemplates {
             if (onclickOverride) {
                 await onclickOverride();
             } else {
-                // TODO: Handle based on type
-                await startItem(item as Track);
+                switch (type) {
+                    case EntityType.track:
+                        await startItem(item as Track);
+                        break;
+                    case EntityType.playlist: {
+                        const firstTrack = item.tracks ? item.tracks[0].track : null;
+                        if (firstTrack) {
+                            await PlaylistActions.startTrackInPlaylist(item as Playlist, firstTrack, true);
+                        }
+                        break;
+                    }
+                    case EntityType.album: {
+                        const firstTrack = item.tracks ? item.tracks[0].track : null;
+                        if (firstTrack) {
+                            await AlbumActions.startTrackInAlbum(item as Album, firstTrack, true);
+                        }
+                        break;
+                    }
+                }
             }
         };
         const isOwnItem = compute(u => u?.id === item.user_id, currentUser);
@@ -398,14 +415,7 @@ export class MusicTemplates {
             .classes(`${type}-card`, "padded", "flex-v", "small-gap", isSecondary ? "secondary" : "_")
             .children(
                 vertical(
-                    MusicTemplates.cover(type, list, CoverContext.card, async () => {
-                        const firstTrack = list.tracks![0];
-                        if (type === "album") {
-                            await AlbumActions.startTrackInAlbum(list as Album, firstTrack.track!, true);
-                        } else if (type === "playlist") {
-                            await PlaylistActions.startTrackInPlaylist(list as Playlist, firstTrack.track!, true);
-                        }
-                    }),
+                    MusicTemplates.cover(type, list, CoverContext.card),
                     horizontal(
                         InteractionTemplates.interactions(type, list, {
                             showCount: false,

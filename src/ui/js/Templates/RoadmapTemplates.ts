@@ -1,5 +1,5 @@
 import { create } from "@targoninc/jess";
-import { GenericTemplates } from "./generic/GenericTemplates.ts";
+import { GenericTemplates, vertical } from "./generic/GenericTemplates.ts";
 import { roadMapItemIcons, RoadmapItemStatus } from "@targoninc/lyda-shared/src/Enums/RoadmapItemStatus";
 import { t } from "../../locales";
 import { TextSize } from "../Enums/TextSize.ts";
@@ -10,23 +10,22 @@ export class RoadmapTemplates {
     static roadmapPage() {
         index = 0;
 
-        return create("div")
-            .classes("flex-v")
-            .children(
-                create("h1")
-                    .text(t("FEATURE_ROADMAP"))
-                    .build(),
-                RoadmapTemplates.roadmapItem(RoadmapItemStatus.todo, "2025-2026", "Stripe payments + payouts"),
-                RoadmapTemplates.roadmapItem(RoadmapItemStatus.todo, "2025", "Buying music"),
-                RoadmapTemplates.roadmapItem(RoadmapItemStatus.inProgress, "2025", "Localization"),
-                RoadmapTemplates.roadmapItem(RoadmapItemStatus.inProgress, "2025", "UX improvements and bugfixes"),
-                RoadmapTemplates.roadmapItem(RoadmapItemStatus.done, "2025", "MFA"),
-                RoadmapTemplates.roadmapItem(RoadmapItemStatus.done, "2025", "Royalty payouts"),
-                RoadmapTemplates.roadmapItem(RoadmapItemStatus.done, "2024", "Subscriptions"),
-                RoadmapTemplates.roadmapItem(RoadmapItemStatus.done, "2024", "Complete UI + API rewrite"),
-                RoadmapTemplates.roadmapItem(RoadmapItemStatus.done, "2023", "Basic feeds"),
-                RoadmapTemplates.roadmapItem(RoadmapItemStatus.done, "2023", "Streaming music"),
-            ).build();
+        return vertical(
+            create("h1")
+                .text(t("FEATURE_ROADMAP"))
+                .build(),
+            RoadmapTemplates.roadmapItem(RoadmapItemStatus.todo, "2026", "Stripe payments + payouts"),
+            RoadmapTemplates.roadmapItem(RoadmapItemStatus.todo, "2026", "Buying albums"),
+            RoadmapTemplates.roadmapItem(RoadmapItemStatus.inProgress, "2025-2026", "General improvements and bugfixes"),
+            RoadmapTemplates.roadmapItem(RoadmapItemStatus.done, "2025", "Buying tracks"),
+            RoadmapTemplates.roadmapItem(RoadmapItemStatus.done, "2025", "Localization system"),
+            RoadmapTemplates.roadmapItem(RoadmapItemStatus.done, "2025", "MFA"),
+            RoadmapTemplates.roadmapItem(RoadmapItemStatus.done, "2025", "Royalty payouts"),
+            RoadmapTemplates.roadmapItem(RoadmapItemStatus.done, "2024", "Subscriptions"),
+            RoadmapTemplates.roadmapItem(RoadmapItemStatus.done, "2024", "Complete UI + API rewrite"),
+            RoadmapTemplates.roadmapItem(RoadmapItemStatus.done, "2023", "Basic feeds"),
+            RoadmapTemplates.roadmapItem(RoadmapItemStatus.done, "2023", "Streaming music"),
+        ).build();
     }
 
     static roadmapItem(status: RoadmapItemStatus, plannedTime: string, title: string) {
@@ -43,7 +42,7 @@ export class RoadmapTemplates {
                             .build(),
                         create("span")
                             .text(title)
-                            .build()
+                            .build(),
                     ).build(),
             ).build();
 
@@ -56,7 +55,7 @@ export class RoadmapTemplates {
         return create("div")
             .classes("flex-v", "align-children", "roadmap-item-status")
             .children(
-                GenericTemplates.icon(roadMapItemIcons[status], true, ["roadmap-item-status-icon", status])
+                GenericTemplates.icon(roadMapItemIcons[status], true, ["roadmap-item-status-icon", status]),
             ).build();
     }
 }
