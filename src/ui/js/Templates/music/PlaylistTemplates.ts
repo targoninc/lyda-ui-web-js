@@ -22,6 +22,9 @@ import { t } from "../../../locales";
 import { Visibility } from "@targoninc/lyda-shared/src/Enums/Visibility.ts";
 import { Time } from "../../Classes/Helpers/Time.ts";
 import { CoverContext } from "../../Enums/CoverContext.ts";
+import { navigate } from "../../Routing/Router.ts";
+import { RoutePath } from "../../Routing/routes.ts";
+import { TextSize } from "../../Enums/TextSize.ts";
 
 export class PlaylistTemplates {
     static addTrackToPlaylistModal(track: Track, playlists: Playlist[]) {
@@ -249,6 +252,7 @@ export class PlaylistTemplates {
         }
 
         const duration = playlist.tracks.reduce((acc, t) => acc + (t.track?.length ?? 0), 0);
+        const icons = playlist.visibility === Visibility.private ? [GenericTemplates.lock()] : [];
 
         return create("div")
             .classes("single-page", "noflexwrap", "padded-large", "rounded-large", "flex-v")
@@ -256,10 +260,7 @@ export class PlaylistTemplates {
                 create("div")
                     .classes("flex-v", "nogap")
                     .children(
-                        create("span")
-                            .classes("title", "wordwrap")
-                            .text(playlist.title)
-                            .build(),
+                        MusicTemplates.title(EntityType.playlist, playlist.title, playlist.id, icons, TextSize.xxLarge, false),
                         UserTemplates.userWidget(a_user, [], [], UserWidgetContext.singlePage),
                     ).build(),
                 horizontal(
@@ -322,7 +323,12 @@ export class PlaylistTemplates {
                 icon: { icon: "delete" },
                 classes: ["negative"],
                 onclick: async () => {
-                    await Ui.getConfirmationModal(t("DELETE_PLAYLIST"), t("SURE_DELETE_PLAYLIST"), t("YES"), t("NO"), () => PlaylistActions.deletePlaylist(playlist.id), () => {
+                    await Ui.getConfirmationModal(t("DELETE_PLAYLIST"), t("SURE_DELETE_PLAYLIST"), t("YES"), t("NO"), async () => {
+                        const success = await Api.deletePlaylist(playlist.id);
+                        if (success) {
+                            navigate(RoutePath.profile);
+                        }
+                    }, () => {
                     }, Icons.WARNING);
                 },
             })),

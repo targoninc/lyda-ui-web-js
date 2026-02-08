@@ -2,7 +2,6 @@ import { AlbumTemplates } from "../Templates/music/AlbumTemplates.ts";
 import { Util } from "../Classes/Util.ts";
 import { createModal, notify } from "../Classes/Ui.ts";
 import { PlayManager } from "../Streaming/PlayManager.ts";
-import { QueueManager } from "../Streaming/QueueManager.ts";
 import { navigate } from "../Routing/Router.ts";
 import { RoutePath } from "../Routing/routes.ts";
 import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
@@ -29,8 +28,6 @@ export class AlbumActions {
     static async deleteAlbum(id: number) {
         const success = await Api.deleteAlbum(id);
         if (success) {
-            PlayManager.removeStreamClient(id);
-            QueueManager.removeFromManualQueue(id);
             navigate(RoutePath.profile);
         }
     }

@@ -38,6 +38,7 @@ import { AlbumActions } from "../../Actions/AlbumActions.ts";
 import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { CoverContext } from "../../Enums/CoverContext.ts";
+import { TextSize } from "../../Enums/TextSize.ts";
 
 export class MusicTemplates {
     static feedEntry(item: Track, newPlayingFrom: PlayingFrom) {
@@ -448,7 +449,7 @@ export class MusicTemplates {
         });
     }
 
-    static title(type: EntityType, title: string, id: number, icons: AnyNode[] = [], textSize: string = "text-large", goToEntity = true) {
+    static title(type: EntityType, title: string, id: number, icons: AnyNode[] = [], textSize: TextSize = TextSize.large, goToEntity = true) {
         let baseRoute = RoutePath.track;
         switch (type) {
             case EntityType.album:

@@ -25,6 +25,7 @@ import { DragActions } from "../../Actions/DragActions.ts";
 import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import { t } from "../../../locales";
 import { CoverContext } from "../../Enums/CoverContext.ts";
+import { TextSize } from "../../Enums/TextSize.ts";
 
 export class QueueTemplates {
     static queueItem(track: Track, index: number, isManual: boolean, isCurrent: boolean = false) {
@@ -74,7 +75,7 @@ export class QueueTemplates {
                         QueueManager.removeIndexFromManualQueue(index);
                     }),
                     vertical(
-                        MusicTemplates.title(EntityType.track, track.title, track.id, PlayerTemplates.trackIcons(track), "text-medium"),
+                        MusicTemplates.title(EntityType.track, track.title, track.id, PlayerTemplates.trackIcons(track), TextSize.medium),
                         UserTemplates.userLink(UserWidgetContext.player, track.user!),
                     ).classes("no-gap"),
                 ),

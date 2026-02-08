@@ -2,9 +2,6 @@ import { PlaylistTemplates } from "../Templates/music/PlaylistTemplates.ts";
 import { Util } from "../Classes/Util.ts";
 import { createModal, notify } from "../Classes/Ui.ts";
 import { PlayManager } from "../Streaming/PlayManager.ts";
-import { QueueManager } from "../Streaming/QueueManager.ts";
-import { navigate } from "../Routing/Router.ts";
-import { RoutePath } from "../Routing/routes.ts";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
@@ -30,15 +27,6 @@ export class PlaylistActions {
 
     static async openNewPlaylistModal() {
         createModal([PlaylistTemplates.newPlaylistModal()], "new-playlist");
-    }
-
-    static async deletePlaylist(id: number) {
-        const success = await Api.deletePlaylist(id);
-        if (success) {
-            PlayManager.removeStreamClient(id);
-            QueueManager.removeFromManualQueue(id);
-            navigate(RoutePath.profile);
-        }
     }
 
     static async addTrackToPlaylists(track_id: number, playlist_ids: number[]) {

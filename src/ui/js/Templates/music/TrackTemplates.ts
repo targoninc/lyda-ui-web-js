@@ -68,6 +68,7 @@ import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom.ts";
 import { TrackSale } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackSale.ts";
 import { TransactionTemplates } from "../money/TransactionTemplates.ts";
 import { CoverContext } from "../../Enums/CoverContext.ts";
+import { TextSize } from "../../Enums/TextSize.ts";
 
 export class TrackTemplates {
     static collabIndicator(collab: TrackCollaborator): any {
@@ -397,7 +398,7 @@ export class TrackTemplates {
                     .build()),
                 vertical(
                     vertical(
-                        MusicTemplates.title(EntityType.track, track.title, track.id, icons, "text-xxlarge", false),
+                        MusicTemplates.title(EntityType.track, track.title, track.id, icons, TextSize.xxLarge, false),
                         horizontal(
                             when(bought, GenericTemplates.pill({
                                 icon: "order_approve",
@@ -467,7 +468,7 @@ export class TrackTemplates {
                                         when(bought, vertical(
                                             horizontal(
                                                 MusicTemplates.cover(EntityType.track, track, CoverContext.small),
-                                                MusicTemplates.title(EntityType.track, track.title, track.id, icons, "text-large", false),
+                                                MusicTemplates.title(EntityType.track, track.title, track.id, icons, TextSize.large, false),
                                             ).classes("align-children"),
                                             create("p")
                                                 .text(t("BUY_ITEM_INFO_TEXT"))
