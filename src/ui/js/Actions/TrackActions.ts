@@ -119,35 +119,6 @@ export class TrackActions {
         following.value = !following.value;
     }
 
-    static async replaceCover(id: number, canEdit: boolean, oldSrc: Signal<string>, loading: Signal<boolean>) {
-        if (!canEdit) {
-            return;
-        }
-        loading.value = true;
-        const fileInput = document.createElement("input");
-        fileInput.type = "file";
-        fileInput.accept = "image/*";
-        fileInput.onchange = async (e) => {
-            const fileTarget = e.target as HTMLInputElement;
-            const file = fileTarget.files![0];
-            if (!file) {
-                loading.value = false;
-                return;
-            }
-
-            try {
-                await MediaUploader.upload(MediaFileType.trackCover, id, file);
-                notify(`${t("COVER_UPLOADED")}`, NotificationType.success);
-                await Util.updateImage(URL.createObjectURL(file), oldSrc.value);
-            } catch (e) {
-                notify(`${t("FAILED_UPLOADING_COVER")}`, NotificationType.error);
-            }
-            loading.value = false;
-        };
-        fileInput.onabort = () => loading.value = false;
-        fileInput.click();
-    }
-
     static async replaceAudio(id: number, canEdit: boolean, loading: Signal<boolean>, onSuccess: () => void = () => {}) {
         if (!canEdit) {
             return;

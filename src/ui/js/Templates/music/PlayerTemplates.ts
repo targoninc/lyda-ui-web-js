@@ -1,14 +1,14 @@
-import {PlayManager} from "../../Streaming/PlayManager.ts";
-import {Icons} from "../../Enums/Icons.ts";
-import {Time} from "../../Classes/Helpers/Time.ts";
-import {Images} from "../../Enums/Images.ts";
-import {QueueTemplates} from "./QueueTemplates.ts";
-import {UserTemplates} from "../account/UserTemplates.ts";
-import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
-import {Ui} from "../../Classes/Ui.ts";
-import {getPlayIcon, Util} from "../../Classes/Util.ts";
-import {compute, computeAsync, create, nullElement, Signal, signal, when} from "@targoninc/jess";
-import {navigate} from "../../Routing/Router.ts";
+import { PlayManager } from "../../Streaming/PlayManager.ts";
+import { Icons } from "../../Enums/Icons.ts";
+import { Time } from "../../Classes/Helpers/Time.ts";
+import { Images } from "../../Enums/Images.ts";
+import { QueueTemplates } from "./QueueTemplates.ts";
+import { UserTemplates } from "../account/UserTemplates.ts";
+import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
+import { Ui } from "../../Classes/Ui.ts";
+import { getPlayIcon, Util } from "../../Classes/Util.ts";
+import { compute, computeAsync, create, nullElement, Signal, signal, when } from "@targoninc/jess";
+import { navigate } from "../../Routing/Router.ts";
 import {
     currentlyBuffered,
     currentQuality,
@@ -26,21 +26,22 @@ import {
     trackInfo,
     volume,
 } from "../../state.ts";
-import {RoutePath} from "../../Routing/routes.ts";
-import {heading} from "@targoninc/jess-components";
-import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
-import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
-import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
-import {LoopMode} from "@targoninc/lyda-shared/src/Enums/LoopMode";
-import {InteractionTemplates} from "../InteractionTemplates.ts";
-import {MusicTemplates} from "./MusicTemplates.ts";
-import {StreamingQuality} from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
-import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
-import {InteractionType} from "@targoninc/lyda-shared/src/Enums/InteractionType.ts";
-import {t} from "../../../locales";
-import {FeedType} from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
-import {DefaultImages} from "../../Enums/DefaultImages.ts";
+import { RoutePath } from "../../Routing/routes.ts";
+import { heading } from "@targoninc/jess-components";
+import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
+import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType";
+import { LoopMode } from "@targoninc/lyda-shared/src/Enums/LoopMode";
+import { InteractionTemplates } from "../InteractionTemplates.ts";
+import { MusicTemplates } from "./MusicTemplates.ts";
+import { StreamingQuality } from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
+import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
+import { InteractionType } from "@targoninc/lyda-shared/src/Enums/InteractionType.ts";
+import { t } from "../../../locales";
+import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
+import { DefaultImages } from "../../Enums/DefaultImages.ts";
+import { CoverContext } from "../../Enums/CoverContext.ts";
 
 export const PLAYCHECK_INTERVAL = 200;
 
@@ -334,7 +335,7 @@ export class PlayerTemplates {
                     playingElsewhere,
                     horizontal(
                         horizontal(
-                            MusicTemplates.cover(EntityType.track, track, "player-cover", () => {
+                            MusicTemplates.cover(EntityType.track, track, CoverContext.desktopPlayer, () => {
                                 const windowWidth = window.innerWidth;
                                 if (windowWidth < 600) {
                                     navigate(`${RoutePath.track}/` + track.id);
@@ -610,7 +611,7 @@ export class PlayerTemplates {
         return vertical(
             vertical(
                 horizontal(
-                    MusicTemplates.cover(EntityType.track, track, "fullsize-cover", () => {
+                    MusicTemplates.cover(EntityType.track, track, CoverContext.mobilePlayer, () => {
                         const windowWidth = window.innerWidth;
                         if (windowWidth < 600) {
                             navigate(`${RoutePath.track}/` + track.id);

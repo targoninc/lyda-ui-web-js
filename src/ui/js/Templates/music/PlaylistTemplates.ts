@@ -1,5 +1,5 @@
 import { Icons } from "../../Enums/Icons.ts";
-import { GenericTemplates, horizontal } from "../generic/GenericTemplates.ts";
+import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
 import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { Images } from "../../Enums/Images.ts";
@@ -21,6 +21,7 @@ import { Api } from "../../Api/Api.ts";
 import { t } from "../../../locales";
 import { Visibility } from "@targoninc/lyda-shared/src/Enums/Visibility.ts";
 import { Time } from "../../Classes/Helpers/Time.ts";
+import { CoverContext } from "../../Enums/CoverContext.ts";
 
 export class PlaylistTemplates {
     static addTrackToPlaylistModal(track: Track, playlists: Playlist[]) {
@@ -236,23 +237,17 @@ export class PlaylistTemplates {
             .build();
     }
 
-    static async playlistPage(data: { playlist: Playlist, canEdit: boolean }, user: User) {
+    static playlistPage(data: { playlist: Playlist, canEdit: boolean }, user: User) {
         const playlist = data.playlist;
         if (!playlist.tracks) {
             throw new Error(`Playlist ${playlist.id} has no tracks`);
         }
         const tracks = signal<ListTrack[]>(playlist.tracks);
-        const noTracks = compute(t => t.length === 0, tracks);
         const a_user = playlist.user;
         if (!a_user) {
             throw new Error(`Playlist ${playlist.id} has no user`);
         }
 
-        const coverLoading = signal(false);
-        const coverState = signal(Images.DEFAULT_COVER_PLAYLIST);
-        if (playlist.has_cover) {
-            coverState.value = Util.getPlaylistCover(playlist.id);
-        }
         const duration = playlist.tracks.reduce((acc, t) => acc + (t.track?.length ?? 0), 0);
 
         return create("div")
@@ -267,41 +262,24 @@ export class PlaylistTemplates {
                             .build(),
                         UserTemplates.userWidget(a_user, [], [], UserWidgetContext.singlePage),
                     ).build(),
-                create("div")
-                    .classes("playlist-info-container", "flex")
-                    .children(
-                        create("div")
-                            .classes("cover-container", "relative", data.canEdit ? "pointer" : "_")
-                            .onclick(e => PlaylistActions.replaceCover(e, playlist.id, data.canEdit, coverLoading))
-                            .children(
-                                when(coverLoading, create("div")
-                                    .classes("loader", "loader-small", "centeredInParent")
-                                    .id("cover-loader")
-                                    .build()),
-                                create("img")
-                                    .classes("cover", "blurOnParentHover", "nopointer")
-                                    .src(coverState)
-                                    .alt(playlist.title)
-                                    .build(),
-                            ).build(),
-                        create("div")
-                            .classes("flex-v")
-                            .children(
-                                PlaylistTemplates.audioActions(playlist, user, data.canEdit),
-                                horizontal(
-                                    create("span")
-                                        .classes("date", "text-small")
-                                        .text(t("CREATED_AT", Util.formatDate(playlist.created_at)))
-                                        .build(),
-                                    create("span")
-                                        .classes("date", "text-small")
-                                        .text(Time.format(duration))
-                                        .build(),
-                                ).build(),
-                                InteractionTemplates.interactions(EntityType.playlist, playlist),
-                            ).build(),
+                horizontal(
+                    MusicTemplates.cover(EntityType.playlist, playlist, CoverContext.standalone),
+                    vertical(
+                        PlaylistTemplates.audioActions(playlist, user, data.canEdit),
+                        horizontal(
+                            create("span")
+                                .classes("date", "text-small")
+                                .text(t("CREATED_AT", Util.formatDate(playlist.created_at)))
+                                .build(),
+                            create("span")
+                                .classes("date", "text-small")
+                                .text(Time.format(duration))
+                                .build(),
+                        ).build(),
+                        InteractionTemplates.interactions(EntityType.playlist, playlist),
                     ).build(),
-                MusicTemplates.tracksInList(noTracks, tracks, data.canEdit, playlist, "playlist"),
+                ).build(),
+                MusicTemplates.tracksInList(tracks, data.canEdit, playlist, "playlist"),
             ).build();
     }
 

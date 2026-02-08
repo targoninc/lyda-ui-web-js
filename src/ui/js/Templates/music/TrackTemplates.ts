@@ -31,17 +31,14 @@ import {
     manualQueue,
     playingHere,
 } from "../../state.ts";
-import { createModal, Ui } from "../../Classes/Ui.ts";
+import { createModal } from "../../Classes/Ui.ts";
 import { ApiRoutes } from "../../Api/ApiRoutes.ts";
-import { MediaActions } from "../../Actions/MediaActions.ts";
 import { RoutePath } from "../../Routing/routes.ts";
-import { DefaultImages } from "../../Enums/DefaultImages.ts";
 import { MusicTemplates } from "./MusicTemplates.ts";
 import { button, heading, input } from "@targoninc/jess-components";
 import { TrackCollaborator } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import { Repost } from "@targoninc/lyda-shared/src/Models/db/lyda/Repost";
 import { ListTrack } from "@targoninc/lyda-shared/src/Models/ListTrack";
 import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
@@ -70,6 +67,7 @@ import { AlbumActions } from "../../Actions/AlbumActions.ts";
 import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom.ts";
 import { TrackSale } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackSale.ts";
 import { TransactionTemplates } from "../money/TransactionTemplates.ts";
+import { CoverContext } from "../../Enums/CoverContext.ts";
 
 export class TrackTemplates {
     static collabIndicator(collab: TrackCollaborator): any {
@@ -81,71 +79,6 @@ export class TrackTemplates {
                     .text(collab.collab_type?.name)
                     .build(),
             ).build();
-    }
-
-    static trackCover(track: Track, coverType: "cover" | "small-cover", startCallback: Function | null = null) {
-        const imageState = signal(DefaultImages[EntityType.track]);
-        if (track.has_cover) {
-            imageState.value = Util.getImage(track.id, MediaFileType.trackCover);
-        }
-        const coverLoading = signal(false);
-        const start = async () => {
-            if (!startCallback) {
-                PlayManager.addStreamClientIfNotExists(track.id, track.length);
-                await PlayManager.startAtBeginningAsync(track.id);
-            } else {
-                await startCallback(track.id);
-            }
-        };
-        const isOwnTrack = compute(u => u?.id === track.user_id, currentUser);
-        const alwaysShowClass = compute((id): string => (track.id === id ? "always-show" : "_"), currentTrackId);
-
-        return create("div")
-            .classes("cover-container", "relative", "pointer", coverType)
-            .attributes("track_id", track.id)
-            .id(track.id)
-            .children(
-                create("img")
-                    .classes("cover", "blurOnParentHover")
-                    .src(imageState)
-                    .alt(track.title)
-                    .onclick(() => {
-                        Ui.showImageModal(imageState);
-                    }).build(),
-                when(
-                    isOwnTrack,
-                    create("div")
-                        .classes(
-                            "hidden",
-                            coverType === "cover" ? "showOnParentHover" : "_",
-                            "centeredInParent",
-                            "flex",
-                        ).children(
-                        GenericTemplates.deleteIconButton("delete-image-button", () =>
-                            MediaActions.deleteMedia(MediaFileType.trackCover, track.id, imageState, coverLoading),
-                        ),
-                        GenericTemplates.uploadIconButton("replace-image-button", () =>
-                            TrackActions.replaceCover(track.id, true, imageState, coverLoading),
-                        ),
-                        when(coverLoading, GenericTemplates.loadingSpinner()),
-                    ).build(),
-                ),
-                when(
-                    coverType !== "cover",
-                    create("div")
-                        .classes(
-                            "centeredInParent",
-                            "hidden",
-                            coverType !== "cover" ? "showOnParentHover" : "_",
-                            alwaysShowClass,
-                        ).children(GenericTemplates.playButton(track.id, start))
-                        .build(),
-                ),
-            ).build();
-    }
-
-    static smallListTrackCover(track: Track, startCallback: Function | null = null) {
-        return TrackTemplates.trackCover(track, "small-cover", startCallback);
     }
 
     static trackListWithPagination(
@@ -337,7 +270,7 @@ export class TrackTemplates {
                     .ondblclick(startCallback)
                     .children(
                         when(canEdit, GenericTemplates.verticalDragIndicator()),
-                        TrackTemplates.smallListTrackCover(track, startCallback),
+                        MusicTemplates.cover(EntityType.track, track, CoverContext.small, startCallback),
                         create("div")
                             .classes("flex", "align-children", "flex-grow", "space-between")
                             .children(
@@ -491,7 +424,7 @@ export class TrackTemplates {
                     create("div")
                         .classes("track-info-container", "flex", "align-bottom")
                         .children(
-                            TrackTemplates.trackCover(track, "cover"),
+                            MusicTemplates.cover(EntityType.track, track, CoverContext.standalone),
                             horizontal(
                                 TrackTemplates.playButton(track),
                                 TrackTemplates.waveform(track, track.processed ? JSON.parse(track.loudness_data) : []),
@@ -533,7 +466,7 @@ export class TrackTemplates {
                                         ).classes("space-between"),
                                         when(bought, vertical(
                                             horizontal(
-                                                TrackTemplates.trackCover(track, "small-cover"),
+                                                MusicTemplates.cover(EntityType.track, track, CoverContext.small),
                                                 MusicTemplates.title(EntityType.track, track.title, track.id, icons, "text-large", false),
                                             ).classes("align-children"),
                                             create("p")
@@ -747,7 +680,7 @@ export class TrackTemplates {
 
         return horizontal(
             horizontal(
-                MusicTemplates.cover(EntityType.track, data.track, "inline-cover"),
+                MusicTemplates.cover(EntityType.track, data.track, CoverContext.inline),
                 vertical(
                     MusicTemplates.title(EntityType.track, data.track.title, data.track.id),
                     horizontal(

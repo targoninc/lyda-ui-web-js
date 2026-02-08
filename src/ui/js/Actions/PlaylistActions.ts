@@ -4,14 +4,10 @@ import { createModal, notify } from "../Classes/Ui.ts";
 import { PlayManager } from "../Streaming/PlayManager.ts";
 import { QueueManager } from "../Streaming/QueueManager.ts";
 import { navigate } from "../Routing/Router.ts";
-import { Signal } from "@targoninc/jess";
-import { MediaUploader } from "../Api/MediaUploader.ts";
 import { RoutePath } from "../Routing/routes.ts";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
-import { NotificationType } from "../Enums/NotificationType.ts";
-import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import { playingHere } from "../state.ts";
 import { Api } from "../Api/Api.ts";
 import { startItem } from "./MusicActions.ts";
@@ -49,32 +45,6 @@ export class PlaylistActions {
         const success = await Api.addTrackToPlaylists(track_id, playlist_ids);
         Util.removeModal();
         return success;
-    }
-
-    static async replaceCover(e: MouseEvent, id: number, canEdit: boolean, loading: Signal<boolean>) {
-        const target = e.target as HTMLImageElement;
-        if (!target || !canEdit) {
-            return;
-        }
-        const oldSrc = target.src;
-        const fileInput = document.createElement("input");
-        fileInput.type = "file";
-        fileInput.accept = "image/*";
-        fileInput.onchange = async (e) => {
-            loading.value = true;
-            const fileTarget = e.target as HTMLInputElement;
-            const file = fileTarget.files![0];
-            try {
-                await MediaUploader.upload(MediaFileType.playlistCover, id, file);
-                notify(`${t("COVER_UPLOADED")}`, NotificationType.success);
-                await Util.updateImage(URL.createObjectURL(file), oldSrc);
-            } catch (e: any) {
-                notify(e.toString(), NotificationType.error);
-            }
-            loading.value = false;
-        };
-        fileInput.onabort = () => loading.value = false;
-        fileInput.click();
     }
 
     static async startTrackInPlaylist(playlist: Playlist, track: Track, stopIfPlaying = false) {

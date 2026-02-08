@@ -1,7 +1,7 @@
 import { AuthActions } from "../Actions/AuthActions.ts";
 import { LandingPageTemplates } from "./LandingPageTemplates.ts";
 import { UserTemplates } from "./account/UserTemplates.ts";
-import { AnyElement, create, signal, when } from "@targoninc/jess";
+import { AnyElement, compute, create, nullElement, signal, when } from "@targoninc/jess";
 import { SearchTemplates } from "./SearchTemplates.ts";
 import { SettingsTemplates } from "./account/SettingsTemplates.ts";
 import { RoadmapTemplates } from "./RoadmapTemplates.ts";
@@ -34,6 +34,7 @@ import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 import { SubscriptionTemplates } from "./money/SubscriptionTemplates.ts";
 import { t } from "../../locales";
 import { TransactionTemplates } from "./money/TransactionTemplates.ts";
+import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, (route: Route, params: Record<string, string>) => Promise<AnyElement> | AnyElement> = {
@@ -41,20 +42,20 @@ export class PageTemplates {
         [RoutePath.following]: () => MusicTemplates.trackFeed(FeedType.following),
         [RoutePath.history]: () => MusicTemplates.trackFeed(FeedType.history),
         [RoutePath.album]: AlbumTemplates.albumPage,
-        [RoutePath.playlist]: this.playlistPage,
+        [RoutePath.playlist]: PageTemplates.playlistPage,
         [RoutePath.profile]: UserTemplates.profile,
         [RoutePath.settings]: SettingsTemplates.settingsPage,
-        [RoutePath.statistics]: this.statisticsPage,
-        [RoutePath.track]: this.trackPage,
+        [RoutePath.statistics]: PageTemplates.statisticsPage,
+        [RoutePath.track]: PageTemplates.trackPage,
         [RoutePath.upload]: TrackEditTemplates.uploadPage,
-        [RoutePath.library]: this.libraryPage,
-        [RoutePath.logout]: this.logoutPage,
+        [RoutePath.library]: PageTemplates.libraryPage,
+        [RoutePath.logout]: PageTemplates.logoutPage,
         [RoutePath.login]: LandingPageTemplates.newLandingPage,
-        [RoutePath.faq]: this.faqPage,
-        [RoutePath.notFound]: this.notFoundPage,
-        [RoutePath.unapprovedTracks]: this.unapprovedTracksPage,
+        [RoutePath.faq]: PageTemplates.faqPage,
+        [RoutePath.notFound]: PageTemplates.notFoundPage,
+        [RoutePath.unapprovedTracks]: PageTemplates.unapprovedTracksPage,
         [RoutePath.test]: LandingPageTemplates.newLandingPage,
-        [RoutePath.subscribe]: this.subscribePage,
+        [RoutePath.subscribe]: PageTemplates.subscribePage,
         [RoutePath.passwordReset]: LandingPageTemplates.newLandingPage,
         [RoutePath.verifyEmail]: LandingPageTemplates.newLandingPage,
         [RoutePath.search]: SearchTemplates.searchPage,
@@ -129,15 +130,24 @@ export class PageTemplates {
                 .build();
         }
 
-        const playlist = await Api.getPlaylistById(playlistId);
-        if (!playlist) {
-            return create("div")
-                .text(t("PLAYLIST_NOT_FOUND"))
-                .build();
-        }
+        const loading = signal(true);
+        const playlist = signal<{
+            playlist: Playlist;
+            canEdit: boolean;
+        } | null>(null);
+        Api.getPlaylistById(playlistId).then(p => {
+            console.log(p);
+            playlist.value = p;
+            document.title = p?.playlist.title ?? "Playlist not found";
+        }).finally(() => loading.value = false);
 
-        document.title = playlist.playlist.title;
-        return await PlaylistTemplates.playlistPage(playlist, user);
+        return vertical(
+            when(loading, GenericTemplates.loadingSpinner()),
+            when(playlist, create("div")
+                .text(t("PLAYLIST_NOT_FOUND"))
+                .build(), true),
+            compute(p => p ? PlaylistTemplates.playlistPage(p, user) : nullElement(), playlist),
+        ).build();
     }
 
     static statisticsPage() {

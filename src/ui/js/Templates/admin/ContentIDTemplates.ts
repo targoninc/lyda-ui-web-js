@@ -1,18 +1,19 @@
-import {compute, create, signal, signalMap, StringOrSignal, when} from "@targoninc/jess";
-import {DashboardTemplates} from "./DashboardTemplates.ts";
-import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
-import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
-import {t} from "../../../locales";
-import {button, heading, text, toggle} from "@targoninc/jess-components";
-import {ProgressPart} from "../../Models/ProgressPart.ts";
-import {ProgressState} from "@targoninc/lyda-shared/src/Enums/ProgressState";
-import {Api} from "../../Api/Api.ts";
-import {eventBus} from "../../Classes/EventBus.ts";
-import {ContentIDMatch} from "../../Models/ContentIDMatch.ts";
-import {MusicTemplates} from "../music/MusicTemplates.ts";
-import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
+import { compute, create, signal, signalMap, StringOrSignal, when } from "@targoninc/jess";
+import { DashboardTemplates } from "./DashboardTemplates.ts";
+import { Permissions } from "@targoninc/lyda-shared/src/Enums/Permissions";
+import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
+import { t } from "../../../locales";
+import { button, heading, text, toggle } from "@targoninc/jess-components";
+import { ProgressPart } from "../../Models/ProgressPart.ts";
+import { ProgressState } from "@targoninc/lyda-shared/src/Enums/ProgressState";
+import { Api } from "../../Api/Api.ts";
+import { eventBus } from "../../Classes/EventBus.ts";
+import { ContentIDMatch } from "../../Models/ContentIDMatch.ts";
+import { MusicTemplates } from "../music/MusicTemplates.ts";
+import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { UserTemplates } from "../account/UserTemplates.ts";
+import { CoverContext } from "../../Enums/CoverContext.ts";
 
 interface LogEvent {
     type: "success" | "error" | "info" | "debug";
@@ -232,7 +233,7 @@ export class ContentIDTemplates {
                     return create("details").children(
                         create("summary").children(
                             horizontal(
-                                MusicTemplates.cover(EntityType.track, match.track, "inline-cover"),
+                                MusicTemplates.cover(EntityType.track, match.track, CoverContext.inline),
                                 MusicTemplates.title(EntityType.track, match.track.title, match.track.id),
                                 text({
                                     tag: "span",
@@ -246,7 +247,7 @@ export class ContentIDTemplates {
                                 return create("div").classes("content-id-matches-grid", "padded-small").children(
                                     create("div").classes("content-id-match-part", "card", "secondary").children(
                                         horizontal(
-                                            MusicTemplates.cover(EntityType.track, m, "inline-cover"),
+                                            MusicTemplates.cover(EntityType.track, m, CoverContext.inline),
                                             vertical(
                                                 MusicTemplates.title(EntityType.track, m.title, m.id),
                                                 UserTemplates.userWidget(m.user!)

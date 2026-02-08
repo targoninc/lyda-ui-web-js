@@ -11,7 +11,7 @@ export async function baseHtml(req: Request) {
     const apiUrl = process.env.API_URL ?? "https://api.lyda.app";
     let ogType = "website";
 
-    let id, newimage, res, type, optionalTags;
+    let id, newimage, res, type, optionalTags = "";
     if (url.includes("/track/")) {
         id = url.split("/").at(-1);
         newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.trackCover}&quality=500`;

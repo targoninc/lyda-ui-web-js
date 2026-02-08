@@ -6,11 +6,10 @@ import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
 import { Images } from "../../Enums/Images.ts";
 import { getPlayIcon, Util } from "../../Classes/Util.ts";
 import { createModal, Ui } from "../../Classes/Ui.ts";
-import { AnyNode, compute, create, InputType, nullElement, signal, Signal, when } from "@targoninc/jess";
-import { navigate, Route } from "../../Routing/Router.ts";
+import { AnyNode, compute, create, InputType, signal, Signal, when } from "@targoninc/jess";
+import { Route } from "../../Routing/Router.ts";
 import { currentTrackId, currentUser, loadingAudio, playingFrom, playingHere } from "../../state.ts";
 import { PageTemplates } from "../PageTemplates.ts";
-import { RoutePath } from "../../Routing/routes.ts";
 import { button, input, textarea, toggle } from "@targoninc/jess-components";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
@@ -24,6 +23,7 @@ import { t } from "../../../locales";
 import { Visibility } from "@targoninc/lyda-shared/src/Enums/Visibility";
 import { Time } from "../../Classes/Helpers/Time.ts";
 import { CustomText } from "../../Classes/Helpers/CustomText.ts";
+import { CoverContext } from "../../Enums/CoverContext.ts";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
@@ -106,7 +106,7 @@ export class AlbumTemplates {
                 }
             })
             .children(
-                await AlbumTemplates.smallAlbumCover(item),
+                MusicTemplates.cover(EntityType.album, item, CoverContext.inline),
                 create("span")
                     .text(item.title)
                     .build(),
@@ -253,19 +253,6 @@ export class AlbumTemplates {
             ).build();
     }
 
-    static async smallAlbumCover(album: Album) {
-        const coverState = signal(Images.DEFAULT_COVER_ALBUM);
-        if (album.has_cover) {
-            coverState.value = Util.getAlbumCover(album.id);
-        }
-
-        return create("img")
-            .classes("cover", "rounded", "nopointer", "blurOnParentHover")
-            .styles("height", "var(--font-size-large)")
-            .src(coverState)
-            .alt(album.title).build();
-    }
-
     private static albumPageDisplay(album: Album, canEdit: boolean) {
         const coverLoading = signal(false);
         const coverState = signal(Images.DEFAULT_COVER_ALBUM);
@@ -273,7 +260,6 @@ export class AlbumTemplates {
             coverState.value = Util.getAlbumCover(album.id);
         }
         const albumUser = album.user!;
-        const noTracks = signal(album.tracks?.length === 0);
         const tracks = signal<ListTrack[]>(album.tracks ?? []);
         const duration = album.tracks!.reduce((acc, t) => acc + (t.track?.length ?? 0), 0);
 
@@ -302,20 +288,7 @@ export class AlbumTemplates {
                 create("div")
                     .classes("album-info-container", "flex")
                     .children(
-                        create("div")
-                            .classes("cover-container", "relative", canEdit ? "pointer" : "_")
-                            .onclick(e => AlbumActions.replaceCover(e, album.id, canEdit, coverLoading))
-                            .children(
-                                when(coverLoading, create("div")
-                                    .classes("loader", "loader-small", "centeredInParent")
-                                    .id("cover-loader")
-                                    .build()),
-                                create("img")
-                                    .classes("cover", "blurOnParentHover", "nopointer")
-                                    .src(coverState)
-                                    .alt(album.title)
-                                    .build(),
-                            ).build(),
+                        MusicTemplates.cover(EntityType.album, album, CoverContext.standalone),
                         vertical(
                             AlbumTemplates.audioActions(album, canEdit),
                             InteractionTemplates.interactions(EntityType.album, album),
@@ -326,7 +299,7 @@ export class AlbumTemplates {
                     .classes("card", "description", "break-lines", "padded")
                     .html(CustomText.renderToHtml(album.description))
                     .build(),
-                MusicTemplates.tracksInList(noTracks, tracks, canEdit, album, "album"),
+                MusicTemplates.tracksInList(tracks, canEdit, album, "album"),
             ).build();
     }
 

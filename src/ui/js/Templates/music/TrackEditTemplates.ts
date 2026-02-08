@@ -54,6 +54,7 @@ import { t } from "../../../locales";
 import { Visibility } from "@targoninc/lyda-shared/src/Enums/Visibility.ts";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 import { TrackTemplates } from "./TrackTemplates.ts";
+import { CoverContext } from "../../Enums/CoverContext.ts";
 
 export class TrackEditTemplates {
     static uploadPage() {
@@ -882,7 +883,7 @@ export class TrackEditTemplates {
                         .build(),
                     MusicTemplates.entityCoverButtons(MediaFileType.trackCover, track, imageState, coverLoading),
                     when(coverLoading, GenericTemplates.loadingSpinner()),
-                    MusicTemplates.cover(EntityType.track, track, "inline-cover"),
+                    MusicTemplates.cover(EntityType.track, track, CoverContext.inline),
                 ).classes("align-end"),
                 when(changed, horizontal(
                     create("span")

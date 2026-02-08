@@ -24,6 +24,7 @@ import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
 import { DragActions } from "../../Actions/DragActions.ts";
 import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import { t } from "../../../locales";
+import { CoverContext } from "../../Enums/CoverContext.ts";
 
 export class QueueTemplates {
     static queueItem(track: Track, index: number, isManual: boolean, isCurrent: boolean = false) {
@@ -63,13 +64,13 @@ export class QueueTemplates {
 
         return base
             .on("dblclick", async () => {
-                await startItem(EntityType.track, track);
+                await startItem(track);
             })
             .children(
                 horizontal(
                     when(isManual, GenericTemplates.verticalDragIndicator()),
-                    MusicTemplates.cover(EntityType.track, track, "queue-cover", async () => {
-                        await startItem(EntityType.track, track);
+                    MusicTemplates.cover(EntityType.track, track, CoverContext.queue, async () => {
+                        await startItem(track);
                         QueueManager.removeIndexFromManualQueue(index);
                     }),
                     vertical(

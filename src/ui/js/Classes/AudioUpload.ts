@@ -126,16 +126,16 @@ export class AudioUpload {
             })) {
                 this.setProgressPartState({
                     state: ProgressState.error,
-                    text: t("FAILED_UPLOADING_COVER"),
+                    text: t("FAILED_UPLOADING_IMAGE"),
                     icon: "error"
                 });
-                return `${t("FAILED_UPLOADING_COVER")}`;
+                return `${t("FAILED_UPLOADING_IMAGE")}`;
             }
         }
 
         this.setProgressPartState({
             state: ProgressState.complete,
-            text: t("COVER_UPLOADED"),
+            text: t("IMAGE_UPLOADED"),
             progress: 100
         });
     }

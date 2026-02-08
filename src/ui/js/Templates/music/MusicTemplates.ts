@@ -36,7 +36,8 @@ import { ListTrack } from "@targoninc/lyda-shared/src/Models/ListTrack";
 import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom.ts";
 import { AlbumActions } from "../../Actions/AlbumActions.ts";
 import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
-import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import { CoverContext } from "../../Enums/CoverContext.ts";
 
 export class MusicTemplates {
     static feedEntry(item: Track, newPlayingFrom: PlayingFrom) {
@@ -59,7 +60,7 @@ export class MusicTemplates {
             })
             .children(
                 MusicTemplates.playButton(EntityType.track, item.id, () => startItem(item, newPlayingFrom)),
-                MusicTemplates.cover(EntityType.track, item, "inline-cover"),
+                MusicTemplates.cover(EntityType.track, item, CoverContext.inline),
                 create("div")
                     .classes("flex", "flex-grow", "no-gap", "space-between")
                     .children(
@@ -95,7 +96,7 @@ export class MusicTemplates {
     static cover(
         type: EntityType,
         item: FeedItem,
-        coverContext: string,
+        coverContext: CoverContext,
         onclickOverride: Function | null = null,
     ) {
         const imageState = signal(DefaultImages[type]);
@@ -108,13 +109,14 @@ export class MusicTemplates {
             if (onclickOverride) {
                 await onclickOverride();
             } else {
+                // TODO: Handle based on type
                 await startItem(item as Track);
             }
-        }
+        };
         const isOwnItem = compute(u => u?.id === item.user_id, currentUser);
-        const playButtonContexts = ["card-cover", "queue-cover"];
+        const playButtonContexts = [CoverContext.card, CoverContext.queue];
         const onlyShowOnHover = compute(
-            id => coverContext !== "cover" && id !== item.id,
+            id => coverContext !== CoverContext.standalone && id !== item.id,
             currentTrackId,
         );
         const buttonClass = compute(
@@ -140,7 +142,7 @@ export class MusicTemplates {
                     create("div")
                         .classes(
                             "hidden",
-                            coverContext === "cover" ? "showOnParentHover" : "_",
+                            coverContext === CoverContext.standalone ? "showOnParentHover" : "_",
                             "centeredInParent",
                             "flex",
                         ).children(
@@ -169,8 +171,7 @@ export class MusicTemplates {
                 ),
             ),
             GenericTemplates.uploadIconButton("replace-image-button", () =>
-                TrackActions.replaceCover(item.id, true, imageState, coverLoading),
-            ),
+                MediaActions.replaceImage(fileType, item.id, true, imageState, coverLoading)),
         );
     }
 
@@ -223,7 +224,7 @@ export class MusicTemplates {
             const params = { offset, filter };
             loading$.value = true;
             const res = await Api.getFeed(`${ApiRoutes.trackFeed}/${type}`, Object.assign(params, {
-                id: user?.id
+                id: user?.id,
             }));
             const newTracks = res ?? [];
 
@@ -262,19 +263,20 @@ export class MusicTemplates {
                     TrackTemplates.trackListWithPagination(tracks$, pageState, {
                         type,
                         name: getFeedDisplayName(type, user?.displayname),
-                        id: user?.username
+                        id: user?.username,
                     }, loading$, search, nextDisabled, searchableFeedTypes.includes(type)),
                 ),
             ).build();
     }
 
     static tracksInList(
-        noTracks: Signal<boolean>,
         tracks: Signal<ListTrack[]>,
         canEdit: boolean,
         list: Album | Playlist,
         type: "album" | "playlist",
     ) {
+        const noTracks = compute(t => t.length === 0, tracks);
+
         return create("div")
             .classes("flex-v")
             .children(
@@ -397,7 +399,7 @@ export class MusicTemplates {
             .classes(`${type}-card`, "padded", "flex-v", "small-gap", isSecondary ? "secondary" : "_")
             .children(
                 vertical(
-                    MusicTemplates.cover(type, list, "card-cover", async () => {
+                    MusicTemplates.cover(type, list, CoverContext.card, async () => {
                         const firstTrack = list.tracks![0];
                         if (type === "album") {
                             await AlbumActions.startTrackInAlbum(list as Album, firstTrack.track!, true);
