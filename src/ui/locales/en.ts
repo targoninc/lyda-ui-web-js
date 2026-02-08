@@ -169,6 +169,7 @@ export const en = {
     TRACKS: "Tracks",
     ALBUMS: "Albums",
     PLAYLISTS: "Playlists",
+    BUYERS: "Buyers",
     REPOSTS: "Reposts",
     COMMENTS: "Comments",
     LISTENING_HISTORY: "Listening history",

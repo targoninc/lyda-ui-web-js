@@ -74,6 +74,7 @@ export class ApiRoutes {
     static getUnapprovedCollabs = ApiRoutes.tracks + "/unapprovedCollabs";
     static createTrack = ApiRoutes.tracks + "/create";
     static contentIDMatches = ApiRoutes.tracks + "/contentIDMatches";
+    static getTrackBuyers = ApiRoutes.tracks + "/buyers";
 
     private static tracksActions = ApiRoutes.tracks + "/actions";
     static deleteTrack = ApiRoutes.tracksActions + "/delete";

@@ -872,6 +872,20 @@ export class GenericTemplates {
              .build(),
         );
     }
+
+    static paginationControls(pageState: Signal<number>, nextDisabled: Signal<boolean>) {
+        const previousCallback = () => pageState.value = pageState.value - 1;
+        const nextCallback = () => pageState.value = pageState.value + 1;
+
+        return compute((newPage, nd) => GenericTemplates.#paginationControls(newPage, previousCallback, nextCallback, nd), pageState, nextDisabled);
+    }
+
+    static #paginationControls(currentPage: number, previousCallback: Function, nextCallback: Function, nextDisabled = false) {
+        return horizontal(
+            GenericTemplates.roundIconButton({ icon: "arrow_back_ios_new" }, previousCallback, "", [currentPage === 1 ? "disabled" : "_", "pagination-button"]),
+            GenericTemplates.roundIconButton({ icon: "arrow_forward_ios" }, nextCallback, "", [(currentPage === Infinity || nextDisabled) ? "disabled" : "_", "pagination-button"]),
+        ).build();
+    }
 }
 
 export function vertical(...children: (AnyNode | Signal<AnyNode> | Signal<AnyElement>)[]) {

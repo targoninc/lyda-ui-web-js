@@ -45,6 +45,7 @@ import { t } from "../../locales";
 import { SubscriptionPayment } from "@targoninc/lyda-shared/dist/Models/db/finance/SubscriptionPayment";
 import {ContentIDMatch} from "../Models/ContentIDMatch.ts";
 import { TransactionInfo } from "@targoninc/lyda-shared/src/Models/TransactionInfo.ts";
+import { TrackSale } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackSale.ts";
 
 export class Api {
     //region Interactions
@@ -653,6 +654,14 @@ export class Api {
             isrc: track.isrc,
             upc: track.upc,
             price: track.price,
+        });
+    }
+
+    static async getTrackBuyers(id: number, offset: number = 0, limit: number = 100) {
+        return await get<TrackSale[]>(ApiRoutes.getTrackBuyers, {
+            id,
+            offset,
+            limit,
         });
     }
 

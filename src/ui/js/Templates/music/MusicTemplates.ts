@@ -360,7 +360,7 @@ export class MusicTemplates {
             .children(
                 horizontal(
                     horizontal(
-                        TrackTemplates.paginationControls(page$, nextDisabled),
+                        GenericTemplates.paginationControls(page$, nextDisabled),
                         when(hasSearch, input({
                             type: InputType.text,
                             validators: [],
@@ -383,7 +383,7 @@ export class MusicTemplates {
                     entities$,
                 ),
                 when(empty, GenericTemplates.noTracks()),
-                TrackTemplates.paginationControls(page$, nextDisabled),
+                GenericTemplates.paginationControls(page$, nextDisabled),
             ).build();
     }
 

@@ -19,6 +19,7 @@ import {
     nullElement,
     Signal,
     signal,
+    signalMap,
     TypeOrSignal,
     when,
 } from "@targoninc/jess";
@@ -58,7 +59,6 @@ import {
     CreateOrderData,
     OnApproveActions,
     OnApproveData,
-// @ts-expect-error bc idek
 } from "@paypal/paypal-js/types/components/buttons";
 import { Api } from "../../Api/Api.ts";
 import { PaymentProvider } from "@targoninc/lyda-shared/src/Enums/PaymentProvider";
@@ -68,6 +68,7 @@ import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 import { CommentTemplates } from "../CommentTemplates.ts";
 import { AlbumActions } from "../../Actions/AlbumActions.ts";
 import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom.ts";
+import { TrackSale } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackSale.ts";
 
 export class TrackTemplates {
     static collabIndicator(collab: TrackCollaborator): any {
@@ -162,7 +163,7 @@ export class TrackTemplates {
             .children(
                 horizontal(
                     horizontal(
-                        TrackTemplates.paginationControls(pageState, nextDisabled),
+                        GenericTemplates.paginationControls(pageState, nextDisabled),
                         when(hasSearch, input({
                             type: InputType.text,
                             validators: [],
@@ -186,7 +187,7 @@ export class TrackTemplates {
                     items$,
                 ),
                 when(empty, GenericTemplates.noTracks()),
-                TrackTemplates.paginationControls(pageState, nextDisabled),
+                GenericTemplates.paginationControls(pageState, nextDisabled),
             ).build();
     }
 
@@ -207,20 +208,6 @@ export class TrackTemplates {
             .classes("flex-v", "reverse", "track-list")
             .children(...trackList)
             .build();
-    }
-
-    static paginationControls(pageState: Signal<number>, nextDisabled: Signal<boolean>) {
-        const previousCallback = () => pageState.value = pageState.value - 1;
-        const nextCallback = () => pageState.value = pageState.value + 1;
-
-        return compute((newPage, nd) => TrackTemplates.#paginationControls(newPage, previousCallback, nextCallback, nd), pageState, nextDisabled);
-    }
-
-    static #paginationControls(currentPage: number, previousCallback: Function, nextCallback: Function, nextDisabled = false) {
-        return horizontal(
-            GenericTemplates.roundIconButton({ icon: "arrow_back_ios_new" }, previousCallback, "", [currentPage === 1 ? "disabled" : "_", "pagination-button"]),
-            GenericTemplates.roundIconButton({ icon: "arrow_forward_ios" }, nextCallback, "", [(currentPage === Infinity || nextDisabled) ? "disabled" : "_", "pagination-button"]),
-        ).build();
     }
 
     static waveform(track: Track, loudnessData: number[], small = false) {
@@ -468,7 +455,7 @@ export class TrackTemplates {
         const backgroundImage = compute(c => trackData.canDownload ? `url(${c})` : "none", coverFile);
         const bought = trackData.canDownload && !trackData.canEdit;
         const selectedTab$ = signal(0);
-        const tabs = [t("COMMENTS"), t("ALBUMS"), t("PLAYLISTS")];
+        const tabs = [t("COMMENTS"), t("ALBUMS"), t("PLAYLISTS"), t("BUYERS")];
 
         return create("div")
             .classes("single-page", "rounded-large", "relative")
@@ -617,6 +604,10 @@ export class TrackTemplates {
                     when(
                         tabSelected(selectedTab$, 2),
                         TrackTemplates.inPlaylistsList(track),
+                    ),
+                    when(
+                        tabSelected(selectedTab$, 3),
+                        TrackTemplates.buyersList(track),
                     ),
                 ).classes("noflexwrap", "padded-large")
                  .styles("min-height", "80dvh", "position", "inherit"),
@@ -911,5 +902,32 @@ export class TrackTemplates {
                     .styles("max-width", "300px")
                     .id(id),
             ).build();
+    }
+
+    private static buyersList(track: Track) {
+        const buyers$ = signal<TrackSale[]>([]);
+        const page$ = signal(1);
+        const PAGE_SIZE = 10;
+        const offset$ = compute(p => (p - 1) * PAGE_SIZE, page$);
+        const nextDisabled$ = compute(b => b.length < PAGE_SIZE, buyers$);
+        const loading$ = signal(false);
+        const load = () => {
+            loading$.value = true;
+            Api.getTrackBuyers(track.id, offset$.value, PAGE_SIZE).then(b => {
+                buyers$.value = b ?? [];
+            }).finally(() => loading$.value = false);
+        }
+        load();
+
+        return vertical(
+            GenericTemplates.paginationControls(page$, nextDisabled$),
+            signalMap(
+                buyers$,
+                vertical(),
+                sale => horizontal(
+                    UserTemplates.userWidget(sale.user!, [], [], UserWidgetContext.singlePage)
+                ).build()
+            )
+        ).build();
     }
 }
