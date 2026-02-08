@@ -3,7 +3,6 @@ import { AnyNode, compute, create, InputType, Signal, signal, signalMap, TypeOrS
 import { currentTrackId, currentUser, loadingAudio, manualQueue, playingFrom, playingHere } from "../../state.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { getPlayIcon, Util } from "../../Classes/Util.ts";
-import { Time } from "../../Classes/Helpers/Time.ts";
 import { TrackTemplates } from "./TrackTemplates.ts";
 import { DefaultImages } from "../../Enums/DefaultImages.ts";
 import { PlayManager } from "../../Streaming/PlayManager.ts";
@@ -78,10 +77,7 @@ export class MusicTemplates {
                                     .classes("flex")
                                     .children(
                                         UserTemplates.userLink(UserWidgetContext.card, item.user!, item.artistname),
-                                        create("span")
-                                            .classes("date", "text-small", "nopointer", "color-dim", "align-center")
-                                            .text(Time.ago(item.created_at))
-                                            .build(),
+                                        GenericTemplates.timestamp(item.created_at),
                                     ).build(),
                             ).build(),
                         create("div")

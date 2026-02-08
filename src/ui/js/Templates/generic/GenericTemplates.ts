@@ -33,6 +33,7 @@ import { Filter } from "@targoninc/lyda-shared/src/Models/Filter";
 import { ProgressState } from "@targoninc/lyda-shared/src/Enums/ProgressState";
 import { ProgressPart } from "../../Models/ProgressPart.ts";
 import { t } from "../../../locales";
+import { Time } from "../../Classes/Helpers/Time.ts";
 
 export class GenericTemplates {
     static icon(
@@ -885,6 +886,13 @@ export class GenericTemplates {
             GenericTemplates.roundIconButton({ icon: "arrow_back_ios_new" }, previousCallback, "", [currentPage === 1 ? "disabled" : "_", "pagination-button"]),
             GenericTemplates.roundIconButton({ icon: "arrow_forward_ios" }, nextCallback, "", [(currentPage === Infinity || nextDisabled) ? "disabled" : "_", "pagination-button"]),
         ).build();
+    }
+
+    static timestamp(timestamp: Date | string | number) {
+        return create("span")
+            .classes("date", "text-small", "nopointer", "color-dim", "align-center")
+            .text(Time.ago(timestamp))
+            .build();
     }
 }
 

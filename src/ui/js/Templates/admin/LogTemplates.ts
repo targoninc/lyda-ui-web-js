@@ -75,7 +75,7 @@ export class LogTemplates {
                 "log-properties-cell",
             ],
             data: [
-                create("span").text(Time.ago(l.createdAt)),
+                GenericTemplates.timestamp(l.created_at),
                 UserTemplates.userWidget(l.user),
                 create("span").text(l.actionName),
                 UserTemplates.userWidget(l.actioned_user),

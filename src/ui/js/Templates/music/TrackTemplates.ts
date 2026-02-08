@@ -69,6 +69,7 @@ import { CommentTemplates } from "../CommentTemplates.ts";
 import { AlbumActions } from "../../Actions/AlbumActions.ts";
 import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom.ts";
 import { TrackSale } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackSale.ts";
+import { TransactionTemplates } from "../money/TransactionTemplates.ts";
 
 export class TrackTemplates {
     static collabIndicator(collab: TrackCollaborator): any {
@@ -347,10 +348,7 @@ export class TrackTemplates {
                                             .classes("nopointer", "text-small", "align-center")
                                             .text(Time.format(track.length))
                                             .build(),
-                                        create("span")
-                                            .classes("date", "text-small", "nopointer", "color-dim", "align-center")
-                                            .text(Time.ago(track.created_at))
-                                            .build(),
+                                        GenericTemplates.timestamp(track.created_at),
                                     ),
                                     ...graphics,
                                 ),
@@ -761,10 +759,7 @@ export class TrackTemplates {
                             .classes("warning")
                             .text(collabType.name)
                             .build(),
-                        create("span")
-                            .classes("text-small")
-                            .text(Time.ago(data.created_at))
-                            .build(),
+                        GenericTemplates.timestamp(data.created_at),
                     ).classes("small-gap", "align-children"),
                 ),
             ),
@@ -925,8 +920,10 @@ export class TrackTemplates {
                 buyers$,
                 vertical(),
                 sale => horizontal(
+                    TransactionTemplates.amount("in", sale.amount_ct / 100),
+                    GenericTemplates.timestamp(sale.created_at),
                     UserTemplates.userWidget(sale.user!, [], [], UserWidgetContext.singlePage)
-                ).build()
+                ).classes("align-children").build()
             )
         ).build();
     }

@@ -101,7 +101,7 @@ export class TransactionTemplates {
         return TableTemplates.tr({
             cellClasses: [],
             data: [
-                TransactionTemplates.amount(t),
+                TransactionTemplates.amount(t.direction, t.total),
                 text(t.paymentProcessor),
                 TransactionTemplates.itemName(t),
                 text(Time.agoUpdating(t.date)),
@@ -109,16 +109,16 @@ export class TransactionTemplates {
         });
     }
 
-    static amount(t: Transaction) {
-        if (t.direction === "out") {
+    static amount(direction: "in" | "out", total: number) {
+        if (direction === "out") {
             return horizontal(
                 text("-"),
-                text(currency(t.total)),
+                text(currency(total)),
             ).classes("nogap", "error");
         }
 
         return horizontal(
-            text(currency(t.total)),
+            text(currency(total)),
         ).classes("positive");
     }
 

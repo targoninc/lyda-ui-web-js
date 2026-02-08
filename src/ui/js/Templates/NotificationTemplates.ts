@@ -1,6 +1,5 @@
 import {NotificationParser} from "../Classes/Helpers/NotificationParser.ts";
 import {create, when, nullElement, signalMap, StringOrSignal, compute, Signal, signal} from "@targoninc/jess";
-import {Time} from "../Classes/Helpers/Time.ts";
 import {navigate} from "../Routing/Router.ts";
 import {copy, Util} from "../Classes/Util.ts";
 import {UserActions} from "../Actions/UserActions.ts";
@@ -11,6 +10,7 @@ import {Notification} from "@targoninc/lyda-shared/src/Models/db/lyda/Notificati
 import {NotificationPart} from "@targoninc/lyda-shared/src/Models/NotifcationPart";
 import {Api} from "../Api/Api.ts";
 import {t} from "../../locales";
+import { GenericTemplates } from "./generic/GenericTemplates.ts";
 
 export class NotificationTemplates {
     static notificationInList(notification: Notification) {
@@ -27,10 +27,7 @@ export class NotificationTemplates {
                             .classes("flex", "align-children", "small-gap")
                             .children(...elements)
                             .build(),
-                        create("span")
-                            .classes("text-xsmall")
-                            .text(Time.ago(notification.created_at))
-                            .build()
+                        GenericTemplates.timestamp(notification.created_at)
                     ).build()
             ).build();
     }
