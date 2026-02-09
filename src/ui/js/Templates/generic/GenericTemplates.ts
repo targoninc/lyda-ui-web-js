@@ -893,8 +893,11 @@ export class GenericTemplates {
     static #paginationControls(currentPage: number, previousCallback: Function, nextCallback: Function, nextDisabled = false) {
         return horizontal(
             GenericTemplates.roundIconButton({ icon: "arrow_back_ios_new" }, previousCallback, "", [currentPage === 1 ? "disabled" : "_", "pagination-button"]),
+            create("span")
+                .classes(TextSize.small, "color-dim")
+                .text(currentPage),
             GenericTemplates.roundIconButton({ icon: "arrow_forward_ios" }, nextCallback, "", [(currentPage === Infinity || nextDisabled) ? "disabled" : "_", "pagination-button"]),
-        ).build();
+        ).classes("align-children").build();
     }
 
     static timestamp(timestamp: Date | string | number) {
