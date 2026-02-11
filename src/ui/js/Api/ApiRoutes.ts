@@ -41,6 +41,7 @@ export class ApiRoutes {
     static updateCacheKey = ApiRoutes.userActions + "/update-cache-key";
 
     static toggleInteraction = ApiRoutes.base + "/toggleInteraction";
+    static removeAllInteractions = ApiRoutes.base + "/removeAllInteractions";
     // endregion
 
     // region Subscriptions
