@@ -27,6 +27,16 @@
     display: flex;
 }
 
+.mfa-option {
+    padding: var(--layout-gap) !important;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.mfa-option * {
+    font-size: 1.4em;
+}
+
 .search-result-header {
     padding: 4px 10px 0 10px;
     font-size: 14px;

@@ -159,7 +159,7 @@ export class AuthTemplates {
                         create("p")
                             .text(t("PLEASE_SELECT_MFA_METHOD"))
                             .build(),
-                        signalMap(options, vertical(), o =>
+                        signalMap(options, horizontal(), o =>
                             AuthTemplates.mfaOption(o.type, selected),
                         ),
                     ).build(),
@@ -182,6 +182,7 @@ export class AuthTemplates {
             icon: { icon: icon[opt] },
             text: text[opt],
             onclick: () => (selected.value = opt),
+            classes: ["mfa-option"]
         });
     }
 
@@ -206,7 +207,7 @@ export class AuthTemplates {
                             .build(),
                         when(
                             isSubmittable,
-                            FormTemplates.textField(t("CODE"), "mfa-code", t("CODE"), "text",
+                            FormTemplates.textField(t("CODE", user.value.mfaMethod!), "mfa-code", t("CODE", user.value.mfaMethod!), "text",
                                 "", true,
                                 (value: string) => {
                                     user.value = {
