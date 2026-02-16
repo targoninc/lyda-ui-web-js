@@ -35,6 +35,7 @@ export class ApiRoutes {
     static updateUser = ApiRoutes.userActions + "/update";
     static verifyEmail = ApiRoutes.userActions + "/verify-email";
     static deleteUser = ApiRoutes.userActions + "/delete";
+    static undeleteUser = ApiRoutes.userActions + "/undelete";
     static sendActivationEmail = ApiRoutes.userActions + "/send-activation-email";
     static setUserPermission = ApiRoutes.userActions + "/set-permission";
     static trackClientError = ApiRoutes.userActions + "/track-client-error";

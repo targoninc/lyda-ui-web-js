@@ -397,6 +397,10 @@ export class Api {
         return await post(ApiRoutes.deleteUser);
     }
 
+    static async undeleteUser() {
+        return await post(ApiRoutes.undeleteUser);
+    }
+
     static async updateUser(user: Partial<User>) {
         await post(ApiRoutes.updateUser, { user });
         currentUser.value = <User>{

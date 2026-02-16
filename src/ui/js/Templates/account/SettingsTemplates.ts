@@ -417,6 +417,7 @@ export class SettingsTemplates {
                             text: t("DELETE_ACCOUNT"),
                             icon: { icon: "delete" },
                             classes: ["negative"],
+                            disabled: !!user.deleted_at,
                             onclick: () => {
                                 Ui.getConfirmationModal(
                                     t("DELETE_ACCOUNT"),
@@ -436,6 +437,33 @@ export class SettingsTemplates {
                                 ).then();
                             },
                         }),
+                        when(!!user.deleted_at, horizontal(
+                            create("span")
+                                .classes("warning", TextSize.small)
+                                .text(t("SCHEDULED_FOR_DELETION")),
+                            button({
+                                text: t("CANCEL_ACCOUNT_DELETION"),
+                                icon: { icon: "restore_from_trash" },
+                                classes: ["positive"],
+                                onclick: () => {
+                                    Ui.getConfirmationModal(
+                                        t("CANCEL_ACCOUNT_DELETION"),
+                                        t("CANCEL_ACCOUNT_DELETION_SURE"),
+                                        t("YES_KEEP_ACCOUNT"),
+                                        t("NO_STILL_DELETE_ACCOUNT"),
+                                        async () => {
+                                            Api.undeleteUser().then(() => {
+                                                window.location.reload();
+                                                notify(t("ACCOUNT_DELETION_CANCELLED"), NotificationType.success);
+                                            });
+                                        },
+                                        () => {
+                                        },
+                                        "delete",
+                                    ).then();
+                                },
+                            })
+                        ).classes("align-children").build()),
                         button({
                             text: t("DOWNLOAD_DATA"),
                             icon: { icon: "download" },

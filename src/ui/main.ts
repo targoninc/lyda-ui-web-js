@@ -3,7 +3,7 @@ import { PageTemplates } from "./js/Templates/PageTemplates.ts";
 import { KeyBinds } from "./js/Classes/KeyBindHandler.ts";
 import { LydaCache } from "./js/Cache/LydaCache.ts";
 import { UiActions } from "./js/Actions/UiActions.ts";
-import { Ui } from "./js/Classes/Ui.ts";
+import { notify, Ui } from "./js/Classes/Ui.ts";
 import { Util } from "./js/Classes/Util.ts";
 import { RoutePath, routes } from "./js/Routing/routes.js";
 import { GenericTemplates } from "./js/Templates/generic/GenericTemplates.ts";
@@ -16,6 +16,8 @@ import { initializeMediaSessionCallbacks } from "./js/Classes/Helpers/MediaSessi
 import { Api } from "./js/Api/Api.ts";
 import { initializeGlobalErrorHandler } from "./js/Classes/Helpers/ErrorHandler.ts";
 import { PlayerTemplates } from "./js/Templates/music/PlayerTemplates.ts";
+import { NotificationType } from "./js/Enums/NotificationType.ts";
+import { t } from "./locales";
 
 initializeGlobalErrorHandler();
 
@@ -25,6 +27,9 @@ if (!pageContainer) {
 }
 pageContainer.appendChild(GenericTemplates.loadingSpinner());
 currentUser.value = await Util.getUserAsync(null, false);
+if (currentUser.value?.deleted_at) {
+    notify(t("SCHEDULED_FOR_DELETION"), NotificationType.error);
+}
 
 const footer = document.querySelector("footer");
 if (!footer) {
