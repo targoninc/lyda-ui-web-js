@@ -63,6 +63,16 @@ export class Api {
         });
     }
 
+    static async removeAllInteractions(
+        entityType: EntityType,
+        interactionType: InteractionType
+    ) {
+        return post(ApiRoutes.removeAllInteractions, {
+            entityType,
+            interactionType,
+        });
+    }
+
     static async triggerEventHandling(eventId: string) {
         return post(ApiRoutes.triggerEventHandling, {
             id: eventId,

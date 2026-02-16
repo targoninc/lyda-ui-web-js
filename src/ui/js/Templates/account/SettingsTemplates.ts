@@ -1,8 +1,8 @@
-import { UserActions } from "../../Actions/UserActions.ts";
-import { GenericTemplates, horizontal } from "../generic/GenericTemplates.ts";
-import { copy, getUserSettingValue, Util } from "../../Classes/Util.ts";
-import { createModal, notify, Ui } from "../../Classes/Ui.ts";
-import { Api } from "../../Api/Api.ts";
+import {UserActions} from "../../Actions/UserActions.ts";
+import {GenericTemplates, horizontal} from "../generic/GenericTemplates.ts";
+import {copy, getUserSettingValue, Util} from "../../Classes/Util.ts";
+import {createModal, notify, Ui} from "../../Classes/Ui.ts";
+import {Api} from "../../Api/Api.ts";
 import {
     compute,
     create,
@@ -14,10 +14,10 @@ import {
     StringOrSignal,
     when,
 } from "@targoninc/jess";
-import { navigate, reload, Route } from "../../Routing/Router.ts";
-import { UserTemplates } from "./UserTemplates.ts";
-import { currentUser, permissions } from "../../state.ts";
-import { RoutePath } from "../../Routing/routes.ts";
+import {navigate, reload, Route} from "../../Routing/Router.ts";
+import {UserTemplates} from "./UserTemplates.ts";
+import {currentUser, permissions} from "../../state.ts";
+import {RoutePath} from "../../Routing/routes.ts";
 import {
     button,
     ButtonConfig,
@@ -30,18 +30,20 @@ import {
     TextareaConfig,
     toggle,
 } from "@targoninc/jess-components";
-import { Theme } from "@targoninc/lyda-shared/src/Enums/Theme";
-import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
-import { StreamingQuality } from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
-import { Permission } from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
-import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
-import { UserEmail } from "@targoninc/lyda-shared/src/Models/db/lyda/UserEmail";
-import { NotificationType } from "../../Enums/NotificationType.ts";
-import { TotpTemplates } from "./TotpTemplates.ts";
-import { WebauthnTemplates } from "./WebauthnTemplates.ts";
-import { Language, language, LanguageOptions, t } from "../../../locales";
-import { debounce } from "../../Classes/Helpers/Debounce.ts";
-import { TextSize } from "../../Enums/TextSize.ts";
+import {Theme} from "@targoninc/lyda-shared/src/Enums/Theme";
+import {UserSettings} from "@targoninc/lyda-shared/src/Enums/UserSettings";
+import {StreamingQuality} from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
+import {Permission} from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
+import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import {UserEmail} from "@targoninc/lyda-shared/src/Models/db/lyda/UserEmail";
+import {NotificationType} from "../../Enums/NotificationType.ts";
+import {TotpTemplates} from "./TotpTemplates.ts";
+import {WebauthnTemplates} from "./WebauthnTemplates.ts";
+import {Language, language, LanguageOptions, t} from "../../../locales";
+import {debounce} from "../../Classes/Helpers/Debounce.ts";
+import {TextSize} from "../../Enums/TextSize.ts";
+import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
+import {InteractionType} from "@targoninc/lyda-shared/src/Enums/InteractionType.ts";
 
 export class SettingsTemplates {
     static settingsPage(route: Route, params: Record<string, string>) {
@@ -99,7 +101,7 @@ export class SettingsTemplates {
                             SettingsTemplates.sectionHeading(t("MY_PERMISSIONS")),
                             button({
                                 text: t("GO_TO_ADMINISTRATION"),
-                                icon: { icon: "terminal" },
+                                icon: {icon: "terminal"},
                                 onclick: () => navigate(RoutePath.admin),
                             }),
                             signalMap(
@@ -137,7 +139,7 @@ export class SettingsTemplates {
                 when(
                     user.subscription,
                     button({
-                        icon: { icon: "payments" },
+                        icon: {icon: "payments"},
                         text: t("MANAGE_SUBSCRIPTION"),
                         classes: ["positive"],
                         onclick: () => navigate(RoutePath.subscribe),
@@ -146,7 +148,7 @@ export class SettingsTemplates {
                 when(
                     user.subscription,
                     button({
-                        icon: { icon: "payments" },
+                        icon: {icon: "payments"},
                         text: t("SUBSCRIBE_MORE_FEATURES"),
                         classes: ["special", "bigger-input", "rounded-max"],
                         onclick: () => navigate(RoutePath.subscribe),
@@ -164,7 +166,7 @@ export class SettingsTemplates {
                             required: true,
                             value: compute(uu => uu.username ?? user.username, updatedUser$),
                             onchange: v => {
-                                updatedUser$.value = { ...updatedUser$.value, username: v };
+                                updatedUser$.value = {...updatedUser$.value, username: v};
                             },
                         }),
                         input(<InputConfig<string>>{
@@ -174,7 +176,7 @@ export class SettingsTemplates {
                             required: true,
                             value: compute(uu => uu.displayname ?? user.displayname, updatedUser$),
                             onchange: v => {
-                                updatedUser$.value = { ...updatedUser$.value, displayname: v };
+                                updatedUser$.value = {...updatedUser$.value, displayname: v};
                             },
                         }),
                         textarea(<TextareaConfig>{
@@ -182,7 +184,7 @@ export class SettingsTemplates {
                             name: "description",
                             value: compute(uu => uu.description ?? user.description, updatedUser$),
                             onchange: v => {
-                                updatedUser$.value = { ...updatedUser$.value, description: v };
+                                updatedUser$.value = {...updatedUser$.value, description: v};
                             },
                         }),
                         SettingsTemplates.emailSettings(emails$),
@@ -192,13 +194,13 @@ export class SettingsTemplates {
                         disabled: saveDisabled,
                         classes: ["positive"],
                         text: t("SAVE_CHANGES"),
-                        icon: { icon: "save" },
+                        icon: {icon: "save"},
                         onclick: async () => {
                             if (await Api.updateUser({
                                 ...updatedUser$.value,
                                 emails: emails$.value,
                             })) {
-                                user = { ...user, ...updatedUser$.value };
+                                user = {...user, ...updatedUser$.value};
                                 currentUser.value = await Util.getUserAsync(null, false);
                                 reload();
                             }
@@ -207,7 +209,7 @@ export class SettingsTemplates {
                     when(saveDisabled, horizontal(
                         button(<ButtonConfig>{
                             text: t("REVERT"),
-                            icon: { icon: "undo" },
+                            icon: {icon: "undo"},
                             onclick: () => {
                                 emails$.value = originalMails;
                                 updatedUser$.value = {};
@@ -410,14 +412,12 @@ export class SettingsTemplates {
             .classes("card", "flex-v")
             .children(
                 SettingsTemplates.sectionHeading(t("OTHER")),
-                create("div")
-                    .classes("flex")
-                    .children(
-                        button({
-                            text: t("DELETE_ACCOUNT"),
-                            icon: { icon: "delete" },
-                            classes: ["negative"],
-                            disabled: !!user.deleted_at,
+                horizontal(
+                    button({
+                        text: t("DELETE_ACCOUNT"),
+                        icon: {icon: "delete"},
+                        classes: ["negative"],
+                        disabled: !!user.deleted_at,
                             onclick: () => {
                                 Ui.getConfirmationModal(
                                     t("DELETE_ACCOUNT"),
@@ -464,28 +464,57 @@ export class SettingsTemplates {
                                 },
                             })
                         ).classes("align-children").build()),
-                        button({
-                            text: t("DOWNLOAD_DATA"),
-                            icon: { icon: "download" },
-                            onclick: () => {
-                                Api.exportUser().then(res => {
-                                    const blob = new Blob([JSON.stringify(res)], {
-                                        type: "application/octet-stream",
-                                    });
-                                    const url = URL.createObjectURL(blob);
-                                    const a = document.createElement("a");
-                                    a.href = url;
-                                    a.download = `userdata-${user.username}.json`;
-                                    document.body.appendChild(a);
-                                    a.click();
-                                    document.body.removeChild(a);
-                                    URL.revokeObjectURL(url);
+                    button({
+                        text: t("DOWNLOAD_DATA"),
+                        icon: {icon: "download"},
+                        onclick: () => {
+                            Api.exportUser().then(res => {
+                                const blob = new Blob([JSON.stringify(res)], {
+                                    type: "application/octet-stream",
                                 });
-                            },
-                        }),
-                    )
-                    .build(),
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement("a");
+                                a.href = url;
+                                a.download = `userdata-${user.username}.json`;
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                                URL.revokeObjectURL(url);
+                            });
+                        },
+                    }),
+                ).build(),
+                horizontal(
+                    SettingsTemplates.removeInteractionsButton(EntityType.track, InteractionType.like),
+                    SettingsTemplates.removeInteractionsButton(EntityType.track, InteractionType.repost),
+                    SettingsTemplates.removeInteractionsButton(EntityType.album, InteractionType.like),
+                    SettingsTemplates.removeInteractionsButton(EntityType.playlist, InteractionType.like),
+                )
             ).build();
+    }
+
+    private static removeInteractionsButton(entityType: EntityType, interactionType: InteractionType) {
+        return button({
+            text: t(`DELETE_ALL_INTERACTIONS`, entityType, interactionType),
+            icon: {icon: "delete"},
+            classes: ["negative"],
+            onclick: () => {
+                Ui.getConfirmationModal(
+                    t(`DELETE_ALL_INTERACTIONS`, entityType, interactionType),
+                    t(`DELETE_ALL_INTERACTIONS_SURE`, entityType, interactionType),
+                    t("YES"),
+                    t("NO"),
+                    async () => {
+                        Api.removeAllInteractions(entityType, interactionType).then(() => {
+                            notify(t("INTERACTIONS_DELETED", entityType, interactionType), NotificationType.success);
+                        });
+                    },
+                    () => {
+                    },
+                    "delete",
+                ).then();
+            },
+        });
     }
 
     private static linksSection() {
@@ -575,7 +604,7 @@ export class SettingsTemplates {
                 ),
                 button({
                     text: t("ADD_EMAIL"),
-                    icon: { icon: "add" },
+                    icon: {icon: "add"},
                     onclick: async () => {
                         emails$.value = [
                             ...emails$.value,
@@ -647,7 +676,7 @@ export class SettingsTemplates {
                         when(
                             email.verified || email.email === "",
                             button({
-                                icon: { icon: "verified_user" },
+                                icon: {icon: "verified_user"},
                                 text: t("VERIFY"),
                                 classes: ["positive"],
                                 disabled: activationTimedOut,
@@ -705,7 +734,7 @@ export class SettingsTemplates {
                             email.primary,
                             button({
                                 text: t("DELETE"),
-                                icon: { icon: "delete" },
+                                icon: {icon: "delete"},
                                 classes: ["negative"],
                                 onclick: async () => {
                                     await Ui.getConfirmationModal(
@@ -748,7 +777,7 @@ export class SettingsTemplates {
                 when(hasMethods, TotpTemplates.totpDevices(totpMethods, loading, userId)),
                 button({
                     text: t("ADD_TOTP"),
-                    icon: { icon: "add" },
+                    icon: {icon: "add"},
                     classes: ["positive", "fit-content"],
                     onclick: async () => {
                         await Ui.getTextInputModal(
@@ -760,21 +789,21 @@ export class SettingsTemplates {
                             async (name: string) => {
                                 loading.value = true;
                                 await Api.addTotpMethod(name)
-                                         .then(res => {
-                                             if (!res) {
-                                                 return;
-                                             }
-                                             Api.getUserById().then(u => {
-                                                 currentUser.value = u;
-                                             });
-                                             createModal(
-                                                 [
-                                                     TotpTemplates.verifyTotpAddModal(res.secret, res.qrDataUrl),
-                                                 ],
-                                                 "add-modal-verify",
-                                             );
-                                         })
-                                         .finally(() => (loading.value = false));
+                                    .then(res => {
+                                        if (!res) {
+                                            return;
+                                        }
+                                        Api.getUserById().then(u => {
+                                            currentUser.value = u;
+                                        });
+                                        createModal(
+                                            [
+                                                TotpTemplates.verifyTotpAddModal(res.secret, res.qrDataUrl),
+                                            ],
+                                            "add-modal-verify",
+                                        );
+                                    })
+                                    .finally(() => (loading.value = false));
                             }, () => {
                             }, "qr_code",
                         );
@@ -820,7 +849,7 @@ export class SettingsTemplates {
                         debounce("paypalMail", () => {
                             loading.value = true;
                             Api.updateUserSetting(UserSettings.paypalMail, value)
-                               .finally(() => loading.value = false);
+                                .finally(() => loading.value = false);
                         }, 1000);
                     },
                 }),
