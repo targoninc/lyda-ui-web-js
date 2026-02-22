@@ -283,7 +283,7 @@ export class TrackTemplates {
                                             .text(Time.format(track.length))
                                             .build(),
                                         GenericTemplates.timestamp(track.created_at),
-                                    ),
+                                    ).classes("align-children"),
                                     ...graphics,
                                 ),
                                 vertical(
