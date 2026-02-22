@@ -18,10 +18,11 @@ export class AudioUpload {
     id: number | undefined;
     private progress: Signal<ProgressPart|null>;
 
-    constructor(e: Event, state: Signal<UploadableTrack>, progress: Signal<ProgressPart|null>) {
+    constructor(e: Event, state: Signal<UploadableTrack>, progress: Signal<ProgressPart | null>, loadingUpdate: (loading: boolean) => void) {
         this.triggerEvent = e;
         this.state = state;
         this.progress = progress;
+        loadingUpdate(true);
 
         this.progress.value = <ProgressPart>{
             icon: "info",
@@ -30,7 +31,8 @@ export class AudioUpload {
             retryFunction: () => this.createTrackThenNext()
         };
 
-        this.uploadTrack().then();
+        this.uploadTrack().then()
+            .finally(() => loadingUpdate(false));
     }
 
     setProgressPartState(update: Partial<ProgressPart>) {

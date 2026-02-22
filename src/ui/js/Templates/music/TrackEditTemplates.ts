@@ -248,6 +248,9 @@ export class TrackEditTemplates {
         }, state);
         const buttonClass = compute((d): string => (d ? "disabled" : "positive"), disabled);
         const progressState = signal<ProgressPart | null>(null);
+        const loadingUpdate = (loading: boolean) => {
+            disabled.value = loading;
+        }
 
         return vertical(
             horizontal(
@@ -255,7 +258,9 @@ export class TrackEditTemplates {
                     text: t("UPLOAD"),
                     disabled,
                     classes: [buttonClass, "special", "bigger-input", "rounded-max"],
-                    onclick: e => new AudioUpload(e, state, progressState),
+                    onclick: e => {
+                        new AudioUpload(e, state, progressState, loadingUpdate);
+                    },
                     icon: { icon: "upload" },
                 }),
                 GenericTemplates.progressSectionPart(progressState),
