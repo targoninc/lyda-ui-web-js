@@ -1,7 +1,7 @@
-import { AnyElement, compute, create, Signal, signal, when } from "@targoninc/jess";
+import { AnyElement, compute, create, Signal, signal, StringOrSignal, when } from "@targoninc/jess";
 import { navigate } from "../Routing/Router.ts";
 import { ApiRoutes } from "../Api/ApiRoutes.ts";
-import { GenericTemplates } from "./generic/GenericTemplates.ts";
+import { GenericTemplates, horizontal, vertical } from "./generic/GenericTemplates.ts";
 import { Util } from "../Classes/Util.ts";
 import { router } from "../../main.ts";
 import { RoutePath } from "../Routing/routes.ts";
@@ -13,42 +13,54 @@ import { t } from "../../locales";
 import { TextSize } from "../Enums/TextSize.ts";
 
 export class SearchTemplates {
-    static search(context: SearchContext) {
+    static search(
+        context: SearchContext,
+        onSelect?: (result: SearchResult) => void,
+        endpoints?: string[],
+        classes: StringOrSignal[] = [],
+        resultContainerClasses: StringOrSignal[] = [],
+    ) {
         const results = signal<SearchResult[]>([]);
         const selectedResult = signal<number | null>(null);
         const resultsShown = compute(r => r.length > 0, results);
 
         let q = "";
         const urlParams = new URLSearchParams(window.location.search);
-        if (!(router.currentRoute.value?.path === "search" && context === SearchContext.navBar)) {
+        if (!(router.currentRoute.value?.path === "search" && context === SearchContext.navBar) && !onSelect) {
             q = urlParams.get("q") ?? "";
         }
         const currentSearch = signal(q ?? "");
-        currentSearch.subscribe((newValue, changed) => {
-            if (!changed) {
-                return;
-            }
-            urlParams.set("q", newValue);
-            window.history.pushState({}, "", "?" + urlParams.toString());
-        });
+        if (!onSelect) {
+            currentSearch.subscribe((newValue, changed) => {
+                if (!changed) {
+                    return;
+                }
+                urlParams.set("q", newValue);
+                window.history.pushState({}, "", "?" + urlParams.toString());
+            });
+        }
 
         return create("div")
-            .classes("search", "relative", "flex-v", "align-center")
+            .classes("search", "relative", "flex-v", "align-center", ...classes)
             .children(
                 SearchTemplates.searchInput(
                     results,
                     selectedResult,
                     currentSearch,
                     resultsShown,
-                    context
+                    context,
+                    onSelect,
+                    endpoints,
                 ),
                 SearchTemplates.searchResults(
                     results,
                     selectedResult,
                     resultsShown,
                     currentSearch,
-                    context
-                )
+                    context,
+                    onSelect,
+                    resultContainerClasses,
+                ),
             ).build();
     }
 
@@ -57,7 +69,9 @@ export class SearchTemplates {
         selectedResult: Signal<number | null>,
         currentSearch: Signal<string>,
         resultsShown: Signal<boolean>,
-        context: SearchContext
+        context: SearchContext,
+        onSelect?: (result: SearchResult) => void,
+        endpointsInput?: string[],
     ) {
         const debounce = 200;
         let timeout: Timer | undefined;
@@ -70,7 +84,7 @@ export class SearchTemplates {
             searchCount++;
             results.value = [];
             const currentSearchCount = searchCount;
-            const endpoints = [
+            const endpoints = endpointsInput ?? [
                 ApiRoutes.searchTracks,
                 ApiRoutes.searchAlbums,
                 ApiRoutes.searchPlaylists,
@@ -89,6 +103,7 @@ export class SearchTemplates {
             });
             await Promise.all(promises);
         }
+
         const contextClasses = context === SearchContext.searchPage ? ["fullWidth"] : [];
         getResults().then();
 
@@ -104,7 +119,7 @@ export class SearchTemplates {
                     () => {
                         currentSearch.value = "";
                         resultsShown.value = false;
-                    }
+                    },
                 ),
                 create("input")
                     .classes("jess", "search-input")
@@ -139,6 +154,10 @@ export class SearchTemplates {
                                 return;
                             }
                             resultsShown.value = false;
+                            if (onSelect) {
+                                onSelect(result);
+                                return;
+                            }
                             navigate(result.url);
                             return;
                         }
@@ -167,7 +186,7 @@ export class SearchTemplates {
 
                         timeout = setTimeout(() => getResults(), debounce);
                     })
-                    .build()
+                    .build(),
             ).build();
     }
 
@@ -186,7 +205,7 @@ export class SearchTemplates {
 
     private static selectPreviousResult(
         selectedResult: Signal<number | null>,
-        list: SearchResult[]
+        list: SearchResult[],
     ) {
         if (selectedResult.value === null) {
             selectedResult.value = list[list.length - 1].id;
@@ -205,7 +224,9 @@ export class SearchTemplates {
         selectedResult: Signal<number | null>,
         resultsShown: Signal<boolean>,
         currentSearch: Signal<string>,
-        context: SearchContext
+        context: SearchContext,
+        onSelect?: (result: SearchResult) => void,
+        classes: StringOrSignal[] = [],
     ): Signal<AnyElement> {
         if (context === SearchContext.navBar) {
             return compute(
@@ -214,14 +235,22 @@ export class SearchTemplates {
                         r,
                         selectedResult,
                         resultsShown,
-                        currentSearch
+                        currentSearch,
+                        onSelect,
+                        classes,
                     ),
-                results
+                results,
             );
         } else {
             return compute(
-                r => SearchTemplates.searchResultsCards(r, selectedResult, resultsShown),
-                results
+                r => SearchTemplates.searchResultsCards(
+                    r,
+                    selectedResult,
+                    resultsShown,
+                    onSelect,
+                    classes,
+                ),
+                results,
             );
         }
     }
@@ -230,14 +259,16 @@ export class SearchTemplates {
         searchResults: SearchResult[],
         selectedResult: Signal<number | null>,
         resultsShown: Signal<boolean>,
-        currentSearch: Signal<string>
+        currentSearch: Signal<string>,
+        onSelect?: (result: SearchResult) => void,
+        classes: StringOrSignal[] = [],
     ) {
         const exactMatches = searchResults.filter(r => r.exactMatch);
         const partialMatches = searchResults.filter(r => !r.exactMatch);
         const showClass = compute((s: boolean): string => (s ? "_" : "hidden"), resultsShown);
 
         return create("div")
-            .classes("search-results-popout", showClass)
+            .classes("search-results-popout", showClass, ...classes)
             .children(
                 create("div")
                     .classes("flex-v", "nogap")
@@ -253,7 +284,7 @@ export class SearchTemplates {
                                         resultsShown.value = false;
                                         navigate(`${RoutePath.search}?q=` + currentSearch.value);
                                     },
-                                })
+                                }),
                             )
                             .build(),
                         when(
@@ -261,14 +292,15 @@ export class SearchTemplates {
                             create("span")
                                 .classes("search-result-header")
                                 .text(t("EXACT_MATCHES"))
-                                .build()
+                                .build(),
                         ),
                         ...exactMatches.map(result => {
                             return this.searchResult(
                                 result,
                                 selectedResult,
                                 resultsShown,
-                                SearchContext.navBar
+                                SearchContext.navBar,
+                                onSelect,
                             );
                         }),
                         when(
@@ -276,25 +308,28 @@ export class SearchTemplates {
                             create("span")
                                 .classes("search-result-header")
                                 .text(t("PARTIAL_MATCHES"))
-                                .build()
+                                .build(),
                         ),
                         ...partialMatches.map(result => {
                             return this.searchResult(
                                 result,
                                 selectedResult,
                                 resultsShown,
-                                SearchContext.navBar
+                                SearchContext.navBar,
+                                onSelect,
                             );
-                        })
+                        }),
                     )
-                    .build()
+                    .build(),
             ).build();
     }
 
     static searchResultsCards(
         searchResults: SearchResult[],
         selectedResult: Signal<number | null>,
-        resultsShown: Signal<boolean>
+        resultsShown: Signal<boolean>,
+        onSelect?: (result: SearchResult) => void,
+        classes: StringOrSignal[] = [],
     ) {
         const groups: Record<string, SearchResult[]> = {
             Albums: searchResults.filter(r => r.type === "album"),
@@ -308,61 +343,54 @@ export class SearchTemplates {
             }
         });
 
-        return create("div")
-            .children(
-                create("div")
-                    .classes("flex")
+        return horizontal(
+            when(
+                searchResults.length === 0,
+                vertical(
+                    create("span")
+                        .classes("color-dim")
+                        .text(t("NO_SEARCH_RESULTS"))
+                        .build(),
+                ).build(),
+            ),
+            ...Object.keys(groups).map(group => {
+                return create("div")
+                    .classes("flex-v", "small-gap", "card", "search-results-card", ...classes)
                     .children(
-                        when(
-                            searchResults.length === 0,
-                            create("div")
-                                .classes("flex-v")
-                                .children(
-                                    create("span")
-                                        .classes("color-dim")
-                                        .text(t("NO_SEARCH_RESULTS"))
-                                        .build()
-                                )
-                                .build()
-                        ),
-                        ...Object.keys(groups).map(group => {
-                            return create("div")
-                                .classes("flex-v", "small-gap", "card", "search-results-card")
-                                .children(
-                                    create("h2").text(group).build(),
-                                    ...groups[group]
-                                        .sort((a, b) =>
-                                            a.exactMatch && !b.exactMatch
-                                                ? 1
-                                                : b.exactMatch && !a.exactMatch
-                                                  ? -1
-                                                  : 0
-                                        )
-                                        .map(result => {
-                                            return this.searchResult(
-                                                result,
-                                                selectedResult,
-                                                resultsShown,
-                                                SearchContext.searchPage
-                                            );
-                                        })
-                                )
-                                .build();
-                        })
+                        create("h2").text(group).build(),
+                        ...groups[group]
+                            .sort((a, b) =>
+                                a.exactMatch && !b.exactMatch
+                                    ? 1
+                                    : b.exactMatch && !a.exactMatch
+                                        ? -1
+                                        : 0,
+                            )
+                            .map(result => {
+                                return this.searchResult(
+                                    result,
+                                    selectedResult,
+                                    resultsShown,
+                                    SearchContext.searchPage,
+                                    onSelect,
+                                );
+                            }),
                     )
-                    .build()
-            ).build();
+                    .build();
+            }),
+        ).build();
     }
 
     static searchResult(
         searchResult: SearchResult,
         selectedResult: Signal<number | null>,
         resultsShown: Signal<boolean>,
-        context: SearchContext
+        context: SearchContext,
+        onSelect?: (result: SearchResult) => void,
     ) {
         const addClass = compute(
             (sr): string => (sr === searchResult.id ? "selected" : "_"),
-            selectedResult
+            selectedResult,
         );
         let elementReference: AnyElement | null = null;
         selectedResult.subscribe(newId => {
@@ -400,11 +428,15 @@ export class SearchTemplates {
                 searchResult.type,
                 searchResult.exactMatch ? "exact-match" : "_",
                 addClass,
-                ...contextClasses
+                ...contextClasses,
             )
             .onclick(async () => {
-                navigate(searchResult.url);
                 resultsShown.value = false;
+                if (onSelect) {
+                    onSelect(searchResult);
+                    return;
+                }
+                navigate(searchResult.url);
             })
             .children(
                 create("div")
@@ -423,22 +455,22 @@ export class SearchTemplates {
                                         create("span")
                                             .classes("search-result-display")
                                             .text(display)
-                                            .build()
+                                            .build(),
                                     ).build(),
                                 create("span")
                                     .classes("search-result-subtitle", TextSize.xSmall)
                                     .text(subtitle)
-                                    .build()
-                            ).build()
+                                    .build(),
+                            ).build(),
                     ).build(),
                 create("span")
                     .classes(
                         "search-result-type",
                         "hideOnSmallBreakpoint",
                         "padded-inline",
-                        searchResult.type
+                        searchResult.type,
                     ).text(searchResult.type)
-                    .build()
+                    .build(),
             ).build();
         return elementReference;
     }

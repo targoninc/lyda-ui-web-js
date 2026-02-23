@@ -498,6 +498,8 @@ export const en = {
     SALES_BY_MONTH: "Sales by month",
     LIKES_BY_TRACK: "Likes by track",
     LIKES: "Likes",
+    ADD_TRACK: "Add Track",
+    ADD_TRACK_TO_PLAYLIST: title => `Add track to ${title}`,
     ROYALTIES_BY_TRACK: "Royalties by track",
     PLAYCOUNT_BY_TRACK: "Play count by track",
     PLAYS: "Plays",

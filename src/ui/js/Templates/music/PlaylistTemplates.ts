@@ -25,6 +25,9 @@ import { CoverContext } from "../../Enums/CoverContext.ts";
 import { navigate } from "../../Routing/Router.ts";
 import { RoutePath } from "../../Routing/routes.ts";
 import { TextSize } from "../../Enums/TextSize.ts";
+import { SearchTemplates } from "../SearchTemplates.ts";
+import { SearchContext } from "@targoninc/lyda-shared/src/Enums/SearchContext";
+import { ApiRoutes } from "../../Api/ApiRoutes.ts";
 
 export class PlaylistTemplates {
     static addTrackToPlaylistModal(track: Track, playlists: Playlist[]) {
@@ -195,6 +198,29 @@ export class PlaylistTemplates {
                     ).build(),
                 ).build(),
                 MusicTemplates.tracksInList(tracks, data.canEdit, playlist, "playlist"),
+                when(data.canEdit, vertical(
+                    create("span")
+                        .text(t("ADD_TRACK_TO_PLAYLIST", playlist.title))
+                        .build(),
+                    create("div")
+                        .children(
+                            SearchTemplates.search(
+                                SearchContext.searchPage,
+                                async (result) => {
+                                    if (result.type !== "track") {
+                                        return;
+                                    }
+                                    const success = await Api.addTrackToPlaylists(result.id, [playlist.id]);
+                                    if (success) {
+                                        Util.removeModal();
+                                        navigate(`${RoutePath.playlist}/${playlist.id}`);
+                                    }
+                                },
+                                [ApiRoutes.searchTracks], [],
+                                ["fullWidth"],
+                            ),
+                        )
+                ).classes("card").build()),
             ).build();
     }
 
