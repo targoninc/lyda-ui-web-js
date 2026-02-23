@@ -1,7 +1,4 @@
-import {MenuTemplates} from "../Templates/MenuTemplates.ts";
-import {Util} from "../Classes/Util.ts";
 import {FeatureDetector} from "../Classes/Helpers/FeatureDetector.ts";
-import {createModal} from "../Classes/Ui.ts";
 
 export class UiActions {
     static closeModal() {
@@ -9,14 +6,6 @@ export class UiActions {
         if (modal) {
             modal.remove();
         }
-    }
-
-    static openCreateMenu() {
-        const user = Util.getUserAsync();
-        if (!user) {
-            return;
-        }
-        createModal([MenuTemplates.createMenu()], "create-menu");
     }
 
     static runMobileCheck() {

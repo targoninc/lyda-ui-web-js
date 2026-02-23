@@ -7,10 +7,10 @@ import { Images } from "../../Enums/Images.ts";
 import { getPlayIcon, Util } from "../../Classes/Util.ts";
 import { createModal, Ui } from "../../Classes/Ui.ts";
 import { AnyNode, compute, create, InputType, signal, Signal, when } from "@targoninc/jess";
-import { Route } from "../../Routing/Router.ts";
+import { navigate, Route } from "../../Routing/Router.ts";
 import { currentTrackId, currentUser, loadingAudio, playingFrom, playingHere } from "../../state.ts";
 import { PageTemplates } from "../PageTemplates.ts";
-import { button, input, textarea, toggle } from "@targoninc/jess-components";
+import { button, icon, input, textarea, toggle } from "@targoninc/jess-components";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
@@ -25,6 +25,7 @@ import { Time } from "../../Classes/Helpers/Time.ts";
 import { CustomText } from "../../Classes/Helpers/CustomText.ts";
 import { CoverContext } from "../../Enums/CoverContext.ts";
 import { TextSize } from "../../Enums/TextSize.ts";
+import { RoutePath } from "../../Routing/routes.ts";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
@@ -111,53 +112,6 @@ export class AlbumTemplates {
                 create("span")
                     .text(item.title)
                     .build(),
-            ).build();
-    }
-
-    static newAlbumModal() {
-        const album = signal(<Partial<Album>>{
-            title: "",
-            upc: "",
-            description: "",
-            release_date: new Date(),
-            visibility: Visibility.private,
-        });
-        const disabled = compute((s) => {
-            return !s.title || s.title === "";
-        }, album);
-
-        return create("div")
-            .classes("flex-v")
-            .children(
-                create("div")
-                    .classes("flex")
-                    .children(
-                        create("img")
-                            .styles("width", "30px", "height", "auto")
-                            .classes("inline-icon", "svg", "nopointer")
-                            .attributes("src", Icons.ALBUM_ADD)
-                            .build(),
-                        create("h2")
-                            .text(t("NEW_ALBUM"))
-                            .build(),
-                    )
-                    .build(),
-                AlbumTemplates.albumInputs(album),
-                create("div")
-                    .classes("flex")
-                    .children(
-                        button({
-                            text: t("CREATE"),
-                            disabled,
-                            onclick: async () => {
-                                await Api.createNewAlbum(album.value);
-                                Util.removeModal();
-                            },
-                            icon: { icon: "playlist_add" },
-                            classes: ["positive"],
-                        }),
-                        GenericTemplates.modalCancelButton(),
-                    ).build(),
             ).build();
     }
 
@@ -399,5 +353,48 @@ export class AlbumTemplates {
                 })),
             ).classes("align-children").build()),
         ).build();
+    }
+
+    static createAlbumPage() {
+        const album = signal(<Partial<Album>>{
+            title: "",
+            upc: "",
+            description: "",
+            release_date: new Date(),
+            visibility: Visibility.private,
+        });
+        const disabled = compute((s) => {
+            return !s.title || s.title === "";
+        }, album);
+
+        return vertical(
+            create("h2")
+                .children(
+                    icon({
+                        icon: Icons.ALBUM_ADD,
+                        adaptive: true,
+                        isUrl: true,
+                        classes: ["inline-icon", "svg", "nopointer"],
+                    }),
+                    create("span")
+                        .text(t("NEW_ALBUM"))
+                        .build(),
+                ).build(),
+            AlbumTemplates.albumInputs(album),
+            horizontal(
+                button({
+                    text: t("CREATE"),
+                    disabled,
+                    onclick: async () => {
+                        const id = await Api.createNewAlbum(album.value);
+                        if (id) {
+                            navigate(`${RoutePath.album}/${id}`);
+                        }
+                    },
+                    icon: { icon: "playlist_add" },
+                    classes: ["positive"],
+                }),
+            ).build(),
+        ).classes("card").build();
     }
 }

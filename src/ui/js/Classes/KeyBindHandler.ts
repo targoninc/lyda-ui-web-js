@@ -25,7 +25,6 @@ export class KeyBinds {
         SkipBackward: { function: PlayManager.skipBackward, neededModifiers: ["shift"] },
         VolumeUp: { function: PlayManager.volumeUp, neededModifiers: ["shift"] },
         VolumeDown: { function: PlayManager.volumeDown, neededModifiers: ["shift"] },
-        NewMenu: { function: UiActions.openCreateMenu, neededModifiers: ["shift"] },
         LoginLogout: {function: AuthActions.loginLogout, neededModifiers: ["shift"]},
         Close: { function: UiActions.closeModal },
     };

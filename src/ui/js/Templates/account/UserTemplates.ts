@@ -19,7 +19,6 @@ import {
     StringOrSignal,
     when,
 } from "@targoninc/jess";
-import {UiActions} from "../../Actions/UiActions.ts";
 import {currentUser, permissions} from "../../state.ts";
 import {notify, Ui} from "../../Classes/Ui.ts";
 import {MediaActions} from "../../Actions/MediaActions.ts";
@@ -442,9 +441,15 @@ export class UserTemplates {
                             .children(
                                 button({
                                     classes: ["positive"],
-                                    text: t("CREATE"),
+                                    text: t("NEW_ALBUM"),
                                     icon: {icon: "add"},
-                                    onclick: UiActions.openCreateMenu,
+                                    onclick: () => navigate(RoutePath.createAlbum),
+                                }),
+                                button({
+                                    classes: ["positive"],
+                                    text: t("NEW_PLAYLIST"),
+                                    icon: {icon: "add"},
+                                    onclick: () => navigate(RoutePath.createPlaylist),
                                 }),
                                 button({
                                     text: t("EDIT_TRACKS"),

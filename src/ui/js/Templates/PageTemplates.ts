@@ -63,6 +63,8 @@ export class PageTemplates {
         [RoutePath.editTracks]: TrackEditTemplates.batchEditTracksPage,
         [RoutePath.protocolHandler]: PageTemplates.protocolHandlerPage,
         [RoutePath.transactions]: TransactionTemplates.page,
+        [RoutePath.createAlbum]: AlbumTemplates.createAlbumPage,
+        [RoutePath.createPlaylist]: PlaylistTemplates.createPlaylistPage,
 
         // admin pages
         [RoutePath.admin]: DashboardTemplates.dashboardPage,
@@ -93,6 +95,8 @@ export class PageTemplates {
         RoutePath.contentID,
         RoutePath.editTracks,
         RoutePath.transactions,
+        RoutePath.createAlbum,
+        RoutePath.createAlbum,
     ];
 
     static async libraryPage(route: Route, params: Record<string, string>) {

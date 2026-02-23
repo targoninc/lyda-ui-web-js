@@ -120,7 +120,8 @@ export class NavTemplates {
     }
 
     static accountSection() {
-        const isUploadPage = compute(r => r?.path === 'upload', router.currentRoute);
+        const isUploadPage = compute(r => r?.path === RoutePath.upload, router.currentRoute);
+        const isPlaylistPage = compute(r => r?.path === RoutePath.createPlaylist, router.currentRoute);
         const uploadActiveClass = compute((i): string => i ? "active" : "inactive", isUploadPage);
 
         return create("div")
@@ -133,6 +134,15 @@ export class NavTemplates {
                     onclick: async (e: MouseEvent) => {
                         e.preventDefault();
                         navigate(RoutePath.upload);
+                    }
+                }),
+                button({
+                    classes: ["hideOnMidBreakpoint", "fullHeight", uploadActiveClass],
+                    icon: { icon: "docs_add_on" },
+                    disabled: isPlaylistPage,
+                    onclick: async (e: MouseEvent) => {
+                        e.preventDefault();
+                        navigate(RoutePath.createPlaylist);
                     }
                 }),
                 NotificationTemplates.notifications(),

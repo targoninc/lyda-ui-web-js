@@ -34,6 +34,8 @@ export enum RoutePath {
     protocolHandler = "protocolHandler",
     transactions = "transactions",
     contentID = "content-id",
+    createAlbum = "create-album",
+    createPlaylist = "create-playlist",
 }
 
 export const routes: Route[] = [
@@ -179,4 +181,12 @@ export const routes: Route[] = [
         path: RoutePath.contentID,
         title: "Content ID",
     },
+    {
+        path: RoutePath.createAlbum,
+        title: "Create Album",
+    },
+    {
+        path: RoutePath.createPlaylist,
+        title: "Create Playlist",
+    }
 ];

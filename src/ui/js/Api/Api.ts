@@ -478,8 +478,9 @@ export class Api {
     }
 
     static async createNewAlbum(album: Partial<Album>) {
-        await post(ApiRoutes.newAlbum, album);
+        const out = await post<number>(ApiRoutes.newAlbum, album);
         notify(t("ALBUM_CREATED"), NotificationType.success);
+        return out;
     }
 
     static async deleteAlbum(id: number): Promise<boolean> {
@@ -717,10 +718,10 @@ export class Api {
         });
     }
 
-    static async createNewPlaylist(playlist: Partial<Playlist>): Promise<boolean> {
-        await post(ApiRoutes.newPlaylist, playlist);
+    static async createNewPlaylist(playlist: Partial<Playlist>) {
+        const out = await post<number>(ApiRoutes.newPlaylist, playlist);
         notify(t("PLAYLIST_CREATED"), NotificationType.success);
-        return true;
+        return out;
     }
 
     static async deletePlaylist(id: number): Promise<boolean> {

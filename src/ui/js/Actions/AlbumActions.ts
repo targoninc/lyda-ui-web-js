@@ -21,10 +21,6 @@ export class AlbumActions {
         createModal([await AlbumTemplates.addToAlbumModal(track, albums)], "add-to-album");
     }
 
-    static async openNewAlbumModal() {
-        createModal([AlbumTemplates.newAlbumModal()], "new-album");
-    }
-
     static async deleteAlbum(id: number) {
         const success = await Api.deleteAlbum(id);
         if (success) {

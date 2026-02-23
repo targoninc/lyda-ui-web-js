@@ -143,89 +143,6 @@ export class PlaylistTemplates {
             ).build();
     }
 
-    static newPlaylistModal() {
-        const playlist = signal(<Partial<Playlist>>{
-            title: "",
-            description: "",
-            visibility: "public",
-        });
-        const name = compute(s => s.title ?? "", playlist);
-        const description = compute(s => s.description ?? "", playlist);
-        const visibility = compute(s => s.visibility === Visibility.private, playlist);
-        const disabled = compute(s => {
-            return !s.title || s.title === "";
-        }, playlist);
-
-        return create("div")
-            .classes("flex-v")
-            .children(
-                create("h2")
-                    .children(
-                        icon({
-                            icon: "playlist_add",
-                            adaptive: true,
-                        }),
-                        create("span")
-                            .text(t("NEW_PLAYLIST"))
-                            .build(),
-                    ).build(),
-                create("div")
-                    .classes("flex-v")
-                    .id("newPlaylistForm")
-                    .children(
-                        input<string>({
-                            type: InputType.text,
-                            required: true,
-                            name: "name",
-                            label: t("NAME"),
-                            placeholder: t("PLAYLIST_NAME"),
-                            value: name,
-                            onchange: (v) => {
-                                playlist.value = { ...playlist.value, title: v };
-                            },
-                        }),
-                        textarea({
-                            name: "description",
-                            label: t("DESCRIPTION"),
-                            placeholder: t("EXAMPLE_PLAYLIST_NAME"),
-                            value: description,
-                            onchange: (v) => {
-                                playlist.value = { ...playlist.value, description: v };
-                            },
-                        }),
-                        toggle({
-                            name: "visibility",
-                            label: t("PRIVATE"),
-                            text: t("PRIVATE"),
-                            checked: visibility,
-                            onchange: (v) => {
-                                playlist.value = {
-                                    ...playlist.value,
-                                    visibility: v ? Visibility.private : Visibility.public,
-                                };
-                            },
-                        }),
-                    ).build(),
-                create("div")
-                    .classes("flex")
-                    .children(
-                        button({
-                            text: t("CREATE"),
-                            disabled,
-                            onclick: async () => {
-                                await Api.createNewPlaylist(playlist.value);
-                                Util.removeModal();
-                            },
-                            icon: {
-                                icon: "playlist_add",
-                            },
-                            classes: ["positive"],
-                        }),
-                        GenericTemplates.modalCancelButton(),
-                    ).build(),
-            ).build();
-    }
-
     static smallPlaylistCover(playlist: Playlist) {
         const coverState = signal(Images.DEFAULT_COVER_PLAYLIST);
         if (playlist.has_cover) {
@@ -330,5 +247,82 @@ export class PlaylistTemplates {
                 },
             })),
         ).build();
+    }
+
+    static createPlaylistPage() {
+        const playlist = signal(<Partial<Playlist>>{
+            title: "",
+            description: "",
+            visibility: "public",
+        });
+        const name = compute(s => s.title ?? "", playlist);
+        const description = compute(s => s.description ?? "", playlist);
+        const visibility = compute(s => s.visibility === Visibility.private, playlist);
+        const disabled = compute(s => {
+            return !s.title || s.title === "";
+        }, playlist);
+
+        return vertical(
+            create("h2")
+                .children(
+                    icon({
+                        icon: "playlist_add",
+                        adaptive: true,
+                    }),
+                    create("span")
+                        .text(t("NEW_PLAYLIST"))
+                        .build(),
+                ).build(),
+            vertical(
+                input<string>({
+                    type: InputType.text,
+                    required: true,
+                    name: "name",
+                    label: t("NAME"),
+                    placeholder: t("PLAYLIST_NAME"),
+                    value: name,
+                    onchange: (v) => {
+                        playlist.value = { ...playlist.value, title: v };
+                    },
+                }),
+                textarea({
+                    name: "description",
+                    label: t("DESCRIPTION"),
+                    placeholder: t("EXAMPLE_PLAYLIST_NAME"),
+                    value: description,
+                    onchange: (v) => {
+                        playlist.value = { ...playlist.value, description: v };
+                    },
+                }),
+                toggle({
+                    name: "visibility",
+                    label: t("PRIVATE"),
+                    text: t("PRIVATE"),
+                    checked: visibility,
+                    onchange: (v) => {
+                        playlist.value = {
+                            ...playlist.value,
+                            visibility: v ? Visibility.private : Visibility.public,
+                        };
+                    },
+                }),
+            ).build(),
+            horizontal(
+                button({
+                    text: t("CREATE"),
+                    disabled,
+                    onclick: async () => {
+                        const id = await Api.createNewPlaylist(playlist.value);
+                        if (id) {
+                            navigate(`${RoutePath.playlist}/${id}`);
+                        }
+                    },
+                    icon: {
+                        icon: "playlist_add",
+                    },
+                    classes: ["positive"],
+                }),
+            ).build(),
+        ).classes("card").build();
     }
 }
