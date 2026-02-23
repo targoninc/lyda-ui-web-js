@@ -1,7 +1,7 @@
 import { AuthActions } from "../Actions/AuthActions.ts";
 import { LandingPageTemplates } from "./LandingPageTemplates.ts";
 import { UserTemplates } from "./account/UserTemplates.ts";
-import { AnyElement, compute, create, nullElement, signal, when } from "@targoninc/jess";
+import { AnyElement, create, signal, when } from "@targoninc/jess";
 import { SearchTemplates } from "./SearchTemplates.ts";
 import { SettingsTemplates } from "./account/SettingsTemplates.ts";
 import { RoadmapTemplates } from "./RoadmapTemplates.ts";
@@ -34,7 +34,6 @@ import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 import { SubscriptionTemplates } from "./money/SubscriptionTemplates.ts";
 import { t } from "../../locales";
 import { TransactionTemplates } from "./money/TransactionTemplates.ts";
-import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, (route: Route, params: Record<string, string>) => Promise<AnyElement> | AnyElement> = {
@@ -42,7 +41,7 @@ export class PageTemplates {
         [RoutePath.following]: () => MusicTemplates.trackFeed(FeedType.following),
         [RoutePath.history]: () => MusicTemplates.trackFeed(FeedType.history),
         [RoutePath.album]: AlbumTemplates.albumPage,
-        [RoutePath.playlist]: PageTemplates.playlistPage,
+        [RoutePath.playlist]: PlaylistTemplates.playlistPage,
         [RoutePath.profile]: UserTemplates.profile,
         [RoutePath.settings]: SettingsTemplates.settingsPage,
         [RoutePath.statistics]: PageTemplates.statisticsPage,
@@ -111,7 +110,7 @@ export class PageTemplates {
         }
 
         const user = signal<User>({
-            username: name
+            username: name,
         } as User);
         if (selfUser.username === name) {
             user.value = selfUser;
@@ -121,37 +120,6 @@ export class PageTemplates {
 
         document.title = `${t("LIBRARY")} - @${name}`;
         return UserTemplates.libraryPage(user, selfUser.username === name);
-    }
-
-    static async playlistPage(route: Route, params: Record<string, string>) {
-        const playlistId = parseInt(params["id"]);
-        const user = currentUser.value;
-
-        if (!user) {
-            notify(`${t("LOGIN_TO_VIEW_PLAYLISTS")}`, NotificationType.error);
-            return create("div")
-                .text(t("LOGIN_TO_VIEW_PLAYLISTS"))
-                .build();
-        }
-
-        const loading = signal(true);
-        const playlist = signal<{
-            playlist: Playlist;
-            canEdit: boolean;
-        } | null>(null);
-        Api.getPlaylistById(playlistId).then(p => {
-            console.log(p);
-            playlist.value = p;
-            document.title = p?.playlist.title ?? "Playlist not found";
-        }).finally(() => loading.value = false);
-
-        return vertical(
-            when(loading, GenericTemplates.loadingSpinner()),
-            when(playlist, create("div")
-                .text(t("PLAYLIST_NOT_FOUND"))
-                .build(), true),
-            compute(p => p ? PlaylistTemplates.playlistPage(p, user) : nullElement(), playlist),
-        ).build();
     }
 
     static statisticsPage() {
@@ -254,13 +222,13 @@ export class PageTemplates {
 
     static notFoundPage() {
         const randomUserWidget = signal(create("span").text(t("LOADING")).build());
-        const user = signal<User|null>(null);
+        const user = signal<User | null>(null);
 
         Api.getRandomUser()
-            .then(async data => user.value = data)
-            .catch(() => randomUserWidget.value = create("span")
-                .text(t("FAILED_LOADING_RANDOM_USER"))
-                .build());
+           .then(async data => user.value = data)
+           .catch(() => randomUserWidget.value = create("span")
+               .text(t("FAILED_LOADING_RANDOM_USER"))
+               .build());
 
         return create("div")
             .classes("flex-v")
@@ -278,7 +246,7 @@ export class PageTemplates {
                 when(user, create("div")
                     .classes("flex")
                     .children(
-                        UserTemplates.userWidget(user)
+                        UserTemplates.userWidget(user),
                     ).build()),
             ).build();
     }
@@ -297,7 +265,7 @@ export class PageTemplates {
         return create("div")
             .classes("unapprovedTracks")
             .children(
-                TrackTemplates.unapprovedTracks(tracks ?? [])
+                TrackTemplates.unapprovedTracks(tracks ?? []),
             ).build();
     }
 

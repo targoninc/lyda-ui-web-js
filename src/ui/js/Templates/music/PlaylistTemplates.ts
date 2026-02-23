@@ -5,24 +5,23 @@ import { UserTemplates } from "../account/UserTemplates.ts";
 import { Images } from "../../Enums/Images.ts";
 import { getPlayIcon, Util } from "../../Classes/Util.ts";
 import { Ui } from "../../Classes/Ui.ts";
-import { AnyElement, AnyNode, compute, create, InputType, nullElement, Signal, signal, when } from "@targoninc/jess";
+import { AnyElement, compute, create, InputType, nullElement, Signal, signal, when } from "@targoninc/jess";
 import { button, icon, input, textarea, toggle } from "@targoninc/jess-components";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType";
-import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { ListTrack } from "@targoninc/lyda-shared/src/Models/ListTrack";
 import { InteractionTemplates } from "../InteractionTemplates.ts";
-import { loadingAudio, playingFrom, playingHere } from "../../state.ts";
+import { currentUser, loadingAudio, playingFrom, playingHere } from "../../state.ts";
 import { MusicTemplates } from "./MusicTemplates.ts";
 import { Api } from "../../Api/Api.ts";
 import { t } from "../../../locales";
 import { Visibility } from "@targoninc/lyda-shared/src/Enums/Visibility.ts";
 import { Time } from "../../Classes/Helpers/Time.ts";
 import { CoverContext } from "../../Enums/CoverContext.ts";
-import { navigate } from "../../Routing/Router.ts";
+import { navigate, Route } from "../../Routing/Router.ts";
 import { RoutePath } from "../../Routing/routes.ts";
 import { TextSize } from "../../Enums/TextSize.ts";
 import { SearchTemplates } from "../SearchTemplates.ts";
@@ -160,7 +159,33 @@ export class PlaylistTemplates {
             .build();
     }
 
-    static playlistPage(data: { playlist: Playlist, canEdit: boolean }, user: User) {
+    static async playlistPage(route: Route, params: Record<string, string>) {
+        const playlistId = parseInt(params["id"]);
+
+        const loading = signal(true);
+        const playlist = signal<{
+            playlist: Playlist;
+            canEdit: boolean;
+        } | null>(null);
+        const reload = () => {
+            Api.getPlaylistById(playlistId).then(p => {
+                console.log(p);
+                playlist.value = p;
+                document.title = p?.playlist.title ?? "Playlist not found";
+            }).finally(() => loading.value = false);
+        };
+        reload();
+
+        return vertical(
+            when(loading, GenericTemplates.loadingSpinner()),
+            when(playlist, create("div")
+                .text(t("PLAYLIST_NOT_FOUND"))
+                .build(), true),
+            compute(p => p ? PlaylistTemplates.playlistPageDisplay(p, reload) : nullElement(), playlist),
+        ).build();
+    }
+
+    static playlistPageDisplay(data: { playlist: Playlist, canEdit: boolean }, reload: () => void) {
         const playlist = data.playlist;
         if (!playlist.tracks) {
             throw new Error(`Playlist ${playlist.id} has no tracks`);
@@ -193,14 +218,14 @@ export class PlaylistTemplates {
                 horizontal(
                     MusicTemplates.cover(EntityType.playlist, playlist, CoverContext.standalone),
                     vertical(
-                        PlaylistTemplates.audioActions(playlist, user, data.canEdit),
+                        PlaylistTemplates.audioActions(playlist,  data.canEdit),
                         InteractionTemplates.interactions(EntityType.playlist, playlist),
                     ).build(),
                 ).build(),
                 MusicTemplates.tracksInList(tracks, data.canEdit, playlist, "playlist"),
                 when(data.canEdit, vertical(
                     create("span")
-                        .text(t("ADD_TRACK_TO_PLAYLIST", playlist.title))
+                        .text(t("ADD_TRACK_TO_TITLE", playlist.title))
                         .build(),
                     create("div")
                         .children(
@@ -210,11 +235,8 @@ export class PlaylistTemplates {
                                     if (result.type !== "track") {
                                         return;
                                     }
-                                    const success = await Api.addTrackToPlaylists(result.id, [playlist.id]);
-                                    if (success) {
-                                        Util.removeModal();
-                                        navigate(`${RoutePath.playlist}/${playlist.id}`);
-                                    }
+                                    await Api.addTrackToPlaylists(result.id, [playlist.id]);
+                                    reload();
                                 },
                                 [ApiRoutes.searchTracks], [],
                                 ["fullWidth"],
@@ -224,7 +246,7 @@ export class PlaylistTemplates {
             ).build();
     }
 
-    static audioActions(playlist: Playlist, user: User, canEdit: boolean) {
+    static audioActions(playlist: Playlist, canEdit: boolean) {
         if (!playlist.tracks) {
             throw new Error(`Playlist ${playlist.id} has no tracks`);
         }
@@ -233,9 +255,8 @@ export class PlaylistTemplates {
         const playIcon = getPlayIcon(isPlaying, loadingAudio);
         const playText = compute((p): string => p ? `${t("PAUSE")}` : `${t("PLAY")}`, isPlaying);
 
-        let actions: AnyNode[] = [];
-        if (user) {
-            actions = [
+        return horizontal(
+            when(currentUser, horizontal(
                 button({
                     text: playText,
                     icon: {
@@ -253,11 +274,7 @@ export class PlaylistTemplates {
                     },
                 }),
                 MusicTemplates.addListToQueueButton(playlist),
-            ];
-        }
-
-        return horizontal(
-            ...actions,
+            ).build()),
             when(canEdit, button({
                 text: t("DELETE"),
                 icon: { icon: "delete" },

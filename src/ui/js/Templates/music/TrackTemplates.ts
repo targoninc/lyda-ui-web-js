@@ -315,7 +315,7 @@ export class TrackTemplates {
                     text: t("UP"),
                     icon: { icon: "keyboard_arrow_up" },
                     classes: ["align-children"],
-                    disabled: compute(p => p[0].track_id === track.id, tracks),
+                    disabled: compute(p => p[0]?.track_id === track.id, tracks),
                     onclick: async () => {
                         await TrackActions.reorderTrack(type, list.id, track.id, tracks, listTrack.position - 1);
                     },
@@ -324,7 +324,7 @@ export class TrackTemplates {
                     text: t("DOWN"),
                     icon: { icon: "keyboard_arrow_down" },
                     classes: ["align-children"],
-                    disabled: compute(p => p[p.length - 1].track_id === track.id, tracks),
+                    disabled: compute(p => p[p.length - 1]?.track_id === track.id, tracks),
                     onclick: async () => {
                         await TrackActions.reorderTrack(type, list.id, track.id, tracks, listTrack.position + 1);
                     },

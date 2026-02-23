@@ -3,7 +3,6 @@ import { AlbumActions } from "../../Actions/AlbumActions.ts";
 import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
-import { Images } from "../../Enums/Images.ts";
 import { getPlayIcon, Util } from "../../Classes/Util.ts";
 import { createModal, Ui } from "../../Classes/Ui.ts";
 import { AnyNode, compute, create, InputType, signal, Signal, when } from "@targoninc/jess";
@@ -26,6 +25,9 @@ import { CustomText } from "../../Classes/Helpers/CustomText.ts";
 import { CoverContext } from "../../Enums/CoverContext.ts";
 import { TextSize } from "../../Enums/TextSize.ts";
 import { RoutePath } from "../../Routing/routes.ts";
+import { SearchTemplates } from "../SearchTemplates.ts";
+import { SearchContext } from "@targoninc/lyda-shared/src/Enums/SearchContext.ts";
+import { ApiRoutes } from "../../Api/ApiRoutes.ts";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
@@ -208,12 +210,7 @@ export class AlbumTemplates {
             ).build();
     }
 
-    private static albumPageDisplay(album: Album, canEdit: boolean) {
-        const coverLoading = signal(false);
-        const coverState = signal(Images.DEFAULT_COVER_ALBUM);
-        if (album.has_cover) {
-            coverState.value = Util.getAlbumCover(album.id);
-        }
+    private static albumPageDisplay(album: Album, canEdit: boolean, reload: () => void) {
         const albumUser = album.user!;
         const tracks = signal<ListTrack[]>(album.tracks ?? []);
         const duration = album.tracks!.reduce((acc, t) => acc + (t.track?.length ?? 0), 0);
@@ -252,6 +249,26 @@ export class AlbumTemplates {
                     .html(CustomText.renderToHtml(album.description))
                     .build(),
                 MusicTemplates.tracksInList(tracks, canEdit, album, "album"),
+                when(canEdit, vertical(
+                    create("span")
+                        .text(t("ADD_TRACK_TO_TITLE", album.title))
+                        .build(),
+                    create("div")
+                        .children(
+                            SearchTemplates.search(
+                                SearchContext.searchPage,
+                                async (result) => {
+                                    if (result.type !== "track") {
+                                        return;
+                                    }
+                                    await Api.addTrackToAlbums(result.id, [album.id]);
+                                    reload();
+                                },
+                                [ApiRoutes.searchTracks], [],
+                                ["fullWidth"],
+                            ),
+                        )
+                ).classes("card").build()),
             ).build();
     }
 
@@ -261,17 +278,20 @@ export class AlbumTemplates {
             canEdit: false,
         });
         const loading = signal(true);
-        Api.getAlbumById(parseInt(params.id)).then(async res => {
-            if (res) {
-                data.value = res;
-                document.title = res.album.title;
-                return;
-            }
-            data.value = {
-                album: null,
-                canEdit: false,
-            };
-        }).finally(() => loading.value = false);
+        const reload = () => {
+            Api.getAlbumById(parseInt(params.id)).then(async res => {
+                if (res) {
+                    data.value = res;
+                    document.title = res.album.title;
+                    return;
+                }
+                data.value = {
+                    album: null,
+                    canEdit: false,
+                };
+            }).finally(() => loading.value = false);
+        }
+        reload();
 
         const template = compute((d, l) => {
             if (!d || l) {
@@ -282,7 +302,7 @@ export class AlbumTemplates {
                 return PageTemplates.notFoundPage();
             }
 
-            return AlbumTemplates.albumPageDisplay(d.album, d.canEdit);
+            return AlbumTemplates.albumPageDisplay(d.album, d.canEdit, reload);
         }, data, loading);
 
         return create("div")
