@@ -80,30 +80,37 @@ export class ModerationUsersTemplates {
         return create("details").children(
             create("summary").children(
                 horizontal(
-                    UserTemplates.userIcon(u.id, avatar$, true),
+                    horizontal(
+                        UserTemplates.userIcon(u.id, avatar$, true),
+                        vertical(
+                            horizontal(
+                                heading({
+                                    text: u.displayname,
+                                    level: 3,
+                                }),
+                                create("span")
+                                    .classes(TextSize.xSmall, "nopointer")
+                                    .text("@" + u.username)
+                                    .build(),
+                                when(u.verified, UserTemplates.verificationBadge()),
+                            ).classes("align-children"),
+                            horizontal(
+                                when(u.deleted_at, create("span")
+                                    .classes("deleted-pill")
+                                    .text(t("ACCOUNT_DELETED"))
+                                    .build()),
+                                when(u.banned_at, create("span")
+                                    .classes("banned-pill")
+                                    .text(t("BANNED"))
+                                    .build()),
+                            ).classes("small-gap")
+                        ).classes("nogap")
+                    ).classes("align-children"),
                     vertical(
-                        horizontal(
-                            heading({
-                                text: u.displayname,
-                                level: 3,
-                            }),
-                            create("span")
-                                .classes(TextSize.xSmall, "nopointer")
-                                .text("@" + u.username)
-                                .build(),
-                        ).classes("align-children"),
-                        horizontal(
-                            when(u.deleted_at, create("span")
-                                .classes("deleted-pill")
-                                .text(t("ACCOUNT_DELETED"))
-                                .build()),
-                            when(u.banned_at, create("span")
-                                .classes("banned-pill")
-                                .text(t("BANNED"))
-                                .build()),
-                        ).classes("small-gap")
-                    ).classes("nogap")
-                ).classes("align-children")
+                        when(u.lastlogin, GenericTemplates.timestamp(u.lastlogin ?? new Date())),
+                        when(u.secondlastlogin, GenericTemplates.timestamp(u.secondlastlogin ?? new Date())),
+                    )
+                ).classes("fullWidth", "space-between", "align-children")
             ),
             vertical(
                 GenericTemplates.combinedSelector(tabs, newIndex => i$.value = newIndex, 0),
