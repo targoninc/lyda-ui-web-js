@@ -1,4 +1,4 @@
-import { compute, create, signal, Signal, signalMap, when } from "@targoninc/jess";
+import { AnyElement, compute, create, signal, Signal, signalMap, when } from "@targoninc/jess";
 import { Permissions } from "@targoninc/lyda-shared/src/Enums/Permissions";
 import { DashboardTemplates } from "./DashboardTemplates.ts";
 import { button, checkbox, heading } from "@targoninc/jess-components";
@@ -12,6 +12,9 @@ import { UserTemplates } from "../account/UserTemplates.ts";
 import { Images } from "../../Enums/Images.ts";
 import { Util } from "../../Classes/Util.ts";
 import { TextSize } from "../../Enums/TextSize.ts";
+import { ModerationFilter } from "../../Models/ModerationFilter.ts";
+import { ModerationCommentsTemplates } from "./ModerationCommentsTemplates.ts";
+import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 
 export class ModerationUsersTemplates {
     static usersPage() {
@@ -106,7 +109,10 @@ export class ModerationUsersTemplates {
                 GenericTemplates.combinedSelector(tabs, newIndex => i$.value = newIndex, 0),
                 when(
                     tabSelected(i$, 0), ModerationUsersTemplates.permissionsPopup(permissions, u)
-                )
+                ),
+                when(
+                    tabSelected(i$, 1), ModerationUsersTemplates.userComments(u)
+                ),
             ).classes("card")
         ).build();
     }
@@ -164,5 +170,43 @@ export class ModerationUsersTemplates {
                 }
             },
         });
+    }
+
+    private static userComments(u: User) {
+        const commentsList = signal<AnyElement>(create("div").build());
+        const filterState = signal<ModerationFilter>({
+            potentiallyHarmful: false,
+            user_id: u.id,
+            offset: 0,
+            limit: 10
+        });
+        const loading = signal(false);
+        const comments = signal<Comment[]>([]);
+
+        const update = async (newFilter: ModerationFilter) => {
+            commentsList.value = create("div").build();
+            comments.value = (await Api.getModerationComments(newFilter, loading)) ?? [];
+            if (comments.value) {
+                commentsList.value = ModerationCommentsTemplates.moderatableCommentsList(comments.value, false);
+            }
+        }
+        filterState.subscribe(update);
+        update(filterState.value).then();
+
+        return vertical(
+            create("div")
+                .classes("flex", "align-children", "card")
+                .children(
+                    ModerationCommentsTemplates.commentFilters(filterState, loading, comments, false),
+                    button({
+                        text: t("REFRESH"),
+                        icon: { icon: "refresh" },
+                        classes: ["positive"],
+                        onclick: async () => await update(filterState.value)
+                    }),
+                    when(loading, GenericTemplates.loadingSpinner()),
+                ).build(),
+            commentsList
+        ).build();
     }
 }
