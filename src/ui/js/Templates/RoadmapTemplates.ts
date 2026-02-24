@@ -14,9 +14,10 @@ export class RoadmapTemplates {
             create("h1")
                 .text(t("FEATURE_ROADMAP"))
                 .build(),
-            RoadmapTemplates.roadmapItem(RoadmapItemStatus.todo, "2026", "Stripe payments + payouts"),
+            RoadmapTemplates.roadmapItem(RoadmapItemStatus.todo, "2026", "Stripe payments"),
             RoadmapTemplates.roadmapItem(RoadmapItemStatus.todo, "2026", "Buying albums"),
             RoadmapTemplates.roadmapItem(RoadmapItemStatus.inProgress, "2025-2026", "General improvements and bugfixes"),
+            RoadmapTemplates.roadmapItem(RoadmapItemStatus.done, "2025", "Payouts"),
             RoadmapTemplates.roadmapItem(RoadmapItemStatus.done, "2025", "Buying tracks"),
             RoadmapTemplates.roadmapItem(RoadmapItemStatus.done, "2025", "Localization system"),
             RoadmapTemplates.roadmapItem(RoadmapItemStatus.done, "2025", "MFA"),
