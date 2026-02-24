@@ -986,6 +986,14 @@ td:last-child, th:last-child {
     max-width: max-content;
 }
 
+.permission {
+    background: var(--green);
+    border-radius: var(--border-radius);
+    padding: var(--inline-padding);
+    max-width: max-content;
+    color: var(--color-3);
+}
+
 .queue-popout {
     position: absolute;
     bottom: calc(100% + 15px);

@@ -106,7 +106,7 @@ export class SettingsTemplates {
                             }),
                             signalMap(
                                 permissions,
-                                create("div").classes("flex-v"),
+                                vertical(),
                                 (permission: Permission) =>
                                     SettingsTemplates.permissionCard(permission),
                             ),
@@ -116,7 +116,10 @@ export class SettingsTemplates {
     }
 
     static permissionCard(permission: Permission) {
-        return create("div").children(create("span").text(permission.name).build()).build();
+        return create("div")
+            .classes("permission")
+            .text(permission.name)
+            .build();
     }
 
     static accountSection(user: User) {
@@ -448,17 +451,43 @@ export class SettingsTemplates {
                         icon: {icon: "delete"},
                         classes: ["negative"],
                         disabled: !!user.deleted_at,
+                        onclick: () => {
+                            Ui.getConfirmationModal(
+                                t("DELETE_ACCOUNT"),
+                                t("DELETE_ACCOUNT_SURE"),
+                                t("YES_DELETE_ACCOUNT"),
+                                t("NO_KEEP_ACCOUNT"),
+                                async () => {
+                                    Api.deleteUser().then(() => {
+                                        notify(t("ACCOUNT_DELETED"), NotificationType.success);
+                                        navigate(RoutePath.login);
+                                        window.location.reload();
+                                    });
+                                },
+                                () => {
+                                },
+                                "delete",
+                            ).then();
+                        },
+                    }),
+                    when(!!user.deleted_at, horizontal(
+                        create("span")
+                            .classes("warning", TextSize.small)
+                            .text(t("SCHEDULED_FOR_DELETION")),
+                        button({
+                            text: t("CANCEL_ACCOUNT_DELETION"),
+                            icon: {icon: "restore_from_trash"},
+                            classes: ["positive"],
                             onclick: () => {
                                 Ui.getConfirmationModal(
-                                    t("DELETE_ACCOUNT"),
-                                    t("DELETE_ACCOUNT_SURE"),
-                                    t("YES_DELETE_ACCOUNT"),
-                                    t("NO_KEEP_ACCOUNT"),
+                                    t("CANCEL_ACCOUNT_DELETION"),
+                                    t("CANCEL_ACCOUNT_DELETION_SURE"),
+                                    t("YES_KEEP_ACCOUNT"),
+                                    t("NO_STILL_DELETE_ACCOUNT"),
                                     async () => {
-                                        Api.deleteUser().then(() => {
-                                            notify(t("ACCOUNT_DELETED"), NotificationType.success);
-                                            navigate(RoutePath.login);
+                                        Api.undeleteUser().then(() => {
                                             window.location.reload();
+                                            notify(t("ACCOUNT_DELETION_CANCELLED"), NotificationType.success);
                                         });
                                     },
                                     () => {
@@ -466,34 +495,8 @@ export class SettingsTemplates {
                                     "delete",
                                 ).then();
                             },
-                        }),
-                        when(!!user.deleted_at, horizontal(
-                            create("span")
-                                .classes("warning", TextSize.small)
-                                .text(t("SCHEDULED_FOR_DELETION")),
-                            button({
-                                text: t("CANCEL_ACCOUNT_DELETION"),
-                                icon: { icon: "restore_from_trash" },
-                                classes: ["positive"],
-                                onclick: () => {
-                                    Ui.getConfirmationModal(
-                                        t("CANCEL_ACCOUNT_DELETION"),
-                                        t("CANCEL_ACCOUNT_DELETION_SURE"),
-                                        t("YES_KEEP_ACCOUNT"),
-                                        t("NO_STILL_DELETE_ACCOUNT"),
-                                        async () => {
-                                            Api.undeleteUser().then(() => {
-                                                window.location.reload();
-                                                notify(t("ACCOUNT_DELETION_CANCELLED"), NotificationType.success);
-                                            });
-                                        },
-                                        () => {
-                                        },
-                                        "delete",
-                                    ).then();
-                                },
-                            })
-                        ).classes("align-children").build()),
+                        })
+                    ).classes("align-children").build()),
                     button({
                         text: t("DOWNLOAD_DATA"),
                         icon: {icon: "download"},
