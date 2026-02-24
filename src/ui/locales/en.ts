@@ -234,6 +234,7 @@ export const en = {
     UNKNOWN: "Unknown",
     AUTO_REFRESH: "Auto-refresh",
     REFRESH: "Refresh",
+    BANNED: "Banned",
     COPY_STACK: "Copy stack",
     POTENTIALLY_HARMFUL: "Potentially harmful",
     FILTER_BY_USER_ID: "Filter by user ID",

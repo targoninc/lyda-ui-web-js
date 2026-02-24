@@ -1140,6 +1140,20 @@ td:last-child, th:last-child {
     animation: spin 1.2s linear infinite;
 }
 
+.banned-pill, .deleted-pill {
+    background: var(--red);
+    color: var(--color-4);
+    padding: var(--inline-padding);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-xsmall);
+    width: max-content;
+}
+
+.deleted-pill {
+    background: var(--color-7);
+    color: var(--color-4);
+}
+
 img {
     user-select: none;
 }

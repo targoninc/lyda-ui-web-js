@@ -71,21 +71,35 @@ export class ModerationUsersTemplates {
         if (u.has_avatar) {
             avatar$.value = Util.getUserAvatar(u.id);
         }
-        const tabs = ["Permissions"];
+        const tabs = ["Permissions", "Comments"];
         const i$ = signal(0);
 
         return create("details").children(
             create("summary").children(
                 horizontal(
                     UserTemplates.userIcon(u.id, avatar$, true),
-                    heading({
-                        text: u.displayname,
-                        level: 3,
-                    }),
-                    create("span")
-                        .classes(TextSize.xSmall, "nopointer")
-                        .text("@" + u.username)
-                        .build(),
+                    vertical(
+                        horizontal(
+                            heading({
+                                text: u.displayname,
+                                level: 3,
+                            }),
+                            create("span")
+                                .classes(TextSize.xSmall, "nopointer")
+                                .text("@" + u.username)
+                                .build(),
+                        ).classes("align-children"),
+                        horizontal(
+                            when(u.deleted_at, create("span")
+                                .classes("deleted-pill")
+                                .text(t("ACCOUNT_DELETED"))
+                                .build()),
+                            when(u.banned_at, create("span")
+                                .classes("banned-pill")
+                                .text(t("BANNED"))
+                                .build()),
+                        ).classes("small-gap")
+                    ).classes("nogap")
                 ).classes("align-children")
             ),
             vertical(
