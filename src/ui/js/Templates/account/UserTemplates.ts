@@ -680,16 +680,7 @@ export class UserTemplates {
                 horizontal(
                     when(hasPermissionToVerify, GenericTemplates.roundIconButton({icon: "settings_account_box"}, () => menuShown.value = !menuShown.value, "User options")),
                     when(menuShown, vertical(
-                        when(verified, UserTemplates.verifyUserButton(user, verified), true),
-                        when(verified, button({
-                            text: t("UNVERIFY"),
-                            icon: {icon: "close"},
-                            classes: ["negative"],
-                            onclick: async () => {
-                                await Api.unverifyUser(user.id);
-                                verified.value = false;
-                            },
-                        })),
+                        UserTemplates.verifyUserButton(user, verified),
                     ).classes("popout-below", "borderless", "absolute-align-left").build()),
                 ).classes("relative"),
                 when(isFollowed, UserTemplates.followsBackIndicator()),
@@ -697,15 +688,26 @@ export class UserTemplates {
     }
 
     static verifyUserButton(user: User, verified: Signal<boolean>) {
-        return button({
-            text: t("VERIFY"),
-            icon: {icon: "verified"},
-            classes: ["positive"],
-            onclick: async () => {
-                await Api.verifyUser(user.id);
-                verified.value = true;
-            },
-        });
+        return horizontal(
+            when(verified, button({
+                text: t("VERIFY"),
+                icon: {icon: "verified"},
+                classes: ["positive"],
+                onclick: async () => {
+                    await Api.verifyUser(user.id);
+                    verified.value = true;
+                },
+            }), true),
+            when(verified, button({
+                text: t("UNVERIFY"),
+                icon: {icon: "close"},
+                classes: ["negative"],
+                onclick: async () => {
+                    await Api.unverifyUser(user.id);
+                    verified.value = false;
+                },
+            })),
+        );
     }
 
     static badges(badges: Badge[]) {

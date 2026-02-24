@@ -94,7 +94,7 @@ export class ModerationUsersTemplates {
                                     .classes(TextSize.xSmall, "nopointer")
                                     .text("@" + u.username)
                                     .build(),
-                                when(u.verified, UserTemplates.verificationBadge()),
+                                when(verified, UserTemplates.verificationBadge()),
                             ).classes("align-children"),
                             horizontal(
                                 when(u.deleted_at, create("span")
