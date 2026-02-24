@@ -134,7 +134,35 @@ export class SettingsTemplates {
             .classes("card", "flex-v")
             .children(
                 SettingsTemplates.sectionHeading(t("ACCOUNT")),
-                GenericTemplates.logoutButton(),
+                horizontal(
+                    GenericTemplates.logoutButton(),
+                    vertical(
+                        button({
+                            text: t("REQUEST_PASSWORD_RESET"),
+                            icon: {
+                                icon: "lock_reset"
+                            },
+                            disabled: compute(r => !user.emails.some(e => e.verified || e.primary) || r, resetRequested),
+                            onclick: async () => {
+                                try {
+                                    await Api.requestPasswordReset();
+                                    notify(
+                                        `${t("PASSWORD_RESET_REQUESTED")}`,
+                                        NotificationType.success,
+                                    );
+                                    resetRequested.value = true;
+                                } catch (error: any) {
+                                    resetError.value = error.message;
+                                }
+                            },
+                        }),
+                        when(resetRequested, create("span")
+                            .classes("text-positive")
+                            .text(t("PASSWORD_RESET_REQUESTED"))
+                            .build()),
+                        compute(e => e ? error(e) : nullElement(), resetError)
+                    ),
+                ),
                 create("p")
                     .text(t("CHANGE_ACCOUNT_SETTINGS"))
                     .build(),
@@ -156,25 +184,6 @@ export class SettingsTemplates {
                         onclick: () => navigate(RoutePath.subscribe),
                     }),
                     true,
-                ),
-                vertical(
-                    button({
-                        text: t("REQUEST_PASSWORD_RESET"),
-                        disabled: compute(r => !user.emails.some(e => e.verified || e.primary) || r, resetRequested),
-                        onclick: async () => {
-                            try {
-                                await Api.requestPasswordReset();
-                                notify(
-                                    `${t("PASSWORD_RESET_REQUESTED")}`,
-                                    NotificationType.success,
-                                );
-                                resetRequested.value = true;
-                            } catch (error: any) {
-                                resetError.value = error.message;
-                            }
-                        },
-                    }),
-                    compute(e => e ? error(e) : nullElement(), resetError)
                 ),
                 SettingsTemplates.userImageSettings(user),
                 create("div")
