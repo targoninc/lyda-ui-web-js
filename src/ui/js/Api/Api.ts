@@ -448,6 +448,10 @@ export class Api {
         await post(ApiRoutes.updateCacheKey, { key, value });
     }
 
+    static async banUser(id: number) {
+        await post(ApiRoutes.banUser, { id });
+    }
+
     //endregion
 
     //region Albums

@@ -15,6 +15,7 @@ import { TextSize } from "../../Enums/TextSize.ts";
 import { ModerationFilter } from "../../Models/ModerationFilter.ts";
 import { ModerationCommentsTemplates } from "./ModerationCommentsTemplates.ts";
 import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
+import { Ui } from "../../Classes/Ui.ts";
 
 export class ModerationUsersTemplates {
     static usersPage() {
@@ -113,6 +114,18 @@ export class ModerationUsersTemplates {
                 ).classes("fullWidth", "space-between", "align-children")
             ),
             vertical(
+                horizontal(
+                    button({
+                        text: t("BAN_USER"),
+                        classes: ["negative"],
+                        onclick: async () => {
+                            await Ui.getConfirmationModal(t("BAN_USER"), t("BAN_USER_CONFIRM"), t("BAN_USER"), t("NO"), async () => {
+                                await Api.banUser(u.id);
+                                permissions.value = [];
+                            }, async () => {});
+                        }
+                    })
+                ),
                 GenericTemplates.combinedSelector(tabs, newIndex => i$.value = newIndex, 0),
                 when(
                     tabSelected(i$, 0), ModerationUsersTemplates.permissionsPopup(permissions, u)

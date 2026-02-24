@@ -40,6 +40,7 @@ export class ApiRoutes {
     static setUserPermission = ApiRoutes.userActions + "/set-permission";
     static trackClientError = ApiRoutes.userActions + "/track-client-error";
     static updateCacheKey = ApiRoutes.userActions + "/update-cache-key";
+    static banUser = ApiRoutes.userActions + "/ban";
 
     static toggleInteraction = ApiRoutes.base + "/toggleInteraction";
     static removeAllInteractions = ApiRoutes.base + "/removeAllInteractions";

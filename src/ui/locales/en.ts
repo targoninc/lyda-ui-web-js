@@ -235,6 +235,8 @@ export const en = {
     AUTO_REFRESH: "Auto-refresh",
     REFRESH: "Refresh",
     BANNED: "Banned",
+    BAN_USER: "Ban user",
+    BAN_USER_CONFIRM: "Are you sure you want to ban this user?",
     COPY_STACK: "Copy stack",
     POTENTIALLY_HARMFUL: "Potentially harmful",
     FILTER_BY_USER_ID: "Filter by user ID",
