@@ -863,8 +863,8 @@ export class GenericTemplates {
     }
 
     static textButton(text: StringOrSignal, onclick: (e: MouseEvent) => void, icon: StringOrSignal) {
-        return create("a")
-            .classes("page-link", "color-dim", "flex", "align-children", "small-gap", "text-button")
+        return create("button")
+            .classes("color-dim", "flex", "align-children", "small-gap", "text-button")
             .onclick(onclick)
             .children(
                 GenericTemplates.icon(icon, true),

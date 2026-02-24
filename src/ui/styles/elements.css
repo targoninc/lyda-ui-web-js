@@ -609,6 +609,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     padding: var(--jessc-input-padding-y) var(--jessc-input-padding-x);
     border-radius: var(--border-radius);
     cursor: pointer;
+    background: var(--color-6);
 }
 
 .text-button:hover {
