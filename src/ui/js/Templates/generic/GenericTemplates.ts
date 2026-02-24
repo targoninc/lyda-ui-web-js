@@ -205,28 +205,6 @@ export class GenericTemplates {
         );
     }
 
-    static newAlbumButton(classes: string[] = []) {
-        return button({
-            text: t("NEW_ALBUM"),
-            icon: { icon: "forms_add_on" },
-            classes,
-            onclick: async () => {
-                await AlbumActions.openNewAlbumModal();
-            },
-        });
-    }
-
-    static newPlaylistButton(classes: string[] = []) {
-        return button({
-            text: t("NEW_PLAYLIST"),
-            icon: { icon: "playlist_add" },
-            classes,
-            onclick: async () => {
-                await PlaylistActions.openNewPlaylistModal();
-            },
-        });
-    }
-
     static newTrackButton(classes: string[] = []) {
         return button({
             text: t("UPLOAD"),

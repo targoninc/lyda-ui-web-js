@@ -1,18 +1,25 @@
-import { PlaylistTemplates } from "../Templates/music/PlaylistTemplates.ts";
-import { Util } from "../Classes/Util.ts";
-import { createModal, notify } from "../Classes/Ui.ts";
-import { PlayManager } from "../Streaming/PlayManager.ts";
-import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
-import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
-import { playingHere } from "../state.ts";
-import { Api } from "../Api/Api.ts";
-import { startItem } from "./MusicActions.ts";
-import { t } from "../../locales";
+import {PlaylistTemplates} from "../Templates/music/PlaylistTemplates.ts";
+import {Util} from "../Classes/Util.ts";
+import {createModal, notify} from "../Classes/Ui.ts";
+import {PlayManager} from "../Streaming/PlayManager.ts";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import {currentUser, playingHere} from "../state.ts";
+import {Api} from "../Api/Api.ts";
+import {startItem} from "./MusicActions.ts";
+import {t} from "../../locales";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class PlaylistActions {
     static async openAddToPlaylistModal(objectToBeAdded: Album | Track, type: "track" | "album") {
-        const playlists = await Api.getPlaylistsByUserId(objectToBeAdded.user_id);
+        const userId = currentUser.value?.id;
+        if (!userId) {
+            notify(t("LOGIN_TO_VIEW_PLAYLISTS"), NotificationType.error);
+            return false;
+        }
+
+        const playlists = await Api.getPlaylistsByUserId(userId);
         if (!playlists || playlists.length === 0) {
             notify(`${t("NO_PLAYLISTS_YET")}`);
             return;
@@ -23,10 +30,6 @@ export class PlaylistActions {
         } else {
             createModal([PlaylistTemplates.addAlbumToPlaylistModal(objectToBeAdded as Album, playlists)], "add-to-playlist");
         }
-    }
-
-    static async openNewPlaylistModal() {
-        createModal([PlaylistTemplates.newPlaylistModal()], "new-playlist");
     }
 
     static async addTrackToPlaylists(track_id: number, playlist_ids: number[]) {
