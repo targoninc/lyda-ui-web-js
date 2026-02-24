@@ -118,6 +118,7 @@ export class ModerationUsersTemplates {
                     button({
                         text: t("BAN_USER"),
                         classes: ["negative"],
+                        disabled: !!u.banned_at,
                         onclick: async () => {
                             await Ui.getConfirmationModal(t("BAN_USER"), t("BAN_USER_CONFIRM"), t("BAN_USER"), t("NO"), async () => {
                                 await Api.banUser(u.id);
