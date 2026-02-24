@@ -215,7 +215,7 @@ export class Api {
         });
     }
 
-    static async requestPasswordReset(email: string): Promise<any> {
+    static async requestPasswordReset(email?: string): Promise<any> {
         return post(ApiRoutes.requestPasswordReset, {
             email,
         });

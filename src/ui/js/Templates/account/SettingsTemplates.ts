@@ -1,5 +1,5 @@
 import {UserActions} from "../../Actions/UserActions.ts";
-import {GenericTemplates, horizontal} from "../generic/GenericTemplates.ts";
+import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
 import {copy, getUserSettingValue, Util} from "../../Classes/Util.ts";
 import {createModal, notify, Ui} from "../../Classes/Ui.ts";
 import {Api} from "../../Api/Api.ts";
@@ -20,7 +20,7 @@ import {currentUser, permissions} from "../../state.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {
     button,
-    ButtonConfig,
+    ButtonConfig, error, errorList,
     heading,
     icon,
     input,
@@ -127,6 +127,8 @@ export class SettingsTemplates {
             const keys = Object.keys(u);
             return !keys.some(k => u[k] !== user[k as keyof User]) && JSON.stringify(e) === JSON.stringify(originalMails);
         }, updatedUser$, emails$);
+        const resetRequested = signal(false);
+        const resetError = signal<null | string>(null);
 
         return create("div")
             .classes("card", "flex-v")
@@ -154,6 +156,25 @@ export class SettingsTemplates {
                         onclick: () => navigate(RoutePath.subscribe),
                     }),
                     true,
+                ),
+                vertical(
+                    button({
+                        text: t("REQUEST_PASSWORD_RESET"),
+                        disabled: compute(r => !user.emails.some(e => e.verified || e.primary) || r, resetRequested),
+                        onclick: async () => {
+                            try {
+                                await Api.requestPasswordReset();
+                                notify(
+                                    `${t("PASSWORD_RESET_REQUESTED")}`,
+                                    NotificationType.success,
+                                );
+                                resetRequested.value = true;
+                            } catch (error: any) {
+                                resetError.value = error.message;
+                            }
+                        },
+                    }),
+                    compute(e => e ? error(e) : nullElement(), resetError)
                 ),
                 SettingsTemplates.userImageSettings(user),
                 create("div")

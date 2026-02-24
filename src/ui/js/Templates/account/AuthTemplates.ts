@@ -473,9 +473,10 @@ export class AuthTemplates {
         return create("div")
             .classes("flex-v")
             .children(
-                create("h1")
-                    .text(t("FORGOT_PASSWORD"))
-                    .build(),
+                heading({
+                    level: 1,
+                    text: t("FORGOT_PASSWORD")
+                }),
                 create("div")
                     .classes("flex-v")
                     .children(
@@ -507,7 +508,7 @@ export class AuthTemplates {
                             )
                             .build(),
                         button({
-                            text: "Next",
+                            text: t("NEXT"),
                             id: "checkEmailTrigger",
                             classes: ["positive"],
                             disabled: compute(u => !u.email || u.email.trim().length === 0, user),

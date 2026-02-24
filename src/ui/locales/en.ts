@@ -447,6 +447,7 @@ export const en = {
     CHANGE_FORGOT_PASSWORD: "Change/forgot password?",
     REGISTER_INSTEAD: "Register instead",
     FORGOT_PASSWORD: "Forgot password",
+    REQUEST_PASSWORD_RESET: "Request password reset",
     PASSWORD_RESET_REQUESTED: "Password reset requested",
     PASSWORD_RESET_REQUESTED_CHECK_EMAIL: "Password reset requested, check your email",
     ENTER_NEW_PASSWORD: "Enter new password",
