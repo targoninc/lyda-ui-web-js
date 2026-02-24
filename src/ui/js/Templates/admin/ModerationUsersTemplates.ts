@@ -1,21 +1,23 @@
 import { compute, create, signal, Signal, signalMap, when } from "@targoninc/jess";
 import { Permissions } from "@targoninc/lyda-shared/src/Enums/Permissions";
 import { DashboardTemplates } from "./DashboardTemplates.ts";
-import { Time } from "../../Classes/Helpers/Time.ts";
-import { button, checkbox } from "@targoninc/jess-components";
+import { button, checkbox, heading } from "@targoninc/jess-components";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { Permission } from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
 import { Api } from "../../Api/Api.ts";
 import { t } from "../../../locales";
 import { sortByProperty } from "../../Classes/Helpers/Sorting.ts";
-import { TableTemplates } from "../generic/TableTemplates.ts";
-import { text, vertical } from "../generic/GenericTemplates.ts";
+import { GenericTemplates, horizontal, tabSelected, vertical } from "../generic/GenericTemplates.ts";
+import { UserTemplates } from "../account/UserTemplates.ts";
+import { Images } from "../../Enums/Images.ts";
+import { Util } from "../../Classes/Util.ts";
+import { TextSize } from "../../Enums/TextSize.ts";
 
 export class ModerationUsersTemplates {
     static usersPage() {
         return DashboardTemplates.pageNeedingPermissions(
             [Permissions.canSetPermissions],
-            ModerationUsersTemplates.usersListWithFilter()
+            ModerationUsersTemplates.usersListWithFilter(),
         );
     }
 
@@ -45,7 +47,7 @@ export class ModerationUsersTemplates {
                                 users.value = [];
                                 await refresh();
                             },
-                        })
+                        }),
                     )
                     .build(),
                 ModerationUsersTemplates.usersList(users),
@@ -56,56 +58,53 @@ export class ModerationUsersTemplates {
         const sortBy$ = signal<keyof User | null>(null);
         const filtered = compute(sortByProperty, sortBy$, users);
 
-        return TableTemplates.table(
-            true,
-            TableTemplates.tableHeaders<User>([
-                { title: t("USERNAME"), property: "username" },
-                { title: t("DISPLAY_NAME"), property: "displayname" },
-                { title: t("PERMISSIONS"), property: "permissions" },
-                { title: t("LAST_LOGIN"), property: "last_login" },
-            ], sortBy$),
-            signalMap(
-                filtered,
-                create("tbody"),
-                u => ModerationUsersTemplates.user(u)
-            ),
+        return signalMap(
+            filtered,
+            vertical().classes("fixed-bar-content"),
+            u => ModerationUsersTemplates.user(u),
         );
     }
 
     static user(u: User) {
-        const permissionsOpen = signal(false);
         const permissions = signal(u.permissions ?? []);
+        const avatar$ = signal(Images.DEFAULT_AVATAR);
+        if (u.has_avatar) {
+            avatar$.value = Util.getUserAvatar(u.id);
+        }
+        const tabs = ["Permissions"];
+        const i$ = signal(0);
 
-        return TableTemplates.tr({
-            cellClasses: [
-                [],
-                [],
-                ["relative"],
-            ],
-            data: [
-                text(u.username),
-                text(u.displayname),
-                vertical(
-                    button({
-                        text: compute(p => p.length.toString(), permissions),
-                        onclick: () => (permissionsOpen.value = !permissionsOpen.value),
-                        icon: { icon: "lock_open" },
+        return create("details").children(
+            create("summary").children(
+                horizontal(
+                    UserTemplates.userIcon(u.id, avatar$, true),
+                    heading({
+                        text: u.displayname,
+                        level: 3,
                     }),
-                    when(permissionsOpen, ModerationUsersTemplates.permissionsPopup(permissions, u)),
-                ),
-                text(u.lastlogin ? Time.agoUpdating(new Date(u.lastlogin)) : ""),
-            ],
-        });
+                    create("span")
+                        .classes(TextSize.xSmall, "nopointer")
+                        .text("@" + u.username)
+                        .build(),
+                ).classes("align-children")
+            ),
+            vertical(
+                GenericTemplates.combinedSelector(tabs, newIndex => i$.value = newIndex, 0),
+                when(
+                    tabSelected(i$, 0), ModerationUsersTemplates.permissionsPopup(permissions, u)
+                )
+            ).classes("card")
+        ).build();
     }
 
     private static permissionsPopup(permissions: Signal<Permission[]>, u: User) {
         return create("div")
-            .classes("popout-below", "flex-v", "padded", "rounded")
+            .classes("flex-v", "padded", "rounded")
             .children(
                 ...Object.values(Permissions).map(p => {
                     const hasPermission = compute(
                         up => up.some(upp => upp.name === p),
-                        permissions
+                        permissions,
                     );
 
                     return create("div")
@@ -115,11 +114,11 @@ export class ModerationUsersTemplates {
                                 p,
                                 hasPermission,
                                 u,
-                                permissions
-                            )
+                                permissions,
+                            ),
                         )
                         .build();
-                })
+                }),
             ).build();
     }
 
@@ -127,7 +126,7 @@ export class ModerationUsersTemplates {
         p: string,
         hasPermission: Signal<any>,
         u: User,
-        permissions: Signal<Permission[]>
+        permissions: Signal<Permission[]>,
     ) {
         return checkbox({
             text: p,

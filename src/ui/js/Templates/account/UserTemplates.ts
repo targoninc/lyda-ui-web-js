@@ -295,9 +295,9 @@ export class UserTemplates {
         );
     }
 
-    static userIcon(user_id: HtmlPropertyValue, avatar: StringOrSignal) {
+    static userIcon(user_id: HtmlPropertyValue, avatar: StringOrSignal, big = false) {
         return create("img")
-            .classes("user-icon", "align-center", "nopointer")
+            .classes(`user-icon${big ? "-big" : ""}`, "align-center", "nopointer")
             .attributes("data-user-id", user_id)
             .attributes("src", avatar).build();
     }
