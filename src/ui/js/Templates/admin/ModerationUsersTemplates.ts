@@ -71,6 +71,7 @@ export class ModerationUsersTemplates {
 
     static user(u: User) {
         const permissions = signal(u.permissions ?? []);
+        const verified = signal(u.verified);
         const avatar$ = signal(Images.DEFAULT_AVATAR);
         if (u.has_avatar) {
             avatar$.value = Util.getUserAvatar(u.id);
@@ -107,7 +108,7 @@ export class ModerationUsersTemplates {
                             ).classes("small-gap")
                         ).classes("nogap")
                     ).classes("align-children"),
-                    vertical(
+                    horizontal(
                         when(u.lastlogin, GenericTemplates.timestamp(u.lastlogin ?? new Date())),
                         when(u.secondlastlogin, GenericTemplates.timestamp(u.secondlastlogin ?? new Date())),
                     )
@@ -125,7 +126,8 @@ export class ModerationUsersTemplates {
                                 permissions.value = [];
                             }, async () => {});
                         }
-                    })
+                    }),
+                    UserTemplates.verifyUserButton(u, verified)
                 ),
                 GenericTemplates.combinedSelector(tabs, newIndex => i$.value = newIndex, 0),
                 when(

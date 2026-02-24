@@ -680,15 +680,7 @@ export class UserTemplates {
                 horizontal(
                     when(hasPermissionToVerify, GenericTemplates.roundIconButton({icon: "settings_account_box"}, () => menuShown.value = !menuShown.value, "User options")),
                     when(menuShown, vertical(
-                        when(verified, button({
-                            text: t("VERIFY"),
-                            icon: {icon: "verified"},
-                            classes: ["positive"],
-                            onclick: async () => {
-                                await Api.verifyUser(user.id);
-                                verified.value = true;
-                            },
-                        }), true),
+                        when(verified, UserTemplates.verifyUserButton(user, verified), true),
                         when(verified, button({
                             text: t("UNVERIFY"),
                             icon: {icon: "close"},
@@ -702,6 +694,18 @@ export class UserTemplates {
                 ).classes("relative"),
                 when(isFollowed, UserTemplates.followsBackIndicator()),
             ).build();
+    }
+
+    static verifyUserButton(user: User, verified: Signal<boolean>) {
+        return button({
+            text: t("VERIFY"),
+            icon: {icon: "verified"},
+            classes: ["positive"],
+            onclick: async () => {
+                await Api.verifyUser(user.id);
+                verified.value = true;
+            },
+        });
     }
 
     static badges(badges: Badge[]) {
