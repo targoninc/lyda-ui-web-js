@@ -156,6 +156,9 @@ export class ModerationUsersTemplates {
                     horizontal(
                         button({
                             text: t("BAN_USER"),
+                            icon: {
+                                icon: "gavel"
+                            },
                             classes: ["negative"],
                             disabled: !!u.banned_at,
                             onclick: async () => {
