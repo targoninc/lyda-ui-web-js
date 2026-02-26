@@ -10,7 +10,7 @@ import { sortByProperty } from "../../Classes/Helpers/Sorting.ts";
 import { GenericTemplates, horizontal, tabSelected, vertical } from "../generic/GenericTemplates.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { Images } from "../../Enums/Images.ts";
-import { Util } from "../../Classes/Util.ts";
+import { target, Util } from "../../Classes/Util.ts";
 import { TextSize } from "../../Enums/TextSize.ts";
 import { ModerationFilter } from "../../Models/ModerationFilter.ts";
 import { ModerationCommentsTemplates } from "./ModerationCommentsTemplates.ts";
@@ -70,7 +70,6 @@ export class ModerationUsersTemplates {
     }
 
     static user(u: User) {
-        const permissions = signal(u.permissions ?? []);
         const verified = signal(u.verified);
         const avatar$ = signal(Images.DEFAULT_AVATAR);
         if (u.has_avatar) {
@@ -78,8 +77,13 @@ export class ModerationUsersTemplates {
         }
         const tabs = ["Permissions", "Comments"];
         const i$ = signal(0);
+        const open = signal(false);
 
-        return create("details").children(
+        return create("details")
+            .on("toggle", e => {
+                open.value = target<HTMLDetailsElement>(e).open;
+            })
+            .children(
             create("summary").children(
                 horizontal(
                     horizontal(
@@ -123,7 +127,6 @@ export class ModerationUsersTemplates {
                         onclick: async () => {
                             await Ui.getConfirmationModal(t("BAN_USER"), t("BAN_USER_CONFIRM"), t("BAN_USER"), t("NO"), async () => {
                                 await Api.banUser(u.id);
-                                permissions.value = [];
                             }, async () => {});
                         }
                     }),
@@ -131,16 +134,28 @@ export class ModerationUsersTemplates {
                 ),
                 GenericTemplates.combinedSelector(tabs, newIndex => i$.value = newIndex, 0),
                 when(
-                    tabSelected(i$, 0), ModerationUsersTemplates.permissionsPopup(permissions, u)
+                    tabSelected(i$, 0), ModerationUsersTemplates.permissionsPopup(u, open)
                 ),
                 when(
-                    tabSelected(i$, 1), ModerationUsersTemplates.userComments(u)
+                    tabSelected(i$, 1), ModerationUsersTemplates.userComments(u, open)
                 ),
             ).classes("card")
         ).build();
     }
 
-    private static permissionsPopup(permissions: Signal<Permission[]>, u: User) {
+    private static permissionsPopup(u: User, open: Signal<boolean>) {
+        const permissions = signal<Permission[]>(u.permissions ?? []);
+        const update = () => {
+            if (open.value) {
+                Api.getPermissions(u.id).then(perms => {
+                    if (perms) {
+                        permissions.value = perms;
+                    }
+                });
+            }
+        }
+        open.subscribe(update);
+
         return create("div")
             .classes("flex-v", "padded", "rounded")
             .children(
@@ -159,8 +174,7 @@ export class ModerationUsersTemplates {
                                 u,
                                 permissions,
                             ),
-                        )
-                        .build();
+                        ).build();
                 }),
             ).build();
     }
@@ -195,7 +209,7 @@ export class ModerationUsersTemplates {
         });
     }
 
-    private static userComments(u: User) {
+    private static userComments(u: User, open: Signal<boolean>) {
         const commentsList = signal<AnyElement>(create("div").build());
         const filterState = signal<ModerationFilter>({
             potentiallyHarmful: false,
@@ -207,6 +221,10 @@ export class ModerationUsersTemplates {
         const comments = signal<Comment[]>([]);
 
         const update = async (newFilter: ModerationFilter) => {
+            if (!open.value) {
+                commentsList.value = create("div").build();
+                return;
+            }
             commentsList.value = create("div").build();
             comments.value = (await Api.getModerationComments(newFilter, loading)) ?? [];
             if (comments.value) {
@@ -214,7 +232,7 @@ export class ModerationUsersTemplates {
             }
         }
         filterState.subscribe(update);
-        update(filterState.value).then();
+        open.subscribe(() => update(filterState.value).then());
 
         return vertical(
             create("div")

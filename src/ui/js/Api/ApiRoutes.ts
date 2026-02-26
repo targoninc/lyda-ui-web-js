@@ -19,6 +19,7 @@ export class ApiRoutes {
     static userExists = ApiRoutes.user + "/exists";
     static exportUser = ApiRoutes.user + "/export";
     static getUserCache = ApiRoutes.user + "/get-cache";
+    static getIps = ApiRoutes.user + "/ips";
 
     private static userActions = ApiRoutes.user + "/actions";
     static followUser = ApiRoutes.userActions + "/follow";

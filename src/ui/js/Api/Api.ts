@@ -332,8 +332,10 @@ export class Api {
     //endregion
 
     //region User
-    static async getPermissions() {
-        return get<Permission[]>(ApiRoutes.userPermissions);
+    static async getPermissions(id?: number) {
+        return get<Permission[]>(ApiRoutes.userPermissions, {
+            id,
+        });
     }
 
     static async userExists(email: string) {
@@ -450,6 +452,10 @@ export class Api {
 
     static async banUser(id: number) {
         await post(ApiRoutes.banUser, { id });
+    }
+
+    static async getIps(id: number) {
+        await post(ApiRoutes.getIps, { id });
     }
 
     //endregion
