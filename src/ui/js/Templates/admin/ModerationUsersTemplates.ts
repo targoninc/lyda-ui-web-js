@@ -1,7 +1,7 @@
-import { AnyElement, compute, create, signal, Signal, signalMap, when } from "@targoninc/jess";
+import { AnyElement, compute, create, InputType, signal, Signal, signalMap, when } from "@targoninc/jess";
 import { Permissions } from "@targoninc/lyda-shared/src/Enums/Permissions";
 import { DashboardTemplates } from "./DashboardTemplates.ts";
-import { button, checkbox, heading } from "@targoninc/jess-components";
+import { button, checkbox, heading, input, toggle } from "@targoninc/jess-components";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { Permission } from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
 import { Api } from "../../Api/Api.ts";
@@ -28,14 +28,17 @@ export class ModerationUsersTemplates {
 
     static usersListWithFilter() {
         const users = signal<User[]>([]);
-        const query = signal<string | null>(null);
-        const offset = signal<number>(0);
+        const query = signal<string>("");
+        const skip = signal<number>(0);
+        const loading = signal(false);
 
         const refresh = async () => {
-            const res = await Api.getUsers(query.value ?? "%", offset.value, 100);
-            if (res) {
-                users.value = res;
-            }
+            loading.value = true;
+            Api.getUsers(query.value ?? "", skip.value, 10).then(u => {
+                if (u) {
+                    users.value = u;
+                }
+            }).finally(() => loading.value = false);
         };
         refresh().then();
 
@@ -53,8 +56,37 @@ export class ModerationUsersTemplates {
                                 await refresh();
                             },
                         }),
-                    )
-                    .build(),
+                        input<string>({
+                            type: InputType.text,
+                            name: "search",
+                            placeholder: t("FILTER"),
+                            value: query,
+                            onchange: async (v: string) => {
+                                query.value = v;
+                                skip.value = 0;
+                                await refresh();
+                            },
+                        }),
+                        button({
+                            text: t("PREVIOUS_PAGE"),
+                            icon: { icon: "skip_previous" },
+                            disabled: compute((l, s) => l || s <= 0, loading, skip),
+                            onclick: async () => {
+                                skip.value = Math.max(0, skip.value - 10);
+                                await refresh();
+                            },
+                        }),
+                        button({
+                            text: t("NEXT_PAGE"),
+                            icon: { icon: "skip_next" },
+                            disabled: compute((l, e) => l || e.length < 10, loading, users),
+                            onclick: async () => {
+                                skip.value = skip.value + 10;
+                                await refresh();
+                            },
+                        }),
+                        when(loading, GenericTemplates.loadingSpinner())
+                    ).build(),
                 ModerationUsersTemplates.usersList(users),
             ).build();
     }
@@ -257,6 +289,8 @@ export class ModerationUsersTemplates {
 
     private static userIps(u: User, open: Signal<boolean>) {
         const ips = signal<UserIp[]>([]);
+        const filters = signal<string[]>(["cf-connecting-ip"]);
+        const filtered = compute((i, f) => i.filter(ip => f.includes(ip.header)), ips, filters);
         const update = async () => {
             if (!open.value) {
                 ips.value = [];
@@ -265,9 +299,33 @@ export class ModerationUsersTemplates {
             Api.getUserIps(u.id).then(i => ips.value = i ?? []);
         };
         open.subscribe(update);
+        const toggleHeader = (header: string, on: boolean) => {
+            if (!on) {
+                filters.value = filters.value.filter(h => h !== header);
+            } else {
+                filters.value = [...filters.value, header];
+            }
+        }
 
         return vertical(
-            signalMap(ips, vertical(),
+            horizontal(
+                toggle({
+                    text: "cf-connecting-ip",
+                    checked: compute(f => f.includes("cf-connecting-ip"), filters),
+                    onchange: n => toggleHeader("cf-connecting-ip", n),
+                }),
+                toggle({
+                    text: "x-forwarded-for",
+                    checked: compute(f => f.includes("x-forwarded-for"), filters),
+                    onchange: n => toggleHeader("x-forwarded-for", n),
+                }),
+                toggle({
+                    text: "ip",
+                    checked: compute(f => f.includes("ip"), filters),
+                    onchange: n => toggleHeader("ip", n),
+                }),
+            ),
+            signalMap(filtered, vertical(),
                     ip => ModerationUsersTemplates.userIp(ip)),
         ).build();
     }
