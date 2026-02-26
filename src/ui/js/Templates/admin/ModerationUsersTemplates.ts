@@ -61,6 +61,7 @@ export class ModerationUsersTemplates {
                             name: "search",
                             placeholder: t("FILTER"),
                             value: query,
+                            debounce: 200,
                             onchange: async (v: string) => {
                                 query.value = v;
                                 skip.value = 0;
