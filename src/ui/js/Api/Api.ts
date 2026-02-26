@@ -46,6 +46,7 @@ import { SubscriptionPayment } from "@targoninc/lyda-shared/dist/Models/db/finan
 import {ContentIDMatch} from "../Models/ContentIDMatch.ts";
 import { TransactionInfo } from "@targoninc/lyda-shared/src/Models/TransactionInfo.ts";
 import { TrackSale } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackSale.ts";
+import { UserIp } from "@targoninc/lyda-shared/src/Models/db/lyda/UserIp.ts";
 
 export class Api {
     //region Interactions
@@ -454,8 +455,8 @@ export class Api {
         await post(ApiRoutes.banUser, { id });
     }
 
-    static async getIps(id: number) {
-        await post(ApiRoutes.getIps, { id });
+    static async getUserIps(id: number) {
+        return await get<UserIp[]>(ApiRoutes.getIps, { id });
     }
 
     //endregion

@@ -16,6 +16,7 @@ import { ModerationFilter } from "../../Models/ModerationFilter.ts";
 import { ModerationCommentsTemplates } from "./ModerationCommentsTemplates.ts";
 import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import { Ui } from "../../Classes/Ui.ts";
+import { UserIp } from "@targoninc/lyda-shared/src/Models/db/lyda/UserIp.ts";
 
 export class ModerationUsersTemplates {
     static usersPage() {
@@ -75,7 +76,7 @@ export class ModerationUsersTemplates {
         if (u.has_avatar) {
             avatar$.value = Util.getUserAvatar(u.id);
         }
-        const tabs = ["Permissions", "Comments"];
+        const tabs = ["Permissions", "Comments", "IPs"];
         const i$ = signal(0);
         const open = signal(false);
 
@@ -84,63 +85,66 @@ export class ModerationUsersTemplates {
                 open.value = target<HTMLDetailsElement>(e).open;
             })
             .children(
-            create("summary").children(
-                horizontal(
+                create("summary").children(
                     horizontal(
-                        UserTemplates.userIcon(u.id, avatar$, true),
-                        vertical(
-                            horizontal(
-                                heading({
-                                    text: u.displayname,
-                                    level: 3,
-                                }),
-                                create("span")
-                                    .classes(TextSize.xSmall, "nopointer")
-                                    .text("@" + u.username)
-                                    .build(),
-                                when(verified, UserTemplates.verificationBadge()),
-                            ).classes("align-children"),
-                            horizontal(
-                                when(u.deleted_at, create("span")
-                                    .classes("deleted-pill")
-                                    .text(t("ACCOUNT_DELETED"))
-                                    .build()),
-                                when(u.banned_at, create("span")
-                                    .classes("banned-pill")
-                                    .text(t("BANNED"))
-                                    .build()),
-                            ).classes("small-gap")
-                        ).classes("nogap")
-                    ).classes("align-children"),
+                        horizontal(
+                            UserTemplates.userIcon(u.id, avatar$, true),
+                            vertical(
+                                horizontal(
+                                    heading({
+                                        text: u.displayname,
+                                        level: 3,
+                                    }),
+                                    create("span")
+                                        .classes(TextSize.xSmall, "nopointer")
+                                        .text("@" + u.username)
+                                        .build(),
+                                    when(verified, UserTemplates.verificationBadge()),
+                                ).classes("align-children"),
+                                horizontal(
+                                    when(u.deleted_at, create("span")
+                                        .classes("deleted-pill")
+                                        .text(t("ACCOUNT_DELETED"))
+                                        .build()),
+                                    when(u.banned_at, create("span")
+                                        .classes("banned-pill")
+                                        .text(t("BANNED"))
+                                        .build()),
+                                ).classes("small-gap"),
+                            ).classes("nogap"),
+                        ).classes("align-children"),
+                        horizontal(
+                            when(u.lastlogin, GenericTemplates.timestamp(u.lastlogin ?? new Date())),
+                            when(u.secondlastlogin, GenericTemplates.timestamp(u.secondlastlogin ?? new Date())),
+                        ),
+                    ).classes("fullWidth", "space-between", "align-children"),
+                ),
+                vertical(
                     horizontal(
-                        when(u.lastlogin, GenericTemplates.timestamp(u.lastlogin ?? new Date())),
-                        when(u.secondlastlogin, GenericTemplates.timestamp(u.secondlastlogin ?? new Date())),
-                    )
-                ).classes("fullWidth", "space-between", "align-children")
-            ),
-            vertical(
-                horizontal(
-                    button({
-                        text: t("BAN_USER"),
-                        classes: ["negative"],
-                        disabled: !!u.banned_at,
-                        onclick: async () => {
-                            await Ui.getConfirmationModal(t("BAN_USER"), t("BAN_USER_CONFIRM"), t("BAN_USER"), t("NO"), async () => {
-                                await Api.banUser(u.id);
-                            }, async () => {});
-                        }
-                    }),
-                    UserTemplates.verifyUserButton(u, verified)
-                ),
-                GenericTemplates.combinedSelector(tabs, newIndex => i$.value = newIndex, 0),
-                when(
-                    tabSelected(i$, 0), ModerationUsersTemplates.permissionsPopup(u, open)
-                ),
-                when(
-                    tabSelected(i$, 1), ModerationUsersTemplates.userComments(u, open)
-                ),
-            ).classes("card")
-        ).build();
+                        button({
+                            text: t("BAN_USER"),
+                            classes: ["negative"],
+                            disabled: !!u.banned_at,
+                            onclick: async () => {
+                                await Ui.getConfirmationModal(t("BAN_USER"), t("BAN_USER_CONFIRM"), t("BAN_USER"), t("NO"), async () => {
+                                    await Api.banUser(u.id);
+                                }, async () => {});
+                            },
+                        }),
+                        UserTemplates.verifyUserButton(u, verified),
+                    ),
+                    GenericTemplates.combinedSelector(tabs, newIndex => i$.value = newIndex, 0),
+                    when(
+                        tabSelected(i$, 0), ModerationUsersTemplates.permissionsPopup(u, open),
+                    ),
+                    when(
+                        tabSelected(i$, 1), ModerationUsersTemplates.userComments(u, open),
+                    ),
+                    when(
+                        tabSelected(i$, 2), ModerationUsersTemplates.userIps(u, open),
+                    ),
+                ).classes("card"),
+            ).build();
     }
 
     private static permissionsPopup(u: User, open: Signal<boolean>) {
@@ -153,7 +157,7 @@ export class ModerationUsersTemplates {
                     }
                 });
             }
-        }
+        };
         open.subscribe(update);
 
         return create("div")
@@ -215,7 +219,7 @@ export class ModerationUsersTemplates {
             potentiallyHarmful: false,
             user_id: u.id,
             offset: 0,
-            limit: 10
+            limit: 10,
         });
         const loading = signal(false);
         const comments = signal<Comment[]>([]);
@@ -230,7 +234,7 @@ export class ModerationUsersTemplates {
             if (comments.value) {
                 commentsList.value = ModerationCommentsTemplates.moderatableCommentsList(comments.value, false);
             }
-        }
+        };
         filterState.subscribe(update);
         open.subscribe(() => update(filterState.value).then());
 
@@ -243,11 +247,50 @@ export class ModerationUsersTemplates {
                         text: t("REFRESH"),
                         icon: { icon: "refresh" },
                         classes: ["positive"],
-                        onclick: async () => await update(filterState.value)
+                        onclick: async () => await update(filterState.value),
                     }),
                     when(loading, GenericTemplates.loadingSpinner()),
                 ).build(),
-            commentsList
+            commentsList,
         ).build();
+    }
+
+    private static userIps(u: User, open: Signal<boolean>) {
+        const ips = signal<UserIp[]>([]);
+        const update = async () => {
+            if (!open.value) {
+                ips.value = [];
+                return;
+            }
+            Api.getUserIps(u.id).then(i => ips.value = i ?? []);
+        };
+        open.subscribe(update);
+
+        return vertical(
+            signalMap(ips, vertical(),
+                    ip => ModerationUsersTemplates.userIp(ip)),
+        ).build();
+    }
+
+    private static userIp(ip: UserIp) {
+        return horizontal(
+            horizontal(
+                create("span")
+                    .classes("color-dim")
+                    .text(ip.header)
+                    .build(),
+                create("span")
+                    .classes("bold")
+                    .text(ip.ip)
+                    .build(),
+            ),
+            horizontal(
+                create("span")
+                    .classes("mono", "text-small")
+                    .text(ip.last_user_agent)
+                    .build(),
+                GenericTemplates.timestamp(ip.created_at!),
+            ).classes("align-children")
+        ).classes("card", "secondary", "space-between").build();
     }
 }
