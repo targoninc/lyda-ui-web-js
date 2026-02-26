@@ -335,7 +335,7 @@ export class ModerationUsersTemplates {
     }
 
     private static userIp(ip: UserIp) {
-        const location = JSON.parse(ip.location_info) as Record<string, string>;
+        const location = (typeof ip.location_info === "string") ? JSON.parse(ip.location_info) as Record<string, string> : ip.location_info as Record<string, string>;
 
         return horizontal(
             vertical(
