@@ -349,10 +349,10 @@ export class ModerationUsersTemplates {
                         .text(ip.ip)
                         .build(),
                 ),
-                create("span")
+                when(Object.keys(location).length > 0, create("span")
                     .classes("mono", "text-xsmall")
                     .text(Object.keys(location).map((k) => `${k}: ${location[k]}`).join(", "))
-                    .build(),
+                    .build()),
                 create("span")
                     .classes("mono", "text-xsmall")
                     .text(ip.last_user_agent)
