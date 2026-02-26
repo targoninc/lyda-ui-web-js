@@ -63,9 +63,11 @@ export class ModerationUsersTemplates {
                             value: query,
                             debounce: 200,
                             onchange: async (v: string) => {
-                                query.value = v;
-                                skip.value = 0;
-                                await refresh();
+                                if (v !== query.value) {
+                                    query.value = v;
+                                    skip.value = 0;
+                                    await refresh();
+                                }
                             },
                         }),
                         button({
