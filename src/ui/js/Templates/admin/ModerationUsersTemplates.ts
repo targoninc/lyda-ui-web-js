@@ -335,22 +335,30 @@ export class ModerationUsersTemplates {
     }
 
     private static userIp(ip: UserIp) {
+        const location = JSON.parse(ip.location_info) as Record<string, string>;
+
         return horizontal(
-            horizontal(
+            vertical(
+                horizontal(
+                    create("span")
+                        .classes("color-dim")
+                        .text(ip.header)
+                        .build(),
+                    create("span")
+                        .classes("bold")
+                        .text(ip.ip)
+                        .build(),
+                ),
                 create("span")
-                    .classes("color-dim")
-                    .text(ip.header)
+                    .classes("mono", "text-xsmall")
+                    .text(Object.keys(location).map((k) => `${k}: ${location[k]}`).join(", "))
                     .build(),
                 create("span")
-                    .classes("bold")
-                    .text(ip.ip)
+                    .classes("mono", "text-xsmall")
+                    .text(ip.last_user_agent)
                     .build(),
             ),
             horizontal(
-                create("span")
-                    .classes("mono", "text-small")
-                    .text(ip.last_user_agent)
-                    .build(),
                 GenericTemplates.timestamp(ip.created_at!),
             ).classes("align-children")
         ).classes("card", "secondary", "space-between").build();
