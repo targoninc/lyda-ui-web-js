@@ -885,6 +885,50 @@ export class GenericTemplates {
             .text(Time.agoUpdating(timestamp))
             .build();
     }
+
+    static steppedSlider(
+        label: StringOrSignal,
+        min: number,
+        max: number,
+        step: number,
+        value: Signal<number>,
+        onchange: (v: number) => void,
+        displayValueUnderneath?: Signal<StringOrSignal>,
+    ) {
+        const steps = (max - min) / step;
+        const currentStep = compute(v => Math.round((v - min) / step), value);
+
+        return create("div")
+            .classes("flex-v", "small-gap", "stepped-slider-container")
+            .children(
+                create("label").text(label).build(),
+                create("div")
+                    .classes("relative", "stepped-slider-wrapper")
+                    .children(
+                        create("div")
+                            .classes("flex", "space-between", "stepped-slider-display", "absolute-fill")
+                            .children(
+                                ...Array.from({ length: steps + 1 }).map((_, i) =>
+                                    create("div")
+                                        .classes("stepped-slider-step", compute(cs => cs >= i ? "active" : "_", currentStep))
+                                        .build(),
+                                ),
+                            ).build(),
+                        input<number>({
+                            type: InputType.range,
+                            name: "stepped-slider",
+                            value: currentStep,
+                            onchange: v => onchange(min + v * step),
+                            attributes: ["min", "0", "max", steps.toString(), "step", "1"],
+                            classes: ["stepped-slider-input"],
+                        }),
+                    ).build(),
+                when(displayValueUnderneath, create("span")
+                    .classes(TextSize.small, "color-dim", "align-center")
+                    .text(displayValueUnderneath)
+                    .build()),
+            ).build();
+    }
 }
 
 export function vertical(...children: (AnyNode | Signal<AnyNode> | Signal<AnyElement>)[]) {

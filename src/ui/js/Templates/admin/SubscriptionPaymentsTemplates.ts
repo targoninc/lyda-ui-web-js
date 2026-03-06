@@ -59,7 +59,8 @@ export class SubscriptionPaymentsTemplates {
 
     private static paymentRow(payment: SubscriptionPayment, reload: () => void) {
         const maxRefundable = payment.received - payment.refunded;
-        const refundAmount = signal<number | null>(maxRefundable);
+        const refundPercentage = signal(100);
+        const refundAmount = compute(p => Math.round(maxRefundable * (p / 100) * 100) / 100, refundPercentage);
         const note = signal<string>("");
         const isRefunding = signal(false);
         const alreadyRefunded = payment.refunded > 0;
@@ -82,16 +83,14 @@ export class SubscriptionPaymentsTemplates {
         };
 
         const refundControls = horizontal(
-            FormTemplates.moneyField(
+            GenericTemplates.steppedSlider(
                 t("REFUND_AMOUNT"),
-                "refundAmount",
-                "0.00",
-                refundAmount,
-                true,
-                v => refundAmount.value = v,
-                0.01,
-                maxRefundable,
-                0.01,
+                0,
+                100,
+                20,
+                refundPercentage,
+                v => refundPercentage.value = v,
+                compute(a => currency(a), refundAmount),
             ),
             input<string>({
                 type: InputType.text,
@@ -107,14 +106,14 @@ export class SubscriptionPaymentsTemplates {
                 classes: ["negative"],
                 onclick: doRefund,
             }),
-        ).build();
+        ).classes("align-children").build();
 
         return TableTemplates.tr({
             cellClasses: [],
             data: [
                 text(String(payment.id)),
                 text(String(payment.user_id)),
-                text(Time.agoUpdating(payment.received_at)),
+                text(`${Time.localDate(payment.received_at)} ${Time.toTimeString(payment.received_at)}`),
                 text(currency(payment.total)),
                 text(currency(payment.received)),
                 horizontal(
