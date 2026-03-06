@@ -14,6 +14,7 @@ import { ModerationCommentsTemplates } from "./admin/ModerationCommentsTemplates
 import { LogTemplates } from "./admin/LogTemplates.ts";
 import { RoyaltyTemplates } from "./admin/RoyaltyTemplates.ts";
 import { ContentIDTemplates } from "./admin/ContentIDTemplates.ts";
+import { SubscriptionPaymentsTemplates } from "./admin/SubscriptionPaymentsTemplates.ts";
 import { PayoutTemplates } from "./money/PayoutTemplates.ts";
 import { MusicTemplates } from "./music/MusicTemplates.ts";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
@@ -74,6 +75,7 @@ export class PageTemplates {
         [RoutePath.users]: ModerationUsersTemplates.usersPage,
         [RoutePath.events]: EventsTemplates.eventsPage,
         [RoutePath.contentID]: ContentIDTemplates.contentIDPage,
+        [RoutePath.subscriptionPayments]: SubscriptionPaymentsTemplates.page,
     };
     static needLoginPages: RoutePath[] = [
         RoutePath.library,
@@ -96,6 +98,7 @@ export class PageTemplates {
         RoutePath.transactions,
         RoutePath.createAlbum,
         RoutePath.createAlbum,
+        RoutePath.subscriptionPayments,
     ];
 
     static async libraryPage(route: Route, params: Record<string, string>) {

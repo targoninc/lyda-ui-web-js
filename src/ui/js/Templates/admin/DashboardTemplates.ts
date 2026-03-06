@@ -62,6 +62,11 @@ export class DashboardTemplates {
                             onclick: () => navigate(RoutePath.contentID),
                             icon: { icon: "fingerprint" },
                         })),
+                        when(hasPermission(Permissions.canRefund), button({
+                            text: t("SUBSCRIPTION_PAYMENTS"),
+                            onclick: () => navigate(RoutePath.subscriptionPayments),
+                            icon: { icon: "subscriptions" },
+                        })),
                     ).build())
             ).build();
     }

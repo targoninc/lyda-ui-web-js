@@ -51,6 +51,7 @@ export class ApiRoutes {
     private static subscriptions = ApiRoutes.base + "/subscriptions";
     static getSubscriptionOptions = ApiRoutes.subscriptions + "/options";
     static getPaymentHistory = ApiRoutes.subscriptions + "/payments";
+    static refundSubscriptionPayment = ApiRoutes.subscriptions + "/refund";
 
     private static subscriptionActions = ApiRoutes.subscriptions + "/actions";
     static subscribe = ApiRoutes.subscriptionActions + "/subscribe";

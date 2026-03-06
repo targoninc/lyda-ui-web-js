@@ -330,6 +330,10 @@ export class Api {
         await post(ApiRoutes.unsubscribe, { id });
     }
 
+    static async refundSubscriptionPayment(paymentId: number, refundAmount: number, note?: string) {
+        return post(ApiRoutes.refundSubscriptionPayment, { paymentId, refundAmount, note });
+    }
+
     //endregion
 
     //region User

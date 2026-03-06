@@ -36,6 +36,7 @@ export enum RoutePath {
     contentID = "content-id",
     createAlbum = "create-album",
     createPlaylist = "create-playlist",
+    subscriptionPayments = "subscription-payments",
 }
 
 export const routes: Route[] = [
@@ -188,5 +189,9 @@ export const routes: Route[] = [
     {
         path: RoutePath.createPlaylist,
         title: "Create Playlist",
+    },
+    {
+        path: RoutePath.subscriptionPayments,
+        title: "Subscription Payments",
     }
 ];
