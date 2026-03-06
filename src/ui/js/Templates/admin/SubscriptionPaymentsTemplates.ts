@@ -1,4 +1,4 @@
-import { compute, create, InputType, signal, signalMap, when } from "@targoninc/jess";
+import { compute, create, InputType, Signal, signal, signalMap, StringOrSignal, when } from "@targoninc/jess";
 import { button, input } from "@targoninc/jess-components";
 import { DashboardTemplates } from "./DashboardTemplates.ts";
 import { Permissions } from "@targoninc/lyda-shared/src/Enums/Permissions";
@@ -12,6 +12,9 @@ import { Time } from "../../Classes/Helpers/Time.ts";
 import { currency } from "../../Classes/Helpers/Num.ts";
 import { t } from "../../../locales";
 import { FormTemplates } from "../generic/FormTemplates.ts";
+import { UserTemplates } from "../account/UserTemplates.ts";
+import { Util } from "../../Classes/Util.ts";
+import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 
 export class SubscriptionPaymentsTemplates {
     static page() {
@@ -58,6 +61,8 @@ export class SubscriptionPaymentsTemplates {
     }
 
     private static paymentRow(payment: SubscriptionPayment, reload: () => void) {
+        const user = signal<User | null>(null);
+        Util.getUserAsync(payment.user_id).then(u => user.value = u);
         const maxRefundable = payment.received - payment.refunded;
         const refundPercentage = signal(100);
         const refundAmount = compute(p => Math.round(maxRefundable * (p / 100) * 100) / 100, refundPercentage);
@@ -90,7 +95,7 @@ export class SubscriptionPaymentsTemplates {
                 20,
                 refundPercentage,
                 v => refundPercentage.value = v,
-                compute(a => currency(a), refundAmount),
+                compute(a => currency(a), refundAmount) as Signal<StringOrSignal>,
             ),
             input<string>({
                 type: InputType.text,
@@ -112,7 +117,7 @@ export class SubscriptionPaymentsTemplates {
             cellClasses: [],
             data: [
                 text(String(payment.id)),
-                text(String(payment.user_id)),
+                UserTemplates.userWidget(user),
                 text(`${Time.localDate(payment.received_at)} ${Time.toTimeString(payment.received_at)}`),
                 text(currency(payment.total)),
                 text(currency(payment.received)),
