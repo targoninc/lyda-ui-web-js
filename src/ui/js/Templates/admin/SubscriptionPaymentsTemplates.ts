@@ -109,6 +109,7 @@ export class SubscriptionPaymentsTemplates {
                 text: compute((r): string => r ? `${t("REFUNDING")}` : `${t("REFUND")}`, isRefunding),
                 icon: { icon: "undo" },
                 classes: ["negative"],
+                disabled: compute(a => a <= 0, refundAmount),
                 onclick: doRefund,
             }),
         ).classes("align-children").build();
