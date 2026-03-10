@@ -1,6 +1,9 @@
 import { Translation } from "./index.ts";
 
 export const de: Translation = {
+    BAN_USER: "User bannen",
+    BAN_USER_CONFIRM: "Sicher, dass du diesen User bannen möchtest?",
+    BUYERS: "Käufer*innen",
     INVALID_CREDENTIALS: "Ungültige Anmeldedaten",
     CONTENT_ID: "Content ID",
     COMMENTS: "Kommentare",
@@ -41,6 +44,8 @@ export const de: Translation = {
     TOTAL_RECEIVED: "Gesamt erhalten",
     TRACK_BOUGHT: "Track gekauft",
     TRACK_BOUGHT_INFO: "Du hast erfolgreich diesen Track gekauft. Du kannst ihn nun herunterladen und offline hören!",
+    ITEM_BOUGHT: "Artikel gekauft",
+    ITEM_BOUGHT_INFO: "Du hast erfolgreich diesen Artikel gekauft. Du kannst ihn nun herunterladen!",
     USER: "Nutzer",
     EDIT_DISPLAYNAME: "Anzeigename bearbeiten",
     EDIT_USERNAME: "Benutzername bearbeiten",
@@ -201,6 +206,8 @@ export const de: Translation = {
     MFA_VERIFICATION: "MFA-Verfizierung",
     MINIMUM_TRACK_PRICE_MUST_BE_NUMBER: "Minimaler Track-Preis muss eine Zahl sein",
     MINIMUM_TRACK_PRICE_USD: "Minimaler Track-Preis in USD",
+    MINIMUM_ALBUM_PRICE_USD: "Minimaler Album-Preis in USD (0 = Summe der Track-Preise)",
+    MINIMUM_ALBUM_PRICE_MUST_BE_NUMBER: "Minimaler Album-Preis muss eine positive Zahl sein",
     MISSING_CODE: "Code fehlt",
     MISSING_REQUIRED_FIELDS: "fehlende Pflichtfelder",
     MONETIZATION: "Monetarisierung",
@@ -593,5 +600,5 @@ export const de: Translation = {
     COPY_LINK: "Link kopieren",
     BANNED: "Gesperrt",
     ADD_TRACK: "Track hinzufügen",
-    ADD_TRACK_TO_TITLE: title => `Track zu ${title} hinzufügen`,
+    ADD_TRACK_TO_TITLE: title => `Track zu ${title} hinzufügen`
 };

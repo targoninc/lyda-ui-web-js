@@ -18,7 +18,7 @@ import { SearchResult } from "@targoninc/lyda-shared/src/Models/SearchResult";
 import { navigate } from "../Routing/Router.ts";
 import { RoutePath } from "../Routing/routes.ts";
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
-import { WebauthnVerificationRequest } from "@targoninc/lyda-shared/dist/Models/WebauthnVerificationRequest";
+import { WebauthnVerificationRequest } from "@targoninc/lyda-shared/src/Models/WebauthnVerificationRequest";
 import { AuthenticationJSON, CredentialDescriptor, RegistrationJSON } from "@passwordless-id/webauthn/dist/esm/types";
 import { MfaOption } from "@targoninc/lyda-shared/src/Enums/MfaOption.ts";
 import { UploadableTrack } from "../Models/UploadableTrack.ts";
@@ -33,16 +33,16 @@ import { TypedStatistic } from "@targoninc/lyda-shared/src/Models/TypedStatistic
 import { Payout } from "@targoninc/lyda-shared/src/Models/db/finance/Payout";
 import { Permission } from "@targoninc/lyda-shared/src/Models/db/lyda/Permission.ts";
 import { RoyaltyMonth } from "@targoninc/lyda-shared/src/Models/RoyaltyMonth";
-import { ActionLog } from "@targoninc/lyda-shared/dist/Models/db/lyda/ActionLog";
+import { ActionLog } from "@targoninc/lyda-shared/src/Models/db/lyda/ActionLog";
 import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import { ModerationFilter } from "../Models/ModerationFilter.ts";
-import { ClientError } from "@targoninc/lyda-shared/dist/Models/db/lyda/ClientError";
-import { KeyValue } from "@targoninc/lyda-shared/dist/Models/KeyValue";
+import { ClientError } from "@targoninc/lyda-shared/src/Models/db/lyda/ClientError";
+import { KeyValue } from "@targoninc/lyda-shared/src/Models/KeyValue";
 import { CreateOrderRequest } from "@targoninc/lyda-shared/src/Models/CreateOrderRequest";
 import { CaptureOrderRequest } from "@targoninc/lyda-shared/src/Models/CaptureOrderRequest";
-import { Transaction } from "@targoninc/lyda-shared/dist/Models/Transaction";
+import { Transaction } from "@targoninc/lyda-shared/src/Models/Transaction";
 import { t } from "../../locales";
-import { SubscriptionPayment } from "@targoninc/lyda-shared/dist/Models/db/finance/SubscriptionPayment";
+import { SubscriptionPayment } from "@targoninc/lyda-shared/src/Models/db/finance/SubscriptionPayment";
 import {ContentIDMatch} from "../Models/ContentIDMatch.ts";
 import { TransactionInfo } from "@targoninc/lyda-shared/src/Models/TransactionInfo.ts";
 import { TrackSale } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackSale.ts";
@@ -467,7 +467,7 @@ export class Api {
 
     //region Albums
     static async getAlbumById(id: number) {
-        return get<{ album: Album, canEdit: boolean }>(ApiRoutes.getAlbumById, { id });
+        return get<{ album: Album, canEdit: boolean, canBuy: boolean, canDownload: boolean }>(ApiRoutes.getAlbumById, { id });
     }
 
     static async updateAlbum(album: Partial<Album>) {

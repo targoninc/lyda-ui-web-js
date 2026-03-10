@@ -28,6 +28,8 @@ import { RoutePath } from "../../Routing/routes.ts";
 import { SearchTemplates } from "../SearchTemplates.ts";
 import { SearchContext } from "@targoninc/lyda-shared/src/Enums/SearchContext.ts";
 import { ApiRoutes } from "../../Api/ApiRoutes.ts";
+import { BuyTemplates } from "../money/BuyTemplates.ts";
+import { FormTemplates } from "../generic/FormTemplates.ts";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
@@ -162,6 +164,7 @@ export class AlbumTemplates {
         const upc = compute((s) => s.upc ?? "", album);
         const description = compute((s) => s.description ?? "", album);
         const visibility = compute((s) => s.visibility === "private", album);
+        const price = compute((s) => s.price ?? 0, album);
 
         return create("div")
             .classes("flex-v")
@@ -198,6 +201,9 @@ export class AlbumTemplates {
                     },
                 }),
                 GenericTemplates.releaseDateInput(album),
+                FormTemplates.moneyField(t("MINIMUM_ALBUM_PRICE_USD"), "price", "0", price, false, (v) => {
+                    album.value = { ...album.value, price: v };
+                }, 0),
                 toggle({
                     name: "visibility",
                     label: t("PRIVATE"),
@@ -210,7 +216,7 @@ export class AlbumTemplates {
             ).build();
     }
 
-    private static albumPageDisplay(album: Album, canEdit: boolean, reload: () => void) {
+    private static albumPageDisplay(album: Album, canEdit: boolean, canBuy: boolean, canDownload: boolean, reload: () => void) {
         const albumUser = album.user!;
         const tracks = signal<ListTrack[]>(album.tracks ?? []);
         const duration = album.tracks!.reduce((acc, t) => acc + (t.track?.length ?? 0), 0);
@@ -225,7 +231,14 @@ export class AlbumTemplates {
                             .classes("title", "wordwrap")
                             .text(album.title)
                             .build(),
-                        UserTemplates.userWidget(albumUser, [], [], UserWidgetContext.singlePage),
+                        horizontal(
+                            when(canDownload && !canEdit, GenericTemplates.pill({
+                                icon: "order_approve",
+                                onclick: () => {},
+                                text: t("BOUGHT"),
+                            })),
+                            UserTemplates.userWidget(albumUser, [], [], UserWidgetContext.singlePage),
+                        ).classes("align-children"),
                     ).build(),
                 horizontal(
                     GenericTemplates.timestamp(album.release_date),
@@ -239,7 +252,7 @@ export class AlbumTemplates {
                     .children(
                         MusicTemplates.cover(EntityType.album, album, CoverContext.standalone),
                         vertical(
-                            AlbumTemplates.audioActions(album, canEdit),
+                            AlbumTemplates.audioActions(album, canEdit, canBuy),
                             InteractionTemplates.interactions(EntityType.album, album),
                         ),
                     ).build(),
@@ -273,9 +286,11 @@ export class AlbumTemplates {
     }
 
     static albumPage(route: Route, params: Record<string, string>) {
-        const data = signal<{ album: Album | null, canEdit: boolean }>({
+        const data = signal<{ album: Album | null, canEdit: boolean, canBuy: boolean, canDownload: boolean }>({
             album: null,
             canEdit: false,
+            canBuy: false,
+            canDownload: false,
         });
         const loading = signal(true);
         const reload = () => {
@@ -288,6 +303,8 @@ export class AlbumTemplates {
                 data.value = {
                     album: null,
                     canEdit: false,
+                    canBuy: false,
+                    canDownload: false,
                 };
             }).finally(() => loading.value = false);
         }
@@ -302,7 +319,7 @@ export class AlbumTemplates {
                 return PageTemplates.notFoundPage();
             }
 
-            return AlbumTemplates.albumPageDisplay(d.album, d.canEdit, reload);
+            return AlbumTemplates.albumPageDisplay(d.album, d.canEdit, d.canBuy, d.canDownload, reload);
         }, data, loading);
 
         return create("div")
@@ -311,7 +328,7 @@ export class AlbumTemplates {
             ).build();
     }
 
-    static audioActions(album: Album, canEdit: boolean) {
+    static audioActions(album: Album, canEdit: boolean, canBuy: boolean = false) {
         const isPlaying = compute((p, pHere) => (p && p.type === "album" && p.id === album.id && pHere) ?? false, playingFrom, playingHere);
         const hasTracks = album.tracks!.length > 0;
         const playIcon = getPlayIcon(isPlaying, loadingAudio);
@@ -355,6 +372,15 @@ export class AlbumTemplates {
                         await PlaylistActions.openAddToPlaylistModal(album, "album");
                     },
                 }),
+                when(canBuy, button({
+                    icon: { icon: "attach_money" },
+                    text: t("BUY"),
+                    onclick: () => {
+                        BuyTemplates.openBuyModal({ type: "album", entity: album }, () => {
+                            window.location.reload();
+                        });
+                    },
+                })),
                 when(canEdit, button({
                     text: t("EDIT"),
                     icon: { icon: "edit" },
@@ -382,6 +408,7 @@ export class AlbumTemplates {
             description: "",
             release_date: new Date(),
             visibility: Visibility.private,
+            price: 0,
         });
         const disabled = compute((s) => {
             return !s.title || s.title === "";

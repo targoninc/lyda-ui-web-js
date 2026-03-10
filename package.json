@@ -6,7 +6,7 @@
         "start-dev": "bun --watch ./src/server.ts",
         "build-prod": "bun build src/ui/main.ts --outdir ./out --sourcemap=linked --minify",
         "start-prod": "bun ./src/server.ts",
-        "copy-version-to-file": "node ./.scripts/copy-version.js",
+        "copy-version-to-file": "bun ./.scripts/copy-version.js",
         "bump-version": "npm version patch --no-git-tag-version && npm run copy-version-to-file && git add package.json package-lock.json src/ui/js/Classes/Helpers/version.txt",
         "prepare": "husky",
         "lint": "eslint --ext .ts,.tsx,.js,.jsx src/",
@@ -38,5 +38,5 @@
         "dotenv": "^17.2.3",
         "express": "^5.1.0"
     },
-    "version": "0.0.615"
+    "version": "0.0.620"
 }
