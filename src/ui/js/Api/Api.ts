@@ -871,7 +871,7 @@ export class Api {
     }
 
     static async getCountryCodes() {
-        return await get<{ Name: string; Code: string; Number: number; Taxrate: number }[]>(ApiRoutes.getCountryCodes);
+        return await get<{ Name: string; Code: string; Numeric: number; Taxrate: number }[]>(ApiRoutes.getCountryCodes);
     }
 
     // endregion
