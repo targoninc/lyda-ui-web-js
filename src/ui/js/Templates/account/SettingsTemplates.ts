@@ -941,6 +941,7 @@ export class SettingsTemplates {
 
         return create("div")
             .classes("flex-v", "card")
+            .id("tax-info-section")
             .children(
                 SettingsTemplates.sectionHeading(t("TAX_INFO")),
                 input<string>({

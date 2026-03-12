@@ -41,7 +41,7 @@ export class PayoutTemplates {
                     .onclick((e: MouseEvent) => {
                         e.preventDefault();
                         navigate(RoutePath.settings);
-                        setTimeout(() => document.getElementById("tax-info")?.scrollIntoView({ behavior: "smooth" }), 100);
+                        setTimeout(() => document.getElementById("tax-info-section")?.scrollIntoView({ behavior: "smooth" }), 500);
                     })
                     .build(), true),
                 create("div")
