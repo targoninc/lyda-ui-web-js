@@ -1,4 +1,4 @@
-import { compute, create, nullElement, signal, when } from "@targoninc/jess";
+import { compute, create, nullElement, signal, signalMap, when } from "@targoninc/jess";
 import { notify } from "../../Classes/Ui.ts";
 import { Permissions } from "@targoninc/lyda-shared/src/Enums/Permissions";
 import { permissions } from "../../state.ts";
@@ -8,10 +8,12 @@ import { button, toggle } from "@targoninc/jess-components";
 import { RoyaltyMonth } from "@targoninc/lyda-shared/src/Models/RoyaltyMonth";
 import { NotificationType } from "../../Enums/NotificationType.ts";
 import { Api } from "../../Api/Api.ts";
-import { GenericTemplates, vertical } from "../generic/GenericTemplates.ts";
+import { GenericTemplates, tabSelected, vertical } from "../generic/GenericTemplates.ts";
 import { MonthIdentifier } from "../../Classes/Helpers/Date.ts";
 import { currency } from "../../Classes/Helpers/Num.ts";
 import {t} from "../../../locales";
+import { TableTemplates } from "../generic/TableTemplates.ts";
+import { ArtistRoyaltySummary } from "@targoninc/lyda-shared/src/Models/ArtistRoyaltySummary.ts";
 
 export class RoyaltyTemplates {
     static royaltyCalculator(month: Partial<RoyaltyMonth>, monthIdentifier: MonthIdentifier, refresh: () => void) {
@@ -100,6 +102,19 @@ export class RoyaltyTemplates {
     }
 
     static royaltyOverview(royaltyMonth: Partial<RoyaltyMonth>, monthIdentifier: MonthIdentifier, refresh: () => void) {
+        const selectedTab = signal(0);
+        const artistsByMonth = signal<ArtistRoyaltySummary[]>([]);
+        const artistsAvailable = signal<ArtistRoyaltySummary[]>([]);
+
+        Api.getRoyaltyArtistsByMonth(monthIdentifier).then(res => {
+            if (res) artistsByMonth.value = res;
+        });
+        Api.getRoyaltyArtistsAvailable().then(res => {
+            if (res) artistsAvailable.value = res;
+        });
+
+        const tabs = [`${t("ROYALTIES_THIS_MONTH")}`, `${t("ROYALTIES_AVAILABLE")}`];
+
         return create("div")
             .classes("card", "flex-v")
             .children(
@@ -107,7 +122,37 @@ export class RoyaltyTemplates {
                     .text(t("ROYALTY_OVERVIEW"))
                     .build(),
                 RoyaltyTemplates.royaltyCalculator(royaltyMonth, monthIdentifier, refresh),
+                GenericTemplates.combinedSelector(tabs, i => selectedTab.value = i),
+                when(
+                    tabSelected(selectedTab, 0),
+                    RoyaltyTemplates.artistRoyaltiesTable(artistsByMonth),
+                ),
+                when(
+                    tabSelected(selectedTab, 1),
+                    RoyaltyTemplates.artistRoyaltiesTable(artistsAvailable),
+                ),
             ).build();
+    }
+
+    private static artistRoyaltiesTable(artists: ReturnType<typeof signal<ArtistRoyaltySummary[]>>) {
+        return TableTemplates.table(
+            false,
+            TableTemplates.tableHeaders<ArtistRoyaltySummary>([
+                { title: t("ARTIST"), property: "displayname" },
+                { title: t("AMOUNT"), property: "amount_ct" },
+            ]),
+            signalMap(
+                artists,
+                create("tbody"),
+                (a: ArtistRoyaltySummary) => TableTemplates.tr({
+                    cellClasses: [],
+                    data: [
+                        create("span").text(a.displayname).build(),
+                        create("span").text(currency(a.amount_ct / 100, "USD")).build(),
+                    ],
+                }),
+            ),
+        );
     }
 
     static royaltyManagementPage() {

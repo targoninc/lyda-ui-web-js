@@ -167,6 +167,8 @@ export class ApiRoutes {
     static getPayouts = ApiRoutes.royalties + "/payouts";
     static getRoyaltyInfo = ApiRoutes.royalties + "/info";
     static getRoyaltyCalculationInfo = ApiRoutes.royalties + "/calculationInfo";
+    static getRoyaltyArtistsByMonth = ApiRoutes.royalties + "/artistsByMonth";
+    static getRoyaltyArtistsAvailable = ApiRoutes.royalties + "/artistsAvailable";
     static requestPayout = ApiRoutes.royalties + "/requestPayout";
     static calculateRoyalties = ApiRoutes.royalties + "/calculate";
     static setRoyaltyActivation = ApiRoutes.royalties + "/setActivation";

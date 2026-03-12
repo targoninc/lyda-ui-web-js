@@ -33,6 +33,7 @@ import { TypedStatistic } from "@targoninc/lyda-shared/src/Models/TypedStatistic
 import { Payout } from "@targoninc/lyda-shared/src/Models/db/finance/Payout";
 import { Permission } from "@targoninc/lyda-shared/src/Models/db/lyda/Permission.ts";
 import { RoyaltyMonth } from "@targoninc/lyda-shared/src/Models/RoyaltyMonth";
+import { ArtistRoyaltySummary } from "@targoninc/lyda-shared/src/Models/ArtistRoyaltySummary.ts";
 import { ActionLog } from "@targoninc/lyda-shared/src/Models/db/lyda/ActionLog";
 import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import { ModerationFilter } from "../Models/ModerationFilter.ts";
@@ -441,6 +442,17 @@ export class Api {
             month: month.month,
             year: month.year,
         });
+    }
+
+    static async getRoyaltyArtistsByMonth(month: MonthIdentifier): Promise<ArtistRoyaltySummary[] | null> {
+        return await get<ArtistRoyaltySummary[]>(ApiRoutes.getRoyaltyArtistsByMonth, {
+            month: month.month,
+            year: month.year,
+        });
+    }
+
+    static async getRoyaltyArtistsAvailable(): Promise<ArtistRoyaltySummary[] | null> {
+        return await get<ArtistRoyaltySummary[]>(ApiRoutes.getRoyaltyArtistsAvailable);
     }
 
     static async trackClientError(error: ClientError) {
