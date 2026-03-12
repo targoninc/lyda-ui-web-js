@@ -48,6 +48,7 @@ import {ContentIDMatch} from "../Models/ContentIDMatch.ts";
 import { TransactionInfo } from "@targoninc/lyda-shared/src/Models/TransactionInfo.ts";
 import { TrackSale } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackSale.ts";
 import { UserIp } from "@targoninc/lyda-shared/src/Models/db/lyda/UserIp.ts";
+import {UserTaxinfo} from "@targoninc/lyda-shared/src/Models/db/lyda/UserTaxinfo.ts";
 
 export class Api {
     //region Interactions
@@ -855,7 +856,7 @@ export class Api {
 
     // region Taxes
     static async getTaxinfo() {
-        return await get<import("@targoninc/lyda-shared/src/Models/db/lyda/UserTaxinfo").UserTaxinfo | null>(ApiRoutes.getTaxinfo);
+        return await get<UserTaxinfo | null>(ApiRoutes.getTaxinfo);
     }
 
     static async updateTaxinfo(data: {
