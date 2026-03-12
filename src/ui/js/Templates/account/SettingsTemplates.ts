@@ -959,11 +959,16 @@ export class SettingsTemplates {
                     required: true,
                     onchange: v => taxNumber$.value = v,
                 }),
-                select({
-                    options: countryOptions$,
-                    value: countryCode$,
-                    onchange: v => countryCode$.value = v,
-                }),
+                create("div")
+                    .classes("flex-v", "small-gap")
+                    .children(
+                        create("label").text(t("COUNTRY_CODE")).build(),
+                        select({
+                            options: countryOptions$,
+                            value: countryCode$,
+                            onchange: v => countryCode$.value = v,
+                        }),
+                    ).build(),
                 input<string>({
                     type: InputType.text,
                     name: "region_code",
