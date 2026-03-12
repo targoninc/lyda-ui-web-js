@@ -35,9 +35,14 @@ export class PayoutTemplates {
             .children(
                 compute(ri => ri ? PayoutTemplates.royaltyInfo(ri) : nullElement(), royaltyInfo),
                 when(royaltiesLoading, GenericTemplates.loadingSpinner()),
-                when(hasTaxInfo$, create("span")
+                when(hasTaxInfo$, create("a")
                     .classes("negative", "small")
                     .text(t("TAX_INFO_REQUIRED_FOR_PAYOUT"))
+                    .onclick((e: MouseEvent) => {
+                        e.preventDefault();
+                        navigate(RoutePath.settings);
+                        setTimeout(() => document.getElementById("tax-info")?.scrollIntoView({ behavior: "smooth" }), 100);
+                    })
                     .build(), true),
                 create("div")
                     .classes("flex")
