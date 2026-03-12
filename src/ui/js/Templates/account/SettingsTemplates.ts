@@ -46,6 +46,7 @@ import {TextSize} from "../../Enums/TextSize.ts";
 import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 import {InteractionType} from "@targoninc/lyda-shared/src/Enums/InteractionType.ts";
 import {UserTaxinfo} from "@targoninc/lyda-shared/src/Models/db/lyda/UserTaxinfo.ts";
+import {SelectOption} from "@targoninc/jess-components/dist/jess-components/Types";
 
 export class SettingsTemplates {
     static settingsPage(route: Route, params: Record<string, string>) {
@@ -902,7 +903,6 @@ export class SettingsTemplates {
         const regionCode$ = signal("");
         const addressLine1$ = signal("");
         const addressLine2$ = signal("");
-        const missingFields$ = signal<string[]>([]);
 
         taxinfo.subscribe(ti => {
             if (!ti) return;
@@ -914,10 +914,13 @@ export class SettingsTemplates {
             addressLine2$.value = ti.address_line_2 ?? "";
         });
 
-        const countryOptions$ = signal<{id: string; name: string}[]>([]);
+        const countryOptions$ = signal<SelectOption<string>[]>([]);
         Api.getCountryCodes().then(codes => {
             if (codes) {
-                countryOptions$.value = codes.map(c => ({id: c.Code, name: `${c.Name} (${c.Code})`}));
+                countryOptions$.value = codes.map(c => ({
+                    id: c.Code,
+                    name: `${c.Name} (${c.Code})`
+                }));
             }
         });
 
