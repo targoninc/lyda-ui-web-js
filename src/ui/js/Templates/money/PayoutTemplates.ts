@@ -36,7 +36,7 @@ export class PayoutTemplates {
                 compute(ri => ri ? PayoutTemplates.royaltyInfo(ri) : nullElement(), royaltyInfo),
                 when(royaltiesLoading, GenericTemplates.loadingSpinner()),
                 when(hasTaxInfo$, create("a")
-                    .classes("negative", "small")
+                    .classes("error", "clickable")
                     .text(t("TAX_INFO_REQUIRED_FOR_PAYOUT"))
                     .onclick((e: MouseEvent) => {
                         e.preventDefault();
