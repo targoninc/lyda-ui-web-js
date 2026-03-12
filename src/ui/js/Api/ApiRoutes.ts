@@ -213,4 +213,11 @@ export class ApiRoutes {
     static createOrder = ApiRoutes.orders + "/create";
     static captureOrder = ApiRoutes.orders + "/capture";
     // endregion
+
+    // region Taxes
+    private static taxes = ApiRoutes.base + "/taxes";
+    static getTaxinfo = ApiRoutes.taxes + "/taxinfo";
+    static updateTaxinfo = ApiRoutes.taxes + "/taxinfo/update";
+    static getCountryCodes = ApiRoutes.taxes + "/countryCodes";
+    // endregion
 }

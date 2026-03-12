@@ -604,5 +604,15 @@ export const de: Translation = {
     COPY_LINK: "Link kopieren",
     BANNED: "Gesperrt",
     ADD_TRACK: "Track hinzufügen",
-    ADD_TRACK_TO_TITLE: title => `Track zu ${title} hinzufügen`
+    ADD_TRACK_TO_TITLE: title => `Track zu ${title} hinzufügen`,
+    TAX_INFO: "Steuerinformationen",
+    TAX_INFO_REQUIRED_FOR_PAYOUT: "Steuerinformationen sind erforderlich, bevor eine Auszahlung beantragt werden kann.",
+    FULL_NAME: "Vollständiger Name",
+    TAX_NUMBER: "Steuernummer",
+    COUNTRY_CODE: "Land (ISO 3166 A3)",
+    REGION_CODE: "Region / Bundesland-Code",
+    ADDRESS_LINE_1: "Adresszeile 1",
+    ADDRESS_LINE_2: "Adresszeile 2 (optional)",
+    TAX_INFO_SAVED: "Steuerinformationen gespeichert",
+    TAX_INFO_SAVE_FAILED: "Steuerinformationen konnten nicht gespeichert werden",
 };

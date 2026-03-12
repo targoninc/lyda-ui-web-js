@@ -77,6 +77,7 @@ export class SettingsTemplates {
                 SettingsTemplates.totpSection(),
                 WebauthnTemplates.devicesSection(),
                 SettingsTemplates.paymentSection(),
+                SettingsTemplates.taxinfoSection(),
                 SettingsTemplates.themeSection(getUserSettingValue<Theme>(user, UserSettings.theme)),
                 SettingsTemplates.languageSection(),
                 SettingsTemplates.qualitySection(getUserSettingValue<StreamingQuality>(user, UserSettings.streamingQuality) ?? "m"),
@@ -887,5 +888,97 @@ export class SettingsTemplates {
                     },
                 }),
             );
+    }
+
+    private static taxinfoSection() {
+        const taxinfo = signal<UserTaxinfo | null>(null);
+        Api.getTaxinfo().then(ti => taxinfo.value = ti ?? null);
+
+        const fullName$ = signal("");
+        const taxNumber$ = signal("");
+        const countryCode$ = signal("");
+        const regionCode$ = signal("");
+        const addressLine1$ = signal("");
+        const addressLine2$ = signal("");
+
+        taxinfo.subscribe(ti => {
+            if (!ti) return;
+            fullName$.value = ti.full_name ?? "";
+            taxNumber$.value = ti.tax_number ?? "";
+            countryCode$.value = ti.country_code_iso3166_a3 ?? "";
+            regionCode$.value = ti.region_code ?? "";
+            addressLine1$.value = ti.address_line_1 ?? "";
+            addressLine2$.value = ti.address_line_2 ?? "";
+        });
+
+        const save = async () => {
+            const res = await Api.updateTaxinfo({
+                full_name: fullName$.value,
+                tax_number: taxNumber$.value,
+                country_code_iso3166_a3: countryCode$.value,
+                region_code: regionCode$.value,
+                address_line_1: addressLine1$.value,
+                address_line_2: addressLine2$.value,
+            });
+            if (res) {
+                notify(`${t("TAX_INFO_SAVED")}`, NotificationType.success);
+            } else {
+                notify(`${t("TAX_INFO_SAVE_FAILED")}`, NotificationType.error);
+            }
+        };
+
+        return create("div")
+            .classes("flex-v", "card")
+            .children(
+                SettingsTemplates.sectionHeading(t("TAX_INFO")),
+                input<string>({
+                    type: InputType.text,
+                    name: "full_name",
+                    label: t("FULL_NAME"),
+                    value: fullName$,
+                    onchange: v => fullName$.value = v,
+                }),
+                input<string>({
+                    type: InputType.text,
+                    name: "tax_number",
+                    label: t("TAX_NUMBER"),
+                    value: taxNumber$,
+                    onchange: v => taxNumber$.value = v,
+                }),
+                input<string>({
+                    type: InputType.text,
+                    name: "country_code_iso3166_a3",
+                    label: t("COUNTRY_CODE"),
+                    value: countryCode$,
+                    onchange: v => countryCode$.value = v,
+                }),
+                input<string>({
+                    type: InputType.text,
+                    name: "region_code",
+                    label: t("REGION_CODE"),
+                    value: regionCode$,
+                    onchange: v => regionCode$.value = v,
+                }),
+                input<string>({
+                    type: InputType.text,
+                    name: "address_line_1",
+                    label: t("ADDRESS_LINE_1"),
+                    value: addressLine1$,
+                    onchange: v => addressLine1$.value = v,
+                }),
+                input<string>({
+                    type: InputType.text,
+                    name: "address_line_2",
+                    label: t("ADDRESS_LINE_2"),
+                    value: addressLine2$,
+                    onchange: v => addressLine2$.value = v,
+                }),
+                button({
+                    text: t("SAVE"),
+                    icon: {icon: "save"},
+                    classes: ["positive", "fit-content"],
+                    onclick: save,
+                }),
+            ).build();
     }
 }

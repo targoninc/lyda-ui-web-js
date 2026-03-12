@@ -27,12 +27,18 @@ export class PayoutTemplates {
            .finally(() => royaltiesLoading.value = false);
         const hasPayableRoyalties = compute(ri => ri && ri.personal.available && ri.personal.available >= AVAILABLE_THRESHOLD_USD, royaltyInfo);
         const paypalMailExists$ = compute(ri => ri && ri.personal.paypalMail !== null, royaltyInfo);
+        const hasTaxInfo$ = compute(ri => !!(ri && ri.personal.hasTaxInfo), royaltyInfo);
+        const canRequestPayout$ = compute(ri => !!(ri && ri.personal.hasTaxInfo && ri.personal.paypalMail), royaltyInfo);
 
         return create("div")
             .classes("flex-v", "card")
             .children(
                 compute(ri => ri ? PayoutTemplates.royaltyInfo(ri) : nullElement(), royaltyInfo),
                 when(royaltiesLoading, GenericTemplates.loadingSpinner()),
+                when(hasTaxInfo$, create("span")
+                    .classes("negative", "small")
+                    .text(t("TAX_INFO_REQUIRED_FOR_PAYOUT"))
+                    .build(), true),
                 create("div")
                     .classes("flex")
                     .children(
@@ -71,7 +77,7 @@ export class PayoutTemplates {
                                         }, "warning");
                                     },
                                 })),
-                                when(paypalMailExists$, button({
+                                when(canRequestPayout$, button({
                                     text: compute(ri => ri ? `${t("REQUEST_PAYOUT_TO", anonymize(ri.personal.paypalMail, 2, 8))}` : "", royaltyInfo),
                                     icon: { icon: "mintmark" },
                                     classes: ["positive"],

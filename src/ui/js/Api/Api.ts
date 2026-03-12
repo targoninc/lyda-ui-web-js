@@ -852,4 +852,26 @@ export class Api {
     }
 
     // endregion
+
+    // region Taxes
+    static async getTaxinfo() {
+        return await get<import("@targoninc/lyda-shared/src/Models/db/lyda/UserTaxinfo").UserTaxinfo | null>(ApiRoutes.getTaxinfo);
+    }
+
+    static async updateTaxinfo(data: {
+        full_name: string;
+        tax_number: string;
+        country_code_iso3166_a3: string;
+        region_code: string;
+        address_line_1?: string;
+        address_line_2?: string;
+    }) {
+        return await post(ApiRoutes.updateTaxinfo, data);
+    }
+
+    static async getCountryCodes() {
+        return await get<{ Name: string; Code: string; Number: number; Taxrate: number }[]>(ApiRoutes.getCountryCodes);
+    }
+
+    // endregion
 }
