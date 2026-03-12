@@ -1,6 +1,5 @@
 import {UserActions} from "../../Actions/UserActions.ts";
 import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
-import {FormTemplates} from "../generic/FormTemplates.ts";
 import {copy, getUserSettingValue, Util} from "../../Classes/Util.ts";
 import {createModal, notify, Ui} from "../../Classes/Ui.ts";
 import {Api} from "../../Api/Api.ts";
@@ -21,7 +20,7 @@ import {currentUser, permissions} from "../../state.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {
     button,
-    ButtonConfig, error, errorList,
+    ButtonConfig, error,
     heading,
     icon,
     input,
@@ -960,7 +959,11 @@ export class SettingsTemplates {
                     required: true,
                     onchange: v => taxNumber$.value = v,
                 }),
-                FormTemplates.dropDownField(t("COUNTRY_CODE"), countryOptions$, countryCode$),
+                select({
+                    options: countryOptions$,
+                    value: countryCode$,
+                    onchange: v => countryCode$.value = v,
+                }),
                 input<string>({
                     type: InputType.text,
                     name: "region_code",
