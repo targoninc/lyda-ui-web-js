@@ -1,5 +1,6 @@
 import {UserActions} from "../../Actions/UserActions.ts";
 import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
+import {FormTemplates} from "../generic/FormTemplates.ts";
 import {copy, getUserSettingValue, Util} from "../../Classes/Util.ts";
 import {createModal, notify, Ui} from "../../Classes/Ui.ts";
 import {Api} from "../../Api/Api.ts";
@@ -44,6 +45,7 @@ import {debounce} from "../../Classes/Helpers/Debounce.ts";
 import {TextSize} from "../../Enums/TextSize.ts";
 import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 import {InteractionType} from "@targoninc/lyda-shared/src/Enums/InteractionType.ts";
+import {UserTaxinfo} from "@targoninc/lyda-shared/src/Models/db/lyda/UserTaxinfo.ts";
 
 export class SettingsTemplates {
     static settingsPage(route: Route, params: Record<string, string>) {
@@ -900,6 +902,7 @@ export class SettingsTemplates {
         const regionCode$ = signal("");
         const addressLine1$ = signal("");
         const addressLine2$ = signal("");
+        const missingFields$ = signal<string[]>([]);
 
         taxinfo.subscribe(ti => {
             if (!ti) return;
@@ -909,6 +912,13 @@ export class SettingsTemplates {
             regionCode$.value = ti.region_code ?? "";
             addressLine1$.value = ti.address_line_1 ?? "";
             addressLine2$.value = ti.address_line_2 ?? "";
+        });
+
+        const countryOptions$ = signal<{id: string; name: string}[]>([]);
+        Api.getCountryCodes().then(codes => {
+            if (codes) {
+                countryOptions$.value = codes.map(c => ({id: c.Code, name: `${c.Name} (${c.Code})`}));
+            }
         });
 
         const save = async () => {
@@ -936,6 +946,7 @@ export class SettingsTemplates {
                     name: "full_name",
                     label: t("FULL_NAME"),
                     value: fullName$,
+                    required: true,
                     onchange: v => fullName$.value = v,
                 }),
                 input<string>({
@@ -943,20 +954,16 @@ export class SettingsTemplates {
                     name: "tax_number",
                     label: t("TAX_NUMBER"),
                     value: taxNumber$,
+                    required: true,
                     onchange: v => taxNumber$.value = v,
                 }),
-                input<string>({
-                    type: InputType.text,
-                    name: "country_code_iso3166_a3",
-                    label: t("COUNTRY_CODE"),
-                    value: countryCode$,
-                    onchange: v => countryCode$.value = v,
-                }),
+                FormTemplates.dropDownField(t("COUNTRY_CODE"), countryOptions$, countryCode$),
                 input<string>({
                     type: InputType.text,
                     name: "region_code",
                     label: t("REGION_CODE"),
                     value: regionCode$,
+                    required: true,
                     onchange: v => regionCode$.value = v,
                 }),
                 input<string>({
@@ -964,6 +971,7 @@ export class SettingsTemplates {
                     name: "address_line_1",
                     label: t("ADDRESS_LINE_1"),
                     value: addressLine1$,
+                    required: true,
                     onchange: v => addressLine1$.value = v,
                 }),
                 input<string>({
