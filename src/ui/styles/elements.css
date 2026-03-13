@@ -128,6 +128,17 @@
     align-self: end;
 }
 
+.stepped-slider-step {
+    height: 3px;
+    --slider-step-color: var(--color-5);
+    background: var(--slider-step-color);
+    flex-grow: 1;
+}
+
+.stepped-slider-step.active {
+    --slider-step-color: var(--green);
+}
+
 .align-end {
     align-self: end;
 }
