@@ -9,6 +9,10 @@ import { button, input, textarea } from "@targoninc/jess-components";
 import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import { UserWidgetContext } from "../Enums/UserWidgetContext.ts";
 import { t } from "../../locales";
+import {permissions} from "../state.ts";
+import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
+import {RoutePath} from "../Routing/routes.ts";
+import {navigate} from "../Routing/Router.ts";
 
 export class CommentTemplates {
     static commentListFullWidth(track_id: number, comments: Signal<Comment[]>, showComments: Signal<boolean>) {
@@ -59,7 +63,7 @@ export class CommentTemplates {
             ).build();
     }
 
-    static commentInList(comment: Comment, comments: Signal<Comment[]>): AnyElement {
+    static commentInList(comment: Comment, comments: Signal<Comment[]>, isInModeration = false): AnyElement {
         if (!comment.user) {
             throw new Error(`Comment ${comment.id} has no user`);
         }
@@ -71,6 +75,7 @@ export class CommentTemplates {
         const repliesShown = signal(false);
         const newComment = signal("");
         const menuShown$ = signal(false);
+        const canModerate = compute(ps => ps.some(p => p.name === Permissions.canDeleteComments), permissions);
 
         return create("div")
             .classes("comment-in-list", "flex-v", "small-gap", (comment.parent_id ?? 0) === 0 ? "tight-border-card" : "_")
@@ -102,6 +107,11 @@ export class CommentTemplates {
                                     onclick: () => TrackActions.deleteComment(comment.id, comments),
                                 })),
                             ).classes("relative").build()),
+                            when(canModerate, button({
+                                text: t("MODERATION"),
+                                icon: { icon: "gavel" },
+                                onclick: () => navigate(RoutePath.moderation)
+                            })),
                         ).classes("align-children"),
                     ).build(),
                 when(repliesShown, create("div")
