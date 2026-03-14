@@ -908,7 +908,7 @@ export class GenericTemplates {
                     .classes("relative", "stepped-slider-wrapper")
                     .children(
                         create("div")
-                            .classes("flex", "space-between", "stepped-slider-display", "absolute-fill")
+                            .classes("flex", "space-between", "stepped-slider-display", "nogap")
                             .children(
                                 ...Array.from({ length: steps + 1 }).map((_, i) =>
                                     create("div")
