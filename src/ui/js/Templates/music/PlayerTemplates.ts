@@ -563,14 +563,25 @@ export class PlayerTemplates {
     }
 
     static shuffleButton() {
+        const disabled = compute(pf => {
+            return pf?.type === FeedType.explore || pf?.type === FeedType.following;
+        }, playingFrom);
+
         return GenericTemplates.roundIconButton(
             {
                 icon: compute(s => s ? Icons.SHUFFLE_ON : Icons.SHUFFLE_OFF, shuffling),
                 adaptive: true,
                 isUrl: true,
             },
-            () => shuffling.value = !shuffling.value,
+            () => {
+                if (disabled.value) {
+                    return;
+                }
+                shuffling.value = !shuffling.value;
+            },
             t("TOGGLE_SHUFFLE"),
+            [],
+            disabled,
         );
     }
 

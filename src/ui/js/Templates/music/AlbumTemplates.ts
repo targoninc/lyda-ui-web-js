@@ -279,6 +279,7 @@ export class AlbumTemplates {
                                 },
                                 [ApiRoutes.searchTracks], [],
                                 ["fullWidth"],
+                                { userId: currentUser.value?.id },
                             ),
                         )
                 ).classes("card").build()),

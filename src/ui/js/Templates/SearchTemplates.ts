@@ -19,6 +19,7 @@ export class SearchTemplates {
         endpoints?: string[],
         classes: StringOrSignal[] = [],
         resultContainerClasses: StringOrSignal[] = [],
+        additionalParams: Record<string, any> = {},
     ) {
         const results = signal<SearchResult[]>([]);
         const selectedResult = signal<number | null>(null);
@@ -51,6 +52,7 @@ export class SearchTemplates {
                     context,
                     onSelect,
                     endpoints,
+                    additionalParams,
                 ),
                 SearchTemplates.searchResults(
                     results,
@@ -72,6 +74,7 @@ export class SearchTemplates {
         context: SearchContext,
         onSelect?: (result: SearchResult) => void,
         endpointsInput?: string[],
+        additionalParams: Record<string, any> = {},
     ) {
         const debounce = 200;
         let timeout: Timer | undefined;
@@ -93,6 +96,7 @@ export class SearchTemplates {
             const promises = endpoints.map(async endpoint => {
                 const data = await get<SearchResult[]>(endpoint, {
                     search: currentSearch.value,
+                    ...additionalParams,
                 });
 
                 if (currentSearchCount !== searchCount || !data) {

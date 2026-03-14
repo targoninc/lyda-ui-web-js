@@ -240,6 +240,7 @@ export class PlaylistTemplates {
                                 },
                                 [ApiRoutes.searchTracks], [],
                                 ["fullWidth"],
+                                { userId: currentUser.value?.id },
                             ),
                         )
                 ).classes("card").build()),

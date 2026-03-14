@@ -8,11 +8,11 @@ import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { LoopMode } from "@targoninc/lyda-shared/src/Enums/LoopMode";
 import { Permission } from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
 import { Notification } from "@targoninc/lyda-shared/src/Models/db/lyda/Notification";
-import { ListeningHistory } from "@targoninc/lyda-shared/dist/Models/db/lyda/ListeningHistory";
+import { ListeningHistory } from "@targoninc/lyda-shared/src/Models/db/lyda/ListeningHistory";
 import { PlayManager } from "./Streaming/PlayManager.ts";
 import { IStreamClient } from "./Streaming/IStreamClient.ts";
 import { Language, language } from "../locales";
-import { getUserSettingValue } from "./Classes/Util.ts";
+import {getUserSettingValue, shuffleArray} from "./Classes/Util.ts";
 import { Api } from "./Api/Api.ts";
 import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import { UserCacheKey } from "@targoninc/lyda-shared/src/Enums/UserCacheKey";
@@ -148,14 +148,25 @@ shuffling.subscribe((p, changed) => {
     LydaCache.set(UserCacheKey.shuffling, new CacheItem(p));
     Api.setCacheKey(UserCacheKey.shuffling, p.toString()).then();
 
-    // TODO: Handle any potential context queue changes we need to do
     const pf = playingFrom.value;
-    if (pf && pf.type && !["album", "playlist"].includes(pf.type)) {
-        Api.getFeed(`${ApiRoutes.trackFeed}/${pf.type}`).then(tracks => {
-            if (tracks && tracks.length > 0) {
-                contextQueue.value = tracks.map(t => t.id);
+    if (pf && pf.type) {
+        if (["album", "playlist"].includes(pf.type) && pf.entity && pf.entity.tracks) {
+            let trackIds = pf.entity.tracks.map(t => t.track_id);
+            if (p) {
+                trackIds = shuffleArray(trackIds);
             }
-        });
+            contextQueue.value = trackIds;
+        } else if (!["album", "playlist"].includes(pf.type)) {
+            Api.getFeed(`${ApiRoutes.trackFeed}/${pf.type}`).then(tracks => {
+                if (tracks && tracks.length > 0) {
+                    let trackIds = tracks.map(t => t.id);
+                    if (p) {
+                        trackIds = shuffleArray(trackIds);
+                    }
+                    contextQueue.value = trackIds;
+                }
+            });
+        }
     }
 });
 
