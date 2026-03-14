@@ -179,7 +179,7 @@ export class ModerationCommentsTemplates {
                 create("div")
                     .classes("card")
                     .children(
-                        CommentTemplates.commentInList(comment, comments),
+                        CommentTemplates.commentInList(comment, comments, true),
                     ).build(),
             ).build();
     }
