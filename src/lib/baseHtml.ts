@@ -66,6 +66,7 @@ export async function baseHtml(req: Request) {
     return `<!DOCTYPE html>
 <html lang="en">
 <head id="header">    
+    <meta charset="utf-8">
     <!-- Preconnects -->
     <link rel="preconnect" href="${apiUrl}" crossorigin>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -103,7 +104,6 @@ export async function baseHtml(req: Request) {
     
     <!-- Other -->
     <title>${title}</title>
-    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="${description}">
     <meta name="theme-color" content="#202025">
