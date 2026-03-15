@@ -544,13 +544,12 @@ export class GenericTemplates {
         onclick: Function,
         title: StringOrSignal = "",
         classes: StringOrSignal[] = [],
-        disabled: HtmlPropertyValue = false,
+        disabled: Signal<boolean> = signal(false),
     ) {
         return create("button")
-            .classes("round-button", "jess", ...classes)
+            .classes("round-button", "jess", ...classes, compute((d): string => d ? "disabled" : "_", disabled))
             .onclick(onclick)
             .title(title)
-            .attributes("disabled", disabled)
             .children(
                 icon({
                     ...iconConfig,
