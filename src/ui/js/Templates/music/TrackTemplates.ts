@@ -474,7 +474,7 @@ export class TrackTemplates {
                 { icon: "more_horiz" },
                 () => menuShown$.value = !menuShown$.value,
                 "Show menu"),
-            GenericTemplates.menu(compute(s => s, menuShown$),
+            GenericTemplates.menu(menuShown$,
                 when(trackData.canDownload, TrackEditTemplates.downloadAudioButton(track)),
                 when(trackData.canEdit, vertical(
                     TrackEditTemplates.addToAlbumsButton(track),
