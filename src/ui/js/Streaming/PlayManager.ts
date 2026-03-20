@@ -65,10 +65,20 @@ export class PlayManager {
             const loopingContext = PlayManager.isLoopingContext();
             const contextQueue = QueueManager.getContextQueue();
             if (contextQueue.length > 0) {
-                let nextTrackId = QueueManager.getNextTrackInContextQueue(finishedId ?? currentTrackId.value);
-                if (nextTrackId !== undefined && nextTrackId !== null) {
+                const currentId = finishedId ?? currentTrackId.value;
+                const index = contextQueue.findIndex(id => id === currentId);
+                let nextTrackId = null;
+
+                if (index !== -1 && index < contextQueue.length - 1) {
+                    nextTrackId = contextQueue[index + 1];
+                }
+
+                if (nextTrackId !== null) {
                     // Play next track in context queue
                     await PlayManager.startAtBeginningAsync(nextTrackId);
+                } else if (index === -1) {
+                    // Current track not in context queue (e.g. from manual queue), just play first item of context
+                    await PlayManager.startAtBeginningAsync(contextQueue[0]);
                 } else {
                     // End of context queue reached
                     if (loopingContext || shuffling.value) {

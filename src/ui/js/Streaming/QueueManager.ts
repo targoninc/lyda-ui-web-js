@@ -57,13 +57,6 @@ export class QueueManager {
         return autoQueue.value;
     }
 
-    static getNextTrackInContextQueue(currentId: number) {
-        const index = contextQueue.value.findIndex(id => id === currentId);
-        if (index === -1) {
-            return null;
-        }
-        return contextQueue.value[index + 1];
-    }
 
     static removeFromManualQueue(id: number) {
         manualQueue.value = manualQueue.value.filter((queueId) => queueId !== id);
