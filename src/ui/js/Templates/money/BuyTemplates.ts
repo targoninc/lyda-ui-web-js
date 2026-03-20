@@ -64,7 +64,7 @@ export class BuyTemplates {
                 ).classes("space-between"),
                 when(bought, vertical(
                     horizontal(
-                        MusicTemplates.cover(entityType, item.entity, CoverContext.small),
+                        MusicTemplates.cover(entityType, item.entity, CoverContext.inline),
                         MusicTemplates.title(entityType, title, id, [], TextSize.large, false),
                     ).classes("align-children"),
                     create("p")

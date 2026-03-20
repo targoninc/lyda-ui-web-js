@@ -130,7 +130,7 @@ export class MusicTemplates {
             }
         };
         const isOwnItem = compute(u => u?.id === item.user_id, currentUser);
-        const playButtonContexts = [CoverContext.card, CoverContext.queue];
+        const playButtonContexts = [CoverContext.card, CoverContext.queue, CoverContext.small];
         const onlyShowOnHover = compute(
             id => coverContext !== CoverContext.standalone && id !== item.id,
             currentTrackId,
