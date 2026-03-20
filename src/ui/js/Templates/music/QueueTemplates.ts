@@ -211,7 +211,7 @@ export class QueueTemplates {
             parent.children(
                 compute(t => t ? QueueTemplates.queueItem(t.track, i, type) : nullElement(), track),
             ).build(),
-        ).classes("relative")
+        ).classes("relative", `queue-${type}-track-${i}`)
          .build();
     }
 }

@@ -57,7 +57,6 @@ export class QueueManager {
         return autoQueue.value;
     }
 
-
     static removeFromManualQueue(id: number) {
         manualQueue.value = manualQueue.value.filter((queueId) => queueId !== id);
     }

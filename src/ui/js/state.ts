@@ -37,6 +37,12 @@ currentTrackId.subscribe((id, changed) => {
     } else {
         footer?.classList.remove("hidden");
     }
+    setTimeout(() => {
+        const currentTrack = document.querySelector(`.queue-current-track-0`);
+        if (currentTrack) {
+            currentTrack.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+    }, 50);
 });
 if (!currentTrackId.value) {
     footer?.classList.add("hidden");
