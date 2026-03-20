@@ -56,11 +56,12 @@ export class PlayManager {
 
     static async playNextFromQueues(finishedId: number | null = null) {
         const manualQueue = QueueManager.getManualQueue();
-        const nextTrackId = manualQueue[0];
-        if (nextTrackId !== undefined) {
+        const nextTrackIdFromManual = manualQueue[0];
+        if (nextTrackIdFromManual !== undefined) {
             // Prioritize manual queue
-            await PlayManager.startAtBeginningAsync(nextTrackId);
-            QueueManager.removeFromManualQueue(nextTrackId);
+            const currentId = finishedId ?? currentTrackId.value;
+            await PlayManager.startAsync(nextTrackIdFromManual, true, nextTrackIdFromManual === currentId);
+            QueueManager.removeFromManualQueue(nextTrackIdFromManual);
         } else {
             const loopingContext = PlayManager.isLoopingContext();
             const contextQueue = QueueManager.getContextQueue();
@@ -75,10 +76,11 @@ export class PlayManager {
 
                 if (nextTrackId !== null) {
                     // Play next track in context queue
-                    await PlayManager.startAtBeginningAsync(nextTrackId);
+                    await PlayManager.startAsync(nextTrackId, true, nextTrackId === currentId);
                 } else if (index === -1) {
                     // Current track not in context queue (e.g. from manual queue), just play first item of context
-                    await PlayManager.startAtBeginningAsync(contextQueue[0]);
+                    const nextId = contextQueue[0];
+                    await PlayManager.startAsync(nextId, true, nextId === currentId);
                 } else {
                     // End of context queue reached
                     if (loopingContext || shuffling.value) {
@@ -89,7 +91,8 @@ export class PlayManager {
                         } else {
                             nextTrackId = contextQueue[0];
                         }
-                        await PlayManager.startAtBeginningAsync(nextTrackId);
+
+                        await PlayManager.startAsync(nextTrackId, true, nextTrackId === currentId);
                     } else {
                         // Clear the context queue and play from the auto queue
                         QueueManager.clearContextQueue();
@@ -253,10 +256,10 @@ export class PlayManager {
         }
     }
 
-    static async startAsync(id: number, fromBeginning: boolean = false) {
+    static async startAsync(id: number, fromBeginning: boolean = false, force: boolean = false) {
         await PlayManager.stopAllAsync();
 
-        if (id !== currentTrackId.value) {
+        if (id !== currentTrackId.value || force) {
             history.value = [
                 ...history.value,
                 {
