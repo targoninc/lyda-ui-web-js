@@ -14,7 +14,7 @@ import {
     loopMode,
     muted,
     playingFrom,
-    playingHere,
+    playingHere, shuffling,
     streamClients,
     trackInfo,
     volume,
@@ -70,7 +70,7 @@ export class PlayManager {
                     await PlayManager.startAtBeginningAsync(nextTrackId);
                 } else {
                     // End of context queue reached
-                    if (loopingContext) {
+                    if (loopingContext || shuffling.value) {
                         // Play from the start
                         nextTrackId = QueueManager.getContextQueue()[0];
                         await PlayManager.startAtBeginningAsync(nextTrackId);
