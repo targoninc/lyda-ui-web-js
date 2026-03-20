@@ -243,7 +243,7 @@ export class PlayManager {
         }
     }
 
-    static async startAsync(id: number) {
+    static async startAsync(id: number, fromBeginning: boolean = false) {
         await PlayManager.stopAllAsync();
 
         if (id !== currentTrackId.value) {
@@ -278,15 +278,12 @@ export class PlayManager {
         });
         const streamClient = PlayManager.addStreamClientIfNotExists(id, d.track.length);
 
-        await streamClient.startAsync();
+        await streamClient.startAsync(fromBeginning);
         await StreamingUpdater.updatePlayState();
     }
 
     static async startAtBeginningAsync(id: number) {
-        await PlayManager.startAsync(id);
-        if (PlayManager.getCurrentTime(id).relative > .1) {
-            await PlayManager.scrubTo(id, 0);
-        }
+        await PlayManager.startAsync(id, true);
     }
 
     static async playNextInAutoQueue() {

@@ -34,8 +34,12 @@ export class StreamClient implements IStreamClient {
         }
     }
 
-    public async startAsync(): Promise<void> {
+    public async startAsync(fromBeginning: boolean = false): Promise<void> {
         await this.ensureAudioContext();
+
+        if (fromBeginning) {
+            this.offset = 0;
+        }
 
         // If not loaded yet, start loading/decoding
         if (!this.buffer) {

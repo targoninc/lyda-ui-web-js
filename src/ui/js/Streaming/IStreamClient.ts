@@ -2,7 +2,7 @@ export interface IStreamClient {
     duration: number;
     playing: boolean;
 
-    startAsync(): Promise<void>;
+    startAsync(fromBeginning?: boolean): Promise<void>;
 
     stopAsync(): void;
 
