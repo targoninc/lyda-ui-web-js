@@ -38,10 +38,10 @@ currentTrackId.subscribe((id, changed) => {
         footer?.classList.remove("hidden");
     }
     setTimeout(() => {
-        const currentTrack = document.querySelector(`.queue-current-track-0`);
-        if (currentTrack) {
-            currentTrack.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
+        document.querySelector(`.current-track`)?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+        });
     }, 50);
 });
 if (!currentTrackId.value) {
