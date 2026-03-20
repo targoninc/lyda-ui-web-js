@@ -20,7 +20,7 @@ export function initializeMediaSessionCallbacks() {
         if (!currentTrackId.value) {
             return;
         }
-        await PlayManager.playNextFromQueues();
+        await PlayManager.playNextFromQueues(currentTrackId.value);
     });
 
     navigator.mediaSession.setActionHandler("previoustrack", async () => {
@@ -35,7 +35,7 @@ export function initializeMediaSessionCallbacks() {
             return;
         }
         const d = await PlayManager.getTrackData(currentTrackId.value);
-        await PlayManager.scrubTo(currentTrackId.value, opts.seekTime / d.track.length);
+        await PlayManager.scrubTo(currentTrackId.value, opts.seekTime / (d?.track.length ?? 1));
     });
 
     navigator.mediaSession.setActionHandler("seekforward", async () => {
