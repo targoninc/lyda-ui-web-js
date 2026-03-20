@@ -3,8 +3,9 @@ import { StreamingUpdater } from "./StreamingUpdater.ts";
 import { QueueManager } from "./QueueManager.ts";
 import { TrackActions } from "../Actions/TrackActions.ts";
 import { StreamClient } from "./StreamClient.ts";
-import { target, userHasSettingValue, Util } from "../Classes/Util.ts";
+import {shuffleArray, target, userHasSettingValue, Util} from "../Classes/Util.ts";
 import { ApiRoutes } from "../Api/ApiRoutes.ts";
+import { Api } from "../Api/Api.ts";
 import {
     currentQuality,
     currentSecretCode,
@@ -44,7 +45,7 @@ export class PlayManager {
                     await PlayManager.togglePlayAsync(track.id);
                     await PlayManager.scrubTo(track.id, 0);
                 } else {
-                    await PlayManager.playNextFromQueues();
+                    await PlayManager.playNextFromQueues(track.id);
                 }
                 TrackActions.savePlayAfterTimeIf(track.id, 5, () => track.id === currentTrackId.value && PlayManager.isPlaying(track.id));
             }
@@ -53,7 +54,7 @@ export class PlayManager {
         }
     }
 
-    static async playNextFromQueues() {
+    static async playNextFromQueues(finishedId: number | null = null) {
         const manualQueue = QueueManager.getManualQueue();
         const nextTrackId = manualQueue[0];
         if (nextTrackId !== undefined) {
@@ -64,7 +65,7 @@ export class PlayManager {
             const loopingContext = PlayManager.isLoopingContext();
             const contextQueue = QueueManager.getContextQueue();
             if (contextQueue.length > 0) {
-                let nextTrackId = QueueManager.getNextTrackInContextQueue(currentTrackId.value);
+                let nextTrackId = QueueManager.getNextTrackInContextQueue(finishedId ?? currentTrackId.value);
                 if (nextTrackId !== undefined && nextTrackId !== null) {
                     // Play next track in context queue
                     await PlayManager.startAtBeginningAsync(nextTrackId);
@@ -72,7 +73,12 @@ export class PlayManager {
                     // End of context queue reached
                     if (loopingContext || shuffling.value) {
                         // Play from the start
-                        nextTrackId = QueueManager.getContextQueue()[0];
+                        if (shuffling.value) {
+                            await PlayManager.reshuffleContextQueue();
+                            nextTrackId = QueueManager.getContextQueue()[0];
+                        } else {
+                            nextTrackId = contextQueue[0];
+                        }
                         await PlayManager.startAtBeginningAsync(nextTrackId);
                     } else {
                         // Clear the context queue and play from the auto queue
@@ -84,6 +90,24 @@ export class PlayManager {
             } else {
                 // Context queue is empty, play from auto queue
                 await PlayManager.playNextInAutoQueueOrStop();
+            }
+        }
+    }
+
+    private static async reshuffleContextQueue() {
+        const pf = playingFrom.value;
+        if (pf && pf.type) {
+            if (["album", "playlist"].includes(pf.type) && pf.entity && pf.entity.tracks) {
+                let trackIds = pf.entity.tracks.map(t => t.track_id);
+                trackIds = shuffleArray(trackIds);
+                QueueManager.setContextQueue(trackIds);
+            } else if (!["album", "playlist"].includes(pf.type)) {
+                const tracks = await Api.getFeed(`${ApiRoutes.trackFeed}/${pf.type}`);
+                if (tracks && tracks.length > 0) {
+                    let trackIds = tracks.map(t => t.id);
+                    trackIds = shuffleArray(trackIds);
+                    QueueManager.setContextQueue(trackIds);
+                }
             }
         }
     }
