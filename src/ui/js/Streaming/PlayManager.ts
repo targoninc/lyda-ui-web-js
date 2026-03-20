@@ -57,16 +57,15 @@ export class PlayManager {
     static async playNextFromQueues(finishedId: number | null = null) {
         const manualQueue = QueueManager.getManualQueue();
         const nextTrackIdFromManual = manualQueue[0];
+        const currentId = finishedId ?? currentTrackId.value;
         if (nextTrackIdFromManual !== undefined) {
             // Prioritize manual queue
-            const currentId = finishedId ?? currentTrackId.value;
             await PlayManager.startAsync(nextTrackIdFromManual, true, nextTrackIdFromManual === currentId);
             QueueManager.removeFromManualQueue(nextTrackIdFromManual);
         } else {
             const loopingContext = PlayManager.isLoopingContext();
             const contextQueue = QueueManager.getContextQueue();
             if (contextQueue.length > 0) {
-                const currentId = finishedId ?? currentTrackId.value;
                 const index = contextQueue.findIndex(id => id === currentId);
                 let nextTrackId = null;
 
@@ -77,6 +76,10 @@ export class PlayManager {
                 if (nextTrackId !== null) {
                     // Play next track in context queue
                     await PlayManager.startAsync(nextTrackId, true, nextTrackId === currentId);
+                    if (nextTrackId === currentId) {
+                        // If
+                        QueueManager.setContextQueue(QueueManager.getContextQueue().slice(1));
+                    }
                 } else if (index === -1) {
                     // Current track not in context queue (e.g. from manual queue), just play first item of context
                     const nextId = contextQueue[0];
