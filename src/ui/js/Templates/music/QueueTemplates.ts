@@ -11,7 +11,7 @@ import {
     currentTrackId,
     currentUser,
     history,
-    manualQueue,
+    manualQueue, playingFrom,
     queueVisible,
 } from "../../state.ts";
 import { PlayManager } from "../../Streaming/PlayManager.ts";
@@ -28,7 +28,7 @@ import { CoverContext } from "../../Enums/CoverContext.ts";
 import { TextSize } from "../../Enums/TextSize.ts";
 
 export class QueueTemplates {
-    static queueItem(track: Track, index: number, isManual: boolean, isCurrent: boolean = false) {
+    static queueItem(track: Track, index: number, type: "manual" | "context" | "auto" | "current" | "history") {
         if (!track.user) {
             throw new Error(`Track ${track.id} has no user`);
         }
@@ -37,7 +37,7 @@ export class QueueTemplates {
             coverState.value = Util.getTrackCover(track.id);
         }
         const playing = compute(id => id === track.id, currentTrackId);
-        const playingClass = compute((p): string => (p && isCurrent) ? "playing" : "_", playing);
+        const playingClass = compute((p): string => (p && type === "current") ? "playing" : "_", playing);
 
         const dragData = {
             type: "track",
@@ -48,7 +48,7 @@ export class QueueTemplates {
         const base = create("div")
             .classes("queue-item", "flex", "fullWidth", "small-gap", "rounded", "padded-small", "space-between", playingClass);
 
-        if (isManual) {
+        if (type === "manual") {
             base.attributes("draggable", "true")
                 .ondragstart(async (e: DragEvent) => {
                     DragActions.showDragTargets();
@@ -69,9 +69,13 @@ export class QueueTemplates {
             })
             .children(
                 horizontal(
-                    when(isManual, GenericTemplates.verticalDragIndicator()),
+                    when(type === "manual", GenericTemplates.verticalDragIndicator()),
                     MusicTemplates.cover(EntityType.track, track, CoverContext.queue, async () => {
-                        await startItem(track);
+                        if (type === "context" && playingFrom.value) {
+                            await startItem(track, playingFrom.value);
+                        } else {
+                            await startItem(track);
+                        }
                         QueueManager.removeIndexFromManualQueue(index);
                     }),
                     vertical(
@@ -79,7 +83,7 @@ export class QueueTemplates {
                         UserTemplates.userLink(UserWidgetContext.player, track.user!),
                     ).classes("no-gap"),
                 ),
-                when(isManual, QueueTemplates.manualQueueItemActions(index)),
+                when(type === "manual", QueueTemplates.manualQueueItemActions(index)),
             ).id(track.id).build();
     }
 
@@ -162,12 +166,12 @@ export class QueueTemplates {
         }, currentUser);
 
         return vertical(
-            compute((q) => QueueTemplates.queueList(q.map(i => i.track_id).slice(0, q.length - 1), t("HISTORY")), history),
-            compute(id => QueueTemplates.queueList([id], t("CURRENT_TRACK"), false, true), currentTrackId),
-            compute((q) => QueueTemplates.queueList(q, t("MANUAL_QUEUE"), true), manualQueue),
-            compute((q) => QueueTemplates.queueList(q, t("CONTEXT_QUEUE")), contextQueue),
+            compute((q) => QueueTemplates.queueList(q.map(i => i.track_id).slice(0, q.length - 1), t("HISTORY"), "history"), history),
+            compute(id => QueueTemplates.queueList([id], t("CURRENT_TRACK"), "current"), currentTrackId),
+            compute((q) => QueueTemplates.queueList(q, t("MANUAL_QUEUE"), "manual"), manualQueue),
+            compute((q) => QueueTemplates.queueList(q, t("CONTEXT_QUEUE"), "context"), contextQueue),
             when(playFromAutoEnabled, vertical(
-                compute((q) => QueueTemplates.queueList(q, t("AUTO_QUEUE")), autoQueue),
+                compute((q) => QueueTemplates.queueList(q, t("AUTO_QUEUE"), "auto"), autoQueue),
             ).build()),
             create("div")
                 .classes("queue-spacer")
@@ -175,7 +179,7 @@ export class QueueTemplates {
         ).classes("fullWidth", ...classes).build();
     }
 
-    static queueList(q: number[], text: StringOrSignal, isManual: boolean = false, isCurrent: boolean = false) {
+    static queueList(q: number[], text: StringOrSignal, type: "manual" | "context" | "auto" | "current" | "history") {
         if (q.length === 0) {
             return nullElement();
         }
@@ -185,19 +189,19 @@ export class QueueTemplates {
                 .classes("color-dim", TextSize.small)
                 .text(text)
                 .build(),
-            ...q.map((id, i) => QueueTemplates.trackAsQueueItem(id, i, isManual, isCurrent)),
-        ).classes("no-gap", isCurrent ? "current-track" : "_")
+            ...q.map((id, i) => QueueTemplates.trackAsQueueItem(id, i, type)),
+        ).classes("no-gap", type === "current" ? "current-track" : "_")
          .build();
     }
 
-    static trackAsQueueItem(id: number, i: number, isManual: boolean, isCurrent: boolean = false) {
+    static trackAsQueueItem(id: number, i: number, type: "manual" | "context" | "auto" | "current" | "history") {
         const track = signal<{ track: Track } | null>(null);
         PlayManager.getTrackData(id).then((data: any) => {
             track.value = data;
         });
 
         let parent = horizontal().classes("fullWidth");
-        if (isManual) {
+        if (type === "manual") {
             parent = GenericTemplates.dragTargetInList(async (data: any) => {
                 QueueManager.moveInManualQueue(data.index, i);
             }, i.toString()).classes("fullWidth");
@@ -205,7 +209,7 @@ export class QueueTemplates {
 
         return vertical(
             parent.children(
-                compute(t => t ? QueueTemplates.queueItem(t.track, i, isManual, isCurrent) : nullElement(), track),
+                compute(t => t ? QueueTemplates.queueItem(t.track, i, type) : nullElement(), track),
             ).build(),
         ).classes("relative")
          .build();
