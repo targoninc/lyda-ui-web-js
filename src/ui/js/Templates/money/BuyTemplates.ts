@@ -3,7 +3,8 @@ import { button, heading } from "@targoninc/jess-components";
 import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
 import { MusicTemplates } from "../music/MusicTemplates.ts";
 import { FormTemplates } from "../generic/FormTemplates.ts";
-import { createModal } from "../../Classes/Ui.ts";
+import {createModal, notify} from "../../Classes/Ui.ts";
+import { NotificationType } from "../../Enums/NotificationType.ts";
 import { Util } from "../../Classes/Util.ts";
 import { Api } from "../../Api/Api.ts";
 import { currency } from "../../Classes/Helpers/Num.ts";
@@ -97,7 +98,10 @@ export class BuyTemplates {
                             disabled: compute(v => !v, amountValid),
                             onclick: async () => inCheckout.value = true,
                         }), true),
-                        when(compute(p => p.includes(PaymentProvider.stripe), providers), BuyTemplates.stripeButton(item, onSuccess)),
+                        when(compute(p => p.includes(PaymentProvider.stripe), providers), BuyTemplates.stripeButton(item, estTotal, () => {
+                            bought.value = true;
+                            onSuccess();
+                        })),
                         when(compute(p => p.includes(PaymentProvider.paypal), providers), BuyTemplates.paypalButton(item, estTotal, inCheckout, () => {
                             bought.value = true;
                             onSuccess();
@@ -123,20 +127,20 @@ export class BuyTemplates {
         ], `buy-${item.type}`);
     }
 
-    static stripeButton(item: BuyableEntity, onSuccess: () => void) {
+    static stripeButton(item: BuyableEntity, amount: Signal<number>, onSuccess: () => void) {
         return button({
             text: "Pay with Stripe",
             icon: { icon: "credit_card" },
             classes: ["rounded-max", TextSize.medium, "align-end", "stripe-button"],
             onclick: async () => {
                 try {
-                    const success = await StripeService.checkout(item.type, item.entity.id);
+                    const success = await StripeService.checkout(item.type, item.entity.id, amount.value);
                     if (success) {
                         onSuccess();
                     }
                 } catch (e: any) {
                     console.error("Stripe checkout failed", e);
-                    // Handle error (e.g. show a toast or message)
+                    notify(`${t("FAILED_CHECKOUT_ERROR", e.message)}`, NotificationType.error);
                 }
             }
         });

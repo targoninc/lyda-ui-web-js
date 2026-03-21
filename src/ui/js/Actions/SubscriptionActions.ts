@@ -11,6 +11,8 @@ import { reload } from "../Routing/Router.ts";
 import { NotificationType } from "../Enums/NotificationType.ts";
 import { Subscription } from "@targoninc/lyda-shared/src/Models/db/finance/Subscription";
 import { Api } from "../Api/Api.ts";
+import { PaymentProvider } from "@targoninc/lyda-shared/src/Enums/PaymentProvider";
+import { StripeService } from "../Services/StripeService.ts";
 import { t } from "../../locales";
 
 const clientId = "AUw6bB-HQTIfqy5fhk-s5wZOaEQdaCIjRnCyIC3WDCRxVKc9Qvz1c6xLw7etCit1CD1qSHY5Pv-3xgQN";
@@ -24,6 +26,16 @@ if (!paypal) {
 }
 
 export class SubscriptionActions {
+    static async startStripeSubscription(id: number, subPlanId: string, optionMessage: Signal<string>) {
+        try {
+            optionMessage.value = `${t("REDIRECTING_TO_STRIPE")}`;
+            await StripeService.subscribe(id, subPlanId);
+        } catch (e: any) {
+            notify(`${t("FAILED_STARTING_SUBSCRIPTION_ERROR", e.message)}`, NotificationType.error);
+            optionMessage.value = `${t("FAILED_STARTING_SUBSCRIPTION")}`;
+        }
+    }
+
     static async startSubscription(id: number, subPlanId: string, optionMessage: Signal<string>) {
         SubscriptionActions.initializeDomForSubStart(id, optionMessage);
         SubscriptionActions.initializePaypalButton(subPlanId, "paypal-button-" + id, optionMessage, async (paypalData: any) => {

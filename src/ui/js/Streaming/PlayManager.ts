@@ -77,7 +77,6 @@ export class PlayManager {
                     // Play next track in context queue
                     await PlayManager.startAsync(nextTrackId, true, nextTrackId === currentId);
                     if (nextTrackId === currentId) {
-                        // If
                         QueueManager.setContextQueue(QueueManager.getContextQueue().slice(1));
                     }
                 } else if (index === -1) {
@@ -86,15 +85,8 @@ export class PlayManager {
                     await PlayManager.startAsync(nextId, true, nextId === currentId);
                 } else {
                     // End of context queue reached
-                    if (loopingContext || shuffling.value) {
-                        // Play from the start
-                        if (shuffling.value) {
-                            await PlayManager.reshuffleContextQueue();
-                            nextTrackId = QueueManager.getContextQueue()[0];
-                        } else {
-                            nextTrackId = contextQueue[0];
-                        }
-
+                    if (loopingContext) {
+                        nextTrackId = contextQueue[0];
                         await PlayManager.startAsync(nextTrackId, true, nextTrackId === currentId);
                     } else {
                         // Clear the context queue and play from the auto queue

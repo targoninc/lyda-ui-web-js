@@ -14,7 +14,7 @@ export class StripeService {
         return this.stripe;
     }
 
-    static async checkout(type: "album" | "track", entityId: number) {
+    static async checkout(type: "album" | "track", entityId: number, amount: number) {
         const stripe = await this.getStripe();
         if (!stripe) throw new Error("Stripe failed to load");
 
@@ -23,9 +23,13 @@ export class StripeService {
             type,
             entityId,
             paymentProvider: PaymentProvider.stripe,
-            orderId: "new"
+            orderId: "new",
+            amount
         });
 
+        if (!initResponse) {
+            throw new Error("Failed to get order creation response");
+        }
         const { clientSecret, id } = initResponse;
 
         if (!clientSecret) {
@@ -55,17 +59,22 @@ export class StripeService {
 
     static async subscribe(id: number, planId: string, targetUserId?: number) {
         // planId is the external plan/price id (e.g. Stripe Price ID)
-        const response = await Api.subscribe({
-            id,
-            planId,
-            targetUserId,
-            provider: "stripe"
-        });
+        try {
+            const response = await Api.subscribe({
+                id,
+                planId,
+                targetUserId,
+                provider: PaymentProvider.stripe
+            });
 
-        if (response?.url) {
-            window.location.href = response.url;
-        } else {
-            throw new Error("Failed to create subscription session");
+            if (response?.url) {
+                window.location.href = response.url;
+            } else {
+                throw new Error("Failed to create subscription session: No URL returned");
+            }
+        } catch (e: any) {
+            console.error("Stripe subscription failed", e);
+            throw e;
         }
     }
 }

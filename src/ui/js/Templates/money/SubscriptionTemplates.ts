@@ -3,6 +3,7 @@ import { button, heading } from "@targoninc/jess-components";
 import { AvailableSubscription } from "@targoninc/lyda-shared/src/Models/db/finance/AvailableSubscription";
 import { Subscription } from "@targoninc/lyda-shared/src/Models/db/finance/Subscription";
 import { SubscriptionStatus } from "@targoninc/lyda-shared/src/Enums/SubscriptionStatus";
+import { PaymentProvider } from "@targoninc/lyda-shared/src/Enums/PaymentProvider";
 import { getSubscriptionLink, SubscriptionActions } from "../../Actions/SubscriptionActions.ts";
 import { GenericTemplates, vertical } from "../generic/GenericTemplates.ts";
 import { navigate } from "../../Routing/Router.ts";
@@ -17,15 +18,19 @@ import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { TableTemplates } from "../generic/TableTemplates.ts";
 import { sortByProperty } from "../../Classes/Helpers/Sorting.ts";
 import { TextSize } from "../../Enums/TextSize.ts";
+import {Api} from "../../Api/Api.ts";
 
 export class SubscriptionTemplates {
     static page() {
         const options = signal<AvailableSubscription[]>([]);
         const currentSubscription = signal<Subscription | null>(null);
+        const providers = signal<PaymentProvider[]>([]);
+
         SubscriptionActions.loadSubscriptionOptions().then(res => {
             options.value = res.options;
             currentSubscription.value = res.currentSubscription;
         });
+        Api.getPaymentProviders().then(p => providers.value = p ?? []);
         const currency = "USD";
         const selectedOption = signal<number | null>(null);
         const optionsLoading = compute(o => o.length === 0, options);
@@ -52,7 +57,7 @@ export class SubscriptionTemplates {
                 SubscriptionTemplates.subscriptionBenefits(),
                 when(optionsLoading, GenericTemplates.loadingSpinner()),
                 signalMap(options, create("div").classes("flex"),
-                    (option) => SubscriptionTemplates.option(currentSubscription, selectedOption, currency, option)),
+                    (option) => SubscriptionTemplates.option(currentSubscription, selectedOption, currency, option, providers)),
                 when(hasGiftedSubscriptions, vertical(
                     heading({
                         level: 2,
@@ -109,7 +114,7 @@ export class SubscriptionTemplates {
             ).build();
     }
 
-    static option(currentSubscription: Signal<Subscription | null>, selectedOption: Signal<number | null>, cur: string, option: AvailableSubscription) {
+    static option(currentSubscription: Signal<Subscription | null>, selectedOption: Signal<number | null>, cur: string, option: AvailableSubscription, providers: Signal<PaymentProvider[]>) {
         const active = compute(sub => sub && sub.subscription_id === option.id && sub.status === SubscriptionStatus.active, currentSubscription);
         const pending = compute(sub => sub && sub.subscription_id === option.id && sub.status === SubscriptionStatus.pending, currentSubscription);
         const enabled = compute((a, p) => !a && !p, active, pending);
@@ -171,7 +176,7 @@ export class SubscriptionTemplates {
                         create("div")
                             .classes("flex-v", startSubClass)
                             .children(
-                                when(active, GenericTemplates.inlineLink(link, t("MANAGE_ON_PAYPAL"))),
+                                when(active, GenericTemplates.inlineLink(link, t("MANAGE_SUBSCRIPTION"))),
                                 create("div")
                                     .classes("flex", "small-gap", "align-children")
                                     .children(
@@ -212,6 +217,16 @@ export class SubscriptionTemplates {
                                     .text(optionMessage)
                                     .build()),
                                 when(isSelectedOption, SubscriptionTemplates.paypalButton("paypal-button-" + option.id)),
+                                when(compute((selected, p) => selected && p.includes(PaymentProvider.stripe), isSelectedOption, providers),
+                                    button({
+                                        text: "Pay with Stripe",
+                                        icon: { icon: "credit_card" },
+                                        classes: ["rounded-max", "stripe-button", "margin-top"],
+                                        onclick: async () => {
+                                            await SubscriptionActions.startStripeSubscription(option.id, option.plan_id, optionMessage);
+                                        }
+                                    })
+                                ),
                             ).build(),
                     ).build(),
             ).build();

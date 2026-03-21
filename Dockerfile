@@ -1,4 +1,4 @@
-FROM oven/bun:1 AS base
+FROM oven/bun:slim AS base
 
 # Set the working directory
 WORKDIR /usr/src/app
