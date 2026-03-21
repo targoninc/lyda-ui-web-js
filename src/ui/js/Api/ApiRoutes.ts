@@ -212,6 +212,7 @@ export class ApiRoutes {
     private static orders = ApiRoutes.base + "/orders";
     static createOrder = ApiRoutes.orders + "/create";
     static captureOrder = ApiRoutes.orders + "/capture";
+    static getPaymentProviders = ApiRoutes.orders + "/providers";
     // endregion
 
     // region Taxes

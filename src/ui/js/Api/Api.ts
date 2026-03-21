@@ -40,6 +40,7 @@ import { ModerationFilter } from "../Models/ModerationFilter.ts";
 import { ClientError } from "@targoninc/lyda-shared/src/Models/db/lyda/ClientError";
 import { KeyValue } from "@targoninc/lyda-shared/src/Models/KeyValue";
 import { CreateOrderRequest } from "@targoninc/lyda-shared/src/Models/CreateOrderRequest";
+import { CreateOrderResponse } from "@targoninc/lyda-shared/src/Models/CreateOrderResponse";
 import { CaptureOrderRequest } from "@targoninc/lyda-shared/src/Models/CaptureOrderRequest";
 import { Transaction } from "@targoninc/lyda-shared/src/Models/Transaction";
 import { t } from "../../locales";
@@ -47,8 +48,9 @@ import { SubscriptionPayment } from "@targoninc/lyda-shared/src/Models/db/financ
 import {ContentIDMatch} from "../Models/ContentIDMatch.ts";
 import { TransactionInfo } from "@targoninc/lyda-shared/src/Models/TransactionInfo.ts";
 import { TrackSale } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackSale.ts";
-import { UserIp } from "@targoninc/lyda-shared/src/Models/db/lyda/UserIp.ts";
+import {UserIp} from "@targoninc/lyda-shared/src/Models/db/lyda/UserIp.ts";
 import {UserTaxinfo} from "@targoninc/lyda-shared/src/Models/db/lyda/UserTaxinfo.ts";
+import {PaymentProvider} from "@targoninc/lyda-shared/src/Enums/PaymentProvider";
 
 export class Api {
     //region Interactions
@@ -325,7 +327,10 @@ export class Api {
     }
 
     static async subscribe(parameters: Record<any, any>) {
-        await post(ApiRoutes.subscribe, parameters);
+        return await post<{
+            url?: string,
+            id?: string,
+        }>(ApiRoutes.subscribe, parameters);
     }
 
     static async unsubscribe(id: number) {
@@ -845,11 +850,15 @@ export class Api {
 
     // region Orders
     static async createOrder(request: CreateOrderRequest) {
-        return await post<string>(ApiRoutes.createOrder, request);
+        return await post<CreateOrderResponse>(ApiRoutes.createOrder, request);
     }
 
     static async captureOrder(request: CaptureOrderRequest) {
         return await post<string>(ApiRoutes.captureOrder, request);
+    }
+
+    static async getPaymentProviders() {
+        return await get<PaymentProvider[]>(ApiRoutes.getPaymentProviders);
     }
 
     // endregion

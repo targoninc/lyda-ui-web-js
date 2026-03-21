@@ -21,6 +21,7 @@ import {
 } from "@paypal/paypal-js/types/components/buttons";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import { StripeService } from "../../Services/StripeService.ts";
 
 export type BuyableEntity = {
     type: "track";
@@ -46,6 +47,9 @@ export class BuyTemplates {
 
         const amount = signal<number | null>(null);
         const amountValid = compute(a => a !== null && a >= price && a <= price * 100, amount);
+        const providers = signal<PaymentProvider[]>([]);
+        Api.getPaymentProviders().then(p => providers.value = p ?? []);
+
         let modal: AnyElement | null = null;
         const onClose = () => modal ? Util.removeModal(modal) : undefined;
         const inCheckout = signal(false);
@@ -93,10 +97,11 @@ export class BuyTemplates {
                             disabled: compute(v => !v, amountValid),
                             onclick: async () => inCheckout.value = true,
                         }), true),
-                        BuyTemplates.paypalButton(item, estTotal, inCheckout, () => {
+                        when(compute(p => p.includes(PaymentProvider.stripe), providers), BuyTemplates.stripeButton(item, onSuccess)),
+                        when(compute(p => p.includes(PaymentProvider.paypal), providers), BuyTemplates.paypalButton(item, estTotal, inCheckout, () => {
                             bought.value = true;
                             onSuccess();
-                        }),
+                        })),
                     ).classes("space-between"),
                     when(compute(a => a !== null && a > price * 100, amount), create("span")
                         .classes("warning")
@@ -116,6 +121,25 @@ export class BuyTemplates {
                 ).build()),
             ).styles("max-width", "500px"),
         ], `buy-${item.type}`);
+    }
+
+    static stripeButton(item: BuyableEntity, onSuccess: () => void) {
+        return button({
+            text: "Pay with Stripe",
+            icon: { icon: "credit_card" },
+            classes: ["rounded-max", TextSize.medium, "align-end", "stripe-button"],
+            onclick: async () => {
+                try {
+                    const success = await StripeService.checkout(item.type, item.entity.id);
+                    if (success) {
+                        onSuccess();
+                    }
+                } catch (e: any) {
+                    console.error("Stripe checkout failed", e);
+                    // Handle error (e.g. show a toast or message)
+                }
+            }
+        });
     }
 
     static paypalButton(item: BuyableEntity, amount: Signal<number>, inCheckout: Signal<boolean>, onSuccess: () => void) {
