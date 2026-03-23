@@ -1,4 +1,4 @@
-import { compute, create, Signal, signal, signalMap, when } from "@targoninc/jess";
+import {compute, create, nullElement, Signal, signal, signalMap, when} from "@targoninc/jess";
 import { button } from "@targoninc/jess-components";
 import { currentUser } from "../../state";
 import { Time } from "../../Classes/Helpers/Time.ts";
@@ -11,78 +11,89 @@ import { registerWebauthnMethod, webauthnLogin } from "../../Classes/Helpers/Web
 import { notify, Ui } from "../../Classes/Ui.ts";
 import { NotificationType } from "../../Enums/NotificationType.ts";
 import { Api } from "../../Api/Api.ts";
-import { PublicKey } from "@targoninc/lyda-shared/dist/Models/db/lyda/PublicKey";
+import { PublicKey } from "@targoninc/lyda-shared/src/Models/db/lyda/PublicKey";
 import { SettingsTemplates } from "./SettingsTemplates.ts";
 import { t } from "../../../locales";
 import { TextSize } from "../../Enums/TextSize.ts";
-import { horizontal, vertical } from "../generic/GenericTemplates.ts";
+import { vertical } from "../generic/GenericTemplates.ts";
 
 export class WebauthnTemplates {
-    static devicesSection() {
+    static devicesSection(searchQuery$: Signal<string>) {
+        const heading = t("PASSKEYS");
         const public_keys = compute(u => u?.public_keys ?? [], currentUser);
         const hasCredentials = compute(m => m.length > 0, public_keys);
         const loading = signal(false);
         const message = signal("");
 
-        return create("div")
-            .classes("flex-v", "card")
-            .children(
-                SettingsTemplates.sectionHeading(t("PASSKEYS")),
-                when(hasCredentials, create("span")
-                    .text(t("NO_PASSKEYS"))
-                    .build(), true),
-                when(hasCredentials, vertical(
-                    signalMap(public_keys, horizontal(), key => create("div")
-                        .classes("flex-v", "card")
-                        .children(
-                            create("span")
-                                .classes(TextSize.large)
-                                .text(key.name)
-                                .build(),
-                            create("span")
-                                .text(compute(time => `${t("CREATED")} ${time}`, Time.agoUpdating(new Date(key.created_at), true)))
-                                .build(),
-                            WebauthnTemplates.webAuthNActions(loading, key, message),
-                        ).build()),
-                ).build()),
-                button({
-                    text: t("ADD_PASSKEY"),
-                    icon: { icon: "add" },
-                    classes: ["positive", "fit-content"],
-                    disabled: loading,
-                    onclick: async () => {
-                        await Ui.getTextInputModal(
-                            t("ADD_PASSKEY"),
-                            t("PASSKEY_NAME_DESCRIPTION"),
-                            "",
-                            t("ADD"),
-                            t("CANCEL"),
-                            async (name: string) => {
-                                loading.value = true;
-                                await Api.getWebauthnChallenge().then(async (res) => {
-                                    const user = currentUser.value;
-                                    if (!user || !res) {
-                                        return;
-                                    }
-                                    let registration: RegistrationJSON;
-                                    try {
-                                        registration = await registerWebauthnMethod(user, res.challenge);
-                                    } catch (e: any) {
-                                        notify(`${t("ERROR")}: ${e.message}`, NotificationType.error);
-                                        return;
-                                    }
-                                    Api.registerWebauthnMethod(registration, res.challenge, name).then(() => {
-                                        Api.getUserById().then(u => {
-                                            currentUser.value = u;
+        return compute(query => {
+            const headingMatches = SettingsTemplates.matches(heading, query);
+            const btnMatches = SettingsTemplates.matches(t("ADD_PASSKEY"), query);
+            const matchingKeys = public_keys.value.filter(key => headingMatches || SettingsTemplates.matches(key.name, query));
+
+            if (!headingMatches && !btnMatches && matchingKeys.length === 0) {
+                return nullElement();
+            }
+
+            return create("div")
+                .classes("flex-v", "card")
+                .children(
+                    SettingsTemplates.sectionHeading(heading),
+                    when(hasCredentials, create("span")
+                        .text(t("NO_PASSKEYS"))
+                        .build(), true),
+                    when(hasCredentials, vertical(
+                        ...matchingKeys.map(key => create("div")
+                            .classes("flex-v", "card")
+                            .children(
+                                create("span")
+                                    .classes(TextSize.large)
+                                    .text(key.name)
+                                    .build(),
+                                create("span")
+                                    .text(compute(time => `${t("CREATED")} ${time}`, Time.agoUpdating(new Date(key.created_at), true)))
+                                    .build(),
+                                WebauthnTemplates.webAuthNActions(loading, key, message),
+                            ).build()),
+                    ).build()),
+                    when(headingMatches || btnMatches, button({
+                        text: t("ADD_PASSKEY"),
+                        icon: { icon: "add" },
+                        classes: ["positive", "fit-content"],
+                        disabled: loading,
+                        onclick: async () => {
+                            await Ui.getTextInputModal(
+                                t("ADD_PASSKEY"),
+                                t("PASSKEY_NAME_DESCRIPTION"),
+                                "",
+                                t("ADD"),
+                                t("CANCEL"),
+                                async (name: string) => {
+                                    loading.value = true;
+                                    await Api.getWebauthnChallenge().then(async (res) => {
+                                        const user = currentUser.value;
+                                        if (!user || !res) {
+                                            return;
+                                        }
+                                        let registration: RegistrationJSON;
+                                        try {
+                                            registration = await registerWebauthnMethod(user, res.challenge);
+                                        } catch (e: any) {
+                                            notify(`${t("ERROR")}: ${e.message}`, NotificationType.error);
+                                            return;
+                                        }
+                                        Api.registerWebauthnMethod(registration, res.challenge, name).then(() => {
+                                            Api.getUserById().then(u => {
+                                                currentUser.value = u;
+                                            });
+                                            notify(t("SUCCESSFULLY_REGISTERED_PASSKEY"), NotificationType.success);
                                         });
-                                        notify(t("SUCCESSFULLY_REGISTERED_PASSKEY"), NotificationType.success);
-                                    });
-                                }).finally(() => loading.value = false);
-                            }, () => {},
-                        );
-                    },
-                }),
-            ).build();
+                                    }).finally(() => loading.value = false);
+                                }, () => {},
+                            );
+                        },
+                    })),
+                ).build();
+        }, searchQuery$);
     }
 
     private static webAuthNActions(loading: Signal<boolean>, key: PublicKey, message: Signal<string>) {

@@ -274,6 +274,7 @@ export const de: Translation = {
     ROYALTIES_BY_TRACK: "Tantiemen nach Track",
     ROYALTY_DATA_EXPORT: "Tantiemendaten exportieren",
     SEARCH: "Suchen",
+    SEARCH_SETTINGS: "Einstellungen suchen",
     SEARCH_FOR_USER: "Nach Nutzer suchen",
     SELECT_MFA: "MFA auswählen",
     SELECT_MFA_METHOD: "MFA-Methode auswählen",

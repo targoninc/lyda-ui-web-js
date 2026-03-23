@@ -501,6 +501,7 @@ export const en = {
     FEATURE_ROADMAP: "Feature Roadmap",
     CLEAR_SEARCH: "Clear search",
     SEARCH: "Search",
+    SEARCH_SETTINGS: "Search settings",
     OPEN_SEARCH: "Open search",
     EXACT_MATCHES: "Exact Matches",
     PARTIAL_MATCHES: "Partial Matches",
