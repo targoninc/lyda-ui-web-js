@@ -1247,4 +1247,8 @@ img.loading:before {
         border-radius: 999px !important;
         height: 34px !important;
     }
+
+    .hideTextOnSmallBreakpointButton span {
+        display: none;
+    }
 }

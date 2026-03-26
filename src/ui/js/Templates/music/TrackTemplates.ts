@@ -489,6 +489,7 @@ export class TrackTemplates {
     static addToPlaylistButton(track: Track) {
         return button({
             text: t("ADD_TO_PLAYLIST"),
+            classes: ["hideTextOnSmallBreakpointButton"],
             icon: { icon: "playlist_add" },
             onclick: async () => {
                 await PlaylistActions.openAddToPlaylistModal(track, "track");
@@ -553,7 +554,7 @@ export class TrackTemplates {
         return button({
             text,
             icon: { icon },
-            classes: [queueClass],
+            classes: [queueClass, "hideTextOnSmallBreakpointButton"],
             onclick: () => {
                 QueueManager.toggleInManualQueue(track.id);
                 inQueue.value = QueueManager.isInManualQueue(track.id);
@@ -573,7 +574,7 @@ export class TrackTemplates {
                 classes: ["inline-icon", "svg", "nopointer"],
                 isUrl: true,
             },
-            classes: ["special", "bigger-input", "rounded-max"],
+            classes: ["special", "bigger-input", "rounded-max", "hideTextOnSmallBreakpointButton"],
             id: track.id,
             onclick: async () => {
                 PlayManager.addStreamClientIfNotExists(track.id, track.length);
