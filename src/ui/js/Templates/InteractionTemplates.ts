@@ -1,17 +1,17 @@
-import { AnyNode, compute, create, HtmlPropertyValue, nullElement, Signal, signal, when } from "@targoninc/jess";
-import { GenericTemplates } from "./generic/GenericTemplates.ts";
-import { InteractionMetadata } from "@targoninc/lyda-shared/src/Models/InteractionMetadata";
-import { InteractionConfig } from "@targoninc/lyda-shared/src/Models/InteractionConfig";
-import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType";
-import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import { InteractionType } from "@targoninc/lyda-shared/src/Enums/InteractionType";
-import { Icons } from "../Enums/Icons.ts";
-import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
-import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
-import { currentUser } from "../state.ts";
-import { Visibility } from "@targoninc/lyda-shared/src/Enums/Visibility";
-import { Api } from "../Api/Api.ts";
-import { InteractionOptions } from "../Models/InteractionOptions.ts";
+import {AnyNode, compute, create, HtmlPropertyValue, nullElement, Signal, signal, when} from "@targoninc/jess";
+import {GenericTemplates} from "./generic/GenericTemplates.ts";
+import {InteractionMetadata} from "@targoninc/lyda-shared/src/Models/InteractionMetadata";
+import {InteractionConfig} from "@targoninc/lyda-shared/src/Models/InteractionConfig";
+import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {InteractionType} from "@targoninc/lyda-shared/src/Enums/InteractionType";
+import {Icons} from "../Enums/Icons.ts";
+import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import {currentUser} from "../state.ts";
+import {Visibility} from "@targoninc/lyda-shared/src/Enums/Visibility";
+import {Api} from "../Api/Api.ts";
+import {InteractionOptions} from "../Models/InteractionOptions.ts";
 
 const interactionConfigs: Record<InteractionType, InteractionConfig> = {
     [InteractionType.like]: {
@@ -48,9 +48,10 @@ export class InteractionTemplates {
         const stateClass$ = compute((s: boolean): string => s ? "active" : "_", interacted$);
         const inertClass = config.toggleable ? "_" : "inert";
         const disabledClass$ = compute((u): string => (!u || (entity.visibility === Visibility.private && inertClass !== "inert")) ? "disabled" : "_", currentUser);
+        const hideOnSmall = interactionType === InteractionType.comment;
 
         return create("div")
-            .classes("flex", "align-children", disabledClass$)
+            .classes("flex", "align-children", hideOnSmall ? "hideOnSmallBreakpoint" : "", disabledClass$)
             .children(
                 GenericTemplates.roundIconButton({
                     icon: icon$,
@@ -58,7 +59,7 @@ export class InteractionTemplates {
                 }, () => toggleInteraction(entityType, interactionType, config, entity.id, interacted$, count$), interactionType,
                     ["positive", stateClass$, "stats-indicator", inertClass]),
                 when(metadata.count !== undefined && metadata.count !== null && showCount, create("span")
-                    .classes("interaction-count", stateClass$)
+                    .classes("interaction-count", stateClass$, "hideOnSmallBreakpoint")
                     .text(count$ as HtmlPropertyValue)
                     .build()),
             ).build();

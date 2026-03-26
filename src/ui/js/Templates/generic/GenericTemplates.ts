@@ -879,9 +879,9 @@ export class GenericTemplates {
         ).classes("align-children").build();
     }
 
-    static timestamp(timestamp: Date | string | number) {
+    static timestamp(timestamp: Date | string | number, classes: StringOrSignal[] = []) {
         return create("span")
-            .classes("date", TextSize.small, "color-dim")
+            .classes("date", TextSize.small, "color-dim", ...classes)
             .title(Util.formatDate(new Date(timestamp)))
             .text(Time.agoUpdating(timestamp))
             .build();

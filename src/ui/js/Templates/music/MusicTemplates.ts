@@ -77,7 +77,7 @@ export class MusicTemplates {
                                     ).build(),
                                 horizontal(
                                     UserTemplates.userLink(UserWidgetContext.card, item.user!, item.artistname),
-                                    GenericTemplates.timestamp(item.created_at),
+                                    GenericTemplates.timestamp(item.created_at, ["hideOnSmallBreakpoint"]),
                                 ).classes("align-children").build(),
                             ).build(),
                         create("div")
