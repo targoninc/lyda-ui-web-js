@@ -854,6 +854,8 @@ export class TrackEditTemplates {
                 s.credits !== track.credits ||
                 s.artistname !== track.artistname ||
                 s.visibility !== track.visibility ||
+                s.isrc !== track.isrc ||
+                s.upc !== track.upc ||
                 s.price !== track.price;
         }, state);
         const loading = signal(false);
@@ -866,10 +868,12 @@ export class TrackEditTemplates {
                 horizontal(
                     TrackEditTemplates.titleInput(state),
                     TrackEditTemplates.artistNameInput(state),
+                    TrackEditTemplates.isrcInput(state),
                 ),
                 horizontal(
                     TrackEditTemplates.creditsInput(state),
                     TrackEditTemplates.priceInput(state),
+                    TrackEditTemplates.upcInput(state),
                 ),
                 horizontal(
                     TrackEditTemplates.addToAlbumsButton(track),
