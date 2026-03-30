@@ -10,7 +10,7 @@ import { GenericTemplates } from "./js/Templates/generic/GenericTemplates.ts";
 import { contextQueue, currentUser, history, permissions, playingFrom } from "./js/state.ts";
 import { StreamingBroadcaster } from "./js/Streaming/StreamingBroadcaster.ts";
 import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom";
-import { ListeningHistory } from "@targoninc/lyda-shared/dist/Models/db/lyda/ListeningHistory";
+import { ListeningHistory } from "@targoninc/lyda-shared/src/Models/db/lyda/ListeningHistory";
 import { QueueManager } from "./js/Streaming/QueueManager.ts";
 import { initializeMediaSessionCallbacks } from "./js/Classes/Helpers/MediaSession.ts";
 import { Api } from "./js/Api/Api.ts";

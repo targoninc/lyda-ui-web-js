@@ -1,6 +1,4 @@
 import { Icons } from "../../Enums/Icons.ts";
-import { AlbumActions } from "../../Actions/AlbumActions.ts";
-import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
 import {
     AnyElement,
     AnyNode,
@@ -894,7 +892,7 @@ export class GenericTemplates {
         step: number,
         value: Signal<number>,
         onchange: (v: number) => void,
-        displayValueUnderneath?: Signal<StringOrSignal>,
+        displayValueUnderneath?: StringOrSignal,
     ) {
         const steps = (max - min) / step;
         const currentStep = compute(v => Math.round((v - min) / step), value);
@@ -911,7 +909,7 @@ export class GenericTemplates {
                             .children(
                                 ...Array.from({ length: steps + 1 }).map((_, i) =>
                                     create("div")
-                                        .classes("stepped-slider-step", compute(cs => cs >= i ? "active" : "_", currentStep))
+                                        .classes("stepped-slider-step", compute((cs): string => cs >= i ? "active" : "_", currentStep))
                                         .build(),
                                 ),
                             ).build(),

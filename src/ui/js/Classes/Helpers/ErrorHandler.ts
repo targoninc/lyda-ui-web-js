@@ -1,4 +1,4 @@
-import { ClientError } from "@targoninc/lyda-shared/dist/Models/db/lyda/ClientError";
+import { ClientError } from "@targoninc/lyda-shared/src/Models/db/lyda/ClientError";
 import { Api } from "../../Api/Api.ts";
 
 async function handleError(msg: string, url: string, line: number, col: number, error: Error) {
