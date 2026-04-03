@@ -41,7 +41,7 @@ export const en = {
     ACCOUNT_DELETED: "Account deleted",
     NO_KEEP_ACCOUNT: "No, keep account",
     YES_DELETE_ACCOUNT: "Yes, delete my account",
-    DELETE_ACCOUNT_SURE: "Are you sure you want to delete your account? This will delete ALL your content and cancel your subscription immediately. You'll get a grace period of 7 days to change your mind, after which your account will be permanently deleted. Your content will not be recoverable even during the grace period.",
+    DELETE_ACCOUNT_SURE: "Are you sure you want to delete your account? This will delete ALL your content and cancel your subscription immediately. You'll get a grace period of 7 days to change your mind, after which your account will be permanently deleted.",
     DELETE_ACCOUNT: "Delete account",
     CANCEL_ACCOUNT_DELETION: "Cancel account deletion",
     CANCEL_ACCOUNT_DELETION_SURE: "Are you sure you want to cancel account deletion?",

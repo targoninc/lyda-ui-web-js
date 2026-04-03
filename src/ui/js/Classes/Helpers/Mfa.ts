@@ -1,10 +1,10 @@
 import {Signal} from "@targoninc/jess";
-import {MfaOption} from "@targoninc/lyda-shared/dist/Enums/MfaOption";
+import {MfaOption} from "@targoninc/lyda-shared/src/Enums/MfaOption";
 import {notify} from "../Ui.ts";
 import {NotificationType} from "../../Enums/NotificationType.ts";
 import {webauthnLogin} from "./Webauthn.ts";
-import {AuthData} from "../../Templates/LandingPageTemplates.ts";
-import { Api } from "../../Api/Api.ts";
+import {AuthData} from "../../Templates/account/AuthTemplates.ts";
+import {Api} from "../../Api/Api.ts";
 
 function loginWithWebauthn(credentialDescriptors: any, loading: Signal<boolean>, step: Signal<string>, user: Signal<AuthData>) {
     Api.getWebauthnChallenge()
