@@ -1,12 +1,22 @@
 export class CustomText {
+    static escapeHtml(text: string): string {
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
+
     static renderToHtml(text: string): string {
         if (!text) {
             return "";
         }
 
-        let atMentionPattern = /(?<!<a[^>]*>)@(\w+)/gmi;
-        let httpPattern = /(http(s)?:\/\/[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?)/gmi;
-        let replacedText = text.replace(httpPattern, "<a href=\"$1\" target='_blank' class='inlineLink'>$1</a>");
+        const escaped = CustomText.escapeHtml(text);
+        const atMentionPattern = /(?<!<a[^>]*>)@(\w+)/gmi;
+        const httpPattern = /(https?:\/\/[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?)/gmi;
+        let replacedText = escaped.replace(httpPattern, "<a href=\"$1\" target='_blank' class='inlineLink'>$1</a>");
         replacedText = replacedText.replace(atMentionPattern, "<a href=\"/profile/$1\" target='_blank' class='inlineLink'>@$1</a>");
         return replacedText;
     }
