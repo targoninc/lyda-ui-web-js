@@ -13,12 +13,47 @@ export class CustomText {
             return "";
         }
 
-        const escaped = CustomText.escapeHtml(text);
-        const atMentionPattern = /(?<!<a[^>]*>)@(\w+)/gmi;
-        const httpPattern = /(https?:\/\/[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?)/gmi;
-        let replacedText = escaped.replace(httpPattern, "<a href=\"$1\" target='_blank' class='inlineLink'>$1</a>");
-        replacedText = replacedText.replace(atMentionPattern, "<a href=\"/profile/$1\" target='_blank' class='inlineLink'>@$1</a>");
-        return replacedText;
+        const httpPattern = /(https?:\/\/[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/[^\s<>"']*)?)/gmi;
+        const atMentionPattern = /@(\w+)/gmi;
+
+        // Collect URL matches from raw text
+        const urlMatches: { start: number; end: number; url: string }[] = [];
+        let match;
+        while ((match = httpPattern.exec(text)) !== null) {
+            urlMatches.push({ start: match.index, end: match.index + match[0].length, url: match[0] });
+        }
+
+        // Collect @mention matches from raw text, skipping those inside URLs
+        const mentionMatches: { start: number; end: number; username: string }[] = [];
+        while ((match = atMentionPattern.exec(text)) !== null) {
+            const inUrl = urlMatches.some(u => match!.index >= u.start && match!.index < u.end);
+            if (!inUrl) {
+                mentionMatches.push({ start: match.index, end: match.index + match[0].length, username: match[1] });
+            }
+        }
+
+        // Merge and sort by position
+        const allMatches = [
+            ...urlMatches.map(m => ({ ...m, type: "url" as const })),
+            ...mentionMatches.map(m => ({ ...m, type: "mention" as const })),
+        ].sort((a, b) => a.start - b.start);
+
+        let result = "";
+        let lastIndex = 0;
+        for (const m of allMatches) {
+            result += CustomText.escapeHtml(text.substring(lastIndex, m.start));
+            if (m.type === "url") {
+                const escaped = CustomText.escapeHtml(m.url);
+                result += `<a href="${escaped}" target='_blank' class='inlineLink'>${escaped}</a>`;
+            } else {
+                const escaped = CustomText.escapeHtml(m.username);
+                result += `<a href="/profile/${escaped}" target='_blank' class='inlineLink'>@${escaped}</a>`;
+            }
+            lastIndex = m.end;
+        }
+        result += CustomText.escapeHtml(text.substring(lastIndex));
+
+        return result;
     }
 }
 
