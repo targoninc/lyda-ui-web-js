@@ -17,6 +17,7 @@ import { ModerationCommentsTemplates } from "./ModerationCommentsTemplates.ts";
 import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import { Ui } from "../../Classes/Ui.ts";
 import { UserIp } from "@targoninc/lyda-shared/src/Models/db/lyda/UserIp.ts";
+import {UserEmail} from "@targoninc/lyda-shared/src/Models/db/lyda/UserEmail";
 
 export class ModerationUsersTemplates {
     static usersPage() {
@@ -111,7 +112,7 @@ export class ModerationUsersTemplates {
         if (u.has_avatar) {
             avatar$.value = Util.getUserAvatar(u.id);
         }
-        const tabs = ["Permissions", "Comments", "IPs"];
+        const tabs = ["Permissions", "Comments", "IPs", "Emails"];
         const i$ = signal(0);
         const open = signal(false);
 
@@ -180,6 +181,9 @@ export class ModerationUsersTemplates {
                     ),
                     when(
                         tabSelected(i$, 2), ModerationUsersTemplates.userIps(u, open),
+                    ),
+                    when(
+                        tabSelected(i$, 3), ModerationUsersTemplates.userEmails(u, open),
                     ),
                 ).classes("card"),
             ).build();
@@ -335,6 +339,48 @@ export class ModerationUsersTemplates {
                     ip => ModerationUsersTemplates.userIp(ip)),
         ).build();
     }
+
+    private static userEmails(user: User, open$: Signal<boolean>): AnyElement {
+        const emails$ = signal<UserEmail[]>([]);
+
+        const load = () => {
+            if (!open$.value) return;
+            Api.getUserEmails(user.id).then((e) => (emails$.value = e ?? []));
+        };
+        open$.subscribe(load);
+
+        return vertical(
+            signalMap(emails$, vertical(), (email) => ModerationUsersTemplates.adminUserEmail(email)),
+        ).build();
+    }
+
+    private static adminUserEmail(email: UserEmail): AnyElement {
+        return horizontal(
+            vertical(
+                horizontal(
+                    create('span').classes('bold').text(email.email).build(),
+                    when(email.primary, create('span').classes('tag', 'positive').text('Primary').build()),
+                ).classes('align-children', 'small-gap'),
+                horizontal(
+                    when(
+                        email.verified,
+                        create('span').classes('tag', 'positive').text('Verified').build(),
+                        false,
+                    ),
+                    when(
+                        email.verified,
+                        create('span').classes('tag', 'negative').text('Unverified').build(),
+                        true,
+                    ),
+                    when(
+                        !!email.verified_at,
+                        GenericTemplates.timestamp(email.verified_at ?? new Date()),
+                    ),
+                ).classes('align-children', 'small-gap'),
+            ).classes('no-gap'),
+        ).classes('card', 'secondary', 'space-between', 'align-children').build();
+    }
+
 
     private static userIp(ip: UserIp) {
         const location = (typeof ip.location_info === "string") ? JSON.parse(ip.location_info) as Record<string, string> : ip.location_info as Record<string, string>;

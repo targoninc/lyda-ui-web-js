@@ -481,6 +481,10 @@ export class Api {
         return await get<UserIp[]>(ApiRoutes.getIps, { id });
     }
 
+    static async getUserEmails(id: number) {
+        return await get<UserEmail[]>(ApiRoutes.getEmails, { id });
+    }
+
     //endregion
 
     //region Albums
