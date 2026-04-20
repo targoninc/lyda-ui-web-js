@@ -880,7 +880,7 @@ export class GenericTemplates {
     static timestamp(timestamp: Date | string | number, classes: StringOrSignal[] = []) {
         return create("span")
             .classes("date", TextSize.small, "color-dim", ...classes)
-            .title(Util.formatDate(new Date(timestamp)))
+            .title(Util.formatDate(Time.adjust(timestamp)))
             .text(Time.agoUpdating(timestamp))
             .build();
     }

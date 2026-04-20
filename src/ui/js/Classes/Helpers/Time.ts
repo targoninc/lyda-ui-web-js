@@ -3,13 +3,14 @@ import { t } from "../../../locales";
 
 export class Time {
     static localDate(time: number|string|Date) {
-        return new Date(time).toDateString();
+        return Time.adjust(time).toDateString();
     }
 
     static adjust(time: number|string|Date): Date {
-        time = new Date(time);
-        time.setMinutes(time.getMinutes() - time.getTimezoneOffset());
-        return time;
+        if (typeof time === "string" && !time.endsWith("Z") && !time.includes("+")) {
+            time = time.replace(" ", "T") + "Z";
+        }
+        return new Date(time);
     }
 
     static ago(time: number|string|Date, useShort = false): string {
@@ -119,6 +120,6 @@ export class Time {
     }
 
     static toTimeString(time: number|string|Date) {
-        return new Date(time).toTimeString().split(" ")[0];
+        return Time.adjust(time).toTimeString().split(" ")[0];
     }
 }

@@ -93,7 +93,8 @@ export class Util {
 
     static formatDate(date: string | Date) {
         if (date.constructor === String) {
-            date = new Date(date);
+            const str = date as string;
+            date = new Date(!str.endsWith("Z") && !str.includes("+") ? str.replace(" ", "T") + "Z" : str);
         }
         return (date as Date).toLocaleDateString(localeByLanguage[language.value], {
             dateStyle: "long",
