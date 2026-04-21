@@ -232,6 +232,12 @@ export class PlayManager {
         await StreamingUpdater.updatePlayState();
     }
 
+    private static afterStart(id: number) {
+        StreamingBroadcaster.send(StreamingEvent.trackStart, id);
+        playingHere.value = true;
+        TrackActions.savePlayAfterTimeIf(id, 5, () => id === currentTrackId.value && PlayManager.isPlaying(id));
+    }
+
     static async togglePlayAsync(id: number) {
         const streamClient = PlayManager.getStreamClient(id);
         if (streamClient === undefined) {
@@ -243,10 +249,7 @@ export class PlayManager {
         } else {
             await PlayManager.stopAllAsync();
             await streamClient.startAsync();
-            StreamingBroadcaster.send(StreamingEvent.trackStart, id);
-            playingHere.value = true;
-            TrackActions.savePlayAfterTimeIf(id, 5, () => id === currentTrackId.value && PlayManager.isPlaying(id));
-
+            PlayManager.afterStart(id);
             await StreamingUpdater.updatePlayState();
         }
     }
@@ -287,6 +290,7 @@ export class PlayManager {
         const streamClient = PlayManager.addStreamClientIfNotExists(id, d.track.length);
 
         await streamClient.startAsync(fromBeginning);
+        PlayManager.afterStart(id);
         await StreamingUpdater.updatePlayState();
     }
 
