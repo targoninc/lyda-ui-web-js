@@ -44,12 +44,10 @@ import { DefaultImages } from "../../Enums/DefaultImages.ts";
 import { CoverContext } from "../../Enums/CoverContext.ts";
 import { TextSize } from "../../Enums/TextSize.ts";
 
-export const PLAYCHECK_INTERVAL = 200;
 
 export class PlayerTemplates {
     static bigAudioPlayer(track: Track) {
         PlayManager.addStreamClientIfNotExists(track.id, track.length);
-        setInterval(async () => await PlayManager.playCheck(track), PLAYCHECK_INTERVAL);
         const isCurrentTrack = compute(id => id === track.id, currentTrackId);
         const positionPercent = compute(
             (p, isCurrent) => (isCurrent ? `${p.relative * 100}%` : "0%"),
@@ -116,7 +114,6 @@ export class PlayerTemplates {
 
     static mobileAudioPlayer(track: Track) {
         PlayManager.addStreamClientIfNotExists(track.id, track.length);
-        setInterval(async () => await PlayManager.playCheck(track), PLAYCHECK_INTERVAL);
         const isCurrentTrack = compute(id => id === track.id, currentTrackId);
         const positionPercent = compute(
             (p, isCurrent) => (isCurrent ? `${p.relative * 100}%` : "0%"),

@@ -17,4 +17,5 @@ export interface IStreamClient {
     getBufferedLength(): any;
 
     setLoop(looping: boolean): void;
+    onEnded?: () => void;
 }

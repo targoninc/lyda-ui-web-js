@@ -30,26 +30,11 @@ import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import { get } from "../Api/ApiClient.ts";
 import { IStreamClient } from "./IStreamClient.ts";
-import { PLAYCHECK_INTERVAL } from "../Templates/music/PlayerTemplates.ts";
-import { FeedItem } from "../Models/FeedItem.ts";
 import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 
 export class PlayManager {
     static async playCheck(track: Track) {
         if (PlayManager.isPlaying(track.id)) {
-            const currentTime = PlayManager.getCurrentTime(track.id);
-
-            if (currentTime.absolute >= PlayManager.getDuration(track.id) - (PLAYCHECK_INTERVAL / 1000)) {
-                const loopingSingle = PlayManager.isLoopingSingle();
-                if (loopingSingle) {
-                    await PlayManager.togglePlayAsync(track.id);
-                    await PlayManager.scrubTo(track.id, 0);
-                } else {
-                    await PlayManager.playNextFromQueues(track.id);
-                }
-                TrackActions.savePlayAfterTimeIf(track.id, 5, () => track.id === currentTrackId.value && PlayManager.isPlaying(track.id));
-            }
-
             StreamingUpdater.updateScrubber(track.id);
         }
     }
@@ -288,6 +273,20 @@ export class PlayManager {
             ]
         });
         const streamClient = PlayManager.addStreamClientIfNotExists(id, d.track.length);
+        streamClient.onEnded = async () => {
+            if (!PlayManager.isPlaying(id)) {
+                return;
+            }
+
+            const loopingSingle = PlayManager.isLoopingSingle();
+            if (loopingSingle) {
+                await PlayManager.togglePlayAsync(id);
+                await PlayManager.scrubTo(id, 0);
+            } else {
+                await PlayManager.playNextFromQueues(id);
+            }
+            TrackActions.savePlayAfterTimeIf(id, 5, () => id === currentTrackId.value && PlayManager.isPlaying(id));
+        };
 
         await streamClient.startAsync(fromBeginning);
         PlayManager.afterStart(id);

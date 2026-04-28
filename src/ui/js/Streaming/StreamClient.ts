@@ -6,6 +6,7 @@ import { initializeClient } from "./InitializeClient.ts";
 export class StreamClient implements IStreamClient {
     public duration = 0;
     public playing = false;
+    public onEnded?: () => void;
 
     private readonly id: number;
     private readonly code: string;
@@ -240,6 +241,10 @@ export class StreamClient implements IStreamClient {
             this.playing = false;
             // Move offset to end
             this.offset = this.duration;
+
+            if (this.onEnded) {
+                this.onEnded();
+            }
         };
 
         this.source = src;
