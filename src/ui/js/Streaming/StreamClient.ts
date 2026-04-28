@@ -1,6 +1,6 @@
 import { IStreamClient } from "./IStreamClient.ts";
 import { ApiRoutes } from "../Api/ApiRoutes.ts";
-import { currentQuality, currentTrackId, loadingAudio, volume } from "../state.ts";
+import { currentQuality, currentTrackId, currentTrackPosition, loadingAudio, playingHere, volume } from "../state.ts";
 import { initializeClient } from "./InitializeClient.ts";
 
 export class StreamClient implements IStreamClient {
@@ -40,6 +40,7 @@ export class StreamClient implements IStreamClient {
 
         if (fromBeginning) {
             this.offset = 0;
+            currentTrackPosition.value = { relative: 0, absolute: 0 };
         }
 
         // If not loaded yet, start loading/decoding
@@ -216,7 +217,9 @@ export class StreamClient implements IStreamClient {
     }
 
     private startFromOffset(offsetSeconds: number): void {
+        console.log(`[StreamClient] startFromOffset called for track ${this.id} at ${offsetSeconds}s. duration: ${this.duration}`);
         if (!this.ctx || !this.gain || !this.buffer) {
+            console.log(`[StreamClient] startFromOffset: missing ctx, gain, or buffer for track ${this.id}`);
             return;
         }
 
@@ -231,10 +234,13 @@ export class StreamClient implements IStreamClient {
         this.offset = startAt;
         this.startCtxTime = this.ctx.currentTime;
         this.playing = true;
+        this.source = src;
 
         src.onended = () => {
+            console.log(`[StreamClient] src.onended triggered for track ${this.id}`);
             // When natural end occurs, update state
-            if (!this.source || src !== this.source) {
+            if (this.source !== src) {
+                console.log(`[StreamClient] src.onended: source mismatch for track ${this.id}, ignoring`);
                 return;
             }
 
@@ -243,11 +249,13 @@ export class StreamClient implements IStreamClient {
             this.offset = this.duration;
 
             if (this.onEnded) {
+                console.log(`[StreamClient] calling this.onEnded for track ${this.id}`);
                 this.onEnded();
+            } else {
+                console.log(`[StreamClient] no onEnded callback registered for track ${this.id}. Current this:`, this);
             }
         };
 
-        this.source = src;
         this.setVolume(volume.value);
 
         // Start immediately at the desired offset

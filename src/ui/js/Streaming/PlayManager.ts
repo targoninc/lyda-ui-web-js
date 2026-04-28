@@ -40,6 +40,7 @@ export class PlayManager {
     }
 
     static async playNextFromQueues(finishedId: number | null = null) {
+        console.log(`[PlayManager] playNextFromQueues called with finishedId: ${finishedId}`);
         const manualQueue = QueueManager.getManualQueue();
         const nextTrackIdFromManual = manualQueue[0];
         const currentId = finishedId ?? currentTrackId.value;
@@ -127,10 +128,32 @@ export class PlayManager {
     }
 
     static addStreamClient(id: number, streamClient: IStreamClient) {
+        console.log(`[PlayManager] Adding streamClient for id ${id}:`, streamClient);
         streamClients.value[id] = streamClient;
     }
 
+    private static registerOnEnded(id: number, streamClient: IStreamClient) {
+        console.log(`[PlayManager] Registering onEnded for track ${id}. streamClient instance:`, streamClient);
+        streamClient.onEnded = async () => {
+            console.log(`[PlayManager] streamClient.onEnded callback triggered for track ${id}. currentTrackId: ${currentTrackId.value}`);
+            if (id !== currentTrackId.value) {
+                console.log(`[PlayManager] streamClient.onEnded: id mismatch (${id} !== ${currentTrackId.value}), returning`);
+                return;
+            }
+
+            const loopingSingle = PlayManager.isLoopingSingle();
+            console.log(`[PlayManager] loopingSingle: ${loopingSingle}`);
+            if (loopingSingle) {
+                await PlayManager.scrubTo(id, 0);
+                await PlayManager.startAsync(id);
+            } else {
+                await PlayManager.playNextFromQueues(id);
+            }
+        };
+    }
+
     static removeStreamClient(id: number) {
+        console.log(`[PlayManager] Removing streamClient for id ${id}`);
         delete streamClients.value[id];
     }
 
@@ -180,6 +203,7 @@ export class PlayManager {
         if (streamClient === undefined) {
             streamClient = new StreamClient(id, currentSecretCode.value);
             PlayManager.addStreamClient(id, streamClient);
+            PlayManager.registerOnEnded(id, streamClient);
         } else {
             if (streamClient.duration === 0) {
                 streamClient.duration = duration;
@@ -272,19 +296,7 @@ export class PlayManager {
             ]
         });
         const streamClient = PlayManager.addStreamClientIfNotExists(id, d.track.length);
-        streamClient.onEnded = async () => {
-            if (!PlayManager.isPlaying(id)) {
-                return;
-            }
-
-            const loopingSingle = PlayManager.isLoopingSingle();
-            if (loopingSingle) {
-                await PlayManager.togglePlayAsync(id);
-                await PlayManager.scrubTo(id, 0);
-            } else {
-                await PlayManager.playNextFromQueues(id);
-            }
-        };
+        PlayManager.registerOnEnded(id, streamClient);
 
         await streamClient.startAsync(fromBeginning);
         PlayManager.afterStart(id);
@@ -306,6 +318,7 @@ export class PlayManager {
     }
 
     static async initializeTrackAsync(id: number) {
+        console.log(`[PlayManager] initializeTrackAsync called for track ${id}`);
         let streamClient = PlayManager.getStreamClient(id);
         const track = await PlayManager.getTrackData(id);
         if (!track) {

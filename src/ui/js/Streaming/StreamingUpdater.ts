@@ -11,8 +11,15 @@ export class StreamingUpdater {
             return;
         }
         const streamClient = PlayManager.getStreamClient(currentTrackId.value);
+        if (!streamClient) {
+            return;
+        }
         StreamingUpdater.updateBuffers(streamClient.getBufferedLength(), streamClient.duration);
         StreamingUpdater.updateScrubber(currentTrackId.value);
+
+        if (streamClient.playing) {
+            requestAnimationFrame(() => StreamingUpdater.updatePermanentPlayer());
+        }
     }
 
     static updateScrubber(id: number) {
