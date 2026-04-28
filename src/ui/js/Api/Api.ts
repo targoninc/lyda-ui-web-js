@@ -585,10 +585,6 @@ export class Api {
         return (await get<any[]>(ApiRoutes.autoQueueFeed)) ?? [];
     }
 
-    static async savePlay(id: number, quality: string): Promise<any> {
-        return await post(ApiRoutes.saveTrackPlay, { id, quality });
-    }
-
     static async unfollowUser(userId: number): Promise<any> {
         await post(ApiRoutes.unfollowUser, {
             id: userId,

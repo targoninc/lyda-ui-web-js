@@ -19,15 +19,6 @@ import { Api } from "../Api/Api.ts";
 import { t } from "../../locales";
 
 export class TrackActions {
-    static async savePlay(id: number) {
-        if (!playingHere.value) {
-            console.log("Not saving play because not playing in this tab.");
-            return;
-        }
-        return await Api.savePlay(id, currentQuality.value);
-    }
-
-
     static async deleteTrack(id: number) {
         if (!confirm) {
             return;
