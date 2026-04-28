@@ -1,7 +1,6 @@
 import { LydaCache } from "../Cache/LydaCache.ts";
 import { StreamingUpdater } from "./StreamingUpdater.ts";
 import { QueueManager } from "./QueueManager.ts";
-import { TrackActions } from "../Actions/TrackActions.ts";
 import { StreamClient } from "./StreamClient.ts";
 import {shuffleArray, target, userHasSettingValue, Util} from "../Classes/Util.ts";
 import { ApiRoutes } from "../Api/ApiRoutes.ts";
@@ -15,7 +14,7 @@ import {
     loopMode,
     muted,
     playingFrom,
-    playingHere, shuffling,
+    playingHere,
     streamClients,
     trackInfo,
     volume,
@@ -31,6 +30,7 @@ import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import { get } from "../Api/ApiClient.ts";
 import { IStreamClient } from "./IStreamClient.ts";
 import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
+import {FeedItem} from "../Models/FeedItem.ts";
 
 export class PlayManager {
     static async playCheck(track: Track) {
@@ -220,7 +220,6 @@ export class PlayManager {
     private static afterStart(id: number) {
         StreamingBroadcaster.send(StreamingEvent.trackStart, id);
         playingHere.value = true;
-        TrackActions.savePlayAfterTimeIf(id, 5, () => id === currentTrackId.value && PlayManager.isPlaying(id));
     }
 
     static async togglePlayAsync(id: number) {
@@ -285,7 +284,6 @@ export class PlayManager {
             } else {
                 await PlayManager.playNextFromQueues(id);
             }
-            TrackActions.savePlayAfterTimeIf(id, 5, () => id === currentTrackId.value && PlayManager.isPlaying(id));
         };
 
         await streamClient.startAsync(fromBeginning);

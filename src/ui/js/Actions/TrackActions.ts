@@ -27,13 +27,6 @@ export class TrackActions {
         return await Api.savePlay(id, currentQuality.value);
     }
 
-    static savePlayAfterTimeIf(id: number, seconds: number, condition: () => boolean) {
-        setTimeout(async () => {
-            if (condition()) {
-                await TrackActions.savePlay(id);
-            }
-        }, seconds * 1000);
-    }
 
     static async deleteTrack(id: number) {
         if (!confirm) {
