@@ -222,7 +222,7 @@ export class SettingsTemplates {
                     })
                 },
                 {
-                    match: (headingMatches || SettingsTemplates.matches(subscribeMoreText, query)) && !!user.subscription,
+                    match: (headingMatches || SettingsTemplates.matches(subscribeMoreText, query)) && !user.subscription,
                     template: () => button({
                         icon: {icon: "payments"},
                         text: subscribeMoreText,
