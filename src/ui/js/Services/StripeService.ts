@@ -1,6 +1,5 @@
 import { loadStripe, Stripe } from "@stripe/stripe-js";
 import { Api } from "../Api/Api.ts";
-import { CreateOrderRequest } from "@targoninc/lyda-shared/src/Models/CreateOrderRequest";
 import { PaymentProvider } from "@targoninc/lyda-shared/src/Enums/PaymentProvider";
 
 export class StripeService {

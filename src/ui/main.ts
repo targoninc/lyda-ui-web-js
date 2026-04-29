@@ -18,6 +18,7 @@ import { initializeGlobalErrorHandler } from "./js/Classes/Helpers/ErrorHandler.
 import { PlayerTemplates } from "./js/Templates/music/PlayerTemplates.ts";
 import { NotificationType } from "./js/Enums/NotificationType.ts";
 import { t } from "./locales";
+import { InteractionStateManager } from "./js/Classes/InteractionStateManager.ts";
 
 initializeGlobalErrorHandler();
 
@@ -42,6 +43,9 @@ footer.appendChild(player);
 export const router = new Router(routes, async (route: Route, params: any) => {
     const page = route.path.replace("/", "") as RoutePath;
     console.log(`Navigating to ${page} with params`, params);
+
+    InteractionStateManager.clearContextType("list");
+    InteractionStateManager.clearContextType("page");
 
     await Ui.windowResize();
 

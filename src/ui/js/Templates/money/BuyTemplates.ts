@@ -46,7 +46,7 @@ export class BuyTemplates {
         const title = item.type === "track" ? item.entity.title : item.entity.title;
         const id = item.entity.id;
 
-        const amount = signal<number | null>(null);
+        const amount = signal<number>(0);
         const amountValid = compute(a => a !== null && a >= price && a <= price * 100, amount);
         const providers = signal<PaymentProvider[]>([]);
         Api.getPaymentProviders().then(p => providers.value = p ?? []);

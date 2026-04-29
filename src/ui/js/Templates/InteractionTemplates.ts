@@ -1,4 +1,4 @@
-import {AnyNode, compute, create, HtmlPropertyValue, nullElement, Signal, signal, when} from "@targoninc/jess";
+import {AnyNode, compute, create, HtmlPropertyValue, nullElement, Signal, when} from "@targoninc/jess";
 import {GenericTemplates} from "./generic/GenericTemplates.ts";
 import {InteractionMetadata} from "@targoninc/lyda-shared/src/Models/InteractionMetadata";
 import {InteractionConfig} from "@targoninc/lyda-shared/src/Models/InteractionConfig";
@@ -12,6 +12,7 @@ import {currentUser} from "../state.ts";
 import {Visibility} from "@targoninc/lyda-shared/src/Enums/Visibility";
 import {Api} from "../Api/Api.ts";
 import {InteractionOptions} from "../Models/InteractionOptions.ts";
+import {InteractionStateManager} from "../Classes/InteractionStateManager.ts";
 
 const interactionConfigs: Record<InteractionType, InteractionConfig> = {
     [InteractionType.like]: {
@@ -40,9 +41,10 @@ const interactionConfigs: Record<InteractionType, InteractionConfig> = {
 export class InteractionTemplates {
     private static interactionButton<T extends { id: number, visibility: Visibility }>(entityType: EntityType,
         interactionType: InteractionType, metadata: InteractionMetadata<T>, config: InteractionConfig, entity: T, showCount = true) {
-        const count$ = signal(metadata.count ?? 0);
-        const interacted$ = signal(metadata.interacted ?? false);
-        //const list$ = signal(metadata.list); TODO: Load the list dynamically and display it in a popup
+        const { interacted$, count$ } = InteractionStateManager.getOrCreate(
+            entityType, entity.id, interactionType,
+            metadata.interacted ?? false, metadata.count ?? 0,
+        );
 
         const icon$ = compute(i => i ? config.icons.interacted : config.icons.default, interacted$);
         const stateClass$ = compute((s: boolean): string => s ? "active" : "_", interacted$);

@@ -1,6 +1,7 @@
 import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
 import { AnyNode, compute, create, InputType, Signal, signal, signalMap, TypeOrSignal, when } from "@targoninc/jess";
 import { currentTrackId, currentUser, loadingAudio, manualQueue, playingFrom, playingHere } from "../../state.ts";
+import { InteractionStateManager } from "../../Classes/InteractionStateManager.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { getPlayIcon, Util } from "../../Classes/Util.ts";
 import { TrackTemplates } from "./TrackTemplates.ts";
@@ -42,6 +43,7 @@ import { TextSize } from "../../Enums/TextSize.ts";
 
 export class MusicTemplates {
     static feedEntry(item: Track, newPlayingFrom: PlayingFrom) {
+        InteractionStateManager.addContext(EntityType.track, item.id, "list");
         const icons = [];
         const isPrivate = item.visibility === "private";
         if (isPrivate) {
@@ -405,6 +407,7 @@ export class MusicTemplates {
         if (!list.user) {
             throw new Error(`Album has no user: ${list.id}`);
         }
+        InteractionStateManager.addContext(type, list.id, "list");
 
         const icons = [];
         if (list.visibility === Visibility.private) {

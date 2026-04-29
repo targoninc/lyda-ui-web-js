@@ -15,6 +15,7 @@ import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType";
 import { ListTrack } from "@targoninc/lyda-shared/src/Models/ListTrack";
 import { InteractionTemplates } from "../InteractionTemplates.ts";
 import { currentUser, loadingAudio, playingFrom, playingHere } from "../../state.ts";
+import { InteractionStateManager } from "../../Classes/InteractionStateManager.ts";
 import { MusicTemplates } from "./MusicTemplates.ts";
 import { Api } from "../../Api/Api.ts";
 import { t } from "../../../locales";
@@ -161,6 +162,7 @@ export class PlaylistTemplates {
 
     static async playlistPage(route: Route, params: Record<string, string>) {
         const playlistId = parseInt(params["id"]);
+        InteractionStateManager.addContext(EntityType.playlist, playlistId, "page");
 
         const loading = signal(true);
         const playlist = signal<{

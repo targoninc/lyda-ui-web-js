@@ -8,6 +8,7 @@ import { createModal, Ui } from "../../Classes/Ui.ts";
 import { AnyNode, compute, create, InputType, signal, Signal, when } from "@targoninc/jess";
 import { navigate, Route } from "../../Routing/Router.ts";
 import { currentTrackId, currentUser, loadingAudio, playingFrom, playingHere } from "../../state.ts";
+import { InteractionStateManager } from "../../Classes/InteractionStateManager.ts";
 import { PageTemplates } from "../PageTemplates.ts";
 import { button, icon, input, textarea, toggle } from "@targoninc/jess-components";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
@@ -287,6 +288,8 @@ export class AlbumTemplates {
     }
 
     static albumPage(route: Route, params: Record<string, string>) {
+        const albumId = parseInt(params.id);
+        InteractionStateManager.addContext(EntityType.album, albumId, "page");
         const data = signal<{ album: Album | null, canEdit: boolean, canBuy: boolean, canDownload: boolean }>({
             album: null,
             canEdit: false,

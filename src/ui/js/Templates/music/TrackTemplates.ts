@@ -31,6 +31,7 @@ import {
     manualQueue,
     playingHere,
 } from "../../state.ts";
+import { InteractionStateManager } from "../../Classes/InteractionStateManager.ts";
 import { ApiRoutes } from "../../Api/ApiRoutes.ts";
 import { RoutePath } from "../../Routing/routes.ts";
 import { MusicTemplates } from "./MusicTemplates.ts";
@@ -208,6 +209,7 @@ export class TrackTemplates {
         if (!track.likes) {
             throw new Error("Track on list track is missing likes");
         }
+        InteractionStateManager.addContext(EntityType.track, track.id, "list");
 
         if (track.visibility === "private") {
             icons.push(GenericTemplates.lock());
@@ -337,6 +339,7 @@ export class TrackTemplates {
             return null;
         }
         const track = trackData.track as Track;
+        InteractionStateManager.addContext(EntityType.track, track.id, "page");
         const collaborators = track.collaborators ?? [];
         const toAppend = [];
         const linkedUserState = signal(collaborators);

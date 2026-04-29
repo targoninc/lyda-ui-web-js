@@ -56,7 +56,7 @@ export class FormTemplates {
         });
     }
 
-    static moneyField(title: StringOrSignal, name: StringOrSignal, placeholder: StringOrSignal, value: TypeOrSignal<number | null> = 0, required = false, onchange: (value: number) => void = (val: number) => {
+    static moneyField(title: StringOrSignal, name: StringOrSignal, placeholder: StringOrSignal, value: TypeOrSignal<number> = 0, required = false, onchange: (value: number) => void = (val: number) => {
     }, min: number = -Infinity, max: number = Infinity, step: number = 0.01, classes: StringOrSignal[] = []) {
         return input<number>({
             type: InputType.number,

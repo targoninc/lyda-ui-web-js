@@ -18,6 +18,8 @@ import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import { UserCacheKey } from "@targoninc/lyda-shared/src/Enums/UserCacheKey";
 import { StreamingQuality } from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
 import { ApiRoutes } from "./Api/ApiRoutes.ts";
+import { InteractionStateManager } from "./Classes/InteractionStateManager.ts";
+import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType";
 
 const footer = document.querySelector("footer");
 
@@ -26,10 +28,21 @@ export const navInitialized = signal(false);
 export const streamClients = signal<Record<number, IStreamClient>>({});
 
 export const currentTrackId = signal(LydaCache.get<number>(UserCacheKey.lastTrackId).content ?? 0);
+let previousTrackId = currentTrackId.value;
+if (previousTrackId) {
+    InteractionStateManager.addContext(EntityType.track, previousTrackId, "player");
+}
 currentTrackId.subscribe((id, changed) => {
     if (!changed) {
         return;
     }
+    if (previousTrackId) {
+        InteractionStateManager.removeContext(EntityType.track, previousTrackId, "player");
+    }
+    if (id) {
+        InteractionStateManager.addContext(EntityType.track, id, "player");
+    }
+    previousTrackId = id;
     LydaCache.set(UserCacheKey.lastTrackId, new CacheItem(id));
     Api.setCacheKey(UserCacheKey.lastTrackId, id.toString()).then();
     if (!id) {
