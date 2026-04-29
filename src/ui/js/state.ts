@@ -205,7 +205,9 @@ currentUser.subscribe(u => {
                 for (const entry of cache) {
                     switch (entry.key as UserCacheKey) {
                         case UserCacheKey.volume:
-                            //volume.value = parseFloat(entry.value ?? volume.value.toString());
+                            if (entry.value) {
+                                volume.value = parseFloat(entry.value);
+                            }
                             break;
                         case UserCacheKey.loopMode:
                             loopMode.value = entry.value ?? loopMode.value;
