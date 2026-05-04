@@ -353,7 +353,7 @@ export class Api {
 
     static async userExists(email: string) {
         return post<User>(ApiRoutes.userExists, {
-            email: encodeURIComponent(email),
+            email,
         });
     }
 
