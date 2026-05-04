@@ -51,6 +51,7 @@ import { TrackSale } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackSale.t
 import {UserIp} from "@targoninc/lyda-shared/src/Models/db/lyda/UserIp.ts";
 import {UserTaxinfo} from "@targoninc/lyda-shared/src/Models/db/lyda/UserTaxinfo.ts";
 import {PaymentProvider} from "@targoninc/lyda-shared/src/Enums/PaymentProvider";
+import {UserEmail} from "@targoninc/lyda-shared/src/Models/db/lyda/UserEmail";
 
 export class Api {
     //region Interactions
@@ -351,7 +352,7 @@ export class Api {
     }
 
     static async userExists(email: string) {
-        return get<User>(ApiRoutes.userExists, {
+        return post<User>(ApiRoutes.userExists, {
             email: encodeURIComponent(email),
         });
     }
@@ -392,11 +393,11 @@ export class Api {
     }
 
     static async getUserByName(name: string) {
-        return get<User>(ApiRoutes.getUser, { name });
+        return post<User>(ApiRoutes.getUser, { name });
     }
 
     static async getUserById(id: number | null = null) {
-        return get<User>(ApiRoutes.getUser, { id });
+        return post<User>(ApiRoutes.getUser, { id });
     }
 
     static async getRandomUser() {
