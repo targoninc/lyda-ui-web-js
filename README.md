@@ -1,5 +1,5 @@
 # Preconditions
- 
+
 It's recommended to use [bun](https://bun.sh/) to run this project.
 
 Install bun:
