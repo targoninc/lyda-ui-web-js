@@ -193,7 +193,7 @@ export class FeedTemplates {
 
         return FeedTemplates.create<Track>({
             id: `feed-${type}`,
-            compact: true,
+            compact: [FeedType.explore, FeedType.following, FeedType.history].includes(type),
             showSearch: ![FeedType.following, FeedType.explore].includes(type),
             columns: [
                 {
