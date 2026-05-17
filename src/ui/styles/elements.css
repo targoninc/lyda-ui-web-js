@@ -1459,12 +1459,8 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .feed-header th {
-    font-weight: 600;
-    color: var(--color-5);
     font-size: var(--font-size-small);
-    padding: 6px 8px;
-    border-bottom: 1px solid var(--color-7);
-    text-align: left;
+    background: transparent;
 }
 
 .feed-header .feed-idx-h {
@@ -1472,7 +1468,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .feed-row td {
-    padding: 4px 8px;
+    padding: 0;
     border-bottom: 1px solid var(--color-6);
     vertical-align: middle;
 }

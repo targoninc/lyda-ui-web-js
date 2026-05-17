@@ -1,5 +1,5 @@
 import {NotificationParser} from "../Classes/Helpers/NotificationParser.ts";
-import {create, when, nullElement, signalMap, StringOrSignal, compute, Signal, signal} from "@targoninc/jess";
+import {create, when, nullElement, signalMap, StringOrSignal, compute} from "@targoninc/jess";
 import {navigate} from "../Routing/Router.ts";
 import {copy, Util} from "../Classes/Util.ts";
 import {UserActions} from "../Actions/UserActions.ts";
@@ -11,6 +11,7 @@ import {NotificationPart} from "@targoninc/lyda-shared/src/Models/NotifcationPar
 import {Api} from "../Api/Api.ts";
 import {t} from "../../locales";
 import { GenericTemplates } from "./generic/GenericTemplates.ts";
+import { PopoverTemplates } from "./generic/PopoverTemplates.ts";
 
 export class NotificationTemplates {
     static notificationInList(notification: Notification) {
@@ -92,41 +93,49 @@ export class NotificationTemplates {
         const unreadNotifications = compute(notifs => notifs.filter(notification => !notification.is_read), notifications);
         const unreadClass = compute((u): string => u.length > 0 ? "unread" : "_", unreadNotifications);
         const newestTimestamp = compute(unreadNotifs => unreadNotifs.length > 0 ? new Date(unreadNotifs[0].created_at) : null, unreadNotifications);
-        const notifsVisible = signal(false);
-        const activeClass = compute((v): string => v ? "active" : "inactive", notifsVisible);
 
         UserActions.getNotificationsPeriodically();
+
+        const popover = PopoverTemplates.manualPopover("notification-popover",
+            create("div")
+                .classes("notification-list", "flex-v")
+                .children(
+                    signalMap(notifications, create("div").classes("flex-v", "nogap"), notif => NotificationTemplates.notificationInList(notif)),
+                    when(hasNotifs, create("div")
+                        .classes("text-center", "padded")
+                        .text(t("NO_NOTIFICATIONS"))
+                        .build(), true),
+                ).build(),
+        );
+
+        popover.addEventListener("toggle", () => {
+            const open = popover.matches(":popover-open");
+            btn.classList.toggle("active", open);
+            if (open) {
+                Api.markNotificationsAsRead(newestTimestamp).then(() => {
+                    notifications.value = notifications.value.map(n => ({ ...n, is_read: true }));
+                });
+            }
+        });
+
+        const btn = button({
+            icon: {icon: "notifications"},
+            onclick: () => {
+                const r = btn.getBoundingClientRect();
+                popover.style.position = "fixed";
+                popover.style.top = `${r.bottom + 2}px`;
+                popover.style.right = `${window.innerWidth - r.right}px`;
+                popover.style.left = "auto";
+                popover.style.bottom = "auto";
+                popover.togglePopover();
+            },
+            text: "",
+            classes: ["fullHeight", "round-on-tiny-breakpoint", unreadClass],
+        }) as HTMLButtonElement;
+
         return create("div")
             .classes("notification-container", "relative")
-            .children(
-                button({
-                    icon: {icon: "notifications"},
-                    onclick: async () => {
-                        notifsVisible.value = !notifsVisible.value;
-                        if (notifsVisible.value) {
-                            await Api.markNotificationsAsRead(newestTimestamp);
-                            notifications.value = notifications.value.map(n => ({
-                                ...n,
-                                is_read: true
-                            }));
-                        }
-                    },
-                    text: "",
-                    classes: ["fullHeight", "round-on-tiny-breakpoint", unreadClass, activeClass]
-                }),
-                NotificationTemplates.notificationContainer(notifsVisible, hasNotifs)
-            ).build();
-    }
-
-    private static notificationContainer(notifsVisible: Signal<boolean>, hasNotifs: Signal<boolean>) {
-        return when(notifsVisible, create("div")
-            .classes("popout-below", "rounded", "absolute-align-right", "notification-list")
-            .children(
-                signalMap(notifications, create("div").classes("flex-v", "nogap"), notif => NotificationTemplates.notificationInList(notif)),
-                when(hasNotifs, create("div")
-                    .classes("text-center", "padded")
-                    .text(t("NO_NOTIFICATIONS"))
-                    .build(), true)
-            ).build());
+            .children(btn, popover)
+            .build();
     }
 }
