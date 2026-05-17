@@ -62,6 +62,8 @@ export class FeedTemplates {
 
         const empty = compute((ii, ll) => ii.length === 0 && !ll, items$, loading$);
         const feedId = config.id || uid();
+        const hasDate = !!config.dateRender;
+        const hasActionDate = !!config.actionDateRender;
 
         const el = create("div")
             .classes("feed-wrapper", "flex-v", "fullWidth")
@@ -92,6 +94,8 @@ export class FeedTemplates {
                                     ...config.columns.map(c =>
                                         create("th").classes("feed-col-h").text(c.header).build(),
                                     ),
+                                    ...(hasDate ? [create("th").classes("feed-date-h").text(t("RELEASE_DATE")).build()] : []),
+                                    ...(hasActionDate ? [create("th").classes("feed-date-h").text(config.actionDateHeader ?? "").build()] : []),
                                     create("th").classes("feed-interact-h").build(),
                                     create("th").classes("feed-menu-h").build(),
                                 ).build(),
@@ -99,7 +103,7 @@ export class FeedTemplates {
                         signalMap(
                             items$,
                             create("tbody").classes("feed-rows"),
-                            (item, i) => FeedTemplates.#row(item, i, config, feedId),
+                            (item, i) => FeedTemplates.#row(item, i, config, feedId, hasDate, hasActionDate),
                         ),
                     ).build(),
                 compute(
@@ -223,11 +227,15 @@ export class FeedTemplates {
                 }
             },
             isPlaying: (id) => compute((c, p) => c === id && p, currentTrackId, playingHere),
+            dateRender: (track) => {
+                const date = (track as any).release_date || track.created_at;
+                return GenericTemplates.timestamp(date, ["hideOnSmallBreakpoint"]);
+            },
         });
     }
 
     static #row<T extends { id: number }>(
-        item: T, index: number, config: FeedConfig<T>, feedId: string,
+        item: T, index: number, config: FeedConfig<T>, feedId: string, hasDate: boolean, hasActionDate: boolean,
     ): any {
         const playing = config.isPlaying(item.id);
         const loading = config.isLoading ? config.isLoading(item.id) : signal(false);
@@ -253,6 +261,12 @@ export class FeedTemplates {
                         .children(c.render(item, index))
                         .build(),
                 ),
+                ...(hasDate && config.dateRender ? [create("td").classes("feed-cell", "feed-cell-date")
+                    .children(config.dateRender(item))
+                    .build()] : []),
+                ...(hasActionDate && config.actionDateRender ? [create("td").classes("feed-cell", "feed-cell-actiondate")
+                    .children(config.actionDateRender(item))
+                    .build()] : []),
                 create("td").classes("feed-interact-cell")
                     .children(interactEl)
                     .build(),

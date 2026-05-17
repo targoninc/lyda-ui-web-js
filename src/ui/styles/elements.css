@@ -1468,7 +1468,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .feed-row td {
-    padding: 0;
+    padding: 0 var(--gap);
     border-bottom: 1px solid var(--color-6);
     vertical-align: middle;
 }
@@ -1553,10 +1553,15 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     width: 40px;
 }
 
+.feed-date-h {
+    width: 1%;
+    white-space: nowrap;
+}
+
 .feed-inline-cover {
     width: 40px;
     height: 40px;
-    border-radius: var(--border-radius);
+    border-radius: 2px;
     object-fit: cover;
     flex-shrink: 0;
 }
