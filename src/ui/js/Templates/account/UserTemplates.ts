@@ -153,7 +153,7 @@ export class UserTemplates {
         );
 
         const link = create("a")
-            .classes("page-link", "color-dim", "flex", "align-children", "small-gap")
+            .classes("page-link", "color-dim", "flex", "align-children", "small-gap", "noflexwrap")
             .onclick((e: MouseEvent) => {
                 if (e.button === 0) {
                     e.preventDefault();
