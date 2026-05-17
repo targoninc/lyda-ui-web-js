@@ -718,7 +718,14 @@ export class UserTemplates {
         const hasBadges = user.badges && user.badges.length > 0;
         const isOwnProfile = currentUser.value?.id === user.id;
         const isFollowed = compute(f => f && !isOwnProfile, Util.isFollowedBy(user));
-        const menuShown = signal(false);
+        const verifyPopover = PopoverTemplates.manualPopover(`verify-${user.id}`,
+            vertical(UserTemplates.verifyUserButton(user, verified)).build(),
+        );
+        const verifyBtn = GenericTemplates.roundIconButton(
+            {icon: "settings_account_box"},
+            () => PopoverTemplates.toggle(verifyPopover, verifyBtn),
+            "User options",
+        );
 
         return create("div")
             .classes("flex", "align-children")
@@ -727,12 +734,10 @@ export class UserTemplates {
                 when(hasBadges, UserTemplates.badges(user.badges ?? [])),
                 when(verified, UserTemplates.verificationBadge()),
                 !isOwnProfile && currentUser.value ? UserTemplates.followButton(Util.isFollowing(user), user.id) : null,
-                horizontal(
-                    when(hasPermissionToVerify, GenericTemplates.roundIconButton({icon: "settings_account_box"}, () => menuShown.value = !menuShown.value, "User options")),
-                    when(menuShown, vertical(
-                        UserTemplates.verifyUserButton(user, verified),
-                    ).classes("popout-below", "borderless", "absolute-align-left").build()),
-                ).classes("relative"),
+                when(hasPermissionToVerify, horizontal(
+                    verifyBtn,
+                    verifyPopover,
+                ).classes("relative").build()),
                 when(isFollowed, UserTemplates.followsBackIndicator()),
             ).build();
     }

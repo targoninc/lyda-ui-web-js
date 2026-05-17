@@ -5,6 +5,7 @@ import { Images } from "../../Enums/Images.ts";
 import { QueueTemplates } from "./QueueTemplates.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
+import { PopoverTemplates } from "../generic/PopoverTemplates.ts";
 import { Ui } from "../../Classes/Ui.ts";
 import { getPlayIcon, Util } from "../../Classes/Util.ts";
 import { compute, computeAsync, create, nullElement, Signal, signal, when } from "@targoninc/jess";
@@ -512,33 +513,27 @@ export class PlayerTemplates {
     }
 
     private static moreMenu(track: Track) {
-        const menuShown = signal(false);
-        const activeClass = compute((m: boolean): string => (m ? "active" : "_"), menuShown);
+        const popId = `player-menu-${track.id}`;
+        const popover = create("div")
+            .classes("generic-popover", "flex-v")
+            .id(popId)
+            .attributes("popover", "manual")
+            .children(
+                InteractionTemplates.interactions(EntityType.track, track),
+                QueueTemplates.queueButton(),
+            ).build() as HTMLElement;
+
+        const btn = GenericTemplates.roundIconButton(
+            { icon: "more_horiz", adaptive: true },
+            () => PopoverTemplates.toggle(popover, btn),
+            t("OPEN_MENU"),
+            ["showOnMidBreakpoint"],
+        );
 
         return create("div")
             .classes("relative", "round-button", "showOnMidBreakpoint")
-            .children(
-                GenericTemplates.roundIconButton(
-                    {
-                        icon: "more_horiz",
-                        adaptive: true,
-                    },
-                    async () => {
-                        menuShown.value = !menuShown.value;
-                    },
-                    t("OPEN_MENU"),
-                    ["showOnMidBreakpoint", activeClass],
-                ),
-                when(
-                    menuShown,
-                    create("div")
-                        .classes("flex", "popout-above", "absolute-align-right", "card")
-                        .children(
-                            InteractionTemplates.interactions(EntityType.track, track),
-                            QueueTemplates.queueButton(),
-                        ).build(),
-                ),
-            ).build();
+            .children(btn, popover)
+            .build();
     }
 
     static loopModeButton() {

@@ -1,6 +1,7 @@
 import { Time } from "../../Classes/Helpers/Time.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { GenericTemplates, text, vertical } from "../generic/GenericTemplates.ts";
+import { PopoverTemplates } from "../generic/PopoverTemplates.ts";
 import { copy } from "../../Classes/Util.ts";
 import {
     AnyElement,
@@ -21,13 +22,14 @@ import { button, toggle } from "@targoninc/jess-components";
 import { Log } from "@targoninc/lyda-shared/src/Models/db/lyda/Log";
 import { LogLevel } from "@targoninc/lyda-shared/src/Enums/LogLevel";
 import { PillOption } from "../../Models/PillOption.ts";
-import { ActionLog } from "@targoninc/lyda-shared/dist/Models/db/lyda/ActionLog";
+import { ActionLog } from "@targoninc/lyda-shared/src/Models/db/lyda/ActionLog";
 import { t } from "../../../locales";
 import { sortByProperty } from "../../Classes/Helpers/Sorting.ts";
 import { TableTemplates } from "../generic/TableTemplates.ts";
 import { TextSize } from "../../Enums/TextSize.ts";
 
 export class LogTemplates {
+    static #popUid = 0;
     static actionLogsPage() {
         return DashboardTemplates.pageNeedingPermissions(
             [Permissions.canViewActionLogs],
@@ -165,26 +167,20 @@ export class LogTemplates {
         if (Object.keys(data).length === 0) {
             return nullElement();
         }
-        const shown = signal(false);
+        const popId = `log-props-${LogTemplates.#popUid++}`;
+        const popover = PopoverTemplates.manualPopover(popId,
+            create("div").classes("flex-v", "log-properties")
+                .children(...Object.keys(data).map(k => LogTemplates.property(k, data[k])))
+                .build(),
+        );
 
-        return vertical(
-            button({
-                text: t("INFO"),
-                icon: { icon: "info" },
-                onclick: () => {
-                    shown.value = !shown.value;
-                },
-            }),
-            when(shown, create("div")
-                .classes("flex-v", "card", "popout-below", "log-properties")
-                .children(
-                    ...Object.keys(data).map(k => {
-                        return LogTemplates.property(k, data[k]);
-                    }),
-                ).build(),
-            ),
-        ).styles("position", "relative")
-         .build();
+        const infoBtn = button({
+            text: t("INFO"),
+            icon: { icon: "info" },
+            onclick: () => PopoverTemplates.toggle(popover, infoBtn),
+        });
+
+        return vertical(infoBtn, popover).build();
     }
 
     static signalProperty(key: string, value: Signal<any>): Signal<HTMLElement | SVGElement> {

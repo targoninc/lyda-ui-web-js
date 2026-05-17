@@ -1,4 +1,5 @@
 import { GenericTemplates, horizontal, vertical } from "./generic/GenericTemplates.ts";
+import { PopoverTemplates } from "./generic/PopoverTemplates.ts";
 import { Icons } from "../Enums/Icons.ts";
 import { TrackActions } from "../Actions/TrackActions.ts";
 import { UserTemplates } from "./account/UserTemplates.ts";
@@ -74,8 +75,21 @@ export class CommentTemplates {
         const replyInputShown = signal(false);
         const repliesShown = signal(false);
         const newComment = signal("");
-        const menuShown$ = signal(false);
         const canModerate = compute(ps => ps.some(p => p.name === Permissions.canDeleteComments), permissions);
+        const deleteBtn = button({
+            text: t("DELETE"),
+            icon: { icon: "delete" },
+            classes: ["negative"],
+            onclick: () => TrackActions.deleteComment(comment.id, comments),
+        });
+        const deletePopover = PopoverTemplates.manualPopover(`comment-menu-${comment.id}`,
+            create("div").classes("flex-v").children(deleteBtn).build(),
+        );
+        const moreBtn = GenericTemplates.textButton(
+            "More",
+            () => PopoverTemplates.toggle(deletePopover, moreBtn),
+            "more_horiz",
+        );
 
         return create("div")
             .classes("comment-in-list", "flex-v", "small-gap", (comment.parent_id ?? 0) === 0 ? "tight-border-card" : "_")
@@ -95,17 +109,8 @@ export class CommentTemplates {
                         horizontal(
                             when(Util.isLoggedIn(), CommentTemplates.commentReplySection(repliesShown, replyInputShown, comment, newComment, comments)),
                             when(Util.isLoggedIn() && comment.canEdit, horizontal(
-                                GenericTemplates.textButton(
-                                    "More",
-                                    () => menuShown$.value = !menuShown$.value,
-                                    "more_horiz",
-                                ),
-                                GenericTemplates.menu(menuShown$, button({
-                                    text: t("DELETE"),
-                                    icon: { icon: "delete" },
-                                    classes: ["negative"],
-                                    onclick: () => TrackActions.deleteComment(comment.id, comments),
-                                })),
+                                moreBtn,
+                                deletePopover,
                             ).classes("relative").build()),
                             when(canModerate, button({
                                 text: t("MODERATION"),

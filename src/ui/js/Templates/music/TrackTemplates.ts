@@ -3,6 +3,7 @@ import { UserTemplates } from "../account/UserTemplates.ts";
 import { copy, getPlayIcon, Util } from "../../Classes/Util.ts";
 import { PlayManager } from "../../Streaming/PlayManager.ts";
 import { GenericTemplates, horizontal, tabSelected, vertical } from "../generic/GenericTemplates.ts";
+import { PopoverTemplates } from "../generic/PopoverTemplates.ts";
 import { Time } from "../../Classes/Helpers/Time.ts";
 import { QueueManager } from "../../Streaming/QueueManager.ts";
 import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
@@ -420,15 +421,12 @@ export class TrackTemplates {
     }
 
     private static trackMenu(isPrivate: boolean, track: Track, trackData: any) {
-        const menuShown$ = signal(false);
-
-        return horizontal(
-            when(isPrivate, TrackTemplates.copyPrivateLinkButton(track.id, track.secretcode)),
-            GenericTemplates.roundIconButton(
-                { icon: "more_horiz" },
-                () => menuShown$.value = !menuShown$.value,
-                "Show menu"),
-            GenericTemplates.menu(menuShown$,
+        const popId = `track-menu-${track.id}`;
+        const popover = create("div")
+            .classes("generic-popover", "flex-v")
+            .id(popId)
+            .attributes("popover", "manual")
+            .children(
                 when(trackData.canDownload, TrackEditTemplates.downloadAudioButton(track)),
                 when(trackData.canEdit, vertical(
                     TrackEditTemplates.addToAlbumsButton(track),
@@ -436,7 +434,17 @@ export class TrackTemplates {
                     TrackEditTemplates.openEditPageButton(track),
                     TrackEditTemplates.deleteTrackButton(track.id),
                 ).build()),
-            ),
+            ).build() as HTMLElement;
+
+        const btn = GenericTemplates.roundIconButton(
+            { icon: "more_horiz" },
+            () => PopoverTemplates.toggle(popover, btn),
+            "Show menu");
+
+        return horizontal(
+            when(isPrivate, TrackTemplates.copyPrivateLinkButton(track.id, track.secretcode)),
+            btn,
+            popover,
         ).classes("relative", "align-children").build();
     }
 

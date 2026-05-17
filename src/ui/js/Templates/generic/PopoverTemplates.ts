@@ -1,4 +1,4 @@
-import { create, AnyNode } from "@targoninc/jess";
+import { create, AnyNode, AnyElement } from "@targoninc/jess";
 
 export class PopoverTemplates {
     static popover(id: string, ...children: AnyNode[]): HTMLElement {
@@ -19,7 +19,7 @@ export class PopoverTemplates {
             .build() as HTMLElement;
     }
 
-    static positionAtAnchor(popover: HTMLElement, anchor: HTMLElement): void {
+    static positionAtAnchor(popover: HTMLElement, anchor: AnyElement): void {
         const r = anchor.getBoundingClientRect();
         popover.style.position = "fixed";
         popover.style.top = `${r.bottom + 2}px`;
@@ -38,7 +38,7 @@ export class PopoverTemplates {
         popover.showPopover();
     }
 
-    static show(popover: HTMLElement, anchor: HTMLElement): void {
+    static show(popover: HTMLElement, anchor: AnyElement): void {
         if (popover.matches(":popover-open")) return;
         PopoverTemplates.positionAtAnchor(popover, anchor);
         popover.showPopover();
@@ -48,7 +48,7 @@ export class PopoverTemplates {
         popover.hidePopover();
     }
 
-    static toggle(popover: HTMLElement, anchor: HTMLElement): void {
+    static toggle(popover: HTMLElement, anchor: AnyElement): void {
         PopoverTemplates.positionAtAnchor(popover, anchor);
         popover.togglePopover();
     }
