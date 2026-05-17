@@ -1230,6 +1230,10 @@ img.loading:before {
     .page-container:has(.feed-compact) {
         padding: 0;
     }
+
+    .hideTextOnSmallBreakpointButton span {
+        display: none;
+    }
 }
 
 @media only screen and (min-width: 600px) {
@@ -1250,9 +1254,5 @@ img.loading:before {
     .round-on-tiny-breakpoint {
         border-radius: 999px !important;
         height: 34px !important;
-    }
-
-    .hideTextOnSmallBreakpointButton span {
-        display: none;
     }
 }
