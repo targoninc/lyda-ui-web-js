@@ -15,12 +15,9 @@ import {
     AnyElement,
     compute,
     create,
-    InputType,
-    nullElement,
     Signal,
     signal,
     signalMap,
-    TypeOrSignal,
     when,
 } from "@targoninc/jess";
 import {
@@ -50,11 +47,9 @@ import { InteractionTemplates } from "../InteractionTemplates.ts";
 import { get } from "../../Api/ApiClient.ts";
 import { UploadableTrack } from "../../Models/UploadableTrack.ts";
 import { t } from "../../../locales";
-import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 import { Api } from "../../Api/Api.ts";
 import { CommentTemplates } from "../CommentTemplates.ts";
 import { AlbumActions } from "../../Actions/AlbumActions.ts";
-import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom.ts";
 import { TrackSale } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackSale.ts";
 import { TransactionTemplates } from "../money/TransactionTemplates.ts";
 import { BuyTemplates } from "../money/BuyTemplates.ts";
@@ -70,50 +65,6 @@ export class TrackTemplates {
                     .classes("align-center", TextSize.small, "nopointer")
                     .text(collab.collab_type?.name)
                     .build(),
-            ).build();
-    }
-
-    static trackListWithPagination(
-        items$: Signal<Track[]>,
-        pageState: Signal<number>,
-        newPlayingFrom: PlayingFrom,
-        loading$: Signal<boolean>,
-        search: Signal<string>,
-        nextDisabled: Signal<boolean>,
-        hasSearch: TypeOrSignal<boolean>,
-    ) {
-        const empty = compute((t, l) => t.length === 0 && !l, items$, loading$);
-
-        return create("div")
-            .classes("flex-v", "fullHeight", "fullWidth")
-            .children(
-                horizontal(
-                    horizontal(
-                        GenericTemplates.paginationControls(pageState, nextDisabled),
-                        when(hasSearch, input({
-                            type: InputType.text,
-                            validators: [],
-                            name: "tracks-filter",
-                            placeholder: t("SEARCH"),
-                            debounce: 200,
-                            classes: ["round-input"],
-                            onchange: value => search.value = value,
-                            value: search,
-                        })),
-                    ).classes("align-children"),
-                    newPlayingFrom.type === FeedType.following ? TrackTemplates.feedFilters(search) : nullElement(),
-                ).classes("space-between", "align-children")
-                 .build(),
-                when(loading$, GenericTemplates.loadingSpinner()),
-                compute(
-                    list =>
-                        TrackTemplates.trackList(
-                            list.reverse().map(track => MusicTemplates.feedEntry(track, newPlayingFrom)),
-                        ),
-                    items$,
-                ),
-                when(empty, GenericTemplates.noTracks()),
-                GenericTemplates.paginationControls(pageState, nextDisabled),
             ).build();
     }
 

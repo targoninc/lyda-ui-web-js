@@ -24,12 +24,21 @@ import {notify, Ui} from "../../Classes/Ui.ts";
 import {MediaActions} from "../../Actions/MediaActions.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {MusicTemplates} from "../music/MusicTemplates.ts";
+import {FeedTemplates} from "../generic/FeedTemplates.ts";
+import {FeedMenuAction} from "../../Models/FeedConfig.ts";
 import {button, icon} from "@targoninc/jess-components";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
 import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
 import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
+import {AlbumActions} from "../../Actions/AlbumActions.ts";
+import {PlaylistActions} from "../../Actions/PlaylistActions.ts";
+import {QueueManager} from "../../Streaming/QueueManager.ts";
+import {playingFrom, playingHere} from "../../state.ts";
+import {TrackList} from "../../Models/TrackList.ts";
+import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import {Badge} from "@targoninc/lyda-shared/src/Models/db/lyda/Badge";
 import {NotificationType} from "../../Enums/NotificationType.ts";
 import {Api} from "../../Api/Api.ts";
@@ -404,27 +413,47 @@ export class UserTemplates {
             window.history.replaceState(null, "", url.toString());
         });
 
+        const cardActions = (list: TrackList): FeedMenuAction<TrackList>[] => [
+            { label: t("QUEUE"), icon: "queue", onclick: (l) => l.tracks?.forEach(t => QueueManager.addToManualQueue(t.track_id)) },
+        ];
+
         return vertical(
             GenericTemplates.combinedSelector(tabs, (i: number) => (currentIndex.value = i), currentIndex.value),
             when(
                 tabSelected(currentIndex, 0),
-                MusicTemplates.trackFeed(FeedType.profileTracks, user),
+                FeedTemplates.feed(FeedType.profileTracks, user),
             ),
             when(
                 tabSelected(currentIndex, 1),
-                MusicTemplates.cardFeed(CardFeedType.profileAlbums, user),
+                FeedTemplates.create<TrackList>({
+                    id: `feed-${CardFeedType.profileAlbums}`,
+                    columns: [{ key: "card", header: "", render: (list) => MusicTemplates.cardItem(EntityType.album, list) }],
+                    pageSize: 10,
+                    fetchPage: (offset) => Api.getAlbumsByUserId(user.id, user.username, offset, "").then(r => r ?? []) as Promise<TrackList[]>,
+                    buildMenuActions: cardActions,
+                    onPlayToggle: async (list) => { const ft = list.tracks?.[0]?.track; if (ft) await AlbumActions.startTrackInAlbum(list as Album, ft, true); },
+                    isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
+                }),
             ),
             when(
                 tabSelected(currentIndex, 2),
-                MusicTemplates.cardFeed(CardFeedType.profilePlaylists, user),
+                FeedTemplates.create<TrackList>({
+                    id: `feed-${CardFeedType.profilePlaylists}`,
+                    columns: [{ key: "card", header: "", render: (list) => MusicTemplates.cardItem(EntityType.playlist, list) }],
+                    pageSize: 10,
+                    fetchPage: (offset) => Api.getPlaylistsByUserId(user.id, user.username, offset, "").then(r => r ?? []) as any,
+                    buildMenuActions: cardActions,
+                    onPlayToggle: async (list) => { const ft = list.tracks?.[0]?.track; if (ft) await PlaylistActions.startTrackInPlaylist(list as Playlist, ft, true); },
+                    isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
+                }),
             ),
             when(
                 tabSelected(currentIndex, 3),
-                MusicTemplates.trackFeed(FeedType.profileReposts, user),
+                FeedTemplates.feed(FeedType.profileReposts, user),
             ),
             when(
                 tabSelected(currentIndex, 4),
-                MusicTemplates.trackFeed(FeedType.history, user),
+                FeedTemplates.feed(FeedType.history, user),
             ),
         ).build();
     }
@@ -733,14 +762,30 @@ export class UserTemplates {
     static libraryPage(user: Signal<User>, isSelf: boolean) {
         const tabs = [`${t("TRACKS")}`, `${t("ALBUMS")}`, `${t("PLAYLISTS")}`];
         const tabContents = [
-            MusicTemplates.trackFeed(FeedType.likedTracks, user.value),
-            MusicTemplates.cardFeed(CardFeedType.likedAlbums, user.value),
-            MusicTemplates.cardFeed(CardFeedType.likedPlaylists, user.value),
+            FeedTemplates.feed(FeedType.likedTracks, user.value),
+            FeedTemplates.create<TrackList>({
+                id: `feed-${CardFeedType.likedAlbums}`,
+                columns: [{ key: "card", header: "", render: (list) => MusicTemplates.cardItem(EntityType.album, list) }],
+                pageSize: 10,
+                fetchPage: (offset) => Api.getLikedAlbums(user.value.id, user.value.username, offset, "").then(r => r ?? []) as any,
+                buildMenuActions: (list) => [{ label: t("QUEUE"), icon: "queue", onclick: (l) => l.tracks?.forEach(t => QueueManager.addToManualQueue(t.track_id)) }],
+                onPlayToggle: async (list) => { const ft = list.tracks?.[0]?.track; if (ft) await AlbumActions.startTrackInAlbum(list as Album, ft, true); },
+                isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
+            }),
+            FeedTemplates.create<TrackList>({
+                id: `feed-${CardFeedType.likedPlaylists}`,
+                columns: [{ key: "card", header: "", render: (list) => MusicTemplates.cardItem(EntityType.playlist, list) }],
+                pageSize: 10,
+                fetchPage: (offset) => Api.getLikedPlaylists(user.value.id, user.value.username, offset, "").then(r => r ?? []) as any,
+                buildMenuActions: (list) => [{ label: t("QUEUE"), icon: "queue", onclick: (l) => l.tracks?.forEach(t => QueueManager.addToManualQueue(t.track_id)) }],
+                onPlayToggle: async (list) => { const ft = list.tracks?.[0]?.track; if (ft) await PlaylistActions.startTrackInPlaylist(list as Playlist, ft, true); },
+                isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
+            }),
         ];
 
         if (isSelf) {
             tabs.push(`${t("BOUGHT")}`);
-            tabContents.push(MusicTemplates.trackFeed(FeedType.boughtTracks));
+            tabContents.push(FeedTemplates.feed(FeedType.boughtTracks));
         }
 
         return vertical(

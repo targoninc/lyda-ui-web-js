@@ -1,8 +1,9 @@
-import { compute, create, Signal, signal, signalMap, when, nullElement, AnyElement } from "@targoninc/jess";
+import { compute, create, Signal, signal, signalMap, when, AnyElement } from "@targoninc/jess";
 import { GenericTemplates } from "./GenericTemplates.ts";
 import { getPlayIcon, copy, Util } from "../../Classes/Util.ts";
 import { t } from "../../../locales";
 import { FeedColumn, FeedMenuAction, FeedConfig } from "../../Models/FeedConfig.ts";
+import { ContextMenuTemplates } from "./ContextMenuTemplates.ts";
 import { currentTrackId, playingHere } from "../../state.ts";
 import { PlayManager } from "../../Streaming/PlayManager.ts";
 import { QueueManager } from "../../Streaming/QueueManager.ts";
@@ -62,7 +63,7 @@ export class FeedTemplates {
                     ).build(),
                 signalMap(
                     items$,
-                    create("div").classes("feed-rows", "flex-v", "fullWidth"),
+                    create("div").classes("flex-v", "no-gap", "fullWidth"),
                     (item, i) => FeedTemplates.#row(item, i, config, feedId, colCount),
                 ),
                 create("div").classes("feed-sentinel").id(`${feedId}-sentinel`).build(),
@@ -164,50 +165,18 @@ export class FeedTemplates {
         const cls = compute((p): string => (p ? "playing" : "_"), playing);
         const popId = `${feedId}-pop-${item.id}`;
 
-        const placePopover = (anchor: HTMLElement) => {
-            const pop = document.getElementById(popId) as HTMLElement | null;
-            if (!pop) return;
-            const r = anchor.getBoundingClientRect();
-            pop.style.position = "fixed";
-            pop.style.top = `${r.bottom + 2}px`;
-            pop.style.left = `${Math.max(4, r.left)}px`;
-        };
-
-        const toggleMenu = (anchor: HTMLElement) => {
-            const pop = document.getElementById(popId) as HTMLElement | null;
-            if (!pop) return;
-            placePopover(anchor);
-            pop.togglePopover();
-        };
-
-        const showMenu = (anchor: HTMLElement) => {
-            const pop = document.getElementById(popId) as HTMLElement | null;
-            if (!pop || pop.matches(":popover-open")) return;
-            placePopover(anchor);
-            pop.showPopover();
-        };
-
-        const menuBtn = create("button")
-            .classes("round-button", "jess", "feed-menu-btn")
-            .onclick((e: Event) => toggleMenu(e.currentTarget as HTMLElement))
-            .children(GenericTemplates.icon("more_horiz", false))
-            .build() as HTMLElement;
+        const ctx = ContextMenuTemplates.create(item, config.buildMenuActions(item), popId);
 
         return create("div")
             .classes("feed-row", `feed-cols-${colCount}`, cls)
-            .oncontextmenu(e => { e.preventDefault(); showMenu(menuBtn); })
+            .oncontextmenu(ctx.onContextMenu)
             .children(
                 FeedTemplates.#idxCell(item, index, icon, loading, config),
                 ...config.columns.map(c =>
                     create("div").classes("feed-cell", `feed-cell-${c.key}`).children(c.render(item, index)).build(),
                 ),
-                create("div").classes("feed-menu-cell").children(menuBtn).build(),
-                create("div")
-                    .classes("feed-menu-popover")
-                    .id(popId)
-                    .attributes("popover", "auto")
-                    .children(...FeedTemplates.#menuItems(item, config))
-                    .build(),
+                create("div").classes("feed-menu-cell").children(ctx.button).build(),
+                ctx.popover,
             ).build();
     }
 
@@ -233,24 +202,5 @@ export class FeedTemplates {
                     ),
                 ).build(),
             ).build();
-    }
-
-    static #menuItems<T extends { id: number }>(item: T, config: FeedConfig<T>): AnyElement[] {
-        return config.buildMenuActions(item)
-            .filter(a => !a.show || a.show(item))
-            .map(a =>
-                create("button")
-                    .classes("feed-menu-item", "flex", "align-children", "small-gap")
-                    .onclick(async (e: Event) => {
-                        e.stopPropagation();
-                        const pop = (e.currentTarget as HTMLElement).closest("[popover]") as HTMLElement | null;
-                        if (pop) pop.hidePopover();
-                        await a.onclick(item);
-                    })
-                    .children(
-                        a.icon ? GenericTemplates.icon(a.icon, true, ["feed-menu-icon"]) : nullElement(),
-                        create("span").text(a.label).build(),
-                    ).build() as HTMLElement,
-            );
     }
 }

@@ -16,7 +16,7 @@ import { RoyaltyTemplates } from "./admin/RoyaltyTemplates.ts";
 import { ContentIDTemplates } from "./admin/ContentIDTemplates.ts";
 import { SubscriptionPaymentsTemplates } from "./admin/SubscriptionPaymentsTemplates.ts";
 import { PayoutTemplates } from "./money/PayoutTemplates.ts";
-import { MusicTemplates } from "./music/MusicTemplates.ts";
+import { FeedTemplates } from "./generic/FeedTemplates.ts";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { TrackEditTemplates } from "./music/TrackEditTemplates.ts";
 import { navigate, Route } from "../Routing/Router.ts";
@@ -38,9 +38,9 @@ import { TransactionTemplates } from "./money/TransactionTemplates.ts";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, (route: Route, params: Record<string, string>) => Promise<AnyElement> | AnyElement> = {
-        [RoutePath.explore]: () => MusicTemplates.trackFeed(FeedType.explore),
-        [RoutePath.following]: () => MusicTemplates.trackFeed(FeedType.following),
-        [RoutePath.history]: () => MusicTemplates.trackFeed(FeedType.history),
+        [RoutePath.explore]: () => FeedTemplates.feed(FeedType.explore),
+        [RoutePath.following]: () => FeedTemplates.feed(FeedType.following),
+        [RoutePath.history]: () => FeedTemplates.feed(FeedType.history),
         [RoutePath.album]: AlbumTemplates.albumPage,
         [RoutePath.playlist]: PlaylistTemplates.playlistPage,
         [RoutePath.profile]: UserTemplates.profile,

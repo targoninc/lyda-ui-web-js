@@ -3,7 +3,7 @@ import { Signal, StringOrSignal } from "@targoninc/jess";
 export interface FeedColumn<T> {
     key: string;
     header: string;
-    render: (item: T, index: number) => HTMLElement | null;
+    render: (item: T, index: number) => any;
 }
 
 export interface FeedMenuAction<T> {

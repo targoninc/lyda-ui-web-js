@@ -1,0 +1,36 @@
+import { create, AnyNode } from "@targoninc/jess";
+
+export class PopoverTemplates {
+    static popover(id: string, ...children: AnyNode[]): HTMLElement {
+        return create("div")
+            .classes("generic-popover")
+            .id(id)
+            .attributes("popover", "auto")
+            .children(...children)
+            .build() as HTMLElement;
+    }
+
+    static positionAtAnchor(popover: HTMLElement, anchor: HTMLElement): void {
+        const r = anchor.getBoundingClientRect();
+        popover.style.position = "fixed";
+        popover.style.top = `${r.bottom + 2}px`;
+        popover.style.left = `${Math.max(4, r.left)}px`;
+        popover.style.right = "auto";
+        popover.style.bottom = "auto";
+    }
+
+    static show(popover: HTMLElement, anchor: HTMLElement): void {
+        if (popover.matches(":popover-open")) return;
+        PopoverTemplates.positionAtAnchor(popover, anchor);
+        popover.showPopover();
+    }
+
+    static hide(popover: HTMLElement): void {
+        popover.hidePopover();
+    }
+
+    static toggle(popover: HTMLElement, anchor: HTMLElement): void {
+        PopoverTemplates.positionAtAnchor(popover, anchor);
+        popover.togglePopover();
+    }
+}

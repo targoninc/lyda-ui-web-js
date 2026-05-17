@@ -1476,3 +1476,13 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 .feed-menu-icon { width: 16px; height: 16px; }
 .feed-sentinel { height: 1px; }
 .feed-inline-cover { width: 40px; height: 40px; border-radius: var(--border-radius); object-fit: cover; flex-shrink: 0; }
+
+/* ─── Generic Popover & Context Menu ─────────────────────── */
+.generic-popover { min-width: 180px; padding: 4px; background: var(--color-3); border: 1px solid var(--color-7); border-radius: var(--border-radius); overflow: hidden; }
+.generic-popover::backdrop { background: transparent; }
+.context-menu-btn { opacity: 0; transition: opacity .15s; }
+*:hover > .context-menu-btn { opacity: .6; }
+.context-menu-btn:hover { opacity: 1 !important; }
+.context-menu-item { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px; border: none; background: transparent; color: var(--color-5); font-size: var(--font-size-small); cursor: pointer; border-radius: var(--border-radius); text-align: left; white-space: nowrap; }
+.context-menu-item:hover { background: var(--color-4); }
+.context-menu-icon { width: 16px; height: 16px; }
