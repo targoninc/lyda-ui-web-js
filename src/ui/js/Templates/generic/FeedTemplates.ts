@@ -1,5 +1,5 @@
-import { compute, create, Signal, signal, signalMap, when, AnyNode, nullElement } from "@targoninc/jess";
-import { GenericTemplates } from "./GenericTemplates.ts";
+import { compute, create, Signal, signal, signalMap, when, AnyNode, nullElement, InputType } from "@targoninc/jess";
+import { GenericTemplates, horizontal } from "./GenericTemplates.ts";
 import { getPlayIcon, copy, Util } from "../../Classes/Util.ts";
 import { t } from "../../../locales";
 import { FeedColumn, FeedMenuAction, FeedConfig } from "../../Models/FeedConfig.ts";
@@ -18,6 +18,10 @@ import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom.ts";
 import { DefaultImages } from "../../Enums/DefaultImages.ts";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType";
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType";
+import { UserTemplates } from "../account/UserTemplates.ts";
+import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
+import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import { input } from "@targoninc/jess-components";
 
 export { FeedColumn, FeedMenuAction, FeedConfig };
 
@@ -31,43 +35,79 @@ export class FeedTemplates {
         const items$ = signal<T[]>([]);
         const loading$ = signal(false);
         const hasMore$ = signal(true);
+        const search$ = signal("");
         const ps = config.pageSize;
         let page = 0;
+
+        const reload = () => {
+            page = 0;
+            items$.value = [];
+            hasMore$.value = true;
+            load();
+        };
 
         const load = async () => {
             if (loading$.value || !hasMore$.value) return;
             loading$.value = true;
             const offset = page * ps;
-            const next = await config.fetchPage(offset, ps);
+            const next = await config.fetchPage(offset, ps, search$.value);
             if (!next || next.length < ps) hasMore$.value = false;
             if (next) items$.value = [...items$.value, ...next];
             page += 1;
             loading$.value = false;
         };
 
+        if (config.showSearch) search$.subscribe(reload);
+
         const empty = compute((ii, ll) => ii.length === 0 && !ll, items$, loading$);
         const feedId = config.id || uid();
 
-        const el = create("table")
-            .classes("feed-table", "fullWidth")
+        const el = create("div")
+            .classes("feed-wrapper", "flex-v", "fullWidth")
             .id(feedId)
             .children(
-                create("thead")
-                    .classes("feed-header")
+                when(config.showSearch,
+                    horizontal(
+                        input({
+                            type: InputType.text,
+                            validators: [],
+                            name: "feed-search",
+                            placeholder: t("SEARCH"),
+                            debounce: 200,
+                            classes: ["round-input"],
+                            onchange: (value: string) => { search$.value = value; },
+                            value: search$,
+                        }),
+                    ).classes("space-between", "align-children").build(),
+                ),
+                create("table")
+                    .classes("feed-table", "fullWidth")
                     .children(
-                        create("tr").classes("feed-header-row").children(
-                            create("th").classes("feed-idx-h").text("#").build(),
-                            ...config.columns.map(c =>
-                                create("th").classes("feed-col-h").text(c.header).build(),
-                            ),
-                            create("th").classes("feed-interact-h").build(),
-                            create("th").classes("feed-menu-h").build(),
-                        ).build(),
+                        create("thead")
+                            .classes("feed-header")
+                            .children(
+                                create("tr").classes("feed-header-row").children(
+                                    create("th").classes("feed-idx-h").text("#").build(),
+                                    ...config.columns.map(c =>
+                                        create("th").classes("feed-col-h").text(c.header).build(),
+                                    ),
+                                    create("th").classes("feed-interact-h").build(),
+                                    create("th").classes("feed-menu-h").build(),
+                                ).build(),
+                            ).build(),
+                        signalMap(
+                            items$,
+                            create("tbody").classes("feed-rows"),
+                            (item, i) => FeedTemplates.#row(item, i, config, feedId),
+                        ),
                     ).build(),
-                signalMap(
-                    items$,
-                    create("tbody").classes("feed-rows"),
-                    (item, i) => FeedTemplates.#row(item, i, config, feedId),
+                compute(
+                    (loading, e) => {
+                        if (loading) return GenericTemplates.loadingSpinner();
+                        if (e) return GenericTemplates.noTracks();
+                        return nullElement();
+                    },
+                    loading$, empty,
                 ),
             ).build();
 
@@ -85,12 +125,10 @@ export class FeedTemplates {
                 );
                 const watchLast = () => {
                     const last = rowsEl.lastElementChild;
-                    if (last) {
-                        obs.disconnect();
-                        obs.observe(last);
-                    }
+                    if (last) { obs.disconnect(); obs.observe(last); }
                 };
-                rowsEl.addEventListener("DOMNodeInserted", watchLast);
+                const mo = new MutationObserver(watchLast);
+                mo.observe(rowsEl, { childList: true });
                 watchLast();
             }
         });
@@ -104,10 +142,10 @@ export class FeedTemplates {
             name: getFeedDisplayName(type, user?.displayname) ?? type,
             id: user?.id,
         };
-        const fetchFilter = type === FeedType.following ? "all" : "";
 
         return FeedTemplates.create<Track>({
             id: `feed-${type}`,
+            showSearch: ![FeedType.following, FeedType.explore].includes(type),
             columns: [
                 {
                     key: "title",
@@ -140,12 +178,18 @@ export class FeedTemplates {
                 {
                     key: "artist",
                     header: t("ARTIST"),
-                    render: (track) => create("span").classes("feed-artist", "color-dim").text(track.user?.displayname ?? "").build(),
+                    render: (track) => {
+                        if (!track.user) return nullElement();
+                        return UserTemplates.userLink(UserWidgetContext.card, track.user as User, track.artistname);
+                    },
                 },
             ],
             pageSize: 10,
-            fetchPage: async (offset) => {
-                const res = await Api.getFeed(`${ApiRoutes.trackFeed}/${type}`, { offset, filter: fetchFilter, id: user?.id });
+            fetchPage: async (offset, limit, filter) => {
+                const params: any = { offset, filter };
+                if (user?.id) params.id = user.id;
+                if (type === FeedType.following) params.filter = filter || "all";
+                const res = await Api.getFeed(`${ApiRoutes.trackFeed}/${type}`, params);
                 return res ?? [];
             },
             buildMenuActions: (track): FeedMenuAction<Track>[] => {

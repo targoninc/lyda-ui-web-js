@@ -17,10 +17,11 @@ export interface FeedConfig<T extends { id: number }> {
     id?: string;
     columns: FeedColumn<T>[];
     pageSize: number;
-    fetchPage: (offset: number, limit: number) => Promise<T[]>;
+    fetchPage: (offset: number, limit: number, filter?: string) => Promise<T[]>;
     buildMenuActions: (item: T) => FeedMenuAction<T>[];
     onPlayToggle: (item: T) => Promise<void>;
     isPlaying: (itemId: number) => Signal<boolean>;
     isLoading?: (itemId: number) => Signal<boolean>;
     buildInteractions?: (item: T) => AnyNode[];
+    showSearch?: boolean;
 }
