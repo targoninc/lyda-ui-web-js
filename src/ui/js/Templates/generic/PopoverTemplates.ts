@@ -29,7 +29,7 @@ export class PopoverTemplates {
     }
 
     static showAtPoint(popover: HTMLElement, x: number, y: number): void {
-        if (popover.matches(":popover-open")) return;
+        if (popover.matches(":popover-open") || !popover.isConnected) return;
         popover.style.position = "fixed";
         popover.style.top = `${y}px`;
         popover.style.left = `${x}px`;
@@ -39,7 +39,7 @@ export class PopoverTemplates {
     }
 
     static show(popover: HTMLElement, anchor: AnyElement): void {
-        if (popover.matches(":popover-open")) return;
+        if (popover.matches(":popover-open") || !popover.isConnected) return;
         PopoverTemplates.positionAtAnchor(popover, anchor);
         popover.showPopover();
     }
@@ -49,6 +49,7 @@ export class PopoverTemplates {
     }
 
     static toggle(popover: HTMLElement, anchor: AnyElement): void {
+        if (!popover.isConnected) return;
         PopoverTemplates.positionAtAnchor(popover, anchor);
         popover.togglePopover();
     }
