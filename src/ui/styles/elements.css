@@ -1558,6 +1558,22 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     white-space: nowrap;
 }
 
+.feed-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+.feed-cell-title {
+    min-width: 0;
+}
+
+.feed-cell-title .flex, .feed-cell-title .flex-v {
+    min-width: 0;
+    overflow: hidden;
+}
+
 .feed-inline-cover {
     width: 40px;
     height: 40px;

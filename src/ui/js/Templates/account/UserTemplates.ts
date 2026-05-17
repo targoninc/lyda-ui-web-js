@@ -438,6 +438,58 @@ export class UserTemplates {
             { label: t("QUEUE"), icon: "queue", onclick: (l) => l.tracks?.forEach(t => QueueManager.addToManualQueue(t.track_id)) },
         ];
 
+        const albumColumns = [
+            {
+                key: "title",
+                header: t("TRACK_TITLE"),
+                render: (list: TrackList) => {
+                    const coverSrc = list.has_cover
+                        ? Util.getImage(list.id, MediaFileType.albumCover)
+                        : Images.DEFAULT_COVER_ALBUM;
+                    return create("div")
+                        .classes("flex", "align-children", "small-gap")
+                        .children(
+                            create("img").classes("feed-inline-cover").src(coverSrc).alt(list.title).build(),
+                            create("span").classes("feed-title", "clickable", "pointer")
+                                .text(list.title)
+                                .onclick((e: Event) => { e.stopPropagation(); navigate(`/album/${list.id}`); })
+                                .build(),
+                        ).build();
+                },
+            },
+            {
+                key: "artist",
+                header: t("ARTIST"),
+                render: (list: TrackList) => list.user ? UserTemplates.userLink(UserWidgetContext.card, list.user) : nullElement(),
+            },
+        ];
+
+        const playlistColumns = [
+            {
+                key: "title",
+                header: t("TRACK_TITLE"),
+                render: (list: TrackList) => {
+                    const coverSrc = list.has_cover
+                        ? Util.getImage(list.id, MediaFileType.playlistCover)
+                        : Images.DEFAULT_COVER_PLAYLIST;
+                    return create("div")
+                        .classes("flex", "align-children", "small-gap")
+                        .children(
+                            create("img").classes("feed-inline-cover").src(coverSrc).alt(list.title).build(),
+                            create("span").classes("feed-title", "clickable", "pointer")
+                                .text(list.title)
+                                .onclick((e: Event) => { e.stopPropagation(); navigate(`/playlist/${list.id}`); })
+                                .build(),
+                        ).build();
+                },
+            },
+            {
+                key: "artist",
+                header: t("ARTIST"),
+                render: (list: TrackList) => list.user ? UserTemplates.userLink(UserWidgetContext.card, list.user) : nullElement(),
+            },
+        ];
+
         return vertical(
             GenericTemplates.combinedSelector(tabs, (i: number) => (currentIndex.value = i), currentIndex.value),
             when(
@@ -448,24 +500,26 @@ export class UserTemplates {
                 tabSelected(currentIndex, 1),
                 FeedTemplates.create<TrackList>({
                     id: `feed-${CardFeedType.profileAlbums}`,
-                    columns: [{ key: "card", header: "", render: (list) => MusicTemplates.cardItem(EntityType.album, list) }],
+                    columns: albumColumns,
                     pageSize: 10,
                     fetchPage: (offset) => Api.getAlbumsByUserId(user.id, user.username, offset, "").then(r => r ?? []) as Promise<TrackList[]>,
                     buildMenuActions: cardActions,
                     onPlayToggle: async (list) => { const ft = list.tracks?.[0]?.track; if (ft) await AlbumActions.startTrackInAlbum(list as Album, ft, true); },
                     isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
+                    dateRender: (list) => GenericTemplates.timestamp(list.created_at, ["hideOnSmallBreakpoint"]),
                 }),
             ),
             when(
                 tabSelected(currentIndex, 2),
                 FeedTemplates.create<TrackList>({
                     id: `feed-${CardFeedType.profilePlaylists}`,
-                    columns: [{ key: "card", header: "", render: (list) => MusicTemplates.cardItem(EntityType.playlist, list) }],
+                    columns: playlistColumns,
                     pageSize: 10,
                     fetchPage: (offset) => Api.getPlaylistsByUserId(user.id, user.username, offset, "").then(r => r ?? []) as any,
                     buildMenuActions: cardActions,
                     onPlayToggle: async (list) => { const ft = list.tracks?.[0]?.track; if (ft) await PlaylistActions.startTrackInPlaylist(list as Playlist, ft, true); },
                     isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
+                    dateRender: (list) => GenericTemplates.timestamp(list.created_at, ["hideOnSmallBreakpoint"]),
                 }),
             ),
             when(
@@ -787,25 +841,80 @@ export class UserTemplates {
 
     static libraryPage(user: Signal<User>, isSelf: boolean) {
         const tabs = [`${t("TRACKS")}`, `${t("ALBUMS")}`, `${t("PLAYLISTS")}`];
+
+        const libAlbumCols = [
+            {
+                key: "title",
+                header: t("TRACK_TITLE"),
+                render: (list: TrackList) => {
+                    const coverSrc = list.has_cover
+                        ? Util.getImage(list.id, MediaFileType.albumCover)
+                        : Images.DEFAULT_COVER_ALBUM;
+                    return create("div")
+                        .classes("flex", "align-children", "small-gap")
+                        .children(
+                            create("img").classes("feed-inline-cover").src(coverSrc).alt(list.title).build(),
+                            create("span").classes("feed-title", "clickable", "pointer")
+                                .text(list.title)
+                                .onclick((e: Event) => { e.stopPropagation(); navigate(`/album/${list.id}`); })
+                                .build(),
+                        ).build();
+                },
+            },
+            {
+                key: "artist",
+                header: t("ARTIST"),
+                render: (list: TrackList) => list.user ? UserTemplates.userLink(UserWidgetContext.card, list.user) : nullElement(),
+            },
+        ];
+
+        const libPlaylistCols = [
+            {
+                key: "title",
+                header: t("TRACK_TITLE"),
+                render: (list: TrackList) => {
+                    const coverSrc = list.has_cover
+                        ? Util.getImage(list.id, MediaFileType.playlistCover)
+                        : Images.DEFAULT_COVER_PLAYLIST;
+                    return create("div")
+                        .classes("flex", "align-children", "small-gap")
+                        .children(
+                            create("img").classes("feed-inline-cover").src(coverSrc).alt(list.title).build(),
+                            create("span").classes("feed-title", "clickable", "pointer")
+                                .text(list.title)
+                                .onclick((e: Event) => { e.stopPropagation(); navigate(`/playlist/${list.id}`); })
+                                .build(),
+                        ).build();
+                },
+            },
+            {
+                key: "artist",
+                header: t("ARTIST"),
+                render: (list: TrackList) => list.user ? UserTemplates.userLink(UserWidgetContext.card, list.user) : nullElement(),
+            },
+        ];
+
         const tabContents = [
             FeedTemplates.feed(FeedType.likedTracks, user.value),
             FeedTemplates.create<TrackList>({
                 id: `feed-${CardFeedType.likedAlbums}`,
-                columns: [{ key: "card", header: "", render: (list) => MusicTemplates.cardItem(EntityType.album, list) }],
+                columns: libAlbumCols,
                 pageSize: 10,
                 fetchPage: (offset) => Api.getLikedAlbums(user.value.id, user.value.username, offset, "").then(r => r ?? []) as any,
                 buildMenuActions: (list) => [{ label: t("QUEUE"), icon: "queue", onclick: (l) => l.tracks?.forEach(t => QueueManager.addToManualQueue(t.track_id)) }],
                 onPlayToggle: async (list) => { const ft = list.tracks?.[0]?.track; if (ft) await AlbumActions.startTrackInAlbum(list as Album, ft, true); },
                 isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
+                dateRender: (list) => GenericTemplates.timestamp(list.created_at, ["hideOnSmallBreakpoint"]),
             }),
             FeedTemplates.create<TrackList>({
                 id: `feed-${CardFeedType.likedPlaylists}`,
-                columns: [{ key: "card", header: "", render: (list) => MusicTemplates.cardItem(EntityType.playlist, list) }],
+                columns: libPlaylistCols,
                 pageSize: 10,
                 fetchPage: (offset) => Api.getLikedPlaylists(user.value.id, user.value.username, offset, "").then(r => r ?? []) as any,
                 buildMenuActions: (list) => [{ label: t("QUEUE"), icon: "queue", onclick: (l) => l.tracks?.forEach(t => QueueManager.addToManualQueue(t.track_id)) }],
                 onPlayToggle: async (list) => { const ft = list.tracks?.[0]?.track; if (ft) await PlaylistActions.startTrackInPlaylist(list as Playlist, ft, true); },
                 isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
+                dateRender: (list) => GenericTemplates.timestamp(list.created_at, ["hideOnSmallBreakpoint"]),
             }),
         ];
 

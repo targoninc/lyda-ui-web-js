@@ -12,6 +12,7 @@ import { startItem } from "../../Actions/MusicActions.ts";
 import { Api } from "../../Api/Api.ts";
 import { ApiRoutes } from "../../Api/ApiRoutes.ts";
 import { getFeedDisplayName } from "../../Classes/Helpers/FeedNames.ts";
+import { navigate } from "../../Routing/Router.ts";
 import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom.ts";
@@ -92,10 +93,10 @@ export class FeedTemplates {
                                 create("tr").classes("feed-header-row").children(
                                     create("th").classes("feed-idx-h").text("#").build(),
                                     ...config.columns.map(c =>
-                                        create("th").classes("feed-col-h").text(c.header).build(),
+                                        create("th").classes("feed-col-h", ...(c.key === "artist" ? ["hideOnSmallBreakpoint"] : [])).text(c.header).build(),
                                     ),
-                                    ...(hasDate ? [create("th").classes("feed-date-h").text(t("RELEASE_DATE")).build()] : []),
-                                    ...(hasActionDate ? [create("th").classes("feed-date-h").text(config.actionDateHeader ?? "").build()] : []),
+                                    ...(hasDate ? [create("th").classes("feed-date-h", "hideOnMidBreakpoint").text(t("RELEASE_DATE")).build()] : []),
+                                    ...(hasActionDate ? [create("th").classes("feed-date-h", "hideOnMidBreakpoint").text(config.actionDateHeader ?? "").build()] : []),
                                     create("th").classes("feed-interact-h").build(),
                                     create("th").classes("feed-menu-h").build(),
                                 ).build(),
@@ -173,7 +174,9 @@ export class FeedTemplates {
                                     .children(
                                         create("div").classes("flex", "align-children", "small-gap")
                                             .children(
-                                                create("span").classes("feed-title").text(track.title).build(),
+                                                create("span").classes("feed-title", "clickable", "pointer").text(track.title)
+                                                    .onclick((e: Event) => { e.stopPropagation(); navigate(`/track/${track.id}`); })
+                                                    .build(),
                                                 ...icons,
                                             ).build(),
                                     ).build(),
@@ -257,14 +260,14 @@ export class FeedTemplates {
                     .children(FeedTemplates.#idxCell(item, index, icon, loading, config))
                     .build(),
                 ...config.columns.map(c =>
-                    create("td").classes("feed-cell", `feed-cell-${c.key}`)
+                    create("td").classes("feed-cell", `feed-cell-${c.key}`, ...(c.key === "artist" ? ["hideOnSmallBreakpoint"] : []))
                         .children(c.render(item, index))
                         .build(),
                 ),
-                ...(hasDate && config.dateRender ? [create("td").classes("feed-cell", "feed-cell-date")
+                ...(hasDate && config.dateRender ? [create("td").classes("feed-cell", "feed-cell-date", "hideOnMidBreakpoint")
                     .children(config.dateRender(item))
                     .build()] : []),
-                ...(hasActionDate && config.actionDateRender ? [create("td").classes("feed-cell", "feed-cell-actiondate")
+                ...(hasActionDate && config.actionDateRender ? [create("td").classes("feed-cell", "feed-cell-actiondate", "hideOnMidBreakpoint")
                     .children(config.actionDateRender(item))
                     .build()] : []),
                 create("td").classes("feed-interact-cell")
@@ -280,6 +283,7 @@ export class FeedTemplates {
         item: T, index: number, icon: Signal<string>, loading: Signal<boolean>, config: FeedConfig<T>,
     ): any {
         const handle = () => config.onPlayToggle(item);
+        const handleButton = (e: Event) => { e.stopPropagation(); handle(); };
 
         return create("div")
             .classes("feed-idx-cell-inner")
@@ -293,7 +297,7 @@ export class FeedTemplates {
                             isUrl: true,
                             classes: [compute((l): string => (l ? "spinner-animation" : "_"), loading)],
                         },
-                        handle,
+                        handleButton,
                         t("PLAY_PAUSE"),
                     ),
                 ).build(),

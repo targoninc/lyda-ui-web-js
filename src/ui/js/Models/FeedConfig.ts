@@ -24,6 +24,7 @@ export interface FeedConfig<T extends { id: number }> {
     isLoading?: (itemId: number) => Signal<boolean>;
     buildInteractions?: (item: T) => AnyNode[];
     showSearch?: boolean;
+    onNavigate?: (item: T) => void;
     dateRender?: (item: T) => AnyNode;
     actionDateHeader?: StringOrSignal;
     actionDateRender?: (item: T) => AnyNode;
