@@ -4,6 +4,7 @@ import { getPlayIcon, copy, Util } from "../../Classes/Util.ts";
 import { t } from "../../../locales";
 import { FeedColumn, FeedMenuAction, FeedConfig } from "../../Models/FeedConfig.ts";
 import { ContextMenuTemplates } from "./ContextMenuTemplates.ts";
+import { PopoverTemplates } from "./PopoverTemplates.ts";
 import { InteractionTemplates } from "../InteractionTemplates.ts";
 import { currentTrackId, playingHere, manualQueue } from "../../state.ts";
 import { PlayManager } from "../../Streaming/PlayManager.ts";
@@ -11,8 +12,8 @@ import { QueueManager } from "../../Streaming/QueueManager.ts";
 import { startItem } from "../../Actions/MusicActions.ts";
 import { Api } from "../../Api/Api.ts";
 import { ApiRoutes } from "../../Api/ApiRoutes.ts";
-import { getFeedDisplayName } from "../../Classes/Helpers/FeedNames.ts";
 import { navigate } from "../../Routing/Router.ts";
+import { getFeedDisplayName } from "../../Classes/Helpers/FeedNames.ts";
 import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom.ts";
@@ -66,8 +67,42 @@ export class FeedTemplates {
         const hasDate = !!config.dateRender;
         const hasActionDate = !!config.actionDateRender;
 
+        const mobilePopover = create("div")
+            .classes("generic-popover", "feed-mobile-popover", "flex-v")
+            .id(`${feedId}-mobile`)
+            .attributes("popover", "manual")
+            .build() as HTMLElement;
+
+        const rebuildAndShowMobile = (item: T) => {
+            mobilePopover.innerHTML = "";
+            const children: AnyNode[] = [];
+            if (config.buildInteractions) {
+                children.push(create("div").classes("flex", "align-children", "small-gap", "feed-mobile-interact").children(...config.buildInteractions(item)).build() as HTMLElement);
+                children.push(create("hr").classes("feed-mobile-divider").build() as HTMLElement);
+            }
+            const actions = config.buildMenuActions(item).filter(a => !a.show || a.show(item));
+            for (const a of actions) {
+                const btn = create("button")
+                    .classes("context-menu-item", "flex", "align-children", "small-gap")
+                    .onclick(async (e: Event) => {
+                        e.stopPropagation();
+                        mobilePopover.hidePopover();
+                        await a.onclick(item);
+                    })
+                    .children(
+                        a.icon ? GenericTemplates.icon(a.icon, true, ["context-menu-icon"]) : nullElement(),
+                        create("span").text(a.label).build(),
+                    ).build() as HTMLElement;
+                children.push(btn);
+            }
+            for (const c of children) {
+                if (c instanceof Node) mobilePopover.appendChild(c);
+            }
+            mobilePopover.showPopover();
+        };
+
         const el = create("div")
-            .classes("feed-wrapper", "flex-v", "fullWidth")
+            .classes("feed-wrapper", "flex-v", "fullWidth", config.compact ? "feed-compact" : "_")
             .id(feedId)
             .children(
                 when(config.showSearch,
@@ -87,24 +122,30 @@ export class FeedTemplates {
                 create("table")
                     .classes("feed-table", "fullWidth")
                     .children(
-                        create("thead")
-                            .classes("feed-header")
-                            .children(
-                                create("tr").classes("feed-header-row").children(
-                                    create("th").classes("feed-idx-h").text("#").build(),
-                                    ...config.columns.map(c =>
-                                        create("th").classes("feed-col-h", ...(c.key === "artist" ? ["hideOnSmallBreakpoint"] : [])).text(c.header).build(),
-                                    ),
-                                    ...(hasDate ? [create("th").classes("feed-date-h", "hideOnMidBreakpoint").text(t("RELEASE_DATE")).build()] : []),
-                                    ...(hasActionDate ? [create("th").classes("feed-date-h", "hideOnMidBreakpoint").text(config.actionDateHeader ?? "").build()] : []),
-                                    create("th").classes("feed-interact-h").build(),
-                                    create("th").classes("feed-menu-h").build(),
-                                ).build(),
-                            ).build(),
+                        compute(
+                            (ii) => {
+                                if (ii.length === 0) return nullElement();
+                                return create("thead")
+                                    .classes("feed-header")
+                                    .children(
+                                        create("tr").classes("feed-header-row").children(
+                                            create("th").classes("feed-idx-h").text("#").build(),
+                                            ...config.columns.map(c =>
+                                                create("th").classes("feed-col-h", ...(c.key === "artist" ? ["hideOnSmallBreakpoint"] : [])).text(c.header).build(),
+                                            ),
+                                            ...(hasDate ? [create("th").classes("feed-date-h", "hideOnMidBreakpoint").text(t("RELEASE_DATE")).build()] : []),
+                                            ...(hasActionDate ? [create("th").classes("feed-date-h", "hideOnMidBreakpoint").text(config.actionDateHeader ?? "").build()] : []),
+                                            create("th").classes("feed-interact-h", "hideOnSmallBreakpoint").build(),
+                                            create("th").classes("feed-menu-h", "hideOnSmallBreakpoint").build(),
+                                        ).build(),
+                                    ).build();
+                            },
+                            items$,
+                        ),
                         signalMap(
                             items$,
                             create("tbody").classes("feed-rows"),
-                            (item, i) => FeedTemplates.#row(item, i, config, feedId, hasDate, hasActionDate),
+                            (item, i) => FeedTemplates.#row(item, i, config, feedId, rebuildAndShowMobile),
                         ),
                     ).build(),
                 compute(
@@ -115,6 +156,7 @@ export class FeedTemplates {
                     },
                     loading$, empty,
                 ),
+                mobilePopover,
             ).build();
 
         setTimeout(() => {
@@ -151,6 +193,7 @@ export class FeedTemplates {
 
         return FeedTemplates.create<Track>({
             id: `feed-${type}`,
+            compact: true,
             showSearch: ![FeedType.following, FeedType.explore].includes(type),
             columns: [
                 {
@@ -238,7 +281,8 @@ export class FeedTemplates {
     }
 
     static #row<T extends { id: number }>(
-        item: T, index: number, config: FeedConfig<T>, feedId: string, hasDate: boolean, hasActionDate: boolean,
+        item: T, index: number, config: FeedConfig<T>, feedId: string,
+        showMobileMenu: (item: T) => void,
     ): any {
         const playing = config.isPlaying(item.id);
         const loading = config.isLoading ? config.isLoading(item.id) : signal(false);
@@ -252,7 +296,9 @@ export class FeedTemplates {
             ? create("div").classes("feed-hover-btns", "flex", "align-children").children(...config.buildInteractions(item)).build()
             : nullElement();
 
-        return create("tr")
+        let longPressTimer: any = null;
+
+        const rowEl = create("tr")
             .classes("feed-row", cls)
             .oncontextmenu(ctx.onContextMenu)
             .children(
@@ -264,19 +310,27 @@ export class FeedTemplates {
                         .children(c.render(item, index))
                         .build(),
                 ),
-                ...(hasDate && config.dateRender ? [create("td").classes("feed-cell", "feed-cell-date", "hideOnMidBreakpoint")
+                ...(!!config.dateRender ? [create("td").classes("feed-cell", "feed-cell-date", "hideOnMidBreakpoint")
                     .children(config.dateRender(item))
                     .build()] : []),
-                ...(hasActionDate && config.actionDateRender ? [create("td").classes("feed-cell", "feed-cell-actiondate", "hideOnMidBreakpoint")
+                ...(!!config.actionDateRender ? [create("td").classes("feed-cell", "feed-cell-actiondate", "hideOnMidBreakpoint")
                     .children(config.actionDateRender(item))
                     .build()] : []),
-                create("td").classes("feed-interact-cell")
+                create("td").classes("feed-interact-cell", "hideOnSmallBreakpoint")
                     .children(interactEl)
                     .build(),
-                create("td").classes("feed-menu-cell")
+                create("td").classes("feed-menu-cell", "hideOnSmallBreakpoint")
                     .children(ctx.button, ctx.popover)
                     .build(),
-            ).build();
+            ).build() as HTMLElement;
+
+        rowEl.addEventListener("touchstart", () => {
+            longPressTimer = setTimeout(() => showMobileMenu(item), 500);
+        });
+        rowEl.addEventListener("touchend", () => { if (longPressTimer) clearTimeout(longPressTimer); });
+        rowEl.addEventListener("touchmove", () => { if (longPressTimer) clearTimeout(longPressTimer); });
+
+        return rowEl;
     }
 
     static #idxCell<T extends { id: number }>(

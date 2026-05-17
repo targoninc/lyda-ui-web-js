@@ -1226,6 +1226,10 @@ img.loading:before {
         padding: 0;
         border: none;
     }
+
+    .page-container:has(.feed-compact) {
+        padding: 0;
+    }
 }
 
 @media only screen and (min-width: 600px) {
