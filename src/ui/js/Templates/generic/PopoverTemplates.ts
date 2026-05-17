@@ -10,6 +10,15 @@ export class PopoverTemplates {
             .build() as HTMLElement;
     }
 
+    static manualPopover(id: string, ...children: AnyNode[]): HTMLElement {
+        return create("div")
+            .classes("generic-popover")
+            .id(id)
+            .attributes("popover", "manual")
+            .children(...children)
+            .build() as HTMLElement;
+    }
+
     static positionAtAnchor(popover: HTMLElement, anchor: HTMLElement): void {
         const r = anchor.getBoundingClientRect();
         popover.style.position = "fixed";

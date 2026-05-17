@@ -25,6 +25,7 @@ import {MediaActions} from "../../Actions/MediaActions.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {MusicTemplates} from "../music/MusicTemplates.ts";
 import {FeedTemplates} from "../generic/FeedTemplates.ts";
+import {PopoverTemplates} from "../generic/PopoverTemplates.ts";
 import {FeedMenuAction} from "../../Models/FeedConfig.ts";
 import {button, icon} from "@targoninc/jess-components";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
@@ -51,6 +52,7 @@ import {CardFeedType} from "../../Enums/CardFeedType.ts";
 import { TextSize } from "../../Enums/TextSize.ts";
 
 export class UserTemplates {
+    static #popoverUid = 0;
     static userWidget(
         user: User | Signal<User | null>,
         extraAttributes: HtmlPropertyValue[] = [],
@@ -137,46 +139,65 @@ export class UserTemplates {
         const maxDisplaynameLength = [UserWidgetContext.singlePage, UserWidgetContext.list].includes(context)
             ? 100
             : 15;
-        const previewShown = signal(false);
-        let timeout: any | null = null;
+        let timeout: any = null;
+        let hideTimeout: any = null;
         const avatarState = getAvatar(user);
         if (overrideArtistName?.trim().length === 0) {
             overrideArtistName = null;
         }
 
-        return horizontal(
-            create("a")
-                .classes("page-link", "color-dim", "flex", "align-children", "small-gap")
-                .onclick((e: MouseEvent) => {
-                    if (e.button === 0) {
-                        e.preventDefault();
-                        navigate(`${RoutePath.profile}/${user.username}`);
-                    }
-                })
-                .href(`${RoutePath.profile}/${user.username}`)
-                .title(user.displayname + " (@" + user.username + ")")
-                .children(
-                    UserTemplates.userIcon(user.id, avatarState),
-                    create("span")
-                        .classes("text", "align-center", "nopointer", "user-displayname")
-                        .text(truncateText(overrideArtistName ?? user.displayname, maxDisplaynameLength))
-                        .attributes("data-user-id", user.id)
-                        .build(),
-                ).build(),
-            when(previewShown, UserTemplates.userPreview(user, context)),
-        ).onmouseover(() => {
-            if (timeout) clearTimeout(timeout);
-            timeout = setTimeout(() => {
-                previewShown.value = true;
-            }, 500);
-        })
-            .onmouseleave(() => {
+        UserTemplates.#popoverUid += 1;
+        const popId = `user-preview-${user.id}-${UserTemplates.#popoverUid}`;
+        const preview = PopoverTemplates.manualPopover(popId,
+            UserTemplates.userPreview(user, context),
+        );
+
+        const link = create("a")
+            .classes("page-link", "color-dim", "flex", "align-children", "small-gap")
+            .onclick((e: MouseEvent) => {
+                if (e.button === 0) {
+                    e.preventDefault();
+                    navigate(`${RoutePath.profile}/${user.username}`);
+                }
+            })
+            .href(`${RoutePath.profile}/${user.username}`)
+            .title(user.displayname + " (@" + user.username + ")")
+            .children(
+                UserTemplates.userIcon(user.id, avatarState),
+                create("span")
+                    .classes("text", "align-center", "nopointer", "user-displayname")
+                    .text(truncateText(overrideArtistName ?? user.displayname, maxDisplaynameLength))
+                    .attributes("data-user-id", user.id)
+                    .build(),
+            ).build();
+
+        const container = horizontal(link, preview)
+            .onmouseover(() => {
+                if (hideTimeout) clearTimeout(hideTimeout);
                 if (timeout) clearTimeout(timeout);
                 timeout = setTimeout(() => {
-                    previewShown.value = false;
+                    PopoverTemplates.show(preview, container);
+                }, 500);
+            })
+            .onmouseleave(() => {
+                if (timeout) clearTimeout(timeout);
+                hideTimeout = setTimeout(() => {
+                    PopoverTemplates.hide(preview);
                 }, 100);
             })
-            .classes("relative");
+            .classes("relative")
+            .build() as HTMLElement;
+
+        preview.addEventListener("mouseover", () => {
+            if (hideTimeout) clearTimeout(hideTimeout);
+        });
+        preview.addEventListener("mouseleave", () => {
+            hideTimeout = setTimeout(() => {
+                PopoverTemplates.hide(preview);
+            }, 100);
+        });
+
+        return container;
     }
 
     static editableLinkedUser(
@@ -891,10 +912,7 @@ export class UserTemplates {
 
     private static userPreview(user: User, context: UserWidgetContext) {
         return create("div")
-            .classes(
-                context === UserWidgetContext.player ? "popout-above" : "popout-below",
-                "user-preview", "flex-v", "small-gap",
-            )
+            .classes("user-preview", "flex-v", "small-gap")
             .children(
                 UserTemplates.profileHeader(
                     user,
