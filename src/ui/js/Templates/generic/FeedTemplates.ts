@@ -5,7 +5,7 @@ import { t } from "../../../locales";
 import { FeedColumn, FeedMenuAction, FeedConfig } from "../../Models/FeedConfig.ts";
 import { ContextMenuTemplates } from "./ContextMenuTemplates.ts";
 import { InteractionTemplates } from "../InteractionTemplates.ts";
-import { currentTrackId, playingHere } from "../../state.ts";
+import { currentTrackId, playingHere, manualQueue } from "../../state.ts";
 import { PlayManager } from "../../Streaming/PlayManager.ts";
 import { QueueManager } from "../../Streaming/QueueManager.ts";
 import { startItem } from "../../Actions/MusicActions.ts";
@@ -17,6 +17,7 @@ import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom.ts";
 import { DefaultImages } from "../../Enums/DefaultImages.ts";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType";
+import { InteractionType } from "@targoninc/lyda-shared/src/Enums/InteractionType";
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
@@ -193,8 +194,11 @@ export class FeedTemplates {
                 return res ?? [];
             },
             buildMenuActions: (track): FeedMenuAction<Track>[] => {
+                const inQueue = compute(q => q.includes(track.id), manualQueue);
+                const queueLabel = compute((q): string => (q ? `${t("UNQUEUE")}` : `${t("QUEUE")}`), inQueue);
+                const queueIcon = compute((q): string => (q ? "remove" : "queue"), inQueue);
                 const items: FeedMenuAction<Track>[] = [
-                    { label: t("QUEUE"), icon: "queue", onclick: () => QueueManager.addToManualQueue(track.id) },
+                    { label: queueLabel, icon: queueIcon, onclick: () => QueueManager.toggleInManualQueue(track.id) },
                 ];
                 if (track.visibility !== "private" && track.secretcode) {
                     items.push({
@@ -206,7 +210,10 @@ export class FeedTemplates {
                 return items;
             },
             buildInteractions: (track): any[] => [
-                InteractionTemplates.interactions(EntityType.track, track),
+                InteractionTemplates.interactions(EntityType.track, track, {
+                    showCount: false,
+                    overrideActions: [InteractionType.like, InteractionType.repost],
+                }),
             ],
             onPlayToggle: async (track) => {
                 if (currentTrackId.value === track.id && playingHere.value) {
