@@ -127,35 +127,8 @@ export class TrackTemplates {
                         .styles("height", (Math.pow(loudness, 4)) * 100 + "%")
                         .build();
                 }),
-            ).build() as HTMLElement;
-
-        TrackTemplates.#setupWaveformResolution(el, loudnessData.length);
+            ).build();
         return el;
-    }
-
-    static #setupWaveformResolution(container: HTMLElement, totalBars: number) {
-        let ro: ResizeObserver | null = null;
-
-        const update = () => {
-            if (totalBars === 0) return;
-            const width = container.clientWidth;
-            if (width === 0) return;
-            const targetBars = Math.max(1, Math.floor(width / 2.5));
-            const stride = Math.max(1, Math.ceil(totalBars / targetBars));
-
-            const bars = container.querySelectorAll<HTMLElement>(".waveform-bar");
-            bars.forEach((bar, i) => {
-                bar.style.display = i % stride === 0 ? "" : "none";
-            });
-        };
-
-        requestAnimationFrame(() => {
-            update();
-            if (!ro) {
-                ro = new ResizeObserver(update);
-                ro.observe(container);
-            }
-        });
     }
 
     static repostIndicator(repost: Repost) {
@@ -402,7 +375,7 @@ export class TrackTemplates {
                             horizontal(
                                 TrackTemplates.playButton(track),
                                 TrackTemplates.waveform(track, track.processed ? JSON.parse(track.loudness_data) : []),
-                            ).classes("align-children", "padded-large", "bordered", "glass", "rounded-max")
+                            ).classes("align-children", "padded-large", "bordered", "glass", "rounded-max", "noflexwrap")
                              .styles("padding-right", "30px"),
                         ).build(),
                     horizontal(

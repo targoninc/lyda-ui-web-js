@@ -2,7 +2,6 @@ import { GenericTemplates, horizontal, vertical } from "../generic/GenericTempla
 import { AnyNode, compute, create, Signal, signal, signalMap, when } from "@targoninc/jess";
 import {currentTrackId, currentUser, loadingAudio, manualQueue, playingFrom, playingHere} from "../../state.ts";
 import { InteractionStateManager } from "../../Classes/InteractionStateManager.ts";
-import { UserTemplates } from "../account/UserTemplates.ts";
 import { getPlayIcon, Util } from "../../Classes/Util.ts";
 import { TrackTemplates } from "./TrackTemplates.ts";
 import { DefaultImages } from "../../Enums/DefaultImages.ts";
@@ -15,7 +14,6 @@ import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
-import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import { InteractionTemplates } from "../InteractionTemplates.ts";
 import { button } from "@targoninc/jess-components";

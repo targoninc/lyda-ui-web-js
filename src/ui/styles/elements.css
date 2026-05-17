@@ -837,6 +837,20 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     background: var(--blue);
 }
 
+@media (max-width: 1100px) {
+    .waveform-bar:nth-child(even) { display: none; }
+}
+
+@media (max-width: 800px) {
+    .waveform-bar:nth-child(3n+2), .waveform-bar:nth-child(3n+3) { display: none; }
+    .waveform-bar:nth-child(3n+1) { display: block; }
+}
+
+@media (max-width: 500px) {
+    .waveform-bar:nth-child(4n+2), .waveform-bar:nth-child(4n+3), .waveform-bar:nth-child(4n+4) { display: none; }
+    .waveform-bar:nth-child(4n+1) { display: block; }
+}
+
 .feed-track {
     border: 1px solid var(--color-7);
 }
