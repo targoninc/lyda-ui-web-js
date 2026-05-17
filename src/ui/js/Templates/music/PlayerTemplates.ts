@@ -504,8 +504,20 @@ export class PlayerTemplates {
     }
 
     static trackInfo(track: Track, trackUser: User) {
+        const titleEl = create("div")
+            .classes("player-track-title")
+            .children(MusicTemplates.title(EntityType.track, track.title, track.id, PlayerTemplates.trackIcons(track), undefined, true))
+            .build() as HTMLElement;
+
+        setTimeout(() => {
+            const span = titleEl.querySelector("span");
+            if (span && span.scrollWidth > titleEl.clientWidth) {
+                titleEl.classList.add("scrolling");
+            }
+        }, 200);
+
         return vertical(
-            MusicTemplates.title(EntityType.track, track.title, track.id, PlayerTemplates.trackIcons(track)),
+            titleEl,
             UserTemplates.userLink(UserWidgetContext.player, trackUser),
             horizontal(PlayerTemplates.noSubscriptionInfo(), PlayerTemplates.playingFrom()),
         )
@@ -525,7 +537,15 @@ export class PlayerTemplates {
 
         const btn = GenericTemplates.roundIconButton(
             { icon: "more_horiz", adaptive: true },
-            () => PopoverTemplates.toggle(popover, btn),
+            () => {
+                const r = btn.getBoundingClientRect();
+                popover.style.position = "fixed";
+                popover.style.bottom = `${window.innerHeight - r.top + 2}px`;
+                popover.style.right = `${window.innerWidth - r.right}px`;
+                popover.style.top = "auto";
+                popover.style.left = "auto";
+                popover.togglePopover();
+            },
             t("OPEN_MENU"),
             ["showOnMidBreakpoint"],
         );

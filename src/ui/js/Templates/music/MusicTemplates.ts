@@ -268,7 +268,7 @@ export class MusicTemplates {
         });
     }
 
-    static title(type: EntityType, title: string, id: number, icons: AnyNode[] = [], textSize: TextSize = TextSize.large, goToEntity = true) {
+    static title(type: EntityType, title: string, id: number, icons: AnyNode[] = [], textSize: TextSize = TextSize.large, goToEntity = true, noTruncate = false) {
         let baseRoute = RoutePath.track;
         switch (type) {
             case EntityType.album:
@@ -285,7 +285,7 @@ export class MusicTemplates {
                 create("span")
                     .classes(...(goToEntity ? ["clickable", "pointer"] : ["_"]), textSize)
                     .title(title)
-                    .text(truncateText(title, 75))
+                    .text(noTruncate ? title : truncateText(title, 75))
                     .onclick(() => goToEntity ? navigate(`${baseRoute}/${id}`) : null)
                     .build(),
                 ...icons,

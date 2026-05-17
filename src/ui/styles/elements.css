@@ -1606,6 +1606,10 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 /* ─── Generic Popover & Context Menu ─────────────────────── */
+[popover]:not(:popover-open) {
+    display: none;
+}
+
 .generic-popover {
     min-width: 180px;
     padding: 4px;
@@ -1617,10 +1621,6 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .generic-popover::backdrop {
     background: transparent;
-}
-
-.feed-mobile-popover:not(:popover-open) {
-    display: none;
 }
 
 @media (max-width: 600px) {
@@ -1684,4 +1684,28 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 .context-menu-icon {
     width: 16px;
     height: 16px;
+}
+
+/* ─── Player Track Title Scroll ───────────────────────────── */
+.player-track-title {
+    max-width: 200px;
+    overflow: hidden;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+.player-track-title > .flex > span {
+    display: inline-block;
+    transition: none;
+}
+
+.player-track-title.scrolling > .flex > span {
+    animation: scroll-title 10s ease-in-out infinite;
+    padding-right: 40px;
+}
+
+@keyframes scroll-title {
+    0%, 15% { transform: translateX(0); }
+    40%, 60% { transform: translateX(calc(-100% + 200px)); }
+    85%, 100% { transform: translateX(0); }
 }
