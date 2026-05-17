@@ -1,8 +1,8 @@
-import { Signal, StringOrSignal } from "@targoninc/jess";
+import { Signal, StringOrSignal, AnyNode } from "@targoninc/jess";
 
 export interface FeedColumn<T> {
     key: string;
-    header: string;
+    header: StringOrSignal;
     render: (item: T, index: number) => any;
 }
 
@@ -22,4 +22,5 @@ export interface FeedConfig<T extends { id: number }> {
     onPlayToggle: (item: T) => Promise<void>;
     isPlaying: (itemId: number) => Signal<boolean>;
     isLoading?: (itemId: number) => Signal<boolean>;
+    buildInteractions?: (item: T) => AnyNode[];
 }

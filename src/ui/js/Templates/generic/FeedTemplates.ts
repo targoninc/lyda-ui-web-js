@@ -1,9 +1,10 @@
-import { compute, create, Signal, signal, signalMap, when, AnyElement } from "@targoninc/jess";
+import { compute, create, Signal, signal, signalMap, when, AnyNode, nullElement } from "@targoninc/jess";
 import { GenericTemplates } from "./GenericTemplates.ts";
 import { getPlayIcon, copy, Util } from "../../Classes/Util.ts";
 import { t } from "../../../locales";
 import { FeedColumn, FeedMenuAction, FeedConfig } from "../../Models/FeedConfig.ts";
 import { ContextMenuTemplates } from "./ContextMenuTemplates.ts";
+import { InteractionTemplates } from "../InteractionTemplates.ts";
 import { currentTrackId, playingHere } from "../../state.ts";
 import { PlayManager } from "../../Streaming/PlayManager.ts";
 import { QueueManager } from "../../Streaming/QueueManager.ts";
@@ -26,7 +27,7 @@ function uid(): string {
 }
 
 export class FeedTemplates {
-    static create<T extends { id: number }>(config: FeedConfig<T>): AnyElement {
+    static create<T extends { id: number }>(config: FeedConfig<T>): any {
         const items$ = signal<T[]>([]);
         const loading$ = signal(false);
         const hasMore$ = signal(true);
@@ -46,47 +47,58 @@ export class FeedTemplates {
 
         const empty = compute((ii, ll) => ii.length === 0 && !ll, items$, loading$);
         const feedId = config.id || uid();
-        const colCount = config.columns.length;
 
-        const el = create("div")
-            .classes("feed-container", "flex-v", "fullWidth")
+        const el = create("table")
+            .classes("feed-table", "fullWidth")
             .id(feedId)
             .children(
-                create("div")
-                    .classes("feed-header", "feed-row", `feed-cols-${colCount}`)
+                create("thead")
+                    .classes("feed-header")
                     .children(
-                        create("div").classes("feed-idx-h").text("#").build(),
-                        ...config.columns.map(c =>
-                            create("div").classes("feed-col-h").text(c.header).build(),
-                        ),
-                        create("div").classes("feed-menu-h").build(),
+                        create("tr").classes("feed-header-row").children(
+                            create("th").classes("feed-idx-h").text("#").build(),
+                            ...config.columns.map(c =>
+                                create("th").classes("feed-col-h").text(c.header).build(),
+                            ),
+                            create("th").classes("feed-interact-h").build(),
+                            create("th").classes("feed-menu-h").build(),
+                        ).build(),
                     ).build(),
                 signalMap(
                     items$,
-                    create("div").classes("flex-v", "no-gap", "fullWidth"),
-                    (item, i) => FeedTemplates.#row(item, i, config, feedId, colCount),
+                    create("tbody").classes("feed-rows"),
+                    (item, i) => FeedTemplates.#row(item, i, config, feedId),
                 ),
-                create("div").classes("feed-sentinel").id(`${feedId}-sentinel`).build(),
-                when(loading$, GenericTemplates.loadingSpinner()),
-                when(empty, GenericTemplates.noTracks()),
             ).build();
 
         setTimeout(() => {
             load();
-            const sen = document.getElementById(`${feedId}-sentinel`);
-            if (sen) {
+            const rowsEl = el.querySelector("tbody");
+            if (rowsEl) {
                 const obs = new IntersectionObserver(
-                    e => { if (e[0].isIntersecting) load(); },
+                    e => {
+                        if (e[0].isIntersecting && e[0].target === rowsEl.lastElementChild) {
+                            load();
+                        }
+                    },
                     { rootMargin: "300px" },
                 );
-                obs.observe(sen);
+                const watchLast = () => {
+                    const last = rowsEl.lastElementChild;
+                    if (last) {
+                        obs.disconnect();
+                        obs.observe(last);
+                    }
+                };
+                rowsEl.addEventListener("DOMNodeInserted", watchLast);
+                watchLast();
             }
         });
 
         return el;
     }
 
-    static feed(type: FeedType, user?: { id?: number; username?: string; displayname?: string }): AnyElement {
+    static feed(type: FeedType, user?: { id?: number; username?: string; displayname?: string }): any {
         const pf: PlayingFrom = {
             type,
             name: getFeedDisplayName(type, user?.displayname) ?? type,
@@ -98,8 +110,8 @@ export class FeedTemplates {
             id: `feed-${type}`,
             columns: [
                 {
-                    key: "entry",
-                    header: "",
+                    key: "title",
+                    header: t("TRACK_TITLE"),
                     render: (track) => {
                         const icons: any[] = [];
                         if (track.visibility === "private") icons.push(GenericTemplates.lock());
@@ -121,10 +133,14 @@ export class FeedTemplates {
                                                 create("span").classes("feed-title").text(track.title).build(),
                                                 ...icons,
                                             ).build(),
-                                        create("span").classes("feed-artist", "color-dim").text(track.user?.displayname ?? "").build(),
                                     ).build(),
-                            ).build() as HTMLElement;
+                            ).build();
                     },
+                },
+                {
+                    key: "artist",
+                    header: t("ARTIST"),
+                    render: (track) => create("span").classes("feed-artist", "color-dim").text(track.user?.displayname ?? "").build(),
                 },
             ],
             pageSize: 10,
@@ -145,6 +161,9 @@ export class FeedTemplates {
                 }
                 return items;
             },
+            buildInteractions: (track): any[] => [
+                InteractionTemplates.interactions(EntityType.track, track),
+            ],
             onPlayToggle: async (track) => {
                 if (currentTrackId.value === track.id && playingHere.value) {
                     await PlayManager.pauseAsync(track.id);
@@ -157,8 +176,8 @@ export class FeedTemplates {
     }
 
     static #row<T extends { id: number }>(
-        item: T, index: number, config: FeedConfig<T>, feedId: string, colCount: number,
-    ): AnyElement {
+        item: T, index: number, config: FeedConfig<T>, feedId: string,
+    ): any {
         const playing = config.isPlaying(item.id);
         const loading = config.isLoading ? config.isLoading(item.id) : signal(false);
         const icon = getPlayIcon(playing, loading) as Signal<string>;
@@ -167,26 +186,38 @@ export class FeedTemplates {
 
         const ctx = ContextMenuTemplates.create(item, config.buildMenuActions(item), popId);
 
-        return create("div")
-            .classes("feed-row", `feed-cols-${colCount}`, cls)
+        const interactEl = config.buildInteractions
+            ? create("div").classes("feed-hover-btns", "flex", "align-children").children(...config.buildInteractions(item)).build()
+            : nullElement();
+
+        return create("tr")
+            .classes("feed-row", cls)
             .oncontextmenu(ctx.onContextMenu)
             .children(
-                FeedTemplates.#idxCell(item, index, icon, loading, config),
+                create("td").classes("feed-idx-cell")
+                    .children(FeedTemplates.#idxCell(item, index, icon, loading, config))
+                    .build(),
                 ...config.columns.map(c =>
-                    create("div").classes("feed-cell", `feed-cell-${c.key}`).children(c.render(item, index)).build(),
+                    create("td").classes("feed-cell", `feed-cell-${c.key}`)
+                        .children(c.render(item, index))
+                        .build(),
                 ),
-                create("div").classes("feed-menu-cell").children(ctx.button).build(),
-                ctx.popover,
+                create("td").classes("feed-interact-cell")
+                    .children(interactEl)
+                    .build(),
+                create("td").classes("feed-menu-cell")
+                    .children(ctx.button, ctx.popover)
+                    .build(),
             ).build();
     }
 
     static #idxCell<T extends { id: number }>(
         item: T, index: number, icon: Signal<string>, loading: Signal<boolean>, config: FeedConfig<T>,
-    ): AnyElement {
+    ): any {
         const handle = () => config.onPlayToggle(item);
 
         return create("div")
-            .classes("feed-idx-cell")
+            .classes("feed-idx-cell-inner")
             .onclick(handle)
             .children(
                 create("span").classes("feed-idx-num").text(String(index + 1)).build(),

@@ -32,7 +32,7 @@ export class ContextMenuTemplates {
 
         const onContextMenu = (e: MouseEvent) => {
             e.preventDefault();
-            PopoverTemplates.show(popover, e.currentTarget as HTMLElement);
+            PopoverTemplates.showAtPoint(popover, e.clientX, e.clientY);
         };
 
         return { button, popover, onContextMenu };
