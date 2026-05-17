@@ -435,7 +435,7 @@ export class UserTemplates {
         });
 
         const cardActions = (list: TrackList): FeedMenuAction<TrackList>[] => [
-            { label: t("QUEUE"), icon: "queue", onclick: (l) => l.tracks?.forEach(t => QueueManager.addToManualQueue(t.track_id)) },
+            { label: t("QUEUE"), icon: "queue", onclick: (l) => l.tracks?.forEach(t => QueueManager.addToManualQueue(t.track_id)), show: (l) => !!l.tracks?.length },
         ];
 
         const albumColumns = [
@@ -456,6 +456,11 @@ export class UserTemplates {
                                 .build(),
                         ).build();
                 },
+            },
+            {
+                key: "tracks",
+                header: t("TRACKS"),
+                render: (list: TrackList) => create("span").classes("hideOnMidBreakpoint").text(String(list.tracks?.length ?? 0)).build(),
             },
             {
                 key: "artist",
@@ -482,6 +487,11 @@ export class UserTemplates {
                                 .build(),
                         ).build();
                 },
+            },
+            {
+                key: "tracks",
+                header: t("TRACKS"),
+                render: (list: TrackList) => create("span").classes("hideOnMidBreakpoint").text(String(list.tracks?.length ?? 0)).build(),
             },
             {
                 key: "artist",
@@ -862,6 +872,11 @@ export class UserTemplates {
                 },
             },
             {
+                key: "tracks",
+                header: t("TRACKS"),
+                render: (list: TrackList) => create("span").classes("hideOnMidBreakpoint").text(String(list.tracks?.length ?? 0)).build(),
+            },
+            {
                 key: "artist",
                 header: t("ARTIST"),
                 render: (list: TrackList) => list.user ? UserTemplates.userLink(UserWidgetContext.card, list.user) : nullElement(),
@@ -888,6 +903,11 @@ export class UserTemplates {
                 },
             },
             {
+                key: "tracks",
+                header: t("TRACKS"),
+                render: (list: TrackList) => create("span").classes("hideOnMidBreakpoint").text(String(list.tracks?.length ?? 0)).build(),
+            },
+            {
                 key: "artist",
                 header: t("ARTIST"),
                 render: (list: TrackList) => list.user ? UserTemplates.userLink(UserWidgetContext.card, list.user) : nullElement(),
@@ -901,7 +921,7 @@ export class UserTemplates {
                 columns: libAlbumCols,
                 pageSize: 10,
                 fetchPage: (offset) => Api.getLikedAlbums(user.value.id, user.value.username, offset, "").then(r => r ?? []) as any,
-                buildMenuActions: (list) => [{ label: t("QUEUE"), icon: "queue", onclick: (l) => l.tracks?.forEach(t => QueueManager.addToManualQueue(t.track_id)) }],
+                buildMenuActions: (list) => [{ label: t("QUEUE"), icon: "queue", onclick: (l) => l.tracks?.forEach(t => QueueManager.addToManualQueue(t.track_id)), show: (l) => !!l.tracks?.length }],
                 onPlayToggle: async (list) => { const ft = list.tracks?.[0]?.track; if (ft) await AlbumActions.startTrackInAlbum(list as Album, ft, true); },
                 isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
                 dateRender: (list) => GenericTemplates.timestamp(list.created_at, ["hideOnSmallBreakpoint"]),
@@ -911,7 +931,7 @@ export class UserTemplates {
                 columns: libPlaylistCols,
                 pageSize: 10,
                 fetchPage: (offset) => Api.getLikedPlaylists(user.value.id, user.value.username, offset, "").then(r => r ?? []) as any,
-                buildMenuActions: (list) => [{ label: t("QUEUE"), icon: "queue", onclick: (l) => l.tracks?.forEach(t => QueueManager.addToManualQueue(t.track_id)) }],
+                buildMenuActions: (list) => [{ label: t("QUEUE"), icon: "queue", onclick: (l) => l.tracks?.forEach(t => QueueManager.addToManualQueue(t.track_id)), show: (l) => !!l.tracks?.length }],
                 onPlayToggle: async (list) => { const ft = list.tracks?.[0]?.track; if (ft) await PlaylistActions.startTrackInPlaylist(list as Playlist, ft, true); },
                 isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
                 dateRender: (list) => GenericTemplates.timestamp(list.created_at, ["hideOnSmallBreakpoint"]),

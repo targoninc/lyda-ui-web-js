@@ -1438,10 +1438,6 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 @media screen and (max-width: 600px) {
-    .waveform-bar.odd {
-        display: none;
-    }
-
     .cover-container.card-cover {
         --cover-size: 90px;
     }
@@ -1572,6 +1568,11 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 .feed-cell-title .flex, .feed-cell-title .flex-v {
     min-width: 0;
     overflow: hidden;
+}
+
+.feed-cell-tracks {
+    text-align: center;
+    width: 1%;
 }
 
 .feed-inline-cover {

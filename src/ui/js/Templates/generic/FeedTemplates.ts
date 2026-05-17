@@ -206,7 +206,7 @@ export class FeedTemplates {
                             ? Util.getImage(track.id, MediaFileType.trackCover)
                             : DefaultImages[EntityType.track];
                         return create("div")
-                            .classes("flex", "align-children", "small-gap")
+                            .classes("flex", "align-children", "small-gap", "noflexwrap")
                             .children(
                                 create("img")
                                     .classes("feed-inline-cover")
