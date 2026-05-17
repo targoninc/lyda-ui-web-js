@@ -385,23 +385,10 @@ export class PlayerTemplates {
             .children(
                 vertical(PlayerTemplates.roundPlayButton(track)).classes("align-center"),
                 vertical(
-                    MusicTemplates.title(EntityType.track, track.title, track.id, PlayerTemplates.trackIcons(track)),
+                    PlayerTemplates.playerTrackTitle(track, () => { playerExpanded.value = !playerExpanded.value; }),
                     PlayerTemplates.trackScrubbar(track, bufferPercent, positionPercent),
                 ).classes("flex-grow", "no-gap")
                  .build(),
-                vertical(
-                    GenericTemplates.roundIconButton(
-                        {
-                            icon: compute(
-                                (p): string => (p ? "keyboard_arrow_down" : "keyboard_arrow_up"),
-                                playerExpanded,
-                            ),
-                            adaptive: true,
-                        },
-                        async () => (playerExpanded.value = !playerExpanded.value),
-                        t("TOGGLE_EXPANDED_PLAYER"),
-                    ),
-                ).classes("align-center"),
             ).build();
     }
 
@@ -503,21 +490,29 @@ export class PlayerTemplates {
         return track.visibility === "private" ? [GenericTemplates.lock()] : [];
     }
 
-    static trackInfo(track: Track, trackUser: User) {
-        const titleEl = create("div")
-            .classes("player-track-title")
-            .children(MusicTemplates.title(EntityType.track, track.title, track.id, PlayerTemplates.trackIcons(track), undefined, true))
+    static playerTrackTitle(track: Track, onTitleClick?: () => void) {
+        const el = create("div")
+            .classes("player-track-title", "clickable", "pointer")
+            .onclick(onTitleClick ? (e: Event) => { e.stopPropagation(); onTitleClick(); } : undefined)
+            .children(MusicTemplates.title(EntityType.track, track.title, track.id, PlayerTemplates.trackIcons(track), undefined, !onTitleClick, true))
             .build() as HTMLElement;
 
         setTimeout(() => {
-            const span = titleEl.querySelector("span");
-            if (span && span.scrollWidth > titleEl.clientWidth) {
-                titleEl.classList.add("scrolling");
+            const span = el.querySelector("span");
+            if (span && span.scrollWidth > el.clientWidth) {
+                el.classList.add("scrolling");
             }
         }, 200);
 
+        return el;
+    }
+
+    static trackInfo(track: Track, trackUser: User) {
         return vertical(
-            titleEl,
+            PlayerTemplates.playerTrackTitle(track, () => {
+                playerExpanded.value = false;
+                navigate(`/track/${track.id}`);
+            }),
             UserTemplates.userLink(UserWidgetContext.player, trackUser),
             horizontal(PlayerTemplates.noSubscriptionInfo(), PlayerTemplates.playingFrom()),
         )
