@@ -17,7 +17,7 @@ export interface FeedConfig<T extends { id: number }> {
     id?: string;
     columns: FeedColumn<T>[];
     pageSize: number;
-    fetchPage: (offset: number, limit: number, filter?: string) => Promise<T[]>;
+    fetchPage: (offset: number, limit: number, filter?: string, sortBy?: string, sortDir?: 'asc' | 'desc') => Promise<T[]>;
     buildMenuActions: (item: T) => FeedMenuAction<T>[];
     onPlayToggle: (item: T) => Promise<void>;
     isPlaying: (itemId: number) => Signal<boolean>;

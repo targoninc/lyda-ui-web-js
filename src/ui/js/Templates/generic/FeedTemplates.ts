@@ -39,6 +39,9 @@ export class FeedTemplates {
         const loading$ = signal(false);
         const hasMore$ = signal(true);
         const search$ = signal("");
+        const sortBy$ = signal<string | null>(null);
+        const sortDir$ = signal<'asc' | 'desc' | null>(null);
+        const colWidths: Record<string, number> = {};
         const ps = config.pageSize;
         let page = 0;
 
@@ -49,11 +52,23 @@ export class FeedTemplates {
             load();
         };
 
+        const cycleSort = (key: string) => {
+            if (sortBy$.value !== key) {
+                sortBy$.value = key;
+                sortDir$.value = 'asc';
+            } else if (sortDir$.value === 'asc') {
+                sortDir$.value = 'desc';
+            } else {
+                sortBy$.value = null;
+                sortDir$.value = null;
+            }
+        };
+
         const load = async () => {
             if (loading$.value || !hasMore$.value) return;
             loading$.value = true;
             const offset = page * ps;
-            const next = await config.fetchPage(offset, ps, search$.value);
+            const next = await config.fetchPage(offset, ps, search$.value, sortBy$.value ?? undefined, sortDir$.value ?? undefined);
             if (!next || next.length < ps) hasMore$.value = false;
             if (next) items$.value = [...items$.value, ...next];
             page += 1;
@@ -61,6 +76,8 @@ export class FeedTemplates {
         };
 
         if (config.showSearch) search$.subscribe(reload);
+        sortBy$.subscribe(reload);
+        sortDir$.subscribe(reload);
 
         const empty = compute((ii, ll) => ii.length === 0 && !ll, items$, loading$);
         const feedId = config.id || uid();
@@ -101,6 +118,8 @@ export class FeedTemplates {
             mobilePopover.showPopover();
         };
 
+        const sortKey = compute((sb, sd) => sb && sd ? `${sb}-${sd}` : null, sortBy$, sortDir$);
+
         const el = create("div")
             .classes("feed-wrapper", "flex-v", "fullWidth", config.compact ? "feed-compact" : "_")
             .id(feedId)
@@ -121,31 +140,82 @@ export class FeedTemplates {
                 ),
                 create("table")
                     .classes("feed-table", "fullWidth")
+                    .id(`${feedId}-table`)
                     .children(
                         compute(
-                            (ii) => {
+                            (ii, sk) => {
                                 if (ii.length === 0) return nullElement();
+                                const sb = sortBy$.value;
+                                const sd = sortDir$.value;
+                                const ths: any[] = [
+                                    create("th").classes("feed-idx-h").text("#").build(),
+                                ];
+                                for (const c of config.columns) {
+                                    const isSorted = sb === c.key;
+                                    const arrow = isSorted ? (sd === 'asc' ? ' ▲' : ' ▼') : '';
+                                    const th = create("th")
+                                        .classes("feed-col-h", ...(c.key === "artist" ? ["hideOnSmallBreakpoint"] : []))
+                                        .text(`${c.header}${arrow}`)
+                                        .build() as HTMLElement;
+                                    th.style.cursor = "pointer";
+                                    th.onclick = () => cycleSort(c.key);
+                                    const resizer = create("div").classes("col-resizer")
+                                            .onmousedown((e: MouseEvent) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                const startX = e.clientX;
+                                                const startW = th.offsetWidth;
+                                                const onMove = (me: MouseEvent) => {
+                                                    const w = Math.max(30, startW + me.clientX - startX);
+                                                    const pw = w + "px";
+                                                    th.style.width = pw;
+                                                    th.style.minWidth = pw;
+                                                    th.style.maxWidth = pw;
+                                                    colWidths[c.key] = w;
+                                                    const colIdx = Array.from(th.parentElement!.children).indexOf(th);
+                                                    const tbody = document.getElementById(`${feedId}-table`)?.querySelector("tbody");
+                                                    if (tbody) {
+                                                        tbody.querySelectorAll<HTMLElement>(`td:nth-child(${colIdx + 1})`).forEach(td => {
+                                                            td.style.width = pw;
+                                                            td.style.maxWidth = pw;
+                                                            td.style.minWidth = pw;
+                                                        });
+                                                    }
+                                                };
+                                                const onUp = () => {
+                                                    document.removeEventListener("mousemove", onMove);
+                                                    document.removeEventListener("mouseup", onUp);
+                                                };
+                                                document.addEventListener("mousemove", onMove);
+                                                document.addEventListener("mouseup", onUp);
+                                            })
+                                            .build() as HTMLElement;
+                                        th.appendChild(resizer);
+                                    if (colWidths[c.key]) {
+                                        const pw = colWidths[c.key] + "px";
+                                        th.style.width = pw;
+                                        th.style.maxWidth = pw;
+                                    }
+                                    ths.push(th);
+                                }
+                                ths.push(
+                                    ...(hasDate ? [create("th").classes("feed-date-h", "hideOnMidBreakpoint").text(t("RELEASE_DATE")).build()] : []),
+                                    ...(hasActionDate ? [create("th").classes("feed-date-h", "hideOnMidBreakpoint").text(config.actionDateHeader ?? "").build()] : []),
+                                    create("th").classes("feed-interact-h", "hideOnSmallBreakpoint").build(),
+                                    create("th").classes("feed-menu-h", "hideOnSmallBreakpoint").build(),
+                                );
                                 return create("thead")
                                     .classes("feed-header")
                                     .children(
-                                        create("tr").classes("feed-header-row").children(
-                                            create("th").classes("feed-idx-h").text("#").build(),
-                                            ...config.columns.map(c =>
-                                                create("th").classes("feed-col-h", ...(c.key === "artist" ? ["hideOnSmallBreakpoint"] : [])).text(c.header).build(),
-                                            ),
-                                            ...(hasDate ? [create("th").classes("feed-date-h", "hideOnMidBreakpoint").text(t("RELEASE_DATE")).build()] : []),
-                                            ...(hasActionDate ? [create("th").classes("feed-date-h", "hideOnMidBreakpoint").text(config.actionDateHeader ?? "").build()] : []),
-                                            create("th").classes("feed-interact-h", "hideOnSmallBreakpoint").build(),
-                                            create("th").classes("feed-menu-h", "hideOnSmallBreakpoint").build(),
-                                        ).build(),
+                                        create("tr").classes("feed-header-row").children(...ths).build(),
                                     ).build();
                             },
-                            items$,
+                            items$, sortKey,
                         ),
                         signalMap(
                             items$,
                             create("tbody").classes("feed-rows"),
-                            (item, i) => FeedTemplates.#row(item, i, config, feedId, rebuildAndShowMobile),
+                            (item, i) => FeedTemplates.#row(item, i, config, feedId, rebuildAndShowMobile, colWidths),
                         ),
                     ).build(),
                 compute(
@@ -282,7 +352,7 @@ export class FeedTemplates {
 
     static #row<T extends { id: number }>(
         item: T, index: number, config: FeedConfig<T>, feedId: string,
-        showMobileMenu: (item: T) => void,
+        showMobileMenu: (item: T) => void, colWidths: Record<string, number>,
     ): any {
         const playing = config.isPlaying(item.id);
         const loading = config.isLoading ? config.isLoading(item.id) : signal(false);
@@ -305,11 +375,17 @@ export class FeedTemplates {
                 create("td").classes("feed-idx-cell")
                     .children(FeedTemplates.#idxCell(item, index, icon, loading, config))
                     .build(),
-                ...config.columns.map(c =>
-                    create("td").classes("feed-cell", `feed-cell-${c.key}`, ...(c.key === "artist" ? ["hideOnSmallBreakpoint"] : []))
+                ...config.columns.map((c, ci) => {
+                    const td = create("td").classes("feed-cell", `feed-cell-${c.key}`, ...(c.key === "artist" ? ["hideOnSmallBreakpoint"] : []))
                         .children(c.render(item, index))
-                        .build(),
-                ),
+                        .build() as HTMLElement;
+                    if (colWidths[c.key]) {
+                        const pw = colWidths[c.key] + "px";
+                        td.style.width = pw;
+                        td.style.maxWidth = pw;
+                    }
+                    return td;
+                }),
                 ...(!!config.dateRender ? [create("td").classes("feed-cell", "feed-cell-date", "hideOnMidBreakpoint")
                     .children(config.dateRender(item))
                     .build()] : []),
