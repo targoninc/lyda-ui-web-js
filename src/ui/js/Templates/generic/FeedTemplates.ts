@@ -259,9 +259,9 @@ export class FeedTemplates {
                     },
                 },
             ],
-            pageSize: 10,
+            pageSize: type === FeedType.explore ? 100 : 10,
             fetchPage: async (offset, limit, filter, sortBy, sortDir) => {
-                const params: any = { offset, filter };
+                const params: any = { offset, limit, filter };
                 if (user?.id) params.id = user.id;
                 if (type === FeedType.following) params.filter = filter || "all";
                 params.sortBy = sortBy || "";
