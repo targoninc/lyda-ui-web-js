@@ -47,6 +47,7 @@ export class PageTemplates {
         [RoutePath.settings]: SettingsTemplates.settingsPage,
         [RoutePath.statistics]: PageTemplates.statisticsPage,
         [RoutePath.track]: PageTemplates.trackPage,
+        [RoutePath.editTrack]: TrackEditTemplates.editTrackPage,
         [RoutePath.upload]: TrackEditTemplates.uploadPage,
         [RoutePath.library]: PageTemplates.libraryPage,
         [RoutePath.logout]: PageTemplates.logoutPage,

@@ -9,6 +9,7 @@ export enum RoutePath {
     album = "album",
     playlist = "playlist",
     track = "track",
+    editTrack = "edit-track",
     settings = "settings",
     statistics = "statistics",
     royaltyManagement = "royalty-management",
@@ -79,6 +80,11 @@ export const routes: Route[] = [
         path: RoutePath.track,
         title: "Track",
         params: ["id", "code"]
+    },
+    {
+        path: RoutePath.editTrack,
+        title: "Edit track",
+        params: ["id"]
     },
     {
         path: RoutePath.settings,

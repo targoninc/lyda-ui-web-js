@@ -1,12 +1,12 @@
-import { FormTemplates } from "../generic/FormTemplates.ts";
-import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
-import { Icons } from "../../Enums/Icons.ts";
-import { UserTemplates } from "../account/UserTemplates.ts";
-import { Images } from "../../Enums/Images.ts";
-import { TrackActions } from "../../Actions/TrackActions.ts";
-import { downloadFile, target, Util } from "../../Classes/Util.ts";
-import { AudioUpload } from "../../Classes/AudioUpload.ts";
-import { Ui } from "../../Classes/Ui.ts";
+import {FormTemplates} from "../generic/FormTemplates.ts";
+import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
+import {Icons} from "../../Enums/Icons.ts";
+import {UserTemplates} from "../account/UserTemplates.ts";
+import {Images} from "../../Enums/Images.ts";
+import {TrackActions} from "../../Actions/TrackActions.ts";
+import {downloadFile, target, Util} from "../../Classes/Util.ts";
+import {AudioUpload} from "../../Classes/AudioUpload.ts";
+import {notify, Ui} from "../../Classes/Ui.ts";
 import {
     AnyElement,
     AnyNode,
@@ -23,9 +23,9 @@ import {
     TypeOrSignal,
     when,
 } from "@targoninc/jess";
-import { AlbumActions } from "../../Actions/AlbumActions.ts";
-import { reload } from "../../Routing/Router.ts";
-import { PlayManager } from "../../Streaming/PlayManager.ts";
+import {AlbumActions} from "../../Actions/AlbumActions.ts";
+import {navigate, reload, Route} from "../../Routing/Router.ts";
+import {PlayManager} from "../../Streaming/PlayManager.ts";
 import {
     button,
     checkbox,
@@ -37,24 +37,25 @@ import {
     textarea,
     toggle,
 } from "@targoninc/jess-components";
-import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import { UploadInfo } from "../../Models/UploadInfo.ts";
-import { UploadableTrack } from "../../Models/UploadableTrack.ts";
-import { TrackCollaborator } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
-import { Genre } from "@targoninc/lyda-shared/src/Enums/Genre";
-import { TrackValidators } from "../../Classes/Validators/TrackValidators.ts";
-import { ProgressPart } from "../../Models/ProgressPart.ts";
-import { CollaboratorType } from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
-import { Api } from "../../Api/Api.ts";
-import { SearchResult } from "@targoninc/lyda-shared/src/Models/SearchResult";
-import { currentUser } from "../../state.ts";
-import { MusicTemplates } from "./MusicTemplates.ts";
-import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
-import { t } from "../../../locales";
-import { Visibility } from "@targoninc/lyda-shared/src/Enums/Visibility.ts";
-import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
-import { TrackTemplates } from "./TrackTemplates.ts";
-import { CoverContext } from "../../Enums/CoverContext.ts";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {UploadInfo} from "../../Models/UploadInfo.ts";
+import {UploadableTrack} from "../../Models/UploadableTrack.ts";
+import {TrackCollaborator} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
+import {Genre} from "@targoninc/lyda-shared/src/Enums/Genre";
+import {TrackValidators} from "../../Classes/Validators/TrackValidators.ts";
+import {ProgressPart} from "../../Models/ProgressPart.ts";
+import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
+import {Api} from "../../Api/Api.ts";
+import {SearchResult} from "@targoninc/lyda-shared/src/Models/SearchResult";
+import {currentUser} from "../../state.ts";
+import {MusicTemplates} from "./MusicTemplates.ts";
+import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
+import {t} from "../../../locales";
+import {Visibility} from "@targoninc/lyda-shared/src/Enums/Visibility.ts";
+import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
+import {TrackTemplates} from "./TrackTemplates.ts";
+import {CoverContext} from "../../Enums/CoverContext.ts";
+import {NotificationType} from "../../Enums/NotificationType.ts";
 
 export class TrackEditTemplates {
     static uploadPage() {
@@ -94,75 +95,83 @@ export class TrackEditTemplates {
     static openEditPageButton(track: Track) {
         return button({
             text: t("EDIT"),
-            icon: { icon: "edit" },
+            icon: {icon: "edit"},
             onclick: async () => {
-                TrackActions.getTrackEditModal(track);
+                navigate("edit-track/" + track.id);
             },
         });
+    }
+
+    static editTrackPage(route: Route, params: Record<string, string>) {
+        const trackId = parseInt(params["id"]);
+        const track = signal<Track | null>(null);
+        Api.getTrackById(trackId).then(d => {
+            if (d?.canEdit) {
+                track.value = d.track;
+                document.title = `${t("EDIT_TRACK")} - ${d.track.title}`;
+            }
+        });
+
+        const state = compute(t => <UploadableTrack>{
+            ...t,
+            release_date: new Date(t?.release_date ?? Date.now()),
+        }, track);
+
+        return vertical(
+            when(track, create("div")
+            .text(t("TRACK_NOT_FOUND"))
+            .build(), true),
+            horizontal(
+                create("img")
+                    .classes("icon", "svg")
+                    .styles("width", "30px", "height", "auto")
+                    .attributes("src", Icons.PEN)
+                    .build(),
+                create("h2")
+                    .text(t("EDIT_TRACK"))
+                    .build(),
+            ).build(),
+            create("p")
+                .text(t("EDIT_TRACK_DETAILS_BELOW"))
+                .build(),
+            TrackEditTemplates.upDownButtons(state, true),
+            TrackEditTemplates.trackEdit(state, signal<string[]>([])),
+            horizontal(
+                button({
+                    text: t("SAVE"),
+                    icon: {icon: "check"},
+                    classes: ["positive"],
+                    onclick: async () => {
+                        await Api.updateTrackFull(state.value);
+                        notify(`${t("TRACK_UPDATED")}`, NotificationType.success);
+                        navigate("track/" + trackId);
+                    },
+                }),
+                button({
+                    text: t("CANCEL"),
+                    icon: {icon: "close"},
+                    classes: ["negative"],
+                    onclick: () => navigate("track/" + trackId),
+                }),
+            ).build(),
+        ).build();
     }
 
     static addToAlbumsButton(track: Track) {
         return button({
             text: t("ADD_TO_ALBUMS"),
-            icon: { icon: "forms_add_on" },
+            icon: {icon: "forms_add_on"},
             onclick: async () => {
                 await AlbumActions.openAddToAlbumModal(track);
             },
         });
     }
 
-    static editTrackModal(track: Track, confirmCallback: Function, cancelCallback: Function) {
-        const state = signal(<UploadableTrack>{
-            ...track,
-            release_date: new Date(track.release_date),
-        });
-
-        return create("div")
-            .classes("flex-v")
-            .children(
-                create("div")
-                    .classes("flex")
-                    .children(
-                        create("img")
-                            .classes("icon", "svg")
-                            .styles("width", "30px", "height", "auto")
-                            .attributes("src", Icons.PEN)
-                            .build(),
-                        create("h2")
-                            .text(t("EDIT_TRACK"))
-                            .build(),
-                    ).build(),
-                create("p")
-                    .text(t("EDIT_TRACK_DETAILS_BELOW"))
-                    .build(),
-                TrackEditTemplates.upDownButtons(state, true),
-                TrackEditTemplates.trackEdit(state, signal<string[]>([])),
-                create("div")
-                    .classes("flex")
-                    .children(
-                        button({
-                            text: t("SAVE"),
-                            icon: { icon: "check" },
-                            classes: ["positive"],
-                            onclick: () => {
-                                confirmCallback(state.value);
-                            },
-                        }),
-                        button({
-                            text: t("CANCEL"),
-                            icon: { icon: "close" },
-                            classes: ["negative"],
-                            onclick: cancelCallback,
-                        }),
-                    ).build(),
-            ).build();
-    }
-
     static upDownButtons(state: Signal<any>, uploadEnabled = false) {
         const buttons = [
             button({
                 text: t("DOWNLOAD_INFO"),
-                icon: { icon: "file_save" },
+                icon: {icon: "file_save"},
                 onclick: () => {
                     const json = JSON.stringify(state.value);
                     downloadFile(`${state.value.title}_${Date.now()}.json`, json);
@@ -174,7 +183,7 @@ export class TrackEditTemplates {
             buttons.push(
                 button({
                     text: t("UPLOAD_INFO"),
-                    icon: { icon: "upload_file" },
+                    icon: {icon: "upload_file"},
                     onclick: () => {
                         const fileInput = document.createElement("input");
                         fileInput.type = "file";
@@ -228,10 +237,10 @@ export class TrackEditTemplates {
         const disabled = compute((s: UploadableTrack) => {
             const newErrors = [];
             const requiredProps = [
-                { section: "audio", field: "audioFileName" },
-                { section: "info", field: "title" },
-                { section: "info", field: "genre" },
-                { section: "terms", field: "termsOfService" },
+                {section: "audio", field: "audioFileName"},
+                {section: "info", field: "title"},
+                {section: "info", field: "genre"},
+                {section: "terms", field: "termsOfService"},
             ];
             if (requiredProps.some(p => !s[p.field])) {
                 newErrors.push(`${t("MISSING_REQUIRED_FIELDS")}`);
@@ -261,7 +270,7 @@ export class TrackEditTemplates {
                     onclick: e => {
                         new AudioUpload(e, state, progressState, loadingUpdate);
                     },
-                    icon: { icon: "upload" },
+                    icon: {icon: "upload"},
                 }),
                 GenericTemplates.progressSectionPart(progressState),
             ),
@@ -377,7 +386,7 @@ export class TrackEditTemplates {
                 },
             ],
             onchange: v => {
-                state.value = { ...state.value, price: v };
+                state.value = {...state.value, price: v};
             },
         });
     }
@@ -392,7 +401,7 @@ export class TrackEditTemplates {
             value: compute(s => s.title ?? "", state),
             validators: TrackValidators.titleValidators,
             onchange: v => {
-                state.value = { ...state.value, title: v };
+                state.value = {...state.value, title: v};
             },
         });
     }
@@ -406,7 +415,7 @@ export class TrackEditTemplates {
             validators: TrackValidators.creditsValidators,
             value: compute(s => s.credits ?? "", state),
             onchange: v => {
-                state.value = { ...state.value, credits: v };
+                state.value = {...state.value, credits: v};
             },
         });
     }
@@ -419,7 +428,7 @@ export class TrackEditTemplates {
             validators: TrackValidators.descriptionValidators,
             value: compute(s => s.description ?? "", state),
             onchange: v => {
-                state.value = { ...state.value, description: v };
+                state.value = {...state.value, description: v};
             },
         });
     }
@@ -434,7 +443,7 @@ export class TrackEditTemplates {
             validators: TrackValidators.upcValidators,
             value: compute(s => s.upc ?? "", state),
             onchange: v => {
-                state.value = { ...state.value, upc: v };
+                state.value = {...state.value, upc: v};
             },
         });
     }
@@ -468,7 +477,7 @@ export class TrackEditTemplates {
             validators: TrackValidators.isrcValidators,
             value: compute(s => s.isrc ?? "", state),
             onchange: v => {
-                state.value = { ...state.value, isrc: v };
+                state.value = {...state.value, isrc: v};
             },
         });
     }
@@ -482,7 +491,7 @@ export class TrackEditTemplates {
             validators: TrackValidators.artistnameValidators,
             value: compute(s => s.artistname ?? "", state),
             onchange: v => {
-                state.value = { ...state.value, artistname: v };
+                state.value = {...state.value, artistname: v};
             },
         });
     }
@@ -579,7 +588,7 @@ export class TrackEditTemplates {
                 if (fileName) {
                     if (parentState) {
                         const safeName = fileName.replace(/\.[^/.]+$/, "");
-                        parentState.value = { ...parentState.value, coverArtFileName: safeName };
+                        parentState.value = {...parentState.value, coverArtFileName: safeName};
                     }
                 }
                 parentState.value = {
@@ -606,7 +615,7 @@ export class TrackEditTemplates {
     static deleteTrackButton(trackId: number) {
         return button({
             text: t("DELETE"),
-            icon: { icon: "delete" },
+            icon: {icon: "delete"},
             classes: ["negative"],
             onclick: async () => {
                 await Ui.getConfirmationModal(
@@ -615,7 +624,8 @@ export class TrackEditTemplates {
                     t("YES"),
                     t("NO"),
                     () => TrackActions.deleteTrack(trackId),
-                    () => {},
+                    () => {
+                    },
                     Icons.WARNING,
                 );
             },
@@ -693,7 +703,7 @@ export class TrackEditTemplates {
 
         return button({
             text: t("REPLACE_AUDIO"),
-            icon: { icon: "upload" },
+            icon: {icon: "upload"},
             disabled: loading,
             onclick: async () => {
                 await TrackActions.replaceAudio(track.id, true, loading, () => {
@@ -709,7 +719,7 @@ export class TrackEditTemplates {
 
         return button({
             text: t("DOWNLOAD_AUDIO"),
-            icon: { icon: "download" },
+            icon: {icon: "download"},
             disabled: loading,
             classes,
             onclick: async () => {
@@ -902,7 +912,7 @@ export class TrackEditTemplates {
                     button({
                         disabled: loading,
                         classes: ["positive"],
-                        icon: { icon: "save" },
+                        icon: {icon: "save"},
                         text: t("SAVE"),
                         onclick: async () => Api.updateTrackFull(state.value).then(() => {
                             Api.getTrackById(track.id).then(t => {
@@ -917,22 +927,22 @@ export class TrackEditTemplates {
                     }),
                     button({
                         disabled: loading,
-                        icon: { icon: "undo" },
+                        icon: {icon: "undo"},
                         text: t("REVERT"),
                         onclick: () => state.value = track as UploadableTrack,
                     }),
                 ).classes("align-end", "align-children").build()),
             ),
         ).classes("card", "space-between")
-         .build();
+            .build();
     }
 
     static batchEditTracksPage() {
         const tracks = signal<Track[]>([]);
         const loading = signal(true);
         Api.getTracksByUser(currentUser.value?.username ?? "", currentUser.value?.id)
-           .then(t => tracks.value = t ?? [])
-           .finally(() => loading.value = false);
+            .then(t => tracks.value = t ?? [])
+            .finally(() => loading.value = false);
 
         return vertical(
             heading({

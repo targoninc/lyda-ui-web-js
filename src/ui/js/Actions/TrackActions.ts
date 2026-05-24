@@ -1,9 +1,8 @@
 import { Util } from "../Classes/Util.ts";
 import { Icons } from "../Enums/Icons.ts";
 import { PlayManager } from "../Streaming/PlayManager.ts";
-import { TrackEditTemplates } from "../Templates/music/TrackEditTemplates.ts";
-import { createModal, notify, Ui } from "../Classes/Ui.ts";
-import { navigate, reload } from "../Routing/Router.ts";
+import { notify, Ui } from "../Classes/Ui.ts";
+import { navigate } from "../Routing/Router.ts";
 import { Signal } from "@targoninc/jess";
 import { MediaUploader } from "../Api/MediaUploader.ts";
 import { currentQuality, playingHere } from "../state.ts";
@@ -205,19 +204,6 @@ export class TrackActions {
         if (collab) {
             collab.remove();
         }
-    }
-
-    static getTrackEditModal(track: Track) {
-        const confirmCallback2 = async (newTrack: Track) => {
-            Util.removeModal();
-            await Api.updateTrackFull(newTrack);
-            notify(`${t("TRACK_UPDATED")}`, NotificationType.success);
-            reload();
-        };
-        const cancelCallback2 = () => {
-            Util.removeModal();
-        };
-        createModal([TrackEditTemplates.editTrackModal(track, confirmCallback2, cancelCallback2)], "track-edit");
     }
 
     static async downloadTrack(track: Track) {
