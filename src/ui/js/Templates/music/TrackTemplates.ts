@@ -423,19 +423,16 @@ export class TrackTemplates {
 
     private static trackMenu(isPrivate: boolean, track: Track, trackData: any) {
         const popId = `track-menu-${track.id}`;
-        const popover = create("div")
-            .classes("generic-popover", "flex-v")
-            .id(popId)
-            .attributes("popover", "manual")
-            .children(
-                when(trackData.canDownload, TrackEditTemplates.downloadAudioButton(track)),
-                when(trackData.canEdit, vertical(
-                    TrackEditTemplates.addToAlbumsButton(track),
-                    TrackEditTemplates.replaceAudioButton(track),
-                    TrackEditTemplates.openEditPageButton(track),
-                    TrackEditTemplates.deleteTrackButton(track.id),
-                ).build()),
-            ).build() as HTMLElement;
+        const popover = PopoverTemplates.manualPopover(popId,
+            when(trackData.canDownload, TrackEditTemplates.downloadAudioButton(track)),
+            when(trackData.canEdit, vertical(
+                TrackEditTemplates.addToAlbumsButton(track),
+                TrackEditTemplates.replaceAudioButton(track),
+                TrackEditTemplates.openEditPageButton(track),
+                TrackEditTemplates.deleteTrackButton(track.id),
+            ).build()),
+        );
+        popover.classList.add("flex-v");
 
         const btn = GenericTemplates.roundIconButton(
             { icon: "more_horiz" },
