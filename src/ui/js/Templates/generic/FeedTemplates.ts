@@ -53,6 +53,7 @@ export class FeedTemplates {
             .build() as HTMLElement;
 
         const handleRowClick = (e: MouseEvent, item: T, index: number) => {
+            e.preventDefault();
             if (e.ctrlKey || e.metaKey) {
                 const newSet = new Set(selectedIds$.value);
                 if (newSet.has(item.id)) {
@@ -145,7 +146,7 @@ export class FeedTemplates {
                 }
                 if (!allReposted) {
                     actions.push({
-                        label: t("REPOST_ALL"),
+                        label: `${t("REPOST_ALL")}`,
                         icon: "repeat",
                         onclick: async () => {
                             for (const t of tracks) {
@@ -158,7 +159,7 @@ export class FeedTemplates {
                 }
                 if (anyReposted) {
                     actions.push({
-                        label: t("UNREPOST_ALL"),
+                        label: `${t("UNREPOST_ALL")}`,
                         icon: "repeat",
                         onclick: async () => {
                             for (const t of tracks) {
@@ -317,6 +318,16 @@ export class FeedTemplates {
             load();
             const rowsEl = el.querySelector("tbody");
             if (rowsEl) {
+                rowsEl.addEventListener("click", (e) => {
+                    const target = e.target as HTMLElement;
+                    const tr = target.closest("tr");
+                    if (tr && tr.parentElement === rowsEl) {
+                        const index = Array.from(rowsEl.children).indexOf(tr);
+                        if (index >= 0) {
+                            handleRowClick(e as MouseEvent, items$.value[index], index);
+                        }
+                    }
+                });
                 const obs = new IntersectionObserver(
                     e => {
                         if (e[0].isIntersecting && e[0].target === rowsEl.lastElementChild) {
@@ -510,7 +521,6 @@ export class FeedTemplates {
         const rowEl = create("tr")
             .classes("feed-row", cls, selCls)
             .oncontextmenu(rowOnContextMenu)
-            .onclick((e: Event) => handleRowClick(e as MouseEvent, item, index))
             .children(
                 create("td").classes("feed-idx-cell")
                     .children(FeedTemplates.#idxCell(item, index, icon, loading, config))

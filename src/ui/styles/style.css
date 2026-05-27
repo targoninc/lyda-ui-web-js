@@ -905,6 +905,10 @@ th, td {
     border-bottom: 1px solid var(--color-4);
 }
 
+.feed-cell {
+    user-select: none;
+}
+
 tr.log {
     background: var(--color-3);
 }
