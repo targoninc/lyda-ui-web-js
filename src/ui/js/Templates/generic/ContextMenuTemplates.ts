@@ -17,25 +17,33 @@ function uid(): string {
 export class ContextMenuTemplates {
     static create<T>(
         item: T,
-        actions: ContextMenuAction<T>[],
+        buildActions: (item: T) => ContextMenuAction<T>[],
         id?: string,
     ) {
         const popId = id || uid();
-        const menuItems = ContextMenuTemplates.#buildItems(item, actions);
-        const popover = PopoverTemplates.popover(popId, ...menuItems);
+        const resolve = () => buildActions(item);
+        const popover = PopoverTemplates.popover(popId, ...ContextMenuTemplates.#buildItems(item, resolve()));
+
+        const rebuild = () => {
+            popover.innerHTML = "";
+            for (const el of ContextMenuTemplates.#buildItems(item, resolve())) {
+                popover.appendChild(el);
+            }
+        };
 
         const button = create("button")
             .classes("round-button", "jess", "context-menu-btn")
-            .onclick((e: Event) => PopoverTemplates.toggle(popover, e.currentTarget as HTMLElement))
+            .onclick((e: Event) => { rebuild(); PopoverTemplates.toggle(popover, e.currentTarget as HTMLElement); })
             .children(GenericTemplates.icon("more_horiz", false))
             .build() as HTMLElement;
 
         const onContextMenu = (e: MouseEvent) => {
             e.preventDefault();
+            rebuild();
             PopoverTemplates.showAtPoint(popover, e.clientX, e.clientY);
         };
 
-        return { button, popover, onContextMenu };
+        return { button, popover, onContextMenu, rebuild };
     }
 
     static #buildItems<T>(item: T, actions: ContextMenuAction<T>[]): HTMLElement[] {

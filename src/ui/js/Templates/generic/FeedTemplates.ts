@@ -6,6 +6,7 @@ import { FeedColumn, FeedMenuAction, FeedConfig } from "../../Models/FeedConfig.
 import { ContextMenuTemplates } from "./ContextMenuTemplates.ts";
 import { PopoverTemplates } from "./PopoverTemplates.ts";
 import { InteractionTemplates } from "../InteractionTemplates.ts";
+import { InteractionStateManager } from "../../Classes/InteractionStateManager.ts";
 import { currentTrackId, playingHere, manualQueue } from "../../state.ts";
 import { PlayManager } from "../../Streaming/PlayManager.ts";
 import { QueueManager } from "../../Streaming/QueueManager.ts";
@@ -113,19 +114,27 @@ export class FeedTemplates {
 
             if (selectedItems.length > 0 && "likes" in (selectedItems[0] as any)) {
                 const tracks = selectedItems as any as Track[];
-                const allLiked = tracks.every(i => i.likes?.interacted);
-                const anyLiked = tracks.some(i => i.likes?.interacted);
-                const allReposted = tracks.every(i => i.reposts?.interacted);
-                const anyReposted = tracks.some(i => i.reposts?.interacted);
+                const getInteracted = (t: Track, type: InteractionType) => {
+                    const entry = InteractionStateManager.get(EntityType.track, t.id, type);
+                    const raw = type === InteractionType.like ? t.likes?.interacted : t.reposts?.interacted;
+                    return entry ? entry.interacted$.value : !!raw;
+                };
+                const allLiked = tracks.every(i => getInteracted(i, InteractionType.like));
+                const anyLiked = tracks.some(i => getInteracted(i, InteractionType.like));
+                const allReposted = tracks.every(i => getInteracted(i, InteractionType.repost));
+                const anyReposted = tracks.some(i => getInteracted(i, InteractionType.repost));
 
                 if (!allLiked) {
                     actions.push({
                         label: `${t("LIKE_ALL")}`,
                         icon: "favorite",
                         onclick: async () => {
-                            for (const t of tracks) {
-                                if (!t.likes?.interacted) {
-                                    await Api.toggleInteraction(EntityType.track, InteractionType.like, t.id, signal(false));
+                            for (const tr of tracks) {
+                                const entry = InteractionStateManager.getOrCreate(EntityType.track, tr.id, InteractionType.like, false, tr.likes?.count ?? 0);
+                                if (!entry.interacted$.value) {
+                                    await Api.toggleInteraction(EntityType.track, InteractionType.like, tr.id, entry.interacted$);
+                                    entry.interacted$.value = !entry.interacted$.value;
+                                    entry.count$.value = entry.count$.value + 1;
                                 }
                             }
                         },
@@ -136,9 +145,12 @@ export class FeedTemplates {
                         label: `${t("UNLIKE_ALL")}`,
                         icon: "heart_broken",
                         onclick: async () => {
-                            for (const t of tracks) {
-                                if (t.likes?.interacted) {
-                                    await Api.toggleInteraction(EntityType.track, InteractionType.like, t.id, signal(true));
+                            for (const tr of tracks) {
+                                const entry = InteractionStateManager.getOrCreate(EntityType.track, tr.id, InteractionType.like, true, tr.likes?.count ?? 0);
+                                if (entry.interacted$.value) {
+                                    await Api.toggleInteraction(EntityType.track, InteractionType.like, tr.id, entry.interacted$);
+                                    entry.interacted$.value = !entry.interacted$.value;
+                                    entry.count$.value = entry.count$.value - 1;
                                 }
                             }
                         },
@@ -149,9 +161,12 @@ export class FeedTemplates {
                         label: `${t("REPOST_ALL")}`,
                         icon: "repeat",
                         onclick: async () => {
-                            for (const t of tracks) {
-                                if (!t.reposts?.interacted) {
-                                    await Api.toggleInteraction(EntityType.track, InteractionType.repost, t.id, signal(false));
+                            for (const tr of tracks) {
+                                const entry = InteractionStateManager.getOrCreate(EntityType.track, tr.id, InteractionType.repost, false, tr.reposts?.count ?? 0);
+                                if (!entry.interacted$.value) {
+                                    await Api.toggleInteraction(EntityType.track, InteractionType.repost, tr.id, entry.interacted$);
+                                    entry.interacted$.value = !entry.interacted$.value;
+                                    entry.count$.value = entry.count$.value + 1;
                                 }
                             }
                         },
@@ -162,9 +177,12 @@ export class FeedTemplates {
                         label: `${t("UNREPOST_ALL")}`,
                         icon: "repeat",
                         onclick: async () => {
-                            for (const t of tracks) {
-                                if (t.reposts?.interacted) {
-                                    await Api.toggleInteraction(EntityType.track, InteractionType.repost, t.id, signal(true));
+                            for (const tr of tracks) {
+                                const entry = InteractionStateManager.getOrCreate(EntityType.track, tr.id, InteractionType.repost, true, tr.reposts?.count ?? 0);
+                                if (entry.interacted$.value) {
+                                    await Api.toggleInteraction(EntityType.track, InteractionType.repost, tr.id, entry.interacted$);
+                                    entry.interacted$.value = !entry.interacted$.value;
+                                    entry.count$.value = entry.count$.value - 1;
                                 }
                             }
                         },
@@ -411,11 +429,9 @@ export class FeedTemplates {
                 return res ?? [];
             },
             buildMenuActions: (track): FeedMenuAction<Track>[] => {
-                const inQueue = compute(q => q.includes(track.id), manualQueue);
-                const queueLabel = compute((q): string => (q ? `${t("UNQUEUE")}` : `${t("QUEUE")}`), inQueue);
-                const queueIcon = compute((q): string => (q ? "remove" : "queue"), inQueue);
+                const inQueue = manualQueue.value.includes(track.id);
                 const items: FeedMenuAction<Track>[] = [
-                    { label: queueLabel, icon: queueIcon, onclick: () => QueueManager.toggleInManualQueue(track.id) },
+                    { label: inQueue ? t("UNQUEUE") : t("QUEUE"), icon: inQueue ? "remove" : "queue", onclick: () => QueueManager.toggleInManualQueue(track.id) },
                 ];
                 if (track.visibility !== "private" && track.secretcode) {
                     items.push({
@@ -477,7 +493,7 @@ export class FeedTemplates {
         const selCls = compute((s): string => (s ? "selected" : "_"), isSelected);
         const popId = `${feedId}-pop-${item.id}`;
 
-        const ctx = ContextMenuTemplates.create(item, config.buildMenuActions(item), popId);
+        const ctx = ContextMenuTemplates.create(item, config.buildMenuActions, popId);
 
         const interactEl = config.buildInteractions
             ? create("div").classes("feed-hover-btns", "flex", "align-children").children(...config.buildInteractions(item)).build()
@@ -512,6 +528,7 @@ export class FeedTemplates {
                     return;
                 }
             }
+            ctx.rebuild();
             if (!selected.has(item.id)) {
                 selectedIds$.value = new Set([item.id]);
             }

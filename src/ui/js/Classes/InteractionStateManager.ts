@@ -47,6 +47,17 @@ export class InteractionStateManager {
         return entity.interactions.get(interactionType)!;
     }
 
+    static get(
+        entityType: EntityType,
+        id: number,
+        interactionType: InteractionType,
+    ): InteractionEntry | undefined {
+        const key = entityKey(entityType, id);
+        const entity = store.get(key);
+        if (!entity) return undefined;
+        return entity.interactions.get(interactionType);
+    }
+
     /** Register that an entity is visible via a given context type. */
     static addContext(entityType: EntityType, id: number, contextType: ContextType): void {
         const key = entityKey(entityType, id);
