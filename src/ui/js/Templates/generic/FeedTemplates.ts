@@ -114,15 +114,12 @@ export class FeedTemplates {
 
             if (selectedItems.length > 0 && "likes" in (selectedItems[0] as any)) {
                 const tracks = selectedItems as any as Track[];
-                const getInteracted = (t: Track, type: InteractionType) => {
-                    const entry = InteractionStateManager.get(EntityType.track, t.id, type);
-                    const raw = type === InteractionType.like ? t.likes?.interacted : t.reposts?.interacted;
-                    return entry ? entry.interacted$.value : !!raw;
+                const getLiked = (t: Track) => {
+                    const entry = InteractionStateManager.get(EntityType.track, t.id, InteractionType.like);
+                    return entry ? entry.interacted$.value : !!t.likes?.interacted;
                 };
-                const allLiked = tracks.every(i => getInteracted(i, InteractionType.like));
-                const anyLiked = tracks.some(i => getInteracted(i, InteractionType.like));
-                const allReposted = tracks.every(i => getInteracted(i, InteractionType.repost));
-                const anyReposted = tracks.some(i => getInteracted(i, InteractionType.repost));
+                const allLiked = tracks.every(i => getLiked(i));
+                const anyLiked = tracks.some(i => getLiked(i));
 
                 if (!allLiked) {
                     actions.push({
@@ -156,37 +153,47 @@ export class FeedTemplates {
                         },
                     });
                 }
-                if (!allReposted) {
-                    actions.push({
-                        label: `${t("REPOST_ALL")}`,
-                        icon: "repeat",
-                        onclick: async () => {
-                            for (const tr of tracks) {
-                                const entry = InteractionStateManager.getOrCreate(EntityType.track, tr.id, InteractionType.repost, false, tr.reposts?.count ?? 0);
-                                if (!entry.interacted$.value) {
-                                    await Api.toggleInteraction(EntityType.track, InteractionType.repost, tr.id, entry.interacted$);
-                                    entry.interacted$.value = !entry.interacted$.value;
-                                    entry.count$.value = entry.count$.value + 1;
+
+                if ("reposts" in (selectedItems[0] as any)) {
+                    const getReposted = (t: Track) => {
+                        const entry = InteractionStateManager.get(EntityType.track, t.id, InteractionType.repost);
+                        return entry ? entry.interacted$.value : !!t.reposts?.interacted;
+                    };
+                    const allReposted = tracks.every(i => getReposted(i));
+                    const anyReposted = tracks.some(i => getReposted(i));
+
+                    if (!allReposted) {
+                        actions.push({
+                            label: `${t("REPOST_ALL")}`,
+                            icon: "repeat",
+                            onclick: async () => {
+                                for (const tr of tracks) {
+                                    const entry = InteractionStateManager.getOrCreate(EntityType.track, tr.id, InteractionType.repost, false, tr.reposts?.count ?? 0);
+                                    if (!entry.interacted$.value) {
+                                        await Api.toggleInteraction(EntityType.track, InteractionType.repost, tr.id, entry.interacted$);
+                                        entry.interacted$.value = !entry.interacted$.value;
+                                        entry.count$.value = entry.count$.value + 1;
+                                    }
                                 }
-                            }
-                        },
-                    });
-                }
-                if (anyReposted) {
-                    actions.push({
-                        label: `${t("UNREPOST_ALL")}`,
-                        icon: "repeat",
-                        onclick: async () => {
-                            for (const tr of tracks) {
-                                const entry = InteractionStateManager.getOrCreate(EntityType.track, tr.id, InteractionType.repost, true, tr.reposts?.count ?? 0);
-                                if (entry.interacted$.value) {
-                                    await Api.toggleInteraction(EntityType.track, InteractionType.repost, tr.id, entry.interacted$);
-                                    entry.interacted$.value = !entry.interacted$.value;
-                                    entry.count$.value = entry.count$.value - 1;
+                            },
+                        });
+                    }
+                    if (anyReposted) {
+                        actions.push({
+                            label: `${t("UNREPOST_ALL")}`,
+                            icon: "repeat",
+                            onclick: async () => {
+                                for (const tr of tracks) {
+                                    const entry = InteractionStateManager.getOrCreate(EntityType.track, tr.id, InteractionType.repost, true, tr.reposts?.count ?? 0);
+                                    if (entry.interacted$.value) {
+                                        await Api.toggleInteraction(EntityType.track, InteractionType.repost, tr.id, entry.interacted$);
+                                        entry.interacted$.value = !entry.interacted$.value;
+                                        entry.count$.value = entry.count$.value - 1;
+                                    }
                                 }
-                            }
-                        },
-                    });
+                            },
+                        });
+                    }
                 }
             }
             return actions;
