@@ -44,6 +44,135 @@ export class FeedTemplates {
         const ps = config.pageSize;
         let page = 0;
 
+        const selectedIds$ = signal<Set<number>>(new Set());
+        let lastSelectedIndex: number | null = null;
+
+        const batchPopover = create("div")
+            .classes("generic-popover")
+            .attributes("popover", "auto")
+            .build() as HTMLElement;
+
+        const handleRowClick = (e: MouseEvent, item: T, index: number) => {
+            if (e.ctrlKey || e.metaKey) {
+                const newSet = new Set(selectedIds$.value);
+                if (newSet.has(item.id)) {
+                    newSet.delete(item.id);
+                } else {
+                    newSet.add(item.id);
+                }
+                lastSelectedIndex = newSet.size > 0 ? index : null;
+                selectedIds$.value = newSet;
+                return;
+            }
+
+            if (e.shiftKey) {
+                if (lastSelectedIndex !== null) {
+                    const start = Math.min(lastSelectedIndex, index);
+                    const end = Math.max(lastSelectedIndex, index);
+                    const range = items$.value.slice(start, end + 1);
+                    const currentSet = selectedIds$.value;
+                    const allInRangeSelected = range.every(i => currentSet.has(i.id));
+                    const newSet = new Set(currentSet);
+                    for (const i of range) {
+                        if (allInRangeSelected) {
+                            newSet.delete(i.id);
+                        } else {
+                            newSet.add(i.id);
+                        }
+                    }
+                    selectedIds$.value = newSet;
+                } else {
+                    selectedIds$.value = new Set([item.id]);
+                    lastSelectedIndex = index;
+                }
+                return;
+            }
+
+            const currentSet = selectedIds$.value;
+            if (currentSet.size === 1 && currentSet.has(item.id)) {
+                selectedIds$.value = new Set();
+                lastSelectedIndex = null;
+            } else {
+                selectedIds$.value = new Set([item.id]);
+                lastSelectedIndex = index;
+            }
+        };
+
+        const buildBatchActions = (selectedItems: T[]): { label: string; icon: string; onclick: () => void }[] => {
+            const actions: { label: string; icon: string; onclick: () => void }[] = [];
+            const allInQueue = selectedItems.every(i => manualQueue.value.includes(i.id));
+            const anyInQueue = selectedItems.some(i => manualQueue.value.includes(i.id));
+
+            if (!allInQueue) {
+                actions.push({ label: `${t("QUEUE_ALL")}`, icon: "playlist_add", onclick: () => selectedItems.forEach(i => QueueManager.addToManualQueue(i.id)) });
+            }
+            if (anyInQueue) {
+                actions.push({ label: `${t("UNQUEUE_ALL")}`, icon: "playlist_remove", onclick: () => selectedItems.forEach(i => QueueManager.removeFromManualQueue(i.id)) });
+            }
+
+            if (selectedItems.length > 0 && "likes" in (selectedItems[0] as any)) {
+                const tracks = selectedItems as any as Track[];
+                const allLiked = tracks.every(i => i.likes?.interacted);
+                const anyLiked = tracks.some(i => i.likes?.interacted);
+                const allReposted = tracks.every(i => i.reposts?.interacted);
+                const anyReposted = tracks.some(i => i.reposts?.interacted);
+
+                if (!allLiked) {
+                    actions.push({
+                        label: `${t("LIKE_ALL")}`,
+                        icon: "favorite",
+                        onclick: async () => {
+                            for (const t of tracks) {
+                                if (!t.likes?.interacted) {
+                                    await Api.toggleInteraction(EntityType.track, InteractionType.like, t.id, signal(false));
+                                }
+                            }
+                        },
+                    });
+                }
+                if (anyLiked) {
+                    actions.push({
+                        label: `${t("UNLIKE_ALL")}`,
+                        icon: "heart_broken",
+                        onclick: async () => {
+                            for (const t of tracks) {
+                                if (t.likes?.interacted) {
+                                    await Api.toggleInteraction(EntityType.track, InteractionType.like, t.id, signal(true));
+                                }
+                            }
+                        },
+                    });
+                }
+                if (!allReposted) {
+                    actions.push({
+                        label: t("REPOST_ALL"),
+                        icon: "repeat",
+                        onclick: async () => {
+                            for (const t of tracks) {
+                                if (!t.reposts?.interacted) {
+                                    await Api.toggleInteraction(EntityType.track, InteractionType.repost, t.id, signal(false));
+                                }
+                            }
+                        },
+                    });
+                }
+                if (anyReposted) {
+                    actions.push({
+                        label: t("UNREPOST_ALL"),
+                        icon: "repeat",
+                        onclick: async () => {
+                            for (const t of tracks) {
+                                if (t.reposts?.interacted) {
+                                    await Api.toggleInteraction(EntityType.track, InteractionType.repost, t.id, signal(true));
+                                }
+                            }
+                        },
+                    });
+                }
+            }
+            return actions;
+        };
+
         const reload = () => {
             page = 0;
             items$.value = [];
@@ -169,7 +298,7 @@ export class FeedTemplates {
                         signalMap(
                             items$,
                             create("tbody").classes("feed-rows"),
-                            (item, i) => FeedTemplates.#row(item, i, config, feedId, rebuildAndShowMobile),
+                            (item, i) => FeedTemplates.#row(item, i, config, feedId, rebuildAndShowMobile, selectedIds$, handleRowClick, buildBatchActions, items$, batchPopover),
                         ),
                     ).build(),
                 compute(
@@ -181,6 +310,7 @@ export class FeedTemplates {
                     loading$, empty,
                 ),
                 mobilePopover,
+                batchPopover,
             ).build();
 
         setTimeout(() => {
@@ -322,11 +452,18 @@ export class FeedTemplates {
     static #row<T extends { id: number }>(
         item: T, index: number, config: FeedConfig<T>, feedId: string,
         showMobileMenu: (item: T) => void,
+        selectedIds$: Signal<Set<number>>,
+        handleRowClick: (e: MouseEvent, item: T, index: number) => void,
+        buildBatchActions: (items: T[]) => { label: string; icon: string; onclick: () => void }[],
+        items$: Signal<T[]>,
+        batchPopover: HTMLElement,
     ): any {
         const playing = config.isPlaying(item.id);
         const loading = config.isLoading ? config.isLoading(item.id) : signal(false);
         const icon = getPlayIcon(playing, loading) as Signal<string>;
+        const isSelected = compute(() => selectedIds$.value.has(item.id), selectedIds$);
         const cls = compute((p): string => (p ? "playing" : "_"), playing);
+        const selCls = compute((s): string => (s ? "selected" : "_"), isSelected);
         const popId = `${feedId}-pop-${item.id}`;
 
         const ctx = ContextMenuTemplates.create(item, config.buildMenuActions(item), popId);
@@ -337,9 +474,43 @@ export class FeedTemplates {
 
         let longPressTimer: any = null;
 
+        const rowOnContextMenu = (e: MouseEvent) => {
+            e.preventDefault();
+            const selected = selectedIds$.value;
+            if (selected.size > 1 && selected.has(item.id)) {
+                const currentItems = items$.value;
+                const selectedItems = currentItems.filter(i => selected.has(i.id));
+                const batchActions = buildBatchActions(selectedItems);
+                if (batchActions.length > 0) {
+                    batchPopover.innerHTML = "";
+                    for (const a of batchActions) {
+                        const btn = create("button")
+                            .classes("context-menu-item", "flex", "align-children", "small-gap")
+                            .onclick(async (e2: Event) => {
+                                e2.stopPropagation();
+                                batchPopover.hidePopover();
+                                await a.onclick();
+                            })
+                            .children(
+                                a.icon ? GenericTemplates.icon(a.icon, true, ["context-menu-icon"]) : nullElement(),
+                                create("span").text(a.label).build(),
+                            ).build() as HTMLElement;
+                        batchPopover.appendChild(btn);
+                    }
+                    PopoverTemplates.showAtPoint(batchPopover, e.clientX, e.clientY);
+                    return;
+                }
+            }
+            if (!selected.has(item.id)) {
+                selectedIds$.value = new Set([item.id]);
+            }
+            ctx.onContextMenu(e);
+        };
+
         const rowEl = create("tr")
-            .classes("feed-row", cls)
-            .oncontextmenu(ctx.onContextMenu)
+            .classes("feed-row", cls, selCls)
+            .oncontextmenu(rowOnContextMenu)
+            .onclick((e: Event) => handleRowClick(e as MouseEvent, item, index))
             .children(
                 create("td").classes("feed-idx-cell")
                     .children(FeedTemplates.#idxCell(item, index, icon, loading, config))
@@ -375,8 +546,8 @@ export class FeedTemplates {
     static #idxCell<T extends { id: number }>(
         item: T, index: number, icon: Signal<string>, loading: Signal<boolean>, config: FeedConfig<T>,
     ): any {
-        const handle = () => config.onPlayToggle(item);
-        const handleButton = (e: Event) => { e.stopPropagation(); handle(); };
+        const handle = (e: Event) => { e.stopPropagation(); config.onPlayToggle(item); };
+        const handleButton = (e: Event) => { e.stopPropagation(); config.onPlayToggle(item); };
 
         return create("div")
             .classes("feed-idx-cell-inner")

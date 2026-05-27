@@ -1490,6 +1490,14 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     background: var(--background-playing);
 }
 
+.feed-row.selected {
+    background: color-mix(in oklab, var(--color-3), var(--blue) 8%);
+}
+
+.feed-row.playing.selected {
+    background: var(--background-playing);
+}
+
 .feed-idx-cell {
     width: 50px;
     text-align: center;
