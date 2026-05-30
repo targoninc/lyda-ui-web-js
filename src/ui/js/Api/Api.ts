@@ -296,7 +296,7 @@ export class Api {
     static async getMfaOptions(email: string, password: string) {
         return await post<{
             userId: number;
-            options: { type: MfaOption }[];
+            options: { type: MfaOption; lastUsed?: string }[];
         }>(ApiRoutes.mfaOptions, {
             email,
             password,

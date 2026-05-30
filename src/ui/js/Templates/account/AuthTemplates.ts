@@ -10,24 +10,25 @@ import {
     StringOrSignal,
     when,
 } from "@targoninc/jess";
-import { LandingPageTemplates } from "../LandingPageTemplates";
-import { t } from "../../../locales";
-import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
-import { Api } from "../../Api/Api.ts";
-import { currentUser } from "../../state.ts";
-import { navigate } from "../../Routing/Router.ts";
-import { RoutePath } from "../../Routing/routes.ts";
-import { MfaOption } from "@targoninc/lyda-shared/src/Enums/MfaOption";
-import { button, error, errorList, heading, input } from "@targoninc/jess-components";
-import { sendMfaRequest } from "../../Classes/Helpers/Mfa.ts";
-import { FormTemplates } from "../generic/FormTemplates.ts";
-import { finalizeLogin, target, Util } from "../../Classes/Util.ts";
-import { AuthApi } from "../../Api/AuthApi.ts";
-import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
-import { notify } from "../../Classes/Ui.ts";
-import { NotificationType } from "../../Enums/NotificationType.ts";
-import { UserValidator } from "../../Classes/Validators/UserValidator.ts";
-import { AuthenticationResponseJSON } from "@passwordless-id/webauthn/dist/esm/types";
+import {LandingPageTemplates} from "../LandingPageTemplates";
+import {t} from "../../../locales";
+import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
+import {Api} from "../../Api/Api.ts";
+import {Time} from "../../Classes/Helpers/Time.ts";
+import {currentUser} from "../../state.ts";
+import {navigate} from "../../Routing/Router.ts";
+import {RoutePath} from "../../Routing/routes.ts";
+import {MfaOption} from "@targoninc/lyda-shared/src/Enums/MfaOption";
+import {button, error, errorList, heading, input} from "@targoninc/jess-components";
+import {sendMfaRequest} from "../../Classes/Helpers/Mfa.ts";
+import {FormTemplates} from "../generic/FormTemplates.ts";
+import {finalizeLogin, target, Util} from "../../Classes/Util.ts";
+import {AuthApi} from "../../Api/AuthApi.ts";
+import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import {notify} from "../../Classes/Ui.ts";
+import {NotificationType} from "../../Enums/NotificationType.ts";
+import {UserValidator} from "../../Classes/Validators/UserValidator.ts";
+import {AuthenticationResponseJSON} from "@passwordless-id/webauthn/dist/esm/types";
 
 export interface AuthData {
     termsOfService: boolean;
@@ -129,7 +130,7 @@ export class AuthTemplates {
     }
 
     static mfaSelection(step: Signal<string>, user: Signal<AuthData>) {
-        const options = signal<{ type: MfaOption }[]>([]);
+        const options = signal<{ type: MfaOption; lastUsed?: string }[]>([]);
         const selected = signal<MfaOption | undefined>(user.value.mfaMethod);
         Api.getMfaOptions(user.value.email, user.value.password).then(data => {
             if (data) {
@@ -160,13 +161,13 @@ export class AuthTemplates {
                             .text(t("PLEASE_SELECT_MFA_METHOD"))
                             .build(),
                         signalMap(options, horizontal(), o =>
-                            AuthTemplates.mfaOption(o.type, selected),
+                            AuthTemplates.mfaOption(o.type, selected, o.lastUsed),
                         ),
                     ).build(),
             ).build();
     }
 
-    static mfaOption(opt: MfaOption, selected: Signal<MfaOption | undefined>) {
+    static mfaOption(opt: MfaOption, selected: Signal<MfaOption | undefined>, lastUsed?: string) {
         const icon: Record<MfaOption, string> = {
             [MfaOption.email]: "forward_to_inbox",
             [MfaOption.totp]: "qr_code",
@@ -178,12 +179,17 @@ export class AuthTemplates {
             [MfaOption.webauthn]: t("PASSKEY"),
         };
 
-        return button({
-            icon: { icon: icon[opt] },
-            text: text[opt],
-            onclick: () => (selected.value = opt),
-            classes: ["mfa-option"]
-        });
+        return create("button")
+            .classes("jess", "mfa-option", "fullHeight", lastUsed ? "positive" : "_")
+            .children(
+                vertical(
+                    GenericTemplates.icon(icon[opt], true),
+                    create("span")
+                        .text(text[opt]),
+                ).classes("align-children"),
+                when(lastUsed, GenericTemplates.tag(`${t("LAST_USED")} ${Time.ago(lastUsed ?? "", true)}`))
+            ).onclick(() => (selected.value = opt))
+            .build();
     }
 
     static mfaRequest(step: Signal<string>, user: Signal<AuthData>) {
@@ -217,7 +223,8 @@ export class AuthTemplates {
                                     if (value.trim().length === 6) {
                                         step.value = "verify-mfa";
                                     }
-                                }, true, () => {}, ["bigger-input"],
+                                }, true, () => {
+                                }, ["bigger-input"],
                             ),
                         ),
                         horizontal(
@@ -225,7 +232,7 @@ export class AuthTemplates {
                                 isSubmittable,
                                 button({
                                     text: t("SUBMIT"),
-                                    icon: { icon: "login" },
+                                    icon: {icon: "login"},
                                     classes: ["positive"],
                                     disabled: compute((c, l) => c || l, codeNotSet, loading),
                                     onclick: () => step.value = "verify-mfa",
@@ -241,12 +248,12 @@ export class AuthTemplates {
     static mfaVerify(step: Signal<string>, user: Signal<AuthData>) {
         if (user.value.mfaMethod! === MfaOption.webauthn) {
             Api.verifyWebauthn(user.value.verification!, user.value.challenge!)
-               .then(() => step.value = "logging-in")
-               .catch(() => step.value = "mfa-request");
+                .then(() => step.value = "logging-in")
+                .catch(() => step.value = "mfa-request");
         } else {
             Api.verifyTotp(user.value.id!, user.value.mfaCode!, user.value.mfaMethod!)
-               .then(() => step.value = "logging-in")
-               .catch(() => step.value = "mfa-request");
+                .then(() => step.value = "logging-in")
+                .catch(() => step.value = "mfa-request");
         }
 
         return horizontal();
@@ -260,9 +267,9 @@ export class AuthTemplates {
 
         if (code) {
             Api.verifyEmail(code)
-               .then(() => (done.value = true))
-               .catch(e => (error$.value = e ?? "Unknown error"))
-               .finally(() => (activating.value = false));
+                .then(() => (done.value = true))
+                .catch(e => (error$.value = e ?? "Unknown error"))
+                .finally(() => (activating.value = false));
         } else {
             error$.value = `${t("MISSING_CODE")}`;
         }
@@ -290,7 +297,7 @@ export class AuthTemplates {
                             done,
                             button({
                                 text: t("GO_TO_PROFILE"),
-                                icon: { icon: "person" },
+                                icon: {icon: "person"},
                                 classes: ["positive"],
                                 onclick: () => navigate(RoutePath.profile),
                             }),
@@ -615,7 +622,8 @@ export class AuthTemplates {
     private static passwordInput(
         password: Signal<string>,
         user: Signal<AuthData>,
-        onEnter: Function = () => {},
+        onEnter: Function = () => {
+        },
         focusImmediately = false,
     ) {
         setTimeout(() => {
@@ -761,7 +769,8 @@ export class AuthTemplates {
                                 };
                             },
                             true,
-                            () => {},
+                            () => {
+                            },
                             ["flex-grow"],
                         ),
                         FormTemplates.textField(
@@ -782,7 +791,8 @@ export class AuthTemplates {
                                 };
                             },
                             false,
-                            () => {},
+                            () => {
+                            },
                             ["flex-grow"],
                         ),
                         input<string>({
@@ -844,7 +854,8 @@ export class AuthTemplates {
                                 };
                             },
                             false,
-                            () => {},
+                            () => {
+                            },
                             ["flex-grow"],
                         ),
                         FormTemplates.textField(
@@ -865,7 +876,8 @@ export class AuthTemplates {
                                 };
                             },
                             false,
-                            () => {},
+                            () => {
+                            },
                             ["flex-grow"],
                         ),
                         FormTemplates.checkBoxField("tos-checkbox", t("AGREE_TO_TOS"), false, true,
@@ -981,7 +993,7 @@ export class AuthTemplates {
                         ),
                     ),
                 ).classes("email-special-box", "animated-background", "align-children")
-                 .build(),
+                    .build(),
                 LandingPageTemplates.landingPageInfo(),
             ).build();
     }

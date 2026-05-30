@@ -625,4 +625,5 @@ export const de: Translation = {
     ADDRESS_LINE_2: "Adresszeile 2 (optional)",
     TAX_INFO_SAVED: "Steuerinformationen gespeichert",
     TAX_INFO_SAVE_FAILED: "Steuerinformationen konnten nicht gespeichert werden",
+    LAST_USED: "Zuletzt genutzt",
 };

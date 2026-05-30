@@ -626,4 +626,5 @@ export const en = {
     ADDRESS_LINE_2: "Address line 2 (optional)",
     TAX_INFO_SAVED: "Tax info saved",
     TAX_INFO_SAVE_FAILED: "Failed to save tax info",
+    LAST_USED: "Last used",
 } satisfies BaseTranslation;
