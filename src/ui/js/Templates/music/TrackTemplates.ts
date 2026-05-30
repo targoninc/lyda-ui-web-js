@@ -71,13 +71,15 @@ export class TrackTemplates {
 
     static feedFilters(filterState: Signal<string>) {
         const tabs = [`${t("ALL")}`, `${t("ORIGINALS")}`, `${t("REPOSTS")}`];
+        const lowerTabs = tabs.map(t => t.toLowerCase());
+        const initialIndex = Math.max(0, lowerTabs.indexOf(filterState.value));
 
         return GenericTemplates.combinedSelector(
             tabs,
             (i: number) => {
                 filterState.value = tabs[i].toLowerCase();
             },
-            0,
+            initialIndex,
         );
     }
 

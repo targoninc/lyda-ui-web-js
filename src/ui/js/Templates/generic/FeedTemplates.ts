@@ -386,8 +386,19 @@ export class FeedTemplates {
             id: user?.id,
         };
 
-        const filterState = signal("all");
+        const validFilters = ["all", "originals", "reposts"];
+        const urlParams = new URLSearchParams(window.location.search);
+        const initialFilter = urlParams.get("filter") ?? "all";
+        const filterState = signal(validFilters.includes(initialFilter) ? initialFilter : "all");
         const isFollowing = type === FeedType.following;
+
+        if (isFollowing) {
+            filterState.subscribe(f => {
+                const url = new URL(window.location.href);
+                url.searchParams.set("filter", f);
+                window.history.replaceState(null, "", url.toString());
+            });
+        }
 
         const baseColumns: FeedColumn<Track>[] = [
             {

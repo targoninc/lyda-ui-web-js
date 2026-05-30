@@ -861,6 +861,19 @@ export class UserTemplates {
 
     static libraryPage(user: Signal<User>, isSelf: boolean) {
         const tabs = [`${t("TRACKS")}`, `${t("ALBUMS")}`, `${t("PLAYLISTS")}`];
+        if (isSelf) tabs.push(`${t("BOUGHT")}`);
+        const urlTabs = tabs.map(t => t.toLowerCase().replace(/\s/g, "-"));
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabIndex = urlTabs.indexOf(urlParams.get("tab") ?? "");
+        const currentIndex = signal(tabIndex === -1 ? 0 : tabIndex);
+
+        currentIndex.subscribe(i => {
+            const tabName = urlTabs[i];
+            const url = new URL(window.location.href);
+            url.searchParams.set("tab", tabName);
+            window.history.replaceState(null, "", url.toString());
+        });
 
         const libAlbumCols = [
             {
@@ -955,7 +968,6 @@ export class UserTemplates {
         ];
 
         if (isSelf) {
-            tabs.push(`${t("BOUGHT")}`);
             tabContents.push(FeedTemplates.feed(FeedType.boughtTracks));
         }
 
@@ -964,11 +976,12 @@ export class UserTemplates {
             GenericTemplates.combinedSelector(
                 tabs,
                 (i: number) => {
+                    currentIndex.value = i;
                     tabContents.forEach((c, j) => {
                         c.style.display = i === j ? "flex" : "none";
                     });
                 },
-                0,
+                currentIndex.value,
             ),
             ...tabContents
         ).build();
