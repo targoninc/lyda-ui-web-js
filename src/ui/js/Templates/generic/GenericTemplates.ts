@@ -526,6 +526,7 @@ export class GenericTemplates {
                 selectedState.subscribe((newSelected: number) => {
                     innerSelectedState.value = i === newSelected ? "selected" : "_";
                 });
+
                 return create("button").classes("tab", innerSelectedState).onclick(() => {
                     selectedState.value = i;
                 }).text(t).build();

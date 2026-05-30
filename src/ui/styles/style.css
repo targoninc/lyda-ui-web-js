@@ -78,6 +78,7 @@
     --jessc-interactive-border-active: var(--blue);
     --jessc-interactive-border-hover: var(--color-5);
     --jessc-input-padding-x: 0.6em;
+    --jessc-input-padding-y: 0.3em;
     --jessc-border-radius-small: 8px;
     --jessc-border-radius-medium: 10px;
 
@@ -1211,6 +1212,20 @@ img.loading:before {
     }
 
     .hideTextOnSmallBreakpointButton span {
+        display: none;
+    }
+
+    .roundIconOnSmallBreakpoint {
+        border-radius: 50% !important;
+        padding: 0 !important;
+        min-width: var(--round-button-size);
+        min-height: var(--round-button-size);
+        max-width: var(--round-button-size);
+        max-height: var(--round-button-size);
+        justify-content: center;
+    }
+
+    .roundIconOnSmallBreakpoint span {
         display: none;
     }
 }

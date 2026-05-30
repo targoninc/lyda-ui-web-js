@@ -19,11 +19,10 @@ import {
     StringOrSignal,
     when,
 } from "@targoninc/jess";
-import {currentUser, permissions} from "../../state.ts";
+import {currentUser, permissions, playingFrom, playingHere} from "../../state.ts";
 import {notify, Ui} from "../../Classes/Ui.ts";
 import {MediaActions} from "../../Actions/MediaActions.ts";
 import {RoutePath} from "../../Routing/routes.ts";
-import {MusicTemplates} from "../music/MusicTemplates.ts";
 import {FeedTemplates} from "../generic/FeedTemplates.ts";
 import {PopoverTemplates} from "../generic/PopoverTemplates.ts";
 import {FeedMenuAction} from "../../Models/FeedConfig.ts";
@@ -36,7 +35,6 @@ import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
 import {AlbumActions} from "../../Actions/AlbumActions.ts";
 import {PlaylistActions} from "../../Actions/PlaylistActions.ts";
 import {QueueManager} from "../../Streaming/QueueManager.ts";
-import {playingFrom, playingHere} from "../../state.ts";
 import {TrackList} from "../../Models/TrackList.ts";
 import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
@@ -49,10 +47,11 @@ import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/Collab
 import {t} from "../../../locales";
 import {FeedType} from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 import {CardFeedType} from "../../Enums/CardFeedType.ts";
-import { TextSize } from "../../Enums/TextSize.ts";
+import {TextSize} from "../../Enums/TextSize.ts";
 
 export class UserTemplates {
     static #popoverUid = 0;
+
     static userWidget(
         user: User | Signal<User | null>,
         extraAttributes: HtmlPropertyValue[] = [],
@@ -368,7 +367,6 @@ export class UserTemplates {
         const isOwnProfile = compute((u1, u2) => u1?.id === u2?.id, currentUser, user);
         const loading = signal(false);
         const notFound = compute((l, u) => l && !u, loading, user);
-        const base = vertical();
 
         Api.getUserByName(params["name"])
             .then(u => {
@@ -381,7 +379,7 @@ export class UserTemplates {
             })
             .finally(() => (loading.value = false));
 
-        return base
+        return vertical()
             .children(
                 when(loading, GenericTemplates.loadingSpinner()),
                 when(
@@ -391,7 +389,7 @@ export class UserTemplates {
                         compute(u => (u ? UserTemplates.profileHeader(u, isOwnProfile) : nullElement()), user),
                         compute((u, i) => (u ? UserTemplates.profileInfo(u, i) : nullElement()), user, isOwnProfile),
                         compute((u) => (u ? UserTemplates.profileTabs(u) : nullElement()), user),
-                    ).classes("noflexwrap")
+                    ).classes("noflexwrap", "fullWidth")
                         .build(),
                     true,
                 ),
@@ -399,7 +397,7 @@ export class UserTemplates {
                     create("span")
                         .text(t("USER_NOT_FOUND")),
                 ).build()),
-            ).build();
+            ).classes("fullWidth").build();
     }
 
     static profileTab<T>(
@@ -437,7 +435,12 @@ export class UserTemplates {
         });
 
         const cardActions = (list: TrackList): FeedMenuAction<TrackList>[] => [
-            { label: t("QUEUE"), icon: "queue", onclick: (l) => l.tracks?.forEach(t => QueueManager.addToManualQueue(t.track_id)), show: (l) => !!l.tracks?.length },
+            {
+                label: t("QUEUE"),
+                icon: "queue",
+                onclick: (l) => l.tracks?.forEach(t => QueueManager.addToManualQueue(t.track_id)),
+                show: (l) => !!l.tracks?.length
+            },
         ];
 
         const albumColumns = [
@@ -457,7 +460,10 @@ export class UserTemplates {
                             create("img").classes("feed-inline-cover").src(coverSrc).alt(list.title).build(),
                             create("span").classes("feed-title", "clickable", "pointer")
                                 .text(list.title)
-                                .onclick((e: Event) => { e.stopPropagation(); navigate(`/album/${list.id}`); })
+                                .onclick((e: Event) => {
+                                    e.stopPropagation();
+                                    navigate(`/album/${list.id}`);
+                                })
                                 .build(),
                         ).build();
                 },
@@ -491,7 +497,10 @@ export class UserTemplates {
                             create("img").classes("feed-inline-cover").src(coverSrc).alt(list.title).build(),
                             create("span").classes("feed-title", "clickable", "pointer")
                                 .text(list.title)
-                                .onclick((e: Event) => { e.stopPropagation(); navigate(`/playlist/${list.id}`); })
+                                .onclick((e: Event) => {
+                                    e.stopPropagation();
+                                    navigate(`/playlist/${list.id}`);
+                                })
                                 .build(),
                         ).build();
                 },
@@ -522,7 +531,10 @@ export class UserTemplates {
                     pageSize: 10,
                     fetchPage: (offset) => Api.getAlbumsByUserId(user.id, user.username, offset, "").then(r => r ?? []) as Promise<TrackList[]>,
                     buildMenuActions: cardActions,
-                    onPlayToggle: async (list) => { const ft = list.tracks?.[0]?.track; if (ft) await AlbumActions.startTrackInAlbum(list as Album, ft, true); },
+                    onPlayToggle: async (list) => {
+                        const ft = list.tracks?.[0]?.track;
+                        if (ft) await AlbumActions.startTrackInAlbum(list as Album, ft, true);
+                    },
                     isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
                     dateRender: (list) => GenericTemplates.timestamp(list.created_at, ["hideOnSmallBreakpoint"]),
                 }),
@@ -535,7 +547,10 @@ export class UserTemplates {
                     pageSize: 10,
                     fetchPage: (offset) => Api.getPlaylistsByUserId(user.id, user.username, offset, "").then(r => r ?? []) as any,
                     buildMenuActions: cardActions,
-                    onPlayToggle: async (list) => { const ft = list.tracks?.[0]?.track; if (ft) await PlaylistActions.startTrackInPlaylist(list as Playlist, ft, true); },
+                    onPlayToggle: async (list) => {
+                        const ft = list.tracks?.[0]?.track;
+                        if (ft) await PlaylistActions.startTrackInPlaylist(list as Playlist, ft, true);
+                    },
                     isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
                     dateRender: (list) => GenericTemplates.timestamp(list.created_at, ["hideOnSmallBreakpoint"]),
                 }),
@@ -556,47 +571,44 @@ export class UserTemplates {
             when(
                 isOwnProfile,
                 create("div")
-                    .classes("flex", "fullWidth", "space-between")
+                    .classes("flex", "fullWidth", "space-between", "align-children")
                     .children(
-                        create("div")
-                            .classes("flex")
-                            .children(
-                                button({
-                                    classes: ["positive"],
-                                    text: t("NEW_ALBUM"),
-                                    icon: {icon: "add"},
-                                    onclick: () => navigate(RoutePath.createAlbum),
-                                }),
-                                button({
-                                    classes: ["positive"],
-                                    text: t("NEW_PLAYLIST"),
-                                    icon: {icon: "add"},
-                                    onclick: () => navigate(RoutePath.createPlaylist),
-                                }),
-                                button({
-                                    text: t("EDIT_TRACKS"),
-                                    icon: {icon: "edit_note"},
-                                    onclick: () => navigate(RoutePath.editTracks),
-                                    classes: ["hideOnMidBreakpoint"],
-                                }),
-                                button({
-                                    text: t("STATISTICS"),
-                                    icon: {icon: "finance"},
-                                    onclick: () => navigate(RoutePath.statistics),
-                                }),
-                                UserTemplates.unapprovedTracksLink(),
-                            )
-                            .build(),
-                        create("div")
-                            .classes("flex")
-                            .children(
-                                button({
-                                    text: t("SETTINGS"),
-                                    icon: {icon: "settings"},
-                                    onclick: () => navigate(RoutePath.settings),
-                                }),
-                                GenericTemplates.logoutButton(["hideOnSmallBreakpoint"]),
-                            ).build(),
+                        horizontal(
+                            button({
+                                classes: ["positive"],
+                                text: t("NEW_ALBUM"),
+                                icon: {icon: "add"},
+                                onclick: () => navigate(RoutePath.createAlbum),
+                            }),
+                            button({
+                                classes: ["positive"],
+                                text: t("NEW_PLAYLIST"),
+                                icon: {icon: "add"},
+                                onclick: () => navigate(RoutePath.createPlaylist),
+                            }),
+                            button({
+                                text: t("EDIT_TRACKS"),
+                                icon: {icon: "edit_note"},
+                                onclick: () => navigate(RoutePath.editTracks),
+                                classes: ["hideOnMidBreakpoint"],
+                            }),
+                            button({
+                                text: t("STATISTICS"),
+                                icon: {icon: "finance"},
+                                classes: ["roundIconOnSmallBreakpoint"],
+                                onclick: () => navigate(RoutePath.statistics),
+                            }),
+                            UserTemplates.unapprovedTracksLink(),
+                        ).classes("align-children").build(),
+                        horizontal(
+                            button({
+                                text: t("SETTINGS"),
+                                icon: {icon: "settings"},
+                                classes: ["roundIconOnSmallBreakpoint"],
+                                onclick: () => navigate(RoutePath.settings),
+                            }),
+                            GenericTemplates.logoutButton(["hideOnSmallBreakpoint"]),
+                        ).build(),
                     ).build(),
             ),
         );
@@ -892,7 +904,10 @@ export class UserTemplates {
                             create("img").classes("feed-inline-cover").src(coverSrc).alt(list.title).build(),
                             create("span").classes("feed-title", "clickable", "pointer")
                                 .text(list.title)
-                                .onclick((e: Event) => { e.stopPropagation(); navigate(`/album/${list.id}`); })
+                                .onclick((e: Event) => {
+                                    e.stopPropagation();
+                                    navigate(`/album/${list.id}`);
+                                })
                                 .build(),
                         ).build();
                 },
@@ -926,7 +941,10 @@ export class UserTemplates {
                             create("img").classes("feed-inline-cover").src(coverSrc).alt(list.title).build(),
                             create("span").classes("feed-title", "clickable", "pointer")
                                 .text(list.title)
-                                .onclick((e: Event) => { e.stopPropagation(); navigate(`/playlist/${list.id}`); })
+                                .onclick((e: Event) => {
+                                    e.stopPropagation();
+                                    navigate(`/playlist/${list.id}`);
+                                })
                                 .build(),
                         ).build();
                 },
@@ -950,8 +968,16 @@ export class UserTemplates {
                 columns: libAlbumCols,
                 pageSize: 10,
                 fetchPage: (offset) => Api.getLikedAlbums(user.value.id, user.value.username, offset, "").then(r => r ?? []) as any,
-                buildMenuActions: (list) => [{ label: t("QUEUE"), icon: "queue", onclick: (l) => l.tracks?.forEach(t => QueueManager.addToManualQueue(t.track_id)), show: (l) => !!l.tracks?.length }],
-                onPlayToggle: async (list) => { const ft = list.tracks?.[0]?.track; if (ft) await AlbumActions.startTrackInAlbum(list as Album, ft, true); },
+                buildMenuActions: (list) => [{
+                    label: t("QUEUE"),
+                    icon: "queue",
+                    onclick: (l) => l.tracks?.forEach(t => QueueManager.addToManualQueue(t.track_id)),
+                    show: (l) => !!l.tracks?.length
+                }],
+                onPlayToggle: async (list) => {
+                    const ft = list.tracks?.[0]?.track;
+                    if (ft) await AlbumActions.startTrackInAlbum(list as Album, ft, true);
+                },
                 isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
                 dateRender: (list) => GenericTemplates.timestamp(list.created_at, ["hideOnSmallBreakpoint"]),
             }),
@@ -960,8 +986,16 @@ export class UserTemplates {
                 columns: libPlaylistCols,
                 pageSize: 10,
                 fetchPage: (offset) => Api.getLikedPlaylists(user.value.id, user.value.username, offset, "").then(r => r ?? []) as any,
-                buildMenuActions: (list) => [{ label: t("QUEUE"), icon: "queue", onclick: (l) => l.tracks?.forEach(t => QueueManager.addToManualQueue(t.track_id)), show: (l) => !!l.tracks?.length }],
-                onPlayToggle: async (list) => { const ft = list.tracks?.[0]?.track; if (ft) await PlaylistActions.startTrackInPlaylist(list as Playlist, ft, true); },
+                buildMenuActions: (list) => [{
+                    label: t("QUEUE"),
+                    icon: "queue",
+                    onclick: (l) => l.tracks?.forEach(t => QueueManager.addToManualQueue(t.track_id)),
+                    show: (l) => !!l.tracks?.length
+                }],
+                onPlayToggle: async (list) => {
+                    const ft = list.tracks?.[0]?.track;
+                    if (ft) await PlaylistActions.startTrackInPlaylist(list as Playlist, ft, true);
+                },
                 isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
                 dateRender: (list) => GenericTemplates.timestamp(list.created_at, ["hideOnSmallBreakpoint"]),
             }),
