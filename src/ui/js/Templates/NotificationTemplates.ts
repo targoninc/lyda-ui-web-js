@@ -1,5 +1,5 @@
 import {NotificationParser} from "../Classes/Helpers/NotificationParser.ts";
-import {create, when, nullElement, signalMap, StringOrSignal, compute} from "@targoninc/jess";
+import {create, when, nullElement, signalMap, StringOrSignal, compute, signal} from "@targoninc/jess";
 import {navigate} from "../Routing/Router.ts";
 import {copy, Util} from "../Classes/Util.ts";
 import {UserActions} from "../Actions/UserActions.ts";
@@ -12,6 +12,7 @@ import {Api} from "../Api/Api.ts";
 import {t} from "../../locales";
 import { GenericTemplates } from "./generic/GenericTemplates.ts";
 import { PopoverTemplates } from "./generic/PopoverTemplates.ts";
+import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 
 export class NotificationTemplates {
     static notificationInList(notification: Notification) {
@@ -75,14 +76,26 @@ export class NotificationTemplates {
         }
 
         switch (part.type) {
-            case "profile":
-                return NotificationTemplates.referenceIcon(Util.getUserAvatar(part.id), Images.DEFAULT_AVATAR);
-            case "track":
-                return NotificationTemplates.referenceIcon(Util.getTrackCover(part.id), Images.DEFAULT_COVER_TRACK);
-            case "album":
-                return NotificationTemplates.referenceIcon(Util.getAlbumCover(part.id), Images.DEFAULT_COVER_ALBUM);
-            case "playlist":
-                return NotificationTemplates.referenceIcon(Util.getPlaylistCover(part.id), Images.DEFAULT_COVER_PLAYLIST);
+            case "profile": {
+                const avatar = signal(Images.DEFAULT_AVATAR);
+                Util.getCachedUserAvatar(part.id).then(url => { avatar.value = url; });
+                return NotificationTemplates.referenceIcon(avatar, Images.DEFAULT_AVATAR);
+            }
+            case "track": {
+                const cover = signal(Images.DEFAULT_COVER_TRACK);
+                Util.getCachedImage(part.id, MediaFileType.trackCover).then(url => { cover.value = url; });
+                return NotificationTemplates.referenceIcon(cover, Images.DEFAULT_COVER_TRACK);
+            }
+            case "album": {
+                const cover = signal(Images.DEFAULT_COVER_ALBUM);
+                Util.getCachedImage(part.id, MediaFileType.albumCover).then(url => { cover.value = url; });
+                return NotificationTemplates.referenceIcon(cover, Images.DEFAULT_COVER_ALBUM);
+            }
+            case "playlist": {
+                const cover = signal(Images.DEFAULT_COVER_PLAYLIST);
+                Util.getCachedImage(part.id, MediaFileType.playlistCover).then(url => { cover.value = url; });
+                return NotificationTemplates.referenceIcon(cover, Images.DEFAULT_COVER_PLAYLIST);
+            }
         }
 
         return nullElement();

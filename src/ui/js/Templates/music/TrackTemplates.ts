@@ -546,7 +546,9 @@ export class TrackTemplates {
     static toBeApprovedTrack(collabType: CollaboratorType, data: TrackCollaborator) {
         const avatarState = signal(Images.DEFAULT_AVATAR);
         if (data.user?.has_avatar) {
-            avatarState.value = Util.getUserAvatar(data.user_id);
+            Util.getCachedUserAvatar(data.user_id).then(url => {
+                avatarState.value = url;
+            });
         }
         if (!data.user) {
             throw new Error(`User not set on to be approved track with ID ${data.track_id}`);

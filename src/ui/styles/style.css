@@ -58,7 +58,7 @@
     --page-padding: 10px 20px;
     --inline-padding: 2px 7px;
     --gap: 5px;
-    --layout-gap: 10px;
+    --layout-gap: 8px;
     --anti-gap-margin: -7px;
     --default-shadow: 0 0 15px -7px var(--color-5);
     --button-bottom-border-size: 3px;
@@ -78,6 +78,8 @@
     --jessc-interactive-border-active: var(--blue);
     --jessc-interactive-border-hover: var(--color-5);
     --jessc-input-padding-x: 0.6em;
+    --jessc-border-radius-small: 8px;
+    --jessc-border-radius-medium: 10px;
 
     --jessc-font: var(--default-font-family);
 }
@@ -239,7 +241,7 @@ button > * {
 }
 
 nav {
-    border-bottom: 1px solid var(--color-7);
+    background: var(--background-light-glass);
     z-index: 1;
     position: relative;
 }
@@ -795,18 +797,7 @@ details > *:not(summary) {
     border: 1px solid var(--color-7);
 }
 
-.fakeButton {
-    background: var(--color-6);
-    border: 1px solid transparent;
-    width: max-content;
-}
-
-.fakeButton.active {
-    background: var(--color-9) !important;
-    border-color: var(--color-1);
-}
-
-.fakeButton.disabled, button.disabled {
+button.disabled {
     opacity: .2;
     cursor: not-allowed;
     pointer-events: none;
@@ -849,28 +840,6 @@ textarea.fullWidth {
 
 .clickablePreserveWidth {
     cursor: pointer;
-}
-
-.fakeButton.negative:hover {
-    border-color: var(--red);
-    color: var(--red);
-}
-
-.fakeButton.negative:hover .svg {
-    filter: var(--filter-2);
-}
-
-.fakeButton.positive:hover {
-    border-color: var(--green);
-    color: var(--green);
-}
-
-.fakeButton.positive:hover .svg {
-    filter: var(--filter-8);
-}
-
-.fakeButton.secondary {
-    background: var(--color-9);
 }
 
 .preventPointerEvents .blurOnParentHover {

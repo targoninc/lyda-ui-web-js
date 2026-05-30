@@ -11,6 +11,7 @@ import { SearchResult } from "@targoninc/lyda-shared/src/Models/SearchResult";
 import { get } from "../Api/ApiClient.ts";
 import { t } from "../../locales";
 import { TextSize } from "../Enums/TextSize.ts";
+import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 
 export class SearchTemplates {
     static search(
@@ -411,15 +412,17 @@ export class SearchTemplates {
             subtitle = subtitle.substring(0, 50) + "...";
         }
 
-        const imageGetterMap: Record<string, (id: number) => string> = {
-            user: Util.getUserAvatar,
-            track: Util.getTrackCover,
-            album: Util.getAlbumCover,
-            playlist: Util.getPlaylistCover,
+        const imageGetterMap: Record<string, (id: number) => Promise<string>> = {
+            user: Util.getCachedUserAvatar,
+            track: (id) => Util.getCachedImage(id, MediaFileType.trackCover),
+            album: (id) => Util.getCachedImage(id, MediaFileType.albumCover),
+            playlist: (id) => Util.getCachedImage(id, MediaFileType.playlistCover),
         };
         const image = signal(Util.defaultImage(searchResult.type));
         if (searchResult.hasImage) {
-            image.value = imageGetterMap[searchResult.type](searchResult.id);
+            imageGetterMap[searchResult.type](searchResult.id).then(url => {
+                image.value = url;
+            });
         }
         const contextClasses = context === SearchContext.searchPage ? ["jess", "fullWidth"] : ["_"];
 

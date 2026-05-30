@@ -270,7 +270,7 @@ export class PlayerTemplates {
                     .id(track.id)
                     .children(
                         create("div")
-                            .classes("audio-player-loudnessbackground", "fakeButton", "nopointer")
+                            .classes("audio-player-loudnessbackground", "nopointer")
                             .build(),
                         create("div")
                             .classes("audio-player-loudnesstracker")

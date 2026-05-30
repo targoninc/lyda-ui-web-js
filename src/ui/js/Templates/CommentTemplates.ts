@@ -70,7 +70,9 @@ export class CommentTemplates {
         }
         const avatarState = signal(Images.DEFAULT_AVATAR);
         if (comment.user.has_avatar) {
-            avatarState.value = Util.getUserAvatar(comment.user_id);
+            Util.getCachedUserAvatar(comment.user_id).then(url => {
+                avatarState.value = url;
+            });
         }
         const replyInputShown = signal(false);
         const repliesShown = signal(false);

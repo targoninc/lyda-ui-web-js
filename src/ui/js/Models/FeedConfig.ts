@@ -1,4 +1,4 @@
-import { Signal, StringOrSignal, AnyNode } from "@targoninc/jess";
+import { Signal, StringOrSignal, AnyNode, isSignal } from "@targoninc/jess";
 
 export interface FeedColumn<T> {
     key: string;
@@ -15,7 +15,7 @@ export interface FeedMenuAction<T> {
 
 export interface FeedConfig<T extends { id: number }> {
     id?: string;
-    columns: FeedColumn<T>[];
+    columns: FeedColumn<T>[] | Signal<FeedColumn<T>[]>;
     pageSize: number;
     fetchPage: (offset: number, limit: number, filter?: string, sortBy?: string, sortDir?: 'asc' | 'desc') => Promise<T[]>;
     buildMenuActions: (item: T) => FeedMenuAction<T>[];
@@ -31,4 +31,12 @@ export interface FeedConfig<T extends { id: number }> {
     actionDateRender?: (item: T) => AnyNode;
     header?: AnyNode;
     filterState?: Signal<string>;
+}
+
+export function resolveColumns<T>(columns: FeedConfig<T>["columns"]): FeedColumn<T>[] {
+    return isSignal(columns) ? columns.value : columns;
+}
+
+export function getColumnsSignal<T>(columns: FeedConfig<T>["columns"]): Signal<FeedColumn<T>[]> | null {
+    return isSignal(columns) ? columns : null;
 }

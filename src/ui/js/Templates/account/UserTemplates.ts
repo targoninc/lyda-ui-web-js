@@ -98,7 +98,9 @@ export class UserTemplates {
             : 15;
         const avatarState = signal(Images.DEFAULT_AVATAR);
         if (user.has_avatar) {
-            avatarState.value = Util.getUserAvatar(user.id);
+            Util.getCachedUserAvatar(user.id).then(url => {
+                avatarState.value = url;
+            });
         }
         if (following.constructor !== Signal) {
             following = signal(following as boolean);
@@ -621,7 +623,9 @@ export class UserTemplates {
         }
         const userAvatar = signal(Images.DEFAULT_AVATAR);
         if (user.has_avatar) {
-            userAvatar.value = Util.getUserAvatar(user.id);
+            Util.getCachedUserAvatar(user.id).then(url => {
+                userAvatar.value = url;
+            });
         }
 
         const bannerContainer = create("div")

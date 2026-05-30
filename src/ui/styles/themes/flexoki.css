@@ -33,22 +33,9 @@
     --jessc-interactive-color-active: var(--color-5);
 }
 
-.fakeButton {
-    background: var(--color-3);
-}
-
-.fakeButton.positive:hover {
-    background-color: var(--green);
-    color: var(--color-5);
-}
-
 button.positive:hover {
     border-color: var(--green-dark);
     background: var(--green);
-}
-
-.fakeButton.positive:hover .svg {
-    filter: var(--filter-5);
 }
 
 .tab {

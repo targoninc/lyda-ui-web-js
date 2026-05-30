@@ -110,7 +110,9 @@ export class ModerationUsersTemplates {
         const verified = signal(u.verified);
         const avatar$ = signal(Images.DEFAULT_AVATAR);
         if (u.has_avatar) {
-            avatar$.value = Util.getUserAvatar(u.id);
+            Util.getCachedUserAvatar(u.id).then(url => {
+                avatar$.value = url;
+            });
         }
         const tabs = ["Permissions", "Comments", "IPs", "Emails"];
         const i$ = signal(0);

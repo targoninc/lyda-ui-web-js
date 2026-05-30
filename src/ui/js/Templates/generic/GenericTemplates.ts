@@ -601,7 +601,9 @@ export class GenericTemplates {
         const selectedClassState = compute((s): string => (s === entry.id ? "active" : "_"), selectedState);
         const avatar = signal(Images.DEFAULT_AVATAR);
         if (entry.hasImage) {
-            avatar.value = Util.getUserAvatar(entry.id);
+            Util.getCachedUserAvatar(entry.id).then(url => {
+                avatar.value = url;
+            });
         }
 
         return button({

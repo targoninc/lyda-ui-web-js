@@ -6,19 +6,6 @@
     --background-light-glass: rgba(var(--color-3-rgb), var(--glass-transparency));
 }
 
-.fakeButton {
-    background: var(--color-3);
-}
-
-.fakeButton.positive:hover {
-    background-color: var(--green);
-    color: var(--color-5);
-}
-
-.fakeButton.positive:hover .svg {
-    filter: var(--filter-5);
-}
-
 .clickable.secondary.padded-inline:hover {
     background: var(--color-4);
 }

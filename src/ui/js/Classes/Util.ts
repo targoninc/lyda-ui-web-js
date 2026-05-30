@@ -48,6 +48,13 @@ export class Util {
         return Util.getImage(id, MediaFileType.userAvatar);
     }
 
+    static async getCachedUserAvatar(id: number | null | undefined): Promise<string> {
+        if (id === null || id === undefined) {
+            return Images.DEFAULT_AVATAR;
+        }
+        return Util.getCachedImage(id, MediaFileType.userAvatar);
+    }
+
     static getUserBanner(id: number | null) {
         if (id === null) {
             return Images.DEFAULT_BANNER;
@@ -348,7 +355,9 @@ export function updateImagesWithSource(newSrc: string, oldSrc: string) {
 export function getAvatar(user: User | null | undefined) {
     const imgState = signal(Images.DEFAULT_AVATAR);
     if (user?.has_avatar) {
-        imgState.value = Util.getUserAvatar(user.id);
+        Util.getCachedUserAvatar(user.id).then(url => {
+            imgState.value = url;
+        });
     }
     return imgState;
 }

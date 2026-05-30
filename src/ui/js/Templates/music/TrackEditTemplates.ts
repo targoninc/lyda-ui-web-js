@@ -665,7 +665,9 @@ export class TrackEditTemplates {
                         }
                         const avatarState = signal(Images.DEFAULT_AVATAR);
                         if (user.has_avatar) {
-                            avatarState.value = Util.getUserAvatar(user.id);
+                            Util.getCachedUserAvatar(user.id).then(url => {
+                                avatarState.value = url;
+                            });
                         }
 
                         if (editable) {

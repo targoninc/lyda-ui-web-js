@@ -2,7 +2,7 @@ import { compute, create, Signal, signal, signalMap, when, AnyNode, nullElement,
 import { GenericTemplates, horizontal } from "./GenericTemplates.ts";
 import { getPlayIcon, copy, Util } from "../../Classes/Util.ts";
 import { t } from "../../../locales";
-import { FeedColumn, FeedMenuAction, FeedConfig } from "../../Models/FeedConfig.ts";
+import { FeedColumn, FeedMenuAction, FeedConfig, resolveColumns, getColumnsSignal } from "../../Models/FeedConfig.ts";
 import { ContextMenuTemplates } from "./ContextMenuTemplates.ts";
 import { PopoverTemplates } from "./PopoverTemplates.ts";
 import { InteractionTemplates } from "../InteractionTemplates.ts";
@@ -43,6 +43,7 @@ export class FeedTemplates {
         const search$ = signal("");
         const sortBy$ = signal<string | null>(null);
         const sortDir$ = signal<'asc' | 'desc' | null>(null);
+        const columnsSignal = getColumnsSignal(config.columns);
         const ps = config.pageSize;
         let page = 0;
 
@@ -304,10 +305,11 @@ export class FeedTemplates {
                                 if (ii.length === 0) return nullElement();
                                 const sb = sortBy$.value;
                                 const sd = sortDir$.value;
+                                const cols = resolveColumns(config.columns);
                                 const ths: any[] = [
                                     create("th").classes("feed-idx-h").text("#").build(),
                                 ];
-                                for (const c of config.columns) {
+                                for (const c of cols) {
                                     const th = FeedTemplates.#sortableTh(c.key, c.header, sb, sd, cycleSort, c.key === "artist" ? ["hideOnSmallBreakpoint"] : []);
                                     ths.push(th);
                                 }
@@ -323,7 +325,7 @@ export class FeedTemplates {
                                         create("tr").classes("feed-header-row").children(...ths).build(),
                                     ).build();
                             },
-                            items$, sortKey,
+                            items$, sortKey, ...(columnsSignal ? [columnsSignal] : []),
                         ),
                         signalMap(
                             items$,
@@ -388,55 +390,70 @@ export class FeedTemplates {
         const filterState = signal("all");
         const isFollowing = type === FeedType.following;
 
+        const baseColumns: FeedColumn<Track>[] = [
+            {
+                key: "title",
+                header: t("TRACK_TITLE"),
+                render: (track) => {
+                    const icons: any[] = [];
+                    if (track.visibility === "private") icons.push(GenericTemplates.lock());
+                    const coverSrc = signal(DefaultImages[EntityType.track]);
+                    if (track.has_cover) {
+                        Util.getCachedImage(track.id, MediaFileType.trackCover).then(url => {
+                            coverSrc.value = url;
+                        });
+                    }
+                    return create("div")
+                        .classes("flex", "align-children", "small-gap", "noflexwrap")
+                        .children(
+                            create("img")
+                                .classes("feed-inline-cover")
+                                .src(coverSrc)
+                                .alt(track.title)
+                                .build(),
+                            create("div").classes("flex-v", "no-gap")
+                                .children(
+                                    create("div").classes("flex", "align-children", "small-gap")
+                                        .children(
+                                            create("span").classes("feed-title", "clickable", "pointer").text(track.title)
+                                                .onclick((e: Event) => { e.stopPropagation(); navigate(`/track/${track.id}`); })
+                                                .build(),
+                                            ...icons,
+                                        ).build(),
+                                ).build(),
+                        ).build();
+                },
+            },
+            {
+                key: "artist",
+                header: t("ARTIST"),
+                render: (track) => {
+                    if (!track.user) return nullElement();
+                    return UserTemplates.userLink(UserWidgetContext.card, track.user as User, track.artistname);
+                },
+            },
+        ];
+
+        const repostColumn: FeedColumn<Track> = {
+            key: "reposted_by",
+            header: "Reposted by",
+            render: (track) => {
+                if (!track.repost) return nullElement();
+                return TrackTemplates.repostIndicator(track.repost);
+            },
+        };
+
+        const columns$ = isFollowing
+            ? compute((f) => f === "reposts" ? [...baseColumns, repostColumn] : baseColumns, filterState)
+            : baseColumns;
+
         return FeedTemplates.create<Track>({
             id: `feed-${type}`,
             compact: [FeedType.explore, FeedType.following, FeedType.history].includes(type),
             showSearch: ![FeedType.following, FeedType.explore].includes(type),
             header: isFollowing ? TrackTemplates.feedFilters(filterState) : undefined,
             filterState: isFollowing ? filterState : undefined,
-            columns: [
-                {
-                    key: "title",
-                    header: t("TRACK_TITLE"),
-                    render: (track) => {
-                        const icons: any[] = [];
-                        if (track.visibility === "private") icons.push(GenericTemplates.lock());
-                        const coverSrc = signal(DefaultImages[EntityType.track]);
-                        if (track.has_cover) {
-                            Util.getCachedImage(track.id, MediaFileType.trackCover).then(url => {
-                                coverSrc.value = url;
-                            });
-                        }
-                        return create("div")
-                            .classes("flex", "align-children", "small-gap", "noflexwrap")
-                            .children(
-                                create("img")
-                                    .classes("feed-inline-cover")
-                                    .src(coverSrc)
-                                    .alt(track.title)
-                                    .build(),
-                                create("div").classes("flex-v", "no-gap")
-                                    .children(
-                                        create("div").classes("flex", "align-children", "small-gap")
-                                            .children(
-                                                create("span").classes("feed-title", "clickable", "pointer").text(track.title)
-                                                    .onclick((e: Event) => { e.stopPropagation(); navigate(`/track/${track.id}`); })
-                                                    .build(),
-                                                ...icons,
-                                            ).build(),
-                                    ).build(),
-                            ).build();
-                    },
-                },
-                {
-                    key: "artist",
-                    header: t("ARTIST"),
-                    render: (track) => {
-                        if (!track.user) return nullElement();
-                        return UserTemplates.userLink(UserWidgetContext.card, track.user as User, track.artistname);
-                    },
-                },
-            ],
+            columns: columns$,
             pageSize: type === FeedType.explore ? 100 : 10,
             fetchPage: async (offset, limit, filter, sortBy, sortDir) => {
                 const params: any = { offset, limit, filter };
@@ -561,7 +578,7 @@ export class FeedTemplates {
                 create("td").classes("feed-idx-cell")
                     .children(FeedTemplates.#idxCell(item, index, icon, loading, config))
                     .build(),
-                ...config.columns.map(c => {
+                ...resolveColumns(config.columns).map(c => {
                     return create("td").classes("feed-cell", `feed-cell-${c.key}`, ...(c.key === "artist" ? ["hideOnSmallBreakpoint"] : []))
                         .children(c.render(item, index))
                         .build();
@@ -580,6 +597,7 @@ export class FeedTemplates {
                     .build(),
             ).build() as HTMLElement;
 
+        rowEl.addEventListener("dblclick", () => config.onPlayToggle(item));
         rowEl.addEventListener("touchstart", () => {
             longPressTimer = setTimeout(() => showMobileMenu(item), 500);
         });

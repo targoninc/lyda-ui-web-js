@@ -503,6 +503,8 @@ label {
     width: calc(100% - 2px);
     bottom: -17px;
     border: 1px solid var(--jessc-interactive-border);
+    background: var(--color-4);
+    cursor: pointer;
 }
 
 .loudness-button {
