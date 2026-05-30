@@ -443,9 +443,12 @@ export class UserTemplates {
                 key: "title",
                 header: t("TRACK_TITLE"),
                 render: (list: TrackList) => {
-                    const coverSrc = list.has_cover
-                        ? Util.getImage(list.id, MediaFileType.albumCover)
-                        : Images.DEFAULT_COVER_ALBUM;
+                    const coverSrc = signal(Images.DEFAULT_COVER_ALBUM);
+                    if (list.has_cover) {
+                        Util.getCachedImage(list.id, MediaFileType.albumCover).then(url => {
+                            coverSrc.value = url;
+                        });
+                    }
                     return create("div")
                         .classes("flex", "align-children", "small-gap")
                         .children(
@@ -474,9 +477,12 @@ export class UserTemplates {
                 key: "title",
                 header: t("TRACK_TITLE"),
                 render: (list: TrackList) => {
-                    const coverSrc = list.has_cover
-                        ? Util.getImage(list.id, MediaFileType.playlistCover)
-                        : Images.DEFAULT_COVER_PLAYLIST;
+                    const coverSrc = signal(Images.DEFAULT_COVER_PLAYLIST);
+                    if (list.has_cover) {
+                        Util.getCachedImage(list.id, MediaFileType.playlistCover).then(url => {
+                            coverSrc.value = url;
+                        });
+                    }
                     return create("div")
                         .classes("flex", "align-children", "small-gap")
                         .children(
@@ -857,9 +863,12 @@ export class UserTemplates {
                 key: "title",
                 header: t("TRACK_TITLE"),
                 render: (list: TrackList) => {
-                    const coverSrc = list.has_cover
-                        ? Util.getImage(list.id, MediaFileType.albumCover)
-                        : Images.DEFAULT_COVER_ALBUM;
+                    const coverSrc = signal(Images.DEFAULT_COVER_ALBUM);
+                    if (list.has_cover) {
+                        Util.getCachedImage(list.id, MediaFileType.albumCover).then(url => {
+                            coverSrc.value = url;
+                        });
+                    }
                     return create("div")
                         .classes("flex", "align-children", "small-gap")
                         .children(
@@ -888,9 +897,12 @@ export class UserTemplates {
                 key: "title",
                 header: t("TRACK_TITLE"),
                 render: (list: TrackList) => {
-                    const coverSrc = list.has_cover
-                        ? Util.getImage(list.id, MediaFileType.playlistCover)
-                        : Images.DEFAULT_COVER_PLAYLIST;
+                    const coverSrc = signal(Images.DEFAULT_COVER_PLAYLIST);
+                    if (list.has_cover) {
+                        Util.getCachedImage(list.id, MediaFileType.playlistCover).then(url => {
+                            coverSrc.value = url;
+                        });
+                    }
                     return create("div")
                         .classes("flex", "align-children", "small-gap")
                         .children(

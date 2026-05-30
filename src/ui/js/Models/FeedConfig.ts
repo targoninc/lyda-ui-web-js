@@ -29,4 +29,6 @@ export interface FeedConfig<T extends { id: number }> {
     dateRender?: (item: T) => AnyNode;
     actionDateHeader?: StringOrSignal;
     actionDateRender?: (item: T) => AnyNode;
+    header?: AnyNode;
+    filterState?: Signal<string>;
 }

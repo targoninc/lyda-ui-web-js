@@ -1,4 +1,4 @@
-import { create, AnyNode, AnyElement } from "@targoninc/jess";
+import {create, AnyNode, AnyElement, DomNode, Signal} from "@targoninc/jess";
 
 export class PopoverTemplates {
     static popover(id: string, ...children: AnyNode[]): HTMLElement {
@@ -10,7 +10,7 @@ export class PopoverTemplates {
             .build() as HTMLElement;
     }
 
-    static manualPopover(id: string, ...children: AnyNode[]): HTMLElement {
+    static manualPopover(id: string, ...children: (HTMLElement | SVGElement | Signal<HTMLElement | SVGElement>)[]): HTMLElement {
         return create("div")
             .classes("generic-popover")
             .id(id)

@@ -14,6 +14,7 @@ import { Icons } from "../Enums/Icons.ts";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import { language, localeByLanguage } from "../../locales";
+import { cachingService } from "../Cache/CachingService.ts";
 
 export class Util {
     static capitalizeFirstLetter(string: string) {
@@ -56,6 +57,10 @@ export class Util {
 
     static getImage(id: number, type: MediaFileType) {
         return ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${type}&t=${Date.now()}`;
+    }
+
+    static async getCachedImage(id: number, type: MediaFileType): Promise<string> {
+        return cachingService.getImageUrl(id, type, 500);
     }
 
     static getTrackCover(id: number) {

@@ -43,7 +43,9 @@ export class MusicTemplates {
         const imageState = signal(DefaultImages[type]);
         const fileType = `${type}Cover` as MediaFileType;
         if (item.has_cover) {
-            imageState.value = Util.getImage(item.id, fileType);
+            Util.getCachedImage(item.id, fileType).then(url => {
+                imageState.value = url;
+            });
         }
         const coverLoading = signal(false);
         const start = async () => {

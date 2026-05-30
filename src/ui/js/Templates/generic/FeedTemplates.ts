@@ -26,6 +26,7 @@ import { UserTemplates } from "../account/UserTemplates.ts";
 import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { input } from "@targoninc/jess-components";
+import { TrackTemplates } from "../music/TrackTemplates.ts";
 
 export { FeedColumn, FeedMenuAction, FeedConfig };
 
@@ -222,7 +223,8 @@ export class FeedTemplates {
             if (loading$.value || !hasMore$.value) return;
             loading$.value = true;
             const offset = page * ps;
-            const next = await config.fetchPage(offset, ps, search$.value, sortBy$.value ?? undefined, sortDir$.value ?? undefined);
+            const filterValue = config.filterState?.value ?? search$.value;
+            const next = await config.fetchPage(offset, ps, filterValue, sortBy$.value ?? undefined, sortDir$.value ?? undefined);
             if (!next || next.length < ps) hasMore$.value = false;
             if (next) items$.value = [...items$.value, ...next];
             page += 1;
@@ -230,6 +232,7 @@ export class FeedTemplates {
         };
 
         if (config.showSearch) search$.subscribe(reload);
+        if (config.filterState) config.filterState.subscribe(reload);
         sortBy$.subscribe(reload);
         sortDir$.subscribe(reload);
 
@@ -292,6 +295,7 @@ export class FeedTemplates {
                         }),
                     ).classes("space-between", "align-children").build(),
                 ),
+                config.header ?? nullElement(),
                 create("table")
                     .classes("feed-table", "fullWidth")
                     .children(
@@ -381,10 +385,15 @@ export class FeedTemplates {
             id: user?.id,
         };
 
+        const filterState = signal("all");
+        const isFollowing = type === FeedType.following;
+
         return FeedTemplates.create<Track>({
             id: `feed-${type}`,
             compact: [FeedType.explore, FeedType.following, FeedType.history].includes(type),
             showSearch: ![FeedType.following, FeedType.explore].includes(type),
+            header: isFollowing ? TrackTemplates.feedFilters(filterState) : undefined,
+            filterState: isFollowing ? filterState : undefined,
             columns: [
                 {
                     key: "title",
@@ -392,9 +401,12 @@ export class FeedTemplates {
                     render: (track) => {
                         const icons: any[] = [];
                         if (track.visibility === "private") icons.push(GenericTemplates.lock());
-                        const coverSrc = track.has_cover
-                            ? Util.getImage(track.id, MediaFileType.trackCover)
-                            : DefaultImages[EntityType.track];
+                        const coverSrc = signal(DefaultImages[EntityType.track]);
+                        if (track.has_cover) {
+                            Util.getCachedImage(track.id, MediaFileType.trackCover).then(url => {
+                                coverSrc.value = url;
+                            });
+                        }
                         return create("div")
                             .classes("flex", "align-children", "small-gap", "noflexwrap")
                             .children(
