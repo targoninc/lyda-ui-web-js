@@ -36,7 +36,3 @@ export interface FeedConfig<T extends { id: number }> {
 export function resolveColumns<T>(columns: FeedConfig<T>["columns"]): FeedColumn<T>[] {
     return isSignal(columns) ? columns.value : columns;
 }
-
-export function getColumnsSignal<T>(columns: FeedConfig<T>["columns"]): Signal<FeedColumn<T>[]> | null {
-    return isSignal(columns) ? columns : null;
-}

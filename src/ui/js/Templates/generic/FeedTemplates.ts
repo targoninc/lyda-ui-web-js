@@ -2,7 +2,7 @@ import { compute, create, Signal, signal, signalMap, when, AnyNode, nullElement,
 import { GenericTemplates, horizontal } from "./GenericTemplates.ts";
 import { getPlayIcon, copy, Util } from "../../Classes/Util.ts";
 import { t } from "../../../locales";
-import { FeedColumn, FeedMenuAction, FeedConfig, resolveColumns, getColumnsSignal } from "../../Models/FeedConfig.ts";
+import { FeedColumn, FeedMenuAction, FeedConfig, resolveColumns } from "../../Models/FeedConfig.ts";
 import { ContextMenuTemplates } from "./ContextMenuTemplates.ts";
 import { PopoverTemplates } from "./PopoverTemplates.ts";
 import { InteractionTemplates } from "../InteractionTemplates.ts";
@@ -43,7 +43,6 @@ export class FeedTemplates {
         const search$ = signal("");
         const sortBy$ = signal<string | null>(null);
         const sortDir$ = signal<'asc' | 'desc' | null>(null);
-        const columnsSignal = getColumnsSignal(config.columns);
         const ps = config.pageSize;
         let page = 0;
 
@@ -325,7 +324,7 @@ export class FeedTemplates {
                                         create("tr").classes("feed-header-row").children(...ths).build(),
                                     ).build();
                             },
-                            items$, sortKey, ...(columnsSignal ? [columnsSignal] : []),
+                            items$, sortKey,
                         ),
                         signalMap(
                             items$,

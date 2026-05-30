@@ -842,16 +842,12 @@ export class GenericTemplates {
     }
 
     static textButton(text: StringOrSignal, onclick: (e: MouseEvent) => void, icon: StringOrSignal) {
-        return create("button")
-            .classes("color-dim", "flex", "align-children", "small-gap", "text-button")
-            .onclick(onclick)
-            .children(
-                GenericTemplates.icon(icon, true),
-                create("span")
-                    .classes("text", "align-center", "nopointer", "user-displayname")
-                    .text(text)
-                    .build(),
-            ).build();
+        return button({
+            classes: ["color-dim"],
+            onclick,
+            icon: { icon, adaptive: true },
+            text
+        });
     }
 
     static menu(shown: Signal<boolean>, ...children: (AnyElement | Signal<AnyElement>)[]) {

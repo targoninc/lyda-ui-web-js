@@ -449,6 +449,10 @@ button {
     display: flex;
     align-items: center;
     gap: var(--gap);
+
+    *, *.jess {
+        color: inherit;
+    }
 }
 
 button.negative {
@@ -461,12 +465,14 @@ button.negative:hover {
 }
 
 button.positive {
-    border-left-color: var(--green);
+    border-color: var(--green-dark);
+    color: var(--green);
 }
 
 button.positive:hover {
     border-color: var(--green);
     background: var(--green-dark);
+    color: var(--color-4);
 }
 
 button.positive.active {

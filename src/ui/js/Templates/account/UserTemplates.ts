@@ -124,7 +124,7 @@ export class UserTemplates {
             .children(
                 UserTemplates.userIcon(user.id, avatarState),
                 create("span")
-                    .classes("text", "align-center", "nopointer", "user-displayname", "hideOnTinyBreakpoint")
+                    .classes("text", "align-center", "nopointer", "hideOnTinyBreakpoint")
                     .text(truncateText(overrideArtistName ?? user.displayname, maxDisplaynameLength))
                     .attributes("data-user-id", user.id)
                     .build(),
@@ -167,7 +167,7 @@ export class UserTemplates {
             .children(
                 UserTemplates.userIcon(user.id, avatarState),
                 create("span")
-                    .classes("text", "align-center", "nopointer", "user-displayname")
+                    .classes("text", "align-center", "nopointer")
                     .text(truncateText(overrideArtistName ?? user.displayname, maxDisplaynameLength))
                     .attributes("data-user-id", user.id)
                     .build(),
@@ -238,7 +238,7 @@ export class UserTemplates {
                     .children(
                         UserTemplates.userIcon(user_id, avatar),
                         create("span")
-                            .classes("text", "nopointer", "user-displayname")
+                            .classes("text", "nopointer")
                             .text(displayname)
                             .attributes("data-user-id", user_id)
                             .build(),
