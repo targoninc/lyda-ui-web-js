@@ -375,7 +375,7 @@ export class FeedTemplates {
                                 }
                                 const skeletonCount = Math.max(0, total - lastLoadedEnd);
                                 if (skeletonCount === 0) return nullElement();
-                                return FeedTemplates.#skeletonRows(skeletonCount, colCount);
+                                return FeedTemplates.#skeletonRows(skeletonCount, colCount, Math.floor(lastLoadedEnd / ps), ps);
                             },
                             totalCount$,
                         ),
@@ -614,10 +614,11 @@ export class FeedTemplates {
         });
     }
 
-    static #skeletonRows(count: number, colCount: number): HTMLElement {
+    static #skeletonRows(count: number, colCount: number, startPage: number, pageSize: number): HTMLElement {
         return create("tbody").classes("feed-rows")
-            .children(...Array.from({ length: count }, () =>
+            .children(...Array.from({ length: count }, (_, i) =>
                 create("tr").classes("feed-row", "skeleton-row")
+                    .attributes("data-page", String(startPage + Math.floor(i / pageSize)))
                     .children(
                         ...Array.from({ length: colCount }, () =>
                             create("td").classes("feed-cell")
