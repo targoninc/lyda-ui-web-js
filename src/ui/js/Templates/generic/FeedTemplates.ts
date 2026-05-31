@@ -384,6 +384,7 @@ export class FeedTemplates {
             type,
             name: getFeedDisplayName(type, user?.displayname) ?? type,
             id: user?.id,
+            username: user?.username,
         };
 
         const validFilters = ["all", "originals", "reposts"];

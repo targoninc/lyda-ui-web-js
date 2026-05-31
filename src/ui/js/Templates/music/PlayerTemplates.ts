@@ -37,13 +37,12 @@ import { LoopMode } from "@targoninc/lyda-shared/src/Enums/LoopMode";
 import { InteractionTemplates } from "../InteractionTemplates.ts";
 import { MusicTemplates } from "./MusicTemplates.ts";
 import { StreamingQuality } from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
-import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
 import { InteractionType } from "@targoninc/lyda-shared/src/Enums/InteractionType.ts";
 import { t } from "../../../locales";
 import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
-import { DefaultImages } from "../../Enums/DefaultImages.ts";
 import { CoverContext } from "../../Enums/CoverContext.ts";
 import { TextSize } from "../../Enums/TextSize.ts";
+import { PlayingFromResolver } from "../../Classes/PlayingFromResolver.ts";
 
 
 export class PlayerTemplates {
@@ -393,39 +392,14 @@ export class PlayerTemplates {
     }
 
     static playingFrom() {
-        const id = compute(pf => pf?.id, playingFrom);
-        const type = compute(pf => pf?.type, playingFrom);
         const name = compute(pf => pf?.name ?? "", playingFrom);
+        const defaultImg$ = compute(pf => PlayingFromResolver.getDefaultImageUrl(pf), playingFrom);
         const img$ = signal(Images.DEFAULT_COVER_ALBUM);
-        const typeMap: Record<"album" | "playlist" | FeedType, MediaFileType> = {
-            album: MediaFileType.albumCover,
-            playlist: MediaFileType.playlistCover,
-            [FeedType.profileTracks]: MediaFileType.userAvatar,
-            [FeedType.profileReposts]: MediaFileType.userAvatar,
-            [FeedType.likedTracks]: MediaFileType.userAvatar,
-        };
-        const linkMap: Record<"album" | "playlist" | FeedType, RoutePath> = {
-            album: RoutePath.album,
-            playlist: RoutePath.playlist,
-            [FeedType.profileTracks]: RoutePath.profile,
-            [FeedType.profileReposts]: RoutePath.profile,
-            [FeedType.likedTracks]: RoutePath.profile,
-            [FeedType.history]: RoutePath.profile,
-        };
-        const paramsMap: Record<"album" | "playlist" | FeedType, string> = {
-            [FeedType.profileReposts]: `?tab=reposts`,
-            [FeedType.profileTracks]: `?tab=tracks`,
-            [FeedType.likedTracks]: `?tab=liked`,
-            [FeedType.history]: `?tab=history`,
-        };
+        const link$ = compute(pf => PlayingFromResolver.getLink(pf), playingFrom);
+        const showImage$ = compute(pf => PlayingFromResolver.shouldShowImage(pf), playingFrom);
+
         playingFrom.subscribe(pf => {
-            if (pf && pf.id && !!typeMap[pf.type!]) {
-                if (pf.entity && !pf.entity.has_cover) {
-                    img$.value = DefaultImages.playlist;
-                    return;
-                }
-                img$.value = Util.getImage(pf.id, typeMap[pf.type!]);
-            }
+            img$.value = PlayingFromResolver.getImageUrl(pf);
         });
 
         return when(
@@ -435,17 +409,20 @@ export class PlayerTemplates {
                 .children(
                     create("a")
                         .classes("page-link", "color-dim", "flex", "align-children", "small-gap")
-                        .href(compute(pf => `/${pf?.type}/${pf?.id}${paramsMap[pf?.type!] ?? ""}`, playingFrom))
+                        .href(link$)
                         .onclick(e => {
                             if (e.button === 0) {
                                 e.preventDefault();
-                                navigate(`${linkMap[type.value!]}/${id.value}`);
+                                navigate(link$.value);
                             }
                         })
                         .children(
-                            when(img$, create("img")
+                            when(showImage$, create("img")
                                 .classes("tiny-cover")
                                 .src(img$)
+                                .onerror((e: Event) => {
+                                    (e.target as HTMLImageElement).src = defaultImg$.value;
+                                })
                                 .build()),
                             create("span")
                                 .classes(TextSize.small)

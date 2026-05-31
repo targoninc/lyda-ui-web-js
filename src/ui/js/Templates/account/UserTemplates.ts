@@ -340,7 +340,7 @@ export class UserTemplates {
         const text = noText ? "" : compute((f): string => (f ? `${t("UNFOLLOW")}` : `${t("FOLLOW")}`), following);
 
         return GenericTemplates.textButton(text, async () => TrackActions.toggleFollow(user_id, following),
-            compute(f => (f ? Icons.UNFOLLOW : Icons.FOLLOW), following));
+            compute((f): string => (f ? "person_cancel" : "person_add"), following));
     }
 
     static followsBackIndicator() {

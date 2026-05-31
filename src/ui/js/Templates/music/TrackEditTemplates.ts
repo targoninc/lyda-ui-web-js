@@ -515,16 +515,15 @@ export class TrackEditTemplates {
                         enableTos
                             ? TrackEditTemplates.sectionCard(t("COPYRIGHT"), errorSections, "terms",
                                 [
-                                    checkbox({
+                                    toggle({
                                         name: "termsOfService",
+                                        label: t("I_HAVE_ALL_NECESSARY_RIGHTS"),
                                         text: t("I_HAVE_ALL_NECESSARY_RIGHTS"),
                                         checked: compute(s => s.termsOfService, state),
-                                        required: true,
-                                        onchange: () => {
-                                            const old = state.value;
+                                        onchange: (v: boolean) => {
                                             state.value = {
-                                                ...old,
-                                                termsOfService: !old.termsOfService,
+                                                ...state.value,
+                                                termsOfService: v,
                                             };
                                         },
                                     }),
@@ -617,7 +616,11 @@ export class TrackEditTemplates {
             text: t("DELETE"),
             icon: {icon: "delete"},
             classes: ["negative"],
-            onclick: async () => {
+            onclick: async (e: Event) => {
+                const popover = (e.target as HTMLElement).closest("[popover]") as HTMLElement;
+                if (popover?.popover) {
+                    popover.hidePopover();
+                }
                 await Ui.getConfirmationModal(
                     t("DELETE_TRACK"),
                     t("SURE_DELETE_TRACK"),

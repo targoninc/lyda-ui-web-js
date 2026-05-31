@@ -163,12 +163,14 @@ export class PlayManager {
 
     static playFrom(type: FeedType | "album" | "playlist", name: string = type, options?: {
         id?: number,
+        username?: string,
         entity?: FeedItem
     }) {
         playingFrom.value = {
             type,
             name,
             id: options?.id,
+            username: options?.username,
             entity: options?.entity as (Album | Playlist),
         };
     }
