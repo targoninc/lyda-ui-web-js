@@ -86,10 +86,6 @@ export class PlayerTemplates {
                             t("NEXT"),
                         ),
                         PlayerTemplates.loopModeButton(),
-                        create("div")
-                            .classes("flex", "align-center", "hideOnMidBreakpoint")
-                            .children(InteractionTemplates.interactions(EntityType.track, track))
-                            .build(),
                         PlayerTemplates.moreMenu(track),
                     ).build(),
                 create("div")
@@ -486,10 +482,18 @@ export class PlayerTemplates {
 
     static trackInfo(track: Track, trackUser: User) {
         return vertical(
-            PlayerTemplates.playerTrackTitle(track, () => {
-                playerExpanded.value = false;
-                navigate(`/track/${track.id}`);
-            }),
+            horizontal(
+                PlayerTemplates.playerTrackTitle(track, () => {
+                    playerExpanded.value = false;
+                    navigate(`/track/${track.id}`);
+                }),
+                create("div")
+                    .classes("hideOnMidBreakpoint")
+                    .children(InteractionTemplates.interactions(EntityType.track, track, {
+                        overrideActions: [InteractionType.like, InteractionType.repost],
+                    }))
+                    .build(),
+            ).classes("align-center").build(),
             UserTemplates.userLink(UserWidgetContext.player, trackUser),
             horizontal(PlayerTemplates.noSubscriptionInfo(), PlayerTemplates.playingFrom()),
         )
@@ -503,7 +507,9 @@ export class PlayerTemplates {
             .id(popId)
             .attributes("popover", "manual")
             .children(
-                InteractionTemplates.interactions(EntityType.track, track),
+                InteractionTemplates.interactions(EntityType.track, track, {
+                    overrideActions: [InteractionType.like, InteractionType.repost],
+                }),
                 QueueTemplates.queueButton(),
             ).build() as HTMLElement;
 
