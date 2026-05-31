@@ -863,7 +863,6 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .playing {
     background: var(--background-playing);
-    border: 1px solid var(--blue);
 }
 
 .track-contained-list .card {
