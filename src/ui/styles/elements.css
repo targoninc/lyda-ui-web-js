@@ -1746,6 +1746,10 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     85%, 100% { transform: translateX(0); }
 }
 
+.skeleton-row {
+    height: var(--inline-track-height);
+}
+
 .skeleton-row .skeleton-pulse {
     height: 16px;
     border-radius: 4px;

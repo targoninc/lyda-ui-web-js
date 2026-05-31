@@ -341,31 +341,20 @@ export class FeedTemplates {
                         ),
                         compute(
                             (items, total, ld) => {
-                                if (items.length > 0 || !ld) return nullElement();
+                                if (!ld || items.length > 0) return nullElement();
                                 const skeletonCount = Math.min(total ?? ps, ps);
-                                const colCount = resolveColumns(config.columns).length + 3;
-                                return create("tbody").classes("feed-rows")
-                                    .children(...Array.from({ length: skeletonCount }, (_, i) =>
-                                        create("tr").classes("feed-row", "skeleton-row")
-                                            .children(
-                                                ...Array.from({ length: colCount }, (_, j) =>
-                                                    create("td").classes("feed-cell")
-                                                        .children(create("div").classes("skeleton-pulse").build())
-                                                        .build()
-                                                )
-                                            ).build()
-                                    )).build();
+                                return FeedTemplates.#skeletonRows(skeletonCount, resolveColumns(config.columns).length + 3);
                             },
                             items$, totalCount$, loading$,
                         ),
                     ).build(),
                 compute(
-                    (loading, e) => {
-                        if (loading) return GenericTemplates.loadingSpinner();
+                    (total, loading, e) => {
+                        if (loading && total === null) return GenericTemplates.loadingSpinner();
                         if (e) return GenericTemplates.noTracks();
                         return nullElement();
                     },
-                    loading$, empty,
+                    totalCount$, loading$, empty,
                 ),
                 mobilePopover,
                 batchPopover,
@@ -537,6 +526,20 @@ export class FeedTemplates {
                 return GenericTemplates.timestamp(date, ["hideOnSmallBreakpoint"]);
             },
         });
+    }
+
+    static #skeletonRows(count: number, colCount: number): HTMLElement {
+        return create("tbody").classes("feed-rows")
+            .children(...Array.from({ length: count }, () =>
+                create("tr").classes("feed-row", "skeleton-row")
+                    .children(
+                        ...Array.from({ length: colCount }, () =>
+                            create("td").classes("feed-cell")
+                                .children(create("div").classes("skeleton-pulse").build())
+                                .build()
+                        )
+                    ).build()
+            )).build() as HTMLElement;
     }
 
     static #sortableTh(key: string, label: any, sortBy: string | null, sortDir: string | null,
