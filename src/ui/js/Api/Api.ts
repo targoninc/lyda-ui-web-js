@@ -497,8 +497,8 @@ export class Api {
         return post(ApiRoutes.updateAlbum, album);
     }
 
-    static async getAlbumsByUserId(userId: number, name: string = "", offset: number = 0, filter: string = ""): Promise<Album[] | null> {
-        return await get<Album[]>(ApiRoutes.getAlbumsByUserId, {
+    static async getAlbumsByUserId(userId: number, name: string = "", offset: number = 0, filter: string = ""): Promise<{ items: Album[], total: number } | null> {
+        return await get<{ items: Album[], total: number }>(ApiRoutes.getAlbumsByUserId, {
             id: userId,
             name,
             offset,
@@ -734,8 +734,8 @@ export class Api {
         }>(ApiRoutes.getPlaylistById, { id });
     }
 
-    static async getPlaylistsByUserId(userId: number, name: string = "", offset: number = 0, filter: string = ""): Promise<Playlist[] | null> {
-        return await get<Playlist[]>(ApiRoutes.getPlaylistsByUserId, {
+    static async getPlaylistsByUserId(userId: number, name: string = "", offset: number = 0, filter: string = ""): Promise<{ items: Playlist[], total: number } | null> {
+        return await get<{ items: Playlist[], total: number }>(ApiRoutes.getPlaylistsByUserId, {
             id: userId,
             name,
             offset,

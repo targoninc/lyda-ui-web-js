@@ -545,7 +545,7 @@ export class UserTemplates {
                     id: `feed-${CardFeedType.profileAlbums}`,
                     columns: albumColumns,
                     pageSize: 10,
-                    fetchPage: (offset) => Api.getAlbumsByUserId(user.id, user.username, offset, "").then(r => r ?? []) as Promise<TrackList[]>,
+                    fetchPage: (offset) => Api.getAlbumsByUserId(user.id, user.username, offset, "").then(r => r ?? { items: [], total: 0 }),
                     buildMenuActions: cardActions("album"),
                     onPlayToggle: async (list) => {
                         const ft = list.tracks?.[0]?.track;
@@ -561,7 +561,7 @@ export class UserTemplates {
                     id: `feed-${CardFeedType.profilePlaylists}`,
                     columns: playlistColumns,
                     pageSize: 10,
-                    fetchPage: (offset) => Api.getPlaylistsByUserId(user.id, user.username, offset, "").then(r => r ?? []) as any,
+                    fetchPage: (offset) => Api.getPlaylistsByUserId(user.id, user.username, offset, "").then(r => r ?? { items: [], total: 0 }),
                     buildMenuActions: cardActions("playlist"),
                     onPlayToggle: async (list) => {
                         const ft = list.tracks?.[0]?.track;
