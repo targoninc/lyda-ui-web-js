@@ -39,13 +39,13 @@ export class FeedTemplates {
     static create<T extends { id: number }>(config: FeedConfig<T>): any {
         const items$ = signal<T[]>([]);
         const loading$ = signal(false);
-        const hasMore$ = signal(true);
         const totalCount$ = signal<number | null>(null);
         const search$ = signal("");
         const sortBy$ = signal<string | null>(null);
         const sortDir$ = signal<'asc' | 'desc' | null>(null);
         const ps = config.pageSize;
-        let page = 0;
+        const loadedPages = new Map<number, T[]>();
+        const loadingPages = new Set<number>();
 
         const selectedIds$ = signal<Set<number>>(new Set());
         let lastSelectedIndex: number | null = null;
@@ -201,11 +201,52 @@ export class FeedTemplates {
             return actions;
         };
 
+        const getPageForIndex = (index: number) => Math.floor(index / ps);
+
+        const isPageLoaded = (page: number) => loadedPages.has(page);
+
+        const flattenLoadedItems = () => {
+            const all: T[] = [];
+            const sortedPages = [...loadedPages.keys()].sort((a, b) => a - b);
+            for (const p of sortedPages) {
+                all.push(...loadedPages.get(p)!);
+            }
+            items$.value = all;
+        };
+
+        const load = async (pageToLoad: number) => {
+            if (loadingPages.has(pageToLoad)) return;
+            if (loadedPages.has(pageToLoad)) return;
+            if (totalCount$.value !== null && pageToLoad * ps >= totalCount$.value) return;
+
+            loadingPages.add(pageToLoad);
+            loading$.value = true;
+
+            const offset = pageToLoad * ps;
+            const filterValue = config.filterState?.value ?? search$.value;
+            const result = await config.fetchPage(offset, ps, filterValue, sortBy$.value ?? undefined, sortDir$.value ?? undefined);
+            let next: T[];
+            if (result && !Array.isArray(result) && 'items' in result) {
+                next = result.items;
+                if (totalCount$.value === null) {
+                    totalCount$.value = result.total;
+                }
+            } else {
+                next = (result as T[]) ?? [];
+            }
+
+            loadingPages.delete(pageToLoad);
+            loadedPages.set(pageToLoad, next);
+            flattenLoadedItems();
+            loading$.value = loadingPages.size > 0;
+        };
+
         const reload = () => {
-            page = 0;
+            loadedPages.clear();
+            loadingPages.clear();
             items$.value = [];
-            hasMore$.value = true;
-            load();
+            totalCount$.value = null;
+            load(0);
         };
 
         const cycleSort = (key: string) => {
@@ -218,25 +259,6 @@ export class FeedTemplates {
                 sortBy$.value = null;
                 sortDir$.value = null;
             }
-        };
-
-        const load = async () => {
-            if (loading$.value || !hasMore$.value) return;
-            loading$.value = true;
-            const offset = page * ps;
-            const filterValue = config.filterState?.value ?? search$.value;
-            const result = await config.fetchPage(offset, ps, filterValue, sortBy$.value ?? undefined, sortDir$.value ?? undefined);
-            let next: T[];
-            if (result && !Array.isArray(result) && 'items' in result) {
-                next = result.items;
-                totalCount$.value = result.total;
-            } else {
-                next = (result as T[]) ?? [];
-            }
-            if (!next || next.length < ps) hasMore$.value = false;
-            if (next) items$.value = [...items$.value, ...next];
-            page += 1;
-            loading$.value = false;
         };
 
         if (config.showSearch) search$.subscribe(reload);
@@ -284,6 +306,7 @@ export class FeedTemplates {
         };
 
         const sortKey = compute((sb, sd) => sb && sd ? `${sb}-${sd}` : null, sortBy$, sortDir$);
+        const colCount = resolveColumns(config.columns).length + 3;
 
         const el = create("div")
             .classes("feed-wrapper", "flex-v", "fullWidth", config.compact ? "feed-compact" : "_")
@@ -308,8 +331,7 @@ export class FeedTemplates {
                     .classes("feed-table", "fullWidth")
                     .children(
                         compute(
-                            (ii, sk) => {
-                                if (ii.length === 0) return nullElement();
+                            (_ii, sk) => {
                                 const sb = sortBy$.value;
                                 const sd = sortDir$.value;
                                 const cols = resolveColumns(config.columns);
@@ -337,15 +359,25 @@ export class FeedTemplates {
                         signalMap(
                             items$,
                             create("tbody").classes("feed-rows"),
-                            (item, i) => FeedTemplates.#row(item, i, config, feedId, rebuildAndShowMobile, selectedIds$, handleRowClick, buildBatchActions, items$, batchPopover),
+                            (item, i) => FeedTemplates.#row(item, i, getPageForIndex(i), config, feedId, rebuildAndShowMobile, selectedIds$, handleRowClick, buildBatchActions, items$, batchPopover),
                         ),
                         compute(
-                            (items, total) => {
-                                if (total === null || items.length >= total) return nullElement();
-                                const skeletonCount = total - items.length;
-                                return FeedTemplates.#skeletonRows(skeletonCount, resolveColumns(config.columns).length + 3);
+                            (total) => {
+                                if (total === null) return nullElement();
+                                // Show skeletons for the gap between last loaded page end and total
+                                const sortedPages = [...loadedPages.keys()].sort((a, b) => a - b);
+                                let lastLoadedEnd = 0;
+                                for (const p of sortedPages) {
+                                    const pageItems = loadedPages.get(p)!;
+                                    if (pageItems.length > 0) {
+                                        lastLoadedEnd = (p + 1) * ps;
+                                    }
+                                }
+                                const skeletonCount = Math.max(0, total - lastLoadedEnd);
+                                if (skeletonCount === 0) return nullElement();
+                                return FeedTemplates.#skeletonRows(skeletonCount, colCount);
                             },
-                            items$, totalCount$,
+                            totalCount$,
                         ),
                     ).build(),
                 compute(
@@ -361,7 +393,7 @@ export class FeedTemplates {
             ).build();
 
         setTimeout(() => {
-            load();
+            load(0);
             const rowsEl = el.querySelector("tbody");
             if (rowsEl) {
                 rowsEl.addEventListener("click", (e) => {
@@ -374,21 +406,67 @@ export class FeedTemplates {
                         }
                     }
                 });
+
                 const obs = new IntersectionObserver(
-                    e => {
-                        if (e[0].isIntersecting && e[0].target === rowsEl.lastElementChild) {
-                            load();
+                    (entries) => {
+                        for (const entry of entries) {
+                            if (entry.isIntersecting) {
+                                const tr = entry.target as HTMLElement;
+                                const pageStr = tr.getAttribute("data-page");
+                                if (pageStr !== null) {
+                                    const pageNum = parseInt(pageStr, 10);
+                                    if (!isPageLoaded(pageNum) && !loadingPages.has(pageNum)) {
+                                        load(pageNum);
+                                    }
+                                }
+                            }
                         }
                     },
                     { rootMargin: "300px" },
                 );
-                const watchLast = () => {
-                    const last = rowsEl.lastElementChild;
-                    if (last) { obs.disconnect(); obs.observe(last); }
+
+                const lastRowObs = new IntersectionObserver(
+                    (entries) => {
+                        for (const entry of entries) {
+                            if (entry.isIntersecting) {
+                                const total = totalCount$.value;
+                                const loadedCount = items$.value.length;
+                                if (total === null || loadedCount < total) {
+                                    const nextPage = Math.floor(loadedCount / ps);
+                                    if (!isPageLoaded(nextPage) && !loadingPages.has(nextPage)) {
+                                        load(nextPage);
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    { rootMargin: "300px" },
+                );
+
+                let settingUp = false;
+                const setupObservers = () => {
+                    if (settingUp) return;
+                    settingUp = true;
+                    const rows = rowsEl.querySelectorAll("tr[data-page]");
+                    rows.forEach(tr => {
+                        if (!tr.hasAttribute("data-observed")) {
+                            tr.setAttribute("data-observed", "");
+                            obs.observe(tr);
+                        }
+                    });
+                    // Always observe the last row for sequential loading fallback
+                    const lastRow = rowsEl.lastElementChild;
+                    if (lastRow && !lastRow.hasAttribute("data-observed-last")) {
+                        lastRow.setAttribute("data-observed-last", "");
+                        lastRowObs.observe(lastRow);
+                    }
+                    settingUp = false;
                 };
-                const mo = new MutationObserver(watchLast);
+
+                setupObservers();
+
+                const mo = new MutationObserver(setupObservers);
                 mo.observe(rowsEl, { childList: true });
-                watchLast();
             }
         });
 
@@ -564,7 +642,7 @@ export class FeedTemplates {
     }
 
     static #row<T extends { id: number }>(
-        item: T, index: number, config: FeedConfig<T>, feedId: string,
+        item: T, index: number, page: number, config: FeedConfig<T>, feedId: string,
         showMobileMenu: (item: T) => void,
         selectedIds$: Signal<Set<number>>,
         handleRowClick: (e: MouseEvent, item: T, index: number) => void,
@@ -624,6 +702,7 @@ export class FeedTemplates {
 
         const rowEl = create("tr")
             .classes("feed-row", cls, selCls)
+            .attributes("data-page", String(page))
             .oncontextmenu(rowOnContextMenu)
             .children(
                 create("td").classes("feed-idx-cell")
