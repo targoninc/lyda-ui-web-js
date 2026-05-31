@@ -1,8 +1,7 @@
 :root {
-    --base: #121212;
-    --base-rgb: 18, 18, 18;
+    --base: #101010;
+    --base-rgb: 16, 16, 16;
     --contrast: #fffffe;
     --contrast-rgb: 255, 255, 254;
-    --base-color: #1b5f94;
-    --base-color-rgb: 27, 95, 148;
+    --base-color: #008fff;
 }

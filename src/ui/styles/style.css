@@ -1,24 +1,24 @@
 :root {
-    --base: #121212;
-    --base-rgb: 18, 18, 18;
+    --base: #101010;
+    --base-rgb: 16, 16, 16;
     --contrast: #fffffe;
     --contrast-rgb: 255, 255, 254;
-    --base-color: #1b5f94;
-    --base-color-rgb: 27, 95, 148;
+    --base-color: #000ba9;
+    --base-mix: 3%;
 
-    --bg-0: var(--base);
-    --bg-1: color-mix(in oklab, color-mix(in oklab, var(--base), var(--contrast) 4%), var(--base-color) 4%);
-    --bg-2: color-mix(in oklab, color-mix(in oklab, var(--base), var(--contrast) 16%), var(--base-color) 4%);
-    --bg-3: color-mix(in oklab, color-mix(in oklab, var(--base), var(--contrast) 30%), var(--base-color) 4%);
-    --bg-4: color-mix(in oklab, color-mix(in oklab, var(--base), var(--contrast) 50%), var(--base-color) 4%);
-    --bg-5: color-mix(in oklab, color-mix(in oklab, var(--base), var(--contrast) 70%), var(--base-color) 4%);
+    --bg-0: color-mix(in oklab, var(--base), var(--base-color) calc(var(--base-mix) / 2));
+    --bg-1: color-mix(in oklab, color-mix(in oklab, var(--base), var(--contrast) 4%), var(--base-color) var(--base-mix));
+    --bg-2: color-mix(in oklab, color-mix(in oklab, var(--base), var(--contrast) 16%), var(--base-color) var(--base-mix));
+    --bg-3: color-mix(in oklab, color-mix(in oklab, var(--base), var(--contrast) 30%), var(--base-color) var(--base-mix));
+    --bg-4: color-mix(in oklab, color-mix(in oklab, var(--base), var(--contrast) 50%), var(--base-color) var(--base-mix));
+    --bg-5: color-mix(in oklab, color-mix(in oklab, var(--base), var(--contrast) 70%), var(--base-color) var(--base-mix));
 
-    --fg-0: var(--contrast);
-    --fg-1: color-mix(in oklab, var(--contrast), var(--base) 10%);
-    --fg-2: color-mix(in oklab, var(--contrast), var(--base) 25%);
-    --fg-3: color-mix(in oklab, var(--contrast), var(--base) 40%);
-    --fg-4: color-mix(in oklab, var(--contrast), var(--base) 55%);
-    --fg-5: color-mix(in oklab, var(--contrast), var(--base) 70%);
+    --fg-0: color-mix(in oklab, var(--contrast), var(--base-color) calc(var(--base-mix) / 2));
+    --fg-1: color-mix(in oklab, var(--contrast), var(--base) 10%, var(--base-color) var(--base-mix));
+    --fg-2: color-mix(in oklab, var(--contrast), var(--base) 25%, var(--base-color) var(--base-mix));
+    --fg-3: color-mix(in oklab, var(--contrast), var(--base) 40%, var(--base-color) var(--base-mix));
+    --fg-4: color-mix(in oklab, var(--contrast), var(--base) 55%, var(--base-color) var(--base-mix));
+    --fg-5: color-mix(in oklab, var(--contrast), var(--base) 70%, var(--base-color) var(--base-mix));
 
     --border: var(--bg-3);
 
