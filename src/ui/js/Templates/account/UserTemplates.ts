@@ -177,7 +177,7 @@ export class UserTemplates {
                 if (hideTimeout) clearTimeout(hideTimeout);
                 if (timeout) clearTimeout(timeout);
                 timeout = setTimeout(() => {
-                    PopoverTemplates.show(preview, container);
+                    PopoverTemplates.show(preview, container, context === UserWidgetContext.player);
                 }, 500);
             })
             .onmouseleave(() => {

@@ -19,13 +19,18 @@ export class PopoverTemplates {
             .build() as HTMLElement;
     }
 
-    static positionAtAnchor(popover: HTMLElement, anchor: AnyElement): void {
+    static positionAtAnchor(popover: HTMLElement, anchor: AnyElement, above = false): void {
         const r = anchor.getBoundingClientRect();
         popover.style.position = "fixed";
-        popover.style.top = `${r.bottom + 2}px`;
         popover.style.left = `${Math.max(4, r.left)}px`;
         popover.style.right = "auto";
-        popover.style.bottom = "auto";
+        if (above) {
+            popover.style.top = "auto";
+            popover.style.bottom = `${window.innerHeight - r.top + 2}px`;
+        } else {
+            popover.style.top = `${r.bottom + 2}px`;
+            popover.style.bottom = "auto";
+        }
     }
 
     static showAtPoint(popover: HTMLElement, x: number, y: number): void {
@@ -38,9 +43,9 @@ export class PopoverTemplates {
         popover.showPopover();
     }
 
-    static show(popover: HTMLElement, anchor: AnyElement): void {
+    static show(popover: HTMLElement, anchor: AnyElement, above = false): void {
         if (popover.matches(":popover-open") || !popover.isConnected) return;
-        PopoverTemplates.positionAtAnchor(popover, anchor);
+        PopoverTemplates.positionAtAnchor(popover, anchor, above);
         popover.showPopover();
     }
 
