@@ -466,6 +466,8 @@ label {
 .audio-player-controls {
     border-radius: 27px;
     flex-wrap: nowrap;
+    max-width: 1000px !important;
+    align-self: center;
 }
 
 .loudness-control {
