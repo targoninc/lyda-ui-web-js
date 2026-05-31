@@ -54,3 +54,11 @@ button.inert {
 .border-card, .tight-border-card {
     background: var(--color-9);
 }
+
+.tag.wip {
+    background: var(--color-3);
+}
+
+.card-label {
+    background: var(--color-4);
+}

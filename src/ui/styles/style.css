@@ -253,10 +253,14 @@ nav, footer {
     padding: var(--page-padding);
 }
 
-nav, footer, .fixed-bar, .modal-overlay, .modal, .card, .user-preview, .glass {
+footer, .fixed-bar, .modal-overlay, .modal, .card, .user-preview, .glass {
     background: var(--background-glass);
     backdrop-filter: saturate(180%) blur(10px);
     -webkit-backdrop-filter: saturate(180%) blur(10px);
+}
+
+nav {
+    background: var(--background-light-glass);
 }
 
 .card {

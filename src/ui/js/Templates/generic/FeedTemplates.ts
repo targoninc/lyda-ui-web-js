@@ -558,6 +558,7 @@ export class FeedTemplates {
                                             create("span").classes("feed-title", "clickable", "pointer").text(track.title)
                                                 .onclick((e: Event) => { e.stopPropagation(); navigate(`/track/${track.id}`); })
                                                 .build(),
+                                            ...(track.wip ? [GenericTemplates.tag(t("WIP"), "wip")] : []),
                                             ...icons,
                                         ).build(),
                                 ).build(),

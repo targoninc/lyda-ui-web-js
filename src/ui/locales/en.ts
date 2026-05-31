@@ -629,5 +629,6 @@ export const en = {
     TAX_INFO_SAVE_FAILED: "Failed to save tax info",
     LAST_USED: "Last used",
     WILL_BE_PUBLICLY_VISIBLE: "This track will be publicly visible",
+    WIP: "WIP",
     WORK_IN_PROGRESS: "Work in progress",
 } satisfies BaseTranslation;

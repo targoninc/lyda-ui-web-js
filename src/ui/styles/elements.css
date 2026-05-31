@@ -606,6 +606,11 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     padding: 1px 10px;
 }
 
+.tag.wip {
+    color: var(--color-5);
+    background: var(--color-6);
+}
+
 .user-icon, .user-icon-big {
     border-radius: 50%;
 }

@@ -471,7 +471,7 @@ export class PlayerTemplates {
         const el = create("div")
             .classes("player-track-title", "clickable", "pointer")
             .onclick(onTitleClick ? (e: Event) => { e.stopPropagation(); onTitleClick(); } : undefined)
-            .children(MusicTemplates.title(EntityType.track, track.title, track.id, PlayerTemplates.trackIcons(track), undefined, !onTitleClick, true))
+            .children(MusicTemplates.title(EntityType.track, track.title, track.id, PlayerTemplates.trackIcons(track), undefined, !onTitleClick, true, track.wip))
             .build() as HTMLElement;
 
         setTimeout(() => {

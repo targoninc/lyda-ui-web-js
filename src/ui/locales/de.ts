@@ -628,5 +628,6 @@ export const de: Translation = {
     TAX_INFO_SAVE_FAILED: "Steuerinformationen konnten nicht gespeichert werden",
     LAST_USED: "Zuletzt genutzt",
     WILL_BE_PUBLICLY_VISIBLE: "Dieser Track wird öffentlich sichtbar sein",
+    WIP: "WIP",
     WORK_IN_PROGRESS: "In Arbeit",
 };

@@ -268,7 +268,7 @@ export class MusicTemplates {
         });
     }
 
-    static title(type: EntityType, title: string, id: number, icons: AnyNode[] = [], textSize: TextSize = TextSize.large, goToEntity = true, noTruncate = false) {
+    static title(type: EntityType, title: string, id: number, icons: AnyNode[] = [], textSize: TextSize = TextSize.large, goToEntity = true, noTruncate = false, wip = false) {
         let baseRoute = RoutePath.track;
         switch (type) {
             case EntityType.album:
@@ -280,7 +280,7 @@ export class MusicTemplates {
         }
 
         return create("div")
-            .classes("flex")
+            .classes("flex", "align-children", "small-gap")
             .children(
                 create("span")
                     .classes(...(goToEntity ? ["clickable", "pointer"] : ["_"]), textSize)
@@ -288,6 +288,7 @@ export class MusicTemplates {
                     .text(noTruncate ? title : truncateText(title, 75))
                     .onclick(() => goToEntity ? navigate(`${baseRoute}/${id}`) : null)
                     .build(),
+                when(wip, GenericTemplates.tag(t("WIP"), "wip")),
                 ...icons,
             ).build();
     }

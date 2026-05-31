@@ -235,7 +235,7 @@ export class ContentIDTemplates {
                         create("summary").children(
                             horizontal(
                                 MusicTemplates.cover(EntityType.track, match.track, CoverContext.inline),
-                                MusicTemplates.title(EntityType.track, match.track.title, match.track.id),
+                                MusicTemplates.title(EntityType.track, match.track.title, match.track.id, [], TextSize.large, true, false, match.track.wip),
                                 text({
                                     tag: "span",
                                     text: `(${match.matches.length} matches)`,
@@ -250,7 +250,7 @@ export class ContentIDTemplates {
                                         horizontal(
                                             MusicTemplates.cover(EntityType.track, m, CoverContext.inline),
                                             vertical(
-                                                MusicTemplates.title(EntityType.track, m.title, m.id),
+                                                MusicTemplates.title(EntityType.track, m.title, m.id, [], TextSize.large, true, false, m.wip),
                                                 UserTemplates.userWidget(m.user!)
                                             ).classes("no-gap")
                                         )

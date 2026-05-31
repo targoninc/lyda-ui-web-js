@@ -221,7 +221,7 @@ export class TrackTemplates {
                             .children(
                                 vertical(
                                     horizontal(
-                                        MusicTemplates.title(EntityType.track, track.title, track.id, icons),
+                                        MusicTemplates.title(EntityType.track, track.title, track.id, icons, TextSize.large, true, false, track.wip),
                                         create("span")
                                             .classes("nopointer", TextSize.small, "align-center")
                                             .text(Time.format(track.length))
@@ -343,7 +343,7 @@ export class TrackTemplates {
                     .build()),
                 vertical(
                     vertical(
-                        MusicTemplates.title(EntityType.track, track.title, track.id, icons, TextSize.xxLarge, false),
+                        MusicTemplates.title(EntityType.track, track.title, track.id, icons, TextSize.xxLarge, false, false, track.wip),
                         horizontal(
                             when(bought, GenericTemplates.pill({
                                 icon: "order_approve",
@@ -564,7 +564,7 @@ export class TrackTemplates {
             horizontal(
                 MusicTemplates.cover(EntityType.track, data.track, CoverContext.inline),
                 vertical(
-                    MusicTemplates.title(EntityType.track, data.track.title, data.track.id),
+                    MusicTemplates.title(EntityType.track, data.track.title, data.track.id, [], TextSize.large, true, false, data.track.wip),
                     horizontal(
                         UserTemplates.userWidget(data.user, [], [], UserWidgetContext.card),
                         create("span")

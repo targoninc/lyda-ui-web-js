@@ -79,7 +79,7 @@ export class QueueTemplates {
                         QueueManager.removeIndexFromManualQueue(index);
                     }),
                     vertical(
-                        MusicTemplates.title(EntityType.track, track.title, track.id, PlayerTemplates.trackIcons(track), TextSize.medium),
+                        MusicTemplates.title(EntityType.track, track.title, track.id, PlayerTemplates.trackIcons(track), TextSize.medium, true, false, track.wip),
                         UserTemplates.userLink(UserWidgetContext.player, track.user!),
                     ).classes("no-gap"),
                 ),
