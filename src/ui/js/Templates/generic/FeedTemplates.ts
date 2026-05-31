@@ -362,22 +362,14 @@ export class FeedTemplates {
                             (item, i) => FeedTemplates.#row(item, i, getPageForIndex(i), config, feedId, rebuildAndShowMobile, selectedIds$, handleRowClick, buildBatchActions, items$, batchPopover),
                         ),
                         compute(
-                            (total) => {
+                            (total, items) => {
                                 if (total === null) return nullElement();
-                                // Show skeletons for the gap between last loaded page end and total
-                                const sortedPages = [...loadedPages.keys()].sort((a, b) => a - b);
-                                let lastLoadedEnd = 0;
-                                for (const p of sortedPages) {
-                                    const pageItems = loadedPages.get(p)!;
-                                    if (pageItems.length > 0) {
-                                        lastLoadedEnd = (p + 1) * ps;
-                                    }
-                                }
-                                const skeletonCount = Math.max(0, total - lastLoadedEnd);
-                                if (skeletonCount === 0) return nullElement();
-                                return FeedTemplates.#skeletonRows(skeletonCount, colCount, Math.floor(lastLoadedEnd / ps), ps);
+                                const skeletonCount = total - items.length;
+                                if (skeletonCount <= 0) return nullElement();
+                                const startPage = Math.floor(items.length / ps);
+                                return FeedTemplates.#skeletonRows(skeletonCount, colCount, startPage, ps);
                             },
-                            totalCount$,
+                            totalCount$, items$,
                         ),
                     ).build(),
                 compute(
