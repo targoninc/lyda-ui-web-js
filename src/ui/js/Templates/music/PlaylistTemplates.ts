@@ -242,7 +242,9 @@ export class PlaylistTemplates {
                                 },
                                 [ApiRoutes.searchTracks], [],
                                 ["fullWidth"],
-                                { userId: currentUser.value?.id },
+                                {},
+                                (result) => result.type !== "track" || !tracks.value.some(t => t.track_id === result.id),
+                                true,
                             ),
                         )
                 ).classes("card").build()),

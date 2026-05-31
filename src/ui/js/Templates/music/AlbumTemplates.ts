@@ -281,6 +281,8 @@ export class AlbumTemplates {
                                 [ApiRoutes.searchTracks], [],
                                 ["fullWidth"],
                                 { userId: currentUser.value?.id },
+                                undefined,
+                                true,
                             ),
                         )
                 ).classes("card").build()),

@@ -8,6 +8,7 @@ import { AnyNode, HtmlPropertyValue, isSignal, signal, Signal, StringOrSignal, w
 import { navigate } from "../Routing/Router.ts";
 import { currentUser, navInitialized, openMenus } from "../state.ts";
 import { NotificationType } from "../Enums/NotificationType.ts";
+import { Icons } from "../Enums/Icons.ts";
 import { Theme } from "@targoninc/lyda-shared/src/Enums/Theme";
 import { t } from "../../locales";
 
@@ -121,6 +122,23 @@ export class Ui {
             Util.removeModal();
         };
         createModal([GenericTemplates.confirmationModal(title, text, icon, confirmText, cancelText, confirmCallback2, cancelCallback2)], "confirmation-modal");
+    }
+
+    static async deleteWithConfirmation(e: Event, title: StringOrSignal, text: StringOrSignal, deleteCallback: () => void | Promise<void>) {
+        const target = e.target as HTMLElement;
+        const popover = target.closest("[popover]") as HTMLElement;
+        if (popover?.popover) {
+            popover.hidePopover();
+        }
+        await Ui.getConfirmationModal(
+            title,
+            text,
+            t("YES"),
+            t("NO"),
+            deleteCallback,
+            () => {},
+            Icons.WARNING,
+        );
     }
 
     static async getTextInputModal(title: HtmlPropertyValue, text: HtmlPropertyValue, currentValue: string, confirmText: StringOrSignal, cancelText: StringOrSignal, confirmCallback: Function, cancelCallback: Function = () => {

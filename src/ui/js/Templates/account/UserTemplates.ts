@@ -434,12 +434,28 @@ export class UserTemplates {
             window.history.replaceState(null, "", url.toString());
         });
 
-        const cardActions = (list: TrackList): FeedMenuAction<TrackList>[] => [
+        const cardActions = (listType: "album" | "playlist") => (list: TrackList): FeedMenuAction<TrackList>[] => [
             {
                 label: t("QUEUE"),
                 icon: "queue",
                 onclick: (l) => l.tracks?.forEach(t => QueueManager.addToManualQueue(t.track_id)),
                 show: (l) => !!l.tracks?.length
+            },
+            {
+                label: t("DELETE"),
+                icon: "delete",
+                onclick: async (l, e) => {
+                    const deleteFn = listType === "album"
+                        ? () => Api.deleteAlbum(l.id).then(() => reload())
+                        : () => Api.deletePlaylist(l.id).then(() => reload());
+                    await Ui.deleteWithConfirmation(
+                        e,
+                        listType === "album" ? t("DELETE_ALBUM") : t("DELETE_PLAYLIST"),
+                        listType === "album" ? t("SURE_DELETE_ALBUM") : t("SURE_DELETE_PLAYLIST"),
+                        deleteFn,
+                    );
+                },
+                show: (l) => l.user_id === currentUser.value?.id,
             },
         ];
 
@@ -530,7 +546,7 @@ export class UserTemplates {
                     columns: albumColumns,
                     pageSize: 10,
                     fetchPage: (offset) => Api.getAlbumsByUserId(user.id, user.username, offset, "").then(r => r ?? []) as Promise<TrackList[]>,
-                    buildMenuActions: cardActions,
+                    buildMenuActions: cardActions("album"),
                     onPlayToggle: async (list) => {
                         const ft = list.tracks?.[0]?.track;
                         if (ft) await AlbumActions.startTrackInAlbum(list as Album, ft, true);
@@ -546,7 +562,7 @@ export class UserTemplates {
                     columns: playlistColumns,
                     pageSize: 10,
                     fetchPage: (offset) => Api.getPlaylistsByUserId(user.id, user.username, offset, "").then(r => r ?? []) as any,
-                    buildMenuActions: cardActions,
+                    buildMenuActions: cardActions("playlist"),
                     onPlayToggle: async (list) => {
                         const ft = list.tracks?.[0]?.track;
                         if (ft) await PlaylistActions.startTrackInPlaylist(list as Playlist, ft, true);
@@ -876,6 +892,31 @@ export class UserTemplates {
         if (isSelf) tabs.push(`${t("BOUGHT")}`);
         const urlTabs = tabs.map(t => t.toLowerCase().replace(/\s/g, "-"));
 
+        const libCardActions = (listType: "album" | "playlist") => (list: TrackList): FeedMenuAction<TrackList>[] => [
+            {
+                label: t("QUEUE"),
+                icon: "queue",
+                onclick: (l) => l.tracks?.forEach(t => QueueManager.addToManualQueue(t.track_id)),
+                show: (l) => !!l.tracks?.length
+            },
+            {
+                label: t("DELETE"),
+                icon: "delete",
+                onclick: async (l, e) => {
+                    const deleteFn = listType === "album"
+                        ? () => Api.deleteAlbum(l.id).then(() => {})
+                        : () => Api.deletePlaylist(l.id).then(() => {});
+                    await Ui.deleteWithConfirmation(
+                        e,
+                        listType === "album" ? t("DELETE_ALBUM") : t("DELETE_PLAYLIST"),
+                        listType === "album" ? t("SURE_DELETE_ALBUM") : t("SURE_DELETE_PLAYLIST"),
+                        deleteFn,
+                    );
+                },
+                show: (l) => l.user_id === currentUser.value?.id,
+            },
+        ];
+
         const urlParams = new URLSearchParams(window.location.search);
         const tabIndex = urlTabs.indexOf(urlParams.get("tab") ?? "");
         const currentIndex = signal(tabIndex === -1 ? 0 : tabIndex);
@@ -968,12 +1009,7 @@ export class UserTemplates {
                 columns: libAlbumCols,
                 pageSize: 10,
                 fetchPage: (offset) => Api.getLikedAlbums(user.value.id, user.value.username, offset, "").then(r => r ?? []) as any,
-                buildMenuActions: (list) => [{
-                    label: t("QUEUE"),
-                    icon: "queue",
-                    onclick: (l) => l.tracks?.forEach(t => QueueManager.addToManualQueue(t.track_id)),
-                    show: (l) => !!l.tracks?.length
-                }],
+                buildMenuActions: libCardActions("album"),
                 onPlayToggle: async (list) => {
                     const ft = list.tracks?.[0]?.track;
                     if (ft) await AlbumActions.startTrackInAlbum(list as Album, ft, true);
@@ -986,12 +1022,7 @@ export class UserTemplates {
                 columns: libPlaylistCols,
                 pageSize: 10,
                 fetchPage: (offset) => Api.getLikedPlaylists(user.value.id, user.value.username, offset, "").then(r => r ?? []) as any,
-                buildMenuActions: (list) => [{
-                    label: t("QUEUE"),
-                    icon: "queue",
-                    onclick: (l) => l.tracks?.forEach(t => QueueManager.addToManualQueue(t.track_id)),
-                    show: (l) => !!l.tracks?.length
-                }],
+                buildMenuActions: libCardActions("playlist"),
                 onPlayToggle: async (list) => {
                     const ft = list.tracks?.[0]?.track;
                     if (ft) await PlaylistActions.startTrackInPlaylist(list as Playlist, ft, true);

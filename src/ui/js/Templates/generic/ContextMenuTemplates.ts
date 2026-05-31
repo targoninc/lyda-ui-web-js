@@ -56,7 +56,7 @@ export class ContextMenuTemplates {
                         e.stopPropagation();
                         const pop = (e.currentTarget as HTMLElement).closest("[popover]") as HTMLElement | null;
                         if (pop) pop.hidePopover();
-                        await a.onclick(item);
+                        await a.onclick(item, e);
                     })
                     .children(
                         a.icon ? GenericTemplates.icon(a.icon, true, ["context-menu-icon"]) : nullElement(),

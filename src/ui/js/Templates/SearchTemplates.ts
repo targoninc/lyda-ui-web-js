@@ -21,6 +21,8 @@ export class SearchTemplates {
         classes: StringOrSignal[] = [],
         resultContainerClasses: StringOrSignal[] = [],
         additionalParams: Record<string, any> = {},
+        filterResults?: (result: SearchResult) => boolean,
+        preventEnterNavigation = false,
     ) {
         const results = signal<SearchResult[]>([]);
         const selectedResult = signal<number | null>(null);
@@ -54,6 +56,8 @@ export class SearchTemplates {
                     onSelect,
                     endpoints,
                     additionalParams,
+                    filterResults,
+                    preventEnterNavigation,
                 ),
                 SearchTemplates.searchResults(
                     results,
@@ -76,6 +80,8 @@ export class SearchTemplates {
         onSelect?: (result: SearchResult) => void,
         endpointsInput?: string[],
         additionalParams: Record<string, any> = {},
+        filterResults?: (result: SearchResult) => boolean,
+        preventEnterNavigation = false,
     ) {
         const debounce = 200;
         let timeout: Timer | undefined;
@@ -104,7 +110,8 @@ export class SearchTemplates {
                     return;
                 }
 
-                results.value = results.value.concat(data);
+                const filtered = filterResults ? data.filter(filterResults) : data;
+                results.value = results.value.concat(filtered);
             });
             await Promise.all(promises);
         }
@@ -151,7 +158,9 @@ export class SearchTemplates {
                         if (pressedKey === "Enter") {
                             if (selectedResult.value === null) {
                                 resultsShown.value = false;
-                                navigate(`${RoutePath.search}?q=` + currentSearch.value);
+                                if (!preventEnterNavigation) {
+                                    navigate(`${RoutePath.search}?q=` + currentSearch.value);
+                                }
                                 return;
                             }
                             const result = results.value.find(r => r.id === selectedResult.value);

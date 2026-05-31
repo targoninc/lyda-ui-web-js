@@ -261,7 +261,7 @@ export class FeedTemplates {
                     .onclick(async (e: Event) => {
                         e.stopPropagation();
                         mobilePopover.hidePopover();
-                        await a.onclick(item);
+                        await a.onclick(item, e);
                     })
                     .children(
                         a.icon ? GenericTemplates.icon(a.icon, true, ["context-menu-icon"]) : nullElement(),

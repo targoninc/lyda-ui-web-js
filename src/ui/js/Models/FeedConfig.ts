@@ -9,7 +9,7 @@ export interface FeedColumn<T> {
 export interface FeedMenuAction<T> {
     label: StringOrSignal;
     icon?: StringOrSignal;
-    onclick: (item: T) => void;
+    onclick: (item: T, e: Event) => void;
     show?: (item: T) => boolean;
 }
 
