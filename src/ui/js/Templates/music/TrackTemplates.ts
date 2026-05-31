@@ -36,6 +36,7 @@ import { MusicTemplates } from "./MusicTemplates.ts";
 import { button, heading, input } from "@targoninc/jess-components";
 import { TrackCollaborator } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType";
+import { InteractionType } from "@targoninc/lyda-shared/src/Enums/InteractionType";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { Repost } from "@targoninc/lyda-shared/src/Models/db/lyda/Repost";
 import { ListTrack } from "@targoninc/lyda-shared/src/Models/ListTrack";
@@ -96,6 +97,16 @@ export class TrackTemplates {
                 .classes("waveform", small ? "waveform-small" : "_", "processing-box", "rounded-max", "relative", "flex", "nogap")
                 .title(t("STILL_PROCESSING_CHECK_LATER"))
                 .build();
+        }
+
+        if (!loudnessData || loudnessData.length === 0) {
+            const n = 200;
+            const cycles = 6;
+            loudnessData = Array.from({ length: n }, (_, i) =>
+                Math.abs(Math.sin((i / n) * Math.PI * cycles))
+            );
+        } else if (loudnessData.every(v => v === loudnessData[0])) {
+            loudnessData = loudnessData.map(() => 1);
         }
 
         const el = create("div")
@@ -378,7 +389,7 @@ export class TrackTemplates {
                              .styles("padding-right", "30px"),
                         ).build(),
                     horizontal(
-                        InteractionTemplates.interactions(EntityType.track, track),
+                        InteractionTemplates.interactions(EntityType.track, track, { overrideActions: [InteractionType.like, InteractionType.repost] }),
                         when(
                             currentUser,
                             horizontal(
