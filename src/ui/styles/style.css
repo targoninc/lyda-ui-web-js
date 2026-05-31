@@ -457,12 +457,14 @@ button {
 }
 
 button.negative {
-    border-left-color: var(--red);
+    border-color: var(--red-dark);
+    color: var(--red);
 }
 
 button.negative:hover {
     border-color: var(--red);
     background: var(--red-dark);
+    color: var(--color-4);
 }
 
 button.positive {
