@@ -500,7 +500,9 @@ export class FeedTemplates {
                 params.sortBy = sortBy || "";
                 params.sortDir = sortDir || "";
                 const res = await Api.getFeed(`${ApiRoutes.trackFeed}/${type}`, params);
-                return res ?? [];
+                if (!res) return [];
+                if (Array.isArray(res)) return res;
+                return res;
             },
             buildMenuActions: (track): FeedMenuAction<Track>[] => {
                 const inQueue = manualQueue.value.includes(track.id);

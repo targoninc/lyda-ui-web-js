@@ -553,8 +553,8 @@ export class Api {
     //endregion
 
     //region Tracks
-    static async getFeed(endpoint: string, params: any = {}) {
-        return get<Track[]>(endpoint, params);
+    static async getFeed(endpoint: string, params: any = {}): Promise<Track[] | { items: Track[], total: number } | null> {
+        return get<Track[] | { items: Track[], total: number }>(endpoint, params);
     }
 
     static async getTracksByUser(name: string, id: number | null = null) {
