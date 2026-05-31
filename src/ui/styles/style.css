@@ -256,16 +256,15 @@ button > * {
     align-self: center;
 }
 
-nav {
-    z-index: 1;
-    position: relative;
-}
-
 nav, footer {
     background: var(--background-light-glass);
     display: flex;
     gap: 1em;
     padding: var(--page-padding);
+}
+
+nav {
+    background: var(--bg-1);
 }
 
 footer, .fixed-bar, .modal-overlay, .modal, .card, .user-preview, .glass {

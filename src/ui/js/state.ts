@@ -108,7 +108,7 @@ playingFrom.subscribe((playingFrom: PlayingFrom|null, changed: boolean) => {
     LydaCache.set("playingFrom", new CacheItem(playingFrom));
 });
 
-export const currentTrackPosition = signal<TrackPosition>({ relative: 0, absolute: 0 });
+export const currentTrackPosition = signal<TrackPosition>(LydaCache.get<TrackPosition>(UserCacheKey.lastTrackPosition).content ?? { relative: 0, absolute: 0 });
 currentTrackPosition.subscribe((p, changed) => {
     if (!changed) {
         return;
