@@ -341,8 +341,8 @@ export class FeedTemplates {
                         ),
                         compute(
                             (items, total, ld) => {
-                                if (items.length > 0 || !ld || total === null) return nullElement();
-                                const skeletonCount = Math.min(total, ps);
+                                if (items.length > 0 || !ld) return nullElement();
+                                const skeletonCount = Math.min(total ?? ps, ps);
                                 const colCount = resolveColumns(config.columns).length + 3;
                                 return create("tbody").classes("feed-rows")
                                     .children(...Array.from({ length: skeletonCount }, (_, i) =>
