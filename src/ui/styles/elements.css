@@ -1745,3 +1745,17 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     40%, 60% { transform: translateX(calc(-100% + 200px)); }
     85%, 100% { transform: translateX(0); }
 }
+
+.skeleton-row .skeleton-pulse {
+    height: 16px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--color-7) 25%, var(--color-6) 50%, var(--color-7) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+    width: 80%;
+}
+
+@keyframes skeleton-pulse {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}

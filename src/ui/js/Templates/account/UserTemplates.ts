@@ -1008,7 +1008,11 @@ export class UserTemplates {
                 id: `feed-${CardFeedType.likedAlbums}`,
                 columns: libAlbumCols,
                 pageSize: 10,
-                fetchPage: (offset) => Api.getLikedAlbums(user.value.id, user.value.username, offset, "").then(r => r ?? []) as any,
+                fetchPage: async (offset) => {
+                    const result = await Api.getLikedAlbums(user.value.id, user.value.username, offset, "");
+                    if (!result) return [];
+                    return { items: result.items as TrackList[], total: result.total };
+                },
                 buildMenuActions: libCardActions("album"),
                 onPlayToggle: async (list) => {
                     const ft = list.tracks?.[0]?.track;
@@ -1021,7 +1025,11 @@ export class UserTemplates {
                 id: `feed-${CardFeedType.likedPlaylists}`,
                 columns: libPlaylistCols,
                 pageSize: 10,
-                fetchPage: (offset) => Api.getLikedPlaylists(user.value.id, user.value.username, offset, "").then(r => r ?? []) as any,
+                fetchPage: async (offset) => {
+                    const result = await Api.getLikedPlaylists(user.value.id, user.value.username, offset, "");
+                    if (!result) return [];
+                    return { items: result.items as TrackList[], total: result.total };
+                },
                 buildMenuActions: libCardActions("playlist"),
                 onPlayToggle: async (list) => {
                     const ft = list.tracks?.[0]?.track;
