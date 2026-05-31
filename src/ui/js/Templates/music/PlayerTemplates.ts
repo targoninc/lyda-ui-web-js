@@ -467,12 +467,13 @@ export class PlayerTemplates {
         const el = create("div")
             .classes("player-track-title", "clickable", "pointer")
             .onclick(onTitleClick ? (e: Event) => { e.stopPropagation(); onTitleClick(); } : undefined)
-            .children(MusicTemplates.title(EntityType.track, track.title, track.id, PlayerTemplates.trackIcons(track), undefined, !onTitleClick, true, track.wip))
-            .build() as HTMLElement;
+            .children(
+                MusicTemplates.title(EntityType.track, track.title, track.id, PlayerTemplates.trackIcons(track), undefined, !onTitleClick, true, track.wip)
+            ).build() as HTMLElement;
 
         setTimeout(() => {
-            const span = el.querySelector("span");
-            if (span && span.scrollWidth > el.clientWidth) {
+            const flex = el.querySelector(".flex") as HTMLElement;
+            if (flex && flex.scrollWidth > el.clientWidth) {
                 el.classList.add("scrolling");
             }
         }, 200);

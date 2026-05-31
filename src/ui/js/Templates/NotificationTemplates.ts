@@ -19,7 +19,7 @@ export class NotificationTemplates {
         const elements = NotificationParser.parse(notification);
 
         return create("div")
-            .classes("listNotification", "flex", notification.type, "rounded", "padded-inline", "hoverable", "text-left", notification.is_read ? "read" : "unread")
+            .classes("listNotification", "flex", notification.type, "padded-inline", "hoverable", "text-left", notification.is_read ? "read" : "unread")
             .id(notification.id)
             .children(
                 create("div")

@@ -631,8 +631,11 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .listNotification {
-    border-bottom: 1px solid var(--bg-5);
-    padding: 10px 20px;
+    padding: var(--base-padding);
+}
+
+.listNotification:not(:last-child) {
+    border-bottom: 1px solid var(--border);
 }
 
 .listNotification.unread {
@@ -753,7 +756,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .queue-item:hover {
-    background: var(--bg-5);
+    background: var(--bg-2);
 }
 
 .waveform {
@@ -922,11 +925,11 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .search-result.selected {
-    background: var(--bg-4);
+    background: var(--bg-2);
 }
 
 .search-result:hover {
-    background: var(--bg-4);
+    background: var(--bg-3);
 }
 
 .search-result.exact-match {
@@ -1726,12 +1729,13 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     display: inline-block;
 }
 
-.player-track-title > .flex > span {
-    display: inline-block;
+.player-track-title > .flex {
+    flex-wrap: nowrap;
+    width: max-content;
     transition: none;
 }
 
-.player-track-title.scrolling > .flex > span {
+.player-track-title.scrolling > .flex {
     animation: scroll-title 10s ease-in-out infinite;
     padding-right: 40px;
 }

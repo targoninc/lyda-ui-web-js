@@ -1,8 +1,8 @@
 :root {
-    --base: #100F0F;
-    --base-rgb: 16, 15, 15;
-    --contrast: #E6E4D9;
-    --contrast-rgb: 230, 228, 217;
+    --base: #E6E4D9;
+    --base-rgb: 230, 228, 217;
+    --contrast: #100F0F;
+    --contrast-rgb: 16, 15, 15;
     --base-color: #DA702C;
     --base-color-rgb: 218, 112, 44;
 
@@ -35,27 +35,6 @@
     --jessc-interactive-color-active: var(--fg-0);
 }
 
-button.positive:hover {
-    border-color: var(--green-dark);
-    background: var(--green);
-}
-
-.tab {
-    background: var(--bg-2);
-}
-
-.clickable.secondary.padded-inline:hover {
-    background: var(--bg-0);
-}
-
-.audio-player-scrubbar {
-    background: var(--bg-4);
-}
-
-.audio-player-buffer-indicator {
-    background: var(--bg-5);
-}
-
 .fixed-bar {
     box-shadow: 0 10px 20px -7px var(--bg-4);
 }
@@ -67,10 +46,6 @@ th {
 button.inert {
     border-color: var(--bg-2);
     background-color: var(--bg-2);
-}
-
-.queue-item:hover {
-    background: var(--bg-2);
 }
 
 .mobile-menu-close {

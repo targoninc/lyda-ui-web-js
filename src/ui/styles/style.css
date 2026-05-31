@@ -1,13 +1,13 @@
 :root {
-    --base: #0d0d0d;
-    --base-rgb: 13, 13, 13;
+    --base: #121212;
+    --base-rgb: 18, 18, 18;
     --contrast: #fffffe;
     --contrast-rgb: 255, 255, 254;
     --base-color: #1b5f94;
     --base-color-rgb: 27, 95, 148;
 
     --bg-0: var(--base);
-    --bg-1: color-mix(in oklab, color-mix(in oklab, var(--base), var(--contrast) 8%), var(--base-color) 4%);
+    --bg-1: color-mix(in oklab, color-mix(in oklab, var(--base), var(--contrast) 4%), var(--base-color) 4%);
     --bg-2: color-mix(in oklab, color-mix(in oklab, var(--base), var(--contrast) 16%), var(--base-color) 4%);
     --bg-3: color-mix(in oklab, color-mix(in oklab, var(--base), var(--contrast) 30%), var(--base-color) 4%);
     --bg-4: color-mix(in oklab, color-mix(in oklab, var(--base), var(--contrast) 50%), var(--base-color) 4%);
@@ -45,11 +45,12 @@
     --verified: var(--blue);
     --link-color: var(--blue);
 
-    --glass-transparency: .75;
-    --background-glass: linear-gradient(-45deg,
-        color-mix(in oklab, var(--bg-1), transparent calc(100% - var(--glass-transparency))),
-        color-mix(in oklab, var(--bg-5), transparent calc(100% - var(--glass-transparency))));
-    --background-light-glass: color-mix(in oklab, var(--bg-5), transparent calc(100% - var(--glass-transparency)));
+    --glass-transparency: .3;
+    --glass-1: rgba(var(--base-rgb), var(--glass-transparency));
+    --glass-2: rgba(var(--contrast-rgb), var(--glass-transparency));
+    --mixed: color-mix(in oklab, var(--glass-1), var(--glass-2) 5%);
+    --background-glass: linear-gradient(-45deg, var(--glass-1), var(--mixed));
+    --background-light-glass: var(--mixed);
 
     --tainted-bg-green: color-mix(in oklab, var(--bg-0), var(--blue) 15%);
     --tainted-bg-green-dark: color-mix(in oklab, var(--bg-0), var(--blue) 10%);
@@ -83,6 +84,7 @@
     --button-bottom-border-size: 3px;
     --default-font-family: "Inter Tight", serif;
 
+    --jessc-base-font-size: var(--font-size-medium);
     --jessc-text-color: var(--fg-0);
     --jessc-error-color: var(--red);
     --jessc-interactive-background: var(--bg-1);
@@ -258,12 +260,12 @@ button > * {
 }
 
 nav {
-    background: var(--background-light-glass);
     z-index: 1;
     position: relative;
 }
 
 nav, footer {
+    background: var(--background-light-glass);
     display: flex;
     gap: 1em;
     padding: var(--page-padding);
@@ -500,8 +502,8 @@ button.positive.active {
 }
 
 button.inert {
-    border-color: var(--bg-2);
-    background-color: var(--bg-5);
+    border-color: var(--border);
+    background-color: var(--bg-3);
     pointer-events: none;
 }
 
@@ -652,7 +654,7 @@ button.unread:before {
 
 .card, .tight-border-card {
     padding: 20px;
-    border-radius: var(--border-radius);
+    border-radius: var(--large-border-radius);
     position: relative;
 }
 
@@ -1003,7 +1005,7 @@ td:last-child, th:last-child {
     transition: height 100ms ease-in-out;
     overflow: auto;
     user-select: none;
-    background: color-mix(in oklab, var(--bg-1), transparent 2%);
+    background: color-mix(in oklab, var(--bg-0), transparent 2%);
 }
 
 .hide {
