@@ -28,7 +28,6 @@ import {navigate, reload, Route} from "../../Routing/Router.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
 import {
     button,
-    checkbox,
     errorList,
     heading,
     input,
