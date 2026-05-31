@@ -120,7 +120,7 @@ export class AlbumTemplates {
             ).build();
     }
 
-    static editAlbumModal(album: Partial<Album>) {
+    static editAlbumModal(album: Partial<Album>, onSaved: () => void = () => {}) {
         const state = signal(album);
         const loading = signal(false);
 
@@ -151,7 +151,10 @@ export class AlbumTemplates {
                             onclick: async () => {
                                 loading.value = true;
                                 Api.updateAlbum(state.value)
-                                   .then(() => Util.removeModal())
+                                   .then(() => {
+                                       Util.removeModal();
+                                       onSaved();
+                                   })
                                    .finally(() => loading.value = false);
                             },
                         }),
@@ -253,7 +256,7 @@ export class AlbumTemplates {
                     .children(
                         MusicTemplates.cover(EntityType.album, album, CoverContext.standalone),
                         vertical(
-                            AlbumTemplates.audioActions(album, canEdit, canBuy),
+                            AlbumTemplates.audioActions(album, canEdit, canBuy, reload),
                             InteractionTemplates.interactions(EntityType.album, album),
                         ),
                     ).build(),
@@ -341,7 +344,7 @@ export class AlbumTemplates {
             ).build();
     }
 
-    static audioActions(album: Album, canEdit: boolean, canBuy: boolean = false) {
+    static audioActions(album: Album, canEdit: boolean, canBuy: boolean = false, onReload: () => void = () => {}) {
         const isPlaying = compute((p, pHere) => (p && p.type === "album" && p.id === album.id && pHere) ?? false, playingFrom, playingHere);
         const hasTracks = album.tracks!.length > 0;
         const playIcon = getPlayIcon(isPlaying, loadingAudio);
@@ -398,7 +401,7 @@ export class AlbumTemplates {
                     text: t("EDIT"),
                     icon: { icon: "edit" },
                     onclick: async () => {
-                        createModal([AlbumTemplates.editAlbumModal(album)], "edit-album");
+                        createModal([AlbumTemplates.editAlbumModal(album, onReload)], "edit-album");
                     },
                 })),
                 when(canEdit, button({

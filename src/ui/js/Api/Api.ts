@@ -506,8 +506,8 @@ export class Api {
         });
     }
 
-    static async getLikedAlbums(userId: number, name: string = "", offset: number = 0, filter: string = ""): Promise<Album[] | null> {
-        return await get<Album[]>(ApiRoutes.likedAlbumsFeed, {
+    static async getLikedAlbums(userId: number, name: string = "", offset: number = 0, filter: string = ""): Promise<{ items: Album[], total: number } | null> {
+        return await get<{ items: Album[], total: number }>(ApiRoutes.likedAlbumsFeed, {
             id: userId,
             name,
             offset,
@@ -743,8 +743,8 @@ export class Api {
         });
     }
 
-    static async getLikedPlaylists(userId: number, name: string = "", offset: number = 0, filter: string = ""): Promise<Playlist[] | null> {
-        return await get<Playlist[]>(ApiRoutes.likedPlaylistsFeed, {
+    static async getLikedPlaylists(userId: number, name: string = "", offset: number = 0, filter: string = ""): Promise<{ items: Playlist[], total: number } | null> {
+        return await get<{ items: Playlist[], total: number }>(ApiRoutes.likedPlaylistsFeed, {
             id: userId,
             name,
             offset,

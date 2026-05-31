@@ -40,6 +40,7 @@ export class FeedTemplates {
         const items$ = signal<T[]>([]);
         const loading$ = signal(false);
         const hasMore$ = signal(true);
+        const totalCount$ = signal<number | null>(null);
         const search$ = signal("");
         const sortBy$ = signal<string | null>(null);
         const sortDir$ = signal<'asc' | 'desc' | null>(null);
@@ -224,7 +225,14 @@ export class FeedTemplates {
             loading$.value = true;
             const offset = page * ps;
             const filterValue = config.filterState?.value ?? search$.value;
-            const next = await config.fetchPage(offset, ps, filterValue, sortBy$.value ?? undefined, sortDir$.value ?? undefined);
+            const result = await config.fetchPage(offset, ps, filterValue, sortBy$.value ?? undefined, sortDir$.value ?? undefined);
+            let next: T[];
+            if (result && !Array.isArray(result) && 'items' in result) {
+                next = result.items;
+                totalCount$.value = result.total;
+            } else {
+                next = (result as T[]) ?? [];
+            }
             if (!next || next.length < ps) hasMore$.value = false;
             if (next) items$.value = [...items$.value, ...next];
             page += 1;
@@ -330,6 +338,25 @@ export class FeedTemplates {
                             items$,
                             create("tbody").classes("feed-rows"),
                             (item, i) => FeedTemplates.#row(item, i, config, feedId, rebuildAndShowMobile, selectedIds$, handleRowClick, buildBatchActions, items$, batchPopover),
+                        ),
+                        compute(
+                            (items, total, ld) => {
+                                if (items.length > 0 || !ld || total === null) return nullElement();
+                                const skeletonCount = Math.min(total, ps);
+                                const colCount = resolveColumns(config.columns).length + 3;
+                                return create("tbody").classes("feed-rows")
+                                    .children(...Array.from({ length: skeletonCount }, (_, i) =>
+                                        create("tr").classes("feed-row", "skeleton-row")
+                                            .children(
+                                                ...Array.from({ length: colCount }, (_, j) =>
+                                                    create("td").classes("feed-cell")
+                                                        .children(create("div").classes("skeleton-pulse").build())
+                                                        .build()
+                                                )
+                                            ).build()
+                                    )).build();
+                            },
+                            items$, totalCount$, loading$,
                         ),
                     ).build(),
                 compute(
