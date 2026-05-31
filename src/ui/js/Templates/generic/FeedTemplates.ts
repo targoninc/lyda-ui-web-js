@@ -340,12 +340,12 @@ export class FeedTemplates {
                             (item, i) => FeedTemplates.#row(item, i, config, feedId, rebuildAndShowMobile, selectedIds$, handleRowClick, buildBatchActions, items$, batchPopover),
                         ),
                         compute(
-                            (items, total, ld) => {
-                                if (!ld || items.length > 0) return nullElement();
-                                const skeletonCount = Math.min(total ?? ps, ps);
+                            (items, total) => {
+                                if (total === null || items.length >= total) return nullElement();
+                                const skeletonCount = total - items.length;
                                 return FeedTemplates.#skeletonRows(skeletonCount, resolveColumns(config.columns).length + 3);
                             },
-                            items$, totalCount$, loading$,
+                            items$, totalCount$,
                         ),
                     ).build(),
                 compute(
