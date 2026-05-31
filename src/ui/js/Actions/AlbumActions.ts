@@ -13,7 +13,8 @@ import { t } from "../../locales";
 
 export class AlbumActions {
     static async openAddToAlbumModal(track: Track) {
-        const albums = await Api.getAlbumsByUserId(track.user_id);
+        const res = await Api.getAlbumsByUserId(track.user_id);
+        const albums = res?.items;
         if (!albums || albums.length === 0) {
             notify(`${t("NO_ALBUMS_YET")}`);
             return;

@@ -60,7 +60,11 @@ export class CommentTemplates {
                             classes: ["positive"],
                             onclick: () => TrackActions.newComment(newComment, comments, track_id),
                         }),
-                    ).build()),
+                    ).on("keydown", (e: KeyboardEvent) => {
+                        if (e.ctrlKey && e.key === "Enter") {
+                            TrackActions.newComment(newComment, comments, track_id);
+                        }
+                    }).build()),
             ).build();
     }
 
@@ -146,6 +150,11 @@ export class CommentTemplates {
                 attributes: ["track_id", comment.track_id.toString()],
                 onchange: v => {
                     newComment.value = v;
+                },
+                onkeydown: (e: KeyboardEvent) => {
+                    if (e.ctrlKey && e.key === "Enter") {
+                        TrackActions.newComment(newComment, comments, comment.track_id, comment.id);
+                    }
                 },
             })),
             when(replyInputShown, button({

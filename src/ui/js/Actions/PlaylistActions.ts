@@ -19,7 +19,8 @@ export class PlaylistActions {
             return false;
         }
 
-        const playlists = await Api.getPlaylistsByUserId(userId);
+        const res = await Api.getPlaylistsByUserId(userId);
+        const playlists = res?.items;
         if (!playlists || playlists.length === 0) {
             notify(`${t("NO_PLAYLISTS_YET")}`);
             return;
