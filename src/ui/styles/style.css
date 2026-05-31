@@ -56,10 +56,7 @@
     --tainted-bg-green-dark: color-mix(in oklab, var(--bg-0), var(--blue) 10%);
     --background-playing: linear-gradient(-45deg, var(--tainted-bg-green), var(--tainted-bg-green-dark));
 
-    --filter-2: invert(27%) sepia(93%) saturate(2198%) hue-rotate(322deg) brightness(92%) contrast(84%);
-    --filter-5: sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%) invert(100%);
-    --filter-6: sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%) invert(1);
-    --filter-8: invert(74%) sepia(50%) saturate(854%) hue-rotate(40deg) brightness(94%) contrast(75%);
+    --icon-filter-2: sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%) invert(100%);
     --icon-filter: invert(1);
 
     --breakpoint-big: 1301px;
@@ -675,21 +672,9 @@ button.unread:before {
     background: var(--bg-0);
 }
 
-.incard_circle-left-top {
-    --circle-size: 250px;
-    top: calc(calc(var(--circle-size) / 2.5) - var(--circle-size));
-    width: var(--circle-size);
-    height: var(--circle-size);
-    border-radius: 50%;
-    background: var(--bg-5);
-    z-index: -1;
-    position: absolute;
-    left: calc(calc(var(--circle-size) / 3) - calc(var(--circle-size) / 2));
-}
-
 summary {
     cursor: pointer;
-    background: var(--bg-5);
+    background: var(--bg-2);
     padding: var(--base-padding);
     border-radius: var(--border-radius);
     display: flex;
@@ -700,7 +685,7 @@ summary.property-value {
 }
 
 summary:hover {
-    background: var(--bg-4);
+    background: var(--bg-3);
 }
 
 details {
@@ -964,7 +949,7 @@ td:last-child, th:last-child {
     bottom: calc(100% - 19px);
     width: 100%;
     max-width: var(--breakpoint-big);
-    height: calc(100dvh - 52px);
+    height: 100dvh;
     border: 1px solid var(--border);
     border-radius: var(--large-border-radius);
     transition: height 100ms ease-in-out;

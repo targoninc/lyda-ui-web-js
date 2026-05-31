@@ -276,7 +276,7 @@
 }
 
 .svg {
-    filter: var(--filter-5);
+    filter: var(--icon-filter-2);
 }
 
 .invertedTextWithBackground {
@@ -285,7 +285,7 @@
 }
 
 .svgInverted {
-    filter: var(--filter-6);
+    filter: var(--icon-filter-2) invert(1);
 }
 
 .inline-icon {
@@ -408,7 +408,7 @@ label {
 }
 
 .audio-player-scrubbar {
-    background: var(--bg-5);
+    background: var(--bg-3);
     position: absolute;
     height: 6px;
     width: 100%;
@@ -580,15 +580,10 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .tag {
-    background: var(--bg-4);
+    background: var(--bg-3);
     border-radius: 999px;
     font-size: var(--font-size-xsmall);
     padding: 1px 10px;
-}
-
-.tag.wip {
-    color: var(--fg-0);
-    background: var(--bg-3);
 }
 
 .user-icon, .user-icon-big {
@@ -1089,7 +1084,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     position: fixed;
     z-index: 1;
     padding: var(--base-padding);
-    border-radius: var(--border-radius);
+    border-radius: var(--large-border-radius);
     border: 1px solid var(--border);
     align-self: center;
     box-shadow: 0 10px 20px -7px var(--bg-0);

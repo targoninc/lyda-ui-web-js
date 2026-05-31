@@ -1,46 +1,8 @@
 :root {
-    --jessc-interactive-background: var(--bg-2);
-    --jessc-interactive-color-active: var(--fg-0);
+    --base: #ebebeb;
+    --base-rgb: 235, 235, 235;
+    --contrast: #121212;
+    --contrast-rgb: 18, 18, 18;
 
-    --background-glass: linear-gradient(-45deg,
-        color-mix(in oklab, var(--bg-0), transparent calc(100% - var(--glass-transparency))),
-        color-mix(in oklab, var(--bg-1), transparent calc(100% - var(--glass-transparency))));
-    --background-light-glass: color-mix(in oklab, var(--bg-1), transparent calc(100% - var(--glass-transparency)));
-}
-
-.clickable.secondary.padded-inline:hover {
-    background: var(--bg-0);
-}
-
-.tab {
-    background: var(--bg-2);
-}
-
-.audio-player-scrubbar {
-    background: var(--bg-2);
-}
-
-.fixed-bar {
-    box-shadow: 0 10px 20px -7px var(--bg-4);
-}
-
-th {
-    background: var(--bg-1);
-}
-
-button.inert {
-    border-color: var(--bg-2);
-    background-color: var(--bg-2);
-}
-
-.mobile-menu-close {
-    background: var(--jessc-interactive-background);
-}
-
-.border-card, .tight-border-card {
-    background: var(--bg-2);
-}
-
-.card-label {
-    background: var(--bg-0);
+    --icon-filter-2: sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%) invert(0%);
 }

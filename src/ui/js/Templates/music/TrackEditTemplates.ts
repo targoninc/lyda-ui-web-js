@@ -886,7 +886,8 @@ export class TrackEditTemplates {
                 s.visibility !== track.visibility ||
                 s.isrc !== track.isrc ||
                 s.upc !== track.upc ||
-                s.price !== track.price;
+                s.price !== track.price ||
+                s.wip !== track.wip;
         }, state);
         const loading = signal(false);
         const coverLoading = signal(false);
