@@ -161,9 +161,6 @@ export class TrackTemplates {
         if (!track) {
             throw new Error("Track is missing on list track");
         }
-        if (!track.likes) {
-            throw new Error("Track on list track is missing likes");
-        }
         InteractionStateManager.addContext(EntityType.track, track.id, "list");
 
         if (track.visibility === "private") {
@@ -313,7 +310,7 @@ export class TrackTemplates {
         }
         const description = create("span")
             .id("track-description")
-            .classes("card", "description", "break-lines", "padded")
+            .classes("description", "break-lines", "padded")
             .html(CustomText.renderToHtml(track.description))
             .build();
 

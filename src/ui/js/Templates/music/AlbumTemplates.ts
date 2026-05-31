@@ -259,7 +259,7 @@ export class AlbumTemplates {
                     ).build(),
                 create("span")
                     .id("track-description")
-                    .classes("card", "description", "break-lines", "padded")
+                    .classes("description", "break-lines", "padded")
                     .html(CustomText.renderToHtml(album.description))
                     .build(),
                 MusicTemplates.tracksInList(tracks, canEdit, album, "album"),
@@ -267,24 +267,31 @@ export class AlbumTemplates {
                     create("span")
                         .text(t("ADD_TRACK_TO_TITLE", album.title))
                         .build(),
-                    create("div")
-                        .children(
-                            SearchTemplates.search(
-                                SearchContext.searchPage,
-                                async (result) => {
-                                    if (result.type !== "track") {
-                                        return;
-                                    }
-                                    await Api.addTrackToAlbums(result.id, [album.id]);
-                                    reload();
-                                },
-                                [ApiRoutes.searchTracks], [],
-                                ["fullWidth"],
-                                { userId: currentUser.value?.id },
-                                undefined,
-                                true,
-                            ),
-                        )
+                    (() => {
+                        const searchEl = SearchTemplates.search(
+                            SearchContext.searchPage,
+                            async (result) => {
+                                if (result.type !== "track") {
+                                    return;
+                                }
+                                await Api.addTrackToAlbums(result.id, [album.id]);
+                                const data = await Api.getTrackById(result.id);
+                                if (data?.track) {
+                                    tracks.value = [...tracks.value, { track_id: result.id, track: data.track, position: tracks.value.length }];
+                                }
+                            },
+                            [ApiRoutes.searchTracks], [],
+                            ["fullWidth"],
+                            { userId: currentUser.value?.id },
+                            (result) => result.type !== "track" || !tracks.value.some(t => t.track_id === result.id),
+                            true,
+                        );
+                        tracks.subscribe(() => {
+                            const trackIds = new Set(tracks.value.map(t => t.track_id));
+                            searchEl.searchResults.value = searchEl.searchResults.value.filter(r => !trackIds.has(r.id));
+                        });
+                        return create("div").children(searchEl).build();
+                    })()
                 ).classes("card").build()),
             ).build();
     }

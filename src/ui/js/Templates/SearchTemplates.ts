@@ -44,7 +44,7 @@ export class SearchTemplates {
             });
         }
 
-        return create("div")
+        const el = create("div")
             .classes("search", "relative", "flex-v", "align-center", ...classes)
             .children(
                 SearchTemplates.searchInput(
@@ -68,7 +68,9 @@ export class SearchTemplates {
                     onSelect,
                     resultContainerClasses,
                 ),
-            ).build();
+            ).build() as any;
+        el.searchResults = results;
+        return el;
     }
 
     static searchInput(
@@ -357,6 +359,9 @@ export class SearchTemplates {
             }
         });
 
+        const groupKeys = Object.keys(groups);
+        const singleGroup = groupKeys.length === 1;
+
         return horizontal(
             when(
                 searchResults.length === 0,
@@ -367,28 +372,37 @@ export class SearchTemplates {
                         .build(),
                 ).build(),
             ),
-            ...Object.keys(groups).map(group => {
+            ...groupKeys.map(group => {
+                const sorted = groups[group]
+                    .sort((a, b) =>
+                        a.exactMatch && !b.exactMatch
+                            ? 1
+                            : b.exactMatch && !a.exactMatch
+                                ? -1
+                                : 0,
+                    )
+                    .map(result => {
+                        return this.searchResult(
+                            result,
+                            selectedResult,
+                            resultsShown,
+                            SearchContext.searchPage,
+                            onSelect,
+                        );
+                    });
+
+                if (singleGroup) {
+                    return create("div")
+                        .classes("flex-v", "small-gap", ...classes)
+                        .children(...sorted)
+                        .build();
+                }
+
                 return create("div")
                     .classes("flex-v", "small-gap", "card", "search-results-card", ...classes)
                     .children(
                         create("h2").text(group).build(),
-                        ...groups[group]
-                            .sort((a, b) =>
-                                a.exactMatch && !b.exactMatch
-                                    ? 1
-                                    : b.exactMatch && !a.exactMatch
-                                        ? -1
-                                        : 0,
-                            )
-                            .map(result => {
-                                return this.searchResult(
-                                    result,
-                                    selectedResult,
-                                    resultsShown,
-                                    SearchContext.searchPage,
-                                    onSelect,
-                                );
-                            }),
+                        ...sorted,
                     )
                     .build();
             }),

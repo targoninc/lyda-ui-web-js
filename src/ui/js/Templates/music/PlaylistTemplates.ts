@@ -229,24 +229,31 @@ export class PlaylistTemplates {
                     create("span")
                         .text(t("ADD_TRACK_TO_TITLE", playlist.title))
                         .build(),
-                    create("div")
-                        .children(
-                            SearchTemplates.search(
-                                SearchContext.searchPage,
-                                async (result) => {
-                                    if (result.type !== "track") {
-                                        return;
-                                    }
-                                    await Api.addTrackToPlaylists(result.id, [playlist.id]);
-                                    reload();
-                                },
-                                [ApiRoutes.searchTracks], [],
-                                ["fullWidth"],
-                                {},
-                                (result) => result.type !== "track" || !tracks.value.some(t => t.track_id === result.id),
-                                true,
-                            ),
-                        )
+                    (() => {
+                        const searchEl = SearchTemplates.search(
+                            SearchContext.searchPage,
+                            async (result) => {
+                                if (result.type !== "track") {
+                                    return;
+                                }
+                                await Api.addTrackToPlaylists(result.id, [playlist.id]);
+                                const data = await Api.getTrackById(result.id);
+                                if (data?.track) {
+                                    tracks.value = [...tracks.value, { track_id: result.id, track: data.track, position: tracks.value.length }];
+                                }
+                            },
+                            [ApiRoutes.searchTracks], [],
+                            ["fullWidth"],
+                            {},
+                            (result) => result.type !== "track" || !tracks.value.some(t => t.track_id === result.id),
+                            true,
+                        );
+                        tracks.subscribe(() => {
+                            const trackIds = new Set(tracks.value.map(t => t.track_id));
+                            searchEl.searchResults.value = searchEl.searchResults.value.filter(r => !trackIds.has(r.id));
+                        });
+                        return create("div").children(searchEl).build();
+                    })()
                 ).classes("card").build()),
             ).build();
     }
