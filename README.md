@@ -8,13 +8,6 @@ Install bun:
 
 `curl -fsSL https://bun.sh/install | bash` (Linux/Mac)
 
-# Needed programs for API to run
-
-- [FFmpeg](https://www.ffmpeg.org/download.html)
-- Chromaprint / fpcalc:
-  - Linux: `sudo apt install libchromaprint-tools`
-  - OSX: `brew install chromaprint`
-
 # Start
 
 `bun run build-dev` to run a continuous build of the web app.
