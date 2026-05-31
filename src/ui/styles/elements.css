@@ -10,13 +10,13 @@
 }
 
 .material-symbols-outlined.has-title {
-    border: 1px solid var(--color-7);
+    border: 1px solid var(--border);
     border-radius: 999px;
     padding: 4px;
 }
 
 .material-symbols-outlined.has-title:hover {
-    background: var(--color-3);
+    background: var(--bg-1);
     transform: scale(1.2);
 }
 
@@ -76,12 +76,12 @@
     transform: translateY(-50%) translateX(-50%);
     width: .5em;
     height: 2em;
-    background: var(--color-6);
+    background: var(--bg-5);
     border-radius: var(--border-radius);
 }
 
 .vertical-drag-indicator:hover::before {
-    background: var(--color-5);
+    background: var(--fg-0);
 }
 
 .dragIndicator.dragover, .dragIndicator.active {
@@ -95,7 +95,7 @@
 }
 
 .single-page {
-    background: var(--color-3);
+    background: var(--bg-1);
 }
 
 .page-background-image {
@@ -108,7 +108,7 @@
     background-position: center;
     background-repeat: no-repeat;
     background-blend-mode: overlay;
-    background-color: color-mix(in oklab, var(--color-3), transparent);
+    background-color: color-mix(in oklab, var(--bg-1), transparent);
     filter: blur(100px);
     min-height: 80dvh;
     opacity: .3;
@@ -129,7 +129,7 @@
 
 .stepped-slider-step {
     height: 3px;
-    --slider-step-color: var(--color-5);
+    --slider-step-color: var(--fg-0);
     background: var(--slider-step-color);
     flex-grow: 1;
 }
@@ -172,7 +172,7 @@
 }
 
 .log.warning {
-    color: var(--color-1);
+    color: var(--base-color);
 }
 
 .log.success {
@@ -253,7 +253,7 @@
 }
 
 .inline-action {
-    background: var(--color-3);
+    background: var(--bg-1);
 }
 
 .track-card, .playlist-card, .album-card {
@@ -261,7 +261,7 @@
     display: flex;
     border-radius: var(--border-radius);
     gap: 15px;
-    border: 1px solid var(--color-7);
+    border: 1px solid var(--border);
     width: max(var(--card-width), 100%);
     max-width: var(--card-width);
     height: max-content;
@@ -280,8 +280,8 @@
 }
 
 .invertedTextWithBackground {
-    background: var(--color-5);
-    color: var(--color-4);
+    background: var(--fg-0);
+    color: var(--bg-0);
 }
 
 .svgInverted {
@@ -306,28 +306,6 @@
     width: var(--cover-size);
 }
 
-.popularity-container {
-    max-width: 150px;
-    border-radius: 10px;
-    border: 1px solid var(--color-5);
-    overflow: hidden;
-    display: flex;
-}
-
-.popularity {
-    height: 5px;
-    background: var(--color-5);
-}
-
-.popularity-text {
-    font-size: .8rem;
-}
-
-.popularity-info-container {
-    display: flex;
-    flex-direction: column;
-}
-
 .stats-indicator {
     z-index: 2;
     align-items: center;
@@ -345,7 +323,7 @@
     display: flex;
     box-sizing: border-box;
     font-variant-numeric: tabular-nums;
-    background: var(--color-6);
+    background: var(--bg-2);
 }
 
 .interaction-count.active {
@@ -353,8 +331,8 @@
 }
 
 .label {
-    background: var(--color-5);
-    color: var(--color-4);
+    background: var(--fg-0);
+    color: var(--bg-0);
     width: max-content;
 }
 
@@ -394,7 +372,7 @@ label {
 .audio-player-scrubhead {
     width: var(--border-radius);
     height: 16px;
-    background: var(--color-5);
+    background: var(--fg-0);
     border-radius: var(--border-radius);
     z-index: 1;
     position: absolute;
@@ -403,7 +381,7 @@ label {
 }
 
 .audio-player-buffer-indicator {
-    background: var(--color-7);
+    background: var(--bg-4);
     border-radius: var(--border-radius);
     position: absolute;
     height: 6px;
@@ -420,7 +398,7 @@ label {
 .audio-player-loudnesshead {
     width: var(--font-size-small);
     height: var(--font-size-small);
-    background: var(--color-5);
+    background: var(--fg-0);
     border-radius: 50%;
     z-index: 1;
     position: absolute;
@@ -430,18 +408,18 @@ label {
 }
 
 .audio-player-scrubbar {
-    background: var(--color-6);
+    background: var(--bg-5);
     position: absolute;
     height: 6px;
     width: 100%;
     top: 50%;
     left: 0;
     transform: translateY(-50%);
-    border: 1px solid var(--color-7);
+    border: 1px solid var(--border);
 }
 
 .audio-player-scrubbar-time {
-    background: var(--color-5);
+    background: var(--fg-0);
     position: absolute;
     height: 6px;
     top: 50%;
@@ -450,7 +428,7 @@ label {
 }
 
 .audio-player-loudnessbar {
-    background: var(--color-5);
+    background: var(--fg-0);
     position: absolute;
     width: 3px;
     height: 100%;
@@ -505,7 +483,7 @@ label {
     width: calc(100% - 2px);
     bottom: -17px;
     border: 1px solid var(--jessc-interactive-border);
-    background: var(--color-4);
+    background: var(--bg-0);
     cursor: pointer;
 }
 
@@ -523,7 +501,7 @@ label {
     width: 40px;
     height: 20px;
     border-radius: 10px;
-    background: var(--color-7);
+    background: var(--bg-4);
     position: relative;
     cursor: pointer;
 }
@@ -532,7 +510,7 @@ label {
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: var(--color-4);
+    background: var(--bg-0);
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
@@ -558,7 +536,7 @@ label {
 }
 
 input.slider:checked ~ .toggle-container {
-    background: var(--color-5);
+    background: var(--fg-0);
 }
 
 input.slider:checked ~ .toggle-container .toggle-slider {
@@ -583,7 +561,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .page-link {
-    color: var(--color-5);
+    color: var(--fg-0);
 }
 
 .page-link:hover {
@@ -597,20 +575,20 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .user-widget.collaborator {
-    border: 1px solid var(--color-7);
+    border: 1px solid var(--border);
     border-radius: 999px;
 }
 
 .tag {
-    background: var(--color-7);
+    background: var(--bg-4);
     border-radius: 999px;
     font-size: var(--font-size-xsmall);
     padding: 1px 10px;
 }
 
 .tag.wip {
-    color: var(--color-5);
-    background: var(--color-6);
+    color: var(--fg-0);
+    background: var(--bg-3);
 }
 
 .user-icon, .user-icon-big {
@@ -636,11 +614,11 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     padding: var(--jessc-input-padding-y) var(--jessc-input-padding-x);
     border-radius: var(--border-radius);
     cursor: pointer;
-    background: var(--color-6);
+    background: var(--bg-5);
 }
 
 .text-button:hover {
-    background: var(--color-7);
+    background: var(--bg-4);
     text-decoration: none !important;
 }
 
@@ -653,7 +631,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .listNotification {
-    border-bottom: 1px solid var(--color-6);
+    border-bottom: 1px solid var(--bg-5);
     padding: 10px 20px;
 }
 
@@ -673,7 +651,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .queue-bubble {
     border-radius: var(--border-radius);
-    background: var(--color-7);
+    background: var(--bg-4);
     font-size: var(--font-size-small);
     padding: var(--inline-padding);
 }
@@ -714,7 +692,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 #banner-loader, #avatar-loader {
-    border-color: var(--color-3);
+    border-color: var(--bg-1);
     width: 30px;
     height: 30px;
 }
@@ -725,7 +703,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     left: 0;
     width: calc(100% - 40px);
     height: calc(100% - 40px);
-    background: var(--color-4);
+    background: var(--bg-0);
     z-index: 3;
 }
 
@@ -770,12 +748,12 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     bottom: 100%;
     right: 0;
     max-height: 300px;
-    background: var(--color-4);
-    border: 1px solid var(--color-5);
+    background: var(--bg-0);
+    border: 1px solid var(--fg-0);
 }
 
 .queue-item:hover {
-    background: var(--color-6);
+    background: var(--bg-5);
 }
 
 .waveform {
@@ -792,7 +770,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .processing-box {
-    background: linear-gradient(45deg, var(--color-6), var(--color-7));
+    background: linear-gradient(45deg, var(--bg-5), var(--bg-4));
     position: relative;
     overflow: hidden;
 }
@@ -804,11 +782,11 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     left: -50%;
     width: 20%;
     height: 100%;
-    --base-color: var(--color-4);
-    background: color-mix(in oklab, var(--base-color), transparent 80%);
+    --shimmer: var(--bg-0);
+    background: color-mix(in oklab, var(--shimmer), transparent 80%);
     transform: skewX(80deg);
     animation: processing 3s infinite;
-    box-shadow: 0 0 20px 10px color-mix(in oklab, var(--base-color), transparent 80%);
+    box-shadow: 0 0 20px 10px color-mix(in oklab, var(--shimmer), transparent 80%);
 }
 
 @keyframes processing {
@@ -823,7 +801,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 .waveform-bar {
     min-width: 1px;
     width: 1px;
-    background: var(--color-5);
+    background: var(--fg-0);
 }
 
 .image-preview {
@@ -869,11 +847,11 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .feed-track {
-    border: 1px solid var(--color-7);
+    border: 1px solid var(--border);
 }
 
 .feed-track:hover {
-    border-color: var(--color-5);
+    border-color: var(--fg-0);
 }
 
 .playing {
@@ -881,7 +859,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .track-contained-list .card {
-    background: var(--color-4);
+    background: var(--bg-0);
     width: 150px;
 }
 
@@ -902,16 +880,16 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     width: max-content;
     max-width: 100%;
     min-width: 300px;
-    border: 1px solid var(--color-7);
+    border: 1px solid var(--border);
     z-index: 9999;
     border-radius: var(--border-radius);
     overflow: auto;
     backdrop-filter: blur(50px);
     -webkit-backdrop-filter: blur(50px);
-    background: color-mix(in oklab, var(--color-3), transparent 2%);
+    background: color-mix(in oklab, var(--bg-1), transparent 2%);
     max-height: 300px;
     box-sizing: border-box;
-    box-shadow: 0 10px 20px 7px var(--color-4);
+    box-shadow: 0 10px 20px 7px var(--bg-0);
 }
 
 .search-results-card {
@@ -944,11 +922,11 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .search-result.selected {
-    background: var(--color-7);
+    background: var(--bg-4);
 }
 
 .search-result:hover {
-    background: var(--color-7);
+    background: var(--bg-4);
 }
 
 .search-result.exact-match {
@@ -978,12 +956,12 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .search-result-type {
     border-radius: 50px;
-    border: 1px solid var(--color-5);
+    border: 1px solid var(--fg-0);
     font-size: 12px;
 }
 
 .search-result-type.album {
-    background: color-mix(in oklab, var(--color-1), transparent 50%);
+    background: color-mix(in oklab, var(--base-color), transparent 50%);
 }
 
 .search-result-type.user {
@@ -1004,7 +982,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .log.warning > td:first-child {
-    --log-color: var(--color-1);
+    --log-color: var(--base-color);
 }
 
 .log.error > td:first-child {
@@ -1036,7 +1014,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .content-id-match-part {
-    background: var(--color-3);
+    background: var(--bg-1);
     padding: var(--base-padding);
     box-sizing: border-box;
     align-items: center;
@@ -1051,22 +1029,22 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .tab {
-    background: var(--color-6);
+    background: var(--bg-1);
     border: none !important;
-    color: var(--color-5);
+    color: var(--fg-0);
     border-radius: 0;
     text-wrap: nowrap;
     padding: var(--jessc-input-padding-y) var(--jessc-input-padding-x);
 }
 
 .tab:hover {
-    background: var(--color-3);
-    color: var(--color-5);
+    background: var(--bg-2);
+    color: var(--fg-0);
 }
 
 .tab.selected {
-    background: var(--color-5);
-    color: var(--color-4);
+    background: var(--fg-0);
+    color: var(--bg-0);
 }
 
 .pagination-button {
@@ -1075,7 +1053,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .tab-selector {
     gap: 0;
-    border: 1px solid var(--color-7);
+    border: 1px solid var(--border);
     border-radius: 999px;
     flex-wrap: nowrap;
     overflow-x: auto;
@@ -1109,9 +1087,9 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     z-index: 1;
     padding: var(--base-padding);
     border-radius: var(--border-radius);
-    border: 1px solid var(--color-7);
+    border: 1px solid var(--border);
     align-self: center;
-    box-shadow: 0 10px 20px -7px var(--color-4);
+    box-shadow: 0 10px 20px -7px var(--bg-0);
     width: 100%;
     max-width: var(--breakpoint-big);
 }
@@ -1142,7 +1120,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .roadmap-item.todo {
-    --item-color: var(--color-7);
+    --item-color: var(--bg-4);
 }
 
 .roadmap-item {
@@ -1161,7 +1139,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .roadmap-item-status-icon {
-    background: var(--color-4);
+    background: var(--bg-0);
     border-radius: 50%;
     padding: var(--base-padding);
     font-size: 1em !important;
@@ -1178,8 +1156,8 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     min-width: 100%;
     top: 100%;
     left: 0;
-    background: var(--color-4);
-    border: 1px solid var(--color-6);
+    background: var(--bg-0);
+    border: 1px solid var(--bg-5);
     border-radius: 0 0 var(--border-radius) var(--border-radius);
     z-index: 9999;
     gap: 0;
@@ -1191,20 +1169,20 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .search-select-option:hover, .search-select-option.selected {
-    background: var(--color-7);
+    background: var(--bg-4);
 }
 
 .search-select-dropdown {
-    background: var(--color-3);
+    background: var(--bg-1);
     cursor: pointer;
     padding: 1px 8px;
-    border: 1px solid var(--color-7);
+    border: 1px solid var(--border);
     border-radius: 0 var(--border-radius) var(--border-radius) 0;
     border-left: none;
 }
 
 .search-select-dropdown:hover {
-    background: var(--color-7);
+    background: var(--bg-4);
 }
 
 .search-select-visible {
@@ -1214,9 +1192,9 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .search-select-input {
     flex-grow: 1;
-    background: var(--color-4);
+    background: var(--bg-0);
     border-radius: var(--border-radius) 0 0 var(--border-radius);
-    border: 1px solid var(--color-7);
+    border: 1px solid var(--border);
 }
 
 .search-select-input:focus-visible {
@@ -1287,7 +1265,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 .progress-circle-overlay {
     width: 50%;
     height: 50%;
-    background: var(--color-4);
+    background: var(--bg-0);
     border-radius: 50%;
     position: absolute;
     top: 50%;
@@ -1312,7 +1290,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .check-list-item {
-    border-color: var(--color-5);
+    border-color: var(--fg-0);
     border-style: solid;
     align-items: center;
     border-width: 0 1px 1px 1px;
@@ -1326,11 +1304,11 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .check-list-item.active {
     border-left: 1em solid var(--green);
-    background: var(--color-3);
+    background: var(--bg-1);
 }
 
 .check-list-item:hover {
-    background: var(--color-6);
+    background: var(--bg-3);
 }
 
 .check-list-item.active:hover {
@@ -1344,7 +1322,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .mobile-menu-close {
     padding: var(--base-padding);
-    background: var(--color-6);
+    background: var(--bg-5);
     border-radius: 999px;
     height: 3em;
     width: 3em;
@@ -1500,12 +1478,12 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .feed-row td {
     padding: 0 var(--gap);
-    border-bottom: 1px solid var(--color-6);
+    border-bottom: 1px solid var(--border);
     vertical-align: middle;
 }
 
 .feed-row:hover {
-    background: var(--color-3);
+    background: var(--bg-1);
 }
 
 .feed-row.playing {
@@ -1513,7 +1491,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .feed-row.selected {
-    background: color-mix(in oklab, var(--color-3), var(--blue) 8%);
+    background: color-mix(in oklab, var(--bg-1), var(--blue) 8%);
 }
 
 .feed-row.playing.selected {
@@ -1535,7 +1513,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .feed-idx-num {
     font-size: var(--font-size-small);
-    color: var(--color-5);
+    color: var(--fg-0);
     font-variant-numeric: tabular-nums;
 }
 
@@ -1663,10 +1641,10 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 .generic-popover {
     min-width: 180px;
     padding: 4px;
-    background: var(--color-3);
-    border: 1px solid var(--color-7);
+    background: var(--bg-1);
+    border: 1px solid var(--border);
     border-radius: var(--large-border-radius);
-    color: var(--color-5);
+    color: var(--fg-0);
 }
 
 .generic-popover::backdrop {
@@ -1694,7 +1672,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     .feed-mobile-divider {
         margin: 8px 0;
         border: none;
-        border-top: 1px solid var(--color-7);
+        border-top: 1px solid var(--bg-3);
     }
 
     .feed-mobile-interact {
@@ -1723,7 +1701,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     padding: 8px 12px;
     border: none;
     background: transparent;
-    color: var(--color-5);
+    color: var(--fg-0);
     font-size: var(--font-size-small);
     cursor: pointer;
     border-radius: var(--border-radius);
@@ -1732,7 +1710,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .context-menu-item:hover {
-    background: var(--color-4);
+    background: var(--bg-0);
 }
 
 .context-menu-icon {
@@ -1771,7 +1749,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 .skeleton-row .skeleton-pulse {
     height: 16px;
     border-radius: 4px;
-    background: linear-gradient(90deg, var(--color-7) 25%, var(--color-6) 50%, var(--color-7) 75%);
+    background: linear-gradient(90deg, var(--bg-4) 25%, var(--bg-5) 50%, var(--bg-4) 75%);
     background-size: 200% 100%;
     animation: skeleton-pulse 1.5s ease-in-out infinite;
     width: 80%;

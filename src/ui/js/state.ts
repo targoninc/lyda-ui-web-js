@@ -240,7 +240,7 @@ export const notifications = signal<Notification[]>([]);
 
 export const permissions = signal<Permission[]>([]);
 
-export const chartColor = signal(getComputedStyle(document.documentElement).getPropertyValue("--color-5").trim());
+export const chartColor = signal(getComputedStyle(document.documentElement).getPropertyValue("--fg-0").trim());
 
 export const history = signal<ListeningHistory[]>([]);
 history.subscribe((h, changed) => {

@@ -1,36 +1,38 @@
 :root {
-    --color-1: #DA702C;
-    --color-1-rgb: 218, 112, 44;
-    --red: #D14D41;
-    --color-2-rgb: 209, 77, 65;
+    --base: #100F0F;
+    --base-rgb: 16, 15, 15;
+    --contrast: #E6E4D9;
+    --contrast-rgb: 230, 228, 217;
+    --base-color: #DA702C;
+    --base-color-rgb: 218, 112, 44;
+
+    --red-base: #D14D41;
+    --red-base-rgb: 209, 77, 65;
     --red-dark: #ce3a32;
-    --color-2-dark-rgb: 206, 58, 50;
-    --color-3: #FFFCF0;
-    --color-3-rgb: 255, 252, 240;
-    --color-4: #E6E4D9;
-    --color-4-rgb: 230, 228, 217;
-    --color-5: #100F0F;
-    --color-5-rgb: 16, 15, 15;
-    --filter-5: sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%) invert(0%);
-    --color-6: #403E3C;
-    --color-6-rgb: 64, 62, 60;
-    --color-7: #6F6E69;
-    --color-7-rgb: 111, 110, 105;
-    --green: #99b238;
-    --color-8-rgb: 153, 178, 56;
+
+    --green-base: #99b238;
+    --green-base-rgb: 153, 178, 56;
     --green-dark: #7a9615;
-    --color-8-dark-rgb: 122, 150, 21;
-    --filter-8: brightness(0) saturate(100%) invert(29%) sepia(96%) saturate(1386%) hue-rotate(53deg) brightness(107%) contrast(91%);
-    --color-9: #DAD8CE;
-    --blue: #1a91f8;
+
+    --blue-base: #1a91f8;
+    --blue-base-rgb: 26, 145, 248;
     --blue-dark: #316fd1;
 
-    --background-glass: linear-gradient(-45deg, rgba(var(--color-4-rgb), var(--glass-transparency)), rgba(var(--color-3-rgb), var(--glass-transparency)));
-    --background-light-glass: rgba(var(--color-3-rgb), var(--glass-transparency));
+    --red: color-mix(in oklab, var(--red-base), var(--base-color) 10%);
+    --green: color-mix(in oklab, var(--green-base), var(--base-color) 10%);
+    --blue: color-mix(in oklab, var(--blue-base), var(--base-color) 10%);
 
-    --jessc-interactive-background: var(--color-3);
-    --jessc-interactive-color: var(--color-5);
-    --jessc-interactive-color-active: var(--color-5);
+    --filter-5: sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%) invert(0%);
+    --filter-8: brightness(0) saturate(100%) invert(29%) sepia(96%) saturate(1386%) hue-rotate(53deg) brightness(107%) contrast(91%);
+
+    --background-glass: linear-gradient(-45deg,
+        color-mix(in oklab, var(--bg-0), transparent calc(100% - var(--glass-transparency))),
+        color-mix(in oklab, var(--bg-1), transparent calc(100% - var(--glass-transparency))));
+    --background-light-glass: color-mix(in oklab, var(--bg-1), transparent calc(100% - var(--glass-transparency)));
+
+    --jessc-interactive-background: var(--bg-1);
+    --jessc-interactive-color: var(--fg-0);
+    --jessc-interactive-color-active: var(--fg-0);
 }
 
 button.positive:hover {
@@ -39,54 +41,42 @@ button.positive:hover {
 }
 
 .tab {
-    background: var(--color-9);
+    background: var(--bg-2);
 }
 
 .clickable.secondary.padded-inline:hover {
-    background: var(--color-4);
+    background: var(--bg-0);
 }
 
 .audio-player-scrubbar {
-    background: var(--color-7);
+    background: var(--bg-4);
 }
 
 .audio-player-buffer-indicator {
-    background: var(--color-6);
+    background: var(--bg-5);
 }
 
 .fixed-bar {
-    box-shadow: 0 10px 20px -7px var(--color-7);
+    box-shadow: 0 10px 20px -7px var(--bg-4);
 }
 
 th {
-    background: var(--color-3);
-}
-
-tr:hover {
-    background: var(--color-9);
+    background: var(--bg-1);
 }
 
 button.inert {
-    border-color: var(--color-9);
-    background-color: var(--color-9);
+    border-color: var(--bg-2);
+    background-color: var(--bg-2);
 }
 
 .queue-item:hover {
-    background: var(--color-9);
+    background: var(--bg-2);
 }
 
 .mobile-menu-close {
     background: var(--jessc-interactive-background);
 }
 
-.interaction-count {
-    background: var(--color-9);
-}
-
-.interaction-count.active {
-    color: var(--green-dark);
-}
-
 .border-card, .tight-border-card {
-    background: var(--color-3);
+    background: var(--bg-1);
 }

@@ -275,7 +275,7 @@ export class Util {
 
     static setForeGroundColor() {
         const rootElement = document.documentElement;
-        chartColor.value = getComputedStyle(rootElement).getPropertyValue('--color-5').trim();
+        chartColor.value = getComputedStyle(rootElement).getPropertyValue('--fg-0').trim();
     }
 }
 
