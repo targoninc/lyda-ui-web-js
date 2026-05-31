@@ -563,6 +563,14 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     left: 22px;
 }
 
+.invalid .jessc-toggle-container {
+    border-color: var(--red);
+}
+
+.invalid .jessc-toggle-slider {
+    background: var(--red);
+}
+
 .interactions-container {
     width: max-content;
 }

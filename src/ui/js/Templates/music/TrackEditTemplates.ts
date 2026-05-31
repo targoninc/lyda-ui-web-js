@@ -73,6 +73,7 @@ export class TrackEditTemplates {
             price: 1,
             collaborators: [],
             termsOfService: false,
+            wip: false,
         });
         const errorSections = signal<string[]>([]);
         const errorFields = signal<string[]>([]);
@@ -240,7 +241,7 @@ export class TrackEditTemplates {
                 {section: "audio", field: "audioFileName"},
                 {section: "info", field: "title"},
                 {section: "info", field: "genre"},
-                {section: "terms", field: "termsOfService"},
+                {section: "monetization", field: "termsOfService"},
             ];
             if (requiredProps.some(p => !s[p.field])) {
                 newErrors.push(`${t("MISSING_REQUIRED_FIELDS")}`);
@@ -260,6 +261,7 @@ export class TrackEditTemplates {
         const loadingUpdate = (loading: boolean) => {
             disabled.value = loading;
         }
+        const isPublic = compute((s: UploadableTrack) => s.visibility === "public", state);
 
         return vertical(
             horizontal(
@@ -273,7 +275,8 @@ export class TrackEditTemplates {
                     icon: {icon: "upload"},
                 }),
                 GenericTemplates.progressSectionPart(progressState),
-            ),
+                when(isPublic, create("span").text(t("WILL_BE_PUBLICLY_VISIBLE")).classes("warning").build()),
+            ).classes("align-children"),
             errorList(errors),
         );
     }
@@ -341,7 +344,7 @@ export class TrackEditTemplates {
 
     private static visibilityToggle(isPrivate: Signal<boolean>, state: Signal<UploadableTrack>) {
         return create("div")
-            .classes("flex")
+            .classes("flex-v")
             .children(
                 toggle({
                     name: "visibility",
@@ -355,18 +358,34 @@ export class TrackEditTemplates {
                         };
                     },
                 }),
+                toggle({
+                    name: "wip",
+                    label: t("WORK_IN_PROGRESS"),
+                    text: t("WORK_IN_PROGRESS"),
+                    checked: compute(s => s.wip ?? false, state),
+                    onchange: v => {
+                        state.value = {
+                            ...state.value,
+                            wip: v,
+                        };
+                    },
+                }),
             ).build();
     }
 
-    private static monetizationSection(errorSections: Signal<string[]>, state: Signal<UploadableTrack>) {
+    private static monetizationSection(errorSections: Signal<string[]>, state: Signal<UploadableTrack>, copyrightToggle: AnyElement | null = null) {
+        const children = [
+            TrackEditTemplates.monetizationInfo(state),
+            TrackEditTemplates.priceInput(state),
+        ];
+        if (copyrightToggle) {
+            children.push(copyrightToggle);
+        }
         return TrackEditTemplates.sectionCard(
             t("MONETIZATION"),
             errorSections,
             "monetization",
-            [
-                TrackEditTemplates.monetizationInfo(),
-                TrackEditTemplates.priceInput(state),
-            ],
+            children,
             "attach_money",
         );
     }
@@ -511,23 +530,20 @@ export class TrackEditTemplates {
                     .classes("flex-v")
                     .children(
                         TrackEditTemplates.filesSection(true, state, errorSections),
-                        TrackEditTemplates.monetizationSection(errorSections, state),
-                        enableTos
-                            ? TrackEditTemplates.sectionCard(t("COPYRIGHT"), errorSections, "terms",
-                                [
-                                    toggle({
-                                        name: "termsOfService",
-                                        label: t("I_HAVE_ALL_NECESSARY_RIGHTS"),
-                                        text: t("I_HAVE_ALL_NECESSARY_RIGHTS"),
-                                        checked: compute(s => s.termsOfService, state),
-                                        onchange: (v: boolean) => {
-                                            state.value = {
-                                                ...state.value,
-                                                termsOfService: v,
-                                            };
-                                        },
-                                    }),
-                                ], "gavel") : null,
+                        TrackEditTemplates.monetizationSection(errorSections, state, enableTos
+                            ? toggle({
+                                name: "termsOfService",
+                                label: t("I_HAVE_ALL_NECESSARY_RIGHTS"),
+                                text: t("I_HAVE_ALL_NECESSARY_RIGHTS"),
+                                required: true,
+                                checked: compute(s => s.termsOfService, state),
+                                onchange: (v: boolean) => {
+                                    state.value = {
+                                        ...state.value,
+                                        termsOfService: v,
+                                    };
+                                },
+                            }) : null),
                     ).build(),
             ).build();
     }
@@ -605,9 +621,9 @@ export class TrackEditTemplates {
             .build();
     }
 
-    static monetizationInfo() {
+    static monetizationInfo(state: Signal<UploadableTrack>) {
         return create("span")
-            .text(t("TRACK_WILL_BE_MONETIZED"))
+            .text(compute(s => s.price === 0 ? t("TRACK_WILL_BE_MONETIZED_FREE") : t("TRACK_WILL_BE_MONETIZED"), state))
             .build();
     }
 

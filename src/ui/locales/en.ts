@@ -398,6 +398,7 @@ export const en = {
     COVER_FILE: "Cover File",
     CHOOSE_IMAGE_FILE: "Choose image file",
     TRACK_WILL_BE_MONETIZED: "This track will be monetized through streaming subscriptions and available for buying.",
+    TRACK_WILL_BE_MONETIZED_FREE: "This track will be monetized through streaming subscriptions and be freely downloadable",
     DELETE_TRACK: "Delete track",
     SURE_DELETE_TRACK: "Are you sure you want to delete this track?",
     LINKED_USERS: "Linked Users",
@@ -627,4 +628,6 @@ export const en = {
     TAX_INFO_SAVED: "Tax info saved",
     TAX_INFO_SAVE_FAILED: "Failed to save tax info",
     LAST_USED: "Last used",
+    WILL_BE_PUBLICLY_VISIBLE: "This track will be publicly visible",
+    WORK_IN_PROGRESS: "Work in progress",
 } satisfies BaseTranslation;

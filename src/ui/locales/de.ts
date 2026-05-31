@@ -300,6 +300,7 @@ export const de: Translation = {
     TRACK_DETAILS: "Track-Details",
     TRACK_TITLE: "Track-Titel",
     TRACK_WILL_BE_MONETIZED: "Dieser Track wird durch Streaming-Abonnements monetarisiert und zum Kauf verfügbar sein.",
+    TRACK_WILL_BE_MONETIZED_FREE: "Dieser Track wird durch Streaming-Abonnements monetarisiert und ist kostenlos herunterladbar.",
     TWELVE_DIGIT_NUMBER: "12-stellige Zahl",
     UNLIKE_ALL: "Alle entliken",
     UNQUEUE: "Aus Warteschlange entfernen",
@@ -626,4 +627,6 @@ export const de: Translation = {
     TAX_INFO_SAVED: "Steuerinformationen gespeichert",
     TAX_INFO_SAVE_FAILED: "Steuerinformationen konnten nicht gespeichert werden",
     LAST_USED: "Zuletzt genutzt",
+    WILL_BE_PUBLICLY_VISIBLE: "Dieser Track wird öffentlich sichtbar sein",
+    WORK_IN_PROGRESS: "In Arbeit",
 };

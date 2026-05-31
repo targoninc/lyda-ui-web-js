@@ -579,6 +579,7 @@ export class Api {
             genre: track.genre,
             description: track.description,
             price: track.price,
+            wip: track.wip,
         });
     }
 
@@ -703,6 +704,7 @@ export class Api {
             isrc: track.isrc,
             upc: track.upc,
             price: track.price,
+            wip: track.wip,
         });
     }
 
