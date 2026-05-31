@@ -872,7 +872,7 @@ textarea.fullWidth {
 th {
     text-wrap: nowrap;
     padding: var(--base-padding) !important;
-    background: var(--bg-5);
+    background: var(--bg-2);
 }
 
 th.sortable {
