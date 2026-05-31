@@ -946,7 +946,7 @@ export class TrackEditTemplates {
         const tracks = signal<Track[]>([]);
         const loading = signal(true);
         Api.getTracksByUser(currentUser.value?.username ?? "", currentUser.value?.id)
-            .then(t => tracks.value = t ?? [])
+            .then(t => tracks.value = (t as any)?.items ?? [])
             .finally(() => loading.value = false);
 
         return vertical(
