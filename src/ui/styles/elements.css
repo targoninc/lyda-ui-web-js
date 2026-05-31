@@ -316,14 +316,15 @@
 }
 
 .interaction-count {
-    padding: .4em 1em 0.4em 2.5em;
+    padding: .3em 1em 0.3em 2.5em;
     margin-left: -2.5em;
     border-radius: 50px;
     align-items: center;
     display: flex;
     box-sizing: border-box;
     font-variant-numeric: tabular-nums;
-    background: var(--bg-2);
+    background: var(--background-glass);
+    border: 1px solid var(--border);
 }
 
 .interaction-count.active {
