@@ -478,6 +478,22 @@ export class FeedTemplates {
 
                 const mo = new MutationObserver(setupObservers);
                 mo.observe(rowsEl, { childList: true });
+
+                // Periodic check for skeleton rows that scrolled into view fast
+                const viewportCheck = setInterval(() => {
+                    const skeletons = rowsEl.querySelectorAll("tr.skeleton-row[data-page]");
+                    skeletons.forEach(tr => {
+                        const rect = tr.getBoundingClientRect();
+                        if (rect.bottom >= -300 && rect.top <= window.innerHeight + 300) {
+                            const pageNum = parseInt(tr.getAttribute("data-page")!, 10);
+                            if (!isPageLoaded(pageNum) && !loadingPages.has(pageNum)) {
+                                load(pageNum);
+                            }
+                        }
+                    });
+                }, 1000);
+
+                el.addEventListener("remove", () => clearInterval(viewportCheck));
             }
         });
 
