@@ -362,12 +362,31 @@ export class FeedTemplates {
                             (item, i) => FeedTemplates.#row(item, i, getPageForIndex(i), config, feedId, rebuildAndShowMobile, selectedIds$, handleRowClick, buildBatchActions, items$, batchPopover),
                         ),
                         compute(
-                            (total, items) => {
+                            (total, _items) => {
                                 if (total === null) return nullElement();
-                                const skeletonCount = total - items.length;
-                                if (skeletonCount <= 0) return nullElement();
-                                const startPage = Math.floor(items.length / ps);
-                                return FeedTemplates.#skeletonRows(skeletonCount, colCount, startPage, ps);
+                                // Render skeleton rows for missing pages between loaded content and total
+                                const totalPages = Math.ceil(total / ps);
+                                const rows: any[] = [];
+                                for (let p = 0; p < totalPages; p++) {
+                                    if (!loadedPages.has(p) || (loadedPages.get(p)?.length === 0 && !loadingPages.has(p))) {
+                                        const pageItemCount = p === totalPages - 1 ? total - p * ps : ps;
+                                        for (let j = 0; j < pageItemCount; j++) {
+                                            rows.push(
+                                                create("tr").classes("feed-row", "skeleton-row")
+                                                    .attributes("data-page", String(p))
+                                                    .children(
+                                                        ...Array.from({ length: colCount }, () =>
+                                                            create("td").classes("feed-cell")
+                                                                .children(create("div").classes("skeleton-pulse").build())
+                                                                .build()
+                                                        )
+                                                    ).build()
+                                            );
+                                        }
+                                    }
+                                }
+                                if (rows.length === 0) return nullElement();
+                                return create("tbody").classes("feed-rows").children(...rows).build();
                             },
                             totalCount$, items$,
                         ),
@@ -604,21 +623,6 @@ export class FeedTemplates {
                 return GenericTemplates.timestamp(date, ["hideOnSmallBreakpoint"]);
             },
         });
-    }
-
-    static #skeletonRows(count: number, colCount: number, startPage: number, pageSize: number): HTMLElement {
-        return create("tbody").classes("feed-rows")
-            .children(...Array.from({ length: count }, (_, i) =>
-                create("tr").classes("feed-row", "skeleton-row")
-                    .attributes("data-page", String(startPage + Math.floor(i / pageSize)))
-                    .children(
-                        ...Array.from({ length: colCount }, () =>
-                            create("td").classes("feed-cell")
-                                .children(create("div").classes("skeleton-pulse").build())
-                                .build()
-                        )
-                    ).build()
-            )).build() as HTMLElement;
     }
 
     static #sortableTh(key: string, label: any, sortBy: string | null, sortDir: string | null,
