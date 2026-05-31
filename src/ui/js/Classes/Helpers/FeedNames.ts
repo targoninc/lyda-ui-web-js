@@ -1,26 +1,40 @@
 import { t } from "../../../locales";
 import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 
-export function getFeedDisplayName(type: FeedType, userName?: string): string {
+export function getFeedDisplayName(type: FeedType, userName?: string, filter?: string): string {
+    let name: string;
     switch (type) {
         case FeedType.following:
-            return `${t("FOLLOWING")}`;
+            name = `${t("FOLLOWING")}`;
+            break;
         case FeedType.explore:
-            return `${t("EXPLORE")}`;
+            name = `${t("EXPLORE")}`;
+            break;
         case FeedType.history:
-            return `${t("HISTORY")}`;
+            name = `${t("HISTORY")}`;
+            break;
         case FeedType.autoQueue:
-            return `${t("AUTO_QUEUE")}`;
+            name = `${t("AUTO_QUEUE")}`;
+            break;
         case FeedType.boughtTracks:
-            return `${t("BOUGHT_ITEMS")}`;
+            name = `${t("BOUGHT_ITEMS")}`;
+            break;
         case FeedType.likedTracks:
-            return `${t("LIKED_TRACKS")}`;
+            name = `${t("LIKED_TRACKS")}`;
+            break;
         case FeedType.profileTracks:
-            return `${t("PROFILE_TRACKS", userName)}`;
+            name = `${t("PROFILE_TRACKS", userName)}`;
+            break;
         case FeedType.profileReposts:
-            return `${t("PROFILE_REPOSTS", userName)}`;
+            name = `${t("PROFILE_REPOSTS", userName)}`;
+            break;
         default:
             console.error(`Unknown feed type ${type}`);
             return null;
     }
+
+    if (type === FeedType.following && filter && filter !== "all") {
+        return `${name} (${filter})`;
+    }
+    return name;
 }

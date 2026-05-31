@@ -70,7 +70,10 @@ export class PlayingFromResolver {
                     const tab = tabParams[pf.type as FeedType] ?? "";
                     return `/${RoutePath.profile}/${pf.username}${tab}`;
                 }
-                if (pf.type === FeedType.following) return `/${RoutePath.following}`;
+                if (pf.type === FeedType.following) {
+                    const filterParam = pf.filter && pf.filter !== "all" ? `?filter=${pf.filter}` : "";
+                    return `/${RoutePath.following}${filterParam}`;
+                }
                 if (pf.type === FeedType.explore) return `/${RoutePath.explore}`;
                 return "";
             }

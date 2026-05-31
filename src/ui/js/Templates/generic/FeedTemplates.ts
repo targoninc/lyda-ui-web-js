@@ -396,18 +396,26 @@ export class FeedTemplates {
     }
 
     static feed(type: FeedType, user?: { id?: number; username?: string; displayname?: string }): any {
-        const pf: PlayingFrom = {
-            type,
-            name: getFeedDisplayName(type, user?.displayname) ?? type,
-            id: user?.id,
-            username: user?.username,
-        };
-
         const validFilters = ["all", "originals", "reposts"];
         const urlParams = new URLSearchParams(window.location.search);
         const initialFilter = urlParams.get("filter") ?? "all";
         const filterState = signal(validFilters.includes(initialFilter) ? initialFilter : "all");
         const isFollowing = type === FeedType.following;
+
+        const pf: PlayingFrom = {
+            type,
+            name: getFeedDisplayName(type, user?.displayname, filterState.value) ?? type,
+            id: user?.id,
+            username: user?.username,
+            filter: filterState.value,
+        };
+
+        if (isFollowing) {
+            filterState.subscribe(f => {
+                pf.filter = f;
+                pf.name = getFeedDisplayName(type, user?.displayname, f) ?? type;
+            });
+        }
 
         if (isFollowing) {
             filterState.subscribe(f => {
