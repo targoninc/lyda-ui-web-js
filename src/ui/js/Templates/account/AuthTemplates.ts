@@ -759,17 +759,21 @@ export class AuthTemplates {
                             user.value.username,
                             true,
                             (value: string) => {
-                                if (!touchedFields.has("username") && value) {
+                                const sanitized = value.replace(/[^a-zA-Z0-9_-]/g, "");
+                                if (!touchedFields.has("username") && sanitized) {
                                     touchedFields.add("username");
                                     checkAllFieldsTouched();
                                 }
                                 user.value = {
                                     ...user.value,
-                                    username: value,
+                                    username: sanitized,
                                 };
                             },
                             true,
-                            () => {
+                            (e: KeyboardEvent) => {
+                                if (e.key === " " || e.key === "Space" || e.key === "Spacebar") {
+                                    e.preventDefault();
+                                }
                             },
                             ["flex-grow"],
                         ),

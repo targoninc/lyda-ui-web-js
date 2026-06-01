@@ -243,7 +243,7 @@ export class SettingsTemplates {
                         required: true,
                         value: compute(uu => uu.username ?? user.username, updatedUser$),
                         onchange: v => {
-                            updatedUser$.value = {...updatedUser$.value, username: v};
+                            updatedUser$.value = {...updatedUser$.value, username: v.replace(/[^a-zA-Z0-9_-]/g, "")};
                         },
                     })
                 },

@@ -14,7 +14,7 @@ export class CustomText {
         }
 
         const httpPattern = /(https?:\/\/[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/[^\s<>"']*)?)/gmi;
-        const atMentionPattern = /@(\w+)/gmi;
+        const atMentionPattern = /@([\w-]+)/gmi;
 
         // Collect URL matches from raw text
         const urlMatches: { start: number; end: number; url: string }[] = [];

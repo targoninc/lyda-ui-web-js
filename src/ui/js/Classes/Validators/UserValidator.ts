@@ -2,7 +2,7 @@ import { AuthData } from "../../Templates/LandingPageTemplates.ts";
 import { t } from "../../../locales";
 
 const regexps: Record<string, RegExp> = {
-    whitespace: new RegExp(/\s/g)
+    whitespace: new RegExp(/[\s\u200b-\u200d\u200e\u200f\u2028\u2029\u202a-\u202e\u2060-\u2064\u2066-\u206f\ufeff\u00ad\u034f\u061c\u115f\u1160\u17b4\u17b5\u180e\u2000-\u200f\u202f\u205f\u3000\uffa0\ufff9-\ufffb]/g)
 };
 
 export class UserValidator {

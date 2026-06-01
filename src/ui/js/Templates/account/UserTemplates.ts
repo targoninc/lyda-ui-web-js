@@ -1117,7 +1117,7 @@ export class UserTemplates {
         }, 100);
 
         return create("div")
-            .classes("card", "rounded", "padded", "flex-v", "limitToContentWidth")
+            .classes("card", "rounded-large", "padded", "flex-v", "limitToContentWidth")
             .children(
                 create("div")
                     .classes("flex-v")
