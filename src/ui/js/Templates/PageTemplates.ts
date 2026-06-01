@@ -1,7 +1,7 @@
 import { AuthActions } from "../Actions/AuthActions.ts";
 import { LandingPageTemplates } from "./LandingPageTemplates.ts";
 import { UserTemplates } from "./account/UserTemplates.ts";
-import { AnyElement, create, signal, when } from "@targoninc/jess";
+import { AnyElement, compute, create, nullElement, signal, when } from "@targoninc/jess";
 import { SearchTemplates } from "./SearchTemplates.ts";
 import { SettingsTemplates } from "./account/SettingsTemplates.ts";
 import { RoadmapTemplates } from "./RoadmapTemplates.ts";
@@ -21,7 +21,7 @@ import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { TrackEditTemplates } from "./music/TrackEditTemplates.ts";
 import { navigate, Route } from "../Routing/Router.ts";
 import { PlayManager } from "../Streaming/PlayManager.ts";
-import { currentSecretCode, currentUser } from "../state.ts";
+import { currentSecretCode, currentTrackId, currentUser, playingHere } from "../state.ts";
 import { TrackTemplates } from "./music/TrackTemplates.ts";
 import { PlaylistTemplates } from "./music/PlaylistTemplates.ts";
 import { StatisticTemplates } from "./StatisticTemplates.ts";
@@ -29,6 +29,19 @@ import { notify } from "../Classes/Ui.ts";
 import { NotificationType } from "../Enums/NotificationType.ts";
 import { Api } from "../Api/Api.ts";
 import { GenericTemplates, horizontal, tabSelected, vertical } from "./generic/GenericTemplates.ts";
+import { FeedMenuAction } from "../Models/FeedConfig.ts";
+import { TrackList } from "../Models/TrackList.ts";
+import { Images } from "../Enums/Images.ts";
+import { DefaultImages } from "../Enums/DefaultImages.ts";
+import { Util } from "../Classes/Util.ts";
+import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType";
+import { UserWidgetContext } from "../Enums/UserWidgetContext.ts";
+import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import { AlbumActions } from "../Actions/AlbumActions.ts";
+import { PlaylistActions } from "../Actions/PlaylistActions.ts";
+import { QueueManager } from "../Streaming/QueueManager.ts";
+import { ApiRoutes } from "../Api/ApiRoutes.ts";
 import { heading } from "@targoninc/jess-components";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
@@ -38,7 +51,7 @@ import { TransactionTemplates } from "./money/TransactionTemplates.ts";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, (route: Route, params: Record<string, string>) => Promise<AnyElement> | AnyElement> = {
-        [RoutePath.explore]: () => FeedTemplates.feed(FeedType.explore),
+        [RoutePath.explore]: () => PageTemplates.explorePage(),
         [RoutePath.following]: () => FeedTemplates.feed(FeedType.following),
         [RoutePath.history]: () => FeedTemplates.feed(FeedType.history),
         [RoutePath.album]: AlbumTemplates.albumPage,
@@ -124,6 +137,162 @@ export class PageTemplates {
 
         document.title = `${t("LIBRARY")} - @${name}`;
         return UserTemplates.libraryPage(user, selfUser.username === name);
+    }
+
+    static explorePage() {
+        const tabs = [`${t("TRACKS")}`, `${t("ALBUMS")}`, `${t("PLAYLISTS")}`];
+        const urlTabs = ["tracks", "albums", "playlists"];
+        const urlParams = new URLSearchParams(window.location.search);
+        const initialTab = urlTabs.indexOf(urlParams.get("tab") ?? "");
+        const selectedTab = signal(initialTab === -1 ? 0 : initialTab);
+
+        selectedTab.subscribe(i => {
+            const url = new URL(window.location.href);
+            url.searchParams.set("tab", urlTabs[i]);
+            window.history.replaceState(null, "", url.toString());
+        });
+
+        const baseAlbumColumns = [
+            {
+                key: "title",
+                header: t("TRACK_TITLE"),
+                render: (list: TrackList) => {
+                    const coverSrc = signal(DefaultImages[EntityType.album]);
+                    if (list.has_cover) {
+                        Util.getCachedImage(list.id, MediaFileType.albumCover).then(url => {
+                            coverSrc.value = url;
+                        });
+                    }
+                    return create("div")
+                        .classes("flex", "align-children", "small-gap")
+                        .children(
+                            create("img").classes("feed-inline-cover").src(coverSrc).alt(list.title).build(),
+                            create("span").classes("feed-title", "clickable", "pointer")
+                                .text(list.title)
+                                .onclick((e: Event) => {
+                                    e.stopPropagation();
+                                    navigate(`/album/${list.id}`);
+                                })
+                                .build(),
+                        ).build();
+                },
+            },
+            {
+                key: "tracks",
+                header: t("TRACKS"),
+                render: (list: TrackList) => create("span").classes("hideOnMidBreakpoint").text(String((list as any).tracks?.length ?? 0)).build(),
+            },
+            {
+                key: "artist",
+                header: t("ARTIST"),
+                render: (list: TrackList) => (list as any).user ? UserTemplates.userLink(UserWidgetContext.card, (list as any).user) : nullElement(),
+            },
+        ];
+
+        const basePlaylistColumns = [
+            {
+                key: "title",
+                header: t("TRACK_TITLE"),
+                render: (list: TrackList) => {
+                    const coverSrc = signal(Images.DEFAULT_COVER_PLAYLIST);
+                    if (list.has_cover) {
+                        Util.getCachedImage(list.id, MediaFileType.playlistCover).then(url => {
+                            coverSrc.value = url;
+                        });
+                    }
+                    return create("div")
+                        .classes("flex", "align-children", "small-gap")
+                        .children(
+                            create("img").classes("feed-inline-cover").src(coverSrc).alt(list.title).build(),
+                            create("span").classes("feed-title", "clickable", "pointer")
+                                .text(list.title)
+                                .onclick((e: Event) => {
+                                    e.stopPropagation();
+                                    navigate(`/playlist/${list.id}`);
+                                })
+                                .build(),
+                        ).build();
+                },
+            },
+            {
+                key: "tracks",
+                header: t("TRACKS"),
+                render: (list: TrackList) => create("span").classes("hideOnMidBreakpoint").text(String((list as any).tracks?.length ?? 0)).build(),
+            },
+            {
+                key: "artist",
+                header: t("ARTIST"),
+                render: (list: TrackList) => (list as any).user ? UserTemplates.userLink(UserWidgetContext.card, (list as any).user) : nullElement(),
+            },
+        ];
+
+        return create("div")
+            .classes("feed-wrapper", "flex-v", "fullWidth")
+            .children(
+                GenericTemplates.combinedSelector(tabs, i => selectedTab.value = i, selectedTab.value),
+                when(
+                    tabSelected(selectedTab, 0),
+                    FeedTemplates.feed(FeedType.explore),
+                ),
+                when(
+                    tabSelected(selectedTab, 1),
+                    FeedTemplates.create<TrackList>({
+                        id: "feed-explore-albums",
+                        columns: baseAlbumColumns,
+                        compact: true,
+                        pageSize: 100,
+                        fetchPage: async (offset, limit) => {
+                            const res = await Api.getFeed(ApiRoutes.exploreAlbumsFeed, { offset, limit });
+                            if (!res) return { items: [], total: 0 };
+                            if (Array.isArray(res)) return { items: res, total: res.length };
+                            return res;
+                        },
+                        buildMenuActions: (list): FeedMenuAction<TrackList>[] => [
+                            {
+                                label: t("QUEUE"),
+                                icon: "queue",
+                                onclick: (l) => (l as any).tracks?.forEach((t: any) => QueueManager.addToManualQueue(t.track_id)),
+                                show: (l) => !!(l as any).tracks?.length,
+                            },
+                        ],
+                        onPlayToggle: async (list) => {
+                            const ft = (list as any).tracks?.[0]?.track;
+                            if (ft) await AlbumActions.startTrackInAlbum(list as Album, ft, true);
+                        },
+                        isPlaying: (id) => compute((c, p) => c === id && p, currentTrackId, playingHere),
+                        dateRender: (list) => GenericTemplates.timestamp((list as any).created_at, ["hideOnSmallBreakpoint"]),
+                    }),
+                ),
+                when(
+                    tabSelected(selectedTab, 2),
+                    FeedTemplates.create<TrackList>({
+                        id: "feed-explore-playlists",
+                        columns: basePlaylistColumns,
+                        compact: true,
+                        pageSize: 100,
+                        fetchPage: async (offset, limit) => {
+                            const res = await Api.getFeed(ApiRoutes.explorePlaylistsFeed, { offset, limit });
+                            if (!res) return { items: [], total: 0 };
+                            if (Array.isArray(res)) return { items: res, total: res.length };
+                            return res;
+                        },
+                        buildMenuActions: (list): FeedMenuAction<TrackList>[] => [
+                            {
+                                label: t("QUEUE"),
+                                icon: "queue",
+                                onclick: (l) => (l as any).tracks?.forEach((t: any) => QueueManager.addToManualQueue(t.track_id)),
+                                show: (l) => !!(l as any).tracks?.length,
+                            },
+                        ],
+                        onPlayToggle: async (list) => {
+                            const ft = (list as any).tracks?.[0]?.track;
+                            if (ft) await PlaylistActions.startTrackInPlaylist(list as Playlist, ft, true);
+                        },
+                        isPlaying: (id) => compute((c, p) => c === id && p, currentTrackId, playingHere),
+                        dateRender: (list) => GenericTemplates.timestamp((list as any).created_at, ["hideOnSmallBreakpoint"]),
+                    }),
+                ),
+            ).build();
     }
 
     static statisticsPage() {

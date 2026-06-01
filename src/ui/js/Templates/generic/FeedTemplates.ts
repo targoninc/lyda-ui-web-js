@@ -509,7 +509,8 @@ export class FeedTemplates {
         const initialFilter = urlParams.get("filter") ?? "all";
         const filterState = signal(validFilters.includes(initialFilter) ? initialFilter : "all");
         const isFollowing = type === FeedType.following;
-        const supportsWip = type === FeedType.profileTracks || type === FeedType.likedTracks || type === FeedType.boughtTracks;
+        const supportsWip = type === FeedType.profileTracks || type === FeedType.likedTracks || type === FeedType.boughtTracks || type === FeedType.following;
+        const validWipValues = ["", "exclude", "only"];
 
         const pf: PlayingFrom = {
             type,
@@ -519,7 +520,8 @@ export class FeedTemplates {
             filter: filterState.value,
         };
 
-        const wipFilterState = signal("");
+        const initialWip = urlParams.get("wip") ?? "";
+        const wipFilterState = signal(validWipValues.includes(initialWip) ? initialWip : "");
         if (supportsWip) {
             pf.wip = wipFilterState.value;
         }
@@ -535,6 +537,19 @@ export class FeedTemplates {
             filterState.subscribe(f => {
                 const url = new URL(window.location.href);
                 url.searchParams.set("filter", f);
+                window.history.replaceState(null, "", url.toString());
+            });
+        }
+
+        if (supportsWip) {
+            wipFilterState.subscribe(w => {
+                pf.wip = w;
+                const url = new URL(window.location.href);
+                if (w) {
+                    url.searchParams.set("wip", w);
+                } else {
+                    url.searchParams.delete("wip");
+                }
                 window.history.replaceState(null, "", url.toString());
             });
         }
@@ -602,7 +617,10 @@ export class FeedTemplates {
             compact: [FeedType.explore, FeedType.following, FeedType.history].includes(type),
             showSearch: ![FeedType.following, FeedType.explore].includes(type),
             header: isFollowing
-                ? TrackTemplates.feedFilters(filterState)
+                ? create("div").classes("flex", "space-between", "align-children").children(
+                    TrackTemplates.feedFilters(filterState),
+                    supportsWip ? TrackTemplates.wipFilter(wipFilterState) : nullElement(),
+                ).build()
                 : supportsWip
                     ? TrackTemplates.wipFilter(wipFilterState)
                     : undefined,

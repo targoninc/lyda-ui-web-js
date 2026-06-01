@@ -1042,7 +1042,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .tab.selected {
-    background: var(--fg-0);
+    background: var(--fg-1);
     color: var(--bg-0);
 }
 

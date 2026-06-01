@@ -117,6 +117,7 @@ export class ApiRoutes {
 
     private static albumFeed = ApiRoutes.albums + "/feeds";
     static likedAlbumsFeed = ApiRoutes.albumFeed + "/liked";
+    static exploreAlbumsFeed = ApiRoutes.albumFeed + "/explore";
     // endregion
 
     // region Playlists
@@ -134,6 +135,7 @@ export class ApiRoutes {
 
     private static playlistFeed = ApiRoutes.playlists + "/feeds";
     static likedPlaylistsFeed = ApiRoutes.playlistFeed + "/liked";
+    static explorePlaylistsFeed = ApiRoutes.playlistFeed + "/explore";
     // endregion
 
     // region Comments
