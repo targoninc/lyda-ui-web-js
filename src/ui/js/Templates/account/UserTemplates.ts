@@ -545,7 +545,10 @@ export class UserTemplates {
                     id: `feed-${CardFeedType.profileAlbums}`,
                     columns: albumColumns,
                     pageSize: 10,
-                    fetchPage: (offset) => Api.getAlbumsByUserId(user.id, user.username, offset, "").then(r => r ?? { items: [], total: 0 }),
+                    fetchPage: (offset) => Api.getAlbumsByUserId(user.id, user.username, offset, "").then(r => r ?? {
+                        items: [],
+                        total: 0
+                    }),
                     buildMenuActions: cardActions("album"),
                     onPlayToggle: async (list) => {
                         const ft = list.tracks?.[0]?.track;
@@ -561,7 +564,10 @@ export class UserTemplates {
                     id: `feed-${CardFeedType.profilePlaylists}`,
                     columns: playlistColumns,
                     pageSize: 10,
-                    fetchPage: (offset) => Api.getPlaylistsByUserId(user.id, user.username, offset, "").then(r => r ?? { items: [], total: 0 }),
+                    fetchPage: (offset) => Api.getPlaylistsByUserId(user.id, user.username, offset, "").then(r => r ?? {
+                        items: [],
+                        total: 0
+                    }),
                     buildMenuActions: cardActions("playlist"),
                     onPlayToggle: async (list) => {
                         const ft = list.tracks?.[0]?.track;
@@ -788,30 +794,31 @@ export class UserTemplates {
         const hasUnverifiedPrimaryEmail =
             isOwnProfile && user.emails && user.emails.some(e => e.primary && !e.verified);
 
-        return create("div")
-            .classes("name-container", "flex-v")
-            .children(
-                vertical(UserTemplates.displayname(user), UserTemplates.usernameAndIcons(user)).classes("no-gap"),
-                UserTemplates.userDescription(user, isOwnProfile),
-                when(
-                    hasUnverifiedPrimaryEmail,
-                    create("div")
-                        .classes("card", "padded", "flex", "warning", "align-children")
-                        .children(
-                            GenericTemplates.icon("warning", true, ["warning"]),
-                            create("span")
-                                .text(t("PRIMARY_EMAIL_NOT_VERIFIED"))
-                                .build(),
-                            button({
-                                text: t("GO_TO_SETTINGS"),
-                                icon: {icon: "settings"},
-                                classes: ["positive"],
-                                onclick: () => navigate(RoutePath.settings),
-                            }),
-                        )
-                        .build(),
-                ),
-            ).build();
+        return vertical(
+            vertical(
+                UserTemplates.displayname(user),
+                UserTemplates.usernameAndIcons(user)
+            ).classes("no-gap"),
+            UserTemplates.userDescription(user, isOwnProfile),
+            when(
+                hasUnverifiedPrimaryEmail,
+                create("div")
+                    .classes("card", "padded", "flex", "warning", "align-children")
+                    .children(
+                        GenericTemplates.icon("warning", true, ["warning"]),
+                        create("span")
+                            .text(t("PRIMARY_EMAIL_NOT_VERIFIED"))
+                            .build(),
+                        button({
+                            text: t("GO_TO_SETTINGS"),
+                            icon: {icon: "settings"},
+                            classes: ["positive"],
+                            onclick: () => navigate(RoutePath.settings),
+                        }),
+                    )
+                    .build(),
+            ),
+        ).build();
     }
 
     private static usernameAndIcons(user: User) {
@@ -904,8 +911,10 @@ export class UserTemplates {
                 icon: "delete",
                 onclick: async (l, e) => {
                     const deleteFn = listType === "album"
-                        ? () => Api.deleteAlbum(l.id).then(() => {})
-                        : () => Api.deletePlaylist(l.id).then(() => {});
+                        ? () => Api.deleteAlbum(l.id).then(() => {
+                        })
+                        : () => Api.deletePlaylist(l.id).then(() => {
+                        });
                     await Ui.deleteWithConfirmation(
                         e,
                         listType === "album" ? t("DELETE_ALBUM") : t("DELETE_PLAYLIST"),
@@ -1011,7 +1020,7 @@ export class UserTemplates {
                 fetchPage: async (offset) => {
                     const result = await Api.getLikedAlbums(user.value.id, user.value.username, offset, "");
                     if (!result) return [];
-                    return { items: result.items as TrackList[], total: result.total };
+                    return {items: result.items as TrackList[], total: result.total};
                 },
                 buildMenuActions: libCardActions("album"),
                 onPlayToggle: async (list) => {
@@ -1028,7 +1037,7 @@ export class UserTemplates {
                 fetchPage: async (offset) => {
                     const result = await Api.getLikedPlaylists(user.value.id, user.value.username, offset, "");
                     if (!result) return [];
-                    return { items: result.items as TrackList[], total: result.total };
+                    return {items: result.items as TrackList[], total: result.total};
                 },
                 buildMenuActions: libCardActions("playlist"),
                 onPlayToggle: async (list) => {
@@ -1117,12 +1126,12 @@ export class UserTemplates {
         }, 100);
 
         return create("div")
-            .classes("card", "rounded-large", "padded", "flex-v", "limitToContentWidth")
+            .classes("card", "rounded-large", "padded", "flex-v", "flex-grow")
             .children(
-                create("div")
-                    .classes("flex-v")
-                    .children(description, when(isOwnProfile, UserTemplates.editDescriptionButton(user.description)))
-                    .build(),
+                vertical(
+                    description,
+                    when(isOwnProfile, UserTemplates.editDescriptionButton(user.description))
+                ).build(),
             ).build();
     }
 
