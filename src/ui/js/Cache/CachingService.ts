@@ -89,6 +89,29 @@ export class CachingService {
         }
     }
 
+    async deleteCacheEntry(id: number, type: MediaFileType, quality: number = 500): Promise<void> {
+        const key = `${type}_${id}_${quality}`;
+
+        const existingUrl = this.blobUrlCache.get(key);
+        if (existingUrl) {
+            URL.revokeObjectURL(existingUrl);
+            this.blobUrlCache.delete(key);
+        }
+
+        try {
+            const db = await this.getDb();
+            await new Promise<void>((resolve) => {
+                const tx = db.transaction(CachingService.IMAGE_STORE, "readwrite");
+                const store = tx.objectStore(CachingService.IMAGE_STORE);
+                store.delete(key);
+                tx.oncomplete = () => resolve();
+                tx.onerror = () => resolve();
+            });
+        } catch {
+            // ignore
+        }
+    }
+
     async clearCache(): Promise<void> {
         for (const url of this.blobUrlCache.values()) {
             URL.revokeObjectURL(url);

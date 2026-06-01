@@ -2,6 +2,7 @@ import { getUserSettingValue, updateImagesWithSource, updateUserSetting, Util } 
 import { notify, Ui } from "../Classes/Ui.ts";
 import { LydaCache } from "../Cache/LydaCache.ts";
 import { CacheItem } from "../Cache/CacheItem.ts";
+import { cachingService } from "../Cache/CachingService.ts";
 import { Icons } from "../Enums/Icons.ts";
 import { MediaUploader } from "../Api/MediaUploader.ts";
 import { Signal } from "@targoninc/jess";
@@ -35,6 +36,7 @@ export class UserActions {
                 const mediaType =
                     type === "avatar" ? MediaFileType.userAvatar : MediaFileType.userBanner;
                 await MediaUploader.upload(mediaType, user.id, file);
+                await cachingService.deleteCacheEntry(user.id, mediaType);
                 notify(
                     `${type.charAt(0).toUpperCase() + type.slice(1)} updated`,
                     NotificationType.success

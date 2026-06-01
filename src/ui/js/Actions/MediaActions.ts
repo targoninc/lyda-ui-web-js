@@ -8,6 +8,7 @@ import { NotificationType } from "../Enums/NotificationType.ts";
 import { Api } from "../Api/Api.ts";
 import { t } from "../../locales";
 import { MediaUploader } from "../Api/MediaUploader.ts";
+import { cachingService } from "../Cache/CachingService.ts";
 
 export class MediaActions {
     static async deleteMedia(type: MediaFileType, referenceId: number, image: Signal<string>, loading: Signal<boolean>) {
@@ -50,6 +51,7 @@ export class MediaActions {
 
             try {
                 await MediaUploader.upload(type, id, file);
+                await cachingService.deleteCacheEntry(id, type);
                 notify(`${t("IMAGE_UPLOADED")}`, NotificationType.success);
                 await Util.updateImage(URL.createObjectURL(file), oldSrc.value);
             } catch (e) {
