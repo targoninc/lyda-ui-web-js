@@ -2,6 +2,8 @@ import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 
+const cssCacheBuster = Date.now();
+
 export async function baseHtml(req: Request) {
     const url = req.url;
 
@@ -79,9 +81,9 @@ export async function baseHtml(req: Request) {
     
     <!-- Styles -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/targoninc/jess-components@0.0.48/src/src/jess-components.css"/>
-    <link rel="stylesheet" type="text/css" href="/styles/style.css"/>
-    <link rel="stylesheet" type="text/css" href="/styles/elements.css"/>
-    <link rel="stylesheet" type="text/css" href="/styles/themes/dark.css"/>
+    <link rel="stylesheet" type="text/css" href="/styles/style.css?v=${cssCacheBuster}"/>
+    <link rel="stylesheet" type="text/css" href="/styles/elements.css?v=${cssCacheBuster}"/>
+    <link rel="stylesheet" type="text/css" href="/styles/themes/dark.css?v=${cssCacheBuster}"/>
     
     <!-- icon -->
     <meta property="og:logo" content="/img/128.png"/>
