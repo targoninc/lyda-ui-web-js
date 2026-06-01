@@ -26,16 +26,7 @@ import {
 import {AlbumActions} from "../../Actions/AlbumActions.ts";
 import {navigate, reload, Route} from "../../Routing/Router.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
-import {
-    button,
-    errorList,
-    heading,
-    input,
-    select,
-    SelectOption,
-    textarea,
-    toggle,
-} from "@targoninc/jess-components";
+import {button, errorList, heading, input, select, SelectOption, textarea, toggle,} from "@targoninc/jess-components";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import {UploadInfo} from "../../Models/UploadInfo.ts";
 import {UploadableTrack} from "../../Models/UploadableTrack.ts";
@@ -78,7 +69,7 @@ export class TrackEditTemplates {
         const errorFields = signal<string[]>([]);
         const uploadInfo = signal<UploadInfo[]>([]);
 
-        return create("div").children(
+        const el = create("div").children(
             create("progress").classes("progress").attributes("max", "100", "value", "0").styles("display", "none").build(),
             create("div").classes("success").build(),
             create("div").classes("error").build(),
@@ -89,7 +80,59 @@ export class TrackEditTemplates {
                 TrackEditTemplates.uploadButton(state, errorSections, errorFields),
                 TrackEditTemplates.uploadInfo(uploadInfo),
             ).build(),
-        ).build();
+        ).build() as HTMLElement;
+
+        const overlay = create("div")
+            .classes("upload-drag-overlay")
+            .children(
+                create("div")
+                    .classes("upload-drag-target")
+                    .text("Drop file to upload")
+                    .build(),
+            )
+            .build() as HTMLElement;
+
+        document.body.appendChild(overlay);
+
+        let dragCounter = 0;
+
+        document.addEventListener("dragenter", () => {
+            dragCounter++;
+            if (dragCounter === 1) {
+                overlay.style.display = "block";
+            }
+        });
+
+        document.addEventListener("dragover", (e) => {
+            e.preventDefault();
+        });
+
+        document.addEventListener("dragleave", () => {
+            dragCounter--;
+            if (dragCounter <= 0) {
+                dragCounter = 0;
+                overlay.style.display = "none";
+            }
+        });
+
+        document.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dragCounter = 0;
+            overlay.style.display = "none";
+
+            const files = e.dataTransfer?.files;
+            if (files && files.length > 0) {
+                const fileInput = document.getElementById("audio-file") as HTMLInputElement;
+                if (fileInput) {
+                    const dt = new DataTransfer();
+                    dt.items.add(files[0]);
+                    fileInput.files = dt.files;
+                    fileInput.dispatchEvent(new Event("change", {bubbles: true}));
+                }
+            }
+        });
+
+        return el;
     }
 
     static openEditPageButton(track: Track) {
@@ -119,8 +162,8 @@ export class TrackEditTemplates {
 
         return vertical(
             when(track, create("div")
-            .text(t("TRACK_NOT_FOUND"))
-            .build(), true),
+                .text(t("TRACK_NOT_FOUND"))
+                .build(), true),
             horizontal(
                 create("img")
                     .classes("icon", "svg")
@@ -320,56 +363,74 @@ export class TrackEditTemplates {
         isPrivate: Signal<boolean>,
         state: Signal<UploadableTrack>,
     ) {
+        const expanded = signal(false);
+
         return TrackEditTemplates.sectionCard(
             t("TRACK_DETAILS"),
             errorSections,
             "info",
             [
-                TrackEditTemplates.visibilityToggle(isPrivate, state),
+                TrackEditTemplates.toggles(isPrivate, state),
                 TrackEditTemplates.titleInput(state),
-                TrackEditTemplates.creditsInput(state),
                 TrackEditTemplates.artistNameInput(state),
-                TrackEditTemplates.linkedUsers(state.value.collaborators, state as Signal<UploadableTrack | Track>, true),
-                GenericTemplates.releaseDateInput(state),
-                TrackEditTemplates.genreInput(state),
-                TrackEditTemplates.isrcInput(state),
-                TrackEditTemplates.upcInput(state),
                 TrackEditTemplates.descriptionInput(state),
+                vertical(
+                    create("div")
+                        .classes("flex", "align-children", "clickable", "expandable")
+                        .onclick(() => {
+                            expanded.value = !expanded.value;
+                        })
+                        .children(
+                            GenericTemplates.icon(
+                                compute((e): string => e ? "expand_more" : "chevron_right", expanded),
+                                true,
+                            ),
+                            create("span").text("More details").build(),
+                        ).build(),
+                    when(expanded, vertical(
+                        TrackEditTemplates.creditsInput(state),
+                        TrackEditTemplates.linkedUsers(state.value.collaborators, state as Signal<UploadableTrack | Track>, true),
+                        GenericTemplates.releaseDateInput(state),
+                        TrackEditTemplates.genreInput(state),
+                        horizontal(
+                            TrackEditTemplates.isrcInput(state),
+                            TrackEditTemplates.upcInput(state),
+                        )
+                    ).classes("big-gap").build()),
+                ).build(),
             ],
             "info",
-            ["flex-grow"],
+            ["flex-grow", "big-gap"],
         );
     }
 
-    private static visibilityToggle(isPrivate: Signal<boolean>, state: Signal<UploadableTrack>) {
-        return create("div")
-            .classes("flex-v")
-            .children(
-                toggle({
-                    name: "visibility",
-                    label: t("PRIVATE"),
-                    text: t("PRIVATE"),
-                    checked: isPrivate,
-                    onchange: v => {
-                        state.value = {
-                            ...state.value,
-                            visibility: v ? Visibility.private : Visibility.public,
-                        };
-                    },
-                }),
-                toggle({
-                    name: "wip",
-                    label: t("WORK_IN_PROGRESS"),
-                    text: t("WORK_IN_PROGRESS"),
-                    checked: compute(s => s.wip ?? false, state),
-                    onchange: v => {
-                        state.value = {
-                            ...state.value,
-                            wip: v,
-                        };
-                    },
-                }),
-            ).build();
+    private static toggles(isPrivate: Signal<boolean>, state: Signal<UploadableTrack>) {
+        return vertical(
+            toggle({
+                name: "visibility",
+                label: t("PRIVATE"),
+                text: t("PRIVATE"),
+                checked: isPrivate,
+                onchange: v => {
+                    state.value = {
+                        ...state.value,
+                        visibility: v ? Visibility.private : Visibility.public,
+                    };
+                },
+            }),
+            toggle({
+                name: "wip",
+                label: t("WORK_IN_PROGRESS"),
+                text: t("WORK_IN_PROGRESS"),
+                checked: compute(s => s.wip ?? false, state),
+                onchange: v => {
+                    state.value = {
+                        ...state.value,
+                        wip: v,
+                    };
+                },
+            }),
+        ).classes("big-gap").build();
     }
 
     private static monetizationSection(errorSections: Signal<string[]>, state: Signal<UploadableTrack>, copyrightToggle: AnyElement | null = null) {
@@ -909,7 +970,7 @@ export class TrackEditTemplates {
                 horizontal(
                     TrackEditTemplates.addToAlbumsButton(track),
                     TrackTemplates.addToPlaylistButton(track),
-                    TrackEditTemplates.visibilityToggle(isPrivate, state),
+                    TrackEditTemplates.toggles(isPrivate, state),
                 ).classes("align-children"),
             ),
             vertical(

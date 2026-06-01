@@ -154,7 +154,7 @@ export class PlaylistTemplates {
 
         return create("img")
             .classes("cover", "rounded", "nopointer", "blurOnParentHover")
-            .styles("height", "var(--font-size-large)")
+            .styles("height", "20px")
             .src(coverState)
             .alt(playlist.title)
             .build();

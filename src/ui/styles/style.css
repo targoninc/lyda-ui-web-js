@@ -67,7 +67,7 @@
     --font-size-xsmall: 12px;
     --font-size-small: 14px;
     --font-size-medium: 16px;
-    --font-size-large: 20px;
+    --font-size-large: 18px;
     --font-size-xlarge: 28px;
     --font-size-xxlarge: 36px;
     --border-radius: 5px;
@@ -181,6 +181,10 @@ a:hover {
 
 .no-gap {
     gap: 0 !important;
+}
+
+.big-gap {
+    gap: calc(var(--gap) * 2);
 }
 
 .draggable {
@@ -366,6 +370,7 @@ h3 {
     border-radius: var(--border-radius) 2em 2em var(--border-radius);
     color: var(--fg-0);
     font-weight: normal;
+    font-size: var(--font-size-large);
     align-items: center;
     border: 1px solid var(--fg-0);
     border-width: 0 0 0 .5em;

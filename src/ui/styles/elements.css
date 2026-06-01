@@ -1073,6 +1073,19 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     padding-right: 1em;
 }
 
+.expandable {
+    cursor: pointer;
+    user-select: none;
+    font-size: var(--font-size-large);
+    background: var(--bg-2);
+    padding: var(--inline-padding);
+    border-radius: var(--jessc-border-radius-small);
+}
+
+.expandable:hover {
+    background: var(--bg-3);
+}
+
 .royalty-info-text {
     font-size: calc(var(--font-size-xxlarge) * 0.5);
 }
@@ -1758,4 +1771,32 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 @keyframes skeleton-pulse {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
+}
+
+.upload-drag-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+}
+
+.upload-drag-overlay .upload-drag-target {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: calc(100% - 80px);
+    height: calc(100% - 80px);
+    border: 2px dashed var(--blue);
+    border-radius: var(--large-border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--blue);
+    font-size: var(--font-size-xxlarge);
 }
