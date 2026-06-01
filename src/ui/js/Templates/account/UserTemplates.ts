@@ -20,7 +20,7 @@ import {
     when,
 } from "@targoninc/jess";
 import {currentUser, permissions, playingFrom, playingHere} from "../../state.ts";
-import {notify, Ui} from "../../Classes/Ui.ts";
+import {createModal, notify, Ui} from "../../Classes/Ui.ts";
 import {MediaActions} from "../../Actions/MediaActions.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {FeedTemplates} from "../generic/FeedTemplates.ts";
@@ -796,7 +796,10 @@ export class UserTemplates {
 
         return vertical(
             vertical(
-                UserTemplates.displayname(user),
+                horizontal(
+                    UserTemplates.displayname(user),
+                    UserTemplates.mutualFollowersIndicator(user),
+                ).classes("space-between"),
                 UserTemplates.usernameAndIcons(user)
             ).classes("no-gap"),
             UserTemplates.userDescription(user, isOwnProfile),
@@ -849,6 +852,75 @@ export class UserTemplates {
                 ).classes("relative").build()),
                 when(isFollowed, UserTemplates.followsBackIndicator()),
             ).build();
+    }
+
+    static mutualFollowersIndicator(profileUser: User) {
+        const currentUserVal = currentUser.value;
+        if (!currentUserVal || currentUserVal.id === profileUser.id) {
+            return nullElement();
+        }
+
+        const users = signal<User[]>([]);
+
+        Api.getMutualFollowers(profileUser.id).then(data => {
+            if (data?.items?.length) {
+                users.value = data.items;
+            }
+        });
+
+        return compute((allUsers: User[]) => {
+            if (allUsers.length === 0) return nullElement();
+
+            const modalId = `mutual-followers-${profileUser.id}`;
+
+            const maxAvatars = Math.min(3, allUsers.length);
+            const avatarImgs: HTMLImageElement[] = [];
+            for (let i = 0; i < maxAvatars; i++) {
+                const u = allUsers[i];
+                const img = create("img")
+                    .classes("user-icon")
+                    .styles("margin-right", i < maxAvatars - 1 ? "-10px" : "0")
+                    .build() as HTMLImageElement;
+                if (u.has_avatar) {
+                    Util.getCachedUserAvatar(u.id).then(url => { img.src = url; });
+                } else {
+                    img.src = Images.DEFAULT_AVATAR;
+                }
+                avatarImgs.push(img);
+            }
+
+            return create("div")
+                .classes("flex", "align-children", "clickable", "small-gap")
+                .styles("cursor", "pointer")
+                .onclick(() => {
+                    const userLinks = allUsers.map(u => {
+                        const link = UserTemplates.userLink(UserWidgetContext.card, u);
+                        link.addEventListener("click", () => {
+                            const container = document.querySelector(".modal-container");
+                            if (container) container.remove();
+                        });
+                        return link;
+                    });
+
+                    const scrollable = create("div")
+                        .classes("flex-v")
+                        .styles("max-height", "400px", "overflow-y", "auto")
+                        .children(...userLinks).build();
+
+                    createModal(
+                        [
+                            create("h3").text(t("FOLLOWS_YOU_KNOW")).build(),
+                            scrollable,
+                            GenericTemplates.modalCancelButton(),
+                        ],
+                        modalId,
+                    );
+                })
+                .children(
+                    create("div").classes("flex", "align-children").children(...avatarImgs).build(),
+                    create("span").text(`${allUsers.length} ${allUsers.length === 1 ? t("PERSON_YOU_FOLLOW_FOLLOWS") : t("PEOPLE_YOU_FOLLOW_FOLLOW")}`).build(),
+                ).build();
+        }, users);
     }
 
     static verifyUserButton(user: User, verified: Signal<boolean>) {

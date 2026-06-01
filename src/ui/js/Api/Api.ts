@@ -637,6 +637,12 @@ export class Api {
         return true;
     }
 
+    static async getMutualFollowers(profileUserId: number): Promise<{items: User[], total: number} | null> {
+        return get<{items: User[], total: number}>(ApiRoutes.mutualFollowers, {
+            userId: profileUserId,
+        });
+    }
+
     static async getCollabTypes(): Promise<CollaboratorType[] | null> {
         return await get<CollaboratorType[]>(ApiRoutes.getTrackCollabTypes);
     }

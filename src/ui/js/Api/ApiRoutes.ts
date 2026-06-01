@@ -43,6 +43,7 @@ export class ApiRoutes {
     static trackClientError = ApiRoutes.userActions + "/track-client-error";
     static updateCacheKey = ApiRoutes.userActions + "/update-cache-key";
     static banUser = ApiRoutes.userActions + "/ban";
+    static mutualFollowers = ApiRoutes.user + "/mutualFollowers";
 
     static toggleInteraction = ApiRoutes.base + "/toggleInteraction";
     static removeAllInteractions = ApiRoutes.base + "/removeAllInteractions";
