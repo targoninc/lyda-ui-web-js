@@ -793,15 +793,22 @@ export class UserTemplates {
     static profileInfo(user: User, isOwnProfile: boolean) {
         const hasUnverifiedPrimaryEmail =
             isOwnProfile && user.emails && user.emails.some(e => e.primary && !e.verified);
+        const isFollowed = compute(f => f && !isOwnProfile, Util.isFollowedBy(user));
 
         return vertical(
-            vertical(
-                horizontal(
+            horizontal(
+                vertical(
                     UserTemplates.displayname(user),
+                    UserTemplates.usernameAndIcons(user)
+                ).classes("no-gap"),
+                vertical(
                     UserTemplates.mutualFollowersIndicator(user),
-                ).classes("space-between"),
-                UserTemplates.usernameAndIcons(user)
-            ).classes("no-gap"),
+                    horizontal(
+                        when(!isOwnProfile && currentUser.value, UserTemplates.followButton(Util.isFollowing(user), user.id)),
+                        when(isFollowed, UserTemplates.followsBackIndicator()),
+                    ).classes("align-children")
+                ),
+            ).classes("space-between"),
             UserTemplates.userDescription(user, isOwnProfile),
             when(
                 hasUnverifiedPrimaryEmail,
@@ -829,7 +836,6 @@ export class UserTemplates {
         const hasPermissionToVerify = compute(p => p.some(p => p.name === Permissions.canVerifyUsers), permissions);
         const hasBadges = user.badges && user.badges.length > 0;
         const isOwnProfile = currentUser.value?.id === user.id;
-        const isFollowed = compute(f => f && !isOwnProfile, Util.isFollowedBy(user));
         const verifyPopover = PopoverTemplates.manualPopover(`verify-${user.id}`,
             vertical(UserTemplates.verifyUserButton(user, verified)).build(),
         );
@@ -845,12 +851,10 @@ export class UserTemplates {
                 UserTemplates.username(user, isOwnProfile),
                 when(hasBadges, UserTemplates.badges(user.badges ?? [])),
                 when(verified, UserTemplates.verificationBadge()),
-                !isOwnProfile && currentUser.value ? UserTemplates.followButton(Util.isFollowing(user), user.id) : null,
                 when(hasPermissionToVerify, horizontal(
                     verifyBtn,
                     verifyPopover,
                 ).classes("relative").build()),
-                when(isFollowed, UserTemplates.followsBackIndicator()),
             ).build();
     }
 
