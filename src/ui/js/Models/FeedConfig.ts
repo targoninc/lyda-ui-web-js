@@ -31,6 +31,7 @@ export interface FeedConfig<T extends { id: number }> {
     actionDateRender?: (item: T) => AnyNode;
     header?: AnyNode;
     filterState?: Signal<string>;
+    wipFilterState?: Signal<string>;
 }
 
 export function resolveColumns<T>(columns: FeedConfig<T>["columns"]): FeedColumn<T>[] {

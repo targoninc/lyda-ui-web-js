@@ -58,6 +58,7 @@ export class QueueManager {
         const params: Record<string, any> = { limit: 100 };
         if (pf.id) params.id = pf.id;
         if (shuffle) params.shuffle = true;
+        if (pf.wip) params.wip = pf.wip;
 
         const result = await Api.getFeed(`${ApiRoutes.trackFeed}/${pf.type}`, params);
         if (!result) return;

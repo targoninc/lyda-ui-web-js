@@ -263,6 +263,7 @@ export class FeedTemplates {
 
         if (config.showSearch) search$.subscribe(reload);
         if (config.filterState) config.filterState.subscribe(reload);
+        if (config.wipFilterState) config.wipFilterState.subscribe(reload);
         sortBy$.subscribe(reload);
         sortDir$.subscribe(reload);
 
@@ -308,25 +309,27 @@ export class FeedTemplates {
         const sortKey = compute((sb, sd) => sb && sd ? `${sb}-${sd}` : null, sortBy$, sortDir$);
         const colCount = resolveColumns(config.columns).length + 3;
 
+        const searchEl = when(config.showSearch,
+            input({
+                type: InputType.text,
+                validators: [],
+                name: "feed-search",
+                placeholder: t("SEARCH"),
+                debounce: 200,
+                classes: ["round-input"],
+                onchange: (value: string) => { search$.value = value; },
+                value: search$,
+            }),
+        );
+        const topRow = config.header && config.showSearch
+            ? horizontal(searchEl, config.header).classes("space-between", "align-children").build()
+            : (config.header ?? searchEl);
+
         const el = create("div")
             .classes("feed-wrapper", "flex-v", "fullWidth", config.compact ? "feed-compact" : "_")
             .id(feedId)
             .children(
-                when(config.showSearch,
-                    horizontal(
-                        input({
-                            type: InputType.text,
-                            validators: [],
-                            name: "feed-search",
-                            placeholder: t("SEARCH"),
-                            debounce: 200,
-                            classes: ["round-input"],
-                            onchange: (value: string) => { search$.value = value; },
-                            value: search$,
-                        }),
-                    ).classes("space-between", "align-children").build(),
-                ),
-                config.header ?? nullElement(),
+                topRow,
                 create("table")
                     .classes("feed-table", "fullWidth")
                     .children(
@@ -506,6 +509,7 @@ export class FeedTemplates {
         const initialFilter = urlParams.get("filter") ?? "all";
         const filterState = signal(validFilters.includes(initialFilter) ? initialFilter : "all");
         const isFollowing = type === FeedType.following;
+        const supportsWip = type === FeedType.profileTracks || type === FeedType.likedTracks || type === FeedType.boughtTracks;
 
         const pf: PlayingFrom = {
             type,
@@ -514,6 +518,11 @@ export class FeedTemplates {
             username: user?.username,
             filter: filterState.value,
         };
+
+        const wipFilterState = signal("");
+        if (supportsWip) {
+            pf.wip = wipFilterState.value;
+        }
 
         if (isFollowing) {
             filterState.subscribe(f => {
@@ -592,14 +601,23 @@ export class FeedTemplates {
             id: `feed-${type}`,
             compact: [FeedType.explore, FeedType.following, FeedType.history].includes(type),
             showSearch: ![FeedType.following, FeedType.explore].includes(type),
-            header: isFollowing ? TrackTemplates.feedFilters(filterState) : undefined,
+            header: isFollowing
+                ? TrackTemplates.feedFilters(filterState)
+                : supportsWip
+                    ? TrackTemplates.wipFilter(wipFilterState)
+                    : undefined,
             filterState: isFollowing ? filterState : undefined,
+            wipFilterState: supportsWip ? wipFilterState : undefined,
             columns: columns$,
             pageSize: type === FeedType.explore ? 100 : 10,
             fetchPage: async (offset, limit, filter, sortBy, sortDir) => {
                 const params: any = { offset, limit, filter };
                 if (user?.id) params.id = user.id;
                 if (type === FeedType.following) params.filter = filter || "all";
+                if (supportsWip) {
+                    params.wip = wipFilterState.value;
+                    pf.wip = wipFilterState.value;
+                }
                 params.sortBy = sortBy || "";
                 params.sortDir = sortDir || "";
                 const res = await Api.getFeed(`${ApiRoutes.trackFeed}/${type}`, params);

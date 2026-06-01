@@ -84,6 +84,23 @@ export class TrackTemplates {
         );
     }
 
+    static wipFilter(wipState: Signal<string>) {
+        const all = `${t("ALL")}`;
+        const noWips = `${t("NO_WIPS")}`;
+        const wipOnly = `${t("WIP_ONLY")}`;
+        const tabs = [all, noWips, wipOnly];
+        const values = ["", "exclude", "only"];
+        const initialIndex = Math.max(0, values.indexOf(wipState.value));
+
+        return GenericTemplates.combinedSelector(
+            tabs,
+            (i: number) => {
+                wipState.value = values[i];
+            },
+            initialIndex,
+        );
+    }
+
     static trackList(trackList: any[]) {
         return create("div")
             .classes("flex-v", "reverse", "track-list")
