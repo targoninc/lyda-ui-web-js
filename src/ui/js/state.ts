@@ -10,14 +10,14 @@ import { Permission } from "@targoninc/lyda-shared/src/Models/db/lyda/Permission
 import { Notification } from "@targoninc/lyda-shared/src/Models/db/lyda/Notification";
 import { ListeningHistory } from "@targoninc/lyda-shared/src/Models/db/lyda/ListeningHistory";
 import { PlayManager } from "./Streaming/PlayManager.ts";
+import { QueueManager } from "./Streaming/QueueManager.ts";
 import { IStreamClient } from "./Streaming/IStreamClient.ts";
 import { Language, language } from "../locales";
-import {getUserSettingValue, shuffleArray} from "./Classes/Util.ts";
+import {getUserSettingValue} from "./Classes/Util.ts";
 import { Api } from "./Api/Api.ts";
 import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import { UserCacheKey } from "@targoninc/lyda-shared/src/Enums/UserCacheKey";
 import { StreamingQuality } from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
-import { ApiRoutes } from "./Api/ApiRoutes.ts";
 import { InteractionStateManager } from "./Classes/InteractionStateManager.ts";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType";
 
@@ -167,25 +167,8 @@ shuffling.subscribe((p, changed) => {
     LydaCache.set(UserCacheKey.shuffling, new CacheItem(p));
     Api.setCacheKey(UserCacheKey.shuffling, p.toString()).then();
 
-    const pf = playingFrom.value;
-    if (pf && pf.type) {
-        if (["album", "playlist"].includes(pf.type) && pf.entity && pf.entity.tracks) {
-            let trackIds = pf.entity.tracks.map(t => t.track_id);
-            if (p) {
-                trackIds = shuffleArray(trackIds);
-            }
-            contextQueue.value = trackIds;
-        } else if (!["album", "playlist"].includes(pf.type)) {
-            Api.getFeed(`${ApiRoutes.trackFeed}/${pf.type}`).then(tracks => {
-                if (tracks && tracks.length > 0) {
-                    let trackIds = tracks.map(t => t.id);
-                    if (p) {
-                        trackIds = shuffleArray(trackIds);
-                    }
-                    contextQueue.value = trackIds;
-                }
-            });
-        }
+    if (playingFrom.value?.type) {
+        QueueManager.populateContextQueue(playingFrom.value, p).then();
     }
 });
 

@@ -2,9 +2,8 @@ import { LydaCache } from "../Cache/LydaCache.ts";
 import { StreamingUpdater } from "./StreamingUpdater.ts";
 import { QueueManager } from "./QueueManager.ts";
 import { StreamClient } from "./StreamClient.ts";
-import {shuffleArray, target, userHasSettingValue, Util} from "../Classes/Util.ts";
+import {target, userHasSettingValue, Util} from "../Classes/Util.ts";
 import { ApiRoutes } from "../Api/ApiRoutes.ts";
-import { Api } from "../Api/Api.ts";
 import {
     currentQuality,
     currentSecretCode,
@@ -84,24 +83,6 @@ export class PlayManager {
             } else {
                 // Context queue is empty, play from auto queue
                 await PlayManager.playNextInAutoQueueOrStop();
-            }
-        }
-    }
-
-    private static async reshuffleContextQueue() {
-        const pf = playingFrom.value;
-        if (pf && pf.type) {
-            if (["album", "playlist"].includes(pf.type) && pf.entity && pf.entity.tracks) {
-                let trackIds = pf.entity.tracks.map(t => t.track_id);
-                trackIds = shuffleArray(trackIds);
-                QueueManager.setContextQueue(trackIds);
-            } else if (!["album", "playlist"].includes(pf.type)) {
-                const tracks = await Api.getFeed(`${ApiRoutes.trackFeed}/${pf.type}`);
-                if (tracks && tracks.length > 0) {
-                    let trackIds = tracks.map(t => t.id);
-                    trackIds = shuffleArray(trackIds);
-                    QueueManager.setContextQueue(trackIds);
-                }
             }
         }
     }

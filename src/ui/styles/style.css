@@ -24,6 +24,8 @@
 
     --red-base: #d9376e;
     --red-base-rgb: 217, 55, 110;
+    --orange-base: #e74c3c;
+    --orange-base-rgb: 217, 55, 110;
     --green-base: #70c926;
     --green-base-rgb: 112, 201, 38;
     --blue-base: #317eef;
@@ -32,6 +34,8 @@
 
     --red: color-mix(in oklab, var(--red-base), var(--base-color) 10%);
     --red-dark: color-mix(in oklab, var(--red), var(--base) 50%);
+    --orange: color-mix(in oklab, var(--orange-base), var(--base-color) 10%);
+    --orange-dark: color-mix(in oklab, var(--orange), var(--base) 50%);
     --green: color-mix(in oklab, var(--green-base), var(--base-color) 10%);
     --green-dark: color-mix(in oklab, var(--green), var(--base) 50%);
     --blue: color-mix(in oklab, var(--blue-base), var(--base-color) 10%);
@@ -39,8 +43,6 @@
     --purple: color-mix(in oklab, var(--purple-base), var(--base-color) 10%);
     --purple-dark: color-mix(in oklab, var(--purple), var(--base) 50%);
 
-    --orange: var(--base-color);
-    --orange-dark: color-mix(in oklab, var(--base-color), var(--base) 50%);
     --color-state: var(--green);
     --verified: var(--blue);
     --link-color: var(--blue);

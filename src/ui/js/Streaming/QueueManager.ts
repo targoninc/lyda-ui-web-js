@@ -1,8 +1,20 @@
 import {LydaCache} from "../Cache/LydaCache.ts";
 import {autoQueue, contextQueue, manualQueue} from "../state.ts";
 import {Api} from "../Api/Api.ts";
+import {PlayingFrom} from "@targoninc/lyda-shared/src/Models/PlayingFrom";
+import {ApiRoutes} from "../Api/ApiRoutes.ts";
+import {shuffleArray} from "../Classes/Util.ts";
+
+function resolveFeedResult(result: any): any[] {
+    if (!result) return [];
+    if (Array.isArray(result)) return result;
+    if (result.items) return result.items;
+    return [];
+}
 
 export class QueueManager {
+    static lastPopulatedShuffleState: boolean | null = null;
+
     static addToAutoQueue(id: number) {
         autoQueue.value.push(id);
     }
@@ -28,6 +40,44 @@ export class QueueManager {
 
     static clearContextQueue() {
         contextQueue.value = [];
+    }
+
+    static async populateContextQueue(pf: PlayingFrom, shuffle: boolean) {
+        if (pf.entity?.tracks) {
+            let trackIds = pf.entity.tracks.map(t => t.track_id);
+            if (shuffle) {
+                trackIds = shuffleArray(trackIds);
+            }
+            contextQueue.value = trackIds;
+            QueueManager.lastPopulatedShuffleState = shuffle;
+            return;
+        }
+
+        if (!pf.type) return;
+
+        const params: Record<string, any> = { limit: 100 };
+        if (pf.id) params.id = pf.id;
+        if (shuffle) params.shuffle = true;
+
+        const result = await Api.getFeed(`${ApiRoutes.trackFeed}/${pf.type}`, params);
+        if (!result) return;
+
+        const tracks = resolveFeedResult(result);
+        if (tracks.length === 0) return;
+
+        let trackIds = tracks.map((t: any) => t.id);
+        if (shuffle) {
+            trackIds = shuffleArray(trackIds);
+        }
+        contextQueue.value = trackIds;
+        QueueManager.lastPopulatedShuffleState = shuffle;
+    }
+
+    static reshuffleContextQueue() {
+        const current = contextQueue.value;
+        if (current.length > 0) {
+            contextQueue.value = shuffleArray(current);
+        }
     }
 
     static async popFromAutoQueue() {
@@ -84,7 +134,7 @@ export class QueueManager {
         if (autoQueueTmp.length === 0) {
             const cache = LydaCache.get<number[] | number>("queue").content;
             if (cache) {
-                autoQueueTmp = ((cache as any[]).length ? cache : [cache]) as number[];
+                autoQueueTmp = (Array.isArray(cache) ? cache : [cache]) as number[];
                 autoQueue.value = autoQueueTmp;
             }
         }
@@ -96,7 +146,7 @@ export class QueueManager {
         if (contextQueueTmp.length === 0) {
             const cache = LydaCache.get<number[] | number>("contextQueue").content;
             if (cache) {
-                contextQueueTmp = ((cache as any[]).length ? cache : [cache]) as number[];
+                contextQueueTmp = (Array.isArray(cache) ? cache : [cache]) as number[];
                 contextQueue.value = contextQueueTmp;
             }
         }
