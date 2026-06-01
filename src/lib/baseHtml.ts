@@ -119,7 +119,7 @@ export async function baseHtml(req: Request) {
     <meta property="og:image:width" content="500" />
     <meta property="og:image:height" content="500" />
     ${newimage ? "" : baseImage}
-    <script src="/main.js" type="module"></script>
+    <script src="/main.js?v=${cssCacheBuster}" type="module"></script>
 </head>
 <body>
 <div class="page-background">
