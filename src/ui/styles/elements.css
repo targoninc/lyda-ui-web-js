@@ -588,9 +588,9 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .tag.follow {
-    background: var(--blue);
-    padding: var(--inline-padding);
-    font-size: var(--font-size-small);
+    background: transparent;
+    padding: 0;
+    font-size: var(--font-size-medium);
 }
 
 .user-icon, .user-icon-big {

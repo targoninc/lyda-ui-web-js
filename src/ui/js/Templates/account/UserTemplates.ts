@@ -803,7 +803,7 @@ export class UserTemplates {
                     horizontal(
                         when(isFollowed, UserTemplates.followsBackIndicator()),
                         when(!isOwnProfile && currentUser.value, UserTemplates.followButton(Util.isFollowing(user), user.id)),
-                    ).classes("align-children", "align-end")
+                    ).classes("align-children", "align-end", "big-gap")
                 ),
             ).classes("space-between"),
             UserTemplates.userDescription(user, isOwnProfile),
