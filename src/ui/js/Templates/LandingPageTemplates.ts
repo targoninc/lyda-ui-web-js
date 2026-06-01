@@ -1,9 +1,9 @@
-import { GenericTemplates, vertical } from "./generic/GenericTemplates.ts";
-import { navigate } from "../Routing/Router.ts";
-import { RoutePath } from "../Routing/routes.ts";
-import { create } from "@targoninc/jess";
-import { t } from "../../locales";
-import { AuthTemplates } from "./account/AuthTemplates.ts";
+import {GenericTemplates, horizontal, vertical} from "./generic/GenericTemplates.ts";
+import {navigate} from "../Routing/Router.ts";
+import {RoutePath} from "../Routing/routes.ts";
+import {AnyNode, create} from "@targoninc/jess";
+import {t} from "../../locales";
+import {AuthTemplates} from "./account/AuthTemplates.ts";
 
 export class LandingPageTemplates {
     static newLandingPage() {
@@ -36,6 +36,12 @@ export class LandingPageTemplates {
                             .text(t("LANDER_PARAGRAPH_2"))
                             .build(),
                     ).build(),
+                vertical(
+                    LandingPageTemplates.feature("neurology", "No AI music allowed", "We want humans to make music and express their emotions"),
+                    LandingPageTemplates.feature("balance", "Fair payouts", "Your money goes to the artists you actually listen to, not pro-rata"),
+                    LandingPageTemplates.feature("discover_tune", "Properly filterable", "Find what you're searching for by filtering for originals, reposts, WIPs..."),
+                    LandingPageTemplates.feature("diversity_1", "Social", "Comment on your favorite tracks to let artists know what you like"),
+                ),
                 create("p")
                     .classes("color-dim")
                     .children(
@@ -58,6 +64,26 @@ export class LandingPageTemplates {
                         GenericTemplates.inlineLink("https://www.targoninc.com/tos", t("IMPRINT"), true),
                     ).build(),
             ).build();
+    }
+
+    static feature(icon: string, buttonText: string, text: string) {
+        return horizontal(
+            LandingPageTemplates.half(
+                GenericTemplates.benefit(buttonText, icon),
+            ),
+            LandingPageTemplates.half(
+                create("p")
+                    .classes("color-dim")
+                    .text(text)
+                    .build(),
+            ),
+        ).classes("space-between", "align-children", "feature", "noflexwrap");
+    }
+
+    static half(...children: AnyNode[]) {
+        return create("div")
+            .classes("half")
+            .children(...children)
     }
 
     static lydaBenefits() {

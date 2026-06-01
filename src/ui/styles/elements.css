@@ -1086,6 +1086,27 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     background: var(--bg-3);
 }
 
+.feature {
+    background: var(--bg-0);
+    border-radius: var(--large-border-radius);
+    padding: calc(var(--large-padding) * 1.5);
+    gap: var(--large-padding);
+}
+
+.feature:nth-child(even) {
+    flex-direction: row-reverse;
+
+    .half:first-child {
+        flex-grow: 1;
+    }
+}
+
+.feature:nth-child(odd) {
+    .half:last-child {
+        flex-grow: 1;
+    }
+}
+
 .royalty-info-text {
     font-size: calc(var(--font-size-xxlarge) * 0.5);
 }
@@ -1344,14 +1365,26 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .benefit-item {
+    text-wrap: nowrap;
     display: flex;
     align-items: center;
     gap: var(--gap);
     border: 1px solid var(--blue);
     background: var(--blue-dark);
-    border-radius: var(--border-radius);
+    border-radius: var(--large-border-radius);
     padding: var(--inline-padding);
     height: max-content;
+    justify-content: center;
+}
+
+.feature:nth-child(even) .benefit-item {
+    background: var(--purple-dark);
+    border-color: var(--purple);
+}
+
+.feature:nth-child(odd) .benefit-item {
+    background: var(--green-dark);
+    border-color: var(--green);
 }
 
 .benefit-item * {
@@ -1364,7 +1397,21 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     height: 40px;
     width: 100%;
     white-space: nowrap;
-    transform: translateX(-20px);
+
+    mask-image: linear-gradient(
+            to right,
+            transparent,
+            black 40px,
+            black calc(100% - 40px),
+            transparent
+    );
+    -webkit-mask-image: linear-gradient(
+            to right,
+            transparent,
+            black 40px,
+            black calc(100% - 40px),
+            transparent
+    );
 }
 
 .marquee .scrolling {

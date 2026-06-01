@@ -1120,6 +1120,7 @@ td:last-child, th:last-child {
     width: 641px;
     margin: auto;
     box-sizing: border-box;
+    border: none;
 }
 
 .spinner {
