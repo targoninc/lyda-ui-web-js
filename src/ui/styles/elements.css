@@ -587,6 +587,12 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     padding: 1px 10px;
 }
 
+.tag.follow {
+    background: var(--blue);
+    padding: var(--inline-padding);
+    font-size: var(--font-size-small);
+}
+
 .user-icon, .user-icon-big {
     border-radius: 50%;
 }

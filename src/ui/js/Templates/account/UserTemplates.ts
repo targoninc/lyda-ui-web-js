@@ -344,10 +344,7 @@ export class UserTemplates {
     }
 
     static followsBackIndicator() {
-        return create("span")
-            .classes("padded-inline", "rounded-max", TextSize.small, "invertedTextWithBackground")
-            .text(t("FOLLOWS_YOU"))
-            .build();
+        return GenericTemplates.tag(t("FOLLOWS_YOU"), "follow");
     }
 
     static unapprovedTracksLink() {
@@ -804,9 +801,9 @@ export class UserTemplates {
                 vertical(
                     UserTemplates.mutualFollowersIndicator(user),
                     horizontal(
-                        when(!isOwnProfile && currentUser.value, UserTemplates.followButton(Util.isFollowing(user), user.id)),
                         when(isFollowed, UserTemplates.followsBackIndicator()),
-                    ).classes("align-children")
+                        when(!isOwnProfile && currentUser.value, UserTemplates.followButton(Util.isFollowing(user), user.id)),
+                    ).classes("align-children", "align-end")
                 ),
             ).classes("space-between"),
             UserTemplates.userDescription(user, isOwnProfile),
