@@ -19,6 +19,8 @@ export class StatisticsWrapper {
         return [
             StatisticTemplates.globalRoyaltiesByMonthChart(),
             StatisticTemplates.globalPlayCountByMonthChart(),
+            StatisticTemplates.globalCumulativeTracksByMonthChart(),
+            StatisticTemplates.globalCumulativeUsersByMonthChart(),
         ];
     }
 

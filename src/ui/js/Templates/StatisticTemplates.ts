@@ -49,6 +49,22 @@ export class StatisticTemplates {
         });
     }
 
+    static globalCumulativeTracksByMonthChart() {
+        return ChartTemplates.paginatedBarChart({
+            title: `${t("CUMULATIVE_TRACKS")}`,
+            endpoint: ApiRoutes.getGlobalCumulativeTracksByMonth,
+            timeType: "month",
+        });
+    }
+
+    static globalCumulativeUsersByMonthChart() {
+        return ChartTemplates.paginatedBarChart({
+            title: `${t("CUMULATIVE_USERS")}`,
+            endpoint: ApiRoutes.getGlobalCumulativeUsersByMonth,
+            timeType: "month",
+        });
+    }
+
     static likesByTrackChart(trackNames: string[], likeCounts: number[]) {
         if (trackNames.length === 0) {
             return ChartTemplates.noData(t("LIKES_BY_TRACK"));

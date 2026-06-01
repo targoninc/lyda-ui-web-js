@@ -162,6 +162,8 @@ export class ApiRoutes {
     static getGlobalPlayCountByMonth = ApiRoutes.globalStatistics + "/playCountByMonth";
     static getGlobalRoyaltiesByMonth = ApiRoutes.globalStatistics + "/royaltiesByMonth";
     static getGlobalSalesByMonth = ApiRoutes.globalStatistics + "/salesByMonth";
+    static getGlobalCumulativeTracksByMonth = ApiRoutes.globalStatistics + "/cumulativeTracksByMonth";
+    static getGlobalCumulativeUsersByMonth = ApiRoutes.globalStatistics + "/cumulativeUsersByMonth";
     // endregion
 
     // region Royalties

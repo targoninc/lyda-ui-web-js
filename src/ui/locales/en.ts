@@ -516,6 +516,8 @@ export const en = {
     PLAYCOUNT_BY_MONTH: "Play count by month",
     ROYALTIES_BY_MONTH: "Royalties by month",
     SALES_BY_MONTH: "Sales by month",
+    CUMULATIVE_TRACKS: "Cumulative tracks",
+    CUMULATIVE_USERS: "Cumulative users",
     LIKES_BY_TRACK: "Likes by track",
     LIKES: "Likes",
     ADD_TRACK: "Add Track",

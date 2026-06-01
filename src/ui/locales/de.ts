@@ -612,6 +612,8 @@ export const de: Translation = {
     PERSONAL: "Persönlich",
     REQUEST_PASSWORD_RESET: "Passwort zurücksetzen",
     SALES_BY_MONTH: "Verkäufe pro Monat",
+    CUMULATIVE_TRACKS: "Kumulative Tracks",
+    CUMULATIVE_USERS: "Kumulative Nutzer",
     COPY_LINK: "Link kopieren",
     BANNED: "Gesperrt",
     ADD_TRACK: "Track hinzufügen",

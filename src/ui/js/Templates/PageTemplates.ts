@@ -297,12 +297,21 @@ export class PageTemplates {
 
     static statisticsPage() {
         const tabs = [`${t("YOUR_STATISTICS")}`, `${t("GLOBAL")}`];
-        const selectedTab = signal(0);
+        const urlTabs = ["your", "global"];
+        const urlParams = new URLSearchParams(window.location.search);
+        const initialTab = urlTabs.indexOf(urlParams.get("tab") ?? "");
+        const selectedTab = signal(initialTab === -1 ? 0 : initialTab);
+
+        selectedTab.subscribe(i => {
+            const url = new URL(window.location.href);
+            url.searchParams.set("tab", urlTabs[i]);
+            window.history.replaceState(null, "", url.toString());
+        });
 
         return create("div")
             .classes("statistics", "flex-v")
             .children(
-                GenericTemplates.combinedSelector(tabs, i => selectedTab.value = i),
+                GenericTemplates.combinedSelector(tabs, i => selectedTab.value = i, selectedTab.value),
                 when(
                     tabSelected(selectedTab, 0),
                     vertical(
