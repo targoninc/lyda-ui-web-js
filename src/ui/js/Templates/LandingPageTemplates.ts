@@ -36,12 +36,14 @@ export class LandingPageTemplates {
                             .text(t("LANDER_PARAGRAPH_2"))
                             .build(),
                     ).build(),
+                create("hr"),
                 vertical(
                     LandingPageTemplates.feature("neurology", "No AI music allowed", "We want humans to make music and express their emotions"),
                     LandingPageTemplates.feature("balance", "Fair payouts", "Your money goes to the artists you actually listen to, not pro-rata"),
                     LandingPageTemplates.feature("discover_tune", "Properly filterable", "Find what you're searching for by filtering for originals, reposts, WIPs..."),
                     LandingPageTemplates.feature("diversity_1", "Social", "Comment on your favorite tracks to let artists know what you like"),
                 ),
+                create("hr"),
                 create("p")
                     .classes("color-dim")
                     .children(
@@ -67,23 +69,15 @@ export class LandingPageTemplates {
     }
 
     static feature(icon: string, buttonText: string, text: string) {
-        return horizontal(
-            LandingPageTemplates.half(
+        return vertical(
+            horizontal(
                 GenericTemplates.benefit(buttonText, icon),
             ),
-            LandingPageTemplates.half(
-                create("p")
-                    .classes("color-dim")
-                    .text(text)
-                    .build(),
-            ),
-        ).classes("space-between", "align-children", "feature", "noflexwrap");
-    }
-
-    static half(...children: AnyNode[]) {
-        return create("div")
-            .classes("half")
-            .children(...children)
+            create("p")
+                .classes("color-dim")
+                .text(text)
+                .build(),
+        ).classes("feature", "noflexwrap");
     }
 
     static lydaBenefits() {

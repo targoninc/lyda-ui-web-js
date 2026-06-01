@@ -1087,24 +1087,8 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .feature {
-    background: var(--bg-0);
     border-radius: var(--large-border-radius);
-    padding: calc(var(--large-padding) * 1.5);
-    gap: var(--large-padding);
-}
-
-.feature:nth-child(even) {
-    flex-direction: row-reverse;
-
-    .half:first-child {
-        flex-grow: 1;
-    }
-}
-
-.feature:nth-child(odd) {
-    .half:last-child {
-        flex-grow: 1;
-    }
+    padding: var(--base-padding) 0;
 }
 
 .royalty-info-text {
@@ -1377,14 +1361,9 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     justify-content: center;
 }
 
-.feature:nth-child(even) .benefit-item {
+.feature .benefit-item {
     background: var(--purple-dark);
     border-color: var(--purple);
-}
-
-.feature:nth-child(odd) .benefit-item {
-    background: var(--green-dark);
-    border-color: var(--green);
 }
 
 .benefit-item * {
