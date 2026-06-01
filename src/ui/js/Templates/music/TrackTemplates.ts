@@ -385,8 +385,8 @@ export class TrackTemplates {
                             horizontal(
                                 TrackTemplates.playButton(track),
                                 TrackTemplates.waveform(track, track.processed ? JSON.parse(track.loudness_data) : []),
-                            ).classes("align-children", "padded-large", "bordered", "glass", "rounded-max", "noflexwrap")
-                             .styles("padding-right", "30px"),
+                            ).classes("align-children", "bordered", "glass", "rounded-max", "noflexwrap")
+                             .styles("padding", "10px 20px 10px 10px"),
                         ).build(),
                     horizontal(
                         InteractionTemplates.interactions(EntityType.track, track, { overrideActions: [InteractionType.like, InteractionType.repost] }),
