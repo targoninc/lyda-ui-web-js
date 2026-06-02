@@ -547,7 +547,7 @@ export class UserTemplates {
         const filterBtn = create("button")
             .classes("round-button", "jess", "feed-filter-btn")
             .title(t("FILTER"))
-            .onclick(() => PopoverTemplates.toggle(filterPopover, filterBtn))
+            .onclick(() => PopoverTemplates.toggle(filterPopover, filterBtn, true))
             .children(
                 GenericTemplates.icon("filter_alt", true, ["round-button-icon", "align-center", "inline-icon", "svg", "nopointer"]),
             ).build();
@@ -584,7 +584,7 @@ export class UserTemplates {
                     pageSize: 10,
                     showSearch: true,
                     searchOverride$: pageSearch$,
-                    fetchPage: (offset) => Api.getAlbumsByUserId(user.id, user.username, offset, "").then(r => r ?? {
+                    fetchPage: (offset, limit, filter) => Api.getAlbumsByUserId(user.id, user.username, offset, filter || "").then(r => r ?? {
                         items: [],
                         total: 0
                     }),
@@ -606,7 +606,7 @@ export class UserTemplates {
                     pageSize: 10,
                     showSearch: true,
                     searchOverride$: pageSearch$,
-                    fetchPage: (offset) => Api.getPlaylistsByUserId(user.id, user.username, offset, "").then(r => r ?? {
+                    fetchPage: (offset, limit, filter) => Api.getPlaylistsByUserId(user.id, user.username, offset, filter || "").then(r => r ?? {
                         items: [],
                         total: 0
                     }),
@@ -1144,7 +1144,7 @@ export class UserTemplates {
         const filterBtn = create("button")
             .classes("round-button", "jess", "feed-filter-btn")
             .title(t("FILTER"))
-            .onclick(() => PopoverTemplates.toggle(filterPopover, filterBtn))
+            .onclick(() => PopoverTemplates.toggle(filterPopover, filterBtn, true))
             .children(
                 GenericTemplates.icon("filter_alt", true, ["round-button-icon", "align-center", "inline-icon", "svg", "nopointer"]),
             ).build();
@@ -1170,58 +1170,66 @@ export class UserTemplates {
                     ).build(),
             ).build();
 
-        const tabContents = [
-            FeedTemplates.feed(FeedType.likedTracks, user.value, {search$: pageSearch$, wipFilterState: pageWipFilter$, noToolbar: true}),
-            FeedTemplates.create<TrackList>({
-                id: `feed-${CardFeedType.likedAlbums}`,
-                columns: libAlbumCols,
-                compact: true,
-                pageSize: 10,
-                showSearch: true,
-                searchOverride$: pageSearch$,
-                fetchPage: async (offset) => {
-                    const result = await Api.getLikedAlbums(user.value.id, user.value.username, offset, "");
-                    if (!result) return [];
-                    return {items: result.items as TrackList[], total: result.total};
-                },
-                buildMenuActions: libCardActions("album"),
-                onPlayToggle: async (list) => {
-                    const ft = list.tracks?.[0]?.track;
-                    if (ft) await AlbumActions.startTrackInAlbum(list as Album, ft, true);
-                },
-                isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
-                dateRender: (list) => GenericTemplates.timestamp(list.created_at, ["hideOnSmallBreakpoint"]),
-            }),
-            FeedTemplates.create<TrackList>({
-                id: `feed-${CardFeedType.likedPlaylists}`,
-                columns: libPlaylistCols,
-                compact: true,
-                pageSize: 10,
-                showSearch: true,
-                searchOverride$: pageSearch$,
-                fetchPage: async (offset) => {
-                    const result = await Api.getLikedPlaylists(user.value.id, user.value.username, offset, "");
-                    if (!result) return [];
-                    return {items: result.items as TrackList[], total: result.total};
-                },
-                buildMenuActions: libCardActions("playlist"),
-                onPlayToggle: async (list) => {
-                    const ft = list.tracks?.[0]?.track;
-                    if (ft) await PlaylistActions.startTrackInPlaylist(list as Playlist, ft, true);
-                },
-                isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
-                dateRender: (list) => GenericTemplates.timestamp(list.created_at, ["hideOnSmallBreakpoint"]),
-            }),
-        ];
-
-        if (isSelf) {
-            tabContents.push(FeedTemplates.feed(FeedType.boughtTracks, undefined, {search$: pageSearch$, wipFilterState: pageWipFilter$, noToolbar: true}));
-        }
+        const sharedFeed = (type: FeedType, extraOverrides?: any) =>
+            FeedTemplates.feed(type, user.value, {search$: pageSearch$, wipFilterState: pageWipFilter$, noToolbar: true, ...extraOverrides});
 
         return vertical(
             GenericTemplates.title(t("YOUR_LIKED_MUSIC")),
             tabRow,
-            ...tabContents
+            when(
+                tabSelected(currentIndex, 0),
+                sharedFeed(FeedType.likedTracks),
+            ),
+            when(
+                tabSelected(currentIndex, 1),
+                FeedTemplates.create<TrackList>({
+                    id: `feed-${CardFeedType.likedAlbums}`,
+                    columns: libAlbumCols,
+                    compact: true,
+                    pageSize: 10,
+                    showSearch: true,
+                    searchOverride$: pageSearch$,
+                    fetchPage: async (offset, limit, filter) => {
+                        const result = await Api.getLikedAlbums(user.value.id, user.value.username, offset, filter || "");
+                        if (!result) return [];
+                        return {items: result.items as TrackList[], total: result.total};
+                    },
+                    buildMenuActions: libCardActions("album"),
+                    onPlayToggle: async (list) => {
+                        const ft = list.tracks?.[0]?.track;
+                        if (ft) await AlbumActions.startTrackInAlbum(list as Album, ft, true);
+                    },
+                    isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
+                    dateRender: (list) => GenericTemplates.timestamp(list.created_at, ["hideOnSmallBreakpoint"]),
+                }),
+            ),
+            when(
+                tabSelected(currentIndex, 2),
+                FeedTemplates.create<TrackList>({
+                    id: `feed-${CardFeedType.likedPlaylists}`,
+                    columns: libPlaylistCols,
+                    compact: true,
+                    pageSize: 10,
+                    showSearch: true,
+                    searchOverride$: pageSearch$,
+                    fetchPage: async (offset, limit, filter) => {
+                        const result = await Api.getLikedPlaylists(user.value.id, user.value.username, offset, filter || "");
+                        if (!result) return [];
+                        return {items: result.items as TrackList[], total: result.total};
+                    },
+                    buildMenuActions: libCardActions("playlist"),
+                    onPlayToggle: async (list) => {
+                        const ft = list.tracks?.[0]?.track;
+                        if (ft) await PlaylistActions.startTrackInPlaylist(list as Playlist, ft, true);
+                    },
+                    isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
+                    dateRender: (list) => GenericTemplates.timestamp(list.created_at, ["hideOnSmallBreakpoint"]),
+                }),
+            ),
+            when(
+                isSelf && tabSelected(currentIndex, 3),
+                sharedFeed(FeedType.boughtTracks),
+            ),
         ).build();
     }
 

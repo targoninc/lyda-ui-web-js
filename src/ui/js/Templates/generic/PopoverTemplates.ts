@@ -19,11 +19,16 @@ export class PopoverTemplates {
             .build() as HTMLElement;
     }
 
-    static positionAtAnchor(popover: HTMLElement, anchor: AnyElement, above = false): void {
+    static positionAtAnchor(popover: HTMLElement, anchor: AnyElement, above = false, rightAlign = false): void {
         const r = anchor.getBoundingClientRect();
         popover.style.position = "fixed";
-        popover.style.left = `${Math.max(4, r.left)}px`;
-        popover.style.right = "auto";
+        if (rightAlign) {
+            popover.style.left = "auto";
+            popover.style.right = `${window.innerWidth - r.right}px`;
+        } else {
+            popover.style.left = `${Math.max(4, r.left)}px`;
+            popover.style.right = "auto";
+        }
         if (above) {
             popover.style.top = "auto";
             popover.style.bottom = `${window.innerHeight - r.top + 2}px`;
@@ -43,9 +48,9 @@ export class PopoverTemplates {
         popover.showPopover();
     }
 
-    static show(popover: HTMLElement, anchor: AnyElement, above = false): void {
+    static show(popover: HTMLElement, anchor: AnyElement, above = false, rightAlign = false): void {
         if (popover.matches(":popover-open") || !popover.isConnected) return;
-        PopoverTemplates.positionAtAnchor(popover, anchor, above);
+        PopoverTemplates.positionAtAnchor(popover, anchor, above, rightAlign);
         popover.showPopover();
     }
 
@@ -53,9 +58,9 @@ export class PopoverTemplates {
         popover.hidePopover();
     }
 
-    static toggle(popover: HTMLElement, anchor: AnyElement): void {
+    static toggle(popover: HTMLElement, anchor: AnyElement, rightAlign = false): void {
         if (!popover.isConnected) return;
-        PopoverTemplates.positionAtAnchor(popover, anchor);
+        PopoverTemplates.positionAtAnchor(popover, anchor, false, rightAlign);
         popover.togglePopover();
     }
 }

@@ -255,8 +255,8 @@ export class PageTemplates {
                         pageSize: 100,
                         showSearch: true,
                         searchOverride$: pageSearch$,
-                        fetchPage: async (offset, limit) => {
-                            const res = await Api.getFeed(ApiRoutes.exploreAlbumsFeed, { offset, limit });
+                        fetchPage: async (offset, limit, filter) => {
+                            const res = await Api.getFeed(ApiRoutes.exploreAlbumsFeed, { offset, limit, filter: filter || "" });
                             if (!res) return { items: [], total: 0 };
                             if (Array.isArray(res)) return { items: res, total: res.length };
                             return res;
@@ -286,8 +286,8 @@ export class PageTemplates {
                         pageSize: 100,
                         showSearch: true,
                         searchOverride$: pageSearch$,
-                        fetchPage: async (offset, limit) => {
-                            const res = await Api.getFeed(ApiRoutes.explorePlaylistsFeed, { offset, limit });
+                        fetchPage: async (offset, limit, filter) => {
+                            const res = await Api.getFeed(ApiRoutes.explorePlaylistsFeed, { offset, limit, filter: filter || "" });
                             if (!res) return { items: [], total: 0 };
                             if (Array.isArray(res)) return { items: res, total: res.length };
                             return res;

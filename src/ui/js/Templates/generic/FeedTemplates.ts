@@ -331,7 +331,7 @@ export class FeedTemplates {
                 .classes("round-button", "jess", "feed-filter-btn")
                 .title(t("FILTER"))
                 .onclick(() => {
-                    if (filterPopover) PopoverTemplates.toggle(filterPopover, filterBtn as HTMLElement);
+                    if (filterPopover) PopoverTemplates.toggle(filterPopover, filterBtn as HTMLElement, true);
                 })
                 .children(
                     GenericTemplates.icon("filter_alt", true, ["round-button-icon", "align-center", "inline-icon", "svg", "nopointer"]),
