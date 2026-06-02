@@ -461,7 +461,7 @@ export class UserTemplates {
         const albumColumns = [
             {
                 key: "title",
-                header: t("TRACK_TITLE"),
+                header: t("TITLE"),
                 render: (list: TrackList) => {
                     const coverSrc = signal(Images.DEFAULT_COVER_ALBUM);
                     if (list.has_cover) {
@@ -498,7 +498,7 @@ export class UserTemplates {
         const playlistColumns = [
             {
                 key: "title",
-                header: t("TRACK_TITLE"),
+                header: t("TITLE"),
                 render: (list: TrackList) => {
                     const coverSrc = signal(Images.DEFAULT_COVER_PLAYLIST);
                     if (list.has_cover) {
@@ -1058,7 +1058,7 @@ export class UserTemplates {
         const libAlbumCols = [
             {
                 key: "title",
-                header: t("TRACK_TITLE"),
+                header: t("TITLE"),
                 render: (list: TrackList) => {
                     const coverSrc = signal(Images.DEFAULT_COVER_ALBUM);
                     if (list.has_cover) {
@@ -1095,7 +1095,7 @@ export class UserTemplates {
         const libPlaylistCols = [
             {
                 key: "title",
-                header: t("TRACK_TITLE"),
+                header: t("TITLE"),
                 render: (list: TrackList) => {
                     const coverSrc = signal(Images.DEFAULT_COVER_PLAYLIST);
                     if (list.has_cover) {

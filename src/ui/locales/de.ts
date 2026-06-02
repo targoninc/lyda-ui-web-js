@@ -299,6 +299,7 @@ export const de: Translation = {
     TOTP: "TOTP",
     TRACK_DETAILS: "Track-Details",
     TRACK_TITLE: "Track-Titel",
+    TITLE: "Titel",
     TRACK_WILL_BE_MONETIZED: "Dieser Track wird durch Streaming-Abonnements monetarisiert und zum Kauf verfügbar sein.",
     TRACK_WILL_BE_MONETIZED_FREE: "Dieser Track wird durch Streaming-Abonnements monetarisiert und ist kostenlos herunterladbar.",
     TWELVE_DIGIT_NUMBER: "12-stellige Zahl",

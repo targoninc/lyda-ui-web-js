@@ -155,7 +155,7 @@ export class PageTemplates {
         const baseAlbumColumns = [
             {
                 key: "title",
-                header: t("TRACK_TITLE"),
+                header: t("TITLE"),
                 render: (list: TrackList) => {
                     const coverSrc = signal(DefaultImages[EntityType.album]);
                     if (list.has_cover) {
@@ -192,7 +192,7 @@ export class PageTemplates {
         const basePlaylistColumns = [
             {
                 key: "title",
-                header: t("TRACK_TITLE"),
+                header: t("TITLE"),
                 render: (list: TrackList) => {
                     const coverSrc = signal(Images.DEFAULT_COVER_PLAYLIST);
                     if (list.has_cover) {

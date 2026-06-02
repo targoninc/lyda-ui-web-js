@@ -385,6 +385,7 @@ export const en = {
     MINIMUM_ALBUM_PRICE_MUST_BE_NUMBER: "Minimum album price must be a positive number",
     TITLE_STAR: "Title*",
     TRACK_TITLE: "Track title",
+    TITLE: "Title",
     COLLABORATORS: "Collaborators",
     EXAMPLE_COLLABORATORS: "John Music, Alice Frequency",
     EXAMPLE_TRACK_NAME: "My cool track",
