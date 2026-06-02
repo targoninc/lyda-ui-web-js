@@ -622,6 +622,7 @@ export class FeedTemplates {
                                                 .onclick((e: Event) => { e.stopPropagation(); navigate(`/track/${track.id}`); })
                                                 .build(),
                                             ...(track.wip ? [GenericTemplates.tag(t("WIP"), "wip")] : []),
+                                            ...(track.collab?.collab_type ? [TrackTemplates.collabIndicator(track.collab)] : []),
                                             ...icons,
                                         ).build(),
                                 ).build(),
