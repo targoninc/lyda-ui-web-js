@@ -559,7 +559,7 @@ export class UserTemplates {
             ).build();
 
         const tabRow = create("div")
-            .classes("flex", "space-between", "align-children")
+            .classes("flex", "space-between", "align-children", "fullWidth")
             .children(
                 GenericTemplates.combinedSelector(tabs, (i: number) => (currentIndex.value = i), currentIndex.value),
                 create("div").classes("flex", "align-children", "small-gap")
