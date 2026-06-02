@@ -241,73 +241,77 @@ export class PageTemplates {
         return create("div")
             .classes("feed-wrapper", "flex-v", "fullWidth")
             .children(
-                tabRow,
-                when(
-                    tabSelected(selectedTab, 0),
-                    FeedTemplates.feed(FeedType.explore, undefined, {search$: pageSearch$, noToolbar: true}),
-                ),
-                when(
-                    tabSelected(selectedTab, 1),
-                    FeedTemplates.create<TrackList>({
-                        id: "feed-explore-albums",
-                        columns: baseAlbumColumns,
-                        compact: true,
-                        pageSize: 100,
-                        showSearch: true,
-                        searchOverride$: pageSearch$,
-                        fetchPage: async (offset, limit, filter) => {
-                            const res = await Api.getFeed(ApiRoutes.exploreAlbumsFeed, { offset, limit, filter: filter || "" });
-                            if (!res) return { items: [], total: 0 };
-                            if (Array.isArray(res)) return { items: res, total: res.length };
-                            return res;
-                        },
-                        buildMenuActions: (list): FeedMenuAction<TrackList>[] => [
-                            {
-                                label: t("QUEUE"),
-                                icon: "queue",
-                                onclick: (l) => (l as any).tracks?.forEach((t: any) => QueueManager.addToManualQueue(t.track_id)),
-                                show: (l) => !!(l as any).tracks?.length,
+                GenericTemplates.fixedBar([tabRow]),
+                create("div").classes("fixed-bar-content").children(
+                    when(
+                        tabSelected(selectedTab, 0),
+                        FeedTemplates.feed(FeedType.explore, undefined, {search$: pageSearch$, noToolbar: true}),
+                    ),
+                    when(
+                        tabSelected(selectedTab, 1),
+                        FeedTemplates.create<TrackList>({
+                            id: "feed-explore-albums",
+                            columns: baseAlbumColumns,
+                            compact: true,
+                            pageSize: 100,
+                            showSearch: true,
+                            searchOverride$: pageSearch$,
+                            noToolbar: true,
+                            fetchPage: async (offset, limit, filter) => {
+                                const res = await Api.getFeed(ApiRoutes.exploreAlbumsFeed, { offset, limit, filter: filter || "" });
+                                if (!res) return { items: [], total: 0 };
+                                if (Array.isArray(res)) return { items: res, total: res.length };
+                                return res;
                             },
-                        ],
-                        onPlayToggle: async (list) => {
-                            const ft = (list as any).tracks?.[0]?.track;
-                            if (ft) await AlbumActions.startTrackInAlbum(list as Album, ft, true);
-                        },
-                        isPlaying: (id) => compute((c, p) => c === id && p, currentTrackId, playingHere),
-                        dateRender: (list) => GenericTemplates.timestamp((list as any).created_at, ["hideOnSmallBreakpoint"]),
-                    }),
-                ),
-                when(
-                    tabSelected(selectedTab, 2),
-                    FeedTemplates.create<TrackList>({
-                        id: "feed-explore-playlists",
-                        columns: basePlaylistColumns,
-                        compact: true,
-                        pageSize: 100,
-                        showSearch: true,
-                        searchOverride$: pageSearch$,
-                        fetchPage: async (offset, limit, filter) => {
-                            const res = await Api.getFeed(ApiRoutes.explorePlaylistsFeed, { offset, limit, filter: filter || "" });
-                            if (!res) return { items: [], total: 0 };
-                            if (Array.isArray(res)) return { items: res, total: res.length };
-                            return res;
-                        },
-                        buildMenuActions: (list): FeedMenuAction<TrackList>[] => [
-                            {
-                                label: t("QUEUE"),
-                                icon: "queue",
-                                onclick: (l) => (l as any).tracks?.forEach((t: any) => QueueManager.addToManualQueue(t.track_id)),
-                                show: (l) => !!(l as any).tracks?.length,
+                            buildMenuActions: (list): FeedMenuAction<TrackList>[] => [
+                                {
+                                    label: t("QUEUE"),
+                                    icon: "queue",
+                                    onclick: (l) => (l as any).tracks?.forEach((t: any) => QueueManager.addToManualQueue(t.track_id)),
+                                    show: (l) => !!(l as any).tracks?.length,
+                                },
+                            ],
+                            onPlayToggle: async (list) => {
+                                const ft = (list as any).tracks?.[0]?.track;
+                                if (ft) await AlbumActions.startTrackInAlbum(list as Album, ft, true);
                             },
-                        ],
-                        onPlayToggle: async (list) => {
-                            const ft = (list as any).tracks?.[0]?.track;
-                            if (ft) await PlaylistActions.startTrackInPlaylist(list as Playlist, ft, true);
-                        },
-                        isPlaying: (id) => compute((c, p) => c === id && p, currentTrackId, playingHere),
-                        dateRender: (list) => GenericTemplates.timestamp((list as any).created_at, ["hideOnSmallBreakpoint"]),
-                    }),
-                ),
+                            isPlaying: (id) => compute((c, p) => c === id && p, currentTrackId, playingHere),
+                            dateRender: (list) => GenericTemplates.timestamp((list as any).created_at, ["hideOnSmallBreakpoint"]),
+                        }),
+                    ),
+                    when(
+                        tabSelected(selectedTab, 2),
+                        FeedTemplates.create<TrackList>({
+                            id: "feed-explore-playlists",
+                            columns: basePlaylistColumns,
+                            compact: true,
+                            pageSize: 100,
+                            showSearch: true,
+                            searchOverride$: pageSearch$,
+                            noToolbar: true,
+                            fetchPage: async (offset, limit, filter) => {
+                                const res = await Api.getFeed(ApiRoutes.explorePlaylistsFeed, { offset, limit, filter: filter || "" });
+                                if (!res) return { items: [], total: 0 };
+                                if (Array.isArray(res)) return { items: res, total: res.length };
+                                return res;
+                            },
+                            buildMenuActions: (list): FeedMenuAction<TrackList>[] => [
+                                {
+                                    label: t("QUEUE"),
+                                    icon: "queue",
+                                    onclick: (l) => (l as any).tracks?.forEach((t: any) => QueueManager.addToManualQueue(t.track_id)),
+                                    show: (l) => !!(l as any).tracks?.length,
+                                },
+                            ],
+                            onPlayToggle: async (list) => {
+                                const ft = (list as any).tracks?.[0]?.track;
+                                if (ft) await PlaylistActions.startTrackInPlaylist(list as Playlist, ft, true);
+                            },
+                            isPlaying: (id) => compute((c, p) => c === id && p, currentTrackId, playingHere),
+                            dateRender: (list) => GenericTemplates.timestamp((list as any).created_at, ["hideOnSmallBreakpoint"]),
+                        }),
+                    ),
+                ).build(),
             ).build();
     }
 

@@ -1100,6 +1100,8 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .fixed-bar {
     position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 1;
     padding: var(--base-padding);
     border-radius: var(--large-border-radius);
@@ -1724,10 +1726,6 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     }
 }
 
-.feed-top-row {
-    padding-bottom: var(--gap);
-}
-
 .feed-search-container {
     max-width: 200px;
 }
@@ -1865,8 +1863,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     left: 50%;
     transform: translate(-50%, -50%);
     font-size: var(--font-size-xxlarge);
-    font-weight: bold;
-    color: var(--fg-0);
+    color: var(--fg-2);
     pointer-events: none;
     z-index: 1;
 }

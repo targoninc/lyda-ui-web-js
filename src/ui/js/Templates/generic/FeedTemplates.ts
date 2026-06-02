@@ -341,7 +341,7 @@ export class FeedTemplates {
         const topRow = config.noToolbar
             ? nullElement()
             : create("div")
-                .classes("flex", "space-between", "align-children", "feed-top-row")
+                .classes("flex", "space-between", "align-children")
                 .children(
                     config.header ?? nullElement(),
                     create("div").classes("flex", "align-children", "small-gap")
@@ -351,12 +351,15 @@ export class FeedTemplates {
                         ).build(),
                 ).build();
 
+        const toolbar = config.noToolbar ? nullElement() : GenericTemplates.fixedBar([topRow]);
+        const contentClass = config.noToolbar ? "_" : "fixed-bar-content";
+
         const el = create("div")
             .classes("feed-wrapper", "flex-v", "fullWidth", config.compact ? "feed-compact" : "_")
             .id(feedId)
             .children(
-                topRow,
-                create("table")
+                toolbar,
+                create("table").classes(contentClass)
                     .classes("feed-table", "fullWidth")
                     .children(
                         compute(

@@ -419,7 +419,6 @@ export const de: Translation = {
     UNVERIFY: "Entverifizieren",
     USER_NOT_FOUND: "Nutzer nicht gefunden",
     VERIFIED: "Verifiziert",
-    YOUR_LIKED_MUSIC: "Deine Lieblingsmusik",
     LYDA_SUBSCRIPTION: "Lyda Abonnement",
     NO_ACTIVE_SUBSCRIPTION: "Du hast kein aktives Abonnement. Wähle eine der unteren Optionen, um anzufangen. Alle Preise sind in USD.",
     SUBSCRIPTIONS_GIFTED: "Verschenkte Abonnements",

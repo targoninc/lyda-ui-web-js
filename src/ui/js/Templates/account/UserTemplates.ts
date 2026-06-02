@@ -570,63 +570,67 @@ export class UserTemplates {
             ).build();
 
         return vertical(
-            tabRow,
-            when(
-                tabSelected(currentIndex, 0),
-                FeedTemplates.feed(FeedType.profileTracks, user, {search$: pageSearch$, wipFilterState: pageWipFilter$, noToolbar: true}),
-            ),
-            when(
-                tabSelected(currentIndex, 1),
-                FeedTemplates.create<TrackList>({
-                    id: `feed-${CardFeedType.profileAlbums}`,
-                    columns: albumColumns,
-                    compact: true,
-                    pageSize: 10,
-                    showSearch: true,
-                    searchOverride$: pageSearch$,
-                    fetchPage: (offset, limit, filter) => Api.getAlbumsByUserId(user.id, user.username, offset, filter || "").then(r => r ?? {
-                        items: [],
-                        total: 0
+            GenericTemplates.fixedBar([tabRow]),
+            create("div").classes("fixed-bar-content").children(
+                when(
+                    tabSelected(currentIndex, 0),
+                    FeedTemplates.feed(FeedType.profileTracks, user, {search$: pageSearch$, wipFilterState: pageWipFilter$, noToolbar: true}),
+                ),
+                when(
+                    tabSelected(currentIndex, 1),
+                    FeedTemplates.create<TrackList>({
+                        id: `feed-${CardFeedType.profileAlbums}`,
+                        columns: albumColumns,
+                        compact: true,
+                        pageSize: 10,
+                        showSearch: true,
+                        searchOverride$: pageSearch$,
+                        noToolbar: true,
+                        fetchPage: (offset, limit, filter) => Api.getAlbumsByUserId(user.id, user.username, offset, filter || "").then(r => r ?? {
+                            items: [],
+                            total: 0
+                        }),
+                        buildMenuActions: cardActions("album"),
+                        onPlayToggle: async (list) => {
+                            const ft = list.tracks?.[0]?.track;
+                            if (ft) await AlbumActions.startTrackInAlbum(list as Album, ft, true);
+                        },
+                        isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
+                        dateRender: (list) => GenericTemplates.timestamp(list.created_at, ["hideOnSmallBreakpoint"]),
                     }),
-                    buildMenuActions: cardActions("album"),
-                    onPlayToggle: async (list) => {
-                        const ft = list.tracks?.[0]?.track;
-                        if (ft) await AlbumActions.startTrackInAlbum(list as Album, ft, true);
-                    },
-                    isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
-                    dateRender: (list) => GenericTemplates.timestamp(list.created_at, ["hideOnSmallBreakpoint"]),
-                }),
-            ),
-            when(
-                tabSelected(currentIndex, 2),
-                FeedTemplates.create<TrackList>({
-                    id: `feed-${CardFeedType.profilePlaylists}`,
-                    columns: playlistColumns,
-                    compact: true,
-                    pageSize: 10,
-                    showSearch: true,
-                    searchOverride$: pageSearch$,
-                    fetchPage: (offset, limit, filter) => Api.getPlaylistsByUserId(user.id, user.username, offset, filter || "").then(r => r ?? {
-                        items: [],
-                        total: 0
+                ),
+                when(
+                    tabSelected(currentIndex, 2),
+                    FeedTemplates.create<TrackList>({
+                        id: `feed-${CardFeedType.profilePlaylists}`,
+                        columns: playlistColumns,
+                        compact: true,
+                        pageSize: 10,
+                        showSearch: true,
+                        searchOverride$: pageSearch$,
+                        noToolbar: true,
+                        fetchPage: (offset, limit, filter) => Api.getPlaylistsByUserId(user.id, user.username, offset, filter || "").then(r => r ?? {
+                            items: [],
+                            total: 0
+                        }),
+                        buildMenuActions: cardActions("playlist"),
+                        onPlayToggle: async (list) => {
+                            const ft = list.tracks?.[0]?.track;
+                            if (ft) await PlaylistActions.startTrackInPlaylist(list as Playlist, ft, true);
+                        },
+                        isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
+                        dateRender: (list) => GenericTemplates.timestamp(list.created_at, ["hideOnSmallBreakpoint"]),
                     }),
-                    buildMenuActions: cardActions("playlist"),
-                    onPlayToggle: async (list) => {
-                        const ft = list.tracks?.[0]?.track;
-                        if (ft) await PlaylistActions.startTrackInPlaylist(list as Playlist, ft, true);
-                    },
-                    isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
-                    dateRender: (list) => GenericTemplates.timestamp(list.created_at, ["hideOnSmallBreakpoint"]),
-                }),
-            ),
-            when(
-                tabSelected(currentIndex, 3),
-                FeedTemplates.feed(FeedType.profileReposts, user, {search$: pageSearch$, noToolbar: true}),
-            ),
-            when(
-                tabSelected(currentIndex, 4),
-                FeedTemplates.feed(FeedType.history, user, {search$: pageSearch$, noToolbar: true}),
-            ),
+                ),
+                when(
+                    tabSelected(currentIndex, 3),
+                    FeedTemplates.feed(FeedType.profileReposts, user, {search$: pageSearch$, noToolbar: true}),
+                ),
+                when(
+                    tabSelected(currentIndex, 4),
+                    FeedTemplates.feed(FeedType.history, user, {search$: pageSearch$, noToolbar: true}),
+                ),
+            ).build(),
         ).build();
     }
 
@@ -1174,8 +1178,8 @@ export class UserTemplates {
             FeedTemplates.feed(type, user.value, {search$: pageSearch$, wipFilterState: pageWipFilter$, noToolbar: true, ...extraOverrides});
 
         return vertical(
-            GenericTemplates.title(t("YOUR_LIKED_MUSIC")),
-            tabRow,
+            GenericTemplates.fixedBar([tabRow]),
+            create("div").classes("fixed-bar-content").children(
             when(
                 tabSelected(currentIndex, 0),
                 sharedFeed(FeedType.likedTracks),
@@ -1189,6 +1193,7 @@ export class UserTemplates {
                     pageSize: 10,
                     showSearch: true,
                     searchOverride$: pageSearch$,
+                    noToolbar: true,
                     fetchPage: async (offset, limit, filter) => {
                         const result = await Api.getLikedAlbums(user.value.id, user.value.username, offset, filter || "");
                         if (!result) return [];
@@ -1212,6 +1217,7 @@ export class UserTemplates {
                     pageSize: 10,
                     showSearch: true,
                     searchOverride$: pageSearch$,
+                    noToolbar: true,
                     fetchPage: async (offset, limit, filter) => {
                         const result = await Api.getLikedPlaylists(user.value.id, user.value.username, offset, filter || "");
                         if (!result) return [];
@@ -1230,7 +1236,7 @@ export class UserTemplates {
                 isSelf && tabSelected(currentIndex, 3),
                 sharedFeed(FeedType.boughtTracks),
             ),
-        ).build();
+        ).build()).build();
     }
 
     static username(user: User, isOwnProfile: boolean) {

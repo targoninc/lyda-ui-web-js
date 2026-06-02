@@ -417,6 +417,13 @@ export class GenericTemplates {
             .build();
     }
 
+    static fixedBar(children: any[]) {
+        return create("div")
+            .classes("fixed-bar")
+            .children(...children)
+            .build();
+    }
+
     static noTracks() {
         const rand = (min: number, max: number) => Math.random() * (max - min) + min;
         const circles = Array.from({ length: 6 }, (_, i) => {

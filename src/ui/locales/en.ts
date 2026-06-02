@@ -201,7 +201,6 @@ export const en = {
     PRIMARY_EMAIL_NOT_VERIFIED: "Your primary email is not verified. Please verify it to ensure you can recover your account.",
     GO_TO_SETTINGS: "Go to settings",
     UNVERIFY: "Unverify",
-    YOUR_LIKED_MUSIC: "Your liked music",
     LIKE_TRACKS_TO_SEE: "Like some tracks to see them here",
     LIKE_PLAYLISTS_TO_SEE: "Like some playlists to see them here",
     EDIT_DESCRIPTION: "Edit description",
