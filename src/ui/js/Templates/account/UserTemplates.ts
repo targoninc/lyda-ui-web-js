@@ -938,7 +938,7 @@ export class UserTemplates {
                         const y = (e.clientY - rect.top) / rect.height;
                         const tiltX = (y - 0.5) * -16;
                         const tiltY = (x - 0.5) * 16;
-                        pinEl.style.transform = `perspective(800px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+                        pinEl.style.transform = `perspective(600px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
                     })
                     .onmouseleave(() => {
                         pinEl.style.transform = "";
@@ -971,10 +971,13 @@ export class UserTemplates {
                             .classes("nopointer", "break-lines", "pin-title")
                             .text(entity.title)
                             .build(),
-                        create("span")
-                            .classes("nopointer", "pin-type")
-                            .text(typeLabel(pin.entity_type))
-                            .build(),
+                        horizontal(
+                            GenericTemplates.icon("keep", true),
+                            create("span")
+                                .classes("nopointer", "pin-type")
+                                .text(typeLabel(pin.entity_type))
+                                .build(),
+                        ).classes("small-gap")
                     ).build();
                 scrollDiv.appendChild(pinEl);
             }

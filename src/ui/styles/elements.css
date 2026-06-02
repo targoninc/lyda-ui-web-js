@@ -1840,7 +1840,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     padding: var(--mid-padding);
     border: 1px solid var(--border);
     border-radius: var(--large-border-radius);
-    perspective: 800px;
+    perspective: 600px;
 }
 
 .pin-card > * {
