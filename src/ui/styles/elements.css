@@ -1099,21 +1099,15 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .fixed-bar {
-    position: fixed;
-    left: 50%;
-    transform: translateX(-50%);
+    position: sticky;
+    top: var(--gap);
     z-index: 1;
     padding: var(--base-padding);
     border-radius: var(--large-border-radius);
     border: 1px solid var(--border);
-    align-self: center;
     box-shadow: 0 10px 20px -7px var(--bg-0);
     width: 100%;
-    max-width: var(--breakpoint-big);
-}
-
-.fixed-bar-content {
-    margin-top: 4em;
+    box-sizing: border-box;
 }
 
 .log-properties {
