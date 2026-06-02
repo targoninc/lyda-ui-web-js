@@ -418,13 +418,34 @@ export class GenericTemplates {
     }
 
     static noTracks() {
-        return horizontal(
-            create("span")
-                .text(t("NOTHING_FOUND"))
-                .build(),
-            GenericTemplates.graphic("email-box.webp", ["fullWidth", "no-tracks-bg"]),
-        ).classes("align-children")
-         .build();
+        const rand = (min: number, max: number) => Math.random() * (max - min) + min;
+        const circles = Array.from({ length: 6 }, (_, i) => {
+            const size = rand(120, 350);
+            const animName = i % 2 === 0 ? "float1" : "float2";
+            return create("div")
+                .classes("float-circle")
+                .styles(
+                    "width", `${size}px`,
+                    "height", `${size}px`,
+                    "top", `${rand(5, 60)}%`,
+                    "left", `${rand(5, 80)}%`,
+                    "animation-name", animName,
+                    "animation-duration", `${rand(10, 25)}s`,
+                    "animation-delay", `${rand(-10, 0)}s`,
+                )
+                .build();
+        });
+
+        return create("div")
+            .classes("no-tracks-scene")
+            .children(
+                ...circles,
+                create("span")
+                    .classes("no-tracks-text")
+                    .text(t("NOTHING_FOUND"))
+                    .build(),
+            )
+            .build();
     }
 
     static textInputModal(
