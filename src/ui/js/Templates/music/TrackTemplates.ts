@@ -123,8 +123,8 @@ export class TrackTemplates {
         const pathD = TrackTemplates.waveformPath(loudnessData, svgW, svgH);
 
         const clipInset = compute(
-            (pos, id): string => id === track.id ? `inset(0 ${Math.round((1 - pos.relative) * 100)}% 0 0)` : "none",
-            currentTrackPosition, currentTrackId,
+            (pos, isCurrent): string => isCurrent ? `inset(0 ${(1 - pos.relative) * 100}% 0 0)` : "none",
+            currentTrackPosition, compute(id => id === track.id, currentTrackId),
         );
 
         const el = create("div")
