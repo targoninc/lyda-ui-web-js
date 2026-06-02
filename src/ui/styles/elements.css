@@ -1830,14 +1830,27 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     overflow-x: auto;
     flex-wrap: nowrap;
     scroll-behavior: smooth;
+    padding: var(--gap) 0;
+    width: 100%;
 }
 
 .pin-card {
     width: 140px;
     flex-shrink: 0;
-    padding: var(--base-padding);
+    padding: var(--mid-padding);
     border: 1px solid var(--border);
     border-radius: var(--large-border-radius);
+    perspective: 800px;
+}
+
+.pin-card > * {
+    transition: transform 0.3s ease-out;
+    backface-visibility: hidden;
+}
+
+.pin-card > * {
+    transition: transform 0.3s ease-out;
+    backface-visibility: hidden;
 }
 
 .pin-card img {

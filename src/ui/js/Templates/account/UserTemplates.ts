@@ -917,7 +917,8 @@ export class UserTemplates {
                 .classes("flex", "small-gap", "pin-scroll")
                 .build() as HTMLElement;
 
-            for (const pin of items) {
+            for (let pi = 0; pi < items.length; pi++) {
+                const pin = items[pi];
                 const entity = pin.track || pin.album || pin.playlist;
                 if (!entity) continue;
 
@@ -931,6 +932,17 @@ export class UserTemplates {
                 const pinEl = create("div")
                     .classes("flex-v", "clickable", "no-gap", "pin-card")
                     .onclick(() => navigate(entityUrl(pin.entity_type, pin.entity_id)))
+                    .onmousemove((e: MouseEvent) => {
+                        const rect = pinEl.getBoundingClientRect();
+                        const x = (e.clientX - rect.left) / rect.width;
+                        const y = (e.clientY - rect.top) / rect.height;
+                        const tiltX = (y - 0.5) * -16;
+                        const tiltY = (x - 0.5) * 16;
+                        pinEl.style.transform = `perspective(800px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+                    })
+                    .onmouseleave(() => {
+                        pinEl.style.transform = "";
+                    })
                     .oncontextmenu((e: MouseEvent) => {
                         e.preventDefault();
                         const popId = `pin-menu-${pin.id}`;

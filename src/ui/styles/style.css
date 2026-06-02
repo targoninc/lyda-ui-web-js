@@ -73,6 +73,7 @@
     --border-radius: 5px;
     --large-border-radius: calc(var(--border-radius) * 2);
     --base-padding: 10px;
+    --mid-padding: calc(var(--base-padding) * 1.5);
     --large-padding: calc(var(--base-padding) * 2);
     --page-padding: 10px 20px;
     --inline-padding: 2px 7px;
