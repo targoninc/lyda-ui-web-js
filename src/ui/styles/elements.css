@@ -763,15 +763,28 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .waveform {
     width: 100%;
+    max-width: 600px;
     height: 1em;
     position: relative;
-    max-width: 100%;
+}
+
+@media (max-width: 1100px) {
+    .waveform { max-width: 400px; }
+}
+
+@media (max-width: 800px) {
+    .waveform { max-width: 300px; }
+}
+
+@media (max-width: 500px) {
+    .waveform { max-width: 100%; }
 }
 
 .waveform-svg {
     display: block;
     width: 100%;
     height: 100%;
+    max-width: 400px;
 }
 
 .single-page .waveform {
@@ -1223,6 +1236,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     min-width: 100px;
     overflow: auto;
     position: relative;
+    font-size: var(--font-size-small);
 }
 
 #track-description.overflowing, #user-description.overflowing {

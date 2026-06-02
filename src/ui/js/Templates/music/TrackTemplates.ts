@@ -100,6 +100,20 @@ export class TrackTemplates {
             .build();
     }
 
+    private static downsampleData(data: number[], target: number): number[] {
+        if (data.length <= target) return data;
+        const step = data.length / target;
+        const result: number[] = [];
+        for (let i = 0; i < target; i++) {
+            const start = Math.floor(i * step);
+            const end = Math.floor((i + 1) * step);
+            let sum = 0;
+            for (let j = start; j < end; j++) sum += Math.pow(data[j], 4);
+            result.push(Math.pow(sum / (end - start), 0.25));
+        }
+        return result;
+    }
+
     static waveform(track: Track, loudnessData: number[], small = false) {
         if (!track.processed) {
             return create("div")
@@ -120,11 +134,31 @@ export class TrackTemplates {
 
         const svgW = 1000;
         const svgH = small ? 40 : 80;
-        const pathD = TrackTemplates.waveformPath(loudnessData, svgW, svgH);
+
+        const windowWidth$ = signal(window.innerWidth);
+        const onResize = () => { windowWidth$.value = window.innerWidth; };
+        window.addEventListener("resize", onResize);
+
+        const pathD = compute(
+            w => {
+                let count = 200;
+                if (w < 500) count = 50;
+                else if (w < 800) count = 67;
+                else if (w < 1100) count = 100;
+                const data = TrackTemplates.downsampleData(loudnessData, count);
+                return TrackTemplates.waveformPath(data, svgW, svgH);
+            },
+            windowWidth$,
+        );
 
         const clipInset = compute(
             (pos, isCurrent): string => isCurrent ? `inset(0 ${(1 - pos.relative) * 100}% 0 0)` : "none",
             currentTrackPosition, compute(id => id === track.id, currentTrackId),
+        );
+
+        const blueDisplay = compute(
+            (id, ph): string => id === track.id && ph ? "" : "none",
+            currentTrackId, playingHere,
         );
 
         const el = create("div")
@@ -141,7 +175,7 @@ export class TrackTemplates {
                             .styles("fill", "var(--fg-0)")
                             .build(),
                         create("g")
-                            .styles("clip-path", clipInset)
+                            .styles("clip-path", clipInset, "display", blueDisplay)
                             .children(
                                 create("path")
                                     .attributes("d", pathD)
@@ -268,7 +302,7 @@ export class TrackTemplates {
                                     horizontal(
                                         TrackTemplates.addToQueueButton(track),
                                         InteractionTemplates.interactions(EntityType.track, track),
-                                    ),
+                                    ).classes("align-children"),
                                 ).classes("align-children-end"),
                             ).build(),
                     ).build(),
@@ -323,11 +357,9 @@ export class TrackTemplates {
         const track = trackData.track as Track;
         InteractionStateManager.addContext(EntityType.track, track.id, "page");
         const collaborators = track.collaborators ?? [];
-        const toAppend = [];
         const linkedUserState = signal(collaborators);
         const track$ = signal(track as Track | UploadableTrack);
 
-        toAppend.push(TrackTemplates.collaboratorSection(track$, linkedUserState));
         const icons: AnyElement[] = [];
         const isPrivate = track.visibility === "private";
         if (isPrivate) {
@@ -340,7 +372,7 @@ export class TrackTemplates {
         }
         const description = create("span")
             .id("track-description")
-            .classes("description", "break-lines", "padded")
+            .classes("description", "break-lines")
             .html(CustomText.renderToHtml(track.description))
             .build();
 
@@ -388,7 +420,7 @@ export class TrackTemplates {
                                         UserTemplates.userWidget(trackUser, [], [], UserWidgetContext.singlePage, track.artistname),
                                     ).classes("align-children"),
                                 ).classes("nogap"),
-                                ...toAppend,
+                                TrackTemplates.collaboratorSection(track$, linkedUserState),
                                 vertical(
                                     create("span").classes("collaborators").text(track.credits).build(),
                                     horizontal(
@@ -402,39 +434,41 @@ export class TrackTemplates {
                                             .build(),
                                     ).classes("align-children"),
                                 ).classes("small-gap"),
+                                when(track.description.length > 0, description),
                             ),
                         ),
                         horizontal(
                             TrackTemplates.playButton(track),
                             TrackTemplates.waveform(track, track.processed ? JSON.parse(track.loudness_data) : []),
-                        ).classes("align-children", "bordered", "glass", "rounded-max", "noflexwrap")
+                        ).classes("align-children", "bordered", "glass", "rounded-max", "noflexwrap", "limitToContentWidth")
                             .styles("padding", "10px 20px 10px 10px"),
                     ).build(),
                     create("div")
                         .classes("flex-v", "noflexwrap")
                         .children(
                             horizontal(
-                                InteractionTemplates.interactions(EntityType.track, track, {overrideActions: [InteractionType.like, InteractionType.repost]}),
-                                when(
-                                    currentUser,
-                                    horizontal(
-                                        TrackTemplates.addToPlaylistButton(track),
-                                        TrackTemplates.addToQueueButton(track),
-                                    ).build(),
-                                ),
-                                when(trackData.canBuy, button({
-                                    icon: {icon: "attach_money"},
-                                    text: t("BUY"),
-                                    onclick: () => {
-                                        BuyTemplates.openBuyModal({type: "track", entity: track}, () => {
-                                            window.location.reload();
-                                        });
-                                    },
-                                })),
-                                when(hasMenu, TrackTemplates.trackMenu(isPrivate, track, trackData)),
-                            ).classes("align-end"),
-                            when(track.description.length > 0, description),
-                            GenericTemplates.combinedSelector(tabs, (newTabIndex) => selectedTab$.value = newTabIndex, 0),
+                                horizontal(
+                                    InteractionTemplates.interactions(EntityType.track, track, {overrideActions: [InteractionType.like, InteractionType.repost]}),
+                                    when(
+                                        currentUser,
+                                        horizontal(
+                                            TrackTemplates.addToPlaylistButton(track),
+                                            TrackTemplates.addToQueueButton(track),
+                                        ).classes("align-children").build(),
+                                    ),
+                                    when(trackData.canBuy, button({
+                                        icon: {icon: "attach_money"},
+                                        text: t("BUY"),
+                                        onclick: () => {
+                                            BuyTemplates.openBuyModal({type: "track", entity: track}, () => {
+                                                window.location.reload();
+                                            });
+                                        },
+                                    })),
+                                    when(hasMenu, TrackTemplates.trackMenu(isPrivate, track, trackData)),
+                                ).classes("align-end"),
+                                GenericTemplates.combinedSelector(tabs, (newTabIndex) => selectedTab$.value = newTabIndex, 0),
+                            ).classes("space-between", "align-children"),
                             when(
                                 tabSelected(selectedTab$, 0),
                                 CommentTemplates.commentListFullWidth(track.id, comments, showComments),
@@ -646,18 +680,17 @@ export class TrackTemplates {
 
     private static waveformPath(data: number[], w: number, h: number): string {
         const n = data.length;
-        const step = w / Math.max(n - 1, 1);
-        let path = `M 0,${h} L 0,${h - Math.pow(data[0], 4) * h}`;
-        for (let i = 1; i < n; i++) {
-            const x = i * step;
-            const y = h - Math.pow(data[i], 4) * h;
-            const px = (i - 1) * step;
-            const py = h - Math.pow(data[i - 1], 4) * h;
-            const c1x = px + step * 0.4;
-            const c2x = x - step * 0.4;
-            path += ` C ${c1x},${py} ${c2x},${y} ${x},${y}`;
+        const barW = 3;
+        const gap = 2;
+        const step = barW + gap;
+        const scale = w / (n * step - gap);
+        let path = "";
+        for (let i = 0; i < n; i++) {
+            const x = i * step * scale;
+            const barH = Math.pow(data[i], 4) * h;
+            if (barH <= 0) continue;
+            path += `M ${x},${h} v ${-barH} h ${barW * scale} v ${barH} Z `;
         }
-        path += ` L ${w},${h} Z`;
         return path;
     }
 
