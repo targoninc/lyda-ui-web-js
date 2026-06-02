@@ -122,42 +122,34 @@ export class TrackTemplates {
         const svgH = small ? 40 : 80;
         const pathD = TrackTemplates.waveformPath(loudnessData, svgW, svgH);
 
-        const playedWidth = compute(
-            (pos, id): string => id === track.id ? `${Math.round(pos.relative * 100)}%` : "0%",
+        const clipInset = compute(
+            (pos, id): string => id === track.id ? `inset(0 ${Math.round((1 - pos.relative) * 100)}% 0 0)` : "none",
             currentTrackPosition, currentTrackId,
         );
-
-        const bgSvg = create("svg")
-            .classes("waveform-svg")
-            .attributes("viewBox", `0 0 ${svgW} ${svgH}`)
-            .attributes("preserveAspectRatio", "none")
-            .children(
-                create("path")
-                    .attributes("d", pathD)
-                    .styles("fill", "var(--fg-0)")
-                    .build(),
-            ).build();
-
-        const fgSvg = create("svg")
-            .classes("waveform-svg")
-            .attributes("viewBox", `0 0 ${svgW} ${svgH}`)
-            .attributes("preserveAspectRatio", "none")
-            .children(
-                create("path")
-                    .attributes("d", pathD)
-                    .styles("fill", "var(--blue)")
-                    .build(),
-            ).build();
-
-        const clipContainer = create("div")
-            .classes("waveform-played-container")
-            .styles("width", playedWidth)
-            .children(fgSvg)
-            .build();
 
         const el = create("div")
             .classes("waveform", small ? "waveform-small" : "_", "relative", "pointer")
             .id(track.id)
+            .children(
+                create("svg")
+                    .classes("waveform-svg")
+                    .attributes("viewBox", `0 0 ${svgW} ${svgH}`)
+                    .attributes("preserveAspectRatio", "none")
+                    .children(
+                        create("path")
+                            .attributes("d", pathD)
+                            .styles("fill", "var(--fg-0)")
+                            .build(),
+                        create("g")
+                            .styles("clip-path", clipInset)
+                            .children(
+                                create("path")
+                                    .attributes("d", pathD)
+                                    .styles("fill", "var(--blue)")
+                                    .build(),
+                            ).build(),
+                    ).build(),
+            )
             .onmousedown(async e => {
                 PlayManager.addStreamClientIfNotExists(track.id, track.length);
                 await PlayManager.scrubFromElement(e, track.id);
@@ -167,10 +159,7 @@ export class TrackTemplates {
                     await PlayManager.scrubFromElement(e, track.id);
                 }
             })
-            .children(
-                bgSvg,
-                clipContainer,
-            ).build();
+            .build();
         return el;
     }
 
