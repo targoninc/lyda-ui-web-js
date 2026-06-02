@@ -659,6 +659,10 @@ export class Api {
         return post(ApiRoutes.movePin, { pinId, direction });
     }
 
+    static async reorderPins(pinIds: number[]): Promise<any> {
+        return post(ApiRoutes.reorderPins, { pinIds });
+    }
+
     static async getCollabTypes(): Promise<CollaboratorType[] | null> {
         return await get<CollaboratorType[]>(ApiRoutes.getTrackCollabTypes);
     }

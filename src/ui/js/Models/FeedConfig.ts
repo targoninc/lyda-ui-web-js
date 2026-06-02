@@ -13,6 +13,13 @@ export interface FeedMenuAction<T> {
     show?: (item: T) => boolean;
 }
 
+export interface MenuItem {
+    label: StringOrSignal;
+    icon: StringOrSignal;
+    onclick: () => Promise<void>;
+    show?: boolean;
+}
+
 export interface FeedConfig<T extends { id: number }> {
     id?: string;
     columns: FeedColumn<T>[] | Signal<FeedColumn<T>[]>;

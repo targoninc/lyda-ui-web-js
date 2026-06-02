@@ -1,4 +1,4 @@
-import {getAvatar, target, Util} from "../../Classes/Util.ts";
+import {copy, getAvatar, target, Util} from "../../Classes/Util.ts";
 import {TrackActions} from "../../Actions/TrackActions.ts";
 import {UserActions} from "../../Actions/UserActions.ts";
 import {GenericTemplates, horizontal, tabSelected, vertical} from "../generic/GenericTemplates.ts";
@@ -27,7 +27,7 @@ import {FeedTemplates} from "../generic/FeedTemplates.ts";
 import {SearchTemplates} from "../SearchTemplates.ts";
 import {TrackTemplates} from "../music/TrackTemplates.ts";
 import {PopoverTemplates} from "../generic/PopoverTemplates.ts";
-import {FeedMenuAction} from "../../Models/FeedConfig.ts";
+import {FeedMenuAction, MenuItem} from "../../Models/FeedConfig.ts";
 import {button, icon} from "@targoninc/jess-components";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
@@ -585,7 +585,11 @@ export class UserTemplates {
             create("div").classes("fixed-bar-content").children(
                 when(
                     tabSelected(currentIndex, 0),
-                    FeedTemplates.feed(FeedType.profileTracks, user, {search$: pageSearch$, wipFilterState: pageWipFilter$, noToolbar: true}),
+                    FeedTemplates.feed(FeedType.profileTracks, user, {
+                        search$: pageSearch$,
+                        wipFilterState: pageWipFilter$,
+                        noToolbar: true
+                    }),
                 ),
                 when(
                     tabSelected(currentIndex, 1),
@@ -901,7 +905,10 @@ export class UserTemplates {
                     if (pinned) {
                         await pinState.unpin(entityType, entityId);
                     } else {
-                        try { await pinState.pin(entityType, entityId); } catch {}
+                        try {
+                            await pinState.pin(entityType, entityId);
+                        } catch {
+                        }
                     }
                 },
             };
@@ -965,10 +972,119 @@ export class UserTemplates {
                 const isFirst = pi === 0;
                 const isLast = pi === items.length - 1;
 
+                const menuItems: MenuItem[] = [];
+                if (pin.entity_type === EntityType.track && entity) {
+                    menuItems.push({
+                        label: t("QUEUE"), icon: "queue", show: true,
+                        onclick: async () => { QueueManager.addToManualQueue(entity.id); },
+                    });
+                    if (entity.visibility === "private" && entity.secretcode) {
+                        menuItems.push({
+                            label: t("COPY_PRIVATE_LINK"), icon: "link", show: true,
+                            onclick: async () => { copy(window.location.origin + "/track/" + entity.id + "/" + entity.secretcode); },
+                        });
+                    }
+                } else if (entity && (entity.tracks?.length ?? 0) > 0) {
+                    menuItems.push({
+                        label: t("QUEUE"), icon: "queue", show: true,
+                        onclick: async () => { entity.tracks?.forEach((t: any) => QueueManager.addToManualQueue(t.track_id)); },
+                    });
+                }
+                menuItems.push({
+                    label: t("UNPIN"), icon: "push_pin", show: true,
+                    onclick: async () => {
+                        await pinState.unpin(pin.entity_type, pin.entity_id);
+                        items.splice(items.indexOf(pin), 1);
+                        pins.value = [...items];
+                    },
+                });
+                menuItems.push({
+                    label: t("MOVE_LEFT"), icon: "chevron_left", show: !isFirst,
+                    onclick: async () => {
+                        await Api.movePin(pin.id, "left");
+                        [items[pi - 1], items[pi]] = [items[pi], items[pi - 1]];
+                        pins.value = [...items];
+                        pinState.changeCount.value = pinState.changeCount.value + 1;
+                    },
+                });
+                menuItems.push({
+                    label: t("MOVE_RIGHT"), icon: "chevron_right", show: !isLast,
+                    onclick: async () => {
+                        await Api.movePin(pin.id, "right");
+                        [items[pi], items[pi + 1]] = [items[pi + 1], items[pi]];
+                        pins.value = [...items];
+                        pinState.changeCount.value = pinState.changeCount.value + 1;
+                    },
+                });
+
+                const popId = `pin-menu-${pin.id}`;
+                const buildMenuButton = (m: MenuItem) =>
+                    create("button").classes("context-menu-item", "flex", "align-children", "small-gap")
+                        .onclick(async (ev: Event) => {
+                            const pop = (ev.currentTarget as HTMLElement).closest("[popover]") as HTMLElement | null;
+                            if (pop) pop.hidePopover();
+                            await m.onclick();
+                        })
+                        .children(
+                            GenericTemplates.icon(m.icon, true, ["context-menu-icon"]),
+                            create("span").text(m.label).build(),
+                        ).build();
+
+                const visibleMenuItems = () => menuItems.filter(m => m.show !== false);
+                const popover = PopoverTemplates.popover(popId, ...visibleMenuItems().map(buildMenuButton));
+                document.body.appendChild(popover);
+
+                const rebuildContextMenu = () => {
+                    popover.innerHTML = "";
+                    for (const el of visibleMenuItems().map(buildMenuButton)) {
+                        popover.appendChild(el);
+                    }
+                };
+
+                let dragStarted = false;
+
                 const pinEl = create("div")
                     .classes("flex-v", "clickable", "no-gap", "pin-card")
                     .attributes("draggable", "true")
-                    .onclick(() => navigate(entityUrl(pin.entity_type, pin.entity_id)))
+                    .onclick(() => { if (!dragStarted) navigate(entityUrl(pin.entity_type, pin.entity_id)); dragStarted = false; })
+                    .ondragstart((e: DragEvent) => {
+                        dragStarted = true;
+                        if (e.dataTransfer) {
+                            e.dataTransfer.effectAllowed = "move";
+                            e.dataTransfer.setData("text/plain", String(pi));
+                        }
+                        pinEl.classList.add("drag-over");
+                    })
+                    .ondragover((e: Event) => {
+                        e.preventDefault();
+                        (e as DragEvent).dataTransfer!.dropEffect = "move";
+                    })
+                    .ondragenter((e: Event) => {
+                        e.preventDefault();
+                        pinEl.classList.add("drag-over");
+                    })
+                    .ondragleave((e: Event) => {
+                        if (!pinEl.contains((e as DragEvent).relatedTarget as Node)) {
+                            pinEl.classList.remove("drag-over");
+                        }
+                    })
+                    .ondragend(() => {
+                        pinEl.classList.remove("drag-over");
+                        dragStarted = false;
+                    })
+                    .ondrop(async (e: Event) => {
+                        e.preventDefault();
+                        pinEl.classList.remove("drag-over");
+                        const dt = (e as DragEvent).dataTransfer;
+                        if (!dt) return;
+                        const fromIdx = parseInt(dt.getData("text/plain"), 10);
+                        if (fromIdx === pi) return;
+                        const moved = items.splice(fromIdx, 1)[0];
+                        items.splice(pi, 0, moved);
+                        pins.value = [...items];
+                        await Api.reorderPins(items.map((p: any) => p.id));
+                        pinState.changeCount.value = pinState.changeCount.value + 1;
+                    })
                     .onmousemove((e: MouseEvent) => {
                         const rect = pinEl.getBoundingClientRect();
                         const x = (e.clientX - rect.left) / rect.width;
@@ -980,77 +1096,9 @@ export class UserTemplates {
                     .onmouseleave(() => {
                         pinEl.style.transform = "";
                     })
-                    .ondragstart((e: DragEvent) => {
-                        e.dataTransfer?.setData("text/plain", String(pin.id));
-                        pinEl.style.opacity = "0.4";
-                    })
-                    .ondragend(() => {
-                        pinEl.style.opacity = "";
-                        document.querySelectorAll(".pin-card.drag-over").forEach(el => el.classList.remove("drag-over"));
-                    })
-                    .ondragover((e: DragEvent) => {
-                        e.preventDefault();
-                        pinEl.classList.add("drag-over");
-                    })
-                    .ondragleave(() => {
-                        pinEl.classList.remove("drag-over");
-                    })
-                    .ondrop(async (e: DragEvent) => {
-                        e.preventDefault();
-                        pinEl.classList.remove("drag-over");
-                        pinEl.style.opacity = "";
-                        const draggedId = Number(e.dataTransfer?.getData("text/plain"));
-                        if (draggedId && draggedId !== pin.id) {
-                            const fromIdx = items.findIndex(p => p.id === draggedId);
-                            const toIdx = pi;
-                            if (fromIdx !== -1 && toIdx !== -1) {
-                                const dir = toIdx > fromIdx ? "right" : "left";
-                                const steps = Math.abs(toIdx - fromIdx);
-                                for (let s = 0; s < steps; s++) {
-                                    await Api.movePin(items[fromIdx].id, dir);
-                                }
-                                const [moved] = items.splice(fromIdx, 1);
-                                items.splice(toIdx, 0, moved);
-                                pins.value = [...items];
-                            }
-                        }
-                    })
                     .oncontextmenu((e: MouseEvent) => {
                         e.preventDefault();
-                        const popId = `pin-menu-${pin.id}`;
-                        const menuItems = [
-                            { label: t("UNPIN"), icon: "push_pin", onclick: async () => {
-                                await pinState.unpin(pin.entity_type, pin.entity_id);
-                                items.splice(items.indexOf(pin), 1);
-                                pins.value = [...items];
-                            }},
-                            { label: t("MOVE_LEFT"), icon: "chevron_left", show: !isFirst, onclick: async () => {
-                                await Api.movePin(pin.id, "left");
-                                [items[pi - 1], items[pi]] = [items[pi], items[pi - 1]];
-                                pins.value = [...items];
-                                pinState.changeCount.value = pinState.changeCount.value + 1;
-                            }},
-                            { label: t("MOVE_RIGHT"), icon: "chevron_right", show: !isLast, onclick: async () => {
-                                await Api.movePin(pin.id, "right");
-                                [items[pi], items[pi + 1]] = [items[pi + 1], items[pi]];
-                                pins.value = [...items];
-                                pinState.changeCount.value = pinState.changeCount.value + 1;
-                            }},
-                        ];
-                        const popover = PopoverTemplates.popover(popId,
-                            ...menuItems.filter(m => m.show !== false).map(m =>
-                                create("button").classes("context-menu-item", "flex", "align-children", "small-gap")
-                                    .onclick(async (ev: Event) => {
-                                        const pop = (ev.currentTarget as HTMLElement).closest("[popover]") as HTMLElement | null;
-                                        if (pop) pop.hidePopover();
-                                        await m.onclick();
-                                    })
-                                    .children(
-                                        GenericTemplates.icon(m.icon, true, ["context-menu-icon"]),
-                                        create("span").text(m.label).build(),
-                                    ).build(),
-                            ),
-                        );
+                        rebuildContextMenu();
                         PopoverTemplates.showAtPoint(popover, e.clientX, e.clientY);
                     })
                     .children(
@@ -1077,7 +1125,7 @@ export class UserTemplates {
             const leftBtn = create("button")
                 .classes("round-button", "jess")
                 .styles("align-self", "center", "flex-shrink", "0", "display", "none")
-                .onclick(() => scrollDiv.scrollBy({ left: -300, behavior: "smooth" }))
+                .onclick(() => scrollDiv.scrollBy({left: -300, behavior: "smooth"}))
                 .children(
                     GenericTemplates.icon("chevron_left", true, ["round-button-icon", "align-center", "inline-icon", "svg", "nopointer"]),
                 ).build() as HTMLElement;
@@ -1085,7 +1133,7 @@ export class UserTemplates {
             const rightBtn = create("button")
                 .classes("round-button", "jess")
                 .styles("align-self", "center", "flex-shrink", "0", "display", "none")
-                .onclick(() => scrollDiv.scrollBy({ left: 300, behavior: "smooth" }))
+                .onclick(() => scrollDiv.scrollBy({left: 300, behavior: "smooth"}))
                 .children(
                     GenericTemplates.icon("chevron_right", true, ["round-button-icon", "align-center", "inline-icon", "svg", "nopointer"]),
                 ).build() as HTMLElement;
@@ -1165,7 +1213,9 @@ export class UserTemplates {
                     .styles("margin-right", i < maxAvatars - 1 ? "-10px" : "0")
                     .build() as HTMLImageElement;
                 if (u.has_avatar) {
-                    Util.getCachedUserAvatar(u.id).then(url => { img.src = url; });
+                    Util.getCachedUserAvatar(u.id).then(url => {
+                        img.src = url;
+                    });
                 } else {
                     img.src = Images.DEFAULT_AVATAR;
                 }
@@ -1407,7 +1457,9 @@ export class UserTemplates {
             .children(
                 GenericTemplates.combinedSelector(
                     tabs,
-                    (i: number) => { currentIndex.value = i; },
+                    (i: number) => {
+                        currentIndex.value = i;
+                    },
                     currentIndex.value,
                 ),
                 create("div").classes("flex", "align-children", "small-gap")
@@ -1418,68 +1470,72 @@ export class UserTemplates {
             ).build();
 
         const sharedFeed = (type: FeedType, extraOverrides?: any) =>
-            FeedTemplates.feed(type, user.value, {search$: pageSearch$, wipFilterState: pageWipFilter$, noToolbar: true, ...extraOverrides});
+            FeedTemplates.feed(type, user.value, {
+                search$: pageSearch$,
+                wipFilterState: pageWipFilter$,
+                noToolbar: true, ...extraOverrides
+            });
 
         return vertical(
             GenericTemplates.fixedBar([tabRow]),
             create("div").classes("fixed-bar-content").children(
-            when(
-                tabSelected(currentIndex, 0),
-                sharedFeed(FeedType.likedTracks),
-            ),
-            when(
-                tabSelected(currentIndex, 1),
-                FeedTemplates.create<TrackList>({
-                    id: `feed-${CardFeedType.likedAlbums}`,
-                    columns: libAlbumCols,
-                    compact: true,
-                    pageSize: 10,
-                    showSearch: true,
-                    searchOverride$: pageSearch$,
-                    noToolbar: true,
-                    fetchPage: async (offset, limit, filter) => {
-                        const result = await Api.getLikedAlbums(user.value.id, user.value.username, offset, filter || "");
-                        if (!result) return [];
-                        return {items: result.items as TrackList[], total: result.total};
-                    },
-                    buildMenuActions: libCardActions("album"),
-                    onPlayToggle: async (list) => {
-                        const ft = list.tracks?.[0]?.track;
-                        if (ft) await AlbumActions.startTrackInAlbum(list as Album, ft, true);
-                    },
-                    isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
-                    dateRender: (list) => GenericTemplates.timestamp(list.created_at, ["hideOnSmallBreakpoint"]),
-                }),
-            ),
-            when(
-                tabSelected(currentIndex, 2),
-                FeedTemplates.create<TrackList>({
-                    id: `feed-${CardFeedType.likedPlaylists}`,
-                    columns: libPlaylistCols,
-                    compact: true,
-                    pageSize: 10,
-                    showSearch: true,
-                    searchOverride$: pageSearch$,
-                    noToolbar: true,
-                    fetchPage: async (offset, limit, filter) => {
-                        const result = await Api.getLikedPlaylists(user.value.id, user.value.username, offset, filter || "");
-                        if (!result) return [];
-                        return {items: result.items as TrackList[], total: result.total};
-                    },
-                    buildMenuActions: libCardActions("playlist"),
-                    onPlayToggle: async (list) => {
-                        const ft = list.tracks?.[0]?.track;
-                        if (ft) await PlaylistActions.startTrackInPlaylist(list as Playlist, ft, true);
-                    },
-                    isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
-                    dateRender: (list) => GenericTemplates.timestamp(list.created_at, ["hideOnSmallBreakpoint"]),
-                }),
-            ),
-            when(
-                isSelf && tabSelected(currentIndex, 3),
-                sharedFeed(FeedType.boughtTracks),
-            ),
-        ).build()).build();
+                when(
+                    tabSelected(currentIndex, 0),
+                    sharedFeed(FeedType.likedTracks),
+                ),
+                when(
+                    tabSelected(currentIndex, 1),
+                    FeedTemplates.create<TrackList>({
+                        id: `feed-${CardFeedType.likedAlbums}`,
+                        columns: libAlbumCols,
+                        compact: true,
+                        pageSize: 10,
+                        showSearch: true,
+                        searchOverride$: pageSearch$,
+                        noToolbar: true,
+                        fetchPage: async (offset, limit, filter) => {
+                            const result = await Api.getLikedAlbums(user.value.id, user.value.username, offset, filter || "");
+                            if (!result) return [];
+                            return {items: result.items as TrackList[], total: result.total};
+                        },
+                        buildMenuActions: libCardActions("album"),
+                        onPlayToggle: async (list) => {
+                            const ft = list.tracks?.[0]?.track;
+                            if (ft) await AlbumActions.startTrackInAlbum(list as Album, ft, true);
+                        },
+                        isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
+                        dateRender: (list) => GenericTemplates.timestamp(list.created_at, ["hideOnSmallBreakpoint"]),
+                    }),
+                ),
+                when(
+                    tabSelected(currentIndex, 2),
+                    FeedTemplates.create<TrackList>({
+                        id: `feed-${CardFeedType.likedPlaylists}`,
+                        columns: libPlaylistCols,
+                        compact: true,
+                        pageSize: 10,
+                        showSearch: true,
+                        searchOverride$: pageSearch$,
+                        noToolbar: true,
+                        fetchPage: async (offset, limit, filter) => {
+                            const result = await Api.getLikedPlaylists(user.value.id, user.value.username, offset, filter || "");
+                            if (!result) return [];
+                            return {items: result.items as TrackList[], total: result.total};
+                        },
+                        buildMenuActions: libCardActions("playlist"),
+                        onPlayToggle: async (list) => {
+                            const ft = list.tracks?.[0]?.track;
+                            if (ft) await PlaylistActions.startTrackInPlaylist(list as Playlist, ft, true);
+                        },
+                        isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
+                        dateRender: (list) => GenericTemplates.timestamp(list.created_at, ["hideOnSmallBreakpoint"]),
+                    }),
+                ),
+                when(
+                    isSelf && tabSelected(currentIndex, 3),
+                    sharedFeed(FeedType.boughtTracks),
+                ),
+            ).build()).build();
     }
 
     static username(user: User, isOwnProfile: boolean) {
