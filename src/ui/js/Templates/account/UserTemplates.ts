@@ -881,12 +881,15 @@ export class UserTemplates {
 
     static pinsCarousel(profileUser: User) {
         const pins = signal<any[]>([]);
+        const subKey = `pins-carousel-${profileUser.id}`;
 
-        Api.getPins(profileUser.id).then(data => {
-            if (data?.items?.length) {
-                pins.value = data.items;
-            }
-        });
+        const fetchPins = () => {
+            Api.getPins(profileUser.id).then(data => {
+                pins.value = data?.items ?? [];
+            });
+        };
+        fetchPins();
+        pinState.changeCount.subscribe(() => fetchPins(), subKey);
 
         const defaultCover = (type: string) => {
             if (type === EntityType.track) return Images.DEFAULT_COVER_TRACK;

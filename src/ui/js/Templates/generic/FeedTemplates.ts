@@ -28,6 +28,7 @@ import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { input } from "@targoninc/jess-components";
 import { TrackTemplates } from "../music/TrackTemplates.ts";
 import { pinState } from "../../Classes/PinState.ts";
+import {SearchTemplates} from "../SearchTemplates.ts";
 
 export { FeedColumn, FeedMenuAction, FeedConfig };
 
