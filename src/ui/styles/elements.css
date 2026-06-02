@@ -1231,12 +1231,18 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     flex-wrap: nowrap;
 }
 
+.track-info-container {
+    max-width: 80%;
+}
+
 #track-description, #user-description {
-    max-height: 30dvh;
+    max-height: 120px;
     min-width: 100px;
     overflow: auto;
     position: relative;
     font-size: var(--font-size-small);
+    text-wrap: balance;
+    max-width: 400px;
 }
 
 #track-description.overflowing, #user-description.overflowing {

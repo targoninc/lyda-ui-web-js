@@ -370,17 +370,7 @@ export class TrackTemplates {
         if (!trackUser) {
             throw new Error(`Track ${track.id} has no user`);
         }
-        const description = create("span")
-            .id("track-description")
-            .classes("description", "break-lines")
-            .html(CustomText.renderToHtml(track.description))
-            .build();
 
-        setTimeout(() => {
-            if (description.clientHeight < description.scrollHeight) {
-                description.classList.add("overflowing");
-            }
-        }, 200);
         const coverFile = signal(Images.DEFAULT_COVER_TRACK);
         if (track.has_cover) {
             coverFile.value = Util.getTrackCover(track.id);
@@ -434,15 +424,19 @@ export class TrackTemplates {
                                             .build(),
                                     ).classes("align-children"),
                                 ).classes("small-gap"),
-                                when(track.description.length > 0, description),
-                            ),
-                        ),
+                                when(track.description.length > 0, create("span")
+                                    .id("track-description")
+                                    .classes("description", "break-lines")
+                                    .html(CustomText.renderToHtml(track.description))
+                                    .build()),
+                            ).classes("track-info-container"),
+                        ).classes("big-gap"),
                         horizontal(
                             TrackTemplates.playButton(track),
                             TrackTemplates.waveform(track, track.processed ? JSON.parse(track.loudness_data) : []),
                         ).classes("align-children", "bordered", "glass", "rounded-max", "noflexwrap", "limitToContentWidth")
                             .styles("padding", "10px 20px 10px 10px"),
-                    ).build(),
+                    ).classes("big-gap").build(),
                     create("div")
                         .classes("flex-v", "noflexwrap")
                         .children(
