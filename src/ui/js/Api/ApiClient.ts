@@ -28,11 +28,18 @@ const refetch = async <T>(
         }
 
         console.error(text);
+        let message = text;
+        try {
+            const json = JSON.parse(text);
+            if (json.error) message = json.error;
+        } catch {
+            // not JSON, use raw text
+        }
         notify(
-            `${text.substring(0, 100) + ((text.length > 100) ? "..." : "")}`,
+            message.length > 100 ? message.substring(0, 100) + "..." : message,
             NotificationType.error
         );
-        throw new Error(text);
+        throw new Error(message);
     }
 
     if (!text.startsWith("{") && !text.startsWith("[")) {
