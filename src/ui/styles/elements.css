@@ -1830,7 +1830,8 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     overflow-x: auto;
     flex-wrap: nowrap;
     scroll-behavior: smooth;
-    padding: var(--gap) 0;
+    padding: calc(32px + var(--gap)) 32px;
+    margin: -32px;
     width: 100%;
 }
 
