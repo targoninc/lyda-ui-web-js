@@ -1724,6 +1724,23 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     }
 }
 
+.feed-top-row {
+    padding-bottom: var(--gap);
+}
+
+.feed-search-container {
+    max-width: 200px;
+}
+
+.feed-filter-btn {
+    --round-button-size: 32px;
+}
+
+.feed-filter-popover {
+    padding: var(--gap);
+    min-width: 200px;
+}
+
 .context-menu-btn {
     opacity: 0;
     transition: opacity .15s;

@@ -1,5 +1,5 @@
-import { compute, create, Signal, signal, signalMap, when, AnyNode, nullElement, InputType } from "@targoninc/jess";
-import { GenericTemplates, horizontal } from "./GenericTemplates.ts";
+import { compute, create, Signal, signal, signalMap, AnyNode, nullElement } from "@targoninc/jess";
+import { GenericTemplates } from "./GenericTemplates.ts";
 import { getPlayIcon, copy, Util } from "../../Classes/Util.ts";
 import { t } from "../../../locales";
 import { FeedColumn, FeedMenuAction, FeedConfig, resolveColumns } from "../../Models/FeedConfig.ts";
@@ -25,7 +25,7 @@ import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
-import { input } from "@targoninc/jess-components";
+
 import { TrackTemplates } from "../music/TrackTemplates.ts";
 
 export { FeedColumn, FeedMenuAction, FeedConfig };
@@ -309,21 +309,67 @@ export class FeedTemplates {
         const sortKey = compute((sb, sd) => sb && sd ? `${sb}-${sd}` : null, sortBy$, sortDir$);
         const colCount = resolveColumns(config.columns).length + 3;
 
-        const searchEl = when(config.showSearch,
-            input({
-                type: InputType.text,
-                validators: [],
-                name: "feed-search",
-                placeholder: t("SEARCH"),
-                debounce: 200,
-                classes: ["round-input"],
-                onchange: (value: string) => { search$.value = value; },
-                value: search$,
-            }),
-        );
-        const topRow = config.header && config.showSearch
-            ? horizontal(searchEl, config.header).classes("space-between", "align-children").build()
-            : (config.header ?? searchEl);
+        const searchEl = config.showSearch ? (() => {
+            let timeout: ReturnType<typeof setTimeout> | undefined;
+            return create("div")
+                .classes("search-input-container", "feed-search-container", "relative")
+                .children(
+                    GenericTemplates.icon("search", true, ["inline-icon", "svg", "search-icon"]),
+                    GenericTemplates.icon(
+                        "close",
+                        true,
+                        ["inline-icon", "svg", "clear-icon", "clickable"],
+                        t("CLEAR_SEARCH"),
+                        () => { search$.value = ""; if (timeout) clearTimeout(timeout); },
+                    ),
+                    create("input")
+                        .classes("jess", "search-input", "feed-search-input")
+                        .placeholder(t("SEARCH"))
+                        .value(search$)
+                        .onkeyup((e: KeyboardEvent) => {
+                            const target = e.target as HTMLInputElement;
+                            if (timeout) clearTimeout(timeout);
+                            timeout = setTimeout(() => {
+                                search$.value = target.value;
+                            }, 200);
+                        })
+                        .build(),
+                ).build();
+        })() : nullElement();
+
+        const hasFilters = !!config.wipFilterState;
+        let filterBtn: any = nullElement();
+        let filterPopover: HTMLElement | null = null;
+        if (hasFilters) {
+            filterPopover = create("div")
+                .classes("generic-popover", "feed-filter-popover", "flex-v")
+                .attributes("popover", "auto")
+                .children(
+                    create("div").classes("padded").children(
+                        TrackTemplates.wipFilter(config.wipFilterState!),
+                    ).build(),
+                ).build() as HTMLElement;
+            filterBtn = create("button")
+                .classes("round-button", "jess", "feed-filter-btn")
+                .title(t("FILTER"))
+                .onclick(() => {
+                    if (filterPopover) PopoverTemplates.toggle(filterPopover, filterBtn as HTMLElement);
+                })
+                .children(
+                    GenericTemplates.icon("filter_alt", true, ["round-button-icon", "align-center", "inline-icon", "svg", "nopointer"]),
+                ).build();
+        }
+
+        const topRow = create("div")
+            .classes("flex", "space-between", "align-children", "feed-top-row")
+            .children(
+                config.header ?? nullElement(),
+                create("div").classes("flex", "align-children", "small-gap")
+                    .children(
+                        searchEl,
+                        filterBtn,
+                    ).build(),
+            ).build();
 
         const el = create("div")
             .classes("feed-wrapper", "flex-v", "fullWidth", config.compact ? "feed-compact" : "_")
@@ -404,6 +450,7 @@ export class FeedTemplates {
                 ),
                 mobilePopover,
                 batchPopover,
+                filterPopover ?? nullElement(),
             ).build();
 
         setTimeout(() => {
@@ -615,15 +662,10 @@ export class FeedTemplates {
         return FeedTemplates.create<Track>({
             id: `feed-${type}`,
             compact: [FeedType.explore, FeedType.following, FeedType.history].includes(type),
-            showSearch: ![FeedType.following, FeedType.explore].includes(type),
+            showSearch: true,
             header: isFollowing
-                ? create("div").classes("flex", "space-between", "align-children").children(
-                    TrackTemplates.feedFilters(filterState),
-                    supportsWip ? TrackTemplates.wipFilter(wipFilterState) : nullElement(),
-                ).build()
-                : supportsWip
-                    ? TrackTemplates.wipFilter(wipFilterState)
-                    : undefined,
+                ? TrackTemplates.feedFilters(filterState)
+                : undefined,
             filterState: isFollowing ? filterState : undefined,
             wipFilterState: supportsWip ? wipFilterState : undefined,
             columns: columns$,
