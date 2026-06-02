@@ -24,6 +24,8 @@ import {createModal, notify, Ui} from "../../Classes/Ui.ts";
 import {MediaActions} from "../../Actions/MediaActions.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {FeedTemplates} from "../generic/FeedTemplates.ts";
+import {SearchTemplates} from "../SearchTemplates.ts";
+import {TrackTemplates} from "../music/TrackTemplates.ts";
 import {PopoverTemplates} from "../generic/PopoverTemplates.ts";
 import {FeedMenuAction} from "../../Models/FeedConfig.ts";
 import {button, icon} from "@targoninc/jess-components";
@@ -530,18 +532,58 @@ export class UserTemplates {
             },
         ];
 
+        const pageSearch$ = signal("");
+        const pageWipFilter$ = signal("");
+
+        const showFilter = compute(i => i === 0, currentIndex);
+        const filterPopover = create("div")
+            .classes("generic-popover", "feed-filter-popover", "flex-v")
+            .attributes("popover", "auto")
+            .children(
+                create("div").classes("padded").children(
+                    TrackTemplates.wipFilter(pageWipFilter$),
+                ).build(),
+            ).build() as HTMLElement;
+        const filterBtn = create("button")
+            .classes("round-button", "jess", "feed-filter-btn")
+            .title(t("FILTER"))
+            .onclick(() => PopoverTemplates.toggle(filterPopover, filterBtn))
+            .children(
+                GenericTemplates.icon("filter_alt", true, ["round-button-icon", "align-center", "inline-icon", "svg", "nopointer"]),
+            ).build();
+        const filterArea = create("div")
+            .classes(compute((sf): string => sf ? "_" : "hidden", showFilter))
+            .children(
+                filterBtn,
+                filterPopover,
+            ).build();
+
+        const tabRow = create("div")
+            .classes("flex", "space-between", "align-children")
+            .children(
+                GenericTemplates.combinedSelector(tabs, (i: number) => (currentIndex.value = i), currentIndex.value),
+                create("div").classes("flex", "align-children", "small-gap")
+                    .children(
+                        SearchTemplates.searchInputWidget(pageSearch$),
+                        filterArea,
+                    ).build(),
+            ).build();
+
         return vertical(
-            GenericTemplates.combinedSelector(tabs, (i: number) => (currentIndex.value = i), currentIndex.value),
+            tabRow,
             when(
                 tabSelected(currentIndex, 0),
-                FeedTemplates.feed(FeedType.profileTracks, user),
+                FeedTemplates.feed(FeedType.profileTracks, user, {search$: pageSearch$, wipFilterState: pageWipFilter$, noToolbar: true}),
             ),
             when(
                 tabSelected(currentIndex, 1),
                 FeedTemplates.create<TrackList>({
                     id: `feed-${CardFeedType.profileAlbums}`,
                     columns: albumColumns,
+                    compact: true,
                     pageSize: 10,
+                    showSearch: true,
+                    searchOverride$: pageSearch$,
                     fetchPage: (offset) => Api.getAlbumsByUserId(user.id, user.username, offset, "").then(r => r ?? {
                         items: [],
                         total: 0
@@ -560,7 +602,10 @@ export class UserTemplates {
                 FeedTemplates.create<TrackList>({
                     id: `feed-${CardFeedType.profilePlaylists}`,
                     columns: playlistColumns,
+                    compact: true,
                     pageSize: 10,
+                    showSearch: true,
+                    searchOverride$: pageSearch$,
                     fetchPage: (offset) => Api.getPlaylistsByUserId(user.id, user.username, offset, "").then(r => r ?? {
                         items: [],
                         total: 0
@@ -576,11 +621,11 @@ export class UserTemplates {
             ),
             when(
                 tabSelected(currentIndex, 3),
-                FeedTemplates.feed(FeedType.profileReposts, user),
+                FeedTemplates.feed(FeedType.profileReposts, user, {search$: pageSearch$, noToolbar: true}),
             ),
             when(
                 tabSelected(currentIndex, 4),
-                FeedTemplates.feed(FeedType.history, user),
+                FeedTemplates.feed(FeedType.history, user, {search$: pageSearch$, noToolbar: true}),
             ),
         ).build();
     }
@@ -1084,12 +1129,56 @@ export class UserTemplates {
             },
         ];
 
+        const pageSearch$ = signal("");
+        const pageWipFilter$ = signal("");
+
+        const showFilter = compute(i => i === 0 || (isSelf && i === (tabs.length - 1)), currentIndex);
+        const filterPopover = create("div")
+            .classes("generic-popover", "feed-filter-popover", "flex-v")
+            .attributes("popover", "auto")
+            .children(
+                create("div").classes("padded").children(
+                    TrackTemplates.wipFilter(pageWipFilter$),
+                ).build(),
+            ).build() as HTMLElement;
+        const filterBtn = create("button")
+            .classes("round-button", "jess", "feed-filter-btn")
+            .title(t("FILTER"))
+            .onclick(() => PopoverTemplates.toggle(filterPopover, filterBtn))
+            .children(
+                GenericTemplates.icon("filter_alt", true, ["round-button-icon", "align-center", "inline-icon", "svg", "nopointer"]),
+            ).build();
+        const filterArea = create("div")
+            .classes(compute((sf): string => sf ? "_" : "hidden", showFilter))
+            .children(
+                filterBtn,
+                filterPopover,
+            ).build();
+
+        const tabRow = create("div")
+            .classes("flex", "space-between", "align-children")
+            .children(
+                GenericTemplates.combinedSelector(
+                    tabs,
+                    (i: number) => { currentIndex.value = i; },
+                    currentIndex.value,
+                ),
+                create("div").classes("flex", "align-children", "small-gap")
+                    .children(
+                        SearchTemplates.searchInputWidget(pageSearch$),
+                        filterArea,
+                    ).build(),
+            ).build();
+
         const tabContents = [
-            FeedTemplates.feed(FeedType.likedTracks, user.value),
+            FeedTemplates.feed(FeedType.likedTracks, user.value, {search$: pageSearch$, wipFilterState: pageWipFilter$, noToolbar: true}),
             FeedTemplates.create<TrackList>({
                 id: `feed-${CardFeedType.likedAlbums}`,
                 columns: libAlbumCols,
+                compact: true,
                 pageSize: 10,
+                showSearch: true,
+                searchOverride$: pageSearch$,
                 fetchPage: async (offset) => {
                     const result = await Api.getLikedAlbums(user.value.id, user.value.username, offset, "");
                     if (!result) return [];
@@ -1106,7 +1195,10 @@ export class UserTemplates {
             FeedTemplates.create<TrackList>({
                 id: `feed-${CardFeedType.likedPlaylists}`,
                 columns: libPlaylistCols,
+                compact: true,
                 pageSize: 10,
+                showSearch: true,
+                searchOverride$: pageSearch$,
                 fetchPage: async (offset) => {
                     const result = await Api.getLikedPlaylists(user.value.id, user.value.username, offset, "");
                     if (!result) return [];
@@ -1123,21 +1215,12 @@ export class UserTemplates {
         ];
 
         if (isSelf) {
-            tabContents.push(FeedTemplates.feed(FeedType.boughtTracks));
+            tabContents.push(FeedTemplates.feed(FeedType.boughtTracks, undefined, {search$: pageSearch$, wipFilterState: pageWipFilter$, noToolbar: true}));
         }
 
         return vertical(
             GenericTemplates.title(t("YOUR_LIKED_MUSIC")),
-            GenericTemplates.combinedSelector(
-                tabs,
-                (i: number) => {
-                    currentIndex.value = i;
-                    tabContents.forEach((c, j) => {
-                        c.style.display = i === j ? "flex" : "none";
-                    });
-                },
-                currentIndex.value,
-            ),
+            tabRow,
             ...tabContents
         ).build();
     }

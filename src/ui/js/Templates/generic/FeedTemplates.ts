@@ -26,6 +26,7 @@ import { UserTemplates } from "../account/UserTemplates.ts";
 import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 
+import { SearchTemplates } from "../SearchTemplates.ts";
 import { TrackTemplates } from "../music/TrackTemplates.ts";
 
 export { FeedColumn, FeedMenuAction, FeedConfig };
@@ -40,7 +41,7 @@ export class FeedTemplates {
         const items$ = signal<T[]>([]);
         const loading$ = signal(false);
         const totalCount$ = signal<number | null>(null);
-        const search$ = signal("");
+        const search$ = config.searchOverride$ ?? signal("");
         const sortBy$ = signal<string | null>(null);
         const sortDir$ = signal<'asc' | 'desc' | null>(null);
         const ps = config.pageSize;
@@ -261,7 +262,7 @@ export class FeedTemplates {
             }
         };
 
-        if (config.showSearch) search$.subscribe(reload);
+        if (config.showSearch || config.searchOverride$) search$.subscribe(reload);
         if (config.filterState) config.filterState.subscribe(reload);
         if (config.wipFilterState) config.wipFilterState.subscribe(reload);
         sortBy$.subscribe(reload);
@@ -309,35 +310,12 @@ export class FeedTemplates {
         const sortKey = compute((sb, sd) => sb && sd ? `${sb}-${sd}` : null, sortBy$, sortDir$);
         const colCount = resolveColumns(config.columns).length + 3;
 
-        const searchEl = config.showSearch ? (() => {
-            let timeout: ReturnType<typeof setTimeout> | undefined;
-            return create("div")
-                .classes("search-input-container", "feed-search-container", "relative")
-                .children(
-                    GenericTemplates.icon("search", true, ["inline-icon", "svg", "search-icon"]),
-                    GenericTemplates.icon(
-                        "close",
-                        true,
-                        ["inline-icon", "svg", "clear-icon", "clickable"],
-                        t("CLEAR_SEARCH"),
-                        () => { search$.value = ""; if (timeout) clearTimeout(timeout); },
-                    ),
-                    create("input")
-                        .classes("jess", "search-input", "feed-search-input")
-                        .placeholder(t("SEARCH"))
-                        .value(search$)
-                        .onkeyup((e: KeyboardEvent) => {
-                            const target = e.target as HTMLInputElement;
-                            if (timeout) clearTimeout(timeout);
-                            timeout = setTimeout(() => {
-                                search$.value = target.value;
-                            }, 200);
-                        })
-                        .build(),
-                ).build();
-        })() : nullElement();
+        const useInternalSearch = config.showSearch && !config.searchOverride$;
+        const searchEl = useInternalSearch
+            ? SearchTemplates.searchInputWidget(search$, t("SEARCH"), ["feed-search-container", "relative"])
+            : nullElement();
 
-        const hasFilters = !!config.wipFilterState;
+        const hasFilters = !!config.wipFilterState && !config.noToolbar;
         let filterBtn: any = nullElement();
         let filterPopover: HTMLElement | null = null;
         if (hasFilters) {
@@ -360,16 +338,18 @@ export class FeedTemplates {
                 ).build();
         }
 
-        const topRow = create("div")
-            .classes("flex", "space-between", "align-children", "feed-top-row")
-            .children(
-                config.header ?? nullElement(),
-                create("div").classes("flex", "align-children", "small-gap")
-                    .children(
-                        searchEl,
-                        filterBtn,
-                    ).build(),
-            ).build();
+        const topRow = config.noToolbar
+            ? nullElement()
+            : create("div")
+                .classes("flex", "space-between", "align-children", "feed-top-row")
+                .children(
+                    config.header ?? nullElement(),
+                    create("div").classes("flex", "align-children", "small-gap")
+                        .children(
+                            searchEl,
+                            filterBtn,
+                        ).build(),
+                ).build();
 
         const el = create("div")
             .classes("feed-wrapper", "flex-v", "fullWidth", config.compact ? "feed-compact" : "_")
@@ -450,7 +430,7 @@ export class FeedTemplates {
                 ),
                 mobilePopover,
                 batchPopover,
-                filterPopover ?? nullElement(),
+                !config.noToolbar ? (filterPopover ?? nullElement()) : nullElement(),
             ).build();
 
         setTimeout(() => {
@@ -550,7 +530,7 @@ export class FeedTemplates {
         return el;
     }
 
-    static feed(type: FeedType, user?: { id?: number; username?: string; displayname?: string }): any {
+    static feed(type: FeedType, user?: { id?: number; username?: string; displayname?: string }, overrides?: { search$?: Signal<string>; wipFilterState?: Signal<string>; noToolbar?: boolean }): any {
         const validFilters = ["all", "originals", "reposts"];
         const urlParams = new URLSearchParams(window.location.search);
         const initialFilter = urlParams.get("filter") ?? "all";
@@ -567,8 +547,8 @@ export class FeedTemplates {
             filter: filterState.value,
         };
 
-        const initialWip = urlParams.get("wip") ?? "";
-        const wipFilterState = signal(validWipValues.includes(initialWip) ? initialWip : "");
+        const initialWip = overrides?.wipFilterState?.value ?? urlParams.get("wip") ?? "";
+        const wipFilterState = overrides?.wipFilterState ?? signal(validWipValues.includes(initialWip) ? initialWip : "");
         if (supportsWip) {
             pf.wip = wipFilterState.value;
         }
@@ -662,12 +642,14 @@ export class FeedTemplates {
         return FeedTemplates.create<Track>({
             id: `feed-${type}`,
             compact: [FeedType.explore, FeedType.following, FeedType.history].includes(type),
-            showSearch: true,
-            header: isFollowing
+            showSearch: !overrides?.search$,
+            header: isFollowing && !overrides?.noToolbar
                 ? TrackTemplates.feedFilters(filterState)
                 : undefined,
             filterState: isFollowing ? filterState : undefined,
             wipFilterState: supportsWip ? wipFilterState : undefined,
+            searchOverride$: overrides?.search$,
+            noToolbar: overrides?.noToolbar,
             columns: columns$,
             pageSize: type === FeedType.explore ? 100 : 10,
             fetchPage: async (offset, limit, filter, sortBy, sortDir) => {

@@ -32,6 +32,8 @@ export interface FeedConfig<T extends { id: number }> {
     header?: AnyNode;
     filterState?: Signal<string>;
     wipFilterState?: Signal<string>;
+    searchOverride$?: Signal<string>;
+    noToolbar?: boolean;
 }
 
 export function resolveColumns<T>(columns: FeedConfig<T>["columns"]): FeedColumn<T>[] {

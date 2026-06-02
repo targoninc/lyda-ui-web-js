@@ -73,6 +73,41 @@ export class SearchTemplates {
         return el;
     }
 
+    static searchInputWidget(
+        currentSearch: Signal<string>,
+        placeholder: StringOrSignal = t("SEARCH"),
+        extraClasses: StringOrSignal[] = [],
+        debounce = 200,
+    ) {
+        let timeout: ReturnType<typeof setTimeout> | undefined;
+        return create("div")
+            .classes("search-input-container", "relative", ...extraClasses)
+            .children(
+                GenericTemplates.icon("search", true, ["inline-icon", "svg", "search-icon"]),
+                GenericTemplates.icon(
+                    "close",
+                    true,
+                    ["inline-icon", "svg", "clear-icon", "clickable"],
+                    t("CLEAR_SEARCH"),
+                    () => { currentSearch.value = ""; if (timeout) clearTimeout(timeout); },
+                ),
+                create("input")
+                    .classes("jess", "search-input")
+                    .placeholder(placeholder)
+                    .value(currentSearch)
+                    .onkeyup((e: KeyboardEvent) => {
+                        const target = e.target as HTMLInputElement;
+                        if (debounce > 0) {
+                            if (timeout) clearTimeout(timeout);
+                            timeout = setTimeout(() => { currentSearch.value = target.value; }, debounce);
+                        } else {
+                            currentSearch.value = target.value;
+                        }
+                    })
+                    .build(),
+            ).build();
+    }
+
     static searchInput(
         results: Signal<SearchResult[]>,
         selectedResult: Signal<number | null>,
@@ -121,89 +156,78 @@ export class SearchTemplates {
         const contextClasses = context === SearchContext.searchPage ? ["fullWidth"] : [];
         getResults().then();
 
-        return create("div")
-            .classes("search-input-container", "relative", ...contextClasses)
-            .children(
-                GenericTemplates.icon("search", true, ["inline-icon", "svg", "search-icon"]),
-                GenericTemplates.icon(
-                    "close",
-                    true,
-                    ["inline-icon", "svg", "clear-icon", "clickable"],
-                    t("CLEAR_SEARCH"),
-                    () => {
-                        currentSearch.value = "";
-                        resultsShown.value = false;
-                    },
-                ),
-                create("input")
-                    .classes("jess", "search-input")
-                    .placeholder(t("SEARCH"))
-                    .value(currentSearch)
-                    .onclick(() => {
-                        resultsShown.value = true;
-                    })
-                    .onkeydown((e: KeyboardEvent) => {
-                        const list = results.value;
-                        const pressedKey = e.key;
-                        if (pressedKey === "ArrowDown") {
-                            e.preventDefault();
-                            SearchTemplates.selectNextResult(selectedResult, list);
-                        } else if (pressedKey === "ArrowUp") {
-                            e.preventDefault();
-                            SearchTemplates.selectPreviousResult(selectedResult, list);
-                        } else if (pressedKey === "Escape") {
-                            resultsShown.value = false;
-                        }
-                    })
-                    .onkeyup(async (e: KeyboardEvent) => {
-                        const pressedKey = e.key;
-                        if (pressedKey === "Enter") {
-                            if (selectedResult.value === null) {
-                                resultsShown.value = false;
-                                if (!preventEnterNavigation) {
-                                    navigate(`${RoutePath.search}?q=` + currentSearch.value);
-                                }
-                                return;
-                            }
-                            const result = results.value.find(r => r.id === selectedResult.value);
-                            if (!result) {
-                                return;
-                            }
-                            resultsShown.value = false;
-                            if (onSelect) {
-                                onSelect(result);
-                                return;
-                            }
-                            navigate(result.url);
-                            return;
-                        }
+        const widget = SearchTemplates.searchInputWidget(currentSearch, t("SEARCH"), ["relative", ...contextClasses], 0);
+        const inputEl = widget.querySelector("input")!;
+        inputEl.onclick = () => { resultsShown.value = true; };
+        inputEl.onkeydown = (e: KeyboardEvent) => {
+            const list = results.value;
+            const pressedKey = e.key;
+            if (pressedKey === "ArrowDown") {
+                e.preventDefault();
+                SearchTemplates.selectNextResult(selectedResult, list);
+            } else if (pressedKey === "ArrowUp") {
+                e.preventDefault();
+                SearchTemplates.selectPreviousResult(selectedResult, list);
+            } else if (pressedKey === "Escape") {
+                resultsShown.value = false;
+            }
+        };
+        inputEl.onkeyup = async (e: KeyboardEvent) => {
+            const pressedKey = e.key;
+            if (pressedKey === "Enter") {
+                if (selectedResult.value === null) {
+                    resultsShown.value = false;
+                    if (!preventEnterNavigation) {
+                        navigate(`${RoutePath.search}?q=` + currentSearch.value);
+                    }
+                    return;
+                }
+                const result = results.value.find(r => r.id === selectedResult.value);
+                if (!result) {
+                    return;
+                }
+                resultsShown.value = false;
+                if (onSelect) {
+                    onSelect(result);
+                    return;
+                }
+                navigate(result.url);
+                return;
+            }
 
-                        const target = e.target as HTMLInputElement;
-                        const search = target.value;
-                        if (
-                            pressedKey !== "Backspace" &&
-                            pressedKey !== "Delete" &&
-                            pressedKey.length > 1
-                        ) {
-                            return;
-                        }
+            const target = e.target as HTMLInputElement;
+            const search = target.value;
+            if (
+                pressedKey !== "Backspace" &&
+                pressedKey !== "Delete" &&
+                pressedKey.length > 1
+            ) {
+                return;
+            }
 
-                        if (search.trim().length === 0) {
-                            results.value = [];
-                            currentSearch.value = "";
-                            return;
-                        }
-                        currentSearch.value = search;
+            if (search.trim().length === 0) {
+                results.value = [];
+                currentSearch.value = "";
+                return;
+            }
+            currentSearch.value = search;
 
-                        if (timeout) {
-                            clearTimeout(timeout);
-                            timeout = undefined;
-                        }
+            if (timeout) {
+                clearTimeout(timeout);
+                timeout = undefined;
+            }
 
-                        timeout = setTimeout(() => getResults(), debounce);
-                    })
-                    .build(),
-            ).build();
+            timeout = setTimeout(() => getResults(), debounce);
+        };
+        const closeIcon = widget.querySelector(".clear-icon") as HTMLElement;
+        if (closeIcon) {
+            closeIcon.onclick = () => {
+                currentSearch.value = "";
+                resultsShown.value = false;
+            };
+        }
+
+        return widget;
     }
 
     private static selectNextResult(selectedResult: Signal<number | null>, list: SearchResult[]) {

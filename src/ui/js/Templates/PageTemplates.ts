@@ -226,13 +226,25 @@ export class PageTemplates {
             },
         ];
 
+        const pageSearch$ = signal("");
+
+        const tabRow = create("div")
+            .classes("flex", "space-between", "align-children")
+            .children(
+                GenericTemplates.combinedSelector(tabs, i => selectedTab.value = i, selectedTab.value),
+                create("div").classes("flex", "align-children")
+                    .children(
+                        SearchTemplates.searchInputWidget(pageSearch$),
+                    ).build(),
+            ).build();
+
         return create("div")
             .classes("feed-wrapper", "flex-v", "fullWidth")
             .children(
-                GenericTemplates.combinedSelector(tabs, i => selectedTab.value = i, selectedTab.value),
+                tabRow,
                 when(
                     tabSelected(selectedTab, 0),
-                    FeedTemplates.feed(FeedType.explore),
+                    FeedTemplates.feed(FeedType.explore, undefined, {search$: pageSearch$, noToolbar: true}),
                 ),
                 when(
                     tabSelected(selectedTab, 1),
@@ -241,6 +253,8 @@ export class PageTemplates {
                         columns: baseAlbumColumns,
                         compact: true,
                         pageSize: 100,
+                        showSearch: true,
+                        searchOverride$: pageSearch$,
                         fetchPage: async (offset, limit) => {
                             const res = await Api.getFeed(ApiRoutes.exploreAlbumsFeed, { offset, limit });
                             if (!res) return { items: [], total: 0 };
@@ -270,6 +284,8 @@ export class PageTemplates {
                         columns: basePlaylistColumns,
                         compact: true,
                         pageSize: 100,
+                        showSearch: true,
+                        searchOverride$: pageSearch$,
                         fetchPage: async (offset, limit) => {
                             const res = await Api.getFeed(ApiRoutes.explorePlaylistsFeed, { offset, limit });
                             if (!res) return { items: [], total: 0 };
