@@ -1847,6 +1847,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .pin-card.drag-over {
     border-color: var(--blue);
+    background: var(--blue);
 }
 
 .pin-card > * {
