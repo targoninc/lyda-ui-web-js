@@ -1,26 +1,18 @@
-import { TrackActions } from "../../Actions/TrackActions.ts";
-import { UserTemplates } from "../account/UserTemplates.ts";
-import { copy, getPlayIcon, Util } from "../../Classes/Util.ts";
-import { PlayManager } from "../../Streaming/PlayManager.ts";
-import { GenericTemplates, horizontal, tabSelected, vertical } from "../generic/GenericTemplates.ts";
-import { PopoverTemplates } from "../generic/PopoverTemplates.ts";
-import { Time } from "../../Classes/Helpers/Time.ts";
-import { QueueManager } from "../../Streaming/QueueManager.ts";
-import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
-import { DragActions } from "../../Actions/DragActions.ts";
-import { Images } from "../../Enums/Images.ts";
-import { TrackEditTemplates } from "./TrackEditTemplates.ts";
-import { CustomText } from "../../Classes/Helpers/CustomText.ts";
-import { navigate } from "../../Routing/Router.ts";
-import {
-    AnyElement,
-    compute,
-    create,
-    Signal,
-    signal,
-    signalMap,
-    when,
-} from "@targoninc/jess";
+import {TrackActions} from "../../Actions/TrackActions.ts";
+import {UserTemplates} from "../account/UserTemplates.ts";
+import {copy, getPlayIcon, Util} from "../../Classes/Util.ts";
+import {PlayManager} from "../../Streaming/PlayManager.ts";
+import {GenericTemplates, horizontal, tabSelected, vertical} from "../generic/GenericTemplates.ts";
+import {PopoverTemplates} from "../generic/PopoverTemplates.ts";
+import {Time} from "../../Classes/Helpers/Time.ts";
+import {QueueManager} from "../../Streaming/QueueManager.ts";
+import {PlaylistActions} from "../../Actions/PlaylistActions.ts";
+import {DragActions} from "../../Actions/DragActions.ts";
+import {Images} from "../../Enums/Images.ts";
+import {TrackEditTemplates} from "./TrackEditTemplates.ts";
+import {CustomText} from "../../Classes/Helpers/CustomText.ts";
+import {navigate} from "../../Routing/Router.ts";
+import {AnyElement, compute, create, Signal, signal, signalMap, when,} from "@targoninc/jess";
 import {
     currentTrackId,
     currentTrackPosition,
@@ -29,34 +21,34 @@ import {
     manualQueue,
     playingHere,
 } from "../../state.ts";
-import { InteractionStateManager } from "../../Classes/InteractionStateManager.ts";
-import { ApiRoutes } from "../../Api/ApiRoutes.ts";
-import { RoutePath } from "../../Routing/routes.ts";
-import { MusicTemplates } from "./MusicTemplates.ts";
-import { button, heading, input } from "@targoninc/jess-components";
-import { TrackCollaborator } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
-import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType";
-import { InteractionType } from "@targoninc/lyda-shared/src/Enums/InteractionType";
-import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import { Repost } from "@targoninc/lyda-shared/src/Models/db/lyda/Repost";
-import { ListTrack } from "@targoninc/lyda-shared/src/Models/ListTrack";
-import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
-import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
-import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
-import { CollaboratorType } from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
-import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
-import { InteractionTemplates } from "../InteractionTemplates.ts";
-import { get } from "../../Api/ApiClient.ts";
-import { UploadableTrack } from "../../Models/UploadableTrack.ts";
-import { t } from "../../../locales";
-import { Api } from "../../Api/Api.ts";
-import { CommentTemplates } from "../CommentTemplates.ts";
-import { AlbumActions } from "../../Actions/AlbumActions.ts";
-import { TrackSale } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackSale.ts";
-import { TransactionTemplates } from "../money/TransactionTemplates.ts";
-import { BuyTemplates } from "../money/BuyTemplates.ts";
-import { CoverContext } from "../../Enums/CoverContext.ts";
-import { TextSize } from "../../Enums/TextSize.ts";
+import {InteractionStateManager} from "../../Classes/InteractionStateManager.ts";
+import {ApiRoutes} from "../../Api/ApiRoutes.ts";
+import {RoutePath} from "../../Routing/routes.ts";
+import {MusicTemplates} from "./MusicTemplates.ts";
+import {button, heading} from "@targoninc/jess-components";
+import {TrackCollaborator} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
+import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
+import {InteractionType} from "@targoninc/lyda-shared/src/Enums/InteractionType";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {Repost} from "@targoninc/lyda-shared/src/Models/db/lyda/Repost";
+import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
+import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
+import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
+import {Comment} from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
+import {InteractionTemplates} from "../InteractionTemplates.ts";
+import {get} from "../../Api/ApiClient.ts";
+import {UploadableTrack} from "../../Models/UploadableTrack.ts";
+import {t} from "../../../locales";
+import {Api} from "../../Api/Api.ts";
+import {CommentTemplates} from "../CommentTemplates.ts";
+import {AlbumActions} from "../../Actions/AlbumActions.ts";
+import {TrackSale} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackSale.ts";
+import {TransactionTemplates} from "../money/TransactionTemplates.ts";
+import {BuyTemplates} from "../money/BuyTemplates.ts";
+import {CoverContext} from "../../Enums/CoverContext.ts";
+import {TextSize} from "../../Enums/TextSize.ts";
 
 export class TrackTemplates {
     static collabIndicator(collab: TrackCollaborator): any {
@@ -111,7 +103,7 @@ export class TrackTemplates {
     static waveform(track: Track, loudnessData: number[], small = false) {
         if (!track.processed) {
             return create("div")
-                .classes("waveform", small ? "waveform-small" : "_", "processing-box", "rounded-max", "relative", "flex", "nogap")
+                .classes("waveform", small ? "waveform-small" : "_", "processing-box", "rounded-max", "relative")
                 .title(t("STILL_PROCESSING_CHECK_LATER"))
                 .build();
         }
@@ -119,15 +111,52 @@ export class TrackTemplates {
         if (!loudnessData || loudnessData.length === 0) {
             const n = 200;
             const cycles = 6;
-            loudnessData = Array.from({ length: n }, (_, i) =>
+            loudnessData = Array.from({length: n}, (_, i) =>
                 Math.abs(Math.sin((i / n) * Math.PI * cycles))
             );
         } else if (loudnessData.every(v => v === loudnessData[0])) {
             loudnessData = loudnessData.map(() => 1);
         }
 
+        const svgW = 1000;
+        const svgH = small ? 40 : 80;
+        const pathD = TrackTemplates.waveformPath(loudnessData, svgW, svgH);
+
+        const playedWidth = compute(
+            (pos, id): string => id === track.id ? `${Math.round(pos.relative * 100)}%` : "0%",
+            currentTrackPosition, currentTrackId,
+        );
+
+        const bgSvg = create("svg")
+            .classes("waveform-svg")
+            .attributes("viewBox", `0 0 ${svgW} ${svgH}`)
+            .attributes("preserveAspectRatio", "none")
+            .children(
+                create("path")
+                    .attributes("d", pathD)
+                    .styles("fill", "var(--fg-0)")
+                    .build(),
+            ).build();
+
+        const fgSvg = create("svg")
+            .classes("waveform-svg")
+            .attributes("viewBox", `0 0 ${svgW} ${svgH}`)
+            .attributes("preserveAspectRatio", "none")
+            .children(
+                create("path")
+                    .attributes("d", pathD)
+                    .styles("fill", "var(--blue)")
+                    .build(),
+            ).build();
+
+        const clipContainer = create("div")
+            .classes("waveform-played-container")
+            .styles("width", playedWidth)
+            .children(fgSvg)
+            .build();
+
         const el = create("div")
-            .classes("waveform", small ? "waveform-small" : "_", "relative", "flex", "nogap", "pointer")
+            .classes("waveform", small ? "waveform-small" : "_", "relative", "pointer")
             .id(track.id)
             .onmousedown(async e => {
                 PlayManager.addStreamClientIfNotExists(track.id, track.length);
@@ -139,24 +168,8 @@ export class TrackTemplates {
                 }
             })
             .children(
-                ...loudnessData.map((loudness, index) => {
-                    const barClass = compute(
-                        (p, id): string => {
-                            const barsBefore = Math.floor(p.relative * loudnessData.length);
-                            if (index < barsBefore && id === track.id) {
-                                return "active";
-                            }
-                            return "_";
-                        },
-                        currentTrackPosition,
-                        currentTrackId,
-                    );
-
-                    return create("div")
-                        .classes("waveform-bar", "nopointer", barClass)
-                        .styles("height", (Math.pow(loudness, 4)) * 100 + "%")
-                        .build();
-                }),
+                bgSvg,
+                clipContainer,
             ).build();
         return el;
     }
@@ -285,7 +298,7 @@ export class TrackTemplates {
             .children(
                 button({
                     text: t("UP"),
-                    icon: { icon: "keyboard_arrow_up" },
+                    icon: {icon: "keyboard_arrow_up"},
                     classes: ["align-children"],
                     disabled: compute(p => p[0]?.track_id === track.id, tracks),
                     onclick: async () => {
@@ -294,7 +307,7 @@ export class TrackTemplates {
                 }),
                 button({
                     text: t("DOWN"),
-                    icon: { icon: "keyboard_arrow_down" },
+                    icon: {icon: "keyboard_arrow_down"},
                     classes: ["align-children"],
                     disabled: compute(p => p[p.length - 1]?.track_id === track.id, tracks),
                     onclick: async () => {
@@ -303,7 +316,7 @@ export class TrackTemplates {
                 }),
                 button({
                     text: t("REMOVE"),
-                    icon: { icon: "close" },
+                    icon: {icon: "close"},
                     classes: ["negative", "align-children"],
                     onclick: async () => {
                         await TrackActions.removeTrackFromList(tracks, list, type, listTrack);
@@ -353,7 +366,7 @@ export class TrackTemplates {
         }
         const showComments = signal(true);
         const comments = signal<Comment[]>([]);
-        get<Comment[]>(ApiRoutes.getCommentsByTrackId, { track_id: track.id }).then(c => {
+        get<Comment[]>(ApiRoutes.getCommentsByTrackId, {track_id: track.id}).then(c => {
             comments.value = c ?? [];
         });
         const hasMenu = Util.isLoggedIn() && (trackData.canEdit || trackData.canDownload);
@@ -371,113 +384,94 @@ export class TrackTemplates {
                     .build()),
                 vertical(
                     vertical(
-                        MusicTemplates.title(EntityType.track, track.title, track.id, icons, TextSize.xxLarge, false, false, track.wip),
                         horizontal(
-                            when(bought, GenericTemplates.pill({
-                                icon: "order_approve",
-                                onclick: () => {},
-                                text: t("BOUGHT"),
-                            })),
-                            UserTemplates.userWidget(trackUser, [], [], UserWidgetContext.singlePage, track.artistname),
-                        ).classes("align-children"),
-                    ).classes("nogap"),
-                    ...toAppend,
-                    vertical(
-                        create("span").classes("collaborators").text(track.credits).build(),
-                        horizontal(
-                            create("span")
-                                .classes("date", TextSize.small)
-                                .text(t("UPLOADED_AT", Util.formatDate(track.created_at)))
-                                .build(),
-                            create("span")
-                                .classes("playcount", TextSize.small)
-                                .text(t("PLAYS_AMOUNT", track.plays))
-                                .build(),
-                        ).classes("align-children"),
-                    ).classes("small-gap"),
-                    create("div")
-                        .classes("track-info-container", "flex", "align-bottom")
-                        .children(
                             MusicTemplates.cover(EntityType.track, track, CoverContext.standalone),
-                            horizontal(
-                                TrackTemplates.playButton(track),
-                                TrackTemplates.waveform(track, track.processed ? JSON.parse(track.loudness_data) : []),
-                            ).classes("align-children", "bordered", "glass", "rounded-max", "noflexwrap")
-                             .styles("padding", "10px 20px 10px 10px"),
-                        ).build(),
-                    horizontal(
-                        InteractionTemplates.interactions(EntityType.track, track, { overrideActions: [InteractionType.like, InteractionType.repost] }),
-                        when(
-                            currentUser,
-                            horizontal(
-                                TrackTemplates.addToPlaylistButton(track),
-                                TrackTemplates.addToQueueButton(track),
-                            ).build(),
+                            vertical(
+                                vertical(
+                                    MusicTemplates.title(EntityType.track, track.title, track.id, icons, TextSize.xxLarge, false, false, track.wip),
+                                    horizontal(
+                                        when(bought, GenericTemplates.pill({
+                                            icon: "order_approve",
+                                            onclick: () => {
+                                            },
+                                            text: t("BOUGHT"),
+                                        })),
+                                        UserTemplates.userWidget(trackUser, [], [], UserWidgetContext.singlePage, track.artistname),
+                                    ).classes("align-children"),
+                                ).classes("nogap"),
+                                ...toAppend,
+                                vertical(
+                                    create("span").classes("collaborators").text(track.credits).build(),
+                                    horizontal(
+                                        create("span")
+                                            .classes("date", TextSize.small)
+                                            .text(t("UPLOADED_AT", Util.formatDate(track.created_at)))
+                                            .build(),
+                                        create("span")
+                                            .classes("playcount", TextSize.small)
+                                            .text(t("PLAYS_AMOUNT", track.plays))
+                                            .build(),
+                                    ).classes("align-children"),
+                                ).classes("small-gap"),
+                            ),
                         ),
-                        when(trackData.canBuy, button({
-                            icon: { icon: "attach_money" },
-                            text: t("BUY"),
-                            onclick: () => {
-                                BuyTemplates.openBuyModal({ type: "track", entity: track }, () => {
-                                    window.location.reload();
-                                });
-                            },
-                        })),
-                        when(hasMenu, TrackTemplates.trackMenu(isPrivate, track, trackData)),
-                    ).classes("align-children"),
-                    when(track.description.length > 0, description),
-                    GenericTemplates.combinedSelector(tabs, (newTabIndex) => selectedTab$.value = newTabIndex, 0),
-                    when(
-                        tabSelected(selectedTab$, 0),
-                        CommentTemplates.commentListFullWidth(track.id, comments, showComments),
-                    ),
-                    when(
-                        tabSelected(selectedTab$, 1),
-                        TrackTemplates.inAlbumsList(track),
-                    ),
-                    when(
-                        tabSelected(selectedTab$, 2),
-                        TrackTemplates.inPlaylistsList(track),
-                    ),
-                    when(
-                        tabSelected(selectedTab$, 3),
-                        TrackTemplates.buyersList(track),
-                    ),
-                ).classes("noflexwrap", "padded-large")
-                 .styles("min-height", "80dvh", "position", "inherit"),
+                        horizontal(
+                            TrackTemplates.playButton(track),
+                            TrackTemplates.waveform(track, track.processed ? JSON.parse(track.loudness_data) : []),
+                        ).classes("align-children", "bordered", "glass", "rounded-max", "noflexwrap")
+                            .styles("padding", "10px 20px 10px 10px"),
+                    ).build(),
+                    create("div")
+                        .classes("flex-v", "noflexwrap")
+                        .children(
+                            horizontal(
+                                InteractionTemplates.interactions(EntityType.track, track, {overrideActions: [InteractionType.like, InteractionType.repost]}),
+                                when(
+                                    currentUser,
+                                    horizontal(
+                                        TrackTemplates.addToPlaylistButton(track),
+                                        TrackTemplates.addToQueueButton(track),
+                                    ).build(),
+                                ),
+                                when(trackData.canBuy, button({
+                                    icon: {icon: "attach_money"},
+                                    text: t("BUY"),
+                                    onclick: () => {
+                                        BuyTemplates.openBuyModal({type: "track", entity: track}, () => {
+                                            window.location.reload();
+                                        });
+                                    },
+                                })),
+                                when(hasMenu, TrackTemplates.trackMenu(isPrivate, track, trackData)),
+                            ).classes("align-end"),
+                            when(track.description.length > 0, description),
+                            GenericTemplates.combinedSelector(tabs, (newTabIndex) => selectedTab$.value = newTabIndex, 0),
+                            when(
+                                tabSelected(selectedTab$, 0),
+                                CommentTemplates.commentListFullWidth(track.id, comments, showComments),
+                            ),
+                            when(
+                                tabSelected(selectedTab$, 1),
+                                TrackTemplates.inAlbumsList(track),
+                            ),
+                            when(
+                                tabSelected(selectedTab$, 2),
+                                TrackTemplates.inPlaylistsList(track),
+                            ),
+                            when(
+                                tabSelected(selectedTab$, 3),
+                                TrackTemplates.buyersList(track),
+                            ),
+                        ).build(),
+                ).classes("padded-large").styles("position", "inherit").build(),
             ).build();
-    }
-
-    private static trackMenu(isPrivate: boolean, track: Track, trackData: any) {
-        const popId = `track-menu-${track.id}`;
-        const popover = PopoverTemplates.manualPopover(popId,
-            when(trackData.canDownload, TrackEditTemplates.downloadAudioButton(track)),
-            when(trackData.canEdit, vertical(
-                TrackEditTemplates.addToAlbumsButton(track),
-                TrackEditTemplates.replaceAudioButton(track),
-                TrackEditTemplates.openEditPageButton(track),
-                TrackEditTemplates.deleteTrackButton(track.id),
-            ).build()),
-        );
-        popover.classList.add("flex-v");
-
-        const btn = GenericTemplates.roundIconButton(
-            { icon: "more_horiz" },
-            () => PopoverTemplates.toggle(popover, btn),
-            "Show menu");
-
-        return horizontal(
-            when(isPrivate, TrackTemplates.copyPrivateLinkButton(track.id, track.secretcode)),
-            btn,
-            popover,
-        ).classes("relative", "align-children").build();
     }
 
     static addToPlaylistButton(track: Track) {
         return button({
             text: t("ADD_TO_PLAYLIST"),
             classes: ["hideTextOnSmallBreakpointButton"],
-            icon: { icon: "playlist_add" },
+            icon: {icon: "playlist_add"},
             onclick: async () => {
                 await PlaylistActions.openAddToPlaylistModal(track, "track");
             },
@@ -540,7 +534,7 @@ export class TrackTemplates {
 
         return button({
             text,
-            icon: { icon },
+            icon: {icon},
             classes: [queueClass, "hideTextOnSmallBreakpointButton"],
             onclick: () => {
                 QueueManager.toggleInManualQueue(track.id);
@@ -636,8 +630,8 @@ export class TrackTemplates {
                 when(loading, GenericTemplates.loadingSpinner()),
             ),
         ).classes("card", "collab", "space-between", "align-children")
-         .id(data.track_id)
-         .build();
+            .id(data.track_id)
+            .build();
     }
 
     static unapprovedTracks(tracks: TrackCollaborator[]) {
@@ -656,11 +650,52 @@ export class TrackTemplates {
     static copyPrivateLinkButton(id: number, code: string) {
         return button({
             text: t("COPY_PRIVATE_LINK"),
-            icon: { icon: "link" },
+            icon: {icon: "link"},
             onclick: async () => copy(window.location.origin + "/track/" + id + "/" + code),
         });
     }
 
+    private static waveformPath(data: number[], w: number, h: number): string {
+        const n = data.length;
+        const step = w / Math.max(n - 1, 1);
+        let path = `M 0,${h} L 0,${h - Math.pow(data[0], 4) * h}`;
+        for (let i = 1; i < n; i++) {
+            const x = i * step;
+            const y = h - Math.pow(data[i], 4) * h;
+            const px = (i - 1) * step;
+            const py = h - Math.pow(data[i - 1], 4) * h;
+            const c1x = px + step * 0.4;
+            const c2x = x - step * 0.4;
+            path += ` C ${c1x},${py} ${c2x},${y} ${x},${y}`;
+        }
+        path += ` L ${w},${h} Z`;
+        return path;
+    }
+
+    private static trackMenu(isPrivate: boolean, track: Track, trackData: any) {
+        const popId = `track-menu-${track.id}`;
+        const popover = PopoverTemplates.manualPopover(popId,
+            when(trackData.canDownload, TrackEditTemplates.downloadAudioButton(track)),
+            when(trackData.canEdit, vertical(
+                TrackEditTemplates.addToAlbumsButton(track),
+                TrackEditTemplates.replaceAudioButton(track),
+                TrackEditTemplates.openEditPageButton(track),
+                TrackEditTemplates.deleteTrackButton(track.id),
+            ).build()),
+        );
+        popover.classList.add("flex-v");
+
+        const btn = GenericTemplates.roundIconButton(
+            {icon: "more_horiz"},
+            () => PopoverTemplates.toggle(popover, btn),
+            "Show menu");
+
+        return horizontal(
+            when(isPrivate, TrackTemplates.copyPrivateLinkButton(track.id, track.secretcode)),
+            btn,
+            popover,
+        ).classes("relative", "align-children").build();
+    }
 
     private static buyersList(track: Track) {
         const buyers$ = signal<TrackSale[]>([]);
