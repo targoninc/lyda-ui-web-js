@@ -1,4 +1,4 @@
-import { compute, create, Signal, signal, signalMap, AnyNode, nullElement } from "@targoninc/jess";
+import {compute, create, Signal, signal, signalMap, AnyNode, nullElement, when} from "@targoninc/jess";
 import { GenericTemplates } from "./GenericTemplates.ts";
 import { getPlayIcon, copy, Util } from "../../Classes/Util.ts";
 import { t } from "../../../locales";
@@ -380,7 +380,7 @@ export class FeedTemplates {
                                 return create("thead")
                                     .classes("feed-header")
                                     .children(
-                                        create("tr").classes("feed-header-row").children(...ths).build(),
+                                        when(empty, create("tr").classes("feed-header-row").children(...ths).build(), true),
                                     ).build();
                             },
                             items$, sortKey,
@@ -414,7 +414,10 @@ export class FeedTemplates {
                                         }
                                     }
                                 }
-                                if (rows.length === 0) return nullElement();
+                                if (rows.length === 0) {
+                                    return nullElement();
+                                }
+
                                 return create("tbody").classes("feed-rows").children(...rows).build();
                             },
                             totalCount$, items$,
@@ -422,8 +425,14 @@ export class FeedTemplates {
                     ).build(),
                 compute(
                     (total, loading, e) => {
-                        if (loading && total === null) return GenericTemplates.loadingSpinner();
-                        if (e) return GenericTemplates.noTracks();
+                        if (loading && total === null) {
+                            return GenericTemplates.loadingSpinner();
+                        }
+
+                        if (e) {
+                            return GenericTemplates.noTracks();
+                        }
+
                         return nullElement();
                     },
                     totalCount$, loading$, empty,

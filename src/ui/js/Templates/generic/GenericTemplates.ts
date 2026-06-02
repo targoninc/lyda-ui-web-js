@@ -410,19 +410,19 @@ export class GenericTemplates {
             .build();
     }
 
-    static graphic(imageUrl: string) {
+    static graphic(imageUrl: string, classes: string[] = []) {
         return create("img")
-            .classes("graphic", "svg")
+            .classes("graphic", ...classes)
             .attributes("src", `/img/graphics/${imageUrl}`)
             .build();
     }
 
     static noTracks() {
         return horizontal(
-            GenericTemplates.graphic("nothing_found.svg"),
             create("span")
                 .text(t("NOTHING_FOUND"))
                 .build(),
+            GenericTemplates.graphic("email-box.webp", ["fullWidth", "no-tracks-bg"]),
         ).classes("align-children")
          .build();
     }

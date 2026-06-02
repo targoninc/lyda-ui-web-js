@@ -1414,7 +1414,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .graphic {
     width: auto;
-    height: 3em;
+    height: auto;
 }
 
 .update-available {

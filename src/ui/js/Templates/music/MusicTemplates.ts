@@ -1,35 +1,35 @@
-import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
-import { AnyNode, compute, create, Signal, signal, signalMap, when } from "@targoninc/jess";
+import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
+import {AnyNode, compute, create, Signal, signal, signalMap, when} from "@targoninc/jess";
 import {currentTrackId, currentUser, loadingAudio, manualQueue, playingFrom, playingHere} from "../../state.ts";
-import { InteractionStateManager } from "../../Classes/InteractionStateManager.ts";
-import { getPlayIcon, Util } from "../../Classes/Util.ts";
-import { TrackTemplates } from "./TrackTemplates.ts";
-import { DefaultImages } from "../../Enums/DefaultImages.ts";
-import { PlayManager } from "../../Streaming/PlayManager.ts";
-import { Ui } from "../../Classes/Ui.ts";
-import { MediaActions } from "../../Actions/MediaActions.ts";
-import { TrackActions } from "../../Actions/TrackActions.ts";
-import { Icons } from "../../Enums/Icons.ts";
-import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType";
-import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
-import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
-import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType";
-import { InteractionTemplates } from "../InteractionTemplates.ts";
-import { button } from "@targoninc/jess-components";
-import { QueueManager } from "../../Streaming/QueueManager.ts";
-import { navigate } from "../../Routing/Router.ts";
-import { RoutePath } from "../../Routing/routes.ts";
-import { t } from "../../../locales";
-import { TrackList } from "../../Models/TrackList.ts";
-import { FeedItem } from "../../Models/FeedItem.ts";
-import { Visibility } from "@targoninc/lyda-shared/src/Enums/Visibility";
-import { truncateText } from "../../Classes/Helpers/CustomText.ts";
-import { ListTrack } from "@targoninc/lyda-shared/src/Models/ListTrack";
-import { AlbumActions } from "../../Actions/AlbumActions.ts";
-import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
-import { CoverContext } from "../../Enums/CoverContext.ts";
-import { TextSize } from "../../Enums/TextSize.ts";
+import {InteractionStateManager} from "../../Classes/InteractionStateManager.ts";
+import {getPlayIcon, Util} from "../../Classes/Util.ts";
+import {TrackTemplates} from "./TrackTemplates.ts";
+import {DefaultImages} from "../../Enums/DefaultImages.ts";
+import {PlayManager} from "../../Streaming/PlayManager.ts";
+import {Ui} from "../../Classes/Ui.ts";
+import {MediaActions} from "../../Actions/MediaActions.ts";
+import {TrackActions} from "../../Actions/TrackActions.ts";
+import {Icons} from "../../Enums/Icons.ts";
+import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
+import {InteractionTemplates} from "../InteractionTemplates.ts";
+import {button} from "@targoninc/jess-components";
+import {QueueManager} from "../../Streaming/QueueManager.ts";
+import {navigate} from "../../Routing/Router.ts";
+import {RoutePath} from "../../Routing/routes.ts";
+import {t} from "../../../locales";
+import {TrackList} from "../../Models/TrackList.ts";
+import {FeedItem} from "../../Models/FeedItem.ts";
+import {Visibility} from "@targoninc/lyda-shared/src/Enums/Visibility";
+import {truncateText} from "../../Classes/Helpers/CustomText.ts";
+import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
+import {AlbumActions} from "../../Actions/AlbumActions.ts";
+import {PlaylistActions} from "../../Actions/PlaylistActions.ts";
+import {CoverContext} from "../../Enums/CoverContext.ts";
+import {TextSize} from "../../Enums/TextSize.ts";
 import {startItem} from "../../Actions/MusicActions.ts";
 
 export class MusicTemplates {
@@ -179,36 +179,28 @@ export class MusicTemplates {
     ) {
         const noTracks = compute(t => t.length === 0, tracks);
 
-        return create("div")
-            .classes("flex-v")
-            .children(
-                when(
-                    noTracks,
-                    create("div")
-                        .classes("card")
-                        .children(
-                            create("span")
-                                .text(t("NOTHING_FOUND"))
-                                .build(),
-                        ).build(),
-                ),
-                signalMap(tracks, create("div").classes("flex-v"), (track, i) => {
-                    let parent = horizontal().classes("fullWidth");
-                    if (canEdit) {
-                        parent = GenericTemplates.dragTargetInList(async (data: any) => {
-                            await TrackActions.reorderTrack(type, list.id, data.id, tracks, i);
-                        }, i.toString()).classes("fullWidth");
-                    }
+        return vertical(
+            when(
+                noTracks,
+                GenericTemplates.noTracks(),
+            ),
+            signalMap(tracks, vertical(), (track, i) => {
+                let parent = horizontal().classes("fullWidth");
+                if (canEdit) {
+                    parent = GenericTemplates.dragTargetInList(async (data: any) => {
+                        await TrackActions.reorderTrack(type, list.id, data.id, tracks, i);
+                    }, i.toString()).classes("fullWidth");
+                }
 
-                    return create("div")
-                        .classes("flex-v", "relative")
-                        .children(
-                            parent
-                                .children(TrackTemplates.trackInList(track, canEdit, list, tracks, type))
-                                .build(),
-                        ).build();
-                }),
-            ).build();
+                return create("div")
+                    .classes("flex-v", "relative")
+                    .children(
+                        parent
+                            .children(TrackTemplates.trackInList(track, canEdit, list, tracks, type))
+                            .build(),
+                    ).build();
+            }),
+        ).build();
     }
 
     static cardItem(type: EntityType, list: TrackList, isSecondary = false) {
