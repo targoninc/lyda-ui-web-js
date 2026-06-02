@@ -1122,38 +1122,11 @@ export class UserTemplates {
                 scrollDiv.appendChild(pinEl);
             }
 
-            const leftBtn = create("button")
-                .classes("round-button", "jess")
-                .styles("align-self", "center", "flex-shrink", "0", "display", "none")
-                .onclick(() => scrollDiv.scrollBy({left: -300, behavior: "smooth"}))
-                .children(
-                    GenericTemplates.icon("chevron_left", true, ["round-button-icon", "align-center", "inline-icon", "svg", "nopointer"]),
-                ).build() as HTMLElement;
-
-            const rightBtn = create("button")
-                .classes("round-button", "jess")
-                .styles("align-self", "center", "flex-shrink", "0", "display", "none")
-                .onclick(() => scrollDiv.scrollBy({left: 300, behavior: "smooth"}))
-                .children(
-                    GenericTemplates.icon("chevron_right", true, ["round-button-icon", "align-center", "inline-icon", "svg", "nopointer"]),
-                ).build() as HTMLElement;
-
-            const updateNavBtns = () => {
-                const overflows = scrollDiv.scrollWidth > scrollDiv.clientWidth;
-                leftBtn.style.display = overflows && scrollDiv.scrollLeft > 0 ? "" : "none";
-                rightBtn.style.display = overflows && scrollDiv.scrollLeft + scrollDiv.clientWidth < scrollDiv.scrollWidth ? "" : "none";
-            };
-
-            scrollDiv.addEventListener("scroll", updateNavBtns);
-            setTimeout(updateNavBtns);
-
             return create("div")
                 .classes("flex", "align-children", "small-gap")
                 .styles("width", "100%")
                 .children(
-                    leftBtn,
                     scrollDiv,
-                    rightBtn,
                 ).build();
         }, pins);
     }
