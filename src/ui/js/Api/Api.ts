@@ -643,6 +643,18 @@ export class Api {
         });
     }
 
+    static async getPins(userId: number): Promise<{items: any[], total: number} | null> {
+        return get<{items: any[], total: number}>(ApiRoutes.getPins, { userId });
+    }
+
+    static async addPin(entityType: string, entityId: number): Promise<any> {
+        return post(ApiRoutes.addPin, { entityType, entityId });
+    }
+
+    static async removePin(entityType: string, entityId: number): Promise<any> {
+        return post(ApiRoutes.removePin, { entityType, entityId });
+    }
+
     static async getCollabTypes(): Promise<CollaboratorType[] | null> {
         return await get<CollaboratorType[]>(ApiRoutes.getTrackCollabTypes);
     }

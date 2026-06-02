@@ -40,6 +40,7 @@ import {QueueManager} from "../../Streaming/QueueManager.ts";
 import {TrackList} from "../../Models/TrackList.ts";
 import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import {pinState} from "../../Classes/PinState.ts";
 import {Badge} from "@targoninc/lyda-shared/src/Models/db/lyda/Badge";
 import {NotificationType} from "../../Enums/NotificationType.ts";
 import {Api} from "../../Api/Api.ts";
@@ -856,6 +857,7 @@ export class UserTemplates {
                 ),
             ).classes("space-between"),
             UserTemplates.userDescription(user, isOwnProfile),
+            UserTemplates.pinsCarousel(user),
             when(
                 hasUnverifiedPrimaryEmail,
                 create("div")
@@ -875,6 +877,130 @@ export class UserTemplates {
                     .build(),
             ),
         ).build();
+    }
+
+    static pinsCarousel(profileUser: User) {
+        const pins = signal<any[]>([]);
+
+        Api.getPins(profileUser.id).then(data => {
+            if (data?.items?.length) {
+                pins.value = data.items;
+            }
+        });
+
+        const defaultCover = (type: string) => {
+            if (type === EntityType.track) return Images.DEFAULT_COVER_TRACK;
+            if (type === EntityType.album) return Images.DEFAULT_COVER_ALBUM;
+            return Images.DEFAULT_COVER_PLAYLIST;
+        };
+
+        const mediaFileType = (type: string) => {
+            if (type === EntityType.track) return MediaFileType.trackCover;
+            if (type === EntityType.album) return MediaFileType.albumCover;
+            return MediaFileType.playlistCover;
+        };
+
+        const entityUrl = (type: string, id: number) => {
+            return `/${type}/${id}`;
+        };
+
+        const typeLabel = (type: string) => {
+            if (type === EntityType.track) return t("TRACK");
+            if (type === EntityType.album) return t("ALBUM");
+            return t("PLAYLIST");
+        };
+
+        return compute((items: any[]) => {
+            if (items.length === 0) return nullElement();
+
+            const scrollDiv = create("div")
+                .classes("flex", "small-gap", "pin-scroll")
+                .build() as HTMLElement;
+
+            for (const pin of items) {
+                const entity = pin.track || pin.album || pin.playlist;
+                if (!entity) continue;
+
+                const coverSrc = signal(defaultCover(pin.entity_type));
+                if (entity.has_cover) {
+                    Util.getCachedImage(entity.id, mediaFileType(pin.entity_type)).then(url => {
+                        coverSrc.value = url;
+                    });
+                }
+
+                const pinEl = create("div")
+                    .classes("flex-v", "clickable", "no-gap", "pin-card")
+                    .onclick(() => navigate(entityUrl(pin.entity_type, pin.entity_id)))
+                    .oncontextmenu((e: MouseEvent) => {
+                        e.preventDefault();
+                        const popId = `pin-menu-${pin.id}`;
+                        const popover = PopoverTemplates.popover(popId,
+                            create("button").classes("context-menu-item", "flex", "align-children", "small-gap")
+                                .onclick(async () => {
+                                    popover.hidePopover();
+                                    await pinState.unpin(pin.entity_type, pin.entity_id);
+                                    items.splice(items.indexOf(pin), 1);
+                                    pins.value = [...items];
+                                })
+                                .children(
+                                    GenericTemplates.icon("push_pin", true, ["context-menu-icon"]),
+                                    create("span").text(t("UNPIN")).build(),
+                                ).build(),
+                        );
+                        PopoverTemplates.showAtPoint(popover, e.clientX, e.clientY);
+                    })
+                    .children(
+                        create("img")
+                            .classes("rounded")
+                            .src(coverSrc)
+                            .alt(entity.title)
+                            .build(),
+                        create("span")
+                            .classes("nopointer", "break-lines", "pin-title")
+                            .text(entity.title)
+                            .build(),
+                        create("span")
+                            .classes("nopointer", "pin-type")
+                            .text(typeLabel(pin.entity_type))
+                            .build(),
+                    ).build();
+                scrollDiv.appendChild(pinEl);
+            }
+
+            const leftBtn = create("button")
+                .classes("round-button", "jess")
+                .styles("align-self", "center", "flex-shrink", "0", "display", "none")
+                .onclick(() => scrollDiv.scrollBy({ left: -300, behavior: "smooth" }))
+                .children(
+                    GenericTemplates.icon("chevron_left", true, ["round-button-icon", "align-center", "inline-icon", "svg", "nopointer"]),
+                ).build() as HTMLElement;
+
+            const rightBtn = create("button")
+                .classes("round-button", "jess")
+                .styles("align-self", "center", "flex-shrink", "0", "display", "none")
+                .onclick(() => scrollDiv.scrollBy({ left: 300, behavior: "smooth" }))
+                .children(
+                    GenericTemplates.icon("chevron_right", true, ["round-button-icon", "align-center", "inline-icon", "svg", "nopointer"]),
+                ).build() as HTMLElement;
+
+            const updateNavBtns = () => {
+                const overflows = scrollDiv.scrollWidth > scrollDiv.clientWidth;
+                leftBtn.style.display = overflows && scrollDiv.scrollLeft > 0 ? "" : "none";
+                rightBtn.style.display = overflows && scrollDiv.scrollLeft + scrollDiv.clientWidth < scrollDiv.scrollWidth ? "" : "none";
+            };
+
+            scrollDiv.addEventListener("scroll", updateNavBtns);
+            setTimeout(updateNavBtns);
+
+            return create("div")
+                .classes("flex", "align-children", "small-gap")
+                .styles("width", "100%")
+                .children(
+                    leftBtn,
+                    scrollDiv,
+                    rightBtn,
+                ).build();
+        }, pins);
     }
 
     private static usernameAndIcons(user: User) {

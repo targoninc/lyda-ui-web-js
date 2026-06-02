@@ -1826,6 +1826,34 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     backdrop-filter: blur(10px);
 }
 
+.pin-scroll {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scroll-behavior: smooth;
+}
+
+.pin-card {
+    width: 140px;
+    flex-shrink: 0;
+    padding: var(--base-padding);
+    border: 1px solid var(--border);
+    border-radius: var(--large-border-radius);
+}
+
+.pin-card img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+}
+
+.pin-card .pin-title {
+    font-weight: bold;
+}
+
+.pin-card .pin-type {
+    font-size: var(--font-size-small);
+}
+
 .upload-drag-overlay .upload-drag-target {
     position: absolute;
     top: 50%;

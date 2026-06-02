@@ -44,6 +44,9 @@ export class ApiRoutes {
     static updateCacheKey = ApiRoutes.userActions + "/update-cache-key";
     static banUser = ApiRoutes.userActions + "/ban";
     static mutualFollowers = ApiRoutes.user + "/mutualFollowers";
+    static getPins = ApiRoutes.user + "/pins";
+    static addPin = ApiRoutes.user + "/pins/add";
+    static removePin = ApiRoutes.user + "/pins/remove";
 
     static toggleInteraction = ApiRoutes.base + "/toggleInteraction";
     static removeAllInteractions = ApiRoutes.base + "/removeAllInteractions";

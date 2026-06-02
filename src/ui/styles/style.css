@@ -273,7 +273,7 @@ nav {
     background: var(--bg-1);
 }
 
-footer, .fixed-bar, .modal-overlay, .modal, .card, .user-preview, .glass {
+footer, .fixed-bar, .modal-overlay, .modal, .card, .user-preview, .glass, .pin-card {
     background: var(--background-glass);
     backdrop-filter: saturate(180%) blur(10px);
     -webkit-backdrop-filter: saturate(180%) blur(10px);

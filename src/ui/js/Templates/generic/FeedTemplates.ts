@@ -7,7 +7,7 @@ import { ContextMenuTemplates } from "./ContextMenuTemplates.ts";
 import { PopoverTemplates } from "./PopoverTemplates.ts";
 import { InteractionTemplates } from "../InteractionTemplates.ts";
 import { InteractionStateManager } from "../../Classes/InteractionStateManager.ts";
-import { currentTrackId, playingHere, manualQueue } from "../../state.ts";
+import { currentTrackId, currentUser, playingHere, manualQueue } from "../../state.ts";
 import { PlayManager } from "../../Streaming/PlayManager.ts";
 import { QueueManager } from "../../Streaming/QueueManager.ts";
 import { startItem } from "../../Actions/MusicActions.ts";
@@ -25,9 +25,9 @@ import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
-
-import { SearchTemplates } from "../SearchTemplates.ts";
+import { input } from "@targoninc/jess-components";
 import { TrackTemplates } from "../music/TrackTemplates.ts";
+import { pinState } from "../../Classes/PinState.ts";
 
 export { FeedColumn, FeedMenuAction, FeedConfig };
 
@@ -269,6 +269,11 @@ export class FeedTemplates {
         sortDir$.subscribe(reload);
 
         const empty = compute((ii, ll) => ii.length === 0 && !ll, items$, loading$);
+        const cu = currentUser.value;
+        if (cu) {
+            pinState.initWithUser(cu.id);
+        }
+
         const feedId = config.id || uid();
         const hasDate = !!config.dateRender;
         const hasActionDate = !!config.actionDateRender;
@@ -685,11 +690,30 @@ export class FeedTemplates {
                 const items: FeedMenuAction<Track>[] = [
                     { label: inQueue ? t("UNQUEUE") : t("QUEUE"), icon: inQueue ? "remove" : "queue", onclick: () => QueueManager.toggleInManualQueue(track.id) },
                 ];
-                if (track.visibility !== "private" && track.secretcode) {
+                if (track.visibility === "private" && track.secretcode) {
                     items.push({
                         label: t("COPY_PRIVATE_LINK"),
                         icon: "link",
                         onclick: () => copy(window.location.origin + "/track/" + track.id + "/" + track.secretcode),
+                    });
+                }
+                const cu = currentUser.value;
+                if (cu && track.visibility !== "private" && (track.user_id === cu.id || track.collaborators?.some((c: any) => c.user_id === cu.id && c.approved))) {
+                    const pinned = pinState.isPinned(EntityType.track, track.id);
+                    items.push({
+                        label: pinned ? t("UNPIN") : t("PIN_TO_PROFILE"),
+                        icon: pinned ? "push_pin" : "push_pin",
+                        onclick: async () => {
+                            if (pinned) {
+                                await pinState.unpin(EntityType.track, track.id);
+                            } else {
+                                try {
+                                    await pinState.pin(EntityType.track, track.id);
+                                } catch {
+                                    // limit reached or other error
+                                }
+                            }
+                        },
                     });
                 }
                 return items;
