@@ -655,6 +655,10 @@ export class Api {
         return post(ApiRoutes.removePin, { entityType, entityId });
     }
 
+    static async movePin(pinId: number, direction: string): Promise<any> {
+        return post(ApiRoutes.movePin, { pinId, direction });
+    }
+
     static async getCollabTypes(): Promise<CollaboratorType[] | null> {
         return await get<CollaboratorType[]>(ApiRoutes.getTrackCollabTypes);
     }

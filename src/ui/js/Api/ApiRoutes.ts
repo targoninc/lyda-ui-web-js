@@ -47,6 +47,7 @@ export class ApiRoutes {
     static getPins = ApiRoutes.user + "/pins";
     static addPin = ApiRoutes.user + "/pins/add";
     static removePin = ApiRoutes.user + "/pins/remove";
+    static movePin = ApiRoutes.user + "/pins/move";
 
     static toggleInteraction = ApiRoutes.base + "/toggleInteraction";
     static removeAllInteractions = ApiRoutes.base + "/removeAllInteractions";

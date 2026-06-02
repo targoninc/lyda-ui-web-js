@@ -6,7 +6,7 @@ import {Icons as Icons} from "../../Enums/Icons.ts";
 import {Links} from "../../Enums/Links.ts";
 import {CustomText, truncateText} from "../../Classes/Helpers/CustomText.ts";
 import {Images} from "../../Enums/Images.ts";
-import {navigate, Route} from "../../Routing/Router.ts";
+import {navigate, reload, Route} from "../../Routing/Router.ts";
 import {
     AnyElement,
     compute,
@@ -434,30 +434,40 @@ export class UserTemplates {
             window.history.replaceState(null, "", url.toString());
         });
 
-        const cardActions = (listType: "album" | "playlist") => (list: TrackList): FeedMenuAction<TrackList>[] => [
-            {
-                label: t("QUEUE"),
-                icon: "queue",
-                onclick: (l) => l.tracks?.forEach(t => QueueManager.addToManualQueue(t.track_id)),
-                show: (l) => !!l.tracks?.length
-            },
-            {
-                label: t("DELETE"),
-                icon: "delete",
-                onclick: async (l, e) => {
-                    const deleteFn = listType === "album"
-                        ? () => Api.deleteAlbum(l.id).then(() => reload())
-                        : () => Api.deletePlaylist(l.id).then(() => reload());
-                    await Ui.deleteWithConfirmation(
-                        e,
-                        listType === "album" ? t("DELETE_ALBUM") : t("DELETE_PLAYLIST"),
-                        listType === "album" ? t("SURE_DELETE_ALBUM") : t("SURE_DELETE_PLAYLIST"),
-                        deleteFn,
-                    );
+        const cardActions = (listType: "album" | "playlist") => (list: TrackList): FeedMenuAction<TrackList>[] => {
+            const actions: FeedMenuAction<TrackList>[] = [
+                {
+                    label: t("QUEUE"),
+                    icon: "queue",
+                    onclick: (l) => l.tracks?.forEach(t => QueueManager.addToManualQueue(t.track_id)),
+                    show: (l) => !!l.tracks?.length
                 },
-                show: (l) => l.user_id === currentUser.value?.id,
-            },
-        ];
+                {
+                    label: t("DELETE"),
+                    icon: "delete",
+                    onclick: async (l, e) => {
+                        const deleteFn = listType === "album"
+                            ? () => Api.deleteAlbum(l.id).then(() => reload())
+                            : () => Api.deletePlaylist(l.id).then(() => reload());
+                        await Ui.deleteWithConfirmation(
+                            e,
+                            listType === "album" ? t("DELETE_ALBUM") : t("DELETE_PLAYLIST"),
+                            listType === "album" ? t("SURE_DELETE_ALBUM") : t("SURE_DELETE_PLAYLIST"),
+                            deleteFn,
+                        );
+                    },
+                    show: (l) => l.user_id === currentUser.value?.id,
+                },
+            ];
+            const pinAction = UserTemplates.pinActionForEntity(
+                listType === "album" ? EntityType.album : EntityType.playlist,
+                list.id,
+                list.user_id,
+                (list as any).visibility,
+            );
+            if (pinAction) actions.push(pinAction);
+            return actions;
+        };
 
         const albumColumns = [
             {
@@ -879,6 +889,26 @@ export class UserTemplates {
         ).build();
     }
 
+    static pinActionForEntity(entityType: string, entityId: number, userId: number, visibility: string): FeedMenuAction<any> | null {
+        const cu = currentUser.value;
+        if (!cu || visibility === "private") return null;
+        if (userId === cu.id) {
+            const pinned = pinState.isPinned(entityType, entityId);
+            return {
+                label: pinned ? t("UNPIN") : t("PIN_TO_PROFILE"),
+                icon: "push_pin",
+                onclick: async () => {
+                    if (pinned) {
+                        await pinState.unpin(entityType, entityId);
+                    } else {
+                        try { await pinState.pin(entityType, entityId); } catch {}
+                    }
+                },
+            };
+        }
+        return null;
+    }
+
     static pinsCarousel(profileUser: User) {
         const pins = signal<any[]>([]);
         const subKey = `pins-carousel-${profileUser.id}`;
@@ -932,8 +962,12 @@ export class UserTemplates {
                     });
                 }
 
+                const isFirst = pi === 0;
+                const isLast = pi === items.length - 1;
+
                 const pinEl = create("div")
                     .classes("flex-v", "clickable", "no-gap", "pin-card")
+                    .attributes("draggable", "true")
                     .onclick(() => navigate(entityUrl(pin.entity_type, pin.entity_id)))
                     .onmousemove((e: MouseEvent) => {
                         const rect = pinEl.getBoundingClientRect();
@@ -946,21 +980,76 @@ export class UserTemplates {
                     .onmouseleave(() => {
                         pinEl.style.transform = "";
                     })
+                    .ondragstart((e: DragEvent) => {
+                        e.dataTransfer?.setData("text/plain", String(pin.id));
+                        pinEl.style.opacity = "0.4";
+                    })
+                    .ondragend(() => {
+                        pinEl.style.opacity = "";
+                        document.querySelectorAll(".pin-card.drag-over").forEach(el => el.classList.remove("drag-over"));
+                    })
+                    .ondragover((e: DragEvent) => {
+                        e.preventDefault();
+                        pinEl.classList.add("drag-over");
+                    })
+                    .ondragleave(() => {
+                        pinEl.classList.remove("drag-over");
+                    })
+                    .ondrop(async (e: DragEvent) => {
+                        e.preventDefault();
+                        pinEl.classList.remove("drag-over");
+                        pinEl.style.opacity = "";
+                        const draggedId = Number(e.dataTransfer?.getData("text/plain"));
+                        if (draggedId && draggedId !== pin.id) {
+                            const fromIdx = items.findIndex(p => p.id === draggedId);
+                            const toIdx = pi;
+                            if (fromIdx !== -1 && toIdx !== -1) {
+                                const dir = toIdx > fromIdx ? "right" : "left";
+                                const steps = Math.abs(toIdx - fromIdx);
+                                for (let s = 0; s < steps; s++) {
+                                    await Api.movePin(items[fromIdx].id, dir);
+                                }
+                                const [moved] = items.splice(fromIdx, 1);
+                                items.splice(toIdx, 0, moved);
+                                pins.value = [...items];
+                            }
+                        }
+                    })
                     .oncontextmenu((e: MouseEvent) => {
                         e.preventDefault();
                         const popId = `pin-menu-${pin.id}`;
+                        const menuItems = [
+                            { label: t("UNPIN"), icon: "push_pin", onclick: async () => {
+                                await pinState.unpin(pin.entity_type, pin.entity_id);
+                                items.splice(items.indexOf(pin), 1);
+                                pins.value = [...items];
+                            }},
+                            { label: t("MOVE_LEFT"), icon: "chevron_left", show: !isFirst, onclick: async () => {
+                                await Api.movePin(pin.id, "left");
+                                [items[pi - 1], items[pi]] = [items[pi], items[pi - 1]];
+                                pins.value = [...items];
+                                pinState.changeCount.value = pinState.changeCount.value + 1;
+                            }},
+                            { label: t("MOVE_RIGHT"), icon: "chevron_right", show: !isLast, onclick: async () => {
+                                await Api.movePin(pin.id, "right");
+                                [items[pi], items[pi + 1]] = [items[pi + 1], items[pi]];
+                                pins.value = [...items];
+                                pinState.changeCount.value = pinState.changeCount.value + 1;
+                            }},
+                        ];
                         const popover = PopoverTemplates.popover(popId,
-                            create("button").classes("context-menu-item", "flex", "align-children", "small-gap")
-                                .onclick(async () => {
-                                    popover.hidePopover();
-                                    await pinState.unpin(pin.entity_type, pin.entity_id);
-                                    items.splice(items.indexOf(pin), 1);
-                                    pins.value = [...items];
-                                })
-                                .children(
-                                    GenericTemplates.icon("push_pin", true, ["context-menu-icon"]),
-                                    create("span").text(t("UNPIN")).build(),
-                                ).build(),
+                            ...menuItems.filter(m => m.show !== false).map(m =>
+                                create("button").classes("context-menu-item", "flex", "align-children", "small-gap")
+                                    .onclick(async (ev: Event) => {
+                                        const pop = (ev.currentTarget as HTMLElement).closest("[popover]") as HTMLElement | null;
+                                        if (pop) pop.hidePopover();
+                                        await m.onclick();
+                                    })
+                                    .children(
+                                        GenericTemplates.icon(m.icon, true, ["context-menu-icon"]),
+                                        create("span").text(m.label).build(),
+                                    ).build(),
+                            ),
                         );
                         PopoverTemplates.showAtPoint(popover, e.clientX, e.clientY);
                     })
@@ -1165,32 +1254,42 @@ export class UserTemplates {
         if (isSelf) tabs.push(`${t("BOUGHT")}`);
         const urlTabs = tabs.map(t => t.toLowerCase().replace(/\s/g, "-"));
 
-        const libCardActions = (listType: "album" | "playlist") => (list: TrackList): FeedMenuAction<TrackList>[] => [
-            {
-                label: t("QUEUE"),
-                icon: "queue",
-                onclick: (l) => l.tracks?.forEach(t => QueueManager.addToManualQueue(t.track_id)),
-                show: (l) => !!l.tracks?.length
-            },
-            {
-                label: t("DELETE"),
-                icon: "delete",
-                onclick: async (l, e) => {
-                    const deleteFn = listType === "album"
-                        ? () => Api.deleteAlbum(l.id).then(() => {
-                        })
-                        : () => Api.deletePlaylist(l.id).then(() => {
-                        });
-                    await Ui.deleteWithConfirmation(
-                        e,
-                        listType === "album" ? t("DELETE_ALBUM") : t("DELETE_PLAYLIST"),
-                        listType === "album" ? t("SURE_DELETE_ALBUM") : t("SURE_DELETE_PLAYLIST"),
-                        deleteFn,
-                    );
+        const libCardActions = (listType: "album" | "playlist") => (list: TrackList): FeedMenuAction<TrackList>[] => {
+            const actions: FeedMenuAction<TrackList>[] = [
+                {
+                    label: t("QUEUE"),
+                    icon: "queue",
+                    onclick: (l) => l.tracks?.forEach(t => QueueManager.addToManualQueue(t.track_id)),
+                    show: (l) => !!l.tracks?.length
                 },
-                show: (l) => l.user_id === currentUser.value?.id,
-            },
-        ];
+                {
+                    label: t("DELETE"),
+                    icon: "delete",
+                    onclick: async (l, e) => {
+                        const deleteFn = listType === "album"
+                            ? () => Api.deleteAlbum(l.id).then(() => {
+                            })
+                            : () => Api.deletePlaylist(l.id).then(() => {
+                            });
+                        await Ui.deleteWithConfirmation(
+                            e,
+                            listType === "album" ? t("DELETE_ALBUM") : t("DELETE_PLAYLIST"),
+                            listType === "album" ? t("SURE_DELETE_ALBUM") : t("SURE_DELETE_PLAYLIST"),
+                            deleteFn,
+                        );
+                    },
+                    show: (l) => l.user_id === currentUser.value?.id,
+                },
+            ];
+            const pinAction = UserTemplates.pinActionForEntity(
+                listType === "album" ? EntityType.album : EntityType.playlist,
+                list.id,
+                list.user_id,
+                (list as any).visibility,
+            );
+            if (pinAction) actions.push(pinAction);
+            return actions;
+        };
 
         const urlParams = new URLSearchParams(window.location.search);
         const tabIndex = urlTabs.indexOf(urlParams.get("tab") ?? "");

@@ -341,6 +341,8 @@ export const en = {
     UNQUEUE: "Unqueue",
     QUEUE: "Queue",
     PIN_TO_PROFILE: "Pin to profile",
+    MOVE_LEFT: "Move left",
+    MOVE_RIGHT: "Move right",
     UNPIN: "Unpin",
     TRACK: "Track",
     ALBUM: "Album",

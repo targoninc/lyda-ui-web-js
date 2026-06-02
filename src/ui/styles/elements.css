@@ -1840,7 +1840,17 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     padding: var(--mid-padding);
     border: 1px solid var(--border);
     border-radius: var(--large-border-radius);
-    perspective: 600px;
+    perspective: 800px;
+    transition: outline 0.15s ease-out;
+}
+
+.pin-card.drag-over {
+    border-color: var(--blue);
+}
+
+.pin-card > * {
+    transition: transform 0.3s ease-out;
+    backface-visibility: hidden;
 }
 
 .pin-card > * {
