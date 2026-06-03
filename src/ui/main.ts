@@ -7,6 +7,7 @@ import { notify, Ui } from "./js/Classes/Ui.ts";
 import { Util } from "./js/Classes/Util.ts";
 import { RoutePath, routes } from "./js/Routing/routes.js";
 import { GenericTemplates } from "./js/Templates/generic/GenericTemplates.ts";
+import { TrackEditTemplates } from "./js/Templates/music/TrackEditTemplates.ts";
 import { contextQueue, currentUser, history, permissions, playingFrom } from "./js/state.ts";
 import { StreamingBroadcaster } from "./js/Streaming/StreamingBroadcaster.ts";
 import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom";
@@ -44,6 +45,7 @@ export const router = new Router(routes, async (route: Route, params: any) => {
     const page = route.path.replace("/", "") as RoutePath;
     console.log(`Navigating to ${page} with params`, params);
 
+    TrackEditTemplates.clearUploadDragState();
     InteractionStateManager.clearContextType("list");
     InteractionStateManager.clearContextType("page");
 

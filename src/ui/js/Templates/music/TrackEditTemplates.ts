@@ -47,8 +47,17 @@ import {TrackTemplates} from "./TrackTemplates.ts";
 import {CoverContext} from "../../Enums/CoverContext.ts";
 import {NotificationType} from "../../Enums/NotificationType.ts";
 
+let _uploadDragCleanup: (() => void) | null = null;
+
 export class TrackEditTemplates {
+    static clearUploadDragState() {
+        _uploadDragCleanup?.();
+        _uploadDragCleanup = null;
+    }
+
     static uploadPage() {
+        TrackEditTemplates.clearUploadDragState();
+
         const state = signal({
             title: "",
             credits: "",
@@ -96,26 +105,26 @@ export class TrackEditTemplates {
 
         let dragCounter = 0;
 
-        document.addEventListener("dragenter", () => {
+        const onDragEnter = () => {
             dragCounter++;
             if (dragCounter === 1) {
                 overlay.style.display = "block";
             }
-        });
+        };
 
-        document.addEventListener("dragover", (e) => {
+        const onDragOver = (e: DragEvent) => {
             e.preventDefault();
-        });
+        };
 
-        document.addEventListener("dragleave", () => {
+        const onDragLeave = () => {
             dragCounter--;
             if (dragCounter <= 0) {
                 dragCounter = 0;
                 overlay.style.display = "none";
             }
-        });
+        };
 
-        document.addEventListener("drop", (e) => {
+        const onDrop = (e: DragEvent) => {
             e.preventDefault();
             dragCounter = 0;
             overlay.style.display = "none";
@@ -130,7 +139,20 @@ export class TrackEditTemplates {
                     fileInput.dispatchEvent(new Event("change", {bubbles: true}));
                 }
             }
-        });
+        };
+
+        document.addEventListener("dragenter", onDragEnter);
+        document.addEventListener("dragover", onDragOver);
+        document.addEventListener("dragleave", onDragLeave);
+        document.addEventListener("drop", onDrop);
+
+        _uploadDragCleanup = () => {
+            overlay.remove();
+            document.removeEventListener("dragenter", onDragEnter);
+            document.removeEventListener("dragover", onDragOver);
+            document.removeEventListener("dragleave", onDragLeave);
+            document.removeEventListener("drop", onDrop);
+        };
 
         return el;
     }
