@@ -443,6 +443,16 @@ export class UserTemplates {
                     show: (l) => !!l.tracks?.length
                 },
                 {
+                    label: t("COPY_LINK"),
+                    icon: "link",
+                    onclick: (l) => copy(window.location.origin + `/${listType}/${l.id}`),
+                },
+                {
+                    label: t("OPEN_IN_NEW_TAB"),
+                    icon: "open_in_new",
+                    onclick: (l) => window.open(`/${listType}/${l.id}`, "_blank"),
+                },
+                {
                     label: t("DELETE"),
                     icon: "delete",
                     onclick: async (l, e) => {
@@ -612,6 +622,7 @@ export class UserTemplates {
                         },
                         isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
                         dateRender: (list) => GenericTemplates.timestamp(list.created_at, ["hideOnSmallBreakpoint"]),
+                        onNavigate: (list) => window.open(`/album/${list.id}`, "_blank"),
                     }),
                 ),
                 when(
@@ -635,6 +646,7 @@ export class UserTemplates {
                         },
                         isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
                         dateRender: (list) => GenericTemplates.timestamp(list.created_at, ["hideOnSmallBreakpoint"]),
+                        onNavigate: (list) => window.open(`/playlist/${list.id}`, "_blank"),
                     }),
                 ),
                 when(
@@ -983,11 +995,28 @@ export class UserTemplates {
                             label: t("COPY_PRIVATE_LINK"), icon: "link", show: true,
                             onclick: async () => { copy(window.location.origin + "/track/" + entity.id + "/" + entity.secretcode); },
                         });
+                    } else {
+                        menuItems.push({
+                            label: t("COPY_LINK"), icon: "link", show: true,
+                            onclick: async () => { copy(window.location.origin + entityUrl(pin.entity_type, pin.entity_id)); },
+                        });
                     }
+                    menuItems.push({
+                        label: t("OPEN_IN_NEW_TAB"), icon: "open_in_new", show: true,
+                        onclick: async () => { window.open(entityUrl(pin.entity_type, pin.entity_id), "_blank"); },
+                    });
                 } else if (entity && (entity.tracks?.length ?? 0) > 0) {
                     menuItems.push({
                         label: t("QUEUE"), icon: "queue", show: true,
                         onclick: async () => { entity.tracks?.forEach((t: any) => QueueManager.addToManualQueue(t.track_id)); },
+                    });
+                    menuItems.push({
+                        label: t("COPY_LINK"), icon: "link", show: true,
+                        onclick: async () => { copy(window.location.origin + entityUrl(pin.entity_type, pin.entity_id)); },
+                    });
+                    menuItems.push({
+                        label: t("OPEN_IN_NEW_TAB"), icon: "open_in_new", show: true,
+                        onclick: async () => { window.open(entityUrl(pin.entity_type, pin.entity_id), "_blank"); },
                     });
                 }
                 menuItems.push({
@@ -1031,7 +1060,7 @@ export class UserTemplates {
                         ).build();
 
                 const visibleMenuItems = () => menuItems.filter(m => m.show !== false);
-                const popover = PopoverTemplates.popover(popId, ...visibleMenuItems().map(buildMenuButton));
+                const popover = PopoverTemplates.manualPopover(popId, ...visibleMenuItems().map(buildMenuButton));
                 document.body.appendChild(popover);
 
                 const rebuildContextMenu = () => {
@@ -1047,6 +1076,12 @@ export class UserTemplates {
                     .classes("flex-v", "clickable", "no-gap", "pin-card")
                     .attributes("draggable", "true")
                     .onclick(() => { if (!dragStarted) navigate(entityUrl(pin.entity_type, pin.entity_id)); dragStarted = false; })
+                    .onauxclick((e: MouseEvent) => {
+                        if (e.button === 1) {
+                            e.preventDefault();
+                            window.open(entityUrl(pin.entity_type, pin.entity_id), "_blank");
+                        }
+                    })
                     .ondragstart((e: DragEvent) => {
                         dragStarted = true;
                         if (e.dataTransfer) {
@@ -1099,7 +1134,7 @@ export class UserTemplates {
                     .oncontextmenu((e: MouseEvent) => {
                         e.preventDefault();
                         rebuildContextMenu();
-                        PopoverTemplates.showAtPoint(popover, e.clientX, e.clientY);
+                        PopoverTemplates.showContextMenu(popover, e.clientX, e.clientY);
                     })
                     .children(
                         create("img")
@@ -1284,6 +1319,16 @@ export class UserTemplates {
                     icon: "queue",
                     onclick: (l) => l.tracks?.forEach(t => QueueManager.addToManualQueue(t.track_id)),
                     show: (l) => !!l.tracks?.length
+                },
+                {
+                    label: t("COPY_LINK"),
+                    icon: "link",
+                    onclick: (l) => copy(window.location.origin + `/${listType}/${l.id}`),
+                },
+                {
+                    label: t("OPEN_IN_NEW_TAB"),
+                    icon: "open_in_new",
+                    onclick: (l) => window.open(`/${listType}/${l.id}`, "_blank"),
                 },
                 {
                     label: t("DELETE"),
@@ -1478,6 +1523,7 @@ export class UserTemplates {
                         },
                         isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
                         dateRender: (list) => GenericTemplates.timestamp(list.created_at, ["hideOnSmallBreakpoint"]),
+                        onNavigate: (list) => window.open(`/album/${list.id}`, "_blank"),
                     }),
                 ),
                 when(
@@ -1502,6 +1548,7 @@ export class UserTemplates {
                         },
                         isPlaying: (id) => compute((pf, ph) => pf?.id === id && ph, playingFrom, playingHere),
                         dateRender: (list) => GenericTemplates.timestamp(list.created_at, ["hideOnSmallBreakpoint"]),
+                        onNavigate: (list) => window.open(`/playlist/${list.id}`, "_blank"),
                     }),
                 ),
                 when(

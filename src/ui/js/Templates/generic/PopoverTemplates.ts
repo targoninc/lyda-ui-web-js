@@ -48,6 +48,37 @@ export class PopoverTemplates {
         popover.showPopover();
     }
 
+    static showContextMenu(popover: HTMLElement, x: number, y: number): void {
+        if (popover.matches(":popover-open") || !popover.isConnected) return;
+        popover.style.position = "fixed";
+        popover.style.top = `${y}px`;
+        popover.style.left = `${x}px`;
+        popover.style.right = "auto";
+        popover.style.bottom = "auto";
+        popover.showPopover();
+
+        const onDocumentClick = (e: MouseEvent) => {
+            if (!popover.contains(e.target as Node)) {
+                popover.hidePopover();
+            }
+        };
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                popover.hidePopover();
+            }
+        };
+        const onHide = () => {
+            document.removeEventListener("click", onDocumentClick);
+            document.removeEventListener("keydown", onKeyDown);
+            popover.removeEventListener("hidePopover", onHide);
+        };
+        popover.addEventListener("hidePopover", onHide);
+        setTimeout(() => {
+            document.addEventListener("click", onDocumentClick);
+            document.addEventListener("keydown", onKeyDown);
+        }, 0);
+    }
+
     static show(popover: HTMLElement, anchor: AnyElement, above = false, rightAlign = false): void {
         if (popover.matches(":popover-open") || !popover.isConnected) return;
         PopoverTemplates.positionAtAnchor(popover, anchor, above, rightAlign);

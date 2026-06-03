@@ -22,7 +22,7 @@ export class ContextMenuTemplates {
     ) {
         const popId = id || uid();
         const resolve = () => buildActions(item);
-        const popover = PopoverTemplates.popover(popId, ...ContextMenuTemplates.#buildItems(item, resolve()));
+        const popover = PopoverTemplates.manualPopover(popId, ...ContextMenuTemplates.#buildItems(item, resolve()));
 
         const rebuild = () => {
             popover.innerHTML = "";
@@ -40,7 +40,7 @@ export class ContextMenuTemplates {
         const onContextMenu = (e: MouseEvent) => {
             e.preventDefault();
             rebuild();
-            PopoverTemplates.showAtPoint(popover, e.clientX, e.clientY);
+            PopoverTemplates.showContextMenu(popover, e.clientX, e.clientY);
         };
 
         return { button, popover, onContextMenu, rebuild };

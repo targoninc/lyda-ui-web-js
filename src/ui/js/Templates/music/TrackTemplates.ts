@@ -448,17 +448,17 @@ export class TrackTemplates {
                                         horizontal(
                                             TrackTemplates.addToPlaylistButton(track),
                                             TrackTemplates.addToQueueButton(track),
+                                            when(trackData.canBuy, button({
+                                                icon: {icon: "attach_money"},
+                                                text: t("BUY"),
+                                                onclick: () => {
+                                                    BuyTemplates.openBuyModal({type: "track", entity: track}, () => {
+                                                        window.location.reload();
+                                                    });
+                                                },
+                                            })),
                                         ).classes("align-children").build(),
                                     ),
-                                    when(trackData.canBuy, button({
-                                        icon: {icon: "attach_money"},
-                                        text: t("BUY"),
-                                        onclick: () => {
-                                            BuyTemplates.openBuyModal({type: "track", entity: track}, () => {
-                                                window.location.reload();
-                                            });
-                                        },
-                                    })),
                                     when(hasMenu, TrackTemplates.trackMenu(isPrivate, track, trackData)),
                                 ).classes("align-end"),
                                 GenericTemplates.combinedSelector(tabs, (newTabIndex) => selectedTab$.value = newTabIndex, 0),

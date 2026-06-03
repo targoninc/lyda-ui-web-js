@@ -54,7 +54,7 @@ export class FeedTemplates {
 
         const batchPopover = create("div")
             .classes("generic-popover")
-            .attributes("popover", "auto")
+            .attributes("popover", "manual")
             .build() as HTMLElement;
 
         const handleRowClick = (e: MouseEvent, item: T, index: number) => {
@@ -466,6 +466,20 @@ export class FeedTemplates {
                     }
                 });
 
+                rowsEl.addEventListener("auxclick", (e) => {
+                    if (e.button !== 1) return;
+                    e.preventDefault();
+                    const target = e.target as HTMLElement;
+                    const tr = target.closest("tr");
+                    if (tr && tr.parentElement === rowsEl) {
+                        const index = Array.from(rowsEl.children).indexOf(tr);
+                        if (index >= 0) {
+                            const item = items$.value[index];
+                            config.onNavigate?.(item);
+                        }
+                    }
+                });
+
                 const obs = new IntersectionObserver(
                     (entries) => {
                         for (const entry of entries) {
@@ -697,7 +711,18 @@ export class FeedTemplates {
                         icon: "link",
                         onclick: () => copy(window.location.origin + "/track/" + track.id + "/" + track.secretcode),
                     });
+                } else {
+                    items.push({
+                        label: t("COPY_LINK"),
+                        icon: "link",
+                        onclick: () => copy(window.location.origin + "/track/" + track.id),
+                    });
                 }
+                items.push({
+                    label: t("OPEN_IN_NEW_TAB"),
+                    icon: "open_in_new",
+                    onclick: (track) => window.open(`/track/${track.id}`, "_blank"),
+                });
                 const cu = currentUser.value;
                 if (cu && track.visibility !== "private" && (track.user_id === cu.id || track.collaborators?.some((c: any) => c.user_id === cu.id && c.approved))) {
                     const pinned = pinState.isPinned(EntityType.track, track.id);
@@ -737,6 +762,7 @@ export class FeedTemplates {
                 const date = (track as any).release_date || track.created_at;
                 return GenericTemplates.timestamp(date, ["hideOnSmallBreakpoint"]);
             },
+            onNavigate: (track) => window.open(`/track/${track.id}`, "_blank"),
         });
     }
 
@@ -801,7 +827,7 @@ export class FeedTemplates {
                             ).build() as HTMLElement;
                         batchPopover.appendChild(btn);
                     }
-                    PopoverTemplates.showAtPoint(batchPopover, e.clientX, e.clientY);
+                    PopoverTemplates.showContextMenu(batchPopover, e.clientX, e.clientY);
                     return;
                 }
             }

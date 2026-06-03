@@ -20,6 +20,7 @@ import { FeedTemplates } from "./generic/FeedTemplates.ts";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { TrackEditTemplates } from "./music/TrackEditTemplates.ts";
 import { navigate, Route } from "../Routing/Router.ts";
+import { copy } from "../Classes/Util.ts";
 import { PlayManager } from "../Streaming/PlayManager.ts";
 import { currentSecretCode, currentTrackId, currentUser, playingHere } from "../state.ts";
 import { TrackTemplates } from "./music/TrackTemplates.ts";
@@ -270,6 +271,16 @@ export class PageTemplates {
                                     onclick: (l) => (l as any).tracks?.forEach((t: any) => QueueManager.addToManualQueue(t.track_id)),
                                     show: (l) => !!(l as any).tracks?.length,
                                 },
+                                {
+                                    label: t("COPY_LINK"),
+                                    icon: "link",
+                                    onclick: (l) => copy(window.location.origin + `/album/${l.id}`),
+                                },
+                                {
+                                    label: t("OPEN_IN_NEW_TAB"),
+                                    icon: "open_in_new",
+                                    onclick: (l) => window.open(`/album/${l.id}`, "_blank"),
+                                },
                             ],
                             onPlayToggle: async (list) => {
                                 const ft = (list as any).tracks?.[0]?.track;
@@ -277,6 +288,7 @@ export class PageTemplates {
                             },
                             isPlaying: (id) => compute((c, p) => c === id && p, currentTrackId, playingHere),
                             dateRender: (list) => GenericTemplates.timestamp((list as any).created_at, ["hideOnSmallBreakpoint"]),
+                            onNavigate: (list) => window.open(`/album/${list.id}`, "_blank"),
                         }),
                     ),
                     when(
@@ -302,6 +314,16 @@ export class PageTemplates {
                                     onclick: (l) => (l as any).tracks?.forEach((t: any) => QueueManager.addToManualQueue(t.track_id)),
                                     show: (l) => !!(l as any).tracks?.length,
                                 },
+                                {
+                                    label: t("COPY_LINK"),
+                                    icon: "link",
+                                    onclick: (l) => copy(window.location.origin + `/playlist/${l.id}`),
+                                },
+                                {
+                                    label: t("OPEN_IN_NEW_TAB"),
+                                    icon: "open_in_new",
+                                    onclick: (l) => window.open(`/playlist/${l.id}`, "_blank"),
+                                },
                             ],
                             onPlayToggle: async (list) => {
                                 const ft = (list as any).tracks?.[0]?.track;
@@ -309,6 +331,7 @@ export class PageTemplates {
                             },
                             isPlaying: (id) => compute((c, p) => c === id && p, currentTrackId, playingHere),
                             dateRender: (list) => GenericTemplates.timestamp((list as any).created_at, ["hideOnSmallBreakpoint"]),
+                            onNavigate: (list) => window.open(`/playlist/${list.id}`, "_blank"),
                         }),
                     ),
                 ).build(),
