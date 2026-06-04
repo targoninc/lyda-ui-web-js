@@ -200,5 +200,9 @@ export const routes: Route[] = [
     {
         path: RoutePath.subscriptionPayments,
         title: "Subscription Payments",
+    },
+    {
+        path: RoutePath.ipLogs,
+        title: "Ip Logs",
     }
 ];
