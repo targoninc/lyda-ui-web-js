@@ -140,15 +140,14 @@ export class IpLogTemplates {
                 create("summary").children(
                     horizontal(
                         create("span").classes("text", "code").text(log.ip).build(),
-                        create("span").classes(TextSize.xSmall).text(log.method).build(),
-                        create("span").classes(TextSize.xSmall).text(log.path).build(),
-                        create("span").classes(TextSize.xSmall).text(new Date(log.created_at).toLocaleString()).build(),
-                        when(log.rate_limited, create("span").classes("color-negative").text("RATE LIMITED").build()),
+                        create("span").classes(TextSize.xSmall).text(log.month).build(),
+                        create("span").text(`Req: ${log.request_count}`).build(),
+                        when(log.limited_count > 0, create("span").classes("color-negative").text(`Limited: ${log.limited_count}`).build()),
+                        create("span").classes(TextSize.xSmall).text(new Date(log.updated_at).toLocaleString()).build(),
                     ).classes("fullWidth", "space-between", "align-children"),
                 ).build(),
                 vertical(
-                    create("div").text(`User Agent: ${log.user_agent}`).build(),
-                    create("div").text(`User ID: ${log.user_id ?? "anonymous"}`).build(),
+                    create("div").text(`Last User Agent: ${log.last_user_agent}`).build(),
                     horizontal(
                         button({
                             text: "Ban IP",
