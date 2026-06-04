@@ -61,17 +61,21 @@ export class CommentTemplates {
         return create("div")
             .classes("flex-v")
             .children(
-                when(Util.isLoggedIn(), create("div")
+                when(currentUser, create("div")
                     .classes("comment-box-input-container", "flex-v", "fullWidth")
                     .children(
-                        textarea({
-                            classes: ["comment-box-input"],
-                            name: "comment-box-input",
-                            placeholder: t("NEW_COMMENT"),
-                            value: newComment,
-                            attributes: ["track_id", track_id.toString()],
-                            onchange: v => newComment.value = v,
-                        }),
+                        (() => {
+                            const ta = textarea({
+                                classes: ["comment-box-input"],
+                                name: "comment-box-input",
+                                placeholder: t("NEW_COMMENT"),
+                                value: newComment,
+                                attributes: ["track_id", track_id.toString()],
+                                onchange: v => newComment.value = v,
+                            });
+                            ta.querySelector("textarea")?.removeAttribute("autofocus");
+                            return ta;
+                        })(),
                         button({
                             text: t("POST"),
                             icon: { icon: "send" },
@@ -91,7 +95,7 @@ export class CommentTemplates {
                         const secs = Math.floor(pos % 60);
                         newComment.value = `${mins}:${secs.toString().padStart(2, "0")} `;
                     }).on("keydown", (e: KeyboardEvent) => {
-                        if (e.ctrlKey && e.key === "Enter") {
+                        if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
                             TrackActions.newComment(newComment, comments, track_id);
                         }
                     }).build()),
@@ -144,7 +148,7 @@ export class CommentTemplates {
                         ).classes("no-gap"),
                         horizontal(
                             InteractionTemplates.interactions(EntityType.comment, comment, {disabler: compute(u => u?.id === comment.user_id, currentUser)}),
-                            when(Util.isLoggedIn(), CommentTemplates.commentReplySection(repliesShown, replyInputShown, comment, newComment, comments)),
+                            when(currentUser, CommentTemplates.commentReplySection(repliesShown, replyInputShown, comment, newComment, comments)),
                             when(Util.isLoggedIn() && comment.canEdit, horizontal(
                                 moreBtn,
                                 deletePopover,
