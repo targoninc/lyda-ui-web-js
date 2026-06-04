@@ -66,6 +66,7 @@ export const en = {
     NOTIFS_REPOST: "Repost notifications",
     NOTIFS_COLLAB: "Collaboration notifications",
     NOTIFS_SALE: "Sale notifications",
+    NOTIFS_TRACK_DELETED: "Track deleted notifications",
     SAVE_CHANGES: "Save changes",
     DESCRIPTION: "Description",
     DISPLAY_NAME: "Display name",

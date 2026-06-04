@@ -330,6 +330,7 @@ export class SettingsTemplates {
             {text: t("NOTIFS_REPOST"), key: "repost", value: UserSettings.notificationRepost},
             {text: t("NOTIFS_COLLAB"), key: "collaboration", value: UserSettings.notificationCollaboration},
             {text: t("NOTIFS_SALE"), key: "sale", value: UserSettings.notificationSale},
+            {text: t("NOTIFS_TRACK_DELETED"), key: "track_deleted", value: UserSettings.notificationTrackDeleted},
         ];
 
         return compute(query => {
