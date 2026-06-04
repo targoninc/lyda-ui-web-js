@@ -10,12 +10,13 @@ import { button, input, textarea } from "@targoninc/jess-components";
 import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import { UserWidgetContext } from "../Enums/UserWidgetContext.ts";
 import { t } from "../../locales";
-import {permissions, currentUser} from "../state.ts";
+import {permissions, currentUser, currentTrackId, currentTrackPosition, trackInfo} from "../state.ts";
 import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
 import {RoutePath} from "../Routing/routes.ts";
 import {navigate} from "../Routing/Router.ts";
 import {InteractionTemplates} from "./InteractionTemplates.ts";
 import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
+import {PlayManager} from "../Streaming/PlayManager.ts";
 
 export class CommentTemplates {
     static commentListFullWidth(track_id: number, comments: Signal<Comment[]>, showComments: Signal<boolean>) {
@@ -37,6 +38,21 @@ export class CommentTemplates {
                         CommentTemplates.commentBox(track_id, comments),
                     ).build()),
             ).build();
+    }
+
+    static timestamp(trackId: number, totalSeconds: number, trackLength: number, display: string) {
+        return create("a")
+            .classes("text").classes("inlineLink")
+            .text(display)
+            .onclick(async (e: MouseEvent) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (currentTrackId.value !== trackId) {
+                    await PlayManager.startAsync(trackId);
+                }
+                await PlayManager.scrubTo(trackId, totalSeconds / trackLength);
+            })
+            .build();
     }
 
     static commentBox(track_id: number, comments: Signal<Comment[]>) {
@@ -62,7 +78,19 @@ export class CommentTemplates {
                             classes: ["positive"],
                             onclick: () => TrackActions.newComment(newComment, comments, track_id),
                         }),
-                    ).on("keydown", (e: KeyboardEvent) => {
+                    ).on("focusin", (e: FocusEvent) => {
+                        if (newComment.value !== "" || currentTrackId.value !== track_id) {
+                            return;
+                        }
+
+                        const pos = currentTrackPosition.value.absolute;
+                        if (pos <= 0) {
+                            return;
+                        }
+                        const mins = Math.floor(pos / 60);
+                        const secs = Math.floor(pos % 60);
+                        newComment.value = `${mins}:${secs.toString().padStart(2, "0")} `;
+                    }).on("keydown", (e: KeyboardEvent) => {
                         if (e.ctrlKey && e.key === "Enter") {
                             TrackActions.newComment(newComment, comments, track_id);
                         }
@@ -115,7 +143,7 @@ export class CommentTemplates {
                             GenericTemplates.timestamp(comment.created_at),
                         ).classes("no-gap"),
                         horizontal(
-                            InteractionTemplates.interactions(EntityType.comment, comment, {disabled: compute(u => u?.id === comment.user_id, currentUser)}),
+                            InteractionTemplates.interactions(EntityType.comment, comment, {disabler: compute(u => u?.id === comment.user_id, currentUser)}),
                             when(Util.isLoggedIn(), CommentTemplates.commentReplySection(repliesShown, replyInputShown, comment, newComment, comments)),
                             when(Util.isLoggedIn() && comment.canEdit, horizontal(
                                 moreBtn,
@@ -175,6 +203,48 @@ export class CommentTemplates {
     }
 
     static commentContent(comment: Comment) {
+        const trackLength = trackInfo.value[comment.track_id]?.track.length;
+
+        const renderContent = (content: string) => {
+            if (!trackLength) {
+                return create("span").classes("text", "flex-grow").text(content).build();
+            }
+
+            const parts: AnyElement[] = [];
+            const regex = /@?(\d+):(\d+)/g;
+            let lastIndex = 0;
+            let match: RegExpExecArray | null;
+
+            while ((match = regex.exec(content)) !== null) {
+                if (match.index > lastIndex) {
+                    parts.push(create("span").text(content.slice(lastIndex, match.index)).build());
+                }
+
+                const minutes = parseInt(match[1], 10);
+                const seconds = parseInt(match[2], 10);
+                const totalSeconds = minutes * 60 + seconds;
+
+                if (totalSeconds > 0 && totalSeconds <= trackLength) {
+                    parts.push(CommentTemplates.timestamp(
+                        comment.track_id,
+                        totalSeconds,
+                        trackLength,
+                        `${minutes}:${seconds.toString().padStart(2, "0")}`,
+                    ));
+                } else {
+                    parts.push(create("span").text(match[0].replace(/^@/, "")).build());
+                }
+
+                lastIndex = regex.lastIndex;
+            }
+
+            if (lastIndex < content.length) {
+                parts.push(create("span").text(content.slice(lastIndex)).build());
+            }
+
+            return create("span").classes("text", "flex-grow").children(...parts).build();
+        };
+
         if (comment.hidden) {
             const contentShown = signal(false);
 
@@ -198,11 +268,8 @@ export class CommentTemplates {
                         }).text(comment.content)
                         .build()),
                 ).build();
-        } else {
-            return create("span")
-                .classes("text", "flex-grow")
-                .text(comment.content)
-                .build();
         }
+
+        return renderContent(comment.content);
     }
 }
