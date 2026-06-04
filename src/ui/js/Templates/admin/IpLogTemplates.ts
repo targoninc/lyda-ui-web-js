@@ -4,19 +4,20 @@ import { DashboardTemplates } from "./DashboardTemplates.ts";
 import { button, input } from "@targoninc/jess-components";
 import { Api } from "../../Api/Api.ts";
 import { t } from "../../../locales";
-import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
+import { GenericTemplates, vertical } from "../generic/GenericTemplates.ts";
 import { Ui } from "../../Classes/Ui.ts";
+import { TableTemplates } from "../generic/TableTemplates.ts";
 import { TextSize } from "../../Enums/TextSize.ts";
 
 export class IpLogTemplates {
     static ipLogsPage() {
         return DashboardTemplates.pageNeedingPermissions(
             [Permissions.canReadIpLogs],
-            IpLogTemplates.ipLogsList(),
+            IpLogTemplates.ipLogsTable(),
         );
     }
 
-    static ipLogsList() {
+    static ipLogsTable() {
         const logs = signal<any[]>([]);
         const bannedIps = signal<any[]>([]);
         const query = signal<string>("");
@@ -24,24 +25,27 @@ export class IpLogTemplates {
         const skip = signal<number>(0);
         const loading = signal(false);
 
-        const refreshLogs = async () => {
+        const refreshLogs = () => {
             loading.value = true;
-            try {
-                const result = await Api.getIpLogs(skip.value, 20, query.value, ipFilter.value);
-                logs.value = result?.items ?? [];
-            } finally {
+            Api.getIpLogs(skip.value, 20, query.value, ipFilter.value).then(r => {
+                logs.value = r?.items ?? [];
+            }).finally(() => {
                 loading.value = false;
-            }
+            });
         };
-
-        const refresh = async () => {
-            await Promise.all([
-                refreshLogs(),
-                Api.getBannedIps().then(r => { bannedIps.value = r ?? []; }),
-            ]);
+        const refresh = () => {
+            loading.value = true;
+            Promise.all([
+                Api.getIpLogs(skip.value, 20, query.value, ipFilter.value),
+                Api.getBannedIps(),
+            ]).then(([logResult, bannedResult]) => {
+                logs.value = logResult?.items ?? [];
+                bannedIps.value = bannedResult ?? [];
+            }).finally(() => {
+                loading.value = false;
+            });
         };
-
-        refresh().then();
+        refresh();
 
         return create("div")
             .children(
@@ -110,10 +114,21 @@ export class IpLogTemplates {
                     create("div").classes("flex-v", "small-gap", "padded"),
                     ip => IpLogTemplates.bannedIpEntry(ip, bannedIps),
                 ),
-                signalMap(
-                    logs,
-                    vertical().classes("fixed-bar-content"),
-                    log => IpLogTemplates.ipLogEntry(log),
+                TableTemplates.table(true,
+                    TableTemplates.tableHeaders([
+                        { title: "IP" },
+                        { title: "Month" },
+                        { title: "Requests" },
+                        { title: "Limit Hits" },
+                        { title: "Last User Agent" },
+                        { title: "Last Updated" },
+                        { title: "" },
+                    ]),
+                    signalMap(
+                        logs,
+                        create("tbody"),
+                        log => IpLogTemplates.ipLogRow(log),
+                    ),
                 ),
             ).build();
     }
@@ -128,46 +143,50 @@ export class IpLogTemplates {
                     text: "Unban",
                     classes: ["small"],
                     onclick: async () => {
+                        await Api.unbanIp(ip.ip);
                         bannedIps.value = (await Api.getBannedIps()) ?? [];
                     },
                 }),
             ).build();
     }
 
-    private static ipLogEntry(log: any) {
-        return create("details")
-            .children(
-                create("summary").children(
-                    horizontal(
-                        create("span").classes("text", "code").text(log.ip).build(),
-                        create("span").classes(TextSize.xSmall).text(log.month).build(),
-                        create("span").text(`Req: ${log.request_count}`).build(),
-                        when(log.limited_count > 0, create("span").classes("color-negative").text(`Limited: ${log.limited_count}`).build()),
-                        create("span").classes(TextSize.xSmall).text(new Date(log.updated_at).toLocaleString()).build(),
-                    ).classes("fullWidth", "space-between", "align-children"),
-                ).build(),
-                vertical(
-                    create("div").text(`Last User Agent: ${log.last_user_agent}`).build(),
-                    horizontal(
-                        button({
-                            text: "Ban IP",
-                            icon: { icon: "block" },
-                            classes: ["negative", "small"],
-                            onclick: async () => {
-                                await Ui.getConfirmationModal(
-                                    "Ban IP",
-                                    `Are you sure you want to ban IP ${log.ip}?`,
-                                    "Ban",
-                                    "Cancel",
-                                    async () => {
-                                        await Api.banIp(log.ip);
-                                    },
-                                    async () => {},
-                                );
+    private static ipLogRow(log: any) {
+        return TableTemplates.tr({
+            classes: ["log"],
+            cellClasses: [
+                ["code"],
+                [],
+                [],
+                log.limited_count > 0 ? ["color-negative"] : [],
+                [TextSize.xSmall],
+                [TextSize.xSmall],
+                [],
+            ],
+            data: [
+                create("span").text(log.ip).build(),
+                create("span").text(log.month).build(),
+                create("span").text(String(log.request_count)).build(),
+                create("span").text(String(log.limited_count)).build(),
+                create("span").text(log.last_user_agent).build(),
+                create("span").text(new Date(log.updated_at).toLocaleString()).build(),
+                button({
+                    text: "Ban IP",
+                    icon: { icon: "block" },
+                    classes: ["negative", "small"],
+                    onclick: async () => {
+                        await Ui.getConfirmationModal(
+                            "Ban IP",
+                            `Are you sure you want to ban IP ${log.ip}?`,
+                            "Ban",
+                            "Cancel",
+                            async () => {
+                                await Api.banIp(log.ip);
                             },
-                        }),
-                    ).classes("small-gap"),
-                ).classes("card", "padded"),
-            ).build();
+                            async () => {},
+                        );
+                    },
+                }),
+            ],
+        });
     }
 }
