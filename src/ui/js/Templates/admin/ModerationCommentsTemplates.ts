@@ -9,6 +9,8 @@ import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import { Api } from "../../Api/Api.ts";
 import { ModerationFilter } from "../../Models/ModerationFilter.ts";
 import { t } from "../../../locales";
+import {createModal} from "../../Classes/Ui.ts";
+import {Util} from "../../Classes/Util.ts";
 
 export class ModerationCommentsTemplates {
     static commentModerationPage() {
@@ -25,6 +27,7 @@ export class ModerationCommentsTemplates {
             user_id: null,
             offset: 0,
             limit: 10,
+            hasReports: false,
         });
         const loading = signal(false);
         const comments = signal<Comment[]>([]);
@@ -63,6 +66,7 @@ export class ModerationCommentsTemplates {
 
     static commentFilters(filter: Signal<any>, loading: Signal<boolean>, results: Signal<Comment[]>, allowFilteringByUser = true) {
         const potentiallyHarmful = compute(f => f.potentiallyHarmful, filter);
+        const hasReports = compute(f => f.hasReports, filter);
         const userId = compute(f => f.user_id, filter);
         const skip = compute(f => f.offset, filter);
 
@@ -73,7 +77,14 @@ export class ModerationCommentsTemplates {
                     text: t("POTENTIALLY_HARMFUL"),
                     checked: potentiallyHarmful,
                     onchange: (v) => {
-                        filter.value = { ...filter.value, potentiallyHarmful: v };
+                        filter.value = { ...filter.value, potentiallyHarmful: v, hasReports: false };
+                    },
+                }),
+                toggle({
+                    text: t("HAS_REPORTS"),
+                    checked: hasReports,
+                    onchange: (v) => {
+                        filter.value = { ...filter.value, hasReports: v, potentiallyHarmful: false };
                     },
                 }),
                 horizontal(
@@ -175,6 +186,12 @@ export class ModerationCommentsTemplates {
                                 });
                             },
                         }),
+                        when(comment.report_count && comment.report_count > 0, button({
+                            text: t("REPORTS_COUNT", comment.report_count),
+                            icon: { icon: "flag" },
+                            classes: ["negative"],
+                            onclick: () => ModerationCommentsTemplates.showReportsModal(comment),
+                        })),
                     ).build(),
                 create("div")
                     .classes("card")
@@ -182,5 +199,27 @@ export class ModerationCommentsTemplates {
                         CommentTemplates.commentInList(comment, comments, true),
                     ).build(),
             ).build();
+    }
+
+    private static async showReportsModal(comment: Comment) {
+        const reports = await Api.getCommentReports(comment.id);
+        const modalId = `comment-reports-${comment.id}`;
+
+        createModal([
+            create("h2").text(t("REPORTS_FOR_COMMENT")).build(),
+            ...reports.map(r => create("div")
+                .classes("card", "flex-v", "small-gap")
+                .children(
+                    create("span").classes("text", "bold").text(t("REPORT_REASON", r.reason)).build(),
+                    create("div")
+                        .classes("text")
+                        .html(r.description?.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>') ?? "")
+                        .build(),
+                    create("span").classes("color-dim", "text").text(new Date(r.created_at).toLocaleString()).build(),
+                ).build()),
+            create("div").classes("flex").children(
+                GenericTemplates.modalCancelButton(null),
+            ).build(),
+        ].flat(), modalId);
     }
 }

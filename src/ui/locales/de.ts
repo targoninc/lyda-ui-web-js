@@ -638,4 +638,16 @@ export const de: Translation = {
     WORK_IN_PROGRESS: "In Arbeit",
     NO_WIPS: "Keine WIPs",
     WIP_ONLY: "Nur WIPs",
+
+    REPORT: "Melden",
+    REPORTED: "Gemeldet",
+    REPORT_COMMENT: "Kommentar melden",
+    REASON: "Grund",
+    REPORT_DESCRIPTION_PLACEHOLDER: "Beschreibe das Problem...",
+    MAX_2048_CHARACTERS: "Maximal 2048 Zeichen",
+    COMMENT_REPORTED: "Kommentar gemeldet",
+    HAS_REPORTS: "Hat Meldungen",
+    REPORTS_COUNT: (count: number) => `${count} Meldung${count === 1 ? "" : "en"}`,
+    REPORTS_FOR_COMMENT: "Meldungen für Kommentar",
+    REPORT_REASON: (reason: string) => `Grund: ${reason}`,
 };

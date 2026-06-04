@@ -36,6 +36,7 @@ import { RoyaltyMonth } from "@targoninc/lyda-shared/src/Models/RoyaltyMonth";
 import { ArtistRoyaltySummary } from "@targoninc/lyda-shared/src/Models/ArtistRoyaltySummary.ts";
 import { ActionLog } from "@targoninc/lyda-shared/src/Models/db/lyda/ActionLog";
 import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
+import { CommentReport } from "@targoninc/lyda-shared/src/Models/db/lyda/CommentReport";
 import { ModerationFilter } from "../Models/ModerationFilter.ts";
 import { ClientError } from "@targoninc/lyda-shared/src/Models/db/lyda/ClientError";
 import { KeyValue } from "@targoninc/lyda-shared/src/Models/KeyValue";
@@ -867,6 +868,18 @@ export class Api {
 
     static async setHidden(id: number, v: boolean) {
         await post(ApiRoutes.setCommentHidden, { id, hidden: v });
+    }
+
+    static async reportComment(commentId: number, reason: string, description: string) {
+        return await post(ApiRoutes.reportComment, {
+            comment_id: commentId,
+            reason,
+            description,
+        });
+    }
+
+    static async getCommentReports(commentId: number) {
+        return await get<CommentReport[]>(ApiRoutes.getCommentReports, { comment_id: commentId });
     }
 
     //endregion

@@ -17,6 +17,8 @@ import {navigate} from "../Routing/Router.ts";
 import {InteractionTemplates} from "./InteractionTemplates.ts";
 import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
 import {PlayManager} from "../Streaming/PlayManager.ts";
+import {createModal, notify} from "../Classes/Ui.ts";
+import {Api} from "../Api/Api.ts";
 
 export class CommentTemplates {
     static commentListFullWidth(track_id: number, comments: Signal<Comment[]>, showComments: Signal<boolean>) {
@@ -131,6 +133,27 @@ export class CommentTemplates {
             "more_horiz",
         );
 
+        const reportBtn = button({
+            text: comment.reported_by_me ? "Reported" : "Report",
+            icon: { icon: "flag" },
+            classes: comment.reported_by_me ? ["color-dim"] : [],
+            disabled: comment.reported_by_me,
+            onclick: () => {
+                PopoverTemplates.toggle(reportPopover, reportBtn);
+                if (!comment.reported_by_me) {
+                    CommentTemplates.showReportModal(comment);
+                }
+            },
+        });
+        const reportPopover = PopoverTemplates.manualPopover(`report-menu-${comment.id}`,
+            create("div").classes("flex-v").children(reportBtn).build(),
+        );
+        const reportMoreBtn = GenericTemplates.textButton(
+            "More",
+            () => PopoverTemplates.toggle(reportPopover, reportMoreBtn),
+            "more_horiz",
+        );
+
         return create("div")
             .classes("comment-in-list", "flex-v", "small-gap", (comment.parent_id ?? 0) === 0 ? "tight-border-card" : "_")
             .id(comment.id)
@@ -152,6 +175,10 @@ export class CommentTemplates {
                             when(Util.isLoggedIn() && comment.canEdit, horizontal(
                                 moreBtn,
                                 deletePopover,
+                            ).classes("relative").build()),
+                            when(Util.isLoggedIn() && !comment.canEdit, horizontal(
+                                reportMoreBtn,
+                                reportPopover,
                             ).classes("relative").build()),
                             when(canModerate, button({
                                 text: t("MODERATION"),
@@ -275,5 +302,67 @@ export class CommentTemplates {
         }
 
         return renderContent(comment.content);
+    }
+
+    private static showReportModal(comment: Comment) {
+        const reason = signal("spam");
+        const description = signal("");
+        const modalId = `report-comment-${comment.id}`;
+
+        const modalContents = [
+            create("h2").text("Report comment").build(),
+            create("div").classes("flex-v").children(
+                create("label").text("Reason").build(),
+                create("select")
+                    .children(
+                        create("option").value("spam").text("Spam").build(),
+                        create("option").value("bullying").text("Bullying").build(),
+                        create("option").value("sexual_content").text("Sexual Content").build(),
+                        create("option").value("abuse").text("Abuse").build(),
+                        create("option").value("hatespeech").text("Hate Speech").build(),
+                        create("option").value("heavy_swearing").text("Heavy Swearing").build(),
+                        create("option").value("other").text("Other").build(),
+                    )
+                    .onchange((e: Event) => {
+                        reason.value = (e.target as HTMLSelectElement).value;
+                    })
+                    .build(),
+            ).build(),
+            create("div").classes("flex-v").children(
+                create("label").text("Description").build(),
+                textarea({
+                    placeholder: "Describe the issue...",
+                    value: description,
+                    onchange: v => description.value = v,
+                    attributes: ["maxlength", "2048"],
+                }),
+                create("span").classes("color-dim").text("Maximum 2048 characters").build(),
+            ).build(),
+            create("div").classes("flex", "align-children").children(
+                button({
+                    text: "Report",
+                    icon: { icon: "flag" },
+                    classes: ["positive"],
+                    onclick: async () => {
+                        await Api.reportComment(comment.id, reason.value, description.value);
+                        comment.reported_by_me = true;
+                        Util.removeModal(modal);
+                        notify("Comment reported");
+                    },
+                }),
+                button({
+                    text: t("CANCEL"),
+                    icon: { icon: "close" },
+                    classes: ["negative"],
+                    onclick: () => Util.removeModal(modal),
+                }),
+            ).build(),
+        ];
+
+        const modal = createModal(modalContents, modalId);
+
+        if (modal) {
+            modal.querySelector("select")?.focus();
+        }
     }
 }

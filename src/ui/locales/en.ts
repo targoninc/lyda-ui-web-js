@@ -647,4 +647,16 @@ export const en = {
     WORK_IN_PROGRESS: "Work in progress",
     NO_WIPS: "No WIPs",
     WIP_ONLY: "WIP only",
+
+    REPORT: "Report",
+    REPORTED: "Reported",
+    REPORT_COMMENT: "Report comment",
+    REASON: "Reason",
+    REPORT_DESCRIPTION_PLACEHOLDER: "Describe the issue...",
+    MAX_2048_CHARACTERS: "Maximum 2048 characters",
+    COMMENT_REPORTED: "Comment reported",
+    HAS_REPORTS: "Has reports",
+    REPORTS_COUNT: (count: number) => `${count} report${count === 1 ? "" : "s"}`,
+    REPORTS_FOR_COMMENT: "Reports for comment",
+    REPORT_REASON: (reason: string) => `Reason: ${reason}`,
 } satisfies BaseTranslation;
