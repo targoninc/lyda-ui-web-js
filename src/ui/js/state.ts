@@ -27,6 +27,51 @@ export const navInitialized = signal(false);
 
 export const streamClients = signal<Record<number, IStreamClient>>({});
 
+export const currentUser = signal<User|null>(null);
+let cacheFetched = false;
+currentUser.subscribe(u => {
+    if (u) {
+        language.value = getUserSettingValue<Language>(u, UserSettings.language) ?? language.value;
+
+        if (!cacheFetched) {
+            cacheFetched = true;
+            Api.getUserCache().then(cache => {
+                if (!cache) {
+                    return;
+                }
+
+                for (const entry of cache) {
+                    switch (entry.key as UserCacheKey) {
+                        case UserCacheKey.volume:
+                            if (entry.value) {
+                                volume.value = parseFloat(entry.value);
+                            }
+                            break;
+                        case UserCacheKey.loopMode:
+                            loopMode.value = entry.value ?? loopMode.value;
+                            break;
+                        case UserCacheKey.lastTrackId:
+                            currentTrackId.value = Number(entry.value ?? "0");
+
+                            if (currentTrackId.value !== 0) {
+                                PlayManager.initializeTrackAsync(currentTrackId.value).then(async () => {
+                                    await PlayManager.stopAllAsync();
+                                });
+                            }
+                            break;
+                        case UserCacheKey.lastTrackPosition:
+                            currentTrackPosition.value = JSON.parse(entry.value ?? JSON.stringify(currentTrackPosition.value));
+                            break;
+                        case UserCacheKey.playingFrom:
+                            playingFrom.value = JSON.parse(entry.value ?? JSON.stringify(playingFrom.value));
+                            break;
+                    }
+                }
+            });
+        }
+    }
+});
+
 export const currentTrackId = signal(LydaCache.get<number>(UserCacheKey.lastTrackId).content ?? 0);
 let previousTrackId = currentTrackId.value;
 if (previousTrackId) {
@@ -44,7 +89,9 @@ currentTrackId.subscribe((id, changed) => {
     }
     previousTrackId = id;
     LydaCache.set(UserCacheKey.lastTrackId, new CacheItem(id));
-    Api.setCacheKey(UserCacheKey.lastTrackId, id.toString()).then();
+    if (currentUser.value) {
+        Api.setCacheKey(UserCacheKey.lastTrackId, id.toString()).then();
+    }
     if (!id) {
         footer?.classList.add("hidden");
     } else {
@@ -73,7 +120,9 @@ volume.subscribe((newValue, changed) => {
         return;
     }
     LydaCache.set(UserCacheKey.volume, new CacheItem(newValue));
-    Api.setCacheKey(UserCacheKey.volume, newValue.toString()).then();
+    if (currentUser.value) {
+        Api.setCacheKey(UserCacheKey.volume, newValue.toString()).then();
+    }
 });
 
 export const muted = signal<boolean>(false);
@@ -154,7 +203,7 @@ loopMode.subscribe((newMode, changed) => {
     streamClient?.setLoop(loopMode.value === LoopMode.single);
 
     LydaCache.set(UserCacheKey.loopMode, new CacheItem(newMode));
-    if (newMode) {
+    if (newMode && currentUser.value) {
         Api.setCacheKey(UserCacheKey.loopMode, newMode).then();
     }
 });
@@ -165,55 +214,12 @@ shuffling.subscribe((p, changed) => {
         return;
     }
     LydaCache.set(UserCacheKey.shuffling, new CacheItem(p));
-    Api.setCacheKey(UserCacheKey.shuffling, p.toString()).then();
+    if (currentUser.value) {
+        Api.setCacheKey(UserCacheKey.shuffling, p.toString()).then();
+    }
 
     if (playingFrom.value?.type) {
         QueueManager.populateContextQueue(playingFrom.value, p).then();
-    }
-});
-
-export const currentUser = signal<User|null>(null);
-let cacheFetched = false;
-currentUser.subscribe(u => {
-    if (u) {
-        language.value = getUserSettingValue<Language>(u, UserSettings.language) ?? language.value;
-
-        if (!cacheFetched) {
-            cacheFetched = true;
-            Api.getUserCache().then(cache => {
-                if (!cache) {
-                    return;
-                }
-
-                for (const entry of cache) {
-                    switch (entry.key as UserCacheKey) {
-                        case UserCacheKey.volume:
-                            if (entry.value) {
-                                volume.value = parseFloat(entry.value);
-                            }
-                            break;
-                        case UserCacheKey.loopMode:
-                            loopMode.value = entry.value ?? loopMode.value;
-                            break;
-                        case UserCacheKey.lastTrackId:
-                            currentTrackId.value = Number(entry.value ?? "0");
-
-                            if (currentTrackId.value !== 0) {
-                                PlayManager.initializeTrackAsync(currentTrackId.value).then(async () => {
-                                    await PlayManager.stopAllAsync();
-                                });
-                            }
-                            break;
-                        case UserCacheKey.lastTrackPosition:
-                            currentTrackPosition.value = JSON.parse(entry.value ?? JSON.stringify(currentTrackPosition.value));
-                            break;
-                        case UserCacheKey.playingFrom:
-                            playingFrom.value = JSON.parse(entry.value ?? JSON.stringify(playingFrom.value));
-                            break;
-                    }
-                }
-            });
-        }
     }
 });
 

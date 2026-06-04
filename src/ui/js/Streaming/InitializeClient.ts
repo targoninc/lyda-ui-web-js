@@ -1,5 +1,5 @@
 import { IStreamClient } from "./IStreamClient.ts";
-import { currentQuality, currentTrackId, currentTrackPosition, volume } from "../state.ts";
+import { currentQuality, currentTrackId, currentTrackPosition, muted, volume } from "../state.ts";
 import { PlayManager } from "./PlayManager.ts";
 
 export function initializeClient(client: IStreamClient) {
@@ -19,13 +19,13 @@ export function initializeClient(client: IStreamClient) {
         }
     });
 
-    volume.subscribe(async q => client.setVolume(q));
-    client.setVolume(volume.value);
+    volume.subscribe(async q => client.setVolume(muted.value ? 0 : q));
+    client.setVolume(muted.value ? 0 : volume.value);
 
     const currentStreamClient = PlayManager.getStreamClient(currentTrackId.value);
     if (!currentStreamClient) {
-        client.setVolume(volume.value ?? 0.2);
+        client.setVolume(muted.value ? 0 : (volume.value ?? 0.2));
     } else {
-        client.setVolume(currentStreamClient.getVolume());
+        client.setVolume(muted.value ? 0 : currentStreamClient.getVolume());
     }
 }
