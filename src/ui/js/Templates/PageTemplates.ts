@@ -227,16 +227,10 @@ export class PageTemplates {
             },
         ];
 
-        const pageSearch$ = signal("");
-
         const tabRow = create("div")
             .classes("flex", "space-between", "align-children")
             .children(
                 GenericTemplates.combinedSelector(tabs, i => selectedTab.value = i, selectedTab.value),
-                create("div").classes("flex", "align-children")
-                    .children(
-                        SearchTemplates.searchInputWidget(pageSearch$),
-                    ).build(),
             ).build();
 
         return create("div")
@@ -246,7 +240,7 @@ export class PageTemplates {
                 create("div").classes("fixed-bar-content").children(
                     when(
                         tabSelected(selectedTab, 0),
-                        FeedTemplates.feed(FeedType.explore, undefined, {search$: pageSearch$, noToolbar: true}),
+                        FeedTemplates.feed(FeedType.explore, undefined, {noToolbar: true}),
                     ),
                     when(
                         tabSelected(selectedTab, 1),
@@ -255,8 +249,6 @@ export class PageTemplates {
                             columns: baseAlbumColumns,
                             compact: true,
                             pageSize: 100,
-                            showSearch: true,
-                            searchOverride$: pageSearch$,
                             noToolbar: true,
                             fetchPage: async (offset, limit, filter) => {
                                 const res = await Api.getFeed(ApiRoutes.exploreAlbumsFeed, { offset, limit, filter: filter || "" });
@@ -298,8 +290,6 @@ export class PageTemplates {
                             columns: basePlaylistColumns,
                             compact: true,
                             pageSize: 100,
-                            showSearch: true,
-                            searchOverride$: pageSearch$,
                             noToolbar: true,
                             fetchPage: async (offset, limit, filter) => {
                                 const res = await Api.getFeed(ApiRoutes.explorePlaylistsFeed, { offset, limit, filter: filter || "" });

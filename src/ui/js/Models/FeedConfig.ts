@@ -33,6 +33,7 @@ export interface FeedConfig<T extends { id: number }> {
     showSearch?: boolean;
     compact?: boolean;
     onNavigate?: (item: T) => void;
+    sortable?: boolean;
     dateRender?: (item: T) => AnyNode;
     actionDateHeader?: StringOrSignal;
     actionDateRender?: (item: T) => AnyNode;

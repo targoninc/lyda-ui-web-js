@@ -73,6 +73,8 @@ export class UserActions {
     }
 
     static async getNotifications() {
+        if (!currentUser.value) return;
+
         const newestId = notifications.value.sort(
             (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         )[0]?.id;

@@ -373,16 +373,20 @@ export class FeedTemplates {
                                 const sb = sortBy$.value;
                                 const sd = sortDir$.value;
                                 const cols = resolveColumns(config.columns);
+                                const sortable = config.sortable !== false;
                                 const ths: any[] = [
                                     create("th").classes("feed-idx-h").text("#").build(),
                                 ];
                                 for (const c of cols) {
-                                    const th = FeedTemplates.#sortableTh(c.key, c.header, sb, sd, cycleSort, c.key === "artist" ? ["hideOnSmallBreakpoint"] : []);
+                                    const extraClasses = c.key === "artist" ? ["hideOnSmallBreakpoint"] : [];
+                                    const th = sortable
+                                        ? FeedTemplates.#sortableTh(c.key, c.header, sb, sd, cycleSort, extraClasses)
+                                        : create("th").classes("feed-col-h", ...extraClasses).text(c.header).build();
                                     ths.push(th);
                                 }
                                 ths.push(
-                                    ...(hasDate ? [FeedTemplates.#sortableTh("release_date", t("RELEASE_DATE"), sb, sd, cycleSort, ["feed-date-h", "hideOnMidBreakpoint"])] : []),
-                                    ...(hasActionDate ? [FeedTemplates.#sortableTh("created_at", config.actionDateHeader ?? "", sb, sd, cycleSort, ["feed-date-h", "hideOnMidBreakpoint"])] : []),
+                                    ...(hasDate ? (sortable ? [FeedTemplates.#sortableTh("release_date", t("RELEASE_DATE"), sb, sd, cycleSort, ["feed-date-h", "hideOnMidBreakpoint"])] : [create("th").classes("feed-date-h", "hideOnMidBreakpoint").text(t("RELEASE_DATE")).build()]) : []),
+                                    ...(hasActionDate ? (sortable ? [FeedTemplates.#sortableTh("created_at", config.actionDateHeader ?? "", sb, sd, cycleSort, ["feed-date-h", "hideOnMidBreakpoint"])] : [create("th").classes("feed-date-h", "hideOnMidBreakpoint").text(config.actionDateHeader ?? "").build()]) : []),
                                     create("th").classes("feed-interact-h", "hideOnSmallBreakpoint").build(),
                                     create("th").classes("feed-menu-h", "hideOnSmallBreakpoint").build(),
                                 );
