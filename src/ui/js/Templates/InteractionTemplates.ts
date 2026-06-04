@@ -8,6 +8,7 @@ import {InteractionType} from "@targoninc/lyda-shared/src/Enums/InteractionType"
 import {Icons} from "../Enums/Icons.ts";
 import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import {Comment} from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import {currentUser} from "../state.ts";
 import {Visibility} from "@targoninc/lyda-shared/src/Enums/Visibility";
 import {Api} from "../Api/Api.ts";
@@ -39,8 +40,8 @@ const interactionConfigs: Record<InteractionType, InteractionConfig> = {
 }
 
 export class InteractionTemplates {
-    private static interactionButton<T extends { id: number, visibility: Visibility }>(entityType: EntityType,
-        interactionType: InteractionType, metadata: InteractionMetadata<T>, config: InteractionConfig, entity: T, showCount = true) {
+    private static interactionButton<T extends { id: number }>(entityType: EntityType,
+        interactionType: InteractionType, metadata: InteractionMetadata<T>, config: InteractionConfig, entity: T, showCount = true, disabler$?: Signal<boolean>) {
         const { interacted$, count$ } = InteractionStateManager.getOrCreate(
             entityType, entity.id, interactionType,
             metadata.interacted ?? false, metadata.count ?? 0,
@@ -49,7 +50,13 @@ export class InteractionTemplates {
         const icon$ = compute(i => i ? config.icons.interacted : config.icons.default, interacted$);
         const stateClass$ = compute((s: boolean): string => s ? "active" : "_", interacted$);
         const inertClass = config.toggleable ? "_" : "inert";
-        const disabledClass$ = compute((u): string => (!u || (entity.visibility === Visibility.private && inertClass !== "inert")) ? "disabled" : "_", currentUser);
+        const entityVisibility = (entity as any).visibility;
+        const disabledClass$ = compute((u): string => {
+            if (!u) return "disabled";
+            if (entityVisibility === Visibility.private && inertClass !== "inert") return "disabled";
+            if (disabler$?.value) return "disabled";
+            return "_";
+        }, currentUser);
         const hideOnSmall = interactionType === InteractionType.comment;
 
         return create("div")
@@ -71,13 +78,16 @@ export class InteractionTemplates {
         let elements: AnyNode[];
         switch (entityType) {
             case EntityType.track:
-                elements = InteractionTemplates.trackInteractions(entity as Track, options?.overrideActions, options?.showCount);
+                elements = InteractionTemplates.trackInteractions(entity as Track, options);
                 break;
             case EntityType.album:
-                elements = InteractionTemplates.albumInteractions(entity as Album, options?.showCount);
+                elements = InteractionTemplates.albumInteractions(entity as Album, options);
                 break;
             case EntityType.playlist:
-                elements = InteractionTemplates.playlistInteractions(entity as Playlist, options?.showCount);
+                elements = InteractionTemplates.playlistInteractions(entity as Playlist, options);
+                break;
+            case EntityType.comment:
+                elements = InteractionTemplates.commentInteractions(entity as Comment, options);
                 break;
             default:
                 elements = [nullElement()];
@@ -89,29 +99,34 @@ export class InteractionTemplates {
 
     private static interactionList<T extends {
         id: number
-    }>(interactions: InteractionType[], entity: T, entityType: EntityType, showCount = true) {
+    }>(interactions: InteractionType[], entity: T, entityType: EntityType, options?: InteractionOptions) {
         const elements = [];
         for (const interaction of interactions) {
             const config = interactionConfigs[interaction];
-            elements.push(InteractionTemplates.interactionButton(entityType, interaction, entity[interaction + "s" as keyof T] ?? {} as InteractionMetadata<any>, config, entity, showCount));
+            elements.push(InteractionTemplates.interactionButton(entityType, interaction, entity[interaction + "s" as keyof T] ?? {} as InteractionMetadata<any>, config, entity, options?.showCount, options?.disabled));
         }
 
         return elements;
     }
 
-    private static trackInteractions(entity: Track, overrideActions?: InteractionType[], showCount = true) {
+    private static trackInteractions(entity: Track, options?: InteractionOptions) {
         const interactions = [InteractionType.like, InteractionType.repost, InteractionType.comment];
-        return this.interactionList(overrideActions ?? interactions, entity, EntityType.track, showCount);
+        return this.interactionList(options?.overrideActions ?? interactions, entity, EntityType.track, options);
     }
 
-    private static albumInteractions(entity: Album, showCount = true) {
+    private static albumInteractions(entity: Album, options?: InteractionOptions) {
         const interactions = [InteractionType.like];
-        return this.interactionList(interactions, entity, EntityType.album, showCount);
+        return this.interactionList(interactions, entity, EntityType.album, options);
     }
 
-    private static playlistInteractions(entity: Playlist, showCount = true) {
+    private static playlistInteractions(entity: Playlist, options?: InteractionOptions) {
         const interactions = [InteractionType.like];
-        return this.interactionList(interactions, entity, EntityType.playlist, showCount);
+        return this.interactionList(interactions, entity, EntityType.playlist, options);
+    }
+
+    private static commentInteractions(entity: Comment, options?: InteractionOptions) {
+        const interactions = [InteractionType.like];
+        return this.interactionList(interactions, entity, EntityType.comment, options);
     }
 }
 

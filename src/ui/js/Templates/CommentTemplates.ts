@@ -10,10 +10,12 @@ import { button, input, textarea } from "@targoninc/jess-components";
 import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import { UserWidgetContext } from "../Enums/UserWidgetContext.ts";
 import { t } from "../../locales";
-import {permissions} from "../state.ts";
+import {permissions, currentUser} from "../state.ts";
 import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
 import {RoutePath} from "../Routing/routes.ts";
 import {navigate} from "../Routing/Router.ts";
+import {InteractionTemplates} from "./InteractionTemplates.ts";
+import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
 
 export class CommentTemplates {
     static commentListFullWidth(track_id: number, comments: Signal<Comment[]>, showComments: Signal<boolean>) {
@@ -113,6 +115,7 @@ export class CommentTemplates {
                             GenericTemplates.timestamp(comment.created_at),
                         ).classes("no-gap"),
                         horizontal(
+                            InteractionTemplates.interactions(EntityType.comment, comment, {disabled: compute(u => u?.id === comment.user_id, currentUser)}),
                             when(Util.isLoggedIn(), CommentTemplates.commentReplySection(repliesShown, replyInputShown, comment, newComment, comments)),
                             when(Util.isLoggedIn() && comment.canEdit, horizontal(
                                 moreBtn,
