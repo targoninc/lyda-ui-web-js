@@ -566,7 +566,7 @@ export class FeedTemplates {
         return el;
     }
 
-    static feed(type: FeedType, user?: { id?: number; username?: string; displayname?: string }, overrides?: { search$?: Signal<string>; wipFilterState?: Signal<string>; noToolbar?: boolean }): any {
+    static feed(type: FeedType, user?: { id?: number; username?: string; displayname?: string }, overrides?: { search$?: Signal<string>; wipFilterState?: Signal<string>; noToolbar?: boolean; sortable?: boolean }): any {
         const validFilters = ["all", "originals", "reposts"];
         const urlParams = new URLSearchParams(window.location.search);
         const initialFilter = urlParams.get("filter") ?? "all";
@@ -687,6 +687,7 @@ export class FeedTemplates {
             wipFilterState: supportsWip ? wipFilterState : undefined,
             searchOverride$: overrides?.search$,
             noToolbar: overrides?.noToolbar,
+            sortable: overrides?.sortable,
             columns: columns$,
             pageSize: type === FeedType.explore ? 100 : 10,
             fetchPage: async (offset, limit, filter, sortBy, sortDir) => {

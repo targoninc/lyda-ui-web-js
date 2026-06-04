@@ -54,7 +54,7 @@ export class PageTemplates {
     static mapping: Record<RoutePath, (route: Route, params: Record<string, string>) => Promise<AnyElement> | AnyElement> = {
         [RoutePath.explore]: () => PageTemplates.explorePage(),
         [RoutePath.following]: () => FeedTemplates.feed(FeedType.following),
-        [RoutePath.history]: () => FeedTemplates.feed(FeedType.history),
+        [RoutePath.history]: () => FeedTemplates.feed(FeedType.history, undefined, {sortable: false}),
         [RoutePath.album]: AlbumTemplates.albumPage,
         [RoutePath.playlist]: PlaylistTemplates.playlistPage,
         [RoutePath.profile]: UserTemplates.profile,

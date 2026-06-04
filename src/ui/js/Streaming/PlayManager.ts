@@ -449,12 +449,18 @@ export class PlayManager {
 
     static async skipForward(id: number) {
         const streamClient = PlayManager.getStreamClient(id);
-        await PlayManager.scrubTo(id, streamClient.getCurrentTime(true) + .1);
+        const newTime = Math.max(0, streamClient.getCurrentTime(false) + 5);
+        await streamClient.scrubTo(newTime, false);
+        StreamingUpdater.updateScrubber(id);
+        await StreamingUpdater.updatePlayState();
     }
 
     static async skipBackward(id: number) {
         const streamClient = PlayManager.getStreamClient(id);
-        await PlayManager.scrubTo(id, streamClient.getCurrentTime(true) - .1);
+        const newTime = Math.max(0, streamClient.getCurrentTime(false) - 5);
+        await streamClient.scrubTo(newTime, false);
+        StreamingUpdater.updateScrubber(id);
+        await StreamingUpdater.updatePlayState();
     }
 
     static config = {

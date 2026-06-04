@@ -22,6 +22,7 @@ export class StreamClient implements IStreamClient {
 
     private bytesReceived = 0;
     private totalBytes = 0;
+    private abortController?: AbortController;
 
     constructor(id: number, code: string) {
         this.id = id;
@@ -72,6 +73,10 @@ export class StreamClient implements IStreamClient {
             this.source = undefined;
         }
         this.playing = false;
+
+        this.abortController?.abort();
+        this.abortController = undefined;
+        this.loadingPromise = undefined;
     }
 
     public async scrubTo(time: number, relative: boolean): Promise<void> {
@@ -164,10 +169,20 @@ export class StreamClient implements IStreamClient {
             throw new Error("AudioContext not initialized");
         }
 
+        this.abortController = new AbortController();
+        const signal = this.abortController.signal;
+
         const url = this.buildUrl();
-        const res = await fetch(url, {
-            credentials: "include",
-        });
+        let res: Response;
+        try {
+            res = await fetch(url, {
+                credentials: "include",
+                signal,
+            });
+        } catch {
+            if (signal.aborted) return;
+            throw new Error("Failed to fetch stream");
+        }
 
         if (!res.ok || !res.body) {
             throw new Error(`Failed to fetch stream: ${res.status} ${res.statusText}`);
@@ -184,17 +199,22 @@ export class StreamClient implements IStreamClient {
         loadingAudio.value = true;
 
         while (true) {
-            const { done, value } = await reader.read();
-            if (done) {
-                break;
-            }
+            try {
+                const { done, value } = await reader.read();
+                if (done) break;
 
-            if (value) {
-                chunks.push(value);
-                received += value.byteLength;
-                this.bytesReceived = received;
+                if (value) {
+                    chunks.push(value);
+                    received += value.byteLength;
+                    this.bytesReceived = received;
+                }
+            } catch {
+                if (signal.aborted) return;
+                throw new Error("Failed to read stream");
             }
         }
+
+        if (signal.aborted) return;
 
         const merged = new Uint8Array(received);
         let offset = 0;

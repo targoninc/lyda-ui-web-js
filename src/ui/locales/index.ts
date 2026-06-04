@@ -67,7 +67,7 @@ export function getTranslation(lookup: TranslationKey | string, lang: Language) 
             return getTranslation(lookup, defaultLanguage);
         }
 
-        return "<i18n/ERR: Lang not found>";
+        return getTranslation(lookup, Language.en);
     }
 
     if (l[lookup as TranslationKey]) {

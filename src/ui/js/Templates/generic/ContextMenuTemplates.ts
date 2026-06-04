@@ -33,7 +33,7 @@ export class ContextMenuTemplates {
 
         const button = create("button")
             .classes("round-button", "jess", "context-menu-btn")
-            .onclick((e: Event) => { rebuild(); PopoverTemplates.toggle(popover, e.currentTarget as HTMLElement); })
+            .onclick((e: Event) => { rebuild(); PopoverTemplates.toggle(popover, e.currentTarget as HTMLElement, true); })
             .children(GenericTemplates.icon("more_horiz", false))
             .build() as HTMLElement;
 

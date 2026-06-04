@@ -655,7 +655,7 @@ export class UserTemplates {
                 ),
                 when(
                     tabSelected(currentIndex, 4),
-                    FeedTemplates.feed(FeedType.history, user, {search$: pageSearch$, noToolbar: true}),
+                    FeedTemplates.feed(FeedType.history, user, {search$: pageSearch$, noToolbar: true, sortable: false}),
                 ),
             ).build(),
         ).build();
