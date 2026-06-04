@@ -204,6 +204,7 @@ export function notify(textIn: StringOrSignal, type = NotificationType.info, tim
 }
 
 export function createModal(children: AnyNode[], modalId: string) {
+    document.querySelectorAll("[popover]:popover-open").forEach(el => (el as HTMLElement).hidePopover());
     const modal = GenericTemplates.modal(children, modalId);
 
     if (openMenus.value.includes(modalId)) {
