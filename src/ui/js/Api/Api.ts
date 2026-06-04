@@ -486,6 +486,22 @@ export class Api {
         return await get<UserEmail[]>(ApiRoutes.getEmails, { id });
     }
 
+    static async getIpLogs(offset: number, limit: number, filter: string = "", ip: string = "") {
+        return await get<{items: any[], total: number}>(ApiRoutes.getIpLogs, { offset, limit, filter, ip });
+    }
+
+    static async getBannedIps() {
+        return await get<any[]>(ApiRoutes.getBannedIps, {});
+    }
+
+    static async banIp(ip: string, reason: string = "") {
+        await post(ApiRoutes.banIp, { ip, reason });
+    }
+
+    static async unbanIp(ip: string) {
+        await post(ApiRoutes.unbanIp, { ip });
+    }
+
     //endregion
 
     //region Albums

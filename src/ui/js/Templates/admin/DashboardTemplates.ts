@@ -67,6 +67,11 @@ export class DashboardTemplates {
                             onclick: () => navigate(RoutePath.subscriptionPayments),
                             icon: { icon: "subscriptions" },
                         })),
+                        when(hasPermission(Permissions.canReadIpLogs), button({
+                            text: "IP Logs",
+                            onclick: () => navigate(RoutePath.ipLogs),
+                            icon: { icon: "language" },
+                        })),
                     ).build())
             ).build();
     }

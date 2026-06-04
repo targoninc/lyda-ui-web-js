@@ -15,6 +15,7 @@ import { LogTemplates } from "./admin/LogTemplates.ts";
 import { RoyaltyTemplates } from "./admin/RoyaltyTemplates.ts";
 import { ContentIDTemplates } from "./admin/ContentIDTemplates.ts";
 import { SubscriptionPaymentsTemplates } from "./admin/SubscriptionPaymentsTemplates.ts";
+import { IpLogTemplates } from "./admin/IpLogTemplates.ts";
 import { PayoutTemplates } from "./money/PayoutTemplates.ts";
 import { FeedTemplates } from "./generic/FeedTemplates.ts";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
@@ -91,6 +92,7 @@ export class PageTemplates {
         [RoutePath.events]: EventsTemplates.eventsPage,
         [RoutePath.contentID]: ContentIDTemplates.contentIDPage,
         [RoutePath.subscriptionPayments]: SubscriptionPaymentsTemplates.page,
+        [RoutePath.ipLogs]: IpLogTemplates.ipLogsPage,
     };
     static needLoginPages: RoutePath[] = [
         RoutePath.library,

@@ -38,6 +38,7 @@ export enum RoutePath {
     createAlbum = "create-album",
     createPlaylist = "create-playlist",
     subscriptionPayments = "subscription-payments",
+    ipLogs = "ip-logs",
 }
 
 export const routes: Route[] = [

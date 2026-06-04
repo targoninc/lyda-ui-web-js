@@ -225,6 +225,16 @@ export class ApiRoutes {
     static getPaymentProviders = ApiRoutes.orders + "/providers";
     // endregion
 
+    // region Admin
+    private static admin = ApiRoutes.base + "/admin";
+    static getIpLogs = ApiRoutes.admin + "/ip-logs";
+    static getBannedIps = ApiRoutes.admin + "/banned-ips";
+
+    private static adminActions = ApiRoutes.admin + "/actions";
+    static banIp = ApiRoutes.adminActions + "/ban-ip";
+    static unbanIp = ApiRoutes.adminActions + "/unban-ip";
+    // endregion
+
     // region Taxes
     private static taxes = ApiRoutes.base + "/taxes";
     static getTaxinfo = ApiRoutes.taxes + "/taxinfo";
