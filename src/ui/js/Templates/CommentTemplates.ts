@@ -134,7 +134,7 @@ export class CommentTemplates {
         );
 
         const reportBtn = button({
-            text: comment.reported_by_me ? "Reported" : "Report",
+            text: comment.reported_by_me ? t("REPORTED") : t("REPORT"),
             icon: { icon: "flag" },
             classes: comment.reported_by_me ? ["color-dim"] : [],
             disabled: comment.reported_by_me,
@@ -310,18 +310,18 @@ export class CommentTemplates {
         const modalId = `report-comment-${comment.id}`;
 
         const modalContents = [
-            create("h2").text("Report comment").build(),
+            create("h2").text(t("REPORT_COMMENT")).build(),
             create("div").classes("flex-v").children(
-                create("label").text("Reason").build(),
+                create("label").text(t("REASON")).build(),
                 create("select")
                     .children(
-                        create("option").value("spam").text("Spam").build(),
-                        create("option").value("bullying").text("Bullying").build(),
-                        create("option").value("sexual_content").text("Sexual Content").build(),
-                        create("option").value("abuse").text("Abuse").build(),
-                        create("option").value("hatespeech").text("Hate Speech").build(),
-                        create("option").value("heavy_swearing").text("Heavy Swearing").build(),
-                        create("option").value("other").text("Other").build(),
+                        create("option").value("spam").text(t("REASON_SPAM")).build(),
+                        create("option").value("bullying").text(t("REASON_BULLYING")).build(),
+                        create("option").value("sexual_content").text(t("REASON_SEXUAL_CONTENT")).build(),
+                        create("option").value("abuse").text(t("REASON_ABUSE")).build(),
+                        create("option").value("hatespeech").text(t("REASON_HATESPEECH")).build(),
+                        create("option").value("heavy_swearing").text(t("REASON_HEAVY_SWEARING")).build(),
+                        create("option").value("other").text(t("REASON_OTHER")).build(),
                     )
                     .onchange((e: Event) => {
                         reason.value = (e.target as HTMLSelectElement).value;
@@ -329,25 +329,25 @@ export class CommentTemplates {
                     .build(),
             ).build(),
             create("div").classes("flex-v").children(
-                create("label").text("Description").build(),
+                create("label").text(t("DESCRIPTION")).build(),
                 textarea({
-                    placeholder: "Describe the issue...",
+                    placeholder: t("REPORT_DESCRIPTION_PLACEHOLDER"),
                     value: description,
                     onchange: v => description.value = v,
                     attributes: ["maxlength", "2048"],
                 }),
-                create("span").classes("color-dim").text("Maximum 2048 characters").build(),
+                create("span").classes("color-dim").text(t("MAX_2048_CHARACTERS")).build(),
             ).build(),
             create("div").classes("flex", "align-children").children(
                 button({
-                    text: "Report",
+                    text: t("REPORT"),
                     icon: { icon: "flag" },
                     classes: ["positive"],
                     onclick: async () => {
                         await Api.reportComment(comment.id, reason.value, description.value);
                         comment.reported_by_me = true;
                         Util.removeModal(modal);
-                        notify("Comment reported");
+                        notify(t("COMMENT_REPORTED"));
                     },
                 }),
                 button({
