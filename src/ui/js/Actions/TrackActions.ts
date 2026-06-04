@@ -88,6 +88,7 @@ export class TrackActions {
             potentially_harmful: false,
             hidden: false,
             canEdit: true,
+            likes: {count: 0, interacted: false},
         };
         comments.value = [...comments.value, comment];
         content.value = "";

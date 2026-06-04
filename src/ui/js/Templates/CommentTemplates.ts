@@ -147,7 +147,7 @@ export class CommentTemplates {
                             GenericTemplates.timestamp(comment.created_at),
                         ).classes("no-gap"),
                         horizontal(
-                            InteractionTemplates.interactions(EntityType.comment, comment, {disabler: compute(u => u?.id === comment.user_id, currentUser)}),
+                            InteractionTemplates.interactions(EntityType.comment, comment, {disabled: compute(u => u?.id === comment.user_id, currentUser)}),
                             when(currentUser, CommentTemplates.commentReplySection(repliesShown, replyInputShown, comment, newComment, comments)),
                             when(Util.isLoggedIn() && comment.canEdit, horizontal(
                                 moreBtn,
