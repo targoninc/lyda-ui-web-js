@@ -37,6 +37,9 @@ function uid(): string {
     return `fg-${++uidCounter}`;
 }
 
+const lastNavTimestamps = new Map<number, number>();
+
+
 export class FeedTemplates {
     static create<T extends { id: number }>(config: FeedConfig<T>): any {
         const items$ = signal<T[]>([]);
@@ -643,7 +646,14 @@ export class FeedTemplates {
                                     create("div").classes("flex", "align-children", "small-gap")
                                         .children(
                                             create("span").classes("feed-title", "clickable", "pointer").text(track.title)
-                                                .onclick((e: Event) => { e.stopPropagation(); navigate(`/track/${track.id}`); })
+                                                .onclick((e: Event) => {
+                                                    e.stopPropagation();
+                                                    const now = Date.now();
+                                                    const last = lastNavTimestamps.get(track.id) ?? 0;
+                                                    if (now - last < 400) return;
+                                                    lastNavTimestamps.set(track.id, now);
+                                                    navigate(`/track/${track.id}`);
+                                                })
                                                 .build(),
                                             ...(track.wip ? [GenericTemplates.tag(t("WIP"), "wip")] : []),
                                             ...(track.collab?.collab_type ? [TrackTemplates.collabIndicator(track.collab)] : []),
