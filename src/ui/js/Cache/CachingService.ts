@@ -1,5 +1,6 @@
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import { ApiRoutes } from "../Api/ApiRoutes.ts";
+import { Images } from "../Enums/Images.ts";
 
 interface CachedImage {
     key: string;
@@ -7,13 +8,21 @@ interface CachedImage {
     fetchedAt: number;
 }
 
+const DEFAULT_FALLBACKS: Record<string, string> = {
+    [MediaFileType.userAvatar]: Images.DEFAULT_AVATAR,
+    [MediaFileType.userBanner]: Images.DEFAULT_BANNER,
+    [MediaFileType.trackCover]: Images.DEFAULT_COVER_TRACK,
+    [MediaFileType.albumCover]: Images.DEFAULT_COVER_ALBUM,
+    [MediaFileType.playlistCover]: Images.DEFAULT_COVER_PLAYLIST,
+};
+
 export class CachingService {
     private dbPromise: Promise<IDBDatabase> | null = null;
     private readonly blobUrlCache = new Map<string, string>();
     private static readonly DB_NAME = "LydaImageCache";
     private static readonly DB_VERSION = 1;
     private static readonly IMAGE_STORE = "images";
-    private static readonly IMAGE_TTL = 60 * 60 * 1000;
+    private static readonly IMAGE_TTL = 24 * 60 * 60 * 1000;
 
     private getDb(): Promise<IDBDatabase> {
         if (!this.dbPromise) {
@@ -64,7 +73,7 @@ export class CachingService {
         try {
             const resp = await fetch(serverUrl);
             if (!resp.ok) {
-                return serverUrl;
+                return DEFAULT_FALLBACKS[type] ?? serverUrl;
             }
             const blob = await resp.blob();
 
@@ -85,7 +94,7 @@ export class CachingService {
             this.blobUrlCache.set(key, url);
             return url;
         } catch {
-            return serverUrl;
+            return DEFAULT_FALLBACKS[type] ?? serverUrl;
         }
     }
 

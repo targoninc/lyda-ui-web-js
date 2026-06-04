@@ -35,8 +35,12 @@ const server = serve({
             if (await Bun.file(staticFilePath).exists()) {
                 const mimeType = getMimeType(staticFilePath);
 
+                const isDefaultImage = pathname.startsWith("/img/defaults/");
                 return new Response(await file(staticFilePath).arrayBuffer(), {
-                    headers: { "Content-Type": mimeType },
+                    headers: {
+                        "Content-Type": mimeType,
+                        "Cache-Control": isDefaultImage ? "public, max-age=86400" : "public, max-age=3600",
+                    },
                 });
             }
         }
