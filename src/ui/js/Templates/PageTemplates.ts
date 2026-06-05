@@ -1,7 +1,7 @@
 import { AuthActions } from "../Actions/AuthActions.ts";
 import { LandingPageTemplates } from "./LandingPageTemplates.ts";
 import { UserTemplates } from "./account/UserTemplates.ts";
-import { AnyElement, compute, create, nullElement, signal, when } from "@targoninc/jess";
+import { AnyElement, compute, create, InputType, nullElement, signal, signalMap, Signal, when } from "@targoninc/jess";
 import { SearchTemplates } from "./SearchTemplates.ts";
 import { SettingsTemplates } from "./account/SettingsTemplates.ts";
 import { RoadmapTemplates } from "./RoadmapTemplates.ts";
@@ -19,6 +19,7 @@ import { IpLogTemplates } from "./admin/IpLogTemplates.ts";
 import { PayoutTemplates } from "./money/PayoutTemplates.ts";
 import { FeedTemplates } from "./generic/FeedTemplates.ts";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { TrackEditTemplates } from "./music/TrackEditTemplates.ts";
 import { navigate, Route } from "../Routing/Router.ts";
 import { copy } from "../Classes/Util.ts";
@@ -31,6 +32,7 @@ import { notify } from "../Classes/Ui.ts";
 import { NotificationType } from "../Enums/NotificationType.ts";
 import { Api } from "../Api/Api.ts";
 import { GenericTemplates, horizontal, tabSelected, vertical } from "./generic/GenericTemplates.ts";
+import { InteractionTemplates } from "./InteractionTemplates.ts";
 import { FeedMenuAction } from "../Models/FeedConfig.ts";
 import { TrackList } from "../Models/TrackList.ts";
 import { Images } from "../Enums/Images.ts";
@@ -44,9 +46,11 @@ import { AlbumActions } from "../Actions/AlbumActions.ts";
 import { PlaylistActions } from "../Actions/PlaylistActions.ts";
 import { QueueManager } from "../Streaming/QueueManager.ts";
 import { ApiRoutes } from "../Api/ApiRoutes.ts";
-import { heading } from "@targoninc/jess-components";
+import { heading, button } from "@targoninc/jess-components";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
+import { Genre } from "@targoninc/lyda-shared/src/Enums/Genre";
+import { InteractionType } from "@targoninc/lyda-shared/src/Enums/InteractionType";
 import { SubscriptionTemplates } from "./money/SubscriptionTemplates.ts";
 import { t } from "../../locales";
 import { TransactionTemplates } from "./money/TransactionTemplates.ts";
@@ -143,8 +147,8 @@ export class PageTemplates {
     }
 
     static explorePage() {
-        const tabs = [`${t("TRACKS")}`, `${t("ALBUMS")}`, `${t("PLAYLISTS")}`];
-        const urlTabs = ["tracks", "albums", "playlists"];
+        const tabs = [`${t("TRACKS")}`, `${t("ALBUMS")}`, `${t("PLAYLISTS")}`, `${t("GENRES")}`];
+        const urlTabs = ["tracks", "albums", "playlists", "genres"];
         const urlParams = new URLSearchParams(window.location.search);
         const initialTab = urlTabs.indexOf(urlParams.get("tab") ?? "");
         const selectedTab = signal(initialTab === -1 ? 0 : initialTab);
@@ -234,6 +238,8 @@ export class PageTemplates {
             .children(
                 GenericTemplates.combinedSelector(tabs, i => selectedTab.value = i, selectedTab.value),
             ).build();
+
+        const genreExploreState = PageTemplates.genreExploreSection();
 
         return create("div")
             .classes("feed-wrapper", "flex-v", "fullWidth")
@@ -326,8 +332,197 @@ export class PageTemplates {
                             onNavigate: (list) => window.open(`/playlist/${list.id}`, "_blank"),
                         }),
                     ),
+                    when(
+                        tabSelected(selectedTab, 3),
+                        genreExploreState,
+                    ),
                 ).build(),
             ).build();
+    }
+
+    private static genreExploreSection() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const initialGenres = urlParams.get("genres")?.split(",").filter(g => g.trim()) ?? [];
+        const selectedGenres$ = signal<string[]>(initialGenres);
+        const allGenres = Object.values(Genre) as string[];
+        const reloadTrigger$ = signal(0);
+
+        selectedGenres$.subscribe(() => {
+            const url = new URL(window.location.href);
+            if (selectedGenres$.value.length > 0) {
+                url.searchParams.set("genres", selectedGenres$.value.join(","));
+            } else {
+                url.searchParams.delete("genres");
+            }
+            window.history.replaceState(null, "", url.toString());
+            reloadTrigger$.value++;
+        });
+
+        const addGenre = (name: string) => {
+            if (selectedGenres$.value.includes(name)) return;
+            selectedGenres$.value = [...selectedGenres$.value, name];
+        };
+
+        const removeGenre = (name: string) => {
+            selectedGenres$.value = selectedGenres$.value.filter(g => g !== name);
+        };
+
+        const hasGenres = compute(s => s.length > 0, selectedGenres$);
+        const searchFilter$ = signal("");
+
+        const genreSuggestionBtn = (sug: string) => button({
+            text: sug,
+            classes: ["tag-suggestion", "rounded-max"],
+            onclick: () => {
+                addGenre(sug);
+                searchFilter$.value = "";
+            },
+        });
+
+        const tagEditor = create("div").classes("flex-v", "small-gap", "padded").children(
+            create("div").classes("flex", "flex-wrap", "small-gap", "align-children").children(
+                signalMap(
+                    selectedGenres$,
+                    create("div").classes("flex", "flex-wrap", "small-gap", "align-children"),
+                    (tag) =>
+                        button({
+                            text: tag,
+                            icon: {
+                                icon: "close"
+                            },
+                            onclick: () => removeGenre(tag)
+                        }),
+                ),
+                create("input")
+                    .type(InputType.text)
+                    .classes("jess", "tag-input")
+                    .placeholder(t("FILTER_GENRES"))
+                    .value(searchFilter$)
+                    .oninput(e => searchFilter$.value = (e.target as HTMLInputElement).value)
+                    .build(),
+            ).build(),
+            when(
+                compute(s => s.length < allGenres.length, selectedGenres$),
+                create("div").classes("flex", "flex-wrap", "small-gap").children(
+                    signalMap(
+                        compute(
+                            (selected, search) => {
+                                let available = allGenres.filter(g => !selected.includes(g));
+                                if (search.trim()) {
+                                    available = available.filter(g => g.includes(search.trim().toLowerCase()));
+                                }
+                                return available;
+                            },
+                            selectedGenres$, searchFilter$,
+                        ),
+                        create("div").classes("flex", "flex-wrap", "small-gap"),
+                        genreSuggestionBtn,
+                    ),
+                ).build(),
+            ),
+        ).build();
+
+        const noGenres = compute(g => g.length === 0, selectedGenres$);
+
+        return vertical(
+            tagEditor,
+            when(hasGenres, FeedTemplates.create<Track>({
+                id: "feed-genre-explore",
+                compact: true,
+                pageSize: 100,
+                noToolbar: true,
+                searchOverride$: compute(_ => `reload-${reloadTrigger$.value}`, reloadTrigger$),
+                columns: [
+                    {
+                        key: "title",
+                        header: t("TRACK_TITLE"),
+                        render: (track) => {
+                            const icons: any[] = [];
+                            if (track.visibility === "private") icons.push(GenericTemplates.lock());
+                            const coverSrc = signal(DefaultImages[EntityType.track]);
+                            if (track.has_cover) {
+                                Util.getCachedImage(track.id, MediaFileType.trackCover).then(url => {
+                                    coverSrc.value = url;
+                                });
+                            }
+                            return create("div")
+                                .classes("flex", "align-children", "small-gap", "noflexwrap")
+                                .children(
+                                    create("img")
+                                        .classes("feed-inline-cover")
+                                        .src(coverSrc)
+                                        .alt(track.title)
+                                        .build(),
+                                    create("div").classes("flex-v", "no-gap")
+                                        .children(
+                                            create("div").classes("flex", "align-children", "small-gap")
+                                                .children(
+                                                    create("span").classes("feed-title", "clickable", "pointer").text(track.title)
+                                                        .onclick((e: Event) => {
+                                                            e.stopPropagation();
+                                                            navigate(`/track/${track.id}`);
+                                                        })
+                                                        .build(),
+                                                    ...(track.wip ? [GenericTemplates.tag(t("WIP"), "wip")] : []),
+                                                    ...(track.collab?.collab_type ? [TrackTemplates.collabIndicator(track.collab)] : []),
+                                                    ...icons,
+                                                ).build(),
+                                        ).build(),
+                                ).build();
+                        },
+                    },
+                    {
+                        key: "artist",
+                        header: t("ARTIST"),
+                        render: (track) => {
+                            if (!track.user) return nullElement();
+                            return UserTemplates.userLink(UserWidgetContext.card, track.user as User, track.artistname);
+                        },
+                    },
+                ],
+                fetchPage: async (offset, limit) => {
+                    const genres = selectedGenres$.value;
+                    if (genres.length === 0) return [];
+                    const params: any = { offset, limit, genres: genres.join(",") };
+                    const res = await Api.getFeed(ApiRoutes.genreExploreFeed, params);
+                    if (!res) return [];
+                    if (Array.isArray(res)) return res;
+                    return res;
+                },
+                buildMenuActions: (track): FeedMenuAction<Track>[] => [
+                    { label: t("QUEUE"), icon: "queue", onclick: () => QueueManager.addToManualQueue(track.id) },
+                    {
+                        label: t("COPY_LINK"),
+                        icon: "link",
+                        onclick: () => copy(window.location.origin + "/track/" + track.id),
+                    },
+                    {
+                        label: t("OPEN_IN_NEW_TAB"),
+                        icon: "open_in_new",
+                        onclick: () => window.open(`/track/${track.id}`, "_blank"),
+                    },
+                ],
+                buildInteractions: (track): any[] => [
+                    InteractionTemplates.interactions(EntityType.track, track, {
+                        showCount: false,
+                        overrideActions: [InteractionType.like, InteractionType.repost],
+                    }),
+                ],
+                onPlayToggle: async (track) => {
+                    if (currentTrackId.value === track.id && playingHere.value) {
+                        await PlayManager.pauseAsync(track.id);
+                    } else {
+                        await PlayManager.startAsync(track.id);
+                    }
+                },
+                isPlaying: (id) => compute((c, p) => c === id && p, currentTrackId, playingHere),
+                dateRender: (track) => GenericTemplates.timestamp(track.created_at, ["hideOnSmallBreakpoint"]),
+                onNavigate: (track) => window.open(`/track/${track.id}`, "_blank"),
+            })),
+            when(noGenres, create("div").classes("flex-v", "padded", "align-center").children(
+                create("span").classes("color-dim").text(t("SELECT_GENRES_TO_EXPLORE")).build(),
+            ).build()),
+        ).build();
     }
 
     static statisticsPage() {

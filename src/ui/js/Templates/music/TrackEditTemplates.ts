@@ -64,7 +64,7 @@ export class TrackEditTemplates {
             artistname: "",
             release_date: new Date(),
             visibility: "public",
-            genre: Genre.OTHER,
+            genres: [],
             isrc: "",
             upc: "",
             description: "",
@@ -180,6 +180,7 @@ export class TrackEditTemplates {
         const state = compute(t => <UploadableTrack>{
             ...t,
             release_date: new Date(t?.release_date ?? Date.now()),
+            genres: t?.genre ? t.genre.split(",").map(g => g.trim()).filter(g => g) : [],
         }, track);
 
         return vertical(
@@ -304,7 +305,6 @@ export class TrackEditTemplates {
             const requiredProps = [
                 {section: "audio", field: "audioFileName"},
                 {section: "info", field: "title"},
-                {section: "info", field: "genre"},
                 {section: "monetization", field: "termsOfService"},
             ];
             if (requiredProps.some(p => !s[p.field])) {
@@ -413,7 +413,7 @@ export class TrackEditTemplates {
                         TrackEditTemplates.creditsInput(state),
                         TrackEditTemplates.linkedUsers(state.value.collaborators, state as Signal<UploadableTrack | Track>, true),
                         GenericTemplates.releaseDateInput(state),
-                        TrackEditTemplates.genreInput(state),
+                        TrackEditTemplates.genreTagsInput(state),
                         horizontal(
                             TrackEditTemplates.isrcInput(state),
                             TrackEditTemplates.upcInput(state),
@@ -549,23 +549,101 @@ export class TrackEditTemplates {
         });
     }
 
-    static genreInput(parentState: Signal<UploadableTrack>) {
-        const genres = Object.values(Genre).map((genre: string) => ({
-            name: genre,
-            id: genre,
-        })) as SelectOption<string>[];
-        const value = compute(p => p.genre ?? "other", parentState);
-        value.subscribe((v, changed) => {
-            if (!changed) {
-                return;
-            }
+    static genreTagsInput(parentState: Signal<UploadableTrack>) {
+        const MAX_GENRES = 5;
+        const allGenres = Object.values(Genre) as string[];
+        const currentTags = compute(s => s.genres ?? [], parentState);
 
+        const addTag = (name: string) => {
+            const tags = currentTags.value;
+            if (tags.length >= MAX_GENRES) return;
+            if (tags.includes(name)) return;
             parentState.value = {
                 ...parentState.value,
-                genre: v,
+                genres: [...tags, name],
             };
+        };
+
+        const removeTag = (name: string) => {
+            parentState.value = {
+                ...parentState.value,
+                genres: currentTags.value.filter(t => t !== name),
+            };
+        };
+
+        const inputValue = signal("");
+
+        const removeBtn = (tag: string) => button({
+            icon: {icon: "close"},
+            classes: ["tag-remove"],
+            onclick: () => removeTag(tag),
         });
-        return FormTemplates.dropDownField(t("GENRE"), signal(genres), value);
+
+        const suggestionBtn = (sug: string) => button({
+            text: sug,
+            classes: ["tag-suggestion", "rounded-max"],
+            onclick: () => {
+                addTag(sug);
+                inputValue.value = "";
+            },
+        });
+
+        return create("div").classes("flex-v", "small-gap").children(
+            create("label").text(t("GENRE")).build(),
+            create("div").classes("flex", "flex-wrap", "small-gap", "align-children").children(
+                signalMap(
+                    currentTags,
+                    create("div").classes("flex", "flex-wrap", "small-gap", "align-children"),
+                    (tag) =>
+                        create("div").classes("flex", "align-children", "tag-pill").children(
+                            create("span").classes("tag", "tag-active").text(tag).build(),
+                            removeBtn(tag),
+                        ).build(),
+                ),
+                when(
+                    compute(t => t.length < MAX_GENRES, currentTags),
+                    create("input")
+                        .type(InputType.text)
+                        .classes("jess", "tag-input")
+                        .placeholder(t("ADD_GENRE_DOT_DOT"))
+                        .value(inputValue)
+                        .oninput(e => inputValue.value = (e.target as HTMLInputElement).value)
+                        .onkeydown((e: KeyboardEvent) => {
+                            if (e.key === "Enter") {
+                                e.preventDefault();
+                                const val = inputValue.value.trim().toLowerCase();
+                                const match = allGenres.find(g => g === val || g.includes(val));
+                                if (match && !currentTags.value.includes(match)) {
+                                    addTag(match);
+                                }
+                                inputValue.value = "";
+                            }
+                        })
+                        .build(),
+                ),
+            ).build(),
+            when(
+                compute(t => t.length < MAX_GENRES && t.length < allGenres.length, currentTags),
+                create("div").classes("flex-v", "small-gap").children(
+                    create("span").classes("color-dim", "small").text(t("SUGGESTIONS")),
+                    signalMap(
+                        compute(
+                            (tags, search) => {
+                                let available = allGenres.filter(g => !tags.includes(g));
+                                if (search.trim()) {
+                                    const q = search.trim().toLowerCase();
+                                    available = available.filter(g => g.includes(q));
+                                }
+                                return available;
+                            },
+                            currentTags, inputValue,
+                        ),
+                        create("div").classes("flex", "flex-wrap", "small-gap"),
+                        suggestionBtn,
+                    ),
+                ).build(),
+            ),
+        ).build();
     }
 
     private static isrcInput(state: Signal<UploadableTrack>) {

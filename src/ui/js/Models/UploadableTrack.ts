@@ -6,4 +6,5 @@ export interface UploadableTrack extends Partial<Track>, Record<string, any> {
     audioFileName?: string | null;
     coverArtFiles?: FileList | null;
     coverArtFileName?: string | null;
+    genres: string[];
 }

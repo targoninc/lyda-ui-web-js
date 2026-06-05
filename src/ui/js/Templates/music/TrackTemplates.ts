@@ -424,6 +424,7 @@ export class TrackTemplates {
                                             .build(),
                                     ).classes("align-children"),
                                 ).classes("small-gap"),
+                                TrackTemplates.genreTags(track),
                                 when(track.description.length > 0, create("span")
                                     .id("track-description")
                                     .classes("description", "break-lines")
@@ -742,5 +743,24 @@ export class TrackTemplates {
                 ).classes("card").build()
             )
         ).build();
+    }
+
+    private static genreTags(track: Track) {
+        const genres = track.genre ? track.genre.split(",").map(g => g.trim()).filter(g => g) : [];
+        if (genres.length === 0) {
+            return null;
+        }
+
+        return create("div")
+            .classes("flex", "flex-wrap", "small-gap", "align-children")
+            .children(
+                ...genres.map(g =>
+                    create("span")
+                        .classes("tag", "clickable", "pointer", "genre-tag")
+                        .text(`#${g}`)
+                        .onclick(() => navigate(`${RoutePath.explore}?tab=genres&genres=${encodeURIComponent(g)}`))
+                        .build()
+                ),
+            ).build();
     }
 }

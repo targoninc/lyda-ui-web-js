@@ -674,4 +674,10 @@ export const en = {
     REPORTS_COUNT: (count: number) => `${count} report${count === 1 ? "" : "s"}`,
     REPORTS_FOR_COMMENT: "Reports for comment",
     REPORT_REASON: (reason: string) => `Reason: ${reason}`,
+
+    GENRES: "Genres",
+    ADD_GENRE_DOT_DOT: "Add genre...",
+    SUGGESTIONS: "Suggestions:",
+    FILTER_GENRES: "Filter genres...",
+    SELECT_GENRES_TO_EXPLORE: "Select genres above to explore tracks",
 } satisfies BaseTranslation;

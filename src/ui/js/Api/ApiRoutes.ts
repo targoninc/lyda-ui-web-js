@@ -100,6 +100,7 @@ export class ApiRoutes {
     public static trackFeed = ApiRoutes.tracks + "/feeds";
     static followingFeed = ApiRoutes.trackFeed + `/${FeedType.following}`;
     static exploreFeed = ApiRoutes.trackFeed + `/${FeedType.explore}`;
+    static genreExploreFeed = ApiRoutes.trackFeed + "/genre-explore";
     static historyFeed = ApiRoutes.trackFeed + `/${FeedType.history}`;
     static autoQueueFeed = ApiRoutes.trackFeed + `/${FeedType.autoQueue}`;
     static profileTracksFeed = ApiRoutes.trackFeed + `/${FeedType.profileTracks}`;

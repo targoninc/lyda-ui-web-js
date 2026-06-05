@@ -1939,3 +1939,8 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     50% { transform: translate(40px, -20px); }
     75% { transform: translate(-20px, -30px); }
 }
+
+.tag-input {
+    min-width: 120px;
+    max-width: 200px;
+}
