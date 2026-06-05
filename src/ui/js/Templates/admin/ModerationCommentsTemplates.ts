@@ -30,6 +30,7 @@ export class ModerationCommentsTemplates {
             offset: 0,
             limit: 10,
             hasReports: false,
+            showDeleted: false,
         });
         const loading = signal(false);
         const comments = signal<Comment[]>([]);
@@ -71,6 +72,7 @@ export class ModerationCommentsTemplates {
         const hasReports = compute(f => f.hasReports, filter);
         const username = compute(f => f.username, filter);
         const contentFilter = compute(f => f.contentFilter, filter);
+        const showDeleted = compute(f => f.showDeleted, filter);
         const skip = compute(f => f.offset, filter);
 
         return create("div")
@@ -88,6 +90,13 @@ export class ModerationCommentsTemplates {
                     checked: hasReports,
                     onchange: (v) => {
                         filter.value = { ...filter.value, hasReports: v, potentiallyHarmful: false };
+                    },
+                }),
+                toggle({
+                    text: t("SHOW_DELETED"),
+                    checked: showDeleted,
+                    onchange: (v) => {
+                        filter.value = { ...filter.value, showDeleted: v };
                     },
                 }),
                 horizontal(
@@ -197,6 +206,19 @@ export class ModerationCommentsTemplates {
                                 comments.value = comments.value.map(c => {
                                     if (c.id === comment.id) {
                                         c.hidden = v;
+                                    }
+                                    return c;
+                                });
+                            },
+                        }),
+                        toggle({
+                            text: t("SOFT_DELETE"),
+                            checked: !!comment.deleted_at,
+                            onchange: async (v) => {
+                                await Api.setCommentDeleted(comment.id, v);
+                                comments.value = comments.value.map(c => {
+                                    if (c.id === comment.id) {
+                                        c.deleted_at = v ? new Date() : null;
                                     }
                                     return c;
                                 });

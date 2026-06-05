@@ -155,7 +155,7 @@ export class CommentTemplates {
         );
 
         return create("div")
-            .classes("comment-in-list", "flex-v", "small-gap", (comment.parent_id ?? 0) === 0 ? "tight-border-card" : "_")
+            .classes("comment-in-list", "flex-v", "small-gap")
             .id(comment.id)
             .attributes("parent_id", comment.parent_id)
             .children(

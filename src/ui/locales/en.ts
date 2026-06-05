@@ -669,6 +669,8 @@ export const en = {
     MAX_2048_CHARACTERS: "Maximum 2048 characters",
     COMMENT_REPORTED: "Comment reported",
     HAS_REPORTS: "Has reports",
+    SHOW_DELETED: "Show deleted",
+    SOFT_DELETE: "Soft delete",
     REPORTS_COUNT: (count: number) => `${count} report${count === 1 ? "" : "s"}`,
     REPORTS_FOR_COMMENT: "Reports for comment",
     REPORT_REASON: (reason: string) => `Reason: ${reason}`,

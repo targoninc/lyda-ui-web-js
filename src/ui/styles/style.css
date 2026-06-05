@@ -655,19 +655,10 @@ button.unread:before {
     color: var(--orange);
 }
 
-.card, .tight-border-card {
+.card {
     padding: 20px;
     border-radius: var(--large-border-radius);
     position: relative;
-}
-
-.tight-border-card {
-    background: var(--bg-1);
-    border: 1px solid var(--bg-5);
-}
-
-.tight-border-card {
-    padding: 10px;
 }
 
 .card.active {

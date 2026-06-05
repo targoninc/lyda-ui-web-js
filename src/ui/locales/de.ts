@@ -660,6 +660,8 @@ export const de: Translation = {
     MAX_2048_CHARACTERS: "Maximal 2048 Zeichen",
     COMMENT_REPORTED: "Kommentar gemeldet",
     HAS_REPORTS: "Hat Meldungen",
+    SHOW_DELETED: "Gelöschte anzeigen",
+    SOFT_DELETE: "Weich löschen",
     REPORTS_COUNT: (count: number) => `${count} Meldung${count === 1 ? "" : "en"}`,
     REPORTS_FOR_COMMENT: "Meldungen für Kommentar",
     REPORT_REASON: (reason: string) => `Grund: ${reason}`,

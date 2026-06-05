@@ -870,6 +870,10 @@ export class Api {
         await post(ApiRoutes.setCommentHidden, { id, hidden: v });
     }
 
+    static async setCommentDeleted(id: number, v: boolean) {
+        await post(ApiRoutes.setCommentDeleted, { id, deleted: v });
+    }
+
     static async reportComment(commentId: number, reason: string, description: string) {
         return await post(ApiRoutes.reportComment, {
             comment_id: commentId,

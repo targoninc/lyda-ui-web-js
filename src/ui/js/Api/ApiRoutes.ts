@@ -154,6 +154,7 @@ export class ApiRoutes {
     static deleteComment = ApiRoutes.commentActions + "/delete";
     static setCommentPotentiallyHarmful = ApiRoutes.commentActions + "/setPotentiallyHarmful";
     static setCommentHidden = ApiRoutes.commentActions + "/setHidden";
+    static setCommentDeleted = ApiRoutes.commentActions + "/setDeleted";
     static reportComment = ApiRoutes.commentActions + "/report";
     static getCommentReports = ApiRoutes.comments + "/reports/get";
     // endregion

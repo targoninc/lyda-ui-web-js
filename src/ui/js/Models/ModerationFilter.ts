@@ -5,4 +5,5 @@ export interface ModerationFilter {
     offset: number,
     limit: number,
     hasReports?: boolean,
+    showDeleted?: boolean,
 }
