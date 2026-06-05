@@ -1,9 +1,8 @@
 import { AnyElement, AnyNode, compute, create, signal, Signal, StringOrSignal } from "@targoninc/jess";
 
 export class TableTemplates {
-    static table(hasFixedBar: boolean = false, ...children: AnyNode[]) {
+    static table(...children: AnyNode[]) {
         return create("table")
-            .classes(hasFixedBar ? "fixed-bar-content" : "_")
             .attributes("cellspacing", "0", "cellpadding", "0")
             .children(...children)
             .build();

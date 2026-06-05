@@ -16,6 +16,8 @@ import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { Api } from "../Api/Api.ts";
 import { t } from "../../locales";
+import { ProgressPart } from "../Models/ProgressPart.ts";
+import { ProgressState } from "@targoninc/lyda-shared/src/Enums/ProgressState";
 
 export class TrackActions {
     static async deleteTrack(id: number) {
@@ -103,11 +105,10 @@ export class TrackActions {
         following.value = !following.value;
     }
 
-    static async replaceAudio(id: number, canEdit: boolean, loading: Signal<boolean>, onSuccess: () => void = () => {}) {
+    static replaceAudio(id: number, canEdit: boolean, progress: Signal<ProgressPart | null>, onSuccess: () => void = () => {}) {
         if (!canEdit) {
             return;
         }
-        loading.value = true;
         const fileInput = document.createElement("input");
         fileInput.type = "file";
         fileInput.accept = "audio/*";
@@ -115,21 +116,39 @@ export class TrackActions {
             const fileTarget = e.target as HTMLInputElement;
             const file = fileTarget.files![0];
             if (!file) {
-                loading.value = false;
                 return;
             }
+            progress.value = {
+                icon: "music_note",
+                text: t("UPLOADING_AUDIO"),
+                state: ProgressState.inProgress,
+                progress: 0,
+            };
             try {
-                await MediaUploader.upload(MediaFileType.audio, id, file);
+                await MediaUploader.upload(MediaFileType.audio, id, file, (event: ProgressEvent) => {
+                    progress.value = {
+                        ...progress.value!,
+                        progress: (event.loaded / event.total) * 100,
+                    };
+                });
+                progress.value = {
+                    ...progress.value!,
+                    state: ProgressState.complete,
+                    text: t("AUDIO_UPLOADED"),
+                    progress: 100,
+                };
                 notify(`${t("AUDIO_UPLOADED")}`, NotificationType.success);
                 onSuccess();
             } catch (e) {
+                progress.value = {
+                    ...progress.value!,
+                    state: ProgressState.error,
+                    text: t("FAILED_UPLOADING_AUDIO"),
+                    icon: "error",
+                };
                 notify(`${t("FAILED_UPLOADING_AUDIO")}`, NotificationType.error);
             }
-            loading.value = false;
         };
-        fileInput.onabort = () => loading.value = false;
-        fileInput.oncancel = () => loading.value = false;
-        fileInput.onreset = () => loading.value = false;
         fileInput.click();
     }
 

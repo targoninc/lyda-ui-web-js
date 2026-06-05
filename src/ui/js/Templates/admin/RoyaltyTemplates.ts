@@ -136,7 +136,6 @@ export class RoyaltyTemplates {
 
     private static artistRoyaltiesTable(artists: ReturnType<typeof signal<ArtistRoyaltySummary[]>>) {
         return TableTemplates.table(
-            false,
             TableTemplates.tableHeaders<ArtistRoyaltySummary>([
                 { title: t("ARTIST"), property: "displayname" },
                 { title: t("AMOUNT"), property: "amount_ct" },

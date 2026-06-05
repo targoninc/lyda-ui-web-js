@@ -39,7 +39,6 @@ export class SubscriptionPaymentsTemplates {
             create("h1").text(t("SUBSCRIPTION_PAYMENTS")).build(),
             when(loading, GenericTemplates.loadingSpinner()),
             TableTemplates.table(
-                false,
                 TableTemplates.tableHeaders<SubscriptionPayment>([
                     { title: "ID", property: "id" },
                     { title: t("USER"), property: "user_id" },

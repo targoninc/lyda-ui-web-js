@@ -4,6 +4,7 @@ import {copy, getUserSettingValue, Util} from "../../Classes/Util.ts";
 import {createModal, notify, Ui} from "../../Classes/Ui.ts";
 import {Api} from "../../Api/Api.ts";
 import {
+    asSignal,
     compute,
     create,
     InputType,
@@ -20,7 +21,8 @@ import {currentUser, permissions} from "../../state.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {
     button,
-    ButtonConfig, error,
+    ButtonConfig,
+    error,
     heading,
     icon,
     input,
@@ -48,6 +50,10 @@ import {UserTaxinfo} from "@targoninc/lyda-shared/src/Models/db/lyda/UserTaxinfo
 import {SelectOption} from "@targoninc/jess-components/dist/jess-components/Types";
 
 export class SettingsTemplates {
+    private static sectionId(heading: Signal<string>) {
+        return heading.value.trim().replaceAll(/\s+/g, "-").toLowerCase();
+    }
+
     static settingsPage() {
         const user = currentUser.value;
         if (!user) {
@@ -56,6 +62,50 @@ export class SettingsTemplates {
         }
 
         const searchQuery$ = signal("");
+
+        const sectionConfigs: { heading: () => Signal<string>; id: string }[] = [
+            {heading: () => t("ACCOUNT"), id: SettingsTemplates.sectionId(t("ACCOUNT"))},
+            {heading: () => t("TOTP_DEVICES"), id: SettingsTemplates.sectionId(t("TOTP_DEVICES"))},
+            {heading: () => t("PASSKEYS"), id: SettingsTemplates.sectionId(t("PASSKEYS"))},
+            {heading: () => t("PAYMENT_INFO"), id: SettingsTemplates.sectionId(t("PAYMENT_INFO"))},
+            {heading: () => t("TAX_INFO"), id: SettingsTemplates.sectionId(t("TAX_INFO"))},
+            {heading: () => t("UI_THEME"), id: SettingsTemplates.sectionId(t("UI_THEME"))},
+            {heading: () => t("LANGUAGE"), id: SettingsTemplates.sectionId(t("LANGUAGE"))},
+            {heading: () => t("STREAMING_QUALITY"), id: SettingsTemplates.sectionId(t("STREAMING_QUALITY"))},
+            {heading: () => t("MY_PERMISSIONS"), id: SettingsTemplates.sectionId(t("MY_PERMISSIONS"))},
+            {heading: () => t("BEHAVIOUR"), id: SettingsTemplates.sectionId(t("BEHAVIOUR"))},
+            {heading: () => t("EMAIL_NOTIFICATIONS"), id: SettingsTemplates.sectionId(t("EMAIL_NOTIFICATIONS"))},
+            {heading: () => t("OTHER"), id: SettingsTemplates.sectionId(t("OTHER"))},
+            {heading: () => t("LINKS"), id: SettingsTemplates.sectionId(t("LINKS"))},
+        ];
+
+        const navButtons = sectionConfigs.map(({heading, id}) => {
+            const text = heading();
+            return button({
+                text,
+                classes: ["rounded-max"],
+                onclick: () => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.scrollIntoView({behavior: "smooth", block: "center"});
+                    }
+                },
+            });
+        });
+
+        const fixedBar = GenericTemplates.fixedBar([
+            create("div").classes("flex", "align-children", "small-gap", "flex-wrap").children(
+                input({
+                    type: InputType.text,
+                    name: "search",
+                    placeholder: t("SEARCH_SETTINGS"),
+                    debounce: 200,
+                    value: searchQuery$,
+                    onchange: v => searchQuery$.value = v,
+                }),
+                ...navButtons,
+            ).build(),
+        ]);
 
         const url = new URL(window.location.href);
         if (url.hash.length > 0) {
@@ -70,42 +120,38 @@ export class SettingsTemplates {
             }, 100);
         }
 
-        return create("div")
-            .classes("flex-v")
-            .children(
-                heading({
-                    level: 1,
-                    text: t("SETTINGS"),
-                }),
-                input({
-                    type: InputType.text,
-                    name: "search",
-                    placeholder: t("SEARCH_SETTINGS"),
-                    debounce: 200,
-                    value: searchQuery$,
-                    onchange: v => searchQuery$.value = v,
-                }),
-                SettingsTemplates.accountSection(user, searchQuery$),
-                SettingsTemplates.totpSection(searchQuery$),
-                WebauthnTemplates.devicesSection(searchQuery$),
-                SettingsTemplates.paymentSection(searchQuery$),
-                SettingsTemplates.taxinfoSection(searchQuery$),
-                SettingsTemplates.themeSection(getUserSettingValue<Theme>(user, UserSettings.theme), searchQuery$),
-                SettingsTemplates.languageSection(searchQuery$),
-                SettingsTemplates.qualitySection(getUserSettingValue<StreamingQuality>(user, UserSettings.streamingQuality) ?? "m", searchQuery$),
-                SettingsTemplates.permissionsSection(searchQuery$),
-                SettingsTemplates.behaviourSection(user, searchQuery$),
-                SettingsTemplates.notificationsSection(user, searchQuery$),
-                SettingsTemplates.dangerSection(user, searchQuery$),
-                SettingsTemplates.linksSection(searchQuery$),
-            ).build();
+        const sectionWrapper = (id: string, ...children: any[]) =>
+            create("div").id(id).children(...children).build();
+
+        return vertical(
+            heading({
+                level: 1,
+                text: t("SETTINGS"),
+            }),
+            fixedBar,
+            vertical(
+                sectionWrapper(sectionConfigs[0].id, SettingsTemplates.accountSection(user, searchQuery$)),
+                sectionWrapper(sectionConfigs[1].id, SettingsTemplates.totpSection(searchQuery$)),
+                sectionWrapper(sectionConfigs[2].id, WebauthnTemplates.devicesSection(searchQuery$)),
+                sectionWrapper(sectionConfigs[3].id, SettingsTemplates.paymentSection(searchQuery$)),
+                sectionWrapper(sectionConfigs[4].id, SettingsTemplates.taxinfoSection(searchQuery$)),
+                sectionWrapper(sectionConfigs[5].id, SettingsTemplates.themeSection(getUserSettingValue<Theme>(user, UserSettings.theme), searchQuery$)),
+                sectionWrapper(sectionConfigs[6].id, SettingsTemplates.languageSection(searchQuery$)),
+                sectionWrapper(sectionConfigs[7].id, SettingsTemplates.qualitySection(getUserSettingValue<StreamingQuality>(user, UserSettings.streamingQuality) ?? "m", searchQuery$)),
+                sectionWrapper(sectionConfigs[8].id, SettingsTemplates.permissionsSection(searchQuery$)),
+                sectionWrapper(sectionConfigs[9].id, SettingsTemplates.behaviourSection(user, searchQuery$)),
+                sectionWrapper(sectionConfigs[10].id, SettingsTemplates.notificationsSection(user, searchQuery$)),
+                sectionWrapper(sectionConfigs[11].id, SettingsTemplates.dangerSection(user, searchQuery$)),
+                sectionWrapper(sectionConfigs[12].id, SettingsTemplates.linksSection(searchQuery$)),
+            ).build(),
+        ).build();
     }
 
-    static matches(text: Signal<string>, query: string) {
+    static matches(text: StringOrSignal, query: string) {
         if (!query) {
             return true;
         }
-        const t = text.value ?? "";
+        const t = (asSignal(text).value ?? "") as string;
         return t.toLowerCase().includes(query.toLowerCase());
     }
 
@@ -451,9 +497,11 @@ export class SettingsTemplates {
 
         return compute(query => {
             const headingMatches = SettingsTemplates.matches(heading, query);
-            const languageMatches = options.some(opt => SettingsTemplates.matches(opt.text, query));
+            const languageMatches = options.some(opt => SettingsTemplates.matches(opt.name, query));
 
-            if (!headingMatches && !languageMatches) return nullElement();
+            if (!headingMatches && !languageMatches) {
+                return nullElement();
+            }
 
             return create("div")
                 .classes("card", "flex-v")
@@ -1000,7 +1048,6 @@ export class SettingsTemplates {
                 level: 1,
                 classes: ["bold"],
                 text,
-                id,
             }),
             GenericTemplates.icon("link", true, ["showOnParentHover", "clickable", TextSize.xxLarge], t("COPY_LINK"), async () => {
                 const url = new URL(window.location.href);
@@ -1097,55 +1144,67 @@ export class SettingsTemplates {
         };
 
         const items = [
-            { label: t("FULL_NAME"), template: () => input<string>({
-                type: InputType.text,
-                name: "full_name",
-                label: t("FULL_NAME"),
-                value: fullName$,
-                required: true,
-                onchange: v => fullName$.value = v,
-            })},
-            { label: t("TAX_NUMBER"), template: () => input<string>({
-                type: InputType.text,
-                name: "tax_number",
-                label: t("TAX_NUMBER"),
-                value: taxNumber$,
-                required: true,
-                onchange: v => taxNumber$.value = v,
-            })},
-            { label: t("COUNTRY_CODE"), template: () => create("div")
-                .classes("flex-v", "small-gap")
-                .children(
-                    create("label").text(t("COUNTRY_CODE")).build(),
-                    select({
-                        options: countryOptions$,
-                        value: countryCode$,
-                        onchange: v => countryCode$.value = v,
-                    }),
-                ).build()},
-            { label: t("REGION_CODE"), template: () => input<string>({
-                type: InputType.text,
-                name: "region_code",
-                label: t("REGION_CODE"),
-                value: regionCode$,
-                required: true,
-                onchange: v => regionCode$.value = v,
-            })},
-            { label: t("ADDRESS_LINE_1"), template: () => input<string>({
-                type: InputType.text,
-                name: "address_line_1",
-                label: t("ADDRESS_LINE_1"),
-                value: addressLine1$,
-                required: true,
-                onchange: v => addressLine1$.value = v,
-            })},
-            { label: t("ADDRESS_LINE_2"), template: () => input<string>({
-                type: InputType.text,
-                name: "address_line_2",
-                label: t("ADDRESS_LINE_2"),
-                value: addressLine2$,
-                onchange: v => addressLine2$.value = v,
-            })},
+            {
+                label: t("FULL_NAME"), template: () => input<string>({
+                    type: InputType.text,
+                    name: "full_name",
+                    label: t("FULL_NAME"),
+                    value: fullName$,
+                    required: true,
+                    onchange: v => fullName$.value = v,
+                })
+            },
+            {
+                label: t("TAX_NUMBER"), template: () => input<string>({
+                    type: InputType.text,
+                    name: "tax_number",
+                    label: t("TAX_NUMBER"),
+                    value: taxNumber$,
+                    required: true,
+                    onchange: v => taxNumber$.value = v,
+                })
+            },
+            {
+                label: t("COUNTRY_CODE"), template: () => create("div")
+                    .classes("flex-v", "small-gap")
+                    .children(
+                        create("label").text(t("COUNTRY_CODE")).build(),
+                        select({
+                            options: countryOptions$,
+                            value: countryCode$,
+                            onchange: v => countryCode$.value = v,
+                        }),
+                    ).build()
+            },
+            {
+                label: t("REGION_CODE"), template: () => input<string>({
+                    type: InputType.text,
+                    name: "region_code",
+                    label: t("REGION_CODE"),
+                    value: regionCode$,
+                    required: true,
+                    onchange: v => regionCode$.value = v,
+                })
+            },
+            {
+                label: t("ADDRESS_LINE_1"), template: () => input<string>({
+                    type: InputType.text,
+                    name: "address_line_1",
+                    label: t("ADDRESS_LINE_1"),
+                    value: addressLine1$,
+                    required: true,
+                    onchange: v => addressLine1$.value = v,
+                })
+            },
+            {
+                label: t("ADDRESS_LINE_2"), template: () => input<string>({
+                    type: InputType.text,
+                    name: "address_line_2",
+                    label: t("ADDRESS_LINE_2"),
+                    value: addressLine2$,
+                    onchange: v => addressLine2$.value = v,
+                })
+            },
         ];
 
         return compute(query => {

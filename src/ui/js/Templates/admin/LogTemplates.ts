@@ -55,7 +55,6 @@ export class LogTemplates {
         }, logs, currentSortProperty);
 
         return TableTemplates.table(
-            false,
             TableTemplates.tableHeaders<ActionLog>([
                 { title: t("TIMESTAMP"), property: "created_at" },
                 { title: t("USER"), property: "user_id" },
@@ -128,7 +127,6 @@ export class LogTemplates {
         const filtered = compute(sortByProperty, sortBy$, logs);
 
         return TableTemplates.table(
-            true,
             TableTemplates.tableHeaders(headers, sortBy$),
             signalMap(
                 filtered,

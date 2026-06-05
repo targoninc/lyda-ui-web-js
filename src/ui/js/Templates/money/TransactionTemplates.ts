@@ -57,7 +57,6 @@ export class TransactionTemplates {
                 when(loading$, GenericTemplates.loadingSpinner()),
             ),
             TableTemplates.table(
-                false,
                 TableTemplates.tableHeaders<Transaction>([
                     { title: t("AMOUNT_IN_USD"), property: "total" },
                     { title: t("PAYMENT_PROCESSOR"), property: "paymentProcessor" },

@@ -1,13 +1,13 @@
-import { compute, create, InputType, signal, Signal, signalMap, when } from "@targoninc/jess";
-import { Permissions } from "@targoninc/lyda-shared/src/Enums/Permissions";
-import { DashboardTemplates } from "./DashboardTemplates.ts";
-import { button, input } from "@targoninc/jess-components";
-import { Api } from "../../Api/Api.ts";
-import { t } from "../../../locales";
-import { GenericTemplates, vertical } from "../generic/GenericTemplates.ts";
-import { Ui } from "../../Classes/Ui.ts";
-import { TableTemplates } from "../generic/TableTemplates.ts";
-import { TextSize } from "../../Enums/TextSize.ts";
+import {compute, create, InputType, signal, Signal, signalMap, when} from "@targoninc/jess";
+import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
+import {DashboardTemplates} from "./DashboardTemplates.ts";
+import {button, input} from "@targoninc/jess-components";
+import {Api} from "../../Api/Api.ts";
+import {t} from "../../../locales";
+import {GenericTemplates} from "../generic/GenericTemplates.ts";
+import {Ui} from "../../Classes/Ui.ts";
+import {TableTemplates} from "../generic/TableTemplates.ts";
+import {TextSize} from "../../Enums/TextSize.ts";
 
 export class IpLogTemplates {
     static ipLogsPage() {
@@ -54,7 +54,7 @@ export class IpLogTemplates {
                     .children(
                         button({
                             text: t("REFRESH"),
-                            icon: { icon: "refresh" },
+                            icon: {icon: "refresh"},
                             classes: ["positive"],
                             onclick: async () => {
                                 logs.value = [];
@@ -91,7 +91,7 @@ export class IpLogTemplates {
                         }),
                         button({
                             text: t("PREVIOUS_PAGE"),
-                            icon: { icon: "skip_previous" },
+                            icon: {icon: "skip_previous"},
                             disabled: compute((l, s) => l || s <= 0, loading, skip),
                             onclick: async () => {
                                 skip.value = Math.max(0, skip.value - 20);
@@ -100,7 +100,7 @@ export class IpLogTemplates {
                         }),
                         button({
                             text: t("NEXT_PAGE"),
-                            icon: { icon: "skip_next" },
+                            icon: {icon: "skip_next"},
                             disabled: compute((l, e) => l || e.length < 20, loading, logs),
                             onclick: async () => {
                                 skip.value = skip.value + 20;
@@ -114,15 +114,15 @@ export class IpLogTemplates {
                     create("div").classes("flex-v", "small-gap", "padded"),
                     ip => IpLogTemplates.bannedIpEntry(ip, bannedIps),
                 ),
-                TableTemplates.table(true,
+                TableTemplates.table(
                     TableTemplates.tableHeaders([
-                        { title: "IP" },
-                        { title: "Month" },
-                        { title: "Requests" },
-                        { title: "Limit Hits" },
-                        { title: "Last User Agent" },
-                        { title: "Last Updated" },
-                        { title: "" },
+                        {title: "IP"},
+                        {title: "Month"},
+                        {title: "Requests"},
+                        {title: "Limit Hits"},
+                        {title: "Last User Agent"},
+                        {title: "Last Updated"},
+                        {title: ""},
                     ]),
                     signalMap(
                         logs,
@@ -171,7 +171,7 @@ export class IpLogTemplates {
                 create("span").text(new Date(log.updated_at).toLocaleString()).build(),
                 button({
                     text: "Ban IP",
-                    icon: { icon: "block" },
+                    icon: {icon: "block"},
                     classes: ["negative", "small"],
                     onclick: async () => {
                         await Ui.getConfirmationModal(
@@ -182,7 +182,8 @@ export class IpLogTemplates {
                             async () => {
                                 await Api.banIp(log.ip);
                             },
-                            async () => {},
+                            async () => {
+                            },
                         );
                     },
                 }),

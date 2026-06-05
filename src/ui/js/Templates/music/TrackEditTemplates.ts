@@ -34,6 +34,7 @@ import {TrackCollaborator} from "@targoninc/lyda-shared/src/Models/db/lyda/Track
 import {Genre} from "@targoninc/lyda-shared/src/Enums/Genre";
 import {TrackValidators} from "../../Classes/Validators/TrackValidators.ts";
 import {ProgressPart} from "../../Models/ProgressPart.ts";
+import {ProgressState} from "@targoninc/lyda-shared/src/Enums/ProgressState";
 import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
 import {Api} from "../../Api/Api.ts";
 import {SearchResult} from "@targoninc/lyda-shared/src/Models/SearchResult";
@@ -816,19 +817,23 @@ export class TrackEditTemplates {
     }
 
     static replaceAudioButton(track: Track) {
-        const loading = signal(false);
+        const progress = signal<ProgressPart | null>(null);
+        const loading = compute(p => p?.state === ProgressState.inProgress, progress);
 
-        return button({
-            text: t("REPLACE_AUDIO"),
-            icon: {icon: "upload"},
-            disabled: loading,
-            onclick: async () => {
-                await TrackActions.replaceAudio(track.id, true, loading, () => {
-                    PlayManager.removeTrackFromAllStates(track.id);
-                    reload();
-                });
-            },
-        });
+        return horizontal(
+            button({
+                text: t("REPLACE_AUDIO"),
+                icon: {icon: "upload"},
+                disabled: loading,
+                onclick: async () => {
+                    TrackActions.replaceAudio(track.id, true, progress, () => {
+                        PlayManager.removeTrackFromAllStates(track.id);
+                        reload();
+                    });
+                },
+            }),
+            GenericTemplates.progressSectionPart(progress),
+        ).classes("align-children").build();
     }
 
     static downloadAudioButton(track: Track, classes: StringOrSignal[] = []) {

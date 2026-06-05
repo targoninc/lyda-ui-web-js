@@ -1241,6 +1241,10 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     max-width: 400px;
 }
 
+#user-description {
+    max-width: 100%;
+}
+
 #track-description.overflowing, #user-description.overflowing {
     box-shadow: 0 -30px 30px -30px inset black;
     resize: vertical;

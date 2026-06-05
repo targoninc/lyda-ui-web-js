@@ -101,7 +101,7 @@ export class ModerationUsersTemplates {
 
         return signalMap(
             filtered,
-            vertical().classes("fixed-bar-content"),
+            vertical(),
             u => ModerationUsersTemplates.user(u),
         );
     }
