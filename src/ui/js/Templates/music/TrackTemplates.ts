@@ -756,11 +756,11 @@ export class TrackTemplates {
             .classes("flex", "flex-wrap", "small-gap", "align-children")
             .children(
                 ...genres.map(g =>
-                    create("span")
-                        .classes("tag", "clickable", "pointer", "genre-tag")
-                        .text(`#${g}`)
-                        .onclick(() => navigate(`${RoutePath.explore}?tab=genres&genres=${encodeURIComponent(g)}`))
-                        .build()
+                    button({
+                        classes: ["rounded-max"],
+                        onclick: () => navigate(`${RoutePath.explore}?tab=genres&genres=${encodeURIComponent(g)}`),
+                        text: `#${g}`,
+                    }),
                 ),
             ).build();
     }

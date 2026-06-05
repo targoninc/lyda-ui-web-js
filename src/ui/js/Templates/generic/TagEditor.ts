@@ -40,7 +40,7 @@ export function TagEditor(options: TagEditorOptions) {
 
     const suggestionBtn = (sug: string) => button({
         text: sug,
-        classes: ["tag-suggestion", "rounded-max"],
+        classes: ["rounded-max"],
         onclick: () => {
             addTag(sug);
             inputValue.value = "";
