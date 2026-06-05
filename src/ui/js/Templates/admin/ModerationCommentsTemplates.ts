@@ -3,6 +3,8 @@ import { CommentTemplates } from "../CommentTemplates.ts";
 import { AnyElement, compute, create, InputType, Signal, signal, when } from "@targoninc/jess";
 import { TrackActions } from "../../Actions/TrackActions.ts";
 import { GenericTemplates, horizontal } from "../generic/GenericTemplates.ts";
+import { UserTemplates } from "../account/UserTemplates.ts";
+import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
 import { button, input, toggle } from "@targoninc/jess-components";
 import { Permissions } from "@targoninc/lyda-shared/src/Enums/Permissions";
 import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
@@ -10,7 +12,6 @@ import { Api } from "../../Api/Api.ts";
 import { ModerationFilter } from "../../Models/ModerationFilter.ts";
 import { t } from "../../../locales";
 import {createModal} from "../../Classes/Ui.ts";
-import {Util} from "../../Classes/Util.ts";
 
 export class ModerationCommentsTemplates {
     static commentModerationPage() {
@@ -24,7 +25,8 @@ export class ModerationCommentsTemplates {
         const commentsList = signal<AnyElement>(create("div").build());
         const filterState = signal<ModerationFilter>({
             potentiallyHarmful: true,
-            user_id: null,
+            username: null,
+            contentFilter: null,
             offset: 0,
             limit: 10,
             hasReports: false,
@@ -67,7 +69,8 @@ export class ModerationCommentsTemplates {
     static commentFilters(filter: Signal<any>, loading: Signal<boolean>, results: Signal<Comment[]>, allowFilteringByUser = true) {
         const potentiallyHarmful = compute(f => f.potentiallyHarmful, filter);
         const hasReports = compute(f => f.hasReports, filter);
-        const userId = compute(f => f.user_id, filter);
+        const username = compute(f => f.username, filter);
+        const contentFilter = compute(f => f.contentFilter, filter);
         const skip = compute(f => f.offset, filter);
 
         return create("div")
@@ -88,18 +91,30 @@ export class ModerationCommentsTemplates {
                     },
                 }),
                 horizontal(
-                    when(allowFilteringByUser, input<number>({
-                        type: InputType.number,
-                        name: "user_id",
-                        placeholder: t("FILTER_BY_USER_ID"),
-                        value: userId,
-                        onchange: (v: number | null) => {
-                            if (v === 0) {
+                    when(allowFilteringByUser, input<string>({
+                        type: InputType.text,
+                        name: "username",
+                        placeholder: t("FILTER_BY_USERNAME"),
+                        value: username,
+                        onchange: (v: string | null) => {
+                            if (v === "") {
                                 v = null;
                             }
-                            filter.value = { ...filter.value, user_id: v };
+                            filter.value = { ...filter.value, username: v };
                         },
                     })),
+                    input<string>({
+                        type: InputType.text,
+                        name: "contentFilter",
+                        placeholder: t("FILTER_BY_CONTENT"),
+                        value: contentFilter,
+                        onchange: (v: string | null) => {
+                            if (v === "") {
+                                v = null;
+                            }
+                            filter.value = { ...filter.value, contentFilter: v };
+                        },
+                    }),
                     button({
                         text: t("PREVIOUS_PAGE"),
                         icon: { icon: "skip_previous" },
@@ -138,9 +153,10 @@ export class ModerationCommentsTemplates {
 
     static moderatableComment(comment: Comment, comments: Signal<Comment[]>) {
         return create("div")
-            .classes("flex-v", "comment-in-list")
+            .classes("flex-v", "comment-in-list", "card")
             .id(comment.id)
             .children(
+                ModerationCommentsTemplates.parentChain(comment),
                 create("div")
                     .classes("flex", "align-children")
                     .children(
@@ -193,11 +209,40 @@ export class ModerationCommentsTemplates {
                             onclick: () => ModerationCommentsTemplates.showReportsModal(comment),
                         })),
                     ).build(),
+                CommentTemplates.commentInList(comment, comments, true),
+            ).build();
+    }
+
+    private static parentChain(comment: Comment) {
+        if (!comment.parent_chain || comment.parent_chain.length === 0) {
+            return create("div").build();
+        }
+
+        return create("div")
+            .classes("flex-v", "small-gap")
+            .children(
+                ...comment.parent_chain.map(parent => ModerationCommentsTemplates.parentComment(parent)),
+            ).build();
+    }
+
+    private static parentComment(parent: Comment) {
+        if (!parent.user) {
+            return create("div").build();
+        }
+
+        return create("div")
+            .classes("flex-v", "small-gap", "color-dim")
+            .children(
                 create("div")
-                    .classes("card")
+                    .classes("flex", "small-gap", "align-children")
                     .children(
-                        CommentTemplates.commentInList(comment, comments, true),
+                        UserTemplates.userLink(UserWidgetContext.comment, parent.user),
                     ).build(),
+                create("div")
+                    .classes("text")
+                    .text(parent.content)
+                    .build(),
+                GenericTemplates.timestamp(parent.created_at),
             ).build();
     }
 
@@ -207,7 +252,7 @@ export class ModerationCommentsTemplates {
 
         createModal([
             create("h2").text(t("REPORTS_FOR_COMMENT")).build(),
-            ...reports.map(r => create("div")
+            ...reports?.map(r => create("div")
                 .classes("card", "flex-v", "small-gap")
                 .children(
                     create("span").classes("text", "bold").text(t("REPORT_REASON", r.reason)).build(),
@@ -216,10 +261,10 @@ export class ModerationCommentsTemplates {
                         .html(r.description?.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>') ?? "")
                         .build(),
                     create("span").classes("color-dim", "text").text(new Date(r.created_at).toLocaleString()).build(),
-                ).build()),
-            create("div").classes("flex").children(
+                ).build()) ?? [],
+            horizontal(
                 GenericTemplates.modalCancelButton(null),
-            ).build(),
+            ),
         ].flat(), modalId);
     }
 }
