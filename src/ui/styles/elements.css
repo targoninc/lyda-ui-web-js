@@ -581,7 +581,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .tag {
-    background: var(--bg-3);
+    background: var(--bg-2);
     border-radius: 999px;
     font-size: var(--font-size-xsmall);
     padding: 1px 10px;

@@ -46,6 +46,7 @@ import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 import {TrackTemplates} from "./TrackTemplates.ts";
 import {CoverContext} from "../../Enums/CoverContext.ts";
 import {NotificationType} from "../../Enums/NotificationType.ts";
+import {TagEditor} from "../generic/TagEditor.ts";
 
 let _uploadDragCleanup: (() => void) | null = null;
 
@@ -552,98 +553,33 @@ export class TrackEditTemplates {
     static genreTagsInput(parentState: Signal<UploadableTrack>) {
         const MAX_GENRES = 5;
         const allGenres = Object.values(Genre) as string[];
-        const currentTags = compute(s => s.genres ?? [], parentState);
+        const currentTags = signal<string[]>(parentState.value.genres ?? []);
 
-        const addTag = (name: string) => {
-            const tags = currentTags.value;
-            if (tags.length >= MAX_GENRES) return;
-            if (tags.includes(name)) return;
-            parentState.value = {
-                ...parentState.value,
-                genres: [...tags, name],
-            };
-        };
-
-        const removeTag = (name: string) => {
-            parentState.value = {
-                ...parentState.value,
-                genres: currentTags.value.filter(t => t !== name),
-            };
-        };
-
-        const inputValue = signal("");
-
-        const removeBtn = (tag: string) => button({
-            icon: {icon: "close"},
-            classes: ["tag-remove"],
-            onclick: () => removeTag(tag),
+        currentTags.subscribe(tags => {
+            if (JSON.stringify(parentState.value.genres) !== JSON.stringify(tags)) {
+                parentState.value = {
+                    ...parentState.value,
+                    genres: tags,
+                };
+            }
         });
 
-        const suggestionBtn = (sug: string) => button({
-            text: sug,
-            classes: ["tag-suggestion", "rounded-max"],
-            onclick: () => {
-                addTag(sug);
-                inputValue.value = "";
-            },
+        parentState.subscribe(state => {
+            const incoming = state.genres ?? [];
+            if (JSON.stringify(currentTags.value) !== JSON.stringify(incoming)) {
+                currentTags.value = incoming;
+            }
         });
 
-        return create("div").classes("flex-v", "small-gap").children(
-            create("label").text(t("GENRE")).build(),
-            create("div").classes("flex", "flex-wrap", "small-gap", "align-children").children(
-                signalMap(
-                    currentTags,
-                    create("div").classes("flex", "flex-wrap", "small-gap", "align-children"),
-                    (tag) =>
-                        create("div").classes("flex", "align-children", "tag-pill").children(
-                            create("span").classes("tag", "tag-active").text(tag).build(),
-                            removeBtn(tag),
-                        ).build(),
-                ),
-                when(
-                    compute(t => t.length < MAX_GENRES, currentTags),
-                    create("input")
-                        .type(InputType.text)
-                        .classes("jess", "tag-input")
-                        .placeholder(t("ADD_GENRE_DOT_DOT"))
-                        .value(inputValue)
-                        .oninput(e => inputValue.value = (e.target as HTMLInputElement).value)
-                        .onkeydown((e: KeyboardEvent) => {
-                            if (e.key === "Enter") {
-                                e.preventDefault();
-                                const val = inputValue.value.trim().toLowerCase();
-                                const match = allGenres.find(g => g === val || g.includes(val));
-                                if (match && !currentTags.value.includes(match)) {
-                                    addTag(match);
-                                }
-                                inputValue.value = "";
-                            }
-                        })
-                        .build(),
-                ),
-            ).build(),
-            when(
-                compute(t => t.length < MAX_GENRES && t.length < allGenres.length, currentTags),
-                create("div").classes("flex-v", "small-gap").children(
-                    create("span").classes("color-dim", "small").text(t("SUGGESTIONS")),
-                    signalMap(
-                        compute(
-                            (tags, search) => {
-                                let available = allGenres.filter(g => !tags.includes(g));
-                                if (search.trim()) {
-                                    const q = search.trim().toLowerCase();
-                                    available = available.filter(g => g.includes(q));
-                                }
-                                return available;
-                            },
-                            currentTags, inputValue,
-                        ),
-                        create("div").classes("flex", "flex-wrap", "small-gap"),
-                        suggestionBtn,
-                    ),
-                ).build(),
-            ),
-        ).build();
+        return TagEditor({
+            allTags: allGenres,
+            selectedTags: currentTags,
+            maxTags: MAX_GENRES,
+            placeholder: t("ADD_GENRE_DOT_DOT"),
+            label: t("GENRE"),
+            suggestionHeading: t("SUGGESTIONS"),
+            classes: ["flex-v", "small-gap"],
+        });
     }
 
     private static isrcInput(state: Signal<UploadableTrack>) {
@@ -783,7 +719,7 @@ export class TrackEditTemplates {
 
     static monetizationInfo(state: Signal<UploadableTrack>) {
         return create("span")
-            .text(compute(s => s.price === 0 ? t("TRACK_WILL_BE_MONETIZED_FREE") : t("TRACK_WILL_BE_MONETIZED"), state))
+            .text(compute(s => s.price === 0 ? `${t("TRACK_WILL_BE_MONETIZED_FREE")}` : `${t("TRACK_WILL_BE_MONETIZED")}`, state))
             .build();
     }
 

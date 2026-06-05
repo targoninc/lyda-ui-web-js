@@ -54,6 +54,7 @@ import { InteractionType } from "@targoninc/lyda-shared/src/Enums/InteractionTyp
 import { SubscriptionTemplates } from "./money/SubscriptionTemplates.ts";
 import { t } from "../../locales";
 import { TransactionTemplates } from "./money/TransactionTemplates.ts";
+import { TagEditor } from "./generic/TagEditor.ts";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, (route: Route, params: Record<string, string>) => Promise<AnyElement> | AnyElement> = {
@@ -358,69 +359,14 @@ export class PageTemplates {
             reloadTrigger$.value++;
         });
 
-        const addGenre = (name: string) => {
-            if (selectedGenres$.value.includes(name)) return;
-            selectedGenres$.value = [...selectedGenres$.value, name];
-        };
-
-        const removeGenre = (name: string) => {
-            selectedGenres$.value = selectedGenres$.value.filter(g => g !== name);
-        };
-
         const hasGenres = compute(s => s.length > 0, selectedGenres$);
-        const searchFilter$ = signal("");
 
-        const genreSuggestionBtn = (sug: string) => button({
-            text: sug,
-            classes: ["tag-suggestion", "rounded-max"],
-            onclick: () => {
-                addGenre(sug);
-                searchFilter$.value = "";
-            },
+        const tagEditor = TagEditor({
+            allTags: allGenres,
+            selectedTags: selectedGenres$,
+            placeholder: t("FILTER_GENRES"),
+            classes: ["flex-v", "small-gap", "padded"],
         });
-
-        const tagEditor = create("div").classes("flex-v", "small-gap", "padded").children(
-            create("div").classes("flex", "flex-wrap", "small-gap", "align-children").children(
-                signalMap(
-                    selectedGenres$,
-                    create("div").classes("flex", "flex-wrap", "small-gap", "align-children"),
-                    (tag) =>
-                        button({
-                            text: tag,
-                            icon: {
-                                icon: "close"
-                            },
-                            onclick: () => removeGenre(tag)
-                        }),
-                ),
-                create("input")
-                    .type(InputType.text)
-                    .classes("jess", "tag-input")
-                    .placeholder(t("FILTER_GENRES"))
-                    .value(searchFilter$)
-                    .oninput(e => searchFilter$.value = (e.target as HTMLInputElement).value)
-                    .build(),
-            ).build(),
-            when(
-                compute(s => s.length < allGenres.length, selectedGenres$),
-                create("div").classes("flex", "flex-wrap", "small-gap").children(
-                    signalMap(
-                        compute(
-                            (selected, search) => {
-                                let available = allGenres.filter(g => !selected.includes(g));
-                                if (search.trim()) {
-                                    available = available.filter(g => g.includes(search.trim().toLowerCase()));
-                                }
-                                return available;
-                            },
-                            selectedGenres$, searchFilter$,
-                        ),
-                        create("div").classes("flex", "flex-wrap", "small-gap"),
-                        genreSuggestionBtn,
-                    ),
-                ).build(),
-            ),
-        ).build();
 
         const noGenres = compute(g => g.length === 0, selectedGenres$);
 

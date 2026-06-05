@@ -36,10 +36,22 @@ const server = serve({
                 const mimeType = getMimeType(staticFilePath);
 
                 const isDefaultImage = pathname.startsWith("/img/defaults/");
+                const isJs = pathname.endsWith(".js");
+                const isCss = pathname.endsWith(".css");
+
+                let cacheControl: string;
+                if (isJs || isCss) {
+                    cacheControl = "no-cache";
+                } else if (isDefaultImage) {
+                    cacheControl = "public, max-age=86400";
+                } else {
+                    cacheControl = "public, max-age=3600";
+                }
+
                 return new Response(await file(staticFilePath).arrayBuffer(), {
                     headers: {
                         "Content-Type": mimeType,
-                        "Cache-Control": isDefaultImage ? "public, max-age=86400" : "public, max-age=3600",
+                        "Cache-Control": cacheControl,
                     },
                 });
             }

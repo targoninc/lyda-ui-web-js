@@ -1,10 +1,6 @@
 const CACHE_NAME = "lyda-pwa-cache-v1";
 const CORE_ASSETS = [
     "/",
-    "/main.js",
-    "/styles/style.css",
-    "/styles/elements.css",
-    "/styles/themes/dark.css",
     "/img/icons/lyda_black_32.png",
     "/img/icons/lyda_black_64.png",
     "/img/icons/lyda_black_512.png",
@@ -46,7 +42,18 @@ self.addEventListener("fetch", (event) => {
         return;
     }
 
-    // Cache-first for static assets
+    // Never cache JS, CSS, or API responses
+    if (
+        url.pathname.endsWith(".js") ||
+        url.pathname.endsWith(".css") ||
+        url.pathname.startsWith("/api/") ||
+        url.pathname.includes("/feeds/") ||
+        url.pathname === "/sw.js"
+    ) {
+        return;
+    }
+
+    // Cache-first only for images
     event.respondWith(
         caches.match(req).then((cached) => {
             if (cached) return cached;
