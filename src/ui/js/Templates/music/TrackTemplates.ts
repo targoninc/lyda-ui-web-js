@@ -575,6 +575,7 @@ export class TrackTemplates {
             },
             classes: ["special", "bigger-input", "rounded-max", "hideTextOnSmallBreakpointButton"],
             id: track.id,
+            disabled: loadingAudio,
             onclick: async () => {
                 PlayManager.addStreamClientIfNotExists(track.id, track.length);
                 await PlayManager.togglePlayAsync(track.id);
