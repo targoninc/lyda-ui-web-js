@@ -54,6 +54,22 @@ export class SettingsTemplates {
         return heading.value.trim().replaceAll(/\s+/g, "-").toLowerCase();
     }
 
+    private static sectionIcons: Record<string, string> = {
+        "account": "person",
+        "totp-devices": "vpn_key",
+        "passkeys": "fingerprint",
+        "payment-info": "credit_card",
+        "tax-info": "receipt_long",
+        "interface-theme": "palette",
+        "language": "translate",
+        "streaming-quality": "edit_audio",
+        "my-permissions": "admin_panel_settings",
+        "behaviour": "tune",
+        "e-mail-notifications": "notifications",
+        "other": "more_horiz",
+        "links": "link",
+    };
+
     static settingsPage() {
         const user = currentUser.value;
         if (!user) {
@@ -83,6 +99,7 @@ export class SettingsTemplates {
             const text = heading();
             return button({
                 text,
+                icon: {icon: SettingsTemplates.sectionIcons[id] ?? "settings"},
                 classes: ["rounded-max"],
                 onclick: () => {
                     const el = document.getElementById(id);
@@ -1042,17 +1059,21 @@ export class SettingsTemplates {
 
     static sectionHeading(text: Signal<string>) {
         const id = text.value.trim().replaceAll(/\s+/g, "-").toLowerCase();
+        const copyUrl = async () => {
+            const url = new URL(window.location.href);
+            await copy(`${url.origin}${url.pathname}#${id}`);
+        }
 
         return horizontal(
-            heading({
-                level: 1,
-                classes: ["bold"],
-                text,
-            }),
-            GenericTemplates.icon("link", true, ["showOnParentHover", "clickable", TextSize.xxLarge], t("COPY_LINK"), async () => {
-                const url = new URL(window.location.href);
-                await copy(`${url.origin}${url.pathname}#${id}`);
-            }),
+            create("h1")
+                .classes("bold", "clickable")
+                .onclick(copyUrl)
+                .children(
+                    GenericTemplates.icon(SettingsTemplates.sectionIcons[id] ?? "settings", true),
+                    create("span")
+                        .text(text),
+                    GenericTemplates.icon("link", true, ["showOnParentHover", "clickable", TextSize.xxLarge], t("COPY_LINK"), copyUrl),
+                ),
         ).classes("align-children");
     }
 
