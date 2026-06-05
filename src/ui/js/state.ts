@@ -200,7 +200,7 @@ loopMode.subscribe((newMode, changed) => {
     }
 
     const streamClient = PlayManager.getStreamClient(currentTrackId.value);
-    streamClient?.setLoop(loopMode.value === LoopMode.single);
+    streamClient?.setLoop(false);
 
     LydaCache.set(UserCacheKey.loopMode, new CacheItem(newMode));
     if (newMode && currentUser.value) {

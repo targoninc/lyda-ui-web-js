@@ -126,7 +126,6 @@ export class PlayManager {
             console.log(`[PlayManager] loopingSingle: ${loopingSingle}`);
             if (loopingSingle) {
                 await PlayManager.scrubTo(id, 0);
-                await PlayManager.startAsync(id);
             } else {
                 await PlayManager.playNextFromQueues(id);
             }
