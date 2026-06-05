@@ -274,7 +274,7 @@ nav {
     background: var(--bg-1);
 }
 
-footer, .fixed-bar, .modal-overlay, .modal, .card, .user-preview, .glass, .pin-card {
+footer, .fixed-bar, .modal-overlay, .modal, .card, .user-preview, .glass, .pin-card, .description {
     background: var(--background-glass);
     backdrop-filter: saturate(180%) blur(10px);
     -webkit-backdrop-filter: saturate(180%) blur(10px);
