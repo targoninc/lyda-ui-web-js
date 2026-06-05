@@ -330,7 +330,7 @@ export class FeedTemplates {
         if (hasFilters) {
             filterPopover = create("div")
                 .classes("generic-popover", "feed-filter-popover", "flex-v")
-                .attributes("popover", "auto")
+                .attributes("popover", "manual")
                 .children(
                     create("div").classes("padded").children(
                         TrackTemplates.wipFilter(config.wipFilterState!),

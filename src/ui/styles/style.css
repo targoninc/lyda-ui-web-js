@@ -327,7 +327,7 @@ footer:empty {
     position: relative;
     padding: var(--page-padding);
     max-width: var(--breakpoint-big);
-    background: var(--bg-0);
+    background: transparent;
     min-height: 100%;
     margin: 0 auto;
     padding-bottom: 25%;

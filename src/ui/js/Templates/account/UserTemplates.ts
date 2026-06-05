@@ -7,6 +7,7 @@ import {Links} from "../../Enums/Links.ts";
 import {CustomText, truncateText} from "../../Classes/Helpers/CustomText.ts";
 import {Images} from "../../Enums/Images.ts";
 import {navigate, reload, Route} from "../../Routing/Router.ts";
+import {router} from "../../../main.ts";
 import {
     AnyElement,
     compute,
@@ -368,6 +369,57 @@ export class UserTemplates {
         const loading = signal(false);
         const notFound = compute((l, u) => l && !u, loading, user);
 
+        let backgroundEl: HTMLElement | null = null;
+        const clearBackground = () => {
+            if (backgroundEl) {
+                backgroundEl.remove();
+                backgroundEl = null;
+            }
+            const pageBg = document.querySelector(".page-background") as HTMLElement | null;
+            if (pageBg) {
+                pageBg.style.position = "";
+            }
+        };
+
+        const setPageBackground = (u: User | null) => {
+            const pageBg = document.querySelector(".page-background") as HTMLElement | null;
+            if (!pageBg) return;
+
+            if (!backgroundEl) {
+                pageBg.style.position = "relative";
+                backgroundEl = document.createElement("div");
+                backgroundEl.style.position = "absolute";
+                backgroundEl.style.top = "0";
+                backgroundEl.style.left = "0";
+                backgroundEl.style.width = "100%";
+                backgroundEl.style.height = "100%";
+                backgroundEl.style.backgroundSize = "cover";
+                backgroundEl.style.backgroundPosition = "center";
+                backgroundEl.style.backgroundRepeat = "no-repeat";
+                backgroundEl.style.backgroundBlendMode = "overlay";
+                backgroundEl.style.backgroundColor = "color-mix(in oklab, var(--bg-1), transparent)";
+                backgroundEl.style.filter = "blur(100px)";
+                backgroundEl.style.opacity = "0.3";
+                backgroundEl.style.pointerEvents = "none";
+                pageBg.insertBefore(backgroundEl, pageBg.firstChild);
+            }
+
+            if (u && u.has_banner) {
+                backgroundEl.style.backgroundImage = `url(${Util.getUserBanner(u.id)})`;
+            } else {
+                backgroundEl.style.backgroundImage = "";
+            }
+        };
+
+        const routeSubKey = "profile-bg-cleanup";
+        user.subscribe(setPageBackground);
+        router.currentRoute.subscribe(r => {
+            if (r?.path !== RoutePath.profile && !r?.aliases?.includes("user")) {
+                clearBackground();
+                router.currentRoute.unsubscribeKey(routeSubKey);
+            }
+        }, routeSubKey);
+
         Api.getUserByName(params["name"])
             .then(u => {
                 user.value = u;
@@ -559,7 +611,7 @@ export class UserTemplates {
         const showFilter = compute(i => i === 0, currentIndex);
         const filterPopover = create("div")
             .classes("generic-popover", "feed-filter-popover", "flex-v")
-            .attributes("popover", "auto")
+            .attributes("popover", "manual")
             .children(
                 create("div").classes("padded").children(
                     TrackTemplates.wipFilter(pageWipFilter$),
@@ -1450,7 +1502,7 @@ export class UserTemplates {
         const showFilter = compute(i => i === 0 || (isSelf && i === (tabs.length - 1)), currentIndex);
         const filterPopover = create("div")
             .classes("generic-popover", "feed-filter-popover", "flex-v")
-            .attributes("popover", "auto")
+            .attributes("popover", "manual")
             .children(
                 create("div").classes("padded").children(
                     TrackTemplates.wipFilter(pageWipFilter$),

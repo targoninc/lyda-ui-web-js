@@ -133,15 +133,7 @@ export class NotificationTemplates {
 
         const btn = button({
             icon: {icon: "notifications"},
-            onclick: () => {
-                const r = btn.getBoundingClientRect();
-                popover.style.position = "fixed";
-                popover.style.top = `${r.bottom + 2}px`;
-                popover.style.right = `${window.innerWidth - r.right}px`;
-                popover.style.left = "auto";
-                popover.style.bottom = "auto";
-                popover.togglePopover();
-            },
+            onclick: () => PopoverTemplates.toggle(popover, btn, true),
             text: "",
             classes: ["fullHeight", "round-on-tiny-breakpoint", unreadClass],
         }) as HTMLButtonElement;

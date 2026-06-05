@@ -91,7 +91,29 @@ export class PopoverTemplates {
 
     static toggle(popover: HTMLElement, anchor: AnyElement, rightAlign = false): void {
         if (!popover.isConnected) return;
+
+        if (popover.matches(":popover-open")) {
+            popover.hidePopover();
+            return;
+        }
+
         PopoverTemplates.positionAtAnchor(popover, anchor, false, rightAlign);
-        popover.togglePopover();
+        popover.showPopover();
+
+        if (popover.getAttribute("popover") === "manual") {
+            const onDocumentClick = (e: MouseEvent) => {
+                if (!popover.contains(e.target as Node) && e.target !== anchor && !anchor.contains(e.target as Node)) {
+                    popover.hidePopover();
+                }
+            };
+            const onHide = () => {
+                document.removeEventListener("click", onDocumentClick);
+                popover.removeEventListener("hidePopover", onHide);
+            };
+            popover.addEventListener("hidePopover", onHide);
+            setTimeout(() => {
+                document.addEventListener("click", onDocumentClick);
+            }, 0);
+        }
     }
 }
