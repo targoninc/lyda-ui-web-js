@@ -70,8 +70,8 @@ export class ModerationCommentsTemplates {
     static commentFilters(filter: Signal<any>, loading: Signal<boolean>, results: Signal<Comment[]>, allowFilteringByUser = true) {
         const potentiallyHarmful = compute(f => f.potentiallyHarmful, filter);
         const hasReports = compute(f => f.hasReports, filter);
-        const username = compute(f => f.username, filter);
-        const contentFilter = compute(f => f.contentFilter, filter);
+        const username = compute(f => f.username ?? "", filter);
+        const contentFilter = compute(f => f.contentFilter ?? "", filter);
         const showDeleted = compute(f => f.showDeleted, filter);
         const skip = compute(f => f.offset, filter);
 
@@ -117,6 +117,7 @@ export class ModerationCommentsTemplates {
                         name: "contentFilter",
                         placeholder: t("FILTER_BY_CONTENT"),
                         value: contentFilter,
+                        debounce: 200,
                         onchange: (v: string | null) => {
                             if (v === "") {
                                 v = null;
