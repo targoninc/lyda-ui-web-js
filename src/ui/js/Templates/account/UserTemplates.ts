@@ -55,6 +55,34 @@ import {TextSize} from "../../Enums/TextSize.ts";
 
 export class UserTemplates {
     static #popoverUid = 0;
+    static #profileBackgroundEl: HTMLElement | null = null;
+
+    static #clearProfileBackground() {
+        if (UserTemplates.#profileBackgroundEl) {
+            UserTemplates.#profileBackgroundEl.remove();
+            UserTemplates.#profileBackgroundEl = null;
+        }
+        const pageBg = document.querySelector(".page-background") as HTMLElement | null;
+        if (pageBg) {
+            pageBg.style.position = "";
+        }
+    }
+
+    static #setProfileBackground(u: User | null) {
+        const pageBg = document.querySelector(".page-background") as HTMLElement | null;
+        if (!pageBg) return;
+
+        if (!UserTemplates.#profileBackgroundEl) {
+            pageBg.style.position = "relative";
+            UserTemplates.#profileBackgroundEl = document.createElement("div");
+            UserTemplates.#profileBackgroundEl.className = "page-background-image";
+            pageBg.insertBefore(UserTemplates.#profileBackgroundEl, pageBg.firstChild);
+        }
+
+        UserTemplates.#profileBackgroundEl.style.backgroundImage = u?.has_banner
+            ? `url(${Util.getUserBanner(u.id)})`
+            : "";
+    }
 
     static userWidget(
         user: User | Signal<User | null>,
@@ -369,56 +397,16 @@ export class UserTemplates {
         const loading = signal(false);
         const notFound = compute((l, u) => l && !u, loading, user);
 
-        let backgroundEl: HTMLElement | null = null;
-        const clearBackground = () => {
-            if (backgroundEl) {
-                backgroundEl.remove();
-                backgroundEl = null;
-            }
-            const pageBg = document.querySelector(".page-background") as HTMLElement | null;
-            if (pageBg) {
-                pageBg.style.position = "";
-            }
-        };
+        user.subscribe(u => {
+            UserTemplates.#setProfileBackground(u);
+        });
 
-        const setPageBackground = (u: User | null) => {
-            const pageBg = document.querySelector(".page-background") as HTMLElement | null;
-            if (!pageBg) return;
-
-            if (!backgroundEl) {
-                pageBg.style.position = "relative";
-                backgroundEl = document.createElement("div");
-                backgroundEl.style.position = "absolute";
-                backgroundEl.style.top = "0";
-                backgroundEl.style.left = "0";
-                backgroundEl.style.width = "100%";
-                backgroundEl.style.height = "100%";
-                backgroundEl.style.backgroundSize = "cover";
-                backgroundEl.style.backgroundPosition = "center";
-                backgroundEl.style.backgroundRepeat = "no-repeat";
-                backgroundEl.style.backgroundBlendMode = "overlay";
-                backgroundEl.style.backgroundColor = "color-mix(in oklab, var(--bg-1), transparent)";
-                backgroundEl.style.filter = "blur(100px)";
-                backgroundEl.style.opacity = "0.3";
-                backgroundEl.style.pointerEvents = "none";
-                pageBg.insertBefore(backgroundEl, pageBg.firstChild);
-            }
-
-            if (u && u.has_banner) {
-                backgroundEl.style.backgroundImage = `url(${Util.getUserBanner(u.id)})`;
-            } else {
-                backgroundEl.style.backgroundImage = "";
-            }
-        };
-
-        const routeSubKey = "profile-bg-cleanup";
-        user.subscribe(setPageBackground);
         router.currentRoute.subscribe(r => {
             if (r?.path !== RoutePath.profile && !r?.aliases?.includes("user")) {
-                clearBackground();
-                router.currentRoute.unsubscribeKey(routeSubKey);
+                UserTemplates.#clearProfileBackground();
+                router.currentRoute.unsubscribeKey("profile-bg-cleanup");
             }
-        }, routeSubKey);
+        }, "profile-bg-cleanup");
 
         Api.getUserByName(params["name"])
             .then(u => {
