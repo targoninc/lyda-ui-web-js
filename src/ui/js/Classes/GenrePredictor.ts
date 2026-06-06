@@ -136,7 +136,7 @@ function computeMelSpectrogram(audio: Float32Array): number[][] {
             for (let k = 0; k <= FFT_SIZE / 2; k++) {
                 sum += powerSpectrum[k] * fb[m][k];
             }
-            melSpec[m] = Math.log10(10000.0 * sum + 1.0);
+            melSpec[m] = Math.log10(10000.0 * (sum + 1.0));
         }
         result.push(melSpec);
     }
@@ -256,12 +256,14 @@ export async function predictGenresFromFile(audioFile: File): Promise<GenrePredi
         return [];
     }
 
+    const audioContext = new AudioContext({sampleRate: SAMPLE_RATE});
+    let input: any = null;
+    let prediction: any = null;
     try {
-        const audioContext = new AudioContext({sampleRate: SAMPLE_RATE});
         const arrayBuffer = await audioFile.arrayBuffer();
         const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-
         let channelData = audioBuffer.getChannelData(0);
+
         if (audioBuffer.sampleRate !== SAMPLE_RATE) {
             const ratio = audioBuffer.sampleRate / SAMPLE_RATE;
             const newLength = Math.floor(channelData.length / ratio);
@@ -272,8 +274,8 @@ export async function predictGenresFromFile(audioFile: File): Promise<GenrePredi
         }
 
         const melSpec = computeMelSpectrogram(channelData);
-        const input = prepareModelInput(melSpec);
-        const prediction = genreModel.predict(input);
+        input = prepareModelInput(melSpec);
+        prediction = genreModel.predict(input);
         const data = await prediction.data();
 
         const results: GenrePrediction[] = [];
@@ -295,12 +297,14 @@ export async function predictGenresFromFile(audioFile: File): Promise<GenrePredi
             }
         }
 
-        input.dispose();
-        prediction.dispose();
         return results.sort((a, b) => b.confidence - a.confidence);
     } catch (e) {
         console.error("Genre prediction failed:", e);
         return [];
+    } finally {
+        input?.dispose();
+        prediction?.dispose();
+        audioContext.close();
     }
 }
 

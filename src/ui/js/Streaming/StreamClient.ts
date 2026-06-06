@@ -79,6 +79,27 @@ export class StreamClient implements IStreamClient {
         this.loadingPromise = undefined;
     }
 
+    public close(): void {
+        this.stopAsync();
+
+        if (this.gain) {
+            try {
+                this.gain.disconnect();
+            } catch (e: any) {
+                console.warn(e);
+            }
+            this.gain = undefined;
+        }
+
+        this.buffer = undefined;
+        this.duration = 0;
+
+        if (this.ctx && this.ctx.state !== "closed") {
+            this.ctx.close().catch(() => {});
+            this.ctx = undefined;
+        }
+    }
+
     public async scrubTo(time: number, relative: boolean): Promise<void> {
         await this.ensureAudioContext();
 

@@ -137,7 +137,8 @@ export class TrackTemplates {
 
         const windowWidth$ = signal(window.innerWidth);
         const onResize = () => { windowWidth$.value = window.innerWidth; };
-        window.addEventListener("resize", onResize);
+        const abortController = new AbortController();
+        window.addEventListener("resize", onResize, { signal: abortController.signal });
 
         const pathD = compute(
             w => {
@@ -194,6 +195,14 @@ export class TrackTemplates {
                 }
             })
             .build();
+
+        new MutationObserver((_, obs) => {
+            if (!document.contains(el)) {
+                abortController.abort();
+                obs.disconnect();
+            }
+        }).observe(el.parentElement ?? document.body, { childList: true, subtree: true });
+
         return el;
     }
 

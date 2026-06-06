@@ -109,7 +109,10 @@ export class PlayManager {
     }
 
     static addStreamClient(id: number, streamClient: IStreamClient) {
-        console.log(`[PlayManager] Adding streamClient for id ${id}:`, streamClient);
+        const existing = streamClients.value[id];
+        if (existing && typeof (existing as any).close === "function") {
+            (existing as any).close();
+        }
         streamClients.value[id] = streamClient;
     }
 
@@ -133,7 +136,10 @@ export class PlayManager {
     }
 
     static removeStreamClient(id: number) {
-        console.log(`[PlayManager] Removing streamClient for id ${id}`);
+        const existing = streamClients.value[id];
+        if (existing && typeof (existing as any).close === "function") {
+            (existing as any).close();
+        }
         delete streamClients.value[id];
     }
 
@@ -332,6 +338,10 @@ export class PlayManager {
                 continue;
             }
             streamClients.value[key].stopAsync();
+            if (typeof (streamClients.value[key] as any).close === "function") {
+                (streamClients.value[key] as any).close();
+            }
+            delete streamClients.value[key];
         }
         playingHere.value = false;
 

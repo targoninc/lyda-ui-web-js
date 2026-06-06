@@ -583,6 +583,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 .genre-groups {
     max-height: 50dvh;
     overflow: auto;
+    max-width: 580px;
 }
 
 .subgenres {
