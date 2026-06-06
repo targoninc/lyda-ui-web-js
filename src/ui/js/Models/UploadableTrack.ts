@@ -9,4 +9,6 @@ export interface UploadableTrack extends Partial<Track>, Record<string, any> {
     coverArtFileName?: string | null;
     genres: Genre[];
     genrePredictions?: Genre[];
+    genreAnalyzing?: boolean;
+    genreAnalyzeError?: boolean;
 }

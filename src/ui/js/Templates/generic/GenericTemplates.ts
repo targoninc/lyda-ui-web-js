@@ -566,6 +566,17 @@ export class GenericTemplates {
         return create("div").classes("spinner").children().build();
     }
 
+    static loadingBlobs(size = 40) {
+        return create("div").classes("loading-blobs")
+            .style("width", `${size}px`)
+            .style("height", `${size}px`)
+            .children(
+                create("div").classes("loading-blob", "blob-0").build(),
+                create("div").classes("loading-blob", "blob-1").build(),
+                create("div").classes("loading-blob", "blob-2").build(),
+            ).build();
+    }
+
     static roundIconButton(
         iconConfig: IconConfig,
         onclick: Function,

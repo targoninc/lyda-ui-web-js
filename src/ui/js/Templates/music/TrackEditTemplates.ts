@@ -556,6 +556,7 @@ export class TrackEditTemplates {
         const MAX_GENRES = 5;
         const currentTags = signal<Genre[]>(parentState.value.genres as Genre[] ?? []);
         const suggestedGenres = signal<Genre[]>(parentState.value.genrePredictions as Genre[] ?? []);
+        const analyzing = compute(s => !!s.genreAnalyzing, parentState);
 
         currentTags.subscribe(tags => {
             if (JSON.stringify(parentState.value.genres) !== JSON.stringify(tags)) {
@@ -583,6 +584,7 @@ export class TrackEditTemplates {
             placeholder: t("ADD_GENRE_DOT_DOT"),
             label: t("GENRE"),
             suggestedGenres,
+            analyzing,
         });
     }
 
@@ -659,16 +661,6 @@ export class TrackEditTemplates {
     }
 
     static audioFile(canOverwriteTitle = false, parentState: Signal<UploadableTrack>) {
-        const genrePredictions = signal<Genre[]>([]);
-        genrePredictions.subscribe(gp => {
-            parentState.value = {
-                ...parentState.value,
-                genrePredictions: gp
-            };
-        });
-        const analyzing = signal(false);
-        const analyzeError = signal(false);
-
         const fileField = FormTemplates.fileField(
             t("AUDIO_FILE"),
             `${t("CHOOSE_AUDIO_FILE")}`,
@@ -694,16 +686,28 @@ export class TrackEditTemplates {
                 };
 
                 if (files && files.length > 0) {
-                    analyzing.value = true;
-                    analyzeError.value = false;
+                    parentState.value = {
+                        ...parentState.value,
+                        genreAnalyzing: true,
+                        genreAnalyzeError: false,
+                    };
                     try {
                         const predictions = await predictGenresFromFile(files[0]);
-                        genrePredictions.value = predictions.map(p => p.genre);
+                        parentState.value = {
+                            ...parentState.value,
+                            genrePredictions: predictions.map(p => p.genre),
+                        };
                     } catch (e) {
                         console.error("Genre prediction failed:", e);
-                        analyzeError.value = true;
+                        parentState.value = {
+                            ...parentState.value,
+                            genreAnalyzeError: true,
+                        };
                     } finally {
-                        analyzing.value = false;
+                        parentState.value = {
+                            ...parentState.value,
+                            genreAnalyzing: false,
+                        };
                     }
                 }
             },
@@ -712,14 +716,7 @@ export class TrackEditTemplates {
         return create("div").classes("flex", "small-gap", "align-children")
             .children(
                 fileField,
-                when(analyzing, () =>
-                    create("div").classes("flex", "small-gap", "align-end")
-                        .children(
-                            GenericTemplates.loadingSpinner(),
-                            create("span").text(t("ANALYZING")).build(),
-                        ).build()
-                ),
-                when(analyzeError, () =>
+                when(compute(s => !!s.genreAnalyzeError, parentState), () =>
                     create("span").classes("error")
                         .text(t("GENRE_PREDICTION_FAILED"))
                         .build()

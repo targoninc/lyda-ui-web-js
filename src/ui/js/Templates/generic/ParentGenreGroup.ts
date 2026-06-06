@@ -2,7 +2,7 @@ import {compute, create, signal, signalMap, Signal, when, InputType, StringOrSig
 import {button} from "@targoninc/jess-components";
 import {DISCOGS_PARENT_GENRES, DiscogsParentGenre, Genre} from "@targoninc/lyda-shared/src/Enums/Genre";
 import {GenreByParent, getSubgenreDisplay} from "@targoninc/lyda-shared/src/Enums/GenreLabels";
-import {horizontal, vertical} from "./GenericTemplates.ts";
+import {GenericTemplates, horizontal, vertical} from "./GenericTemplates.ts";
 import {t} from "../../../locales";
 
 export interface ParentGenreGroupOptions {
@@ -11,6 +11,7 @@ export interface ParentGenreGroupOptions {
     placeholder?: StringOrSignal;
     label?: StringOrSignal;
     suggestedGenres?: Signal<Genre[]>;
+    analyzing?: Signal<boolean>;
 }
 
 export function ParentGenreGroup(options: ParentGenreGroupOptions) {
@@ -20,6 +21,7 @@ export function ParentGenreGroup(options: ParentGenreGroupOptions) {
         placeholder = "Add genre...",
         label = "Genre",
         suggestedGenres = signal<Genre[]>([]),
+        analyzing = signal(false),
     } = options;
 
     const expandedParents = signal<Set<DiscogsParentGenre>>(new Set());
@@ -64,7 +66,7 @@ export function ParentGenreGroup(options: ParentGenreGroupOptions) {
         .classes("parent-genre-group", "flex-v", "small-gap")
         .children(
             when(label, create("label").text(label).build()),
-            selectedGenresRow(selectedGenres, maxGenres, placeholder, searchQuery, removeGenre),
+            selectedGenresRow(selectedGenres, maxGenres, placeholder, searchQuery, removeGenre, analyzing),
             suggestionsRow(suggestedGenres, addGenre),
             genreGroupList(expandedParents, searchQuery, selectedGenres, addGenre, removeGenre, toggleParent, getFilteredGenres, hasMatchingGenres),
         ).build();
@@ -76,6 +78,7 @@ function selectedGenresRow(
     placeholder: StringOrSignal,
     searchQuery: Signal<string>,
     removeGenre: (g: Genre) => void,
+    analyzing: Signal<boolean>,
 ) {
     return create("div").classes("flex", "flex-wrap", "small-gap", "align-children").children(
         signalMap(
@@ -101,6 +104,13 @@ function selectedGenresRow(
         when(
             compute(s => s.length >= maxGenres, selectedGenres),
             create("span").classes("color-dim", "small").text(t("MAX_GENRES_REACHED")).build(),
+        ),
+        when(analyzing, () =>
+            create("div").classes("flex", "align-children", "color-dim")
+                .children(
+                    GenericTemplates.loadingBlobs(24),
+                    create("span").classes("small").text(t("ANALYZING")).build(),
+                ).build()
         ),
     ).build();
 }
