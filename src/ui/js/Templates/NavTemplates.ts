@@ -17,8 +17,13 @@ import { TextSize } from "../Enums/TextSize.ts";
 
 export class NavTemplates {
     static navTop(burgerMenuOpen: Signal<boolean>) {
-        currentUser.subscribe(async () => {
-            await UserActions.getNotifications();
+        if (currentUser.value) {
+            UserActions.getNotifications();
+        }
+        currentUser.subscribe(async (u) => {
+            if (u) {
+                await UserActions.getNotifications();
+            }
         });
 
         return create("nav")
