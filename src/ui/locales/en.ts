@@ -407,6 +407,8 @@ export const en = {
     I_HAVE_ALL_NECESSARY_RIGHTS: "I have all the necessary rights to distribute this content*",
     AUDIO_FILE: "Audio File*",
     CHOOSE_AUDIO_FILE: "Choose audio file",
+    ANALYZING: "Analyzing...",
+    GENRE_PREDICTION_FAILED: "Genre prediction failed",
     COVER_FILE: "Cover File",
     CHOOSE_IMAGE_FILE: "Choose image file",
     TRACK_WILL_BE_MONETIZED: "This track will be monetized through streaming subscriptions and available for buying.",

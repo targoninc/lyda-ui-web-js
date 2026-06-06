@@ -21,4 +21,6 @@ export const ga: Translation = {
     REPORTS_FOR_COMMENT: "Tuairiscí don trácht",
     REPORT_REASON: (reason: string) => `Cúis: ${reason}`,
     MAX_GENRES_REACHED: "Uasmhéid na n-genre bainte amach",
+    ANALYZING: "Ag anailís...",
+    GENRE_PREDICTION_FAILED: "Theip ar thuarascáil an genre",
 };

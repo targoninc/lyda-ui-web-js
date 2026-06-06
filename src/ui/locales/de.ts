@@ -128,6 +128,8 @@ export const de: Translation = {
     CHECKING_FOR_MFA: "Prüfe auf MFA...",
     CHECK_EMAIL_FOR_RESET_LINK: "Bitte prüfe dein Postfach auf den Link zum Zurücksetzen. Sobald du dein Passwort zurückgesetzt hast, kannst du dich anmelden.",
     CHOOSE_AUDIO_FILE: "Audiodatei auswählen",
+    ANALYZING: "Analysiere...",
+    GENRE_PREDICTION_FAILED: "Genre-Vorhersage fehlgeschlagen",
     CHOOSE_IMAGE_FILE: "Bilddatei auswählen",
     CLEAR_SEARCH: "Suche löschen",
     CLICK_BUTTON_BELOW_START_SUBSCRIPTION: "Klicke auf den Button unten um dein Abonnement zu starten",

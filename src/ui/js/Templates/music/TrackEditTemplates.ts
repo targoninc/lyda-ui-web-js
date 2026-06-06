@@ -573,7 +573,7 @@ export class TrackEditTemplates {
             }
             const incomingSuggestions = state.genrePredictions ?? [];
             if (JSON.stringify(suggestedGenres.value) !== JSON.stringify(incomingSuggestions)) {
-                suggestedGenres.value = incomingSuggestions as Genre[];
+            suggestedGenres.value = incomingSuggestions as Genre[];
             }
         });
 
@@ -672,8 +672,10 @@ export class TrackEditTemplates {
                 genrePredictions: gp
             };
         });
+        const analyzing = signal(false);
+        const analyzeError = signal(false);
 
-        return FormTemplates.fileField(
+        const fileField = FormTemplates.fileField(
             t("AUDIO_FILE"),
             `${t("CHOOSE_AUDIO_FILE")}`,
             "audio-file",
@@ -698,15 +700,37 @@ export class TrackEditTemplates {
                 };
 
                 if (files && files.length > 0) {
+                    analyzing.value = true;
+                    analyzeError.value = false;
                     try {
                         const predictions = await predictGenresFromFile(files[0]);
                         genrePredictions.value = predictions.map(p => p.genre);
                     } catch (e) {
                         console.error("Genre prediction failed:", e);
+                        analyzeError.value = true;
+                    } finally {
+                        analyzing.value = false;
                     }
                 }
             },
         );
+
+        return create("div").classes("flex", "small-gap", "align-children")
+            .children(
+                fileField,
+                when(analyzing, () =>
+                    create("div").classes("flex", "small-gap", "align-end")
+                        .children(
+                            GenericTemplates.loadingSpinner(),
+                            create("span").text(t("ANALYZING")).build(),
+                        ).build()
+                ),
+                when(analyzeError, () =>
+                    create("span").classes("error")
+                        .text(t("GENRE_PREDICTION_FAILED"))
+                        .build()
+                ),
+            ).build();
     }
 
     static coverFile(parentState: Signal<UploadableTrack>) {
