@@ -173,10 +173,17 @@ export class TrackEditTemplates {
     static editTrackPage(route: Route, params: Record<string, string>) {
         const trackId = parseInt(params["id"]);
         const track = signal<Track | null>(null);
+        const genrePredictions = signal<Genre[]>([]);
         Api.getTrackById(trackId).then(d => {
             if (d?.canEdit) {
                 track.value = d.track;
                 document.title = `${t("EDIT_TRACK")} - ${d.track.title}`;
+                if (d.metadata?.genre_suggestions) {
+                    try {
+                        const parsed = JSON.parse(d.metadata.genre_suggestions);
+                        genrePredictions.value = parsed.map((p: any) => p.genre);
+                    } catch {}
+                }
             }
         });
 
@@ -184,6 +191,7 @@ export class TrackEditTemplates {
             ...t,
             release_date: new Date(t?.release_date ?? Date.now()),
             genres: t?.genre ? t.genre.split(",").map(g => g.trim()).filter(g => g) : [],
+            genrePredictions: genrePredictions.value,
         }, track);
 
         return vertical(

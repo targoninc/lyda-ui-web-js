@@ -726,10 +726,12 @@ export class Api {
         code: string = ""
     ): Promise<{
         track: Track;
+        metadata: { genre_suggestions?: string } | null;
         canEdit: boolean;
     } | null> {
         return await get<{
             track: Track;
+            metadata: { genre_suggestions?: string } | null;
             canEdit: boolean;
         }>(ApiRoutes.getTrackById, { id: id.toString(), code });
     }
