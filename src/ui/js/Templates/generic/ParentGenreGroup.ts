@@ -24,7 +24,6 @@ export function ParentGenreGroup(options: ParentGenreGroupOptions) {
 
     const expandedParents = signal<Set<DiscogsParentGenre>>(new Set());
     const searchQuery = signal("");
-    const showSuggestions = signal(true);
 
     const toggleParent = (parent: DiscogsParentGenre) => {
         const current = new Set(expandedParents.value);
@@ -51,8 +50,8 @@ export function ParentGenreGroup(options: ParentGenreGroupOptions) {
         const allGenres = GenreByParent[parent] ?? [];
         const query = searchQuery.value.toLowerCase();
         if (!query) return allGenres;
-        return allGenres.filter(g => 
-            g.toLowerCase().includes(query) || 
+        return allGenres.filter(g =>
+            g.toLowerCase().includes(query) ||
             getSubgenreDisplay(g).toLowerCase().includes(query)
         );
     };
@@ -61,20 +60,36 @@ export function ParentGenreGroup(options: ParentGenreGroupOptions) {
         return getFilteredGenres(parent).length > 0;
     };
 
-    const selectedRow = create("div").classes("flex", "flex-wrap", "small-gap", "align-children").children(
+    return create("div")
+        .classes("parent-genre-group", "flex-v", "small-gap")
+        .children(
+            when(label, create("label").text(label).build()),
+            selectedGenresRow(selectedGenres, maxGenres, placeholder, searchQuery, removeGenre),
+            suggestionsRow(suggestedGenres, addGenre),
+            genreGroupList(expandedParents, searchQuery, selectedGenres, addGenre, toggleParent, getFilteredGenres, hasMatchingGenres),
+        ).build();
+}
+
+function selectedGenresRow(
+    selectedGenres: Signal<Genre[]>,
+    maxGenres: number,
+    placeholder: StringOrSignal,
+    searchQuery: Signal<string>,
+    removeGenre: (g: Genre) => void,
+) {
+    return create("div").classes("flex", "flex-wrap", "small-gap", "align-children").children(
         signalMap(
             selectedGenres,
             create("div").classes("flex", "flex-wrap", "small-gap", "align-children"),
-            (genre) =>
-                button({
-                    icon: {icon: "close"},
-                    text: getSubgenreDisplay(genre),
-                    classes: ["tag-remove"],
-                    onclick: () => removeGenre(genre),
-                }),
+            (genre) => button({
+                icon: {icon: "close"},
+                text: getSubgenreDisplay(genre),
+                classes: ["tag-remove"],
+                onclick: () => removeGenre(genre),
+            }),
         ),
         when(
-            compute(t => t.length < maxGenres || maxGenres === 0, selectedGenres),
+            compute(s => s.length < maxGenres || maxGenres === 0, selectedGenres),
             create("input")
                 .type(InputType.text)
                 .classes("jess", "tag-input")
@@ -84,81 +99,93 @@ export function ParentGenreGroup(options: ParentGenreGroupOptions) {
                 .build(),
         ),
     ).build();
+}
 
-    return create("div")
-        .classes("parent-genre-group", "flex-v", "small-gap")
-        .children(
-            when(label, create("label").text(label).build()),
-            selectedRow,
-            when(
-                compute(s => s.length > 0, suggestedGenres),
-                create("div").classes("flex-v", "small-gap").children(
-                    create("span")
-                        .classes("color-dim", "small")
-                        .text(t("SUGGESTIONS")),
-                    signalMap(
-                        suggestedGenres,
-                        horizontal(),
-                        (genre) => button({
-                            text: getSubgenreDisplay(genre),
-                            classes: ["tag", "suggestion"],
-                            onclick: () => addGenre(genre),
-                        }),
-                    ),
-                ).build(),
+function suggestionsRow(suggestedGenres: Signal<Genre[]>, addGenre: (g: Genre) => void) {
+    return when(
+        compute(s => s.length > 0, suggestedGenres),
+        create("div").classes("flex-v", "small-gap").children(
+            create("span").classes("color-dim", "small").text(t("SUGGESTIONS")),
+            signalMap(
+                suggestedGenres,
+                horizontal(),
+                (genre) => button({
+                    text: getSubgenreDisplay(genre),
+                    classes: ["tag", "suggestion"],
+                    onclick: () => addGenre(genre),
+                }),
             ),
-            create("div")
-                .classes("genre-groups", "flex-v", "small-gap")
-                .children(
-                    signalMap(
-                        compute((sq) => {
-                            if (sq) {
-                                return [...DISCOGS_PARENT_GENRES.filter(p => hasMatchingGenres(p))];
-                            }
-                            return [...DISCOGS_PARENT_GENRES];
-                        }, searchQuery),
-                        vertical(),
-                        (parent) => {
-                            const isExpanded = compute(
-                                (expanded, query) => expanded.has(parent) || (query && query.length > 0),
-                                expandedParents, searchQuery,
-                            );
+        ).build(),
+    );
+}
 
-                            const genreButtons = signalMap(
-                                compute(() => getFilteredGenres(parent)),
-                                create("div").classes("flex", "flex-wrap", "small-gap"),
-                                (genre) => {
-                                    const isSelected = compute((s) => s.includes(genre), selectedGenres);
-                                    return button({
-                                        text: getSubgenreDisplay(genre),
-                                        classes: [
-                                            "tag",
-                                            compute((s): string => s ? "selected" : "_", isSelected),
-                                        ],
-                                        onclick: () => addGenre(genre),
-                                    });
-                                },
-                            );
+function genreGroupList(
+    expandedParents: Signal<Set<DiscogsParentGenre>>,
+    searchQuery: Signal<string>,
+    selectedGenres: Signal<Genre[]>,
+    addGenre: (g: Genre) => void,
+    toggleParent: (p: DiscogsParentGenre) => void,
+    getFilteredGenres: (p: DiscogsParentGenre) => Genre[],
+    hasMatchingGenres: (p: DiscogsParentGenre) => boolean,
+) {
+    return create("div").classes("genre-groups", "flex-v", "small-gap").children(
+        signalMap(
+            compute((sq) => sq
+                ? [...DISCOGS_PARENT_GENRES.filter(p => hasMatchingGenres(p))]
+                : [...DISCOGS_PARENT_GENRES],
+                searchQuery),
+            vertical(),
+            (parent) => parentGenreSection(parent, expandedParents, searchQuery, selectedGenres, addGenre, toggleParent, getFilteredGenres),
+        ),
+    ).build();
+}
 
-                            const header = create("div")
-                                .classes("parent-genre-header", "flex", "align-children", "clickable")
-                                .children(
-                                    create("span").classes("parent-genre-title").text(parent).build(),
-                                    create("span").classes("parent-genre-count").text(`(${GenreByParent[parent]?.length ?? 0})`).build(),
-                                ).onclick(() => toggleParent(parent))
-                                .build();
+function parentGenreSection(
+    parent: DiscogsParentGenre,
+    expandedParents: Signal<Set<DiscogsParentGenre>>,
+    searchQuery: Signal<string>,
+    selectedGenres: Signal<Genre[]>,
+    addGenre: (g: Genre) => void,
+    toggleParent: (p: DiscogsParentGenre) => void,
+    getFilteredGenres: (p: DiscogsParentGenre) => Genre[],
+) {
+    const isExpanded = compute(
+        (expanded, query) => expanded.has(parent) || (!!query && query.length > 0),
+        expandedParents, searchQuery,
+    );
 
-                            return create("div")
-                                .classes("parent-genre-section", "flex-v", "small-gap")
-                                .children(
-                                    header,
-                                    when(
-                                        isExpanded,
-                                        create("div").classes("parent-genre-content", "flex", "flex-wrap", "small-gap").children(genreButtons).build(),
-                                    ),
-                                ).build();
-                        },
-                    )
-                ).build()
-        ).build();
+    return create("div").classes("parent-genre-section", "flex-v", "small-gap").children(
+        parentGenreHeader(parent, isExpanded, toggleParent),
+        when(
+            isExpanded,
+            create("div").classes("parent-genre-content", "flex", "flex-wrap", "small-gap").children(
+                signalMap(
+                    compute(() => getFilteredGenres(parent)),
+                    create("div").classes("flex", "flex-wrap", "small-gap"),
+                    (genre) => genreTag(genre, selectedGenres, addGenre),
+                ),
+            ).build(),
+        ),
+    ).build();
+}
+
+function parentGenreHeader(parent: DiscogsParentGenre, isExpanded: Signal<boolean>, toggleParent: (p: DiscogsParentGenre) => void) {
+    return create("div")
+        .classes("flex", "align-children", "clickable")
+        .children(
+            create("span")
+                .text(parent),
+            create("span")
+                .text(`(${GenreByParent[parent]?.length ?? 0})`),
+        ).onclick(() => toggleParent(parent))
+        .build();
+}
+
+function genreTag(genre: Genre, selectedGenres: Signal<Genre[]>, addGenre: (g: Genre) => void) {
+    const isSelected = compute(s => s.includes(genre), selectedGenres);
+    return button({
+        text: getSubgenreDisplay(genre),
+        classes: ["tag", compute((s): string => s ? "selected" : "_", isSelected)],
+        onclick: () => addGenre(genre),
+    });
 }
