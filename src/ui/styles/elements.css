@@ -580,6 +580,15 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     border-radius: 999px;
 }
 
+.genre-groups {
+    max-height: 50dvh;
+    overflow: auto;
+}
+
+.subgenres {
+    padding-left: var(--layout-gap);
+}
+
 .tag {
     background: var(--bg-2);
     border-radius: 999px;

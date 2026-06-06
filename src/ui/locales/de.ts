@@ -658,6 +658,7 @@ export const de: Translation = {
     REASON_OTHER: "Anderes",
     REPORT_DESCRIPTION_PLACEHOLDER: "Beschreibe das Problem...",
     MAX_2048_CHARACTERS: "Maximal 2048 Zeichen",
+    MAX_GENRES_REACHED: "Maximale Anzahl an Genres erreicht",
     COMMENT_REPORTED: "Kommentar gemeldet",
     HAS_REPORTS: "Hat Meldungen",
     SHOW_DELETED: "Gelöschte anzeigen",

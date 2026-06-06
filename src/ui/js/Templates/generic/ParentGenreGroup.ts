@@ -66,7 +66,7 @@ export function ParentGenreGroup(options: ParentGenreGroupOptions) {
             when(label, create("label").text(label).build()),
             selectedGenresRow(selectedGenres, maxGenres, placeholder, searchQuery, removeGenre),
             suggestionsRow(suggestedGenres, addGenre),
-            genreGroupList(expandedParents, searchQuery, selectedGenres, addGenre, toggleParent, getFilteredGenres, hasMatchingGenres),
+            genreGroupList(expandedParents, searchQuery, selectedGenres, addGenre, removeGenre, toggleParent, getFilteredGenres, hasMatchingGenres),
         ).build();
 }
 
@@ -98,6 +98,10 @@ function selectedGenresRow(
                 .oninput(e => searchQuery.value = (e.target as HTMLInputElement).value)
                 .build(),
         ),
+        when(
+            compute(s => s.length >= maxGenres, selectedGenres),
+            create("span").classes("color-dim", "small").text(t("MAX_GENRES_REACHED")).build(),
+        ),
     ).build();
 }
 
@@ -124,20 +128,19 @@ function genreGroupList(
     searchQuery: Signal<string>,
     selectedGenres: Signal<Genre[]>,
     addGenre: (g: Genre) => void,
+    removeGenre: (g: Genre) => void,
     toggleParent: (p: DiscogsParentGenre) => void,
     getFilteredGenres: (p: DiscogsParentGenre) => Genre[],
     hasMatchingGenres: (p: DiscogsParentGenre) => boolean,
 ) {
-    return create("div").classes("genre-groups", "flex-v", "small-gap").children(
-        signalMap(
-            compute((sq) => sq
+    return signalMap(
+        compute((sq) => sq
                 ? [...DISCOGS_PARENT_GENRES.filter(p => hasMatchingGenres(p))]
                 : [...DISCOGS_PARENT_GENRES],
-                searchQuery),
-            vertical(),
-            (parent) => parentGenreSection(parent, expandedParents, searchQuery, selectedGenres, addGenre, toggleParent, getFilteredGenres),
-        ),
-    ).build();
+            searchQuery),
+        vertical().classes("card", "genre-groups", "noflexwrap"),
+        (parent) => parentGenreSection(parent, expandedParents, searchQuery, selectedGenres, addGenre, removeGenre, toggleParent, getFilteredGenres),
+    );
 }
 
 function parentGenreSection(
@@ -146,6 +149,7 @@ function parentGenreSection(
     searchQuery: Signal<string>,
     selectedGenres: Signal<Genre[]>,
     addGenre: (g: Genre) => void,
+    removeGenre: (g: Genre) => void,
     toggleParent: (p: DiscogsParentGenre) => void,
     getFilteredGenres: (p: DiscogsParentGenre) => Genre[],
 ) {
@@ -154,38 +158,42 @@ function parentGenreSection(
         expandedParents, searchQuery,
     );
 
-    return create("div").classes("parent-genre-section", "flex-v", "small-gap").children(
+    return vertical(
         parentGenreHeader(parent, isExpanded, toggleParent),
         when(
             isExpanded,
-            create("div").classes("parent-genre-content", "flex", "flex-wrap", "small-gap").children(
+            horizontal(
                 signalMap(
                     compute(() => getFilteredGenres(parent)),
                     create("div").classes("flex", "flex-wrap", "small-gap"),
-                    (genre) => genreTag(genre, selectedGenres, addGenre),
+                    (genre) => genreTag(genre, selectedGenres, addGenre, removeGenre),
                 ),
-            ).build(),
+            ).classes("subgenres").build(),
         ),
     ).build();
 }
 
 function parentGenreHeader(parent: DiscogsParentGenre, isExpanded: Signal<boolean>, toggleParent: (p: DiscogsParentGenre) => void) {
-    return create("div")
-        .classes("flex", "align-children", "clickable")
-        .children(
-            create("span")
-                .text(parent),
-            create("span")
-                .text(`(${GenreByParent[parent]?.length ?? 0})`),
-        ).onclick(() => toggleParent(parent))
-        .build();
+    return button({
+        onclick: () => toggleParent(parent),
+        icon: {icon: "folder"},
+        text: `${parent} (${GenreByParent[parent]?.length ?? 0})`,
+        classes: [compute((i): string => i ? "active" : "_", isExpanded)]
+    });
 }
 
-function genreTag(genre: Genre, selectedGenres: Signal<Genre[]>, addGenre: (g: Genre) => void) {
+function genreTag(genre: Genre, selectedGenres: Signal<Genre[]>, addGenre: (g: Genre) => void, removeGenre: (g: Genre) => void) {
     const isSelected = compute(s => s.includes(genre), selectedGenres);
+
     return button({
         text: getSubgenreDisplay(genre),
-        classes: ["tag", compute((s): string => s ? "selected" : "_", isSelected)],
-        onclick: () => addGenre(genre),
+        classes: ["rounded-max", compute((s): string => s ? "active" : "_", isSelected)],
+        onclick: () => {
+            if (isSelected.value) {
+                removeGenre(genre);
+            } else {
+                addGenre(genre);
+            }
+        },
     });
 }

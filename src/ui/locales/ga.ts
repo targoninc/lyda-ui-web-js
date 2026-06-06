@@ -20,4 +20,5 @@ export const ga: Translation = {
     REPORTS_COUNT: (count: number) => `${count} tuairisc${count === 1 ? "" : "í"}`,
     REPORTS_FOR_COMMENT: "Tuairiscí don trácht",
     REPORT_REASON: (reason: string) => `Cúis: ${reason}`,
+    MAX_GENRES_REACHED: "Uasmhéid na n-genre bainte amach",
 };

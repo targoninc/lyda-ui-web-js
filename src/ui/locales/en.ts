@@ -679,5 +679,6 @@ export const en = {
     ADD_GENRE_DOT_DOT: "Add genre...",
     SUGGESTIONS: "Suggestions:",
     FILTER_GENRES: "Filter genres...",
+    MAX_GENRES_REACHED: "Maximum number of genres reached",
     SELECT_GENRES_TO_EXPLORE: "Select genres above to explore tracks",
 } satisfies BaseTranslation;
