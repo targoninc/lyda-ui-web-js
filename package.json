@@ -2,9 +2,9 @@
     "name": "lyda-ui-web",
     "type": "module",
     "scripts": {
-        "build-dev": "bun build src/ui/main.ts --outdir ./out --sourcemap=linked --minify --watch",
+        "build-dev": "bun build src/ui/main.ts src/ui/js/Classes/GenrePredictionWorker.ts --outdir ./out --sourcemap=linked --minify --watch",
         "start-dev": "bun --watch ./src/server.ts",
-        "build-prod": "bun build src/ui/main.ts --outdir ./out --sourcemap=linked --minify",
+        "build-prod": "bun build src/ui/main.ts src/ui/js/Classes/GenrePredictionWorker.ts --outdir ./out --sourcemap=linked --minify",
         "start-prod": "bun ./src/server.ts",
         "copy-version-to-file": "bun ./.scripts/copy-version.js",
         "bump-version": "npm version patch --no-git-tag-version && npm run copy-version-to-file && git add package.json package-lock.json src/ui/js/Classes/Helpers/version.txt",
@@ -39,5 +39,5 @@
         "dotenv": "^17.3.1",
         "express": "^5.2.1"
     },
-    "version": "0.0.836"
+    "version": "0.0.837"
 }
