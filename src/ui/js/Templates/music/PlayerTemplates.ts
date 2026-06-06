@@ -494,11 +494,10 @@ export class PlayerTemplates {
                         overrideActions: [InteractionType.like, InteractionType.repost],
                     }))
                     .build(),
-            ).classes("align-center").build(),
+            ).classes("align-center", "align-children").build(),
             UserTemplates.userLink(UserWidgetContext.player, trackUser),
             horizontal(PlayerTemplates.noSubscriptionInfo(), PlayerTemplates.playingFrom()),
-        )
-            .classes("align-center", "no-gap").build();
+        ).classes("align-center", "no-gap").build();
     }
 
     private static moreMenu(track: Track) {

@@ -28,6 +28,7 @@ import { currentSecretCode, currentTrackId, currentUser, playingHere } from "../
 import { TrackTemplates } from "./music/TrackTemplates.ts";
 import { PlaylistTemplates } from "./music/PlaylistTemplates.ts";
 import { StatisticTemplates } from "./StatisticTemplates.ts";
+import { ParentGenreGroup } from "./generic/ParentGenreGroup.ts";
 import { notify } from "../Classes/Ui.ts";
 import { NotificationType } from "../Enums/NotificationType.ts";
 import { Api } from "../Api/Api.ts";
@@ -344,8 +345,7 @@ export class PageTemplates {
     private static genreExploreSection() {
         const urlParams = new URLSearchParams(window.location.search);
         const initialGenres = urlParams.get("genres")?.split(",").filter(g => g.trim()) ?? [];
-        const selectedGenres$ = signal<string[]>(initialGenres);
-        const allGenres = Object.values(Genre) as string[];
+        const selectedGenres$ = signal<Genre[]>(initialGenres as Genre[]);
         const reloadTrigger$ = signal(0);
 
         selectedGenres$.subscribe(() => {
@@ -361,17 +361,17 @@ export class PageTemplates {
 
         const hasGenres = compute(s => s.length > 0, selectedGenres$);
 
-        const tagEditor = TagEditor({
-            allTags: allGenres,
-            selectedTags: selectedGenres$,
+        const genreGroup = ParentGenreGroup({
+            selectedGenres: selectedGenres$,
+            maxGenres: 10,
             placeholder: t("FILTER_GENRES"),
-            classes: ["flex-v", "small-gap", "padded"],
+            label: t("GENRE"),
         });
 
         const noGenres = compute(g => g.length === 0, selectedGenres$);
 
         return vertical(
-            tagEditor,
+            genreGroup,
             when(hasGenres, FeedTemplates.create<Track>({
                 id: "feed-genre-explore",
                 compact: true,
