@@ -1123,15 +1123,6 @@ td:last-child, th:last-child {
     border: none;
 }
 
-.spinner {
-    border: 1px solid var(--fg-0);
-    border-radius: 50%;
-    border-top: 1px solid var(--blue);
-    width: 20px;
-    height: 20px;
-    animation: spin 1.2s linear infinite;
-}
-
 .banned-pill, .deleted-pill {
     background: var(--red);
     color: var(--bg-0);

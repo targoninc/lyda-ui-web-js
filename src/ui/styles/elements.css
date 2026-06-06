@@ -438,10 +438,6 @@ label {
     transform: translateX(-50%);
 }
 
-.spinner-animation {
-    animation: spin 1s linear infinite;
-}
-
 .audio-player-controls {
     border-radius: 27px;
     flex-wrap: nowrap;

@@ -563,7 +563,7 @@ export class GenericTemplates {
     }
 
     static loadingSpinner() {
-        return create("div").classes("spinner").children().build();
+        return GenericTemplates.loadingBlobs();
     }
 
     static loadingBlobs(size = 40) {
