@@ -2,7 +2,8 @@ import {compute, create, signal, signalMap, Signal, when, InputType, StringOrSig
 import {button} from "@targoninc/jess-components";
 import {DISCOGS_PARENT_GENRES, DiscogsParentGenre, Genre} from "@targoninc/lyda-shared/src/Enums/Genre";
 import {GenreByParent, getSubgenreDisplay} from "@targoninc/lyda-shared/src/Enums/GenreLabels";
-import {vertical} from "./GenericTemplates.ts";
+import {horizontal, vertical} from "./GenericTemplates.ts";
+import {t} from "../../../locales";
 
 export interface ParentGenreGroupOptions {
     selectedGenres: Signal<Genre[]>;
@@ -18,7 +19,7 @@ export function ParentGenreGroup(options: ParentGenreGroupOptions) {
         maxGenres = 5,
         placeholder = "Add genre...",
         label = "Genre",
-        suggestedGenres,
+        suggestedGenres = signal<Genre[]>([]),
     } = options;
 
     const expandedParents = signal<Set<DiscogsParentGenre>>(new Set());
@@ -84,83 +85,80 @@ export function ParentGenreGroup(options: ParentGenreGroupOptions) {
         ),
     ).build();
 
-    const parentSections = signalMap(
-        compute((sq) => {
-            if (sq) {
-                return DISCOGS_PARENT_GENRES.filter(p => hasMatchingGenres(p));
-            }
-            return DISCOGS_PARENT_GENRES;
-        }, searchQuery),
-        vertical(),
-        (parent) => {
-            const isExpanded = compute(
-                (expanded, query) => expanded.has(parent) || (query && query.length > 0),
-                expandedParents, searchQuery,
-            );
-
-            const genreButtons = signalMap(
-                compute(() => getFilteredGenres(parent)),
-                create("div").classes("flex", "flex-wrap", "small-gap"),
-                (genre) => {
-                    const isSelected = compute((s) => s.includes(genre), selectedGenres);
-                    return button({
-                        text: getSubgenreDisplay(genre),
-                        classes: [
-                            "tag",
-                            compute((s): string => s ? "selected" : "_", isSelected),
-                        ],
-                        onclick: () => addGenre(genre),
-                    });
-                },
-            );
-
-            const header = create("div")
-                .classes("parent-genre-header", "flex", "align-children", "clickable")
-                .children(
-                    create("span").classes("parent-genre-title").text(parent).build(),
-                    create("span").classes("parent-genre-count").text(`(${GenreByParent[parent]?.length ?? 0})`).build(),
-                ).onclick(() => toggleParent(parent))
-                .build();
-
-            return create("div")
-                .classes("parent-genre-section", "flex-v", "small-gap")
-                .children(
-                    header,
-                    when(
-                        isExpanded,
-                        create("div").classes("parent-genre-content", "flex", "flex-wrap", "small-gap").children(genreButtons).build(),
+    return create("div")
+        .classes("parent-genre-group", "flex-v", "small-gap")
+        .children(
+            when(label, create("label").text(label).build()),
+            selectedRow,
+            when(
+                compute(s => s.length > 0, suggestedGenres),
+                create("div").classes("flex-v", "small-gap").children(
+                    create("span")
+                        .classes("color-dim", "small")
+                        .text(t("SUGGESTIONS")),
+                    signalMap(
+                        suggestedGenres,
+                        horizontal(),
+                        (genre) => button({
+                            text: getSubgenreDisplay(genre),
+                            classes: ["tag", "suggestion"],
+                            onclick: () => addGenre(genre),
+                        }),
                     ),
-                )
-                .build();
-        },
-    ).build();
+                ).build(),
+            ),
+            create("div")
+                .classes("genre-groups", "flex-v", "small-gap")
+                .children(
+                    signalMap(
+                        compute((sq) => {
+                            if (sq) {
+                                return [...DISCOGS_PARENT_GENRES.filter(p => hasMatchingGenres(p))];
+                            }
+                            return [...DISCOGS_PARENT_GENRES];
+                        }, searchQuery),
+                        vertical(),
+                        (parent) => {
+                            const isExpanded = compute(
+                                (expanded, query) => expanded.has(parent) || (query && query.length > 0),
+                                expandedParents, searchQuery,
+                            );
 
-    const children: any[] = [];
-    if (label) {
-        children.push(create("label").text(label).build());
-    }
-    children.push(selectedRow);
+                            const genreButtons = signalMap(
+                                compute(() => getFilteredGenres(parent)),
+                                create("div").classes("flex", "flex-wrap", "small-gap"),
+                                (genre) => {
+                                    const isSelected = compute((s) => s.includes(genre), selectedGenres);
+                                    return button({
+                                        text: getSubgenreDisplay(genre),
+                                        classes: [
+                                            "tag",
+                                            compute((s): string => s ? "selected" : "_", isSelected),
+                                        ],
+                                        onclick: () => addGenre(genre),
+                                    });
+                                },
+                            );
 
-    if (suggestedGenres) {
-        const suggestionsSection = when(
-            compute(s => s.length > 0, suggestedGenres),
-            create("div").classes("flex-v", "small-gap").children(
-                create("span").classes("color-dim", "small").text("Suggestions").build(),
-                signalMap(
-                    suggestedGenres,
-                    create("div").classes("flex", "flex-wrap", "small-gap"),
-                    (genre) => button({
-                        text: getSubgenreDisplay(genre),
-                        classes: ["tag", "suggestion"],
-                        onclick: () => addGenre(genre),
-                    }),
-                ),
-            ).build(),
-        );
-        children.push(suggestionsSection);
-    }
+                            const header = create("div")
+                                .classes("parent-genre-header", "flex", "align-children", "clickable")
+                                .children(
+                                    create("span").classes("parent-genre-title").text(parent).build(),
+                                    create("span").classes("parent-genre-count").text(`(${GenreByParent[parent]?.length ?? 0})`).build(),
+                                ).onclick(() => toggleParent(parent))
+                                .build();
 
-    children.push(create("div").classes("genre-groups", "flex-v", "small-gap").children(parentSections).build());
-
-    return create("div").classes("parent-genre-group", "flex-v", "small-gap").children(...children).build();
+                            return create("div")
+                                .classes("parent-genre-section", "flex-v", "small-gap")
+                                .children(
+                                    header,
+                                    when(
+                                        isExpanded,
+                                        create("div").classes("parent-genre-content", "flex", "flex-wrap", "small-gap").children(genreButtons).build(),
+                                    ),
+                                ).build();
+                        },
+                    )
+                ).build()
+        ).build();
 }
