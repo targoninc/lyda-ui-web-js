@@ -349,7 +349,7 @@ export class TrackEditTemplates {
     }
 
     static filesSection(isNewTrack = false, state: Signal<UploadableTrack>, errorSections: Signal<string[]>) {
-        return create("div").classes("flex-v").children(
+        return horizontal(
             TrackEditTemplates.sectionCard(
                 t("AUDIO"),
                 errorSections,
@@ -430,7 +430,7 @@ export class TrackEditTemplates {
     }
 
     private static toggles(isPrivate: Signal<boolean>, state: Signal<UploadableTrack>) {
-        return vertical(
+        return horizontal(
             toggle({
                 name: "visibility",
                 label: t("PRIVATE"),
@@ -573,7 +573,7 @@ export class TrackEditTemplates {
             }
             const incomingSuggestions = state.genrePredictions ?? [];
             if (JSON.stringify(suggestedGenres.value) !== JSON.stringify(incomingSuggestions)) {
-            suggestedGenres.value = incomingSuggestions as Genre[];
+                suggestedGenres.value = incomingSuggestions as Genre[];
             }
         });
 
@@ -622,30 +622,24 @@ export class TrackEditTemplates {
     ) {
         const isPrivate = compute(s => s.visibility === "private", state);
 
-        return create("div")
-            .classes("flex")
-            .children(
-                TrackEditTemplates.trackDetails(errorSections, isPrivate, state),
-                create("div")
-                    .classes("flex-v")
-                    .children(
-                        TrackEditTemplates.filesSection(true, state, errorSections),
-                        TrackEditTemplates.monetizationSection(errorSections, state, enableTos
-                            ? toggle({
-                                name: "termsOfService",
-                                label: t("I_HAVE_ALL_NECESSARY_RIGHTS"),
-                                text: t("I_HAVE_ALL_NECESSARY_RIGHTS"),
-                                required: true,
-                                checked: compute(s => s.termsOfService, state),
-                                onchange: (v: boolean) => {
-                                    state.value = {
-                                        ...state.value,
-                                        termsOfService: v,
-                                    };
-                                },
-                            }) : null),
-                    ).build(),
-            ).build();
+        return vertical(
+            TrackEditTemplates.filesSection(true, state, errorSections),
+            TrackEditTemplates.trackDetails(errorSections, isPrivate, state),
+            TrackEditTemplates.monetizationSection(errorSections, state, enableTos
+                ? toggle({
+                    name: "termsOfService",
+                    label: t("I_HAVE_ALL_NECESSARY_RIGHTS"),
+                    text: t("I_HAVE_ALL_NECESSARY_RIGHTS"),
+                    required: true,
+                    checked: compute(s => s.termsOfService, state),
+                    onchange: (v: boolean) => {
+                        state.value = {
+                            ...state.value,
+                            termsOfService: v,
+                        };
+                    },
+                }) : null),
+        ).build();
     }
 
     static sectionCard(
