@@ -1,6 +1,5 @@
 importScripts("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js");
 
-const SAMPLE_RATE = 16000;
 const FRAME_SIZE = 512;
 const HOP_SIZE = 256;
 const PATCH_SIZE = 128;
@@ -38,47 +37,34 @@ self.onmessage = async function(e: MessageEvent) {
 
     if (msg.type === "predict") {
         try {
-            const channelData = new Float32Array(msg.audioData);
+            const audio = new Float32Array(msg.audioData);
 
-            let audio = channelData;
-            if (msg.sampleRate !== SAMPLE_RATE) {
-                const ratio = msg.sampleRate / SAMPLE_RATE;
-                const newLength = Math.floor(channelData.length / ratio);
-                audio = new Float32Array(newLength);
-                for (let i = 0; i < newLength; i++) {
-                    audio[i] = channelData[Math.floor(i * ratio)];
-                }
-            }
+            const totalFrames = Math.floor((audio.length - FRAME_SIZE) / HOP_SIZE) + 1;
 
-            const numFrames = Math.floor((audio.length - FRAME_SIZE) / HOP_SIZE) + 1;
+            const frameBuffer = new Float32Array(FRAME_SIZE);
             const melSpec: number[][] = [];
 
-            for (let f = 0; f < numFrames; f++) {
-                const offset = f * HOP_SIZE;
-                const frame = new Float32Array(FRAME_SIZE);
-                for (let j = 0; j < FRAME_SIZE; j++) {
-                    frame[j] = audio[offset + j];
+            if (totalFrames <= PATCH_SIZE) {
+                for (let f = 0; f < totalFrames; f++) {
+                    frameBuffer.set(audio.subarray(f * HOP_SIZE, f * HOP_SIZE + FRAME_SIZE));
+                    const feature = essentiaExtractor.compute(frameBuffer);
+                    melSpec.push(feature.melSpectrum);
                 }
-
-                const feature = essentiaExtractor.compute(frame);
-                melSpec.push(feature.melSpectrum);
-            }
-
-            let frames = melSpec;
-            if (frames.length > PATCH_SIZE) {
-                const step = Math.floor(frames.length / PATCH_SIZE);
-                const selected: number[][] = [];
+            } else {
+                const step = totalFrames / PATCH_SIZE;
                 for (let i = 0; i < PATCH_SIZE; i++) {
-                    selected.push(frames[i * step]);
-                }
-                frames = selected;
-            } else if (frames.length < PATCH_SIZE) {
-                while (frames.length < PATCH_SIZE) {
-                    frames.push(new Array(96).fill(0));
+                    const f = Math.floor(i * step);
+                    frameBuffer.set(audio.subarray(f * HOP_SIZE, f * HOP_SIZE + FRAME_SIZE));
+                    const feature = essentiaExtractor.compute(frameBuffer);
+                    melSpec.push(feature.melSpectrum);
                 }
             }
 
-            const input = tf.tensor3d([frames]);
+            while (melSpec.length < PATCH_SIZE) {
+                melSpec.push(new Array(96).fill(0));
+            }
+
+            const input = tf.tensor3d([melSpec]);
             const results = genreModel.execute([input]);
             const predData = await (Array.isArray(results) ? results[0] : results).data();
 

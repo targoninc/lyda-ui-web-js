@@ -86,7 +86,6 @@ export async function predictGenresFromFile(audioFile: File): Promise<GenrePredi
                 w.postMessage({
                     type: "predict",
                     audioData,
-                    sampleRate: audioBuffer.sampleRate,
                 }, [audioData]);
             }).catch(() => { audioContext.close(); resolve([]); });
         }).catch(() => resolve([]));
