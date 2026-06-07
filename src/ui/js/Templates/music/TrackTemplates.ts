@@ -38,6 +38,7 @@ import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
 import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
 import {Comment} from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
+import {getSubgenreDisplay} from "@targoninc/lyda-shared/src/Enums/GenreLabels";
 import {InteractionTemplates} from "../InteractionTemplates.ts";
 import {get} from "../../Api/ApiClient.ts";
 import {UploadableTrack} from "../../Models/UploadableTrack.ts";
@@ -769,7 +770,7 @@ export class TrackTemplates {
                     button({
                         classes: ["rounded-max"],
                         onclick: () => navigate(`${RoutePath.explore}?tab=genres&genres=${encodeURIComponent(g)}`),
-                        text: `#${g}`,
+                        text: `#${g.includes("---") ? getSubgenreDisplay(g as any) : g}`,
                     }),
                 ),
             ).build();
