@@ -12,6 +12,8 @@ export interface ParentGenreGroupOptions {
     label?: StringOrSignal;
     suggestedGenres?: Signal<Genre[]>;
     analyzing?: Signal<boolean>;
+    listVisible?: Signal<boolean>;
+    afterSearchElement?: AnyElement;
 }
 
 export function ParentGenreGroup(options: ParentGenreGroupOptions) {
@@ -22,6 +24,8 @@ export function ParentGenreGroup(options: ParentGenreGroupOptions) {
         label = "Genre",
         suggestedGenres = signal<Genre[]>([]),
         analyzing = signal(false),
+        listVisible,
+        afterSearchElement,
     } = options;
 
     const expandedParents = signal<Set<DiscogsParentGenre>>(new Set());
@@ -66,9 +70,9 @@ export function ParentGenreGroup(options: ParentGenreGroupOptions) {
         .classes("parent-genre-group", "flex-v", "small-gap")
         .children(
             when(label, create("label").text(label).build()),
-            selectedGenresRow(selectedGenres, maxGenres, placeholder, searchQuery, removeGenre, analyzing),
+            selectedGenresRow(selectedGenres, maxGenres, placeholder, searchQuery, removeGenre, analyzing, afterSearchElement),
             suggestionsRow(suggestedGenres, addGenre),
-            genreGroupList(expandedParents, searchQuery, selectedGenres, addGenre, removeGenre, toggleParent, getFilteredGenres, hasMatchingGenres),
+            when(listVisible ?? signal(true), genreGroupList(expandedParents, searchQuery, selectedGenres, addGenre, removeGenre, toggleParent, getFilteredGenres, hasMatchingGenres)),
         ).build();
 }
 
@@ -79,6 +83,7 @@ function selectedGenresRow(
     searchQuery: Signal<string>,
     removeGenre: (g: Genre) => void,
     analyzing: Signal<boolean>,
+    afterSearchElement?: AnyElement,
 ) {
     return create("div").classes("flex", "flex-wrap", "small-gap", "align-children").children(
         signalMap(
@@ -105,6 +110,7 @@ function selectedGenresRow(
             compute(s => s.length >= maxGenres, selectedGenres),
             create("span").classes("color-dim", "small").text(t("MAX_GENRES_REACHED")).build(),
         ),
+        afterSearchElement,
         when(analyzing, () =>
             create("div").classes("flex", "align-children", "color-dim")
                 .children(

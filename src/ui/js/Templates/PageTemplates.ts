@@ -347,6 +347,7 @@ export class PageTemplates {
         const initialGenres = urlParams.get("genres")?.split(",").filter(g => g.trim()) ?? [];
         const selectedGenres$ = signal<Genre[]>(initialGenres as Genre[]);
         const reloadTrigger$ = signal(0);
+        const expanded = signal(false);
 
         selectedGenres$.subscribe(() => {
             const url = new URL(window.location.href);
@@ -366,6 +367,12 @@ export class PageTemplates {
             maxGenres: 10,
             placeholder: t("FILTER_GENRES"),
             label: t("GENRE"),
+            listVisible: expanded,
+            afterSearchElement: button({
+                icon: {icon: "list_arrow"},
+                classes: [compute((e): string => e ? "active" : "_", expanded)],
+                onclick: () => expanded.value = !expanded.value,
+            }),
         });
 
         const noGenres = compute(g => g.length === 0, selectedGenres$);
