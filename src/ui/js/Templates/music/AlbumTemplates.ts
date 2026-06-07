@@ -7,7 +7,7 @@ import { getPlayIcon, Util } from "../../Classes/Util.ts";
 import { createModal, Ui } from "../../Classes/Ui.ts";
 import { AnyNode, compute, create, InputType, signal, Signal, when } from "@targoninc/jess";
 import { navigate, Route } from "../../Routing/Router.ts";
-import { currentTrackId, currentUser, loadingAudio, playingFrom, playingHere } from "../../state.ts";
+import { currentTrackId, currentUser, loadingAudio, paymentsEnabled, playingFrom, playingHere } from "../../state.ts";
 import { InteractionStateManager } from "../../Classes/InteractionStateManager.ts";
 import { PageTemplates } from "../PageTemplates.ts";
 import { button, icon, input, textarea, toggle } from "@targoninc/jess-components";
@@ -388,7 +388,7 @@ export class AlbumTemplates {
                         await PlaylistActions.openAddToPlaylistModal(album, "album");
                     },
                 }),
-                when(canBuy, button({
+                when(canBuy && paymentsEnabled.value, button({
                     icon: { icon: "attach_money" },
                     text: t("BUY"),
                     onclick: () => {

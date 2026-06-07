@@ -27,6 +27,9 @@ export const navInitialized = signal(false);
 
 export const streamClients = signal<Record<number, IStreamClient>>({});
 
+export const paymentsEnabled = signal(true);
+Api.getPaymentsEnabled().then(r => paymentsEnabled.value = r?.enabled ?? false);
+
 export const currentUser = signal<User|null>(null);
 let cacheFetched = false;
 currentUser.subscribe(u => {

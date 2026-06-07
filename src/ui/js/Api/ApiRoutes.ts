@@ -239,6 +239,11 @@ export class ApiRoutes {
     static unbanIp = ApiRoutes.adminActions + "/unban-ip";
     // endregion
 
+    // region Config
+    private static config = ApiRoutes.base + "/config";
+    static getPaymentsEnabled = ApiRoutes.config + "/paymentsEnabled";
+    // endregion
+
     // region Taxes
     private static taxes = ApiRoutes.base + "/taxes";
     static getTaxinfo = ApiRoutes.taxes + "/taxinfo";

@@ -19,6 +19,7 @@ import {
     currentUser,
     loadingAudio,
     manualQueue,
+    paymentsEnabled,
     playingHere,
 } from "../../state.ts";
 import {InteractionStateManager} from "../../Classes/InteractionStateManager.ts";
@@ -458,7 +459,7 @@ export class TrackTemplates {
                                         horizontal(
                                             TrackTemplates.addToPlaylistButton(track),
                                             TrackTemplates.addToQueueButton(track),
-                                            when(trackData.canBuy, button({
+                                            when(trackData.canBuy && paymentsEnabled.value, button({
                                                 icon: {icon: "attach_money"},
                                                 text: t("BUY"),
                                                 onclick: () => {

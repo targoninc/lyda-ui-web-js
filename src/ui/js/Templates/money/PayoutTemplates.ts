@@ -15,6 +15,7 @@ import { yearAndMonthByOffset } from "../../Classes/Helpers/Date.ts";
 import { downloadFile } from "../../Classes/Util.ts";
 import { t } from "../../../locales";
 import { TextSize } from "../../Enums/TextSize.ts";
+import { paymentsEnabled } from "../../state.ts";
 
 const AVAILABLE_THRESHOLD_USD = 25;
 
@@ -25,7 +26,7 @@ export class PayoutTemplates {
         Api.getRoyaltyInfo()
            .then(ri => royaltyInfo.value = ri)
            .finally(() => royaltiesLoading.value = false);
-        const hasPayableRoyalties = compute(ri => ri && ri.personal.available && ri.personal.available >= AVAILABLE_THRESHOLD_USD, royaltyInfo);
+        const hasPayableRoyalties = compute((ri, pe) => pe && !!(ri && ri.personal.available && ri.personal.available >= AVAILABLE_THRESHOLD_USD), royaltyInfo, paymentsEnabled);
         const paypalMailExists$ = compute(ri => ri && ri.personal.paypalMail !== null, royaltyInfo);
         const hasTaxInfo$ = compute(ri => !!(ri && ri.personal.hasTaxInfo), royaltyInfo);
         const canRequestPayout$ = compute(ri => !!(ri && ri.personal.hasTaxInfo && ri.personal.paypalMail), royaltyInfo);

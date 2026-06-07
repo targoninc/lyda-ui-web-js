@@ -11,7 +11,7 @@ import { RoutePath } from "../../Routing/routes.ts";
 import { currency } from "../../Classes/Helpers/Num.ts";
 import { Time } from "../../Classes/Helpers/Time.ts";
 import { t } from "../../../locales";
-import { currentUser } from "../../state.ts";
+import { currentUser, paymentsEnabled } from "../../state.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { Util } from "../../Classes/Util.ts";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
@@ -116,7 +116,7 @@ export class SubscriptionTemplates {
     static option(currentSubscription: Signal<Subscription | null>, selectedOption: Signal<number | null>, cur: string, option: AvailableSubscription, providers: Signal<PaymentProvider[]>) {
         const active = compute(sub => sub && sub.subscription_id === option.id && sub.status === SubscriptionStatus.active, currentSubscription);
         const pending = compute(sub => sub && sub.subscription_id === option.id && sub.status === SubscriptionStatus.pending, currentSubscription);
-        const enabled = compute((a, p) => !a && !p, active, pending);
+        const enabled = compute((a, p, pe) => pe && !a && !p, active, pending, paymentsEnabled);
         const activeClass = compute((a): string => a ? "active" : "_", active);
         const pendingClass = compute((a): string => a ? "pending" : "_", pending);
         const isSelectedOption = compute(selected => selected === option.id, selectedOption);

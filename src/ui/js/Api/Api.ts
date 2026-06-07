@@ -927,6 +927,12 @@ export class Api {
 
     // endregion
 
+    // region Config
+    static async getPaymentsEnabled() {
+        return await get<{ enabled: boolean }>(ApiRoutes.getPaymentsEnabled);
+    }
+    // endregion
+
     // region Taxes
     static async getTaxinfo() {
         return await get<UserTaxinfo | null>(ApiRoutes.getTaxinfo);
