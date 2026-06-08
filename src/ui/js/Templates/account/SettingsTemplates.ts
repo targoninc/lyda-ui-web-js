@@ -48,6 +48,7 @@ import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 import {InteractionType} from "@targoninc/lyda-shared/src/Enums/InteractionType.ts";
 import {UserTaxinfo} from "@targoninc/lyda-shared/src/Models/db/lyda/UserTaxinfo.ts";
 import {SelectOption} from "@targoninc/jess-components/dist/jess-components/Types";
+import { StripeService } from "../../Services/StripeService.ts";
 
 export class SettingsTemplates {
     private static sectionId(heading: Signal<string>) {
@@ -1079,19 +1080,13 @@ export class SettingsTemplates {
 
     private static paymentSection(searchQuery$: Signal<string>) {
         const heading = t("PAYMENT_INFO");
-        const loading = signal(false);
-        const user = currentUser.value;
-        if (!user) {
-            return create("div").build();
-        }
-
-        const label = "PayPal account E-Mail address";
+        const searchText = t("STRIPE_CONNECT") + " Stripe";
 
         return compute(query => {
             const headingMatches = SettingsTemplates.matches(heading, query);
-            const inputMatches = SettingsTemplates.matches(label, query);
+            const textMatches = SettingsTemplates.matches(searchText, query);
 
-            if (!headingMatches && !inputMatches) {
+            if (!headingMatches && !textMatches) {
                 return nullElement();
             }
 
@@ -1099,21 +1094,98 @@ export class SettingsTemplates {
                 .classes("flex-v", "card")
                 .children(
                     SettingsTemplates.sectionHeading(heading),
-                    when(headingMatches || inputMatches, input<string>({
-                        type: InputType.text,
-                        name: "paypalMail",
-                        label: label,
-                        value: getUserSettingValue(user, UserSettings.paypalMail),
-                        onchange: value => {
-                            debounce("paypalMail", () => {
-                                loading.value = true;
-                                Api.updateUserSetting(UserSettings.paypalMail, value)
-                                    .finally(() => loading.value = false);
-                            }, 1000);
-                        },
-                    })),
+                    create("p").classes("color-dim", "small").text(t("STRIPE_PAYOUT_DESCRIPTION")).build(),
+                    SettingsTemplates.stripeConnectSection(),
                 );
         }, searchQuery$);
+    }
+
+    private static stripeConnectSection() {
+        const loading = signal(true);
+        const accountStatus = signal<{
+            connected: boolean;
+            stripeAccountId?: string;
+            onboardingComplete?: boolean;
+            chargesEnabled?: boolean;
+            payoutsEnabled?: boolean;
+            detailsSubmitted?: boolean;
+            country?: string;
+            pendingVerification?: string[];
+        } | null>(null);
+        const error = signal("");
+        const onboardingInProgress = signal(false);
+
+        const load = () => {
+            loading.value = true;
+            error.value = "";
+            StripeService.getAccountStatus()
+                .then(d => accountStatus.value = d)
+                .catch(e => error.value = String(e.message ?? e))
+                .finally(() => loading.value = false);
+        };
+        load();
+
+        return create("div").classes("flex-v", "small-gap").children(
+            when(loading, GenericTemplates.loadingSpinner()),
+            when(error, create("div").classes("flex-v", "small-gap").children(
+                create("span").classes("error").text(error).build(),
+                button({
+                    text: t("RETRY"),
+                    icon: { icon: "refresh" },
+                    onclick: () => load(),
+                }),
+            ).build()),
+            when(compute((s, l, e) => !l && !e, accountStatus, loading, error), create("div").classes("flex-v", "small-gap").children(
+                when(compute(s => s?.connected ?? false, accountStatus), create("div").classes("flex-v", "small-gap", "padded").children(
+                    create("span").classes("positive-text").text(t("STRIPE_ACCOUNT_CONNECTED")).build(),
+                    create("div").classes("flex", "flex-wrap", "small-gap").children(
+                        GenericTemplates.pill({
+                            icon: compute(s => s?.chargesEnabled ? "check_circle" : "pending", accountStatus),
+                            text: compute(s => s?.chargesEnabled ? t("CHARGES_ENABLED") : t("CHARGES_DISABLED"), accountStatus),
+                        }),
+                        GenericTemplates.pill({
+                            icon: compute(s => s?.payoutsEnabled ? "check_circle" : "pending", accountStatus),
+                            text: compute(s => s?.payoutsEnabled ? t("PAYOUTS_ENABLED") : t("PAYOUTS_DISABLED"), accountStatus),
+                        }),
+                    ).build(),
+                    when(compute(s => !s?.onboardingComplete && s?.connected, accountStatus),
+                        create("span").classes("warning", "small").text(t("STRIPE_ONBOARDING_PENDING")).build()),
+                    when(compute(s => !!(s?.pendingVerification?.length), accountStatus),
+                        create("span").classes("warning", "small")
+                            .text(compute(s => t("STRIPE_PENDING_VERIFICATION", s?.pendingVerification?.join(", ") ?? ""), accountStatus))
+                            .build()),
+                    button({
+                        text: t("REFRESH_STATUS"),
+                        icon: { icon: "refresh" },
+                        classes: ["small"],
+                        onclick: () => load(),
+                    }),
+                ).build()),
+                when(compute(s => s && !s.connected, accountStatus), create("div").classes("flex-v", "small-gap").children(
+                    when(compute(o => o, onboardingInProgress), GenericTemplates.loadingSpinner()),
+                    button({
+                        text: compute(o => o ? t("OPENING_ONBOARDING") : t("CONNECT_STRIPE_ACCOUNT"), onboardingInProgress),
+                        icon: { icon: "link" },
+                        classes: ["special"],
+                        disabled: onboardingInProgress,
+                        onclick: async () => {
+                            onboardingInProgress.value = true;
+                            try {
+                                const result = await StripeService.startOnboarding();
+                                if ("completed" in result && result.completed) {
+                                    notify(t("STRIPE_ONBOARDING_COMPLETE"), NotificationType.success);
+                                    load();
+                                }
+                            } catch {
+                                notify(t("STRIPE_ONBOARDING_FAILED"), NotificationType.error);
+                            } finally {
+                                onboardingInProgress.value = false;
+                            }
+                        },
+                    }),
+                ).build()),
+            ).build()),
+        ).build();
     }
 
     private static taxinfoSection(searchQuery$: Signal<string>) {

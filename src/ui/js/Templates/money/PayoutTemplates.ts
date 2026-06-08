@@ -6,16 +6,16 @@ import { RoyaltyInfo } from "@targoninc/lyda-shared/src/Models/RoyaltyInfo";
 import { button } from "@targoninc/jess-components";
 import { navigate, reload } from "../../Routing/Router.ts";
 import { RoutePath } from "../../Routing/routes.ts";
-import { notify, Ui } from "../../Classes/Ui.ts";
-import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
+import { notify } from "../../Classes/Ui.ts";
 import { NotificationType } from "../../Enums/NotificationType.ts";
-import { anonymize } from "../../Classes/Helpers/CustomText.ts";
 import { ChartTemplates } from "../generic/ChartTemplates.ts";
 import { yearAndMonthByOffset } from "../../Classes/Helpers/Date.ts";
 import { downloadFile } from "../../Classes/Util.ts";
 import { t } from "../../../locales";
 import { TextSize } from "../../Enums/TextSize.ts";
 import { paymentsEnabled } from "../../state.ts";
+import { StripeService } from "../../Services/StripeService.ts";
+import { StripeConnectTemplates } from "./StripeConnectTemplates.ts";
 
 const AVAILABLE_THRESHOLD_USD = 25;
 
@@ -23,17 +23,41 @@ export class PayoutTemplates {
     static artistRoyaltyActions() {
         const royaltyInfo = signal<RoyaltyInfo | null>(null);
         const royaltiesLoading = signal(true);
-        Api.getRoyaltyInfo()
-           .then(ri => royaltyInfo.value = ri)
-           .finally(() => royaltiesLoading.value = false);
-        const hasPayableRoyalties = compute((ri, pe) => pe && !!(ri && ri.personal.available && ri.personal.available >= AVAILABLE_THRESHOLD_USD), royaltyInfo, paymentsEnabled);
-        const paypalMailExists$ = compute(ri => ri && ri.personal.paypalMail !== null, royaltyInfo);
+        const stripeStatus = signal<{ connected: boolean; payoutsEnabled?: boolean } | null>(null);
+        const stripeLoading = signal(true);
+        const requestLoading = signal(false);
+
+        const loadRoyalties = () => {
+            royaltiesLoading.value = true;
+            Api.getRoyaltyInfo()
+                .then(ri => royaltyInfo.value = ri)
+                .finally(() => royaltiesLoading.value = false);
+        };
+        const loadStripe = () => {
+            stripeLoading.value = true;
+            StripeService.getAccountStatus()
+                .then(d => stripeStatus.value = d)
+                .catch(() => stripeStatus.value = { connected: false })
+                .finally(() => stripeLoading.value = false);
+        };
+        loadRoyalties();
+        loadStripe();
+
+        const hasPayableRoyalties = compute((ri, pe, sl) => pe && !sl && !!(ri && ri.personal.available && ri.personal.available >= AVAILABLE_THRESHOLD_USD), royaltyInfo, paymentsEnabled, stripeLoading);
         const hasTaxInfo$ = compute(ri => !!(ri && ri.personal.hasTaxInfo), royaltyInfo);
-        const canRequestPayout$ = compute(ri => !!(ri && ri.personal.hasTaxInfo && ri.personal.paypalMail), royaltyInfo);
+        const stripeConnected$ = compute(s => s?.connected ?? false, stripeStatus);
+        const stripePayoutsEnabled$ = compute(s => s?.payoutsEnabled ?? false, stripeStatus);
+        const canRequestPayout$ = compute((ri, sc, spe, sl) => {
+            if (!ri || !ri.personal.hasTaxInfo || sl) return false;
+            if (sc && spe) return true;
+            return false;
+        }, royaltyInfo, stripeConnected$, stripePayoutsEnabled$, stripeLoading);
 
         return create("div")
             .classes("flex-v", "card")
             .children(
+                StripeConnectTemplates.accountStatusCard(),
+                StripeConnectTemplates.balanceCard(),
                 compute(ri => ri ? PayoutTemplates.royaltyInfo(ri) : nullElement(), royaltyInfo),
                 when(royaltiesLoading, GenericTemplates.loadingSpinner()),
                 when(hasTaxInfo$, create("a")
@@ -45,6 +69,11 @@ export class PayoutTemplates {
                         setTimeout(() => document.getElementById("tax-info-section")?.scrollIntoView({ behavior: "smooth" }), 500);
                     })
                     .build(), true),
+                when(stripeLoading, GenericTemplates.loadingSpinner()),
+                when(compute((sc, sl) => !sc && !sl, stripeConnected$, stripeLoading),
+                    create("span").classes("color-dim").text(t("CONNECT_STRIPE_TO_RECEIVE_PAYOUTS")).build()),
+                when(compute((sc, spe, sl) => sc && !spe && !sl, stripeConnected$, stripePayoutsEnabled$, stripeLoading),
+                    create("span").classes("warning").text(t("STRIPE_PAYOUTS_DISABLED_MSG")).build()),
                 create("div")
                     .classes("flex")
                     .children(
@@ -53,51 +82,40 @@ export class PayoutTemplates {
                             icon: { icon: "payments" },
                             onclick: () => navigate(RoutePath.transactions),
                         }),
-                        when(hasPayableRoyalties, create("div")
-                            .classes("flex")
-                            .children(
-                                when(paypalMailExists$, button({
-                                    text: t("SET_PAYPAL_MAIL"),
-                                    icon: { icon: "mail" },
-                                    classes: ["positive"],
-                                    onclick: async () => {
-                                        await Ui.getTextInputModal(t("SET_PAYPAL_MAIL"), t("ACCOUNT_RECEIVE_PAYMENTS"), "", t("SAVE"), t("CANCEL"), async (address: string) => {
-                                            await Api.updateUserSetting(UserSettings.paypalMail, address);
-                                            notify(t("PAYPAL_MAIL_SET"), NotificationType.success);
-                                            paypalMailExists$.value = true;
-                                        }, () => {
-                                        }, "mail");
-                                    },
-                                }), true),
-                                when(paypalMailExists$, button({
-                                    text: t("REMOVE_PAYPAL_MAIL"),
-                                    title: t("WONT_RECEIVE_PAYMENTS_WITHOUT_MAIL"),
-                                    icon: { icon: "unsubscribe" },
-                                    classes: ["negative"],
-                                    onclick: async () => {
-                                        await Ui.getConfirmationModal(t("REMOVE_PAYPAL_MAIL"), t("SURE_DELETE_PAYPAL_MAIL"), t("YES"), t("NO"), async () => {
-                                            await Api.updateUserSetting(UserSettings.paypalMail, "");
-                                            notify(`${t("PAYPAL_MAIL_REMOVED")}`, NotificationType.success);
-                                            paypalMailExists$.value = false;
-                                        }, () => {
-                                        }, "warning");
-                                    },
-                                })),
-                                when(canRequestPayout$, button({
-                                    text: compute(ri => ri ? `${t("REQUEST_PAYOUT_TO", anonymize(ri.personal.paypalMail, 2, 8))}` : "", royaltyInfo),
-                                    icon: { icon: "mintmark" },
-                                    classes: ["positive"],
-                                    onclick: async () => {
-                                        await Ui.getConfirmationModal(t("REQUEST_PAYOUT"), t("SURE_REQUEST_PAYOUT"), t("YES"), t("NO"), async () => {
+                        when(canRequestPayout$, button({
+                            text: t("REQUEST_PAYOUT"),
+                            icon: { icon: "mintmark" },
+                            classes: ["positive"],
+                            disabled: requestLoading,
+                            onclick: async () => {
+                                await Ui.getConfirmationModal(
+                                    t("REQUEST_PAYOUT"),
+                                    t("SURE_REQUEST_PAYOUT"),
+                                    t("YES"), t("NO"),
+                                    async () => {
+                                        requestLoading.value = true;
+                                        try {
                                             await Api.requestPayout();
-                                            notify(`${t("PAYOUT_REQUESTED")}`, NotificationType.success);
+                                            notify(t("PAYOUT_REQUESTED"), NotificationType.success);
                                             reload();
-                                        }, () => {
-                                        }, "wallet");
+                                        } catch (e: any) {
+                                            notify(t("PAYOUT_FAILED"), NotificationType.error);
+                                        } finally {
+                                            requestLoading.value = false;
+                                        }
                                     },
-                                })),
-                            ).build()),
+                                    () => {},
+                                    "wallet"
+                                );
+                            },
+                        })),
+                        when(requestLoading, GenericTemplates.loadingSpinner()),
                     ).build(),
+                when(compute((ri, pe) => pe && !!(ri && ri.personal.available && ri.personal.available < AVAILABLE_THRESHOLD_USD), royaltyInfo, paymentsEnabled),
+                    create("span")
+                        .classes("color-dim", "small")
+                        .text(compute(ri => ri ? t("PAYOUT_THRESHOLD_NOT_MET", currency(AVAILABLE_THRESHOLD_USD, "USD")) : "", royaltyInfo))
+                        .build()),
             ).build();
     }
 
@@ -175,6 +193,7 @@ export class PayoutTemplates {
         const month = compute(yearAndMonthByOffset, offset);
         const types = ["excel", "csv", "json"];
         const selectedTypeIndex = signal(0);
+        const exportLoading = signal(false);
 
         return create("div")
             .classes("flex-v", "card")
@@ -195,14 +214,22 @@ export class PayoutTemplates {
                                 button({
                                     text: t("DOWNLOAD"),
                                     icon: { icon: "download" },
+                                    disabled: exportLoading,
                                     onclick: async () => {
-                                        const royalties = await Api.getRoyaltiesForExport(month.value, types[selectedTypeIndex.value]);
-                                        if (royalties) {
-                                            let extension = types[selectedTypeIndex.value];
-                                            if (extension === "excel") {
-                                                extension = "xlsx";
+                                        exportLoading.value = true;
+                                        try {
+                                            const royalties = await Api.getRoyaltiesForExport(month.value, types[selectedTypeIndex.value]);
+                                            if (royalties) {
+                                                let extension = types[selectedTypeIndex.value];
+                                                if (extension === "excel") {
+                                                    extension = "xlsx";
+                                                }
+                                                downloadFile(`Lyda Royalties ${month.value.year}-${month.value.month}.${extension}`, royalties);
                                             }
-                                            downloadFile(`Lyda Royalties ${month.value.year}-${month.value.month}.${extension}`, royalties);
+                                        } catch {
+                                            notify(t("EXPORT_FAILED"), NotificationType.error);
+                                        } finally {
+                                            exportLoading.value = false;
                                         }
                                     },
                                 }),

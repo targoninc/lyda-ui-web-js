@@ -24,4 +24,7 @@ export const ga: Translation = {
     ANALYZING: "Ag anailís...",
     GENRE_PREDICTION_FAILED: "Theip ar thuarascáil an genre",
     CANNOT_PLAY_TRACK: "Ní féidir an rian seo a sheinm faoi láthair",
+    AVAILABLE: "Ar fáil",
+    CONNECT_STRIPE_ACCOUNT: "Ceangail cuntas Stripe",
+    STRIPE_CONNECT: "Stripe Connect",
 };

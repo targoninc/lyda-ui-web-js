@@ -215,7 +215,7 @@ export class SubscriptionTemplates {
                                     .classes("color-dim")
                                     .text(optionMessage)
                                     .build()),
-                                when(isSelectedOption, SubscriptionTemplates.paypalButton("paypal-button-" + option.id)),
+                                when(compute((selected, p) => selected && p.includes(PaymentProvider.paypal), isSelectedOption, providers), SubscriptionTemplates.paypalButton("paypal-button-" + option.id)),
                                 when(compute((selected, p) => selected && p.includes(PaymentProvider.stripe), isSelectedOption, providers),
                                     button({
                                         text: "Pay with Stripe",

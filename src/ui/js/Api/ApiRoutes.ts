@@ -65,6 +65,13 @@ export class ApiRoutes {
     static unsubscribe = ApiRoutes.subscriptionActions + "/unsubscribe";
     // endregion
 
+    // region Stripe Connect
+    private static stripeConnect = ApiRoutes.base + "/stripe/connect";
+    static stripeOnboarding = ApiRoutes.stripeConnect + "/onboard";
+    static stripeAccount = ApiRoutes.stripeConnect + "/account";
+    static stripeBalance = ApiRoutes.stripeConnect + "/balance";
+    // endregion
+
     // region Media
     private static media = ApiRoutes.base + "/media";
     static uploadMedia = ApiRoutes.media + "/upload";
@@ -242,6 +249,7 @@ export class ApiRoutes {
     // region Config
     private static config = ApiRoutes.base + "/config";
     static getPaymentsEnabled = ApiRoutes.config + "/paymentsEnabled";
+    static getStripePublicKey = ApiRoutes.config + "/stripePublicKey";
     // endregion
 
     // region Taxes

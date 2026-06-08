@@ -1,8 +1,7 @@
 import { notify, Ui } from "../Classes/Ui.ts";
 import { Signal } from "@targoninc/jess";
-import {
+import type {
     CreateSubscriptionActions,
-    loadScript,
     OnApproveActions,
     OnApproveData,
     PayPalButtonsComponentOptions,
@@ -15,15 +14,10 @@ import { PaymentProvider } from "@targoninc/lyda-shared/src/Enums/PaymentProvide
 import { StripeService } from "../Services/StripeService.ts";
 import { t } from "../../locales";
 
-const clientId = "AUw6bB-HQTIfqy5fhk-s5wZOaEQdaCIjRnCyIC3WDCRxVKc9Qvz1c6xLw7etCit1CD1qSHY5Pv-3xgQN";
-const paypal = (await loadScript({
-    clientId,
-    vault: true,
-    intent: "subscription",
-}));
-if (!paypal) {
-    console.warn("PayPal SDK could not be initialized");
-}
+let paypalProvidersAvailable = false;
+Api.getPaymentProviders().then(p => {
+    paypalProvidersAvailable = p?.includes(PaymentProvider.paypal) ?? false;
+}).catch(() => paypalProvidersAvailable = false);
 
 export class SubscriptionActions {
     static async startStripeSubscription(id: number, subPlanId: string, optionMessage: Signal<string>) {
@@ -37,8 +31,12 @@ export class SubscriptionActions {
     }
 
     static async startSubscription(id: number, subPlanId: string, optionMessage: Signal<string>) {
+        if (!paypalProvidersAvailable) {
+            console.warn("PayPal is not available as a payment provider");
+            return;
+        }
         SubscriptionActions.initializeDomForSubStart(id, optionMessage);
-        SubscriptionActions.initializePaypalButton(subPlanId, "paypal-button-" + id, optionMessage, async (paypalData: any) => {
+        await SubscriptionActions.initializePaypalButton(subPlanId, "paypal-button-" + id, optionMessage, async (paypalData: any) => {
             await SubscriptionActions.subscriptionSuccess({
                 id,
                 planId: subPlanId,
@@ -58,8 +56,21 @@ export class SubscriptionActions {
         optionMessage.value = `${t("CLICK_BUTTON_BELOW_START_SUBSCRIPTION")}`;
     }
 
-    static initializePaypalButton(plan_id: string, button_id: string, message: Signal<string>, onApprove: Function) {
-        const buttons = paypal?.Buttons!(<PayPalButtonsComponentOptions>{
+    static async initializePaypalButton(plan_id: string, button_id: string, message: Signal<string>, onApprove: Function) {
+        if (!paypalProvidersAvailable) {
+            return;
+        }
+        const { loadScript } = await import("@paypal/paypal-js");
+        const paypal = await loadScript({
+            clientId: "AUw6bB-HQTIfqy5fhk-s5wZOaEQdaCIjRnCyIC3WDCRxVKc9Qvz1c6xLw7etCit1CD1qSHY5Pv-3xgQN",
+            vault: true,
+            intent: "subscription",
+        });
+        if (!paypal?.Buttons) {
+            console.warn("PayPal SDK could not be initialized");
+            return;
+        }
+        const buttons = paypal.Buttons!(<PayPalButtonsComponentOptions>{
             createSubscription(_: Record<string, unknown>, actions: CreateSubscriptionActions) {
                 return actions.subscription.create({
                     "plan_id": plan_id

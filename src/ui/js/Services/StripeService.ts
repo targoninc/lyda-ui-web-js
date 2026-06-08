@@ -1,13 +1,36 @@
 import { loadStripe, Stripe } from "@stripe/stripe-js";
 import { Api } from "../Api/Api.ts";
+import { ApiRoutes } from "../Api/ApiRoutes.ts";
 import { PaymentProvider } from "@targoninc/lyda-shared/src/Enums/PaymentProvider";
 
 export class StripeService {
     private static stripe: Stripe | null = null;
-    private static publicKey: string = "pk_test_51P2UqfP2UqfP2UqfP2UqfP2UqfP2UqfP2UqfP2UqfP2UqfP2UqfP2UqfP2UqfP2UqfP2Uqf"; // Replace with your key
+    private static publicKey: string = "";
+
+    static async init() {
+        try {
+            const res = await fetch(ApiRoutes.getStripePublicKey);
+            const data = await res.json();
+            if (data?.publicKey) {
+                this.publicKey = data.publicKey;
+            }
+        } catch {
+            console.warn("Stripe public key not available");
+        }
+    }
+
+    static setPublicKey(key: string) {
+        this.publicKey = key;
+    }
 
     static async getStripe() {
         if (!this.stripe) {
+            if (!this.publicKey) {
+                await this.init();
+            }
+            if (!this.publicKey) {
+                throw new Error("Stripe public key not configured");
+            }
             this.stripe = await loadStripe(this.publicKey);
         }
         return this.stripe;
@@ -17,7 +40,6 @@ export class StripeService {
         const stripe = await this.getStripe();
         if (!stripe) throw new Error("Stripe failed to load");
 
-        // Step 1: Initialize payment on backend to get client secret
         const initResponse = await Api.createOrder({
             type,
             entityId,
@@ -35,7 +57,6 @@ export class StripeService {
             throw new Error("Missing client secret from backend");
         }
 
-        // Step 2: Confirm payment on client
         const result = await stripe.confirmCardPayment(clientSecret);
 
         if (result.error) {
@@ -43,7 +64,6 @@ export class StripeService {
         }
 
         if (result.paymentIntent?.status === "succeeded") {
-            // Step 3: Notify backend that payment is complete
             await Api.createOrder({
                 type,
                 entityId,
@@ -57,7 +77,6 @@ export class StripeService {
     }
 
     static async subscribe(id: number, planId: string, targetUserId?: number) {
-        // planId is the external plan/price id (e.g. Stripe Price ID)
         try {
             const response = await Api.subscribe({
                 id,
@@ -75,5 +94,48 @@ export class StripeService {
             console.error("Stripe subscription failed", e);
             throw e;
         }
+    }
+
+    static async startOnboarding(): Promise<{ url: string } | { completed: boolean }> {
+        const response = await Api.get<{
+            url?: string;
+            completed: boolean;
+            stripeAccountId?: string;
+            chargesEnabled?: boolean;
+            payoutsEnabled?: boolean;
+            detailsSubmitted?: boolean;
+        }>(ApiRoutes.stripeOnboarding);
+
+        if (!response) {
+            throw new Error("Failed to start Stripe onboarding");
+        }
+
+        if (response.url) {
+            window.location.href = response.url;
+            return { url: response.url };
+        }
+
+        return { completed: response.completed };
+    }
+
+    static async getAccountStatus(): Promise<{
+        connected: boolean;
+        stripeAccountId?: string;
+        onboardingComplete?: boolean;
+        chargesEnabled?: boolean;
+        payoutsEnabled?: boolean;
+        detailsSubmitted?: boolean;
+        country?: string;
+        pendingVerification?: string[];
+    }> {
+        return await Api.get(ApiRoutes.stripeAccount) ?? { connected: false };
+    }
+
+    static async getBalance(): Promise<{
+        available: number;
+        pending: number;
+        currency: string;
+    }> {
+        return await Api.get(ApiRoutes.stripeBalance) ?? { available: 0, pending: 0, currency: "eur" };
     }
 }
