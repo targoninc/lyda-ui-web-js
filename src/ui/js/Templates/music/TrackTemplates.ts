@@ -12,7 +12,7 @@ import {Images} from "../../Enums/Images.ts";
 import {TrackEditTemplates} from "./TrackEditTemplates.ts";
 import {CustomText} from "../../Classes/Helpers/CustomText.ts";
 import {navigate} from "../../Routing/Router.ts";
-import {AnyElement, compute, create, Signal, signal, signalMap, when,} from "@targoninc/jess";
+import {AnyElement, compute, create, nullElement, Signal, signal, signalMap, when,} from "@targoninc/jess";
 import {
     currentTrackId,
     currentTrackPosition,
@@ -588,8 +588,12 @@ export class TrackTemplates {
             id: track.id,
             disabled: loadingAudio,
             onclick: async () => {
-                PlayManager.addStreamClientIfNotExists(track.id, track.length);
-                await PlayManager.togglePlayAsync(track.id);
+                if (isPlaying.value) {
+                    await PlayManager.pauseAsync(track.id);
+                } else {
+                    PlayManager.addStreamClientIfNotExists(track.id, track.length);
+                    await PlayManager.startAsync(track.id);
+                }
             },
         });
     }
@@ -760,7 +764,7 @@ export class TrackTemplates {
     private static genreTags(track: Track) {
         const genres = track.genre ? track.genre.split(",").map(g => g.trim()).filter(g => g) : [];
         if (genres.length === 0) {
-            return null;
+            return nullElement();
         }
 
         return create("div")
