@@ -37,24 +37,30 @@ export class StreamClient implements IStreamClient {
     }
 
     public async startAsync(fromBeginning: boolean = false): Promise<void> {
-        await this.ensureAudioContext();
+        try {
+            await this.ensureAudioContext();
 
-        if (fromBeginning) {
-            this.offset = 0;
-            currentTrackPosition.value = { relative: 0, absolute: 0 };
+            if (fromBeginning) {
+                this.offset = 0;
+                currentTrackPosition.value = { relative: 0, absolute: 0 };
+            }
+
+            // If not loaded yet, start loading/decoding
+            if (!this.buffer) {
+                this.loadingPromise ??= this.loadAndDecode();
+                await this.loadingPromise;
+            }
+
+            if (this.playing) {
+                return;
+            }
+
+            this.startFromOffset(this.offset);
+        } catch (e) {
+            console.error("[StreamClient] startAsync failed:", e);
+            this.loadingPromise = undefined;
+            throw e;
         }
-
-        // If not loaded yet, start loading/decoding
-        if (!this.buffer) {
-            this.loadingPromise ??= this.loadAndDecode();
-            await this.loadingPromise;
-        }
-
-        if (this.playing) {
-            return;
-        }
-
-        this.startFromOffset(this.offset);
     }
 
     public stopAsync(): void {
@@ -101,22 +107,28 @@ export class StreamClient implements IStreamClient {
     }
 
     public async scrubTo(time: number, relative: boolean): Promise<void> {
-        await this.ensureAudioContext();
+        try {
+            await this.ensureAudioContext();
 
-        // Interpret `relative` as "time is a 0..1 fraction of duration"
-        const targetSeconds = relative
-            ? (this.duration > 0 ? time * this.duration : 0)
-            : time;
-        const target = this.clampTime(targetSeconds);
+            // Interpret `relative` as "time is a 0..1 fraction of duration"
+            const targetSeconds = relative
+                ? (this.duration > 0 ? time * this.duration : 0)
+                : time;
+            const target = this.clampTime(targetSeconds);
 
-        this.stopSourceOnly();
-        this.offset = target;
+            this.stopSourceOnly();
+            this.offset = target;
 
-        if (!this.buffer) {
-            this.loadingPromise ??= this.loadAndDecode();
-            await this.loadingPromise;
+            if (!this.buffer) {
+                this.loadingPromise ??= this.loadAndDecode();
+                await this.loadingPromise;
+            }
+            this.startFromOffset(this.offset);
+        } catch (e) {
+            console.error("[StreamClient] scrubTo failed:", e);
+            this.loadingPromise = undefined;
+            throw e;
         }
-        this.startFromOffset(this.offset);
     }
 
     public getCurrentTime(relative: boolean): number {

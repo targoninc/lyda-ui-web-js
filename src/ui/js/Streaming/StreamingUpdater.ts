@@ -23,9 +23,12 @@ export class StreamingUpdater {
     }
 
     static updateScrubber(id: number) {
-        const currentTime = PlayManager.getCurrentTime(id);
         const streamClient = PlayManager.getStreamClient(id);
-        if (streamClient && streamClient.playing) {
+        if (!streamClient) {
+            return;
+        }
+        const currentTime = PlayManager.getCurrentTime(id);
+        if (streamClient.playing) {
             currentTrackPosition.value = currentTime;
         }
 

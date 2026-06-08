@@ -668,4 +668,5 @@ export const de: Translation = {
     REPORTS_COUNT: (count: number) => `${count} Meldung${count === 1 ? "" : "en"}`,
     REPORTS_FOR_COMMENT: "Meldungen für Kommentar",
     REPORT_REASON: (reason: string) => `Grund: ${reason}`,
+    CANNOT_PLAY_TRACK: "Dieser Track kann derzeit nicht abgespielt werden",
 };

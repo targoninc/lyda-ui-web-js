@@ -23,4 +23,5 @@ export const ga: Translation = {
     MAX_GENRES_REACHED: "Uasmhéid na n-genre bainte amach",
     ANALYZING: "Ag anailís...",
     GENRE_PREDICTION_FAILED: "Theip ar thuarascáil an genre",
+    CANNOT_PLAY_TRACK: "Ní féidir an rian seo a sheinm faoi láthair",
 };

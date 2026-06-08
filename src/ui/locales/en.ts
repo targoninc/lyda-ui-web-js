@@ -683,4 +683,5 @@ export const en = {
     FILTER_GENRES: "Filter genres...",
     MAX_GENRES_REACHED: "Maximum number of genres reached",
     SELECT_GENRES_TO_EXPLORE: "Select genres above to explore tracks",
+    CANNOT_PLAY_TRACK: "This track can't be played currently",
 } satisfies BaseTranslation;

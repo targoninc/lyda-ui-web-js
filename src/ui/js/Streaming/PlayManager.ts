@@ -1,9 +1,9 @@
-import { LydaCache } from "../Cache/LydaCache.ts";
-import { StreamingUpdater } from "./StreamingUpdater.ts";
-import { QueueManager } from "./QueueManager.ts";
-import { StreamClient } from "./StreamClient.ts";
+import {LydaCache} from "../Cache/LydaCache.ts";
+import {StreamingUpdater} from "./StreamingUpdater.ts";
+import {QueueManager} from "./QueueManager.ts";
+import {StreamClient} from "./StreamClient.ts";
 import {target, userHasSettingValue, Util} from "../Classes/Util.ts";
-import { ApiRoutes } from "../Api/ApiRoutes.ts";
+import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {
     currentQuality,
     currentSecretCode,
@@ -18,18 +18,21 @@ import {
     trackInfo,
     volume,
 } from "../state.ts";
-import { StreamingBroadcaster, StreamingEvent } from "./StreamingBroadcaster.ts";
-import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom";
-import { LoopMode } from "@targoninc/lyda-shared/src/Enums/LoopMode";
-import { TrackPosition } from "@targoninc/lyda-shared/src/Models/TrackPosition";
-import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
-import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
-import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
-import { get } from "../Api/ApiClient.ts";
-import { IStreamClient } from "./IStreamClient.ts";
-import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
+import {StreamingBroadcaster, StreamingEvent} from "./StreamingBroadcaster.ts";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {PlayingFrom} from "@targoninc/lyda-shared/src/Models/PlayingFrom";
+import {LoopMode} from "@targoninc/lyda-shared/src/Enums/LoopMode";
+import {TrackPosition} from "@targoninc/lyda-shared/src/Models/TrackPosition";
+import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import {UserSettings} from "@targoninc/lyda-shared/src/Enums/UserSettings";
+import {get} from "../Api/ApiClient.ts";
+import {IStreamClient} from "./IStreamClient.ts";
+import {FeedType} from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 import {FeedItem} from "../Models/FeedItem.ts";
+import {notify} from "../Classes/Ui.ts";
+import {t} from "../../locales";
+import {NotificationType} from "../Enums/NotificationType.ts";
 
 export class PlayManager {
     static async playCheck(track: Track) {
@@ -244,7 +247,14 @@ export class PlayManager {
             await PlayManager.pauseAsync(id);
         } else {
             await PlayManager.stopAllAsync();
-            await streamClient.startAsync();
+            try {
+                await streamClient.startAsync();
+            } catch (e) {
+                console.error("[PlayManager] togglePlayAsync failed:", e);
+                notify(t("CANNOT_PLAY_TRACK"), NotificationType.error);
+                PlayManager.removeStreamClient(id);
+                return;
+            }
             PlayManager.afterStart(id);
             await StreamingUpdater.updatePlayState();
         }
@@ -286,7 +296,14 @@ export class PlayManager {
         const streamClient = PlayManager.addStreamClientIfNotExists(id, d.track.length);
         PlayManager.registerOnEnded(id, streamClient);
 
-        await streamClient.startAsync(fromBeginning);
+        try {
+            await streamClient.startAsync(fromBeginning);
+        } catch (e) {
+            console.error("[PlayManager] startAsync failed:", e);
+            notify(t("CANNOT_PLAY_TRACK"), NotificationType.error);
+            PlayManager.removeStreamClient(id);
+            return;
+        }
         PlayManager.afterStart(id);
         await StreamingUpdater.updatePlayState();
     }
@@ -387,6 +404,9 @@ export class PlayManager {
 
     static getCurrentTime(id: number): TrackPosition {
         const streamClient = PlayManager.getStreamClient(id);
+        if (!streamClient) {
+            return { relative: 0, absolute: 0 };
+        }
         const trackPosition = {
             relative: streamClient.getCurrentTime(true),
             absolute: streamClient.getCurrentTime(false)
