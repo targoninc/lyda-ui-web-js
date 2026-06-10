@@ -563,13 +563,13 @@ label {
 
 .corner-check {
     background: var(--green);
-    border-radius: 50%;
+    border-radius: var(--gap);
     width: 16px;
     height: 16px;
     position: absolute;
     top: 0;
     right: 0;
-    transform: translateX(50%) translateY(-50%);
+    transform: translateX(-8px) translateY(8px);
     padding: calc(var(--base-padding) * .5);
     z-index: 2;
 }
