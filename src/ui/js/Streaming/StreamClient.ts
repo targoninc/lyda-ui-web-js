@@ -182,8 +182,16 @@ export class StreamClient implements IStreamClient {
 
     private async ensureAudioContext(): Promise<void> {
         if (!this.ctx) {
-            this.ctx = new AudioContext();
-            await this.ctx.resume().catch(() => {});
+            try {
+                this.ctx = new AudioContext();
+                await this.ctx.resume().catch(() => {});
+            } catch {
+                this.ctx = undefined;
+            }
+        }
+
+        if (!this.ctx) {
+            throw new Error("Failed to create AudioContext");
         }
 
         if (!this.gain) {

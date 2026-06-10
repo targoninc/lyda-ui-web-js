@@ -10,6 +10,7 @@ import {
     currentTrackId,
     currentTrackPosition,
     history,
+    loadingAudio,
     loopMode,
     muted,
     playingFrom,
@@ -238,7 +239,7 @@ export class PlayManager {
     }
 
     static async togglePlayAsync(id: number) {
-        const streamClient = PlayManager.getStreamClient(id);
+        let streamClient = PlayManager.getStreamClient(id);
         if (streamClient === undefined) {
             return;
         }
@@ -246,21 +247,24 @@ export class PlayManager {
         if (streamClient.playing) {
             await PlayManager.pauseAsync(id);
         } else {
-            await PlayManager.stopAllAsync();
+            loadingAudio.value = true;
             try {
                 await streamClient.startAsync();
             } catch (e) {
+                loadingAudio.value = false;
                 console.error("[PlayManager] togglePlayAsync failed:", e);
                 notify(t("CANNOT_PLAY_TRACK"), NotificationType.error);
                 PlayManager.removeStreamClient(id);
                 return;
             }
+            loadingAudio.value = false;
             PlayManager.afterStart(id);
             await StreamingUpdater.updatePlayState();
         }
     }
 
     static async startAsync(id: number, fromBeginning: boolean = false, force: boolean = false) {
+        loadingAudio.value = true;
         await PlayManager.stopAllAsync();
 
         if (id !== currentTrackId.value || force) {
@@ -299,11 +303,13 @@ export class PlayManager {
         try {
             await streamClient.startAsync(fromBeginning);
         } catch (e) {
+            loadingAudio.value = false;
             console.error("[PlayManager] startAsync failed:", e);
             notify(t("CANNOT_PLAY_TRACK"), NotificationType.error);
             PlayManager.removeStreamClient(id);
             return;
         }
+        loadingAudio.value = false;
         PlayManager.afterStart(id);
         await StreamingUpdater.updatePlayState();
     }
@@ -396,6 +402,9 @@ export class PlayManager {
 
         //await PlayManager.stopAllAsync(id);
         const streamClient = PlayManager.getStreamClient(id);
+        if (!streamClient) {
+            return;
+        }
         await streamClient.scrubTo(value, true);
 
         StreamingUpdater.updateScrubber(id);
@@ -447,6 +456,11 @@ export class PlayManager {
 
     static async setLoudnessFromElement(e: any) {
         const value = 1 - (e.offsetY / e.target.offsetHeight);
+        await PlayManager.setLoudness(value);
+    }
+
+    static async setLoudnessFromHorizontalElement(e: any) {
+        const value = e.offsetX / e.target.offsetWidth;
         await PlayManager.setLoudness(value);
     }
 

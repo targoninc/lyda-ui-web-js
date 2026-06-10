@@ -590,6 +590,8 @@ export class TrackTemplates {
             onclick: async () => {
                 if (isPlaying.value) {
                     await PlayManager.pauseAsync(track.id);
+                } else if (currentTrackId.value === track.id) {
+                    await PlayManager.togglePlayAsync(track.id);
                 } else {
                     PlayManager.addStreamClientIfNotExists(track.id, track.length);
                     await PlayManager.startAsync(track.id);

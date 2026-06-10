@@ -489,6 +489,52 @@ label {
     position: relative;
 }
 
+.horizontal-volume-slider {
+    gap: 8px;
+    padding: 4px 0;
+}
+
+.horizontal-volume-button {
+    flex-shrink: 0;
+}
+
+.horizontal-volume-track {
+    height: 24px;
+    cursor: pointer;
+    position: relative;
+}
+
+.horizontal-volume-bar {
+    background: var(--bg-3);
+    position: absolute;
+    height: 6px;
+    width: 100%;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    border: 1px solid var(--border);
+}
+
+.horizontal-volume-fill {
+    background: var(--fg-0);
+    position: absolute;
+    height: 6px;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+}
+
+.horizontal-volume-head {
+    width: 14px;
+    height: 14px;
+    background: var(--fg-0);
+    border-radius: 50%;
+    z-index: 1;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%) translateX(-50%);
+}
+
 #permanent-player {
     justify-content: center;
     align-items: center;

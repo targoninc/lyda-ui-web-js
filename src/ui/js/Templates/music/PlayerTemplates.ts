@@ -64,6 +64,7 @@ export class PlayerTemplates {
             .classes("audio-player", "flex-grow", "flex-v")
             .id("player_" + track.id)
             .children(
+                PlayerTemplates.horizontalVolumeSlider(track),
                 create("div")
                     .classes("flex", "align-center", "align-children")
                     .children(
@@ -126,6 +127,7 @@ export class PlayerTemplates {
             .classes("audio-player", "flex-grow", "flex-v")
             .id("player_" + track.id)
             .children(
+                PlayerTemplates.horizontalVolumeSlider(track),
                 create("div")
                     .classes("flex", "space-between", "align-children")
                     .children(
@@ -237,6 +239,52 @@ export class PlayerTemplates {
                     .classes("audio-player-scrubhead", "rounded", "nopointer")
                     .styles("left", positionPercent)
                     .build(),
+            ).build();
+    }
+
+    static horizontalVolumeSlider(track: Track) {
+        const volumePercent = compute(vol => `${vol * 100}%`, volume);
+
+        return create("div")
+            .classes("horizontal-volume-slider", "flex", "align-children", "fullWidth", "padded-inline")
+            .id("volume_" + track.id)
+            .children(
+                GenericTemplates.roundIconButton(
+                    {
+                        icon: compute(p => (p ? Icons.MUTE : Icons.LOUD), muted),
+                        adaptive: true,
+                        isUrl: true,
+                    },
+                    async () => {
+                        PlayManager.toggleMute(track.id);
+                    },
+                    t("MUTE_UNMUTE"),
+                    ["horizontal-volume-button"],
+                ),
+                create("div")
+                    .classes("horizontal-volume-track", "flex-grow", "rounded", "relative")
+                    .onwheel(PlayManager.setLoudnessFromWheel)
+                    .onmousedown(async e => {
+                        await PlayManager.setLoudnessFromHorizontalElement(e);
+                    })
+                    .onmousemove(async e => {
+                        if (e.buttons === 1) {
+                            await PlayManager.setLoudnessFromHorizontalElement(e);
+                        }
+                    })
+                    .children(
+                        create("div")
+                            .classes("horizontal-volume-bar", "rounded", "nopointer")
+                            .build(),
+                        create("div")
+                            .classes("horizontal-volume-fill", "rounded", "nopointer")
+                            .styles("width", volumePercent)
+                            .build(),
+                        create("div")
+                            .classes("horizontal-volume-head", "rounded", "nopointer")
+                            .styles("left", volumePercent)
+                            .build(),
+                    ).build(),
             ).build();
     }
 
