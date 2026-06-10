@@ -86,7 +86,7 @@ export class StripeService {
             });
 
             if (response?.url) {
-                window.location.href = response.url;
+                window.open(response.url, '_blank');
             } else {
                 throw new Error("Failed to create subscription session: No URL returned");
             }
