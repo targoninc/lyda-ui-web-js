@@ -210,6 +210,7 @@ export class ApiRoutes {
     private static webhooks = ApiRoutes.base + "/webhooks";
     static getEvents = ApiRoutes.webhooks + "/events";
     static triggerEventHandling = ApiRoutes.webhooks + "/triggerEventHandling";
+    static triggerStripeEventHandling = ApiRoutes.webhooks + "/triggerStripeEventHandling";
     // endregion
 
     // region MFA

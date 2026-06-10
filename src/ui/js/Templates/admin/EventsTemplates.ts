@@ -1,12 +1,13 @@
-import { compute, create, signal, when } from "@targoninc/jess";
+import { compute, create, signal, signalMap, when } from "@targoninc/jess";
 import { copy } from "../../Classes/Util.ts";
 import { GenericTemplates, horizontal } from "../generic/GenericTemplates.ts";
 import { Time } from "../../Classes/Helpers/Time.ts";
 import { notify } from "../../Classes/Ui.ts";
 import { DashboardTemplates } from "./DashboardTemplates.ts";
-import { button } from "@targoninc/jess-components";
+import { button, input } from "@targoninc/jess-components";
+import { InputType } from "@targoninc/jess";
 import { Permissions } from "@targoninc/lyda-shared/src/Enums/Permissions";
-import { PaypalWebhook } from "@targoninc/lyda-shared/src/Models/db/finance/PaypalWebhook";
+import { WebhookEvent } from "../../Api/Api.ts";
 import { NotificationType } from "../../Enums/NotificationType.ts";
 import { Api } from "../../Api/Api.ts";
 import { t } from "../../../locales";
@@ -21,26 +22,94 @@ export class EventsTemplates {
     }
 
     private static eventsPageInternal() {
-        const events = signal<PaypalWebhook[]>([]);
+        const events = signal<WebhookEvent[]>([]);
         const skip = signal(0);
-        const load = (filter?: any) => {
+        const includeStripe = signal(true);
+        const includePaypal = signal(false);
+        const loading = signal(false);
+
+        const load = () => {
             loading.value = true;
-            Api.getEvents(skip.value, filter)
+            Api.getEvents(skip.value, { stripe: includeStripe.value, paypal: includePaypal.value })
                .then(e => events.value = e ?? [])
                .finally(() => loading.value = false);
         };
-        const loading = signal(false);
+
+        skip.subscribe(() => load());
+        includeStripe.subscribe(() => { skip.value = 0; load(); });
+        includePaypal.subscribe(() => { skip.value = 0; load(); });
         load();
+
+        const localSearch = signal("");
+        const filteredResults = compute(
+            (r, f) => {
+                if (!r) return [];
+                return r.filter(e => JSON.stringify(e).includes(f));
+            },
+            events,
+            localSearch,
+        );
 
         return create("div")
             .classes("flex-v")
             .children(
-                GenericTemplates.searchWithFilter(events, EventsTemplates.event, skip, loading, load, [], "https://developer.paypal.com/api/rest/webhooks/event-names/"),
+                create("div").classes("flex", "align-children", "fixed-bar").children(
+                    button({
+                        text: t("REFRESH"),
+                        icon: { icon: "refresh" },
+                        classes: ["positive"],
+                        disabled: loading,
+                        onclick: () => load(),
+                    }),
+                    button({
+                        text: t("PREVIOUS_PAGE"),
+                        icon: { icon: "skip_previous" },
+                        disabled: compute((l, s) => l || s <= 0, loading, skip),
+                        onclick: () => { skip.value = Math.max(0, skip.value - 100); },
+                    }),
+                    button({
+                        text: t("NEXT_PAGE"),
+                        icon: { icon: "skip_next" },
+                        disabled: compute((l, e) => l || e.length < 100, loading, events),
+                        onclick: () => { skip.value = skip.value + 100; },
+                    }),
+                    GenericTemplates.toggle("Stripe", "stripe-toggle", () => { includeStripe.value = !includeStripe.value; }, [], true),
+                    GenericTemplates.toggle("PayPal", "paypal-toggle", () => { includePaypal.value = !includePaypal.value; }, [], false),
+                    input<string>({
+                        type: InputType.text,
+                        name: "filter",
+                        placeholder: t("FILTER"),
+                        value: localSearch,
+                        onchange: (newValue: string) => { localSearch.value = newValue; },
+                    }),
+                    create("span")
+                        .text(compute(e => `${t("N_RESULTS", e.length)}`, events))
+                        .build(),
+                    GenericTemplates.inlineLink("https://developer.paypal.com/api/rest/webhooks/event-names/", t("DOCS"), true),
+                ).build(),
+                signalMap(filteredResults, create("div").classes("flex-v", "fixed-bar-content"), EventsTemplates.event),
             ).build();
     }
 
-    static event(event: PaypalWebhook) {
-        const typeIconMap: Record<string, string> = {
+    static event(event: WebhookEvent) {
+        const isStripe = event.provider === "stripe";
+        const parsed = JSON.parse(event.content);
+        const resourceId = isStripe ? parsed.data?.object?.id : parsed.resource?.id;
+        const eventType = isStripe ? parsed.type : parsed.event_type;
+        const stripeIconMap: Record<string, string> = {
+            "payment_intent.succeeded": "price_check",
+            "payment_intent.created": "credit_card",
+            "checkout.session.completed": "shopping_cart_checkout",
+            "customer.subscription.created": "line_start_circle",
+            "customer.subscription.updated": "sync",
+            "customer.subscription.deleted": "money_off",
+            "invoice.paid": "finance_chip",
+            "invoice.payment_succeeded": "paid",
+            "invoice.created": "description",
+            "invoice.finalized": "check_circle",
+        };
+        const typeIcon = isStripe ? stripeIconMap[eventType] : undefined;
+        const paypalIconMap: Record<string, string> = {
             "PAYMENT.SALE.COMPLETED": "price_check",
             "BILLING.SUBSCRIPTION.CREATED": "line_start",
             "BILLING.SUBSCRIPTION.ACTIVATED": "line_start_circle",
@@ -48,17 +117,7 @@ export class EventsTemplates {
             "PAYMENT.PAYOUTSBATCH.SUCCESS": "finance_chip",
             "PAYMENT.PAYOUTSBATCH.DENIED": "money_off",
         };
-
-        const resourceId = JSON.parse(event.content).resource?.id;
-        const relevantReferenceIdMap: Record<string, Function> = {
-            "PAYMENT.SALE.COMPLETED": (e: PaypalWebhook) => JSON.parse(e.content).resource?.billing_agreement_id,
-            "BILLING.SUBSCRIPTION.CREATED": (e: PaypalWebhook) => JSON.parse(e.content).resource?.plan_id,
-            "BILLING.SUBSCRIPTION.ACTIVATED": (e: PaypalWebhook) => JSON.parse(e.content).resource?.plan_id,
-            "PAYMENT.PAYOUTSBATCH.PROCESSING": (e: PaypalWebhook) => JSON.parse(e.content).resource?.batch_header.sender_batch_header.sender_batch_id,
-            "PAYMENT.PAYOUTSBATCH.SUCCESS": (e: PaypalWebhook) => JSON.parse(e.content).resource?.batch_header.sender_batch_header.sender_batch_id,
-            "PAYMENT.PAYOUTSBATCH.DENIED": (e: PaypalWebhook) => JSON.parse(e.content).resource?.batch_header.sender_batch_header.sender_batch_id,
-        };
-        const referenceId = (relevantReferenceIdMap[event.type] ?? (() => null))(event);
+        const icon = isStripe ? stripeIconMap[eventType] : paypalIconMap[eventType];
 
         return create("div")
             .classes("card", "flex", "space-between")
@@ -71,17 +130,22 @@ export class EventsTemplates {
                             .children(
                                 GenericTemplates.roundIconButton({
                                     icon: "data_object",
-                                }, () => copy(JSON.stringify(JSON.parse(event.content), null, 2)), t("COPY_CONTENT")),
-                                when(typeIconMap[event.type], GenericTemplates.icon(typeIconMap[event.type], true)),
+                                }, () => copy(JSON.stringify(parsed, null, 2)), t("COPY_CONTENT")),
                                 create("span")
-                                    .text(event.type)
+                                    .classes("pill", isStripe ? "stripe-pill" : "paypal-pill")
+                                    .text(isStripe ? "STRIPE" : "PAYPAL")
+                                    .build(),
+                                when(icon, GenericTemplates.icon(icon, true)),
+                                create("span")
+                                    .text(eventType)
                                     .build(),
                                 button({
                                     text: t("TRIGGER"),
                                     icon: { icon: "start" },
                                     classes: ["positive"],
                                     onclick: () => {
-                                        Api.triggerEventHandling(event.id).then(() => {
+                                        const trigger = isStripe ? Api.triggerStripeEventHandling(event.id) : Api.triggerEventHandling(event.id);
+                                        trigger.then(() => {
                                             notify(`${t("EVENT_TRIGGERED")}`, NotificationType.success);
                                         }).catch(e => {
                                             notify(`${t("FAILED_EVENT_TRIGGER")}`, NotificationType.error);
@@ -99,25 +163,19 @@ export class EventsTemplates {
                                     .classes(TextSize.small)
                                     .text("E | " + event.id)
                                     .build(),
-                                GenericTemplates.roundIconButton({
-                                    icon: "content_copy",
-                                }, () => copy(resourceId), t("COPY_RESOURCE_ID")),
-                                create("span")
-                                    .classes(TextSize.small)
-                                    .text("R | " + resourceId)
-                                    .build(),
+                                when(resourceId,
+                                    create("span")
+                                        .classes("flex", "align-children")
+                                        .children(
+                                            GenericTemplates.roundIconButton({
+                                                icon: "content_copy",
+                                            }, () => copy(resourceId), t("COPY_RESOURCE_ID")),
+                                            create("span")
+                                                .classes(TextSize.small)
+                                                .text("R | " + resourceId)
+                                                .build(),
+                                        ).build()),
                             ).build(),
-                        when(referenceId, create("div")
-                            .classes("flex", "align-children")
-                            .children(
-                                GenericTemplates.roundIconButton({
-                                    icon: "fingerprint",
-                                }, () => copy(referenceId), t("COPY_REFERENCE_ID")),
-                                create("span")
-                                    .classes(TextSize.small)
-                                    .text(referenceId)
-                                    .build(),
-                            ).build()),
                     ).build(),
                 create("div")
                     .classes("flex-v")

@@ -26,6 +26,9 @@ import { InteractionType } from "@targoninc/lyda-shared/src/Enums/InteractionTyp
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 import { MonthIdentifier } from "../Classes/Helpers/Date.ts";
 import { PaypalWebhook } from "@targoninc/lyda-shared/src/Models/db/finance/PaypalWebhook";
+import { StripeWebhook } from "@targoninc/lyda-shared/src/Models/db/finance/StripeWebhook";
+
+export type WebhookEvent = (PaypalWebhook | StripeWebhook) & { provider: "stripe" | "paypal" };
 import { AvailableSubscription } from "@targoninc/lyda-shared/src/Models/db/finance/AvailableSubscription.ts";
 import { Subscription } from "@targoninc/lyda-shared/src/Models/db/finance/Subscription.ts";
 import { Statistic } from "@targoninc/lyda-shared/src/Models/Statistic";
@@ -86,8 +89,14 @@ export class Api {
         });
     }
 
+    static async triggerStripeEventHandling(eventId: string) {
+        return post(ApiRoutes.triggerStripeEventHandling, {
+            id: eventId,
+        });
+    }
+
     static async getEvents(skip: number, filter: any = {}) {
-        return get<PaypalWebhook[]>(ApiRoutes.getEvents, {
+        return get<WebhookEvent[]>(ApiRoutes.getEvents, {
             skip,
             ...filter,
         });
