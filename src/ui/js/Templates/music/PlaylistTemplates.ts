@@ -259,7 +259,9 @@ export class PlaylistTemplates {
             ).build() as HTMLElement;
 
         if (playlist.has_cover) {
+            ColorExtractor.clearPageBackground();
             Util.getCachedImage(playlist.id, "playlistCover" as any).then(coverUrl => {
+                ColorExtractor.setPageBackground(coverUrl);
                 ColorExtractor.extract(coverUrl).then(color => {
                     if (color) {
                         builder.style.setProperty("--theme-color", color);

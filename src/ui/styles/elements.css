@@ -96,7 +96,8 @@
 
 .single-page {
     position: relative;
-    background: var(--bg-1);
+    background: var(--background-glass);
+    border: 1px solid var(--border);
 }
 
 .theme-tinted {

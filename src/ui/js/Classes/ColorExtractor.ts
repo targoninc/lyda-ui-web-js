@@ -26,6 +26,27 @@ export class ColorExtractor {
         }
     }
 
+    static #bgEl: HTMLElement | null = null;
+
+    static clearPageBackground() {
+        if (this.#bgEl) {
+            this.#bgEl.remove();
+            this.#bgEl = null;
+        }
+    }
+
+    static setPageBackground(imageUrl: string) {
+        const pageBg = document.querySelector(".page-background") as HTMLElement | null;
+        if (!pageBg) return;
+        pageBg.style.position = "relative";
+        if (!this.#bgEl) {
+            this.#bgEl = document.createElement("div");
+            this.#bgEl.className = "page-background-image";
+            pageBg.insertBefore(this.#bgEl, pageBg.firstChild);
+        }
+        this.#bgEl.style.backgroundImage = `url(${imageUrl})`;
+    }
+
     static clearCache() {
         this.cache.clear();
     }

@@ -497,7 +497,9 @@ export class TrackTemplates {
             ).build() as HTMLElement;
 
         if (track.has_cover) {
+            ColorExtractor.clearPageBackground();
             Util.getCachedImage(track.id, "trackCover" as any).then(coverUrl => {
+                ColorExtractor.setPageBackground(coverUrl);
                 ColorExtractor.extract(coverUrl).then(color => {
                     if (color) {
                         pageEl.style.setProperty("--theme-color", color);
