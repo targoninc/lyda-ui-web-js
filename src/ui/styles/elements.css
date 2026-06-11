@@ -102,72 +102,25 @@
 .single-page.theme-tinted {
     --base-color: var(--theme-color);
     --blue: var(--theme-color);
-    --theme-overlay: color-mix(in oklab, var(--theme-color), transparent 75%);
-}
-
-.single-page.theme-tinted::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 50dvh;
-    background: linear-gradient(180deg,
-        var(--theme-overlay) 0%,
-        transparent 100%
-    );
-    pointer-events: none;
-    z-index: 1;
-}
-
-.single-page.theme-tinted > :not(.page-background-image) {
-    position: relative;
-    z-index: 2;
-}
-
-.single-page.theme-tinted .page-background-image {
-    opacity: 0.6;
-    z-index: 0;
 }
 
 .single-page.theme-tinted button.special {
     border-color: var(--theme-color);
-    background: color-mix(in oklab, var(--theme-color), var(--base) 60%);
+    background: var(--theme-accent);
 }
 
 .single-page.theme-tinted button.special:hover {
-    background: color-mix(in oklab, var(--theme-color), var(--base) 30%);
-    border-color: color-mix(in oklab, var(--theme-color), var(--contrast) 30%);
+    background: var(--theme-bg);
+    border-color: var(--theme-color);
 }
 
-.single-page.theme-tinted button:not(.negative):not(.positive):not(.special):not(.special-floating) {
-    border-color: color-mix(in oklab, var(--theme-color), var(--bg-3) 40%);
+.single-page.theme-tinted .tag {
+    background: var(--theme-bg);
+    border-color: var(--theme-text);
+    color: var(--theme-text);
 }
 
-.single-page.theme-tinted .bordered {
-    border-color: color-mix(in oklab, var(--theme-color), transparent 60%) !important;
-}
 
-.single-page.theme-tinted .cover-container .cover {
-    box-shadow: 0 0 30px -8px var(--theme-color);
-}
-
-.single-page.theme-tinted .tab-selector {
-    border-color: color-mix(in oklab, var(--theme-color), var(--border) 50%);
-}
-
-.single-page.theme-tinted .tab.selected {
-    background: color-mix(in oklab, var(--theme-color), var(--fg-0) 40%);
-    color: var(--bg-0);
-}
-
-.single-page.theme-tinted .interaction-count {
-    border-color: color-mix(in oklab, var(--theme-color), var(--border) 40%);
-}
-
-.single-page.theme-tinted .user-widget.collaborator {
-    border-color: color-mix(in oklab, var(--theme-color), var(--border) 40%);
-}
 
 .page-background-image {
     position: absolute;

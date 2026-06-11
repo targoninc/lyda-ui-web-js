@@ -259,12 +259,19 @@ export class PlaylistTemplates {
             ).build() as HTMLElement;
 
         if (playlist.has_cover) {
-            const coverUrl = Util.getPlaylistCover(playlist.id);
-            ColorExtractor.extract(coverUrl).then(color => {
-                if (color) {
-                    builder.style.setProperty("--theme-color", color);
-                    builder.classList.add("theme-tinted");
-                }
+            Util.getCachedImage(playlist.id, "playlistCover" as any).then(coverUrl => {
+                ColorExtractor.extract(coverUrl).then(color => {
+                    if (color) {
+                        const colors = ColorExtractor.getThemeColors(color);
+                        builder.style.setProperty("--theme-color", color);
+                        if (colors) {
+                            builder.style.setProperty("--theme-text", colors.text);
+                            builder.style.setProperty("--theme-bg", colors.bg);
+                            builder.style.setProperty("--theme-accent", colors.accent);
+                        }
+                        builder.classList.add("theme-tinted");
+                    }
+                });
             });
         }
 

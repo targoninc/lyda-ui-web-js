@@ -2,45 +2,46 @@ export class ColorExtractor {
     private static cache = new Map<string, string>();
 
     static async extract(imageUrl: string): Promise<string | null> {
-        const cached = this.cache.get(imageUrl);
-        if (cached) return cached;
-
-        const color = await this.extractDominant(imageUrl);
-        if (color) {
-            this.cache.set(imageUrl, color);
+        if (!imageUrl || imageUrl.includes("/defaults/")) {
+            console.log("[ColorExtractor] skipped (default/no url)", imageUrl?.substring(0, 80));
+            return null;
         }
-        return color;
+
+        const cached = this.cache.get(imageUrl);
+        if (cached) {
+            console.log("[ColorExtractor] cache hit", cached);
+            return cached;
+        }
+
+        try {
+            const color = await this.extractDominant(imageUrl);
+            console.log("[ColorExtractor] extracted", color, "from", imageUrl.substring(0, 80));
+            if (color) {
+                this.cache.set(imageUrl, color);
+            }
+            return color;
+        } catch (e) {
+            console.error("[ColorExtractor] error", e);
+            return null;
+        }
     }
 
     static clearCache() {
         this.cache.clear();
     }
 
-    private static async extractDominant(imageUrl: string): Promise<string | null> {
-        try {
-            const blob = await fetch(imageUrl, { credentials: "include" }).then(r => {
-                if (!r.ok) throw new Error(`HTTP ${r.status}`);
-                return r.blob();
-            });
-            const objectUrl = URL.createObjectURL(blob);
-
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.onload = () => {
-                    const color = this.sampleFromImage(img);
-                    URL.revokeObjectURL(objectUrl);
-                    resolve(color);
-                };
-                img.onerror = () => {
-                    URL.revokeObjectURL(objectUrl);
-                    resolve(null);
-                };
-                img.src = objectUrl;
-            });
-        } catch (e) {
-            console.warn("ColorExtractor: failed to load image", imageUrl, e);
-            return null;
-        }
+    private static extractDominant(imageUrl: string): Promise<string | null> {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+                const color = this.sampleFromImage(img);
+                resolve(color);
+            };
+            img.onerror = () => {
+                resolve(null);
+            };
+            img.src = imageUrl;
+        });
     }
 
     private static sampleFromImage(img: HTMLImageElement): string | null {
@@ -52,68 +53,55 @@ export class ColorExtractor {
         if (!ctx) return null;
 
         ctx.drawImage(img, 0, 0, size, size);
-        const imageData = ctx.getImageData(0, 0, size, size);
+
+        const margin = Math.floor(size * 0.2);
+        const sw = size - margin * 2;
+        const imageData = ctx.getImageData(margin, margin, sw, sw);
         const pixels = imageData.data;
 
-        const saturated = new Map<string, number>();
-        const all = new Map<string, number>();
+        const buckets = new Map<number, { count: number; satSum: number }>();
+        const SAT_THRESHOLD = 0.2;
 
-        const cx = size / 2, cy = size / 2;
-        const maxDist = Math.sqrt(cx * cx + cy * cy);
-
-        for (let y = 0; y < size; y++) {
-            for (let x = 0; x < size; x++) {
-                const i = (y * size + x) * 4;
-                const r = pixels[i];
-                const g = pixels[i + 1];
-                const b = pixels[i + 2];
-                const a = pixels[i + 3];
-
+        for (let y = 0; y < sw; y++) {
+            for (let x = 0; x < sw; x++) {
+                const i = (y * sw + x) * 4;
+                const r = pixels[i], g = pixels[i + 1], b = pixels[i + 2], a = pixels[i + 3];
                 if (a < 128) continue;
 
                 const [h, s, l] = this.rgbToHsl(r, g, b);
-                if (l < 0.08 || l > 0.92) continue;
+                if (l < 0.05 || l > 0.95) continue;
 
+                const cx = sw / 2, cy = sw / 2;
                 const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
-                const weight = Math.max(0, 1 - (dist / maxDist) * 0.8);
+                const maxDist = Math.sqrt(cx * cx + cy * cy);
+                const weight = Math.max(0.1, 1 - (dist / maxDist) * 0.6);
 
-                const q = (v: number) => Math.min(248, Math.round(v / 32) * 32);
-                const hex = this.rgbToHex(q(r), q(g), q(b));
-
-                all.set(hex, (all.get(hex) ?? 0) + weight);
-                if (s > 0.15) {
-                    saturated.set(hex, (saturated.get(hex) ?? 0) + weight);
+                const bucket = Math.round(h / 15) * 15;
+                if (s > SAT_THRESHOLD) {
+                    const entry = buckets.get(bucket) ?? { count: 0, satSum: 0 };
+                    entry.count += weight;
+                    entry.satSum += s * weight;
+                    buckets.set(bucket, entry);
                 }
             }
         }
 
-        if (all.size === 0) return null;
+        if (buckets.size === 0) return null;
 
-        let bestHex = "";
-        let bestCount = 0;
-        const pool = saturated.size > 0 ? saturated : all;
-        for (const [hex, count] of pool) {
-            if (count > bestCount) {
-                bestCount = count;
-                bestHex = hex;
+        let bestBucket = -1;
+        let bestScore = 0;
+        for (const [bucket, entry] of buckets) {
+            const avgSat = entry.satSum / entry.count;
+            const score = entry.count * (1 + avgSat * 4);
+            if (score > bestScore) {
+                bestScore = score;
+                bestBucket = bucket;
             }
         }
 
-        const [r, g, b] = this.hexToRgb(bestHex);
-        let [h, s, l] = this.rgbToHsl(r, g, b);
+        if (bestBucket === -1) return null;
 
-        if (s < 0.15 && this.chroma(r, g, b) > 10) {
-            s = 0.35;
-        }
-
-        s = Math.min(s * 1.5, 0.7);
-        l = 0.35 + l * 0.35;
-
-        return this.hslToHex(h, s, l);
-    }
-
-    private static chroma(r: number, g: number, b: number): number {
-        return Math.max(r, g, b) - Math.min(r, g, b);
+        return this.hslToHex(bestBucket, 0.3, 0.45);
     }
 
     private static rgbToHsl(r: number, g: number, b: number): [number, number, number] {
@@ -135,6 +123,49 @@ export class ColorExtractor {
         return [h * 360, s, l];
     }
 
+    static getThemeColors(themeColor: string): { text: string; bg: string; accent: string } | null {
+        const parseRgb = (s: string): [number, number, number] => {
+            const m = s.match(/^rgba?\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+            return m ? [parseInt(m[1]), parseInt(m[2]), parseInt(m[3])] : [0, 0, 0];
+        };
+        const resolveVar = (name: string): string | null => {
+            const el = document.createElement("div");
+            el.style.setProperty("--x", `var(${name})`);
+            el.style.background = "var(--x)";
+            document.body.appendChild(el);
+            const c = getComputedStyle(el).backgroundColor;
+            el.remove();
+            return c || null;
+        };
+
+        let bg0 = resolveVar("--bg-0");
+        if (!bg0) return null;
+
+        let [r1, g1, b1] = parseRgb(bg0);
+        // also resolve themeColor from hex to rgb for mixing
+        const parseHex = (h: string): [number, number, number] => {
+            let hex = h.trim();
+            if (hex.startsWith("#")) hex = hex.slice(1);
+            if (hex.length === 3) hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+            return [parseInt(hex.slice(0, 2), 16), parseInt(hex.slice(2, 4), 16), parseInt(hex.slice(4, 6), 16)];
+        };
+        const toHex = (r: number, g: number, b: number): string =>
+            "#" + [r, g, b].map(c => Math.round(c).toString(16).padStart(2, "0")).join("");
+        const mix = (c1: string, t: number): string => {
+            const [r2, g2, b2] = parseHex(c1);
+            return toHex(r1 + (r2 - r1) * t, g1 + (g2 - g1) * t, b1 + (b2 - b1) * t);
+        };
+
+        const [tr, tg, tb] = parseHex(themeColor);
+        const [h, s] = this.rgbToHsl(tr, tg, tb);
+
+        return {
+            text: this.hslToHex(h, s, 0.65),
+            bg: mix(themeColor, 0.4),
+            accent: mix(themeColor, 0.6),
+        };
+    }
+
     private static hslToHex(h: number, s: number, l: number): string {
         h /= 360;
         const a = s * Math.min(l, 1 - l);
@@ -142,20 +173,10 @@ export class ColorExtractor {
             const k = (n + h * 12) % 12;
             return l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
         };
-        return this.rgbToHex(
-            Math.round(f(0) * 255),
-            Math.round(f(8) * 255),
-            Math.round(f(4) * 255),
-        );
-    }
-
-    private static rgbToHex(r: number, g: number, b: number): string {
-        return "#" + [r, g, b].map(x => x.toString(16).padStart(2, "0")).join("");
-    }
-
-    private static hexToRgb(hex: string): [number, number, number] {
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        if (!result) return [0, 0, 0];
-        return [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)];
+        return "#" + [
+            Math.round(f(0) * 255).toString(16).padStart(2, "0"),
+            Math.round(f(8) * 255).toString(16).padStart(2, "0"),
+            Math.round(f(4) * 255).toString(16).padStart(2, "0"),
+        ].join("");
     }
 }

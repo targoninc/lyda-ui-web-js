@@ -300,12 +300,19 @@ export class AlbumTemplates {
             ).build() as HTMLElement;
 
         if (album.has_cover) {
-            const coverUrl = Util.getAlbumCover(album.id);
-            ColorExtractor.extract(coverUrl).then(color => {
-                if (color) {
-                    builder.style.setProperty("--theme-color", color);
-                    builder.classList.add("theme-tinted");
-                }
+            Util.getCachedImage(album.id, "albumCover" as any).then(coverUrl => {
+                ColorExtractor.extract(coverUrl).then(color => {
+                    if (color) {
+                        const colors = ColorExtractor.getThemeColors(color);
+                        builder.style.setProperty("--theme-color", color);
+                        if (colors) {
+                            builder.style.setProperty("--theme-text", colors.text);
+                            builder.style.setProperty("--theme-bg", colors.bg);
+                            builder.style.setProperty("--theme-accent", colors.accent);
+                        }
+                        builder.classList.add("theme-tinted");
+                    }
+                });
             });
         }
 

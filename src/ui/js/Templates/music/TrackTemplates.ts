@@ -497,12 +497,19 @@ export class TrackTemplates {
             ).build() as HTMLElement;
 
         if (track.has_cover) {
-            const coverUrl = Util.getTrackCover(track.id);
-            ColorExtractor.extract(coverUrl).then(color => {
-                if (color) {
-                    pageEl.style.setProperty("--theme-color", color);
-                    pageEl.classList.add("theme-tinted");
-                }
+            Util.getCachedImage(track.id, "trackCover" as any).then(coverUrl => {
+                ColorExtractor.extract(coverUrl).then(color => {
+                    if (color) {
+                        const colors = ColorExtractor.getThemeColors(color);
+                        pageEl.style.setProperty("--theme-color", color);
+                        if (colors) {
+                            pageEl.style.setProperty("--theme-text", colors.text);
+                            pageEl.style.setProperty("--theme-bg", colors.bg);
+                            pageEl.style.setProperty("--theme-accent", colors.accent);
+                        }
+                        pageEl.classList.add("theme-tinted");
+                    }
+                });
             });
         }
 
@@ -787,7 +794,7 @@ export class TrackTemplates {
             .children(
                 ...genres.map(g =>
                     button({
-                        classes: ["rounded-max"],
+                        classes: ["rounded-max", "tag"],
                         onclick: () => navigate(`${RoutePath.explore}?tab=genres&genres=${encodeURIComponent(g)}`),
                         text: `#${g.includes("---") ? getSubgenreDisplay(g as any) : g}`,
                     }),
