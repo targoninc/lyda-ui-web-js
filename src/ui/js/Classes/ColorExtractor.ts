@@ -101,7 +101,7 @@ export class ColorExtractor {
 
         if (bestBucket === -1) return null;
 
-        return this.hslToHex(bestBucket, 0.3, 0.45);
+        return this.hslToHex(bestBucket, 0.5, 0.45);
     }
 
     private static rgbToHsl(r: number, g: number, b: number): [number, number, number] {
@@ -121,49 +121,6 @@ export class ColorExtractor {
         }
 
         return [h * 360, s, l];
-    }
-
-    static getThemeColors(themeColor: string): { text: string; bg: string; accent: string } | null {
-        const parseRgb = (s: string): [number, number, number] => {
-            const m = s.match(/^rgba?\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
-            return m ? [parseInt(m[1]), parseInt(m[2]), parseInt(m[3])] : [0, 0, 0];
-        };
-        const resolveVar = (name: string): string | null => {
-            const el = document.createElement("div");
-            el.style.setProperty("--x", `var(${name})`);
-            el.style.background = "var(--x)";
-            document.body.appendChild(el);
-            const c = getComputedStyle(el).backgroundColor;
-            el.remove();
-            return c || null;
-        };
-
-        let bg0 = resolveVar("--bg-0");
-        if (!bg0) return null;
-
-        let [r1, g1, b1] = parseRgb(bg0);
-        // also resolve themeColor from hex to rgb for mixing
-        const parseHex = (h: string): [number, number, number] => {
-            let hex = h.trim();
-            if (hex.startsWith("#")) hex = hex.slice(1);
-            if (hex.length === 3) hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-            return [parseInt(hex.slice(0, 2), 16), parseInt(hex.slice(2, 4), 16), parseInt(hex.slice(4, 6), 16)];
-        };
-        const toHex = (r: number, g: number, b: number): string =>
-            "#" + [r, g, b].map(c => Math.round(c).toString(16).padStart(2, "0")).join("");
-        const mix = (c1: string, t: number): string => {
-            const [r2, g2, b2] = parseHex(c1);
-            return toHex(r1 + (r2 - r1) * t, g1 + (g2 - g1) * t, b1 + (b2 - b1) * t);
-        };
-
-        const [tr, tg, tb] = parseHex(themeColor);
-        const [h, s] = this.rgbToHsl(tr, tg, tb);
-
-        return {
-            text: this.hslToHex(h, s, 0.65),
-            bg: mix(themeColor, 0.4),
-            accent: mix(themeColor, 0.6),
-        };
     }
 
     private static hslToHex(h: number, s: number, l: number): string {

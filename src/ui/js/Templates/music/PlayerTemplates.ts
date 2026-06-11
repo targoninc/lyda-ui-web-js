@@ -43,6 +43,7 @@ import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 import { CoverContext } from "../../Enums/CoverContext.ts";
 import { TextSize } from "../../Enums/TextSize.ts";
 import { PlayingFromResolver } from "../../Classes/PlayingFromResolver.ts";
+import { ColorExtractor } from "../../Classes/ColorExtractor.ts";
 
 
 export class PlayerTemplates {
@@ -60,7 +61,7 @@ export class PlayerTemplates {
             isCurrentTrack,
         );
 
-        return create("div")
+        const playerEl = create("div")
             .classes("audio-player", "flex-grow", "flex-v")
             .id("player_" + track.id)
             .children(
@@ -106,6 +107,19 @@ export class PlayerTemplates {
                         PlayerTemplates.totalTrackTime(track),
                     ).build(),
             ).build();
+
+        if (track.has_cover) {
+            Util.getCachedImage(track.id, "trackCover" as any).then(coverUrl => {
+                ColorExtractor.extract(coverUrl).then(color => {
+                    if (color) {
+                        playerEl.style.setProperty("--theme-color", color);
+                        playerEl.classList.add("theme-tinted");
+                    }
+                });
+            });
+        }
+
+        return playerEl;
     }
 
     static mobileAudioPlayer(track: Track) {
@@ -122,7 +136,7 @@ export class PlayerTemplates {
             isCurrentTrack,
         );
 
-        return create("div")
+        const playerEl = create("div")
             .classes("audio-player", "flex-grow", "flex-v")
             .id("player_" + track.id)
             .children(
@@ -173,6 +187,19 @@ export class PlayerTemplates {
                         PlayerTemplates.totalTrackTime(track, true),
                     ).build(),
             ).build();
+
+        if (track.has_cover) {
+            Util.getCachedImage(track.id, "trackCover" as any).then(coverUrl => {
+                ColorExtractor.extract(coverUrl).then(color => {
+                    if (color) {
+                        playerEl.style.setProperty("--theme-color", color);
+                        playerEl.classList.add("theme-tinted");
+                    }
+                });
+            });
+        }
+
+        return playerEl;
     }
 
     private static roundPlayButton(track: Track) {

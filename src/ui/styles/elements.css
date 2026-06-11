@@ -99,25 +99,30 @@
     background: var(--bg-1);
 }
 
+.theme-tinted {
+    --theme-text: color-mix(in oklab, var(--theme-color), var(--fg-0) 35%);
+    --theme-bg: color-mix(in oklab, var(--bg-0), var(--theme-color) 20%);
+}
+
 .single-page.theme-tinted {
     --base-color: var(--theme-color);
     --blue: var(--theme-color);
 }
 
-.single-page.theme-tinted button.special {
-    border-color: var(--theme-color);
-    background: var(--theme-accent);
-}
-
-.single-page.theme-tinted button.special:hover {
-    background: var(--theme-bg);
-    border-color: var(--theme-color);
-}
-
-.single-page.theme-tinted .tag {
+.theme-tinted .tag {
     background: var(--theme-bg);
     border-color: var(--theme-text);
     color: var(--theme-text);
+}
+
+.theme-tinted .bordered {
+    border-color: var(--theme-text);
+    background: var(--theme-bg);
+}
+
+.audio-player.theme-tinted button.special {
+    background: var(--theme-bg);
+    border-color: var(--theme-text);
 }
 
 

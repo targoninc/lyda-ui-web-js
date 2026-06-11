@@ -303,13 +303,7 @@ export class AlbumTemplates {
             Util.getCachedImage(album.id, "albumCover" as any).then(coverUrl => {
                 ColorExtractor.extract(coverUrl).then(color => {
                     if (color) {
-                        const colors = ColorExtractor.getThemeColors(color);
                         builder.style.setProperty("--theme-color", color);
-                        if (colors) {
-                            builder.style.setProperty("--theme-text", colors.text);
-                            builder.style.setProperty("--theme-bg", colors.bg);
-                            builder.style.setProperty("--theme-accent", colors.accent);
-                        }
                         builder.classList.add("theme-tinted");
                     }
                 });
