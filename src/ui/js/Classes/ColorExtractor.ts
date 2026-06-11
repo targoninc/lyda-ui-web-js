@@ -33,6 +33,10 @@ export class ColorExtractor {
             this.#bgEl.remove();
             this.#bgEl = null;
         }
+        const pageBg = document.querySelector(".page-background") as HTMLElement | null;
+        if (pageBg) {
+            pageBg.style.position = "";
+        }
     }
 
     static setPageBackground(imageUrl: string) {

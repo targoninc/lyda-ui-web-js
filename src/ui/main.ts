@@ -20,6 +20,7 @@ import { PlayerTemplates } from "./js/Templates/music/PlayerTemplates.ts";
 import { NotificationType } from "./js/Enums/NotificationType.ts";
 import { t } from "./locales";
 import { InteractionStateManager } from "./js/Classes/InteractionStateManager.ts";
+import { ColorExtractor } from "./js/Classes/ColorExtractor.ts";
 
 initializeGlobalErrorHandler();
 
@@ -45,6 +46,7 @@ export const router = new Router(routes, async (route: Route, params: any) => {
     const page = route.path.replace("/", "") as RoutePath;
     console.log(`Navigating to ${page} with params`, params);
 
+    ColorExtractor.clearPageBackground();
     TrackEditTemplates.clearUploadDragState();
     InteractionStateManager.clearContextType("list");
     InteractionStateManager.clearContextType("page");

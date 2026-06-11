@@ -44,6 +44,7 @@ import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import {pinState} from "../../Classes/PinState.ts";
 import {Badge} from "@targoninc/lyda-shared/src/Models/db/lyda/Badge";
 import {NotificationType} from "../../Enums/NotificationType.ts";
+import {ColorExtractor} from "../../Classes/ColorExtractor.ts";
 import {Api} from "../../Api/Api.ts";
 import {TrackCollaborator} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
 import {TrackEditTemplates} from "../music/TrackEditTemplates.ts";
@@ -55,34 +56,6 @@ import {TextSize} from "../../Enums/TextSize.ts";
 
 export class UserTemplates {
     static #popoverUid = 0;
-    static #profileBackgroundEl: HTMLElement | null = null;
-
-    static #clearProfileBackground() {
-        if (UserTemplates.#profileBackgroundEl) {
-            UserTemplates.#profileBackgroundEl.remove();
-            UserTemplates.#profileBackgroundEl = null;
-        }
-        const pageBg = document.querySelector(".page-background") as HTMLElement | null;
-        if (pageBg) {
-            pageBg.style.position = "";
-        }
-    }
-
-    static #setProfileBackground(u: User | null) {
-        const pageBg = document.querySelector(".page-background") as HTMLElement | null;
-        if (!pageBg) return;
-
-        if (!UserTemplates.#profileBackgroundEl) {
-            pageBg.style.position = "relative";
-            UserTemplates.#profileBackgroundEl = document.createElement("div");
-            UserTemplates.#profileBackgroundEl.className = "page-background-image";
-            pageBg.insertBefore(UserTemplates.#profileBackgroundEl, pageBg.firstChild);
-        }
-
-        UserTemplates.#profileBackgroundEl.style.backgroundImage = u?.has_banner
-            ? `url(${Util.getUserBanner(u.id)})`
-            : "";
-    }
 
     static userWidget(
         user: User | Signal<User | null>,
@@ -398,15 +371,10 @@ export class UserTemplates {
         const notFound = compute((l, u) => l && !u, loading, user);
 
         user.subscribe(u => {
-            UserTemplates.#setProfileBackground(u);
-        });
-
-        router.currentRoute.subscribe(r => {
-            if (r?.path !== RoutePath.profile && !r?.aliases?.includes("user")) {
-                UserTemplates.#clearProfileBackground();
-                router.currentRoute.unsubscribeKey("profile-bg-cleanup");
+            if (u?.has_banner) {
+                ColorExtractor.setPageBackground(Util.getUserBanner(u.id));
             }
-        }, "profile-bg-cleanup");
+        });
 
         Api.getUserByName(params["name"])
             .then(u => {
