@@ -51,6 +51,7 @@ import {TransactionTemplates} from "../money/TransactionTemplates.ts";
 import {BuyTemplates} from "../money/BuyTemplates.ts";
 import {CoverContext} from "../../Enums/CoverContext.ts";
 import {TextSize} from "../../Enums/TextSize.ts";
+import {ColorExtractor} from "../../Classes/ColorExtractor.ts";
 
 export class TrackTemplates {
     static collabIndicator(collab: TrackCollaborator): any {
@@ -397,7 +398,7 @@ export class TrackTemplates {
         const selectedTab$ = signal(0);
         const tabs = [t("COMMENTS"), t("ALBUMS"), t("PLAYLISTS"), t("BUYERS")];
 
-        return create("div")
+        const pageEl = create("div")
             .classes("single-page", "rounded-large", "relative")
             .children(
                 when(trackData.canDownload, create("div")
@@ -493,7 +494,19 @@ export class TrackTemplates {
                             ),
                         ).build(),
                 ).classes("padded-large").styles("position", "inherit").build(),
-            ).build();
+            ).build() as HTMLElement;
+
+        if (track.has_cover) {
+            const coverUrl = Util.getTrackCover(track.id);
+            ColorExtractor.extract(coverUrl).then(color => {
+                if (color) {
+                    pageEl.style.setProperty("--theme-color", color);
+                    pageEl.classList.add("theme-tinted");
+                }
+            });
+        }
+
+        return pageEl;
     }
 
     static addToPlaylistButton(track: Track) {

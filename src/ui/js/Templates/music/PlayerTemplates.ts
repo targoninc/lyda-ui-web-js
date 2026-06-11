@@ -64,7 +64,6 @@ export class PlayerTemplates {
             .classes("audio-player", "flex-grow", "flex-v")
             .id("player_" + track.id)
             .children(
-                PlayerTemplates.horizontalVolumeSlider(track),
                 create("div")
                     .classes("flex", "align-center", "align-children")
                     .children(

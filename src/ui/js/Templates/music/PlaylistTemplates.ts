@@ -28,6 +28,7 @@ import { TextSize } from "../../Enums/TextSize.ts";
 import { SearchTemplates } from "../SearchTemplates.ts";
 import { SearchContext } from "@targoninc/lyda-shared/src/Enums/SearchContext";
 import { ApiRoutes } from "../../Api/ApiRoutes.ts";
+import { ColorExtractor } from "../../Classes/ColorExtractor.ts";
 
 export class PlaylistTemplates {
     static addTrackToPlaylistModal(track: Track, playlists: Playlist[]) {
@@ -201,7 +202,7 @@ export class PlaylistTemplates {
         const duration = playlist.tracks.reduce((acc, t) => acc + (t.track?.length ?? 0), 0);
         const icons = playlist.visibility === Visibility.private ? [GenericTemplates.lock()] : [];
 
-        return create("div")
+        const builder = create("div")
             .classes("single-page", "noflexwrap", "padded-large", "rounded-large", "flex-v")
             .children(
                 vertical(
@@ -255,7 +256,19 @@ export class PlaylistTemplates {
                         return create("div").children(searchEl).build();
                     })()
                 ).classes("card").build()),
-            ).build();
+            ).build() as HTMLElement;
+
+        if (playlist.has_cover) {
+            const coverUrl = Util.getPlaylistCover(playlist.id);
+            ColorExtractor.extract(coverUrl).then(color => {
+                if (color) {
+                    builder.style.setProperty("--theme-color", color);
+                    builder.classList.add("theme-tinted");
+                }
+            });
+        }
+
+        return builder;
     }
 
     static audioActions(playlist: Playlist, canEdit: boolean) {

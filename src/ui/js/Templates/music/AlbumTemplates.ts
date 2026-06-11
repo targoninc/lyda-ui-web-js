@@ -31,6 +31,7 @@ import { SearchContext } from "@targoninc/lyda-shared/src/Enums/SearchContext.ts
 import { ApiRoutes } from "../../Api/ApiRoutes.ts";
 import { BuyTemplates } from "../money/BuyTemplates.ts";
 import { FormTemplates } from "../generic/FormTemplates.ts";
+import { ColorExtractor } from "../../Classes/ColorExtractor.ts";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
@@ -225,7 +226,7 @@ export class AlbumTemplates {
         const tracks = signal<ListTrack[]>(album.tracks ?? []);
         const duration = album.tracks!.reduce((acc, t) => acc + (t.track?.length ?? 0), 0);
 
-        return create("div")
+        const builder = create("div")
             .classes("single-page", "noflexwrap", "padded-large", "rounded-large", "flex-v")
             .children(
                 create("div")
@@ -296,7 +297,19 @@ export class AlbumTemplates {
                         return create("div").children(searchEl).build();
                     })()
                 ).classes("card").build()),
-            ).build();
+            ).build() as HTMLElement;
+
+        if (album.has_cover) {
+            const coverUrl = Util.getAlbumCover(album.id);
+            ColorExtractor.extract(coverUrl).then(color => {
+                if (color) {
+                    builder.style.setProperty("--theme-color", color);
+                    builder.classList.add("theme-tinted");
+                }
+            });
+        }
+
+        return builder;
     }
 
     static albumPage(route: Route, params: Record<string, string>) {

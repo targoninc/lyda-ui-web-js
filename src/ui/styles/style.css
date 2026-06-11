@@ -1063,16 +1063,16 @@ td:last-child, th:last-child {
     transform: translate(-50%, -50%);
 }
 
+.always-show {
+    display: flex !important;
+}
+
 .showOnParentHover {
     display: none;
 }
 
 *:hover > .showOnParentHover {
     display: flex;
-}
-
-.always-show {
-    display: flex !important;
 }
 
 .blurOnParentHover {
@@ -1139,26 +1139,26 @@ td:last-child, th:last-child {
 
 img {
     user-select: none;
-}
 
-img.loading {
-    position: relative;
-}
+    &.loading {
+        position: relative;
 
-img.loading:before {
-    content: "";
-    position: absolute;
+        &:before {
+            content: "";
+            position: absolute;
 
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
 
-    background: linear-gradient(to right,
-    rgba(128, 128, 128, 0.5),
-    rgba(128, 128, 128, 0.2));
+            background: linear-gradient(to right,
+            rgba(128, 128, 128, 0.5),
+            rgba(128, 128, 128, 0.2));
 
-    animation: loadingAnimation 2s linear infinite;
+            animation: loadingAnimation 2s linear infinite;
+        }
+    }
 }
 
 .hover-image:hover {

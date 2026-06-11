@@ -95,7 +95,78 @@
 }
 
 .single-page {
+    position: relative;
     background: var(--bg-1);
+}
+
+.single-page.theme-tinted {
+    --base-color: var(--theme-color);
+    --blue: var(--theme-color);
+    --theme-overlay: color-mix(in oklab, var(--theme-color), transparent 75%);
+}
+
+.single-page.theme-tinted::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50dvh;
+    background: linear-gradient(180deg,
+        var(--theme-overlay) 0%,
+        transparent 100%
+    );
+    pointer-events: none;
+    z-index: 1;
+}
+
+.single-page.theme-tinted > :not(.page-background-image) {
+    position: relative;
+    z-index: 2;
+}
+
+.single-page.theme-tinted .page-background-image {
+    opacity: 0.6;
+    z-index: 0;
+}
+
+.single-page.theme-tinted button.special {
+    border-color: var(--theme-color);
+    background: color-mix(in oklab, var(--theme-color), var(--base) 60%);
+}
+
+.single-page.theme-tinted button.special:hover {
+    background: color-mix(in oklab, var(--theme-color), var(--base) 30%);
+    border-color: color-mix(in oklab, var(--theme-color), var(--contrast) 30%);
+}
+
+.single-page.theme-tinted button:not(.negative):not(.positive):not(.special):not(.special-floating) {
+    border-color: color-mix(in oklab, var(--theme-color), var(--bg-3) 40%);
+}
+
+.single-page.theme-tinted .bordered {
+    border-color: color-mix(in oklab, var(--theme-color), transparent 60%) !important;
+}
+
+.single-page.theme-tinted .cover-container .cover {
+    box-shadow: 0 0 30px -8px var(--theme-color);
+}
+
+.single-page.theme-tinted .tab-selector {
+    border-color: color-mix(in oklab, var(--theme-color), var(--border) 50%);
+}
+
+.single-page.theme-tinted .tab.selected {
+    background: color-mix(in oklab, var(--theme-color), var(--fg-0) 40%);
+    color: var(--bg-0);
+}
+
+.single-page.theme-tinted .interaction-count {
+    border-color: color-mix(in oklab, var(--theme-color), var(--border) 40%);
+}
+
+.single-page.theme-tinted .user-widget.collaborator {
+    border-color: color-mix(in oklab, var(--theme-color), var(--border) 40%);
 }
 
 .page-background-image {
@@ -668,11 +739,11 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     border-radius: var(--border-radius);
     cursor: pointer;
     background: var(--bg-5);
-}
 
-.text-button:hover {
-    background: var(--bg-4);
-    text-decoration: none !important;
+    &:hover {
+        background: var(--bg-4);
+        text-decoration: none !important;
+    }
 }
 
 .comment-children {
@@ -685,14 +756,14 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .listNotification {
     padding: var(--base-padding);
-}
 
-.listNotification:not(:last-child) {
-    border-bottom: 1px solid var(--border);
-}
+    &.unread {
+        border-left: 3px solid var(--green);
+    }
 
-.listNotification.unread {
-    border-left: 3px solid var(--green);
+    &:not(:last-child) {
+        border-bottom: 1px solid var(--border);
+    }
 }
 
 .notification-bubble {
@@ -846,20 +917,20 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     background: linear-gradient(45deg, var(--bg-5), var(--bg-4));
     position: relative;
     overflow: hidden;
-}
 
-.processing-box:before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -50%;
-    width: 20%;
-    height: 100%;
-    --shimmer: var(--bg-0);
-    background: color-mix(in oklab, var(--shimmer), transparent 80%);
-    transform: skewX(80deg);
-    animation: processing 3s infinite;
-    box-shadow: 0 0 20px 10px color-mix(in oklab, var(--shimmer), transparent 80%);
+    &:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -50%;
+        width: 20%;
+        height: 100%;
+        --shimmer: var(--bg-0);
+        background: color-mix(in oklab, var(--shimmer), transparent 80%);
+        transform: skewX(80deg);
+        animation: processing 3s infinite;
+        box-shadow: 0 0 20px 10px color-mix(in oklab, var(--shimmer), transparent 80%);
+    }
 }
 
 @keyframes processing {
@@ -897,10 +968,10 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .feed-track {
     border: 1px solid var(--border);
-}
 
-.feed-track:hover {
-    border-color: var(--fg-0);
+    &:hover {
+        border-color: var(--fg-0);
+    }
 }
 
 .playing {
@@ -968,31 +1039,31 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     align-items: center;
     cursor: pointer;
     text-align: left;
-}
 
-.search-result.selected {
-    background: var(--bg-2);
-}
+    &.selected {
+        background: var(--bg-2);
+    }
 
-.search-result:hover {
-    background: var(--bg-3);
-}
+    &:hover {
+        background: var(--bg-3);
+    }
 
-.search-result.exact-match {
-    font-weight: bold;
-    border-left: 3px solid var(--blue);
+    &.exact-match {
+        font-weight: bold;
+        border-left: 3px solid var(--blue);
+    }
 }
 
 .search-result-image {
     --search-result-image-size: 2em;
     width: var(--search-result-image-size);
     height: var(--search-result-image-size);
-}
 
-.search-result-image img {
-    width: 100%;
-    height: 100%;
-    border-radius: var(--border-radius);
+    img {
+        width: 100%;
+        height: 100%;
+        border-radius: var(--border-radius);
+    }
 }
 
 .search-result.user .search-result-image img {
