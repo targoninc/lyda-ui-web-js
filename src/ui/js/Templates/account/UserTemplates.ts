@@ -1036,7 +1036,7 @@ export class UserTemplates {
                     },
                 });
                 menuItems.push({
-                    label: t("MOVE_LEFT"), icon: "chevron_left", show: !isFirst,
+                    label: t("MOVE_LEFT"), icon: "chevron_left", show: currentUser.value?.id === profileUser.id && !isFirst,
                     onclick: async () => {
                         await Api.movePin(pin.id, "left");
                         [items[pi - 1], items[pi]] = [items[pi], items[pi - 1]];
@@ -1045,7 +1045,7 @@ export class UserTemplates {
                     },
                 });
                 menuItems.push({
-                    label: t("MOVE_RIGHT"), icon: "chevron_right", show: !isLast,
+                    label: t("MOVE_RIGHT"), icon: "chevron_right", show: currentUser.value?.id === profileUser.id && !isLast,
                     onclick: async () => {
                         await Api.movePin(pin.id, "right");
                         [items[pi], items[pi + 1]] = [items[pi + 1], items[pi]];
