@@ -1028,7 +1028,7 @@ export class UserTemplates {
                     });
                 }
                 menuItems.push({
-                    label: t("UNPIN"), icon: "push_pin", show: true,
+                    label: t("UNPIN"), icon: "push_pin", show: currentUser.value?.id === profileUser.id,
                     onclick: async () => {
                         await pinState.unpin(pin.entity_type, pin.entity_id);
                         items.splice(items.indexOf(pin), 1);
