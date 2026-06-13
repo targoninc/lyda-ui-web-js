@@ -889,7 +889,7 @@ export class UserTemplates {
                         when(!isOwnProfile && currentUser.value, UserTemplates.followButton(Util.isFollowing(user), user.id)),
                     ).classes("align-children", "align-end", "big-gap")
                 ),
-            ).classes("space-between"),
+            ).classes("space-between", "align-children"),
             UserTemplates.userDescription(user, isOwnProfile),
             UserTemplates.pinsCarousel(user),
             when(

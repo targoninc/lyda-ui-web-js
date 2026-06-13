@@ -222,7 +222,10 @@ body {
     padding: 0;
 }
 
-html, body {
+html {
+    height: 100%;
+}
+body {
     overflow: auto;
     height: 100%;
     scroll-padding-top: 60px;
