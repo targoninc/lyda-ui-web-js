@@ -157,10 +157,7 @@ export class PlayManager {
             }
         }
         delete streamClients.value[id];
-    }
-
-    static getStreamClient(id: number): IStreamClient {
-        return streamClients.value[id];
+        this.streamClientLastUsed.delete(id);
     }
 
     static playFrom(type: FeedType | "album" | "playlist", name: string = type, options?: {
@@ -202,19 +199,45 @@ export class PlayManager {
         }
     }
 
+    private static streamClientLastUsed = new Map<number, number>();
+    private static readonly STREAM_CLIENT_TTL = 10 * 60 * 1000;
+
+    private static touchStreamClient(id: number) {
+        this.streamClientLastUsed.set(id, Date.now());
+    }
+
+    private static pruneStaleStreamClients() {
+        const now = Date.now();
+        for (const [id, lastUsed] of this.streamClientLastUsed) {
+            if (id === currentTrackId.value) continue;
+            if (now - lastUsed > this.STREAM_CLIENT_TTL) {
+                this.removeStreamClient(id);
+            }
+        }
+    }
+
     static addStreamClientIfNotExists(id: number, duration: number) {
         let streamClient = PlayManager.getStreamClient(id);
         if (streamClient === undefined) {
             streamClient = new StreamClient(id, currentSecretCode.value);
             PlayManager.addStreamClient(id, streamClient);
             PlayManager.registerOnEnded(id, streamClient);
+            PlayManager.pruneStaleStreamClients();
         } else {
             if (streamClient.duration === 0) {
                 streamClient.duration = duration;
                 StreamingUpdater.updateBuffers(streamClient.getBufferedLength(), streamClient.duration);
             }
         }
+        PlayManager.touchStreamClient(id);
         return streamClient;
+    }
+
+    static getStreamClient(id: number): IStreamClient {
+        if (streamClients.value[id]) {
+            this.touchStreamClient(id);
+        }
+        return streamClients.value[id];
     }
 
     static async removeTrackFromAllStates(id: number) {
