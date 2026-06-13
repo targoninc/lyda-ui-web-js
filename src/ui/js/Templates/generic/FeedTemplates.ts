@@ -7,7 +7,7 @@ import { ContextMenuTemplates } from "./ContextMenuTemplates.ts";
 import { PopoverTemplates } from "./PopoverTemplates.ts";
 import { InteractionTemplates } from "../InteractionTemplates.ts";
 import { InteractionStateManager } from "../../Classes/InteractionStateManager.ts";
-import { currentTrackId, currentUser, playingHere, manualQueue } from "../../state.ts";
+import { currentTrackId, currentUser, loadingAudio, playingHere, manualQueue } from "../../state.ts";
 import { PlayManager } from "../../Streaming/PlayManager.ts";
 import { QueueManager } from "../../Streaming/QueueManager.ts";
 import { startItem } from "../../Actions/MusicActions.ts";
@@ -773,6 +773,7 @@ export class FeedTemplates {
                 }
             },
             isPlaying: (id) => compute((c, p) => c === id && p, currentTrackId, playingHere),
+            isLoading: (id) => compute((c, l) => c === id && l, currentTrackId, loadingAudio),
             dateRender: (track) => {
                 const date = (track as any).release_date || track.created_at;
                 return GenericTemplates.timestamp(date, ["hideOnSmallBreakpoint"]);

@@ -50,9 +50,11 @@
     --glass-transparency: .3;
     --glass-1: rgba(var(--base-rgb), var(--glass-transparency));
     --glass-2: rgba(var(--contrast-rgb), var(--glass-transparency));
+    --glass-3: rgba(var(--base-rgb), calc(var(--glass-transparency) * 3));
     --mixed: color-mix(in oklab, var(--glass-1), var(--glass-2) 5%);
     --background-glass: linear-gradient(-45deg, var(--glass-1), var(--mixed));
     --background-light-glass: var(--mixed);
+    --background-readable-glass: linear-gradient(-45deg, var(--glass-3), var(--mixed));
 
     --tainted-bg-green: color-mix(in oklab, var(--bg-0), var(--blue) 15%);
     --tainted-bg-green-dark: color-mix(in oklab, var(--bg-0), var(--blue) 10%);
@@ -87,12 +89,12 @@
     --jessc-base-font-size: var(--font-size-medium);
     --jessc-text-color: var(--fg-0);
     --jessc-error-color: var(--red);
-    --jessc-interactive-background: var(--bg-1);
+    --jessc-interactive-background: var(--background-readable-glass);
     --jessc-interactive-background-hover: var(--bg-2);
     --jessc-interactive-background-active: var(--background-playing);
     --jessc-interactive-color: var(--fg-0);
     --jessc-interactive-color-active: var(--fg-0);
-    --jessc-interactive-border: var(--bg-3);
+    --jessc-interactive-border: var(--border);
     --jessc-interactive-border-focused: var(--blue);
     --jessc-interactive-border-active: var(--blue);
     --jessc-interactive-border-hover: var(--fg-0);
@@ -221,7 +223,9 @@ body {
 }
 
 html, body {
-    overflow: hidden;
+    overflow: auto;
+    height: 100%;
+    scroll-padding-top: 60px;
 }
 
 .loader {
@@ -271,10 +275,12 @@ nav, footer {
 }
 
 nav {
-    background: var(--bg-1);
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
-footer, .fixed-bar, .modal-overlay, .modal, .card, .user-preview, .glass, .pin-card, .description {
+nav, footer, .fixed-bar, .modal-overlay, .modal, .card, .user-preview, .glass, .pin-card, .description {
     background: var(--background-glass);
     backdrop-filter: saturate(180%) blur(10px);
     -webkit-backdrop-filter: saturate(180%) blur(10px);
@@ -320,7 +326,7 @@ footer:empty {
 
 .page-background {
     background: var(--bg-0);
-    overflow: auto;
+    min-height: 100vh;
 }
 
 .page-container {
@@ -416,6 +422,7 @@ form {
 
 input, textarea, select {
     background: var(--jessc-interactive-background);
+    backdrop-filter: blur(10px);
     border: 1px solid var(--jessc-interactive-border);
     color: var(--fg-0);
     box-sizing: border-box;

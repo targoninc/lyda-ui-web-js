@@ -927,6 +927,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .feed-track {
     border: 1px solid var(--border);
+    border-radius: var(--large-border-radius);
 
     &:hover {
         border-color: var(--fg-0);

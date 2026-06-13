@@ -19,12 +19,6 @@ export class Ui {
             const burgerMenuOpen = signal(false);
             document.body.prepend(NavTemplates.navTop(burgerMenuOpen));
             document.body.prepend(vertical(when(burgerMenuOpen, NavTemplates.burgerMenuContent(burgerMenuOpen))).build())
-
-            setTimeout(() => {
-                window.onresize = async () => {
-                    await Ui.windowResize();
-                };
-            }, 1000);
         }
     }
 
@@ -49,19 +43,10 @@ export class Ui {
     }
 
     static async windowResize() {
-        const pageBackground = document.querySelector(".page-background") as HTMLElement;
         let nav = document.querySelector("nav");
         if (nav === null && !navInitialized.value) {
             navInitialized.value = true;
-            Ui.initializeNavBar().then(() => {
-                nav = document.querySelector("nav");
-                if (nav && pageBackground) {
-                    pageBackground.style.height = (window.innerHeight - nav.clientHeight) + "px";
-                }
-            });
-        }
-        if (nav && pageBackground) {
-            pageBackground.style.height = (window.innerHeight - nav.clientHeight) + "px";
+            await Ui.initializeNavBar();
         }
     }
 
