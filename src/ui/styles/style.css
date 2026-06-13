@@ -227,7 +227,7 @@ html {
 }
 body {
     overflow: auto;
-    height: 100%;
+    min-height: 100%;
     scroll-padding-top: 60px;
 }
 
