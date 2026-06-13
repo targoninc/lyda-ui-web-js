@@ -1182,7 +1182,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .fixed-bar {
     position: sticky;
-    top: var(--gap);
+    top: 44px;
     z-index: 1;
     padding: var(--base-padding);
     border-radius: var(--large-border-radius);
