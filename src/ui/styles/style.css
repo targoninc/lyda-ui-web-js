@@ -295,7 +295,7 @@ nav, footer, .fixed-bar, .modal-overlay, .modal, .card, .user-preview, .glass, .
 }
 
 footer {
-    position: absolute;
+    position: fixed;
     z-index: 2;
     bottom: var(--base-padding);
     left: 50%;
