@@ -38,6 +38,24 @@ function uid(): string {
 }
 
 const lastNavTimestamps = new Map<number, number>();
+const NAV_DEBOUNCE_MS = 300;
+function isNavAllowed(id: number): boolean {
+    const now = Date.now();
+    const last = lastNavTimestamps.get(id);
+    if (last && now - last < NAV_DEBOUNCE_MS) {
+        return false;
+    }
+    lastNavTimestamps.set(id, now);
+    if (lastNavTimestamps.size > 500) {
+        const cutoff = now - 5000;
+        for (const [key, ts] of lastNavTimestamps) {
+            if (ts < cutoff) {
+                lastNavTimestamps.delete(key);
+            }
+        }
+    }
+    return true;
+}
 
 
 export class FeedTemplates {
@@ -648,10 +666,7 @@ export class FeedTemplates {
                                             create("span").classes("feed-title", "clickable", "pointer").text(track.title)
                                                 .onclick((e: Event) => {
                                                     e.stopPropagation();
-                                                    const now = Date.now();
-                                                    const last = lastNavTimestamps.get(track.id) ?? 0;
-                                                    if (now - last < 400) return;
-                                                    lastNavTimestamps.set(track.id, now);
+                                                    if (!isNavAllowed(track.id)) return;
                                                     navigate(`/track/${track.id}`);
                                                 })
                                                 .build(),

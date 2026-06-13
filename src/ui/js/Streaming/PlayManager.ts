@@ -17,6 +17,8 @@ import {
     playingHere,
     streamClients,
     trackInfo,
+    setTrackInfo,
+    removeTrackInfo,
     volume,
 } from "../state.ts";
 import {StreamingBroadcaster, StreamingEvent} from "./StreamingBroadcaster.ts";
@@ -114,8 +116,13 @@ export class PlayManager {
 
     static addStreamClient(id: number, streamClient: IStreamClient) {
         const existing = streamClients.value[id];
-        if (existing && typeof (existing as any).close === "function") {
-            (existing as any).close();
+        if (existing) {
+            if (typeof (existing as any)._cleanup === "function") {
+                (existing as any)._cleanup();
+            }
+            if (typeof (existing as any).close === "function") {
+                (existing as any).close();
+            }
         }
         streamClients.value[id] = streamClient;
     }
@@ -141,8 +148,13 @@ export class PlayManager {
 
     static removeStreamClient(id: number) {
         const existing = streamClients.value[id];
-        if (existing && typeof (existing as any).close === "function") {
-            (existing as any).close();
+        if (existing) {
+            if (typeof (existing as any)._cleanup === "function") {
+                (existing as any)._cleanup();
+            }
+            if (typeof (existing as any).close === "function") {
+                (existing as any).close();
+            }
         }
         delete streamClients.value[id];
     }
@@ -211,12 +223,12 @@ export class PlayManager {
             await PlayManager.stopAsync(id);
             PlayManager.removeStreamClient(id);
             currentTrackId.value = 0;
-            delete trackInfo.value[id];
+            removeTrackInfo(id);
             document.querySelector("#permanent-player")?.remove();
             StreamingBroadcaster.send(StreamingEvent.trackStop, id);
         }
         if (trackInfo.value[id]) {
-            delete trackInfo.value[id];
+            removeTrackInfo(id);
         }
     }
 
@@ -523,7 +535,7 @@ export class PlayManager {
     }
 
     static async cacheTrackData(trackData: { track: Track }) {
-        trackInfo.value[trackData.track.id] = trackData;
+        setTrackInfo(trackData.track.id, trackData);
     }
 
     static async getTrackData(id: number, allowCache = true) {

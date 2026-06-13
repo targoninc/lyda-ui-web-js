@@ -116,6 +116,28 @@ if (!currentTrackId.value) {
 export const currentQuality = signal(StreamingQuality.high);
 
 export const trackInfo = signal<Record<number, { track: Track }>>({});
+let trackInfoInsertionOrder: number[] = [];
+const TRACK_INFO_MAX = 200;
+
+export function setTrackInfo(id: number, data: { track: Track }) {
+    const current = trackInfo.value;
+    if (!current[id]) {
+        trackInfoInsertionOrder.push(id);
+        if (trackInfoInsertionOrder.length > TRACK_INFO_MAX) {
+            const evictId = trackInfoInsertionOrder.shift()!;
+            delete current[evictId];
+        }
+    }
+    current[id] = data;
+    trackInfo.value = current;
+}
+
+export function removeTrackInfo(id: number) {
+    const current = trackInfo.value;
+    delete current[id];
+    trackInfoInsertionOrder = trackInfoInsertionOrder.filter(i => i !== id);
+    trackInfo.value = current;
+}
 
 export const volume = signal(LydaCache.get<number>(UserCacheKey.volume).content ?? 0.25);
 volume.subscribe((newValue, changed) => {
@@ -229,6 +251,24 @@ shuffling.subscribe((p, changed) => {
 export const currentSecretCode = signal<string>("");
 
 export const notifications = signal<Notification[]>([]);
+const NOTIFICATIONS_MAX = 50;
+
+export function setNotifications(value: Notification[]) {
+    if (value.length > NOTIFICATIONS_MAX) {
+        value = value.slice(0, NOTIFICATIONS_MAX);
+    }
+    notifications.value = value;
+}
+
+export function appendNotifications(newNotifs: Notification[], oldNotifs: Notification[]) {
+    const merged = oldNotifs
+        .concat(newNotifs.filter(n => !oldNotifs.find(on => on.id === n.id)))
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    if (merged.length > NOTIFICATIONS_MAX) {
+        merged.length = NOTIFICATIONS_MAX;
+    }
+    notifications.value = merged;
+}
 
 export const permissions = signal<Permission[]>([]);
 

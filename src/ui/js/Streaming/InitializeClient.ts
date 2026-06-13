@@ -3,6 +3,8 @@ import { currentQuality, currentTrackId, currentTrackPosition, muted, volume } f
 import { PlayManager } from "./PlayManager.ts";
 
 export function initializeClient(client: IStreamClient) {
+    const cleanupKey = `init-client-${Math.random()}`;
+
     currentQuality.subscribe(async q => {
         if (client.playing) {
             client.stopAsync();
@@ -17,9 +19,9 @@ export function initializeClient(client: IStreamClient) {
         } else {
             client.stopAsync();
         }
-    });
+    }, cleanupKey);
 
-    volume.subscribe(async q => client.setVolume(muted.value ? 0 : q));
+    volume.subscribe(async q => client.setVolume(muted.value ? 0 : q), cleanupKey);
     client.setVolume(muted.value ? 0 : volume.value);
 
     const currentStreamClient = PlayManager.getStreamClient(currentTrackId.value);
@@ -28,4 +30,9 @@ export function initializeClient(client: IStreamClient) {
     } else {
         client.setVolume(muted.value ? 0 : currentStreamClient.getVolume());
     }
+
+    (client as any)._cleanup = () => {
+        currentQuality.unsubscribeKey(cleanupKey);
+        volume.unsubscribeKey(cleanupKey);
+    };
 }

@@ -1,5 +1,28 @@
 export class ColorExtractor {
     private static cache = new Map<string, string>();
+    private static cacheAccessOrder = new Map<string, number>();
+    private static cacheAccessCounter = 0;
+    private static readonly CACHE_MAX = 500;
+
+    private static touchCache(url: string) {
+        this.cacheAccessOrder.set(url, ++this.cacheAccessCounter);
+    }
+
+    private static evictCache() {
+        if (this.cache.size < this.CACHE_MAX) return;
+        let oldestKey: string | null = null;
+        let oldestOrder = Infinity;
+        for (const [key, order] of this.cacheAccessOrder) {
+            if (this.cache.has(key) && order < oldestOrder) {
+                oldestOrder = order;
+                oldestKey = key;
+            }
+        }
+        if (oldestKey) {
+            this.cache.delete(oldestKey);
+            this.cacheAccessOrder.delete(oldestKey);
+        }
+    }
 
     static async extract(imageUrl: string): Promise<string | null> {
         if (!imageUrl || imageUrl.includes("/defaults/")) {
@@ -9,6 +32,7 @@ export class ColorExtractor {
 
         const cached = this.cache.get(imageUrl);
         if (cached) {
+            this.touchCache(imageUrl);
             console.log("[ColorExtractor] cache hit", cached);
             return cached;
         }
@@ -17,7 +41,9 @@ export class ColorExtractor {
             const color = await this.extractDominant(imageUrl);
             console.log("[ColorExtractor] extracted", color, "from", imageUrl.substring(0, 80));
             if (color) {
+                this.evictCache();
                 this.cache.set(imageUrl, color);
+                this.touchCache(imageUrl);
             }
             return color;
         } catch (e) {
@@ -53,6 +79,7 @@ export class ColorExtractor {
 
     static clearCache() {
         this.cache.clear();
+        this.cacheAccessOrder.clear();
     }
 
     private static extractDominant(imageUrl: string): Promise<string | null> {

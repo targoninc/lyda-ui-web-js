@@ -58,8 +58,15 @@ export class InteractionStateManager {
         return entity.interactions.get(interactionType);
     }
 
-    /** Register that an entity is visible via a given context type. */
+    /**
+     * Register that an entity is visible via a given context type.
+     * For "player" context, any existing "player" context for a different
+     * entity is removed first so stale entries don't accumulate.
+     */
     static addContext(entityType: EntityType, id: number, contextType: ContextType): void {
+        if (contextType === "player") {
+            this.clearContextType("player");
+        }
         const key = entityKey(entityType, id);
         if (!store.has(key)) {
             store.set(key, { contexts: new Set(), interactions: new Map() });

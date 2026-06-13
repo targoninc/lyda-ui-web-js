@@ -19,10 +19,14 @@ const DEFAULT_FALLBACKS: Record<string, string> = {
 export class CachingService {
     private dbPromise: Promise<IDBDatabase> | null = null;
     private readonly blobUrlCache = new Map<string, string>();
+    private readonly blobAccessOrder = new Map<string, number>();
+    private blobAccessCounter = 0;
+    private static readonly BLOB_CACHE_MAX = 50;
     private static readonly DB_NAME = "LydaImageCache";
-    private static readonly DB_VERSION = 1;
+    private static readonly DB_VERSION = 2;
     private static readonly IMAGE_STORE = "images";
     private static readonly IMAGE_TTL = 24 * 60 * 60 * 1000;
+    private static readonly DB_MAX_ENTRIES = 500;
 
     private getDb(): Promise<IDBDatabase> {
         if (!this.dbPromise) {
@@ -41,11 +45,68 @@ export class CachingService {
         return this.dbPromise;
     }
 
+    private touchBlobUrl(key: string) {
+        this.blobAccessOrder.set(key, ++this.blobAccessCounter);
+    }
+
+    private evictBlobUrl(): string | null {
+        if (this.blobUrlCache.size < CachingService.BLOB_CACHE_MAX) {
+            return null;
+        }
+        let oldestKey: string | null = null;
+        let oldestOrder = Infinity;
+        for (const [key, order] of this.blobAccessOrder) {
+            if (this.blobUrlCache.has(key) && order < oldestOrder) {
+                oldestOrder = order;
+                oldestKey = key;
+            }
+        }
+        if (oldestKey) {
+            const url = this.blobUrlCache.get(oldestKey)!;
+            URL.revokeObjectURL(url);
+            this.blobUrlCache.delete(oldestKey);
+            this.blobAccessOrder.delete(oldestKey);
+        }
+        return oldestKey;
+    }
+
+    private async capIndexedDb() {
+        try {
+            const db = await this.getDb();
+            const tx = db.transaction(CachingService.IMAGE_STORE, "readonly");
+            const store = tx.objectStore(CachingService.IMAGE_STORE);
+            const count = await new Promise<number>((resolve) => {
+                const req = store.count();
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => resolve(0);
+            });
+            if (count <= CachingService.DB_MAX_ENTRIES) {
+                return;
+            }
+            const allReq = store.getAll();
+            allReq.onsuccess = async () => {
+                const all: CachedImage[] = allReq.result;
+                all.sort((a, b) => a.fetchedAt - b.fetchedAt);
+                const toDelete = all.slice(0, all.length - CachingService.DB_MAX_ENTRIES);
+                if (toDelete.length === 0) return;
+                const writeTx = db.transaction(CachingService.IMAGE_STORE, "readwrite");
+                const writeStore = writeTx.objectStore(CachingService.IMAGE_STORE);
+                for (const entry of toDelete) {
+                    writeStore.delete(entry.key);
+                }
+                writeTx.onerror = () => {};
+            };
+        } catch {
+            // ignore
+        }
+    }
+
     async getImageUrl(id: number, type: MediaFileType, quality: number = 500): Promise<string> {
         const key = `${type}_${id}_${quality}`;
 
         const existing = this.blobUrlCache.get(key);
         if (existing) {
+            this.touchBlobUrl(key);
             return existing;
         }
 
@@ -60,8 +121,10 @@ export class CachingService {
             });
 
             if (cached && Date.now() - cached.fetchedAt < CachingService.IMAGE_TTL) {
+                this.evictBlobUrl();
                 const url = URL.createObjectURL(cached.blob);
                 this.blobUrlCache.set(key, url);
+                this.touchBlobUrl(key);
                 return url;
             }
         } catch {
@@ -86,12 +149,15 @@ export class CachingService {
                     tx.oncomplete = () => resolve();
                     tx.onerror = () => resolve();
                 });
+                this.capIndexedDb();
             } catch {
                 // storage failed, use blob URL without cache
             }
 
+            this.evictBlobUrl();
             const url = URL.createObjectURL(blob);
             this.blobUrlCache.set(key, url);
+            this.touchBlobUrl(key);
             return url;
         } catch {
             return DEFAULT_FALLBACKS[type] ?? serverUrl;
@@ -106,6 +172,7 @@ export class CachingService {
             URL.revokeObjectURL(existingUrl);
             this.blobUrlCache.delete(key);
         }
+        this.blobAccessOrder.delete(key);
 
         try {
             const db = await this.getDb();
@@ -126,6 +193,7 @@ export class CachingService {
             URL.revokeObjectURL(url);
         }
         this.blobUrlCache.clear();
+        this.blobAccessOrder.clear();
 
         try {
             const db = await this.getDb();

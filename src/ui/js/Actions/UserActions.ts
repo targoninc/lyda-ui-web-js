@@ -7,7 +7,7 @@ import { Icons } from "../Enums/Icons.ts";
 import { MediaUploader } from "../Api/MediaUploader.ts";
 import { Signal } from "@targoninc/jess";
 import { Api } from "../Api/Api.ts";
-import { currentQuality, currentUser, notifications } from "../state.ts";
+import { currentQuality, currentUser, notifications, setNotifications, appendNotifications } from "../state.ts";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
 import { NotificationType } from "../Enums/NotificationType.ts";
@@ -75,19 +75,15 @@ export class UserActions {
     static async getNotifications() {
         if (!currentUser.value) return;
 
-        const newestId = notifications.value.sort(
+        const sorted = [...notifications.value].sort(
             (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        )[0]?.id;
+        );
+        const newestId = sorted[0]?.id;
         if (!newestId) {
-            notifications.value = (await Api.getNotifications()) ?? [];
+            setNotifications((await Api.getNotifications()) ?? []);
         } else {
             const newNotifs = (await Api.getNotifications(newestId)) ?? [];
-            const oldNotifs = notifications.value;
-            notifications.value = oldNotifs
-                .concat(newNotifs.filter(n => !oldNotifs.find(on => on.id === n.id)))
-                .sort(
-                    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-                );
+            appendNotifications(newNotifs, notifications.value);
         }
     }
 
