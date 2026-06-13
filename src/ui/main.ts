@@ -61,7 +61,7 @@ export const router = new Router(routes, async (route: Route, params: any) => {
     }
     pageContainer.appendChild(template);
     pageContainer.setAttribute("page", page);
-    pageContainer.scrollIntoView();
+    window.scrollTo(0, 0);
 
     Ui.loadTheme().then();
 }, () => {}, () => {
