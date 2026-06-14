@@ -965,7 +965,7 @@ td:last-child, th:last-child {
     bottom: calc(100% - 19px);
     width: 100%;
     max-width: var(--breakpoint-big);
-    height: 100dvh;
+    height: calc(100dvh - 50px);
     border: 1px solid var(--border);
     border-radius: var(--large-border-radius);
     transition: height 100ms ease-in-out;

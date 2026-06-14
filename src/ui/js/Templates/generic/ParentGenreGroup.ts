@@ -1,4 +1,4 @@
-import {compute, create, signal, signalMap, Signal, when, InputType, StringOrSignal} from "@targoninc/jess";
+import {compute, create, signal, signalMap, Signal, when, InputType, StringOrSignal, AnyElement} from "@targoninc/jess";
 import {button} from "@targoninc/jess-components";
 import {DISCOGS_PARENT_GENRES, DiscogsParentGenre, Genre} from "@targoninc/lyda-shared/src/Enums/Genre";
 import {GenreByParent, getSubgenreDisplay} from "@targoninc/lyda-shared/src/Enums/GenreLabels";
@@ -13,7 +13,6 @@ export interface ParentGenreGroupOptions {
     suggestedGenres?: Signal<Genre[]>;
     analyzing?: Signal<boolean>;
     listVisible?: Signal<boolean>;
-    afterSearchElement?: AnyElement;
 }
 
 export function ParentGenreGroup(options: ParentGenreGroupOptions) {
@@ -25,7 +24,6 @@ export function ParentGenreGroup(options: ParentGenreGroupOptions) {
         suggestedGenres = signal<Genre[]>([]),
         analyzing = signal(false),
         listVisible,
-        afterSearchElement,
     } = options;
 
     const expandedParents = signal<Set<DiscogsParentGenre>>(new Set());
@@ -66,11 +64,17 @@ export function ParentGenreGroup(options: ParentGenreGroupOptions) {
         return getFilteredGenres(parent).length > 0;
     };
 
+    const toggleBtn = listVisible ? button({
+        icon: {icon: compute((e): string => e ? "expand_more" : "chevron_right", listVisible)},
+        classes: ["rounded-max"],
+        onclick: () => listVisible.value = !listVisible.value,
+    }) : null;
+
     return create("div")
         .classes("parent-genre-group", "flex-v", "small-gap")
         .children(
             when(label, create("label").text(label).build()),
-            selectedGenresRow(selectedGenres, maxGenres, placeholder, searchQuery, removeGenre, analyzing, afterSearchElement),
+            selectedGenresRow(selectedGenres, maxGenres, placeholder, searchQuery, removeGenre, analyzing, toggleBtn),
             suggestionsRow(suggestedGenres, addGenre),
             when(listVisible ?? signal(true), genreGroupList(expandedParents, searchQuery, selectedGenres, addGenre, removeGenre, toggleParent, getFilteredGenres, hasMatchingGenres)),
         ).build();
@@ -83,7 +87,7 @@ function selectedGenresRow(
     searchQuery: Signal<string>,
     removeGenre: (g: Genre) => void,
     analyzing: Signal<boolean>,
-    afterSearchElement?: AnyElement,
+    toggleBtn: AnyElement | null,
 ) {
     return create("div").classes("flex", "flex-wrap", "small-gap", "align-children").children(
         signalMap(
@@ -110,7 +114,7 @@ function selectedGenresRow(
             compute(s => s.length >= maxGenres, selectedGenres),
             create("span").classes("color-dim", "small").text(t("MAX_GENRES_REACHED")).build(),
         ),
-        afterSearchElement,
+        toggleBtn,
         when(analyzing, () =>
             create("div").classes("flex", "align-children", "color-dim")
                 .children(

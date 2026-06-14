@@ -759,6 +759,9 @@ export class Api {
             upc: track.upc,
             price: track.price,
             wip: track.wip,
+            lyrics_plain_text: (track as any).lyrics_plain_text,
+            lyrics_timed_file: (track as any).lyrics_timed_file,
+            lyrics_timed_format: (track as any).lyrics_timed_format,
         });
     }
 

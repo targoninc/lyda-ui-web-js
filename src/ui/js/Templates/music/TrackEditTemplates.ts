@@ -396,6 +396,7 @@ export class TrackEditTemplates {
         state: Signal<UploadableTrack>,
     ) {
         const expanded = signal(false);
+        const genresExpanded = signal(false);
 
         return TrackEditTemplates.sectionCard(
             t("TRACK_DETAILS"),
@@ -423,11 +424,12 @@ export class TrackEditTemplates {
                         TrackEditTemplates.creditsInput(state),
                         TrackEditTemplates.linkedUsers(state.value.collaborators, state as Signal<UploadableTrack | Track>, true),
                         GenericTemplates.releaseDateInput(state),
-                        TrackEditTemplates.genreTagsInput(state),
+                        TrackEditTemplates.lyricsSection(state),
                         horizontal(
                             TrackEditTemplates.isrcInput(state),
                             TrackEditTemplates.upcInput(state),
-                        )
+                        ),
+                        TrackEditTemplates.genreTagsInput(state, genresExpanded),
                     ).classes("big-gap").build()),
                 ).build(),
             ],
@@ -559,7 +561,7 @@ export class TrackEditTemplates {
         });
     }
 
-    static genreTagsInput(parentState: Signal<UploadableTrack>) {
+    static genreTagsInput(parentState: Signal<UploadableTrack>, genresExpanded?: Signal<boolean>) {
         const MAX_GENRES = 5;
         const currentTags = signal<Genre[]>(parentState.value.genres as Genre[] ?? []);
         const suggestedGenres = signal<Genre[]>(parentState.value.genrePredictions as Genre[] ?? []);
@@ -592,7 +594,98 @@ export class TrackEditTemplates {
             label: t("GENRE"),
             suggestedGenres,
             analyzing,
+            listVisible: genresExpanded,
         });
+    }
+
+    private static lyricsSection(state: Signal<UploadableTrack>) {
+        const lyricsTab = signal(state.value.lyrics_timed_file ? 1 : 0);
+        const fileName = signal("");
+
+        lyricsTab.subscribe(i => {
+            if (i === 0) {
+                state.value = { ...state.value, lyrics_timed_file: null, lyrics_timed_format: null };
+            } else {
+                state.value = { ...state.value, lyrics_plain_text: null };
+            }
+        });
+
+        return create("div")
+            .classes("flex-v", "small-gap")
+            .children(
+                create("label")
+                    .text(t("LYRICS"))
+                    .build(),
+                GenericTemplates.combinedSelector(
+                    [`${t("LYRICS_TEXT")}`, `${t("LYRICS_FILE")}`],
+                    i => { lyricsTab.value = i; },
+                    state.value.lyrics_timed_file ? 1 : 0,
+                ),
+                when(compute(i => i === 0, lyricsTab),
+                    textarea({
+                        name: "lyrics_plain_text",
+                        label: "",
+                        placeholder: t("LYRICS_PLACEHOLDER"),
+                        value: compute(s => s.lyrics_plain_text ?? "", state),
+                        onchange: v => {
+                            state.value = { ...state.value, lyrics_plain_text: v || null };
+                        },
+                    }),
+                ),
+                when(compute(i => i === 1, lyricsTab),
+                    vertical(
+                        FormTemplates.fileField(
+                            t("LYRICS_FILE"),
+                            `${t("LYRICS_FILE")}`,
+                            "lyrics-file",
+                            ".lrc,.srt",
+                            false,
+                            (name, files) => {
+                                if (files && files.length > 0) {
+                                    const file = files[0];
+                                    const ext = name.split(".").pop()?.toLowerCase();
+                                    const format = ext === "srt" ? "srt" : "lrc";
+                                    fileName.value = name;
+                                    const reader = new FileReader();
+                                    reader.onload = e => {
+                                        const content = (e.target as FileReader).result as string;
+                                        state.value = {
+                                            ...state.value,
+                                            lyrics_timed_file: content,
+                                            lyrics_timed_format: format,
+                                        };
+                                    };
+                                    reader.readAsText(file);
+                                }
+                            },
+                        ),
+                        when(compute(s => !!s.lyrics_timed_file, state), () =>
+                            create("span")
+                                .classes("color-dim", "text-small")
+                                .text(compute(s => s.lyrics_timed_file ? `${fileName.value}` : "", state))
+                                .build()
+                        ),
+                    ).classes("small-gap").build(),
+                ),
+                when(
+                    compute(s => !!(s.lyrics_plain_text || s.lyrics_timed_file), state),
+                    button({
+                        text: t("REMOVE"),
+                        classes: ["negative"],
+                        icon: { icon: "close" },
+                        onclick: () => {
+                            lyricsTab.value = 0;
+                            fileName.value = "";
+                            state.value = {
+                                ...state.value,
+                                lyrics_plain_text: null,
+                                lyrics_timed_file: null,
+                                lyrics_timed_format: null,
+                            };
+                        },
+                    }),
+                ),
+            ).build();
     }
 
     private static isrcInput(state: Signal<UploadableTrack>) {

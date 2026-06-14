@@ -3,9 +3,9 @@ import { Icons } from "../../Enums/Icons.ts";
 import { Time } from "../../Classes/Helpers/Time.ts";
 import { Images } from "../../Enums/Images.ts";
 import { QueueTemplates } from "./QueueTemplates.ts";
+import { LyricsTemplates } from "./LyricsTemplates.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
-import { PopoverTemplates } from "../generic/PopoverTemplates.ts";
 import { Ui } from "../../Classes/Ui.ts";
 import { getPlayIcon, Util } from "../../Classes/Util.ts";
 import { compute, computeAsync, create, nullElement, Signal, signal, when } from "@targoninc/jess";
@@ -656,9 +656,10 @@ export class PlayerTemplates {
         if (track.has_cover) {
             cover.value = Util.getTrackCover(track.id);
         }
-        const tabs: any[] = [`${t("PLAYER")}`, `${t("QUEUE")}`];
+        const tabs: any[] = [`${t("PLAYER")}`, `${t("LYRICS")}`, `${t("QUEUE")}`];
         const tabContents = [
             PlayerTemplates.mobilePlayerTab(track, cover, trackUser),
+            LyricsTemplates.lyricsView(track),
             QueueTemplates.fullQueueList(),
         ];
 

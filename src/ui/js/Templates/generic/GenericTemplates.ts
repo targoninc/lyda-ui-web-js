@@ -324,7 +324,7 @@ export class GenericTemplates {
         const input = create("input").type(InputType.file).styles("display", "none").id(id).name(name).required(required).attributes("accept", accept).onchange(_ => {
             const fileName = input.value;
             if (accept && !accept.includes("*")) {
-                const accepts = accept.split(",");
+                const accepts = accept.split(",").map(a => a.replace(/^\./, ""));
                 const extension = fileName.substring(fileName.lastIndexOf(".") + 1);
                 if (!accepts.includes(extension)) {
                     text.value = `${t("NOT_SUPPORTED_TYPE")}`;

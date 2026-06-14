@@ -368,11 +368,6 @@ export class PageTemplates {
             placeholder: t("FILTER_GENRES"),
             label: t("GENRE"),
             listVisible: expanded,
-            afterSearchElement: button({
-                icon: {icon: "list_arrow"},
-                classes: [compute((e): string => e ? "active" : "_", expanded)],
-                onclick: () => expanded.value = !expanded.value,
-            }),
         });
 
         const noGenres = compute(g => g.length === 0, selectedGenres$);

@@ -10,6 +10,7 @@ import {PlaylistActions} from "../../Actions/PlaylistActions.ts";
 import {DragActions} from "../../Actions/DragActions.ts";
 import {Images} from "../../Enums/Images.ts";
 import {TrackEditTemplates} from "./TrackEditTemplates.ts";
+import {LyricsTemplates} from "./LyricsTemplates.ts";
 import {CustomText} from "../../Classes/Helpers/CustomText.ts";
 import {navigate} from "../../Routing/Router.ts";
 import {AnyElement, compute, create, nullElement, Signal, signal, signalMap, when,} from "@targoninc/jess";
@@ -442,6 +443,7 @@ export class TrackTemplates {
                                     .classes("description", "break-lines")
                                     .html(CustomText.renderToHtml(track.description))
                                     .build()),
+                                TrackTemplates.lyricsSection(track),
                             ).classes("track-info-container"),
                         ).classes("big-gap"),
                         horizontal(
@@ -796,5 +798,27 @@ export class TrackTemplates {
                     }),
                 ),
             ).build();
+    }
+
+    private static lyricsSection(track: Track) {
+        if (!track.lyrics_plain_text && !track.lyrics_timed_file) {
+            return nullElement();
+        }
+
+        const expanded = signal(false);
+
+        return vertical(
+            create("div")
+                .classes("flex", "align-children", "clickable", "expandable")
+                .onclick(() => { expanded.value = !expanded.value; })
+                .children(
+                    GenericTemplates.icon(
+                        compute((e): string => e ? "expand_more" : "chevron_right", expanded),
+                        true,
+                    ),
+                    create("span").text(t("LYRICS")).build(),
+                ).build(),
+            when(expanded, LyricsTemplates.lyricsView(track, true)),
+        ).build();
     }
 }

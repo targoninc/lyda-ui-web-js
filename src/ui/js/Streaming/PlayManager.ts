@@ -36,6 +36,7 @@ import {FeedItem} from "../Models/FeedItem.ts";
 import {notify} from "../Classes/Ui.ts";
 import {t} from "../../locales";
 import {NotificationType} from "../Enums/NotificationType.ts";
+import {TrackLyrics} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackLyrics.ts";
 
 export class PlayManager {
     static async playCheck(track: Track) {
@@ -579,5 +580,10 @@ export class PlayManager {
 
     static getAllStreamClients() {
         return Object.values(streamClients.value);
+    }
+
+    static async getTrackLyrics(id: number): Promise<TrackLyrics | null> {
+        const data = await get<{ lyrics: TrackLyrics }>(ApiRoutes.getTrackLyrics, { id });
+        return data?.lyrics ?? null;
     }
 }
