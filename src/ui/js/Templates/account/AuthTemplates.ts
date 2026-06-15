@@ -30,6 +30,11 @@ import {NotificationType} from "../../Enums/NotificationType.ts";
 import {UserValidator} from "../../Classes/Validators/UserValidator.ts";
 import {AuthenticationResponseJSON} from "@passwordless-id/webauthn/dist/esm/types";
 
+export interface AuthLink {
+    url: string;
+    title?: string;
+}
+
 export interface AuthData {
     termsOfService: boolean;
     id?: number;
@@ -42,6 +47,8 @@ export interface AuthData {
     mfaMethod?: MfaOption;
     verification?: AuthenticationResponseJSON;
     challenge?: string;
+    userType?: string;
+    links?: AuthLink[];
 }
 
 export class AuthTemplates {
@@ -53,6 +60,8 @@ export class AuthTemplates {
             email: AuthTemplates.emailBox,
             "check-email": AuthTemplates.checkEmailBox,
             register: AuthTemplates.registerBox,
+            "user-type": AuthTemplates.userTypeBox,
+            "artist-links": AuthTemplates.artistLinksBox,
             registering: AuthTemplates.registeringBox,
             login: AuthTemplates.loginBox,
             "check-mfa": AuthTemplates.checkForMfaBox,
@@ -87,6 +96,8 @@ export class AuthTemplates {
         const pageMap: Record<string, string> = {
             email: `${t("EMAIL")}`,
             register: `${t("REGISTER")}`,
+            "user-type": `${t("USER_TYPE")}`,
+            "artist-links": `${t("ARTIST_LINKS")}`,
             login: `${t("LOGIN")}`,
             "mfa-select": `${t("SELECT_MFA")}`,
             "mfa-request": `${t("VERIFY_MFA")}`,
@@ -310,12 +321,146 @@ export class AuthTemplates {
             ).build();
     }
 
+    static userTypeBox(step: Signal<string>, user: Signal<AuthData>) {
+        const selected = signal<string | undefined>(user.value.userType);
+
+        selected.subscribe(s => {
+            if (!s) return;
+            user.value = {
+                ...user.value,
+                userType: s,
+            };
+            if (s === "artist") {
+                step.value = "artist-links";
+            } else {
+                step.value = "registering";
+            }
+        });
+
+        const options = [
+            { type: "artist", icon: "mic", label: t("ARTIST") },
+            { type: "listener", icon: "headphones", label: t("LISTENER") },
+            { type: "label", icon: "business", label: t("LABEL") },
+        ];
+
+        return create("div")
+            .classes("flex-v")
+            .children(
+                create("h1")
+                    .text(t("WHAT_DESCRIBES_YOU"))
+                    .build(),
+                create("div")
+                    .classes("flex-v")
+                    .children(
+                        create("p")
+                            .text(t("PLEASE_SELECT_USER_TYPE"))
+                            .build(),
+                        horizontal(
+                            ...options.map(o =>
+                                create("button")
+                                    .classes("jess", "mfa-option", "fullHeight")
+                                    .children(
+                                        vertical(
+                                            GenericTemplates.icon(o.icon, true),
+                                            create("span")
+                                                .text(o.label),
+                                        ).classes("align-children"),
+                                    ).onclick(() => (selected.value = o.type))
+                                    .build(),
+                            ),
+                        ).classes("flex", "gap", "align-children"),
+                    ).build(),
+            ).build();
+    }
+
+    static artistLinksBox(step: Signal<string>, user: Signal<AuthData>) {
+        const spotifyUrl = signal("");
+        const appleUrl = signal("");
+        const youtubeUrl = signal("");
+        const tidalUrl = signal("");
+
+        const linkFields = [
+            { label: "Spotify", signal: spotifyUrl, placeholder: "https://open.spotify.com/artist/..." },
+            { label: "Apple Music", signal: appleUrl, placeholder: "https://music.apple.com/artist/..." },
+            { label: "YouTube Music", signal: youtubeUrl, placeholder: "https://music.youtube.com/channel/..." },
+            { label: "Tidal", signal: tidalUrl, placeholder: "https://tidal.com/artist/..." },
+        ];
+
+        return create("div")
+            .classes("flex-v")
+            .children(
+                create("h1")
+                    .text(t("ARTIST_LINKS"))
+                    .build(),
+                create("div")
+                    .classes("flex-v")
+                    .children(
+                        create("p")
+                            .text(t("ADD_YOUR_ARTIST_LINKS"))
+                            .build(),
+                        vertical(
+                            ...linkFields.map((field, index) =>
+                                create("div")
+                                    .classes("flex-v", "small-gap")
+                                    .children(
+                                        create("label")
+                                            .text(field.label)
+                                            .build(),
+                                        input<string>({
+                                            type: InputType.text,
+                                            name: `link-${index}`,
+                                            placeholder: field.placeholder,
+                                            value: field.signal,
+                                            required: false,
+                                            onchange: (value) => field.signal.value = value,
+                                        }),
+                                    ).build(),
+                            ),
+                        ),
+                        horizontal(
+                            button({
+                                text: t("SKIP"),
+                                icon: {icon: "skip_next"},
+                                classes: ["secondary"],
+                                onclick: () => {
+                                    user.value = {
+                                        ...user.value,
+                                        links: [],
+                                    };
+                                    step.value = "registering";
+                                },
+                            }),
+                            button({
+                                text: t("CONTINUE"),
+                                icon: {icon: "arrow_forward"},
+                                classes: ["positive"],
+                                onclick: () => {
+                                    const filled: AuthLink[] = [];
+                                    linkFields.forEach(f => {
+                                        if (f.signal.value.trim()) {
+                                            filled.push({ url: f.signal.value.trim(), title: f.label });
+                                        }
+                                    });
+                                    user.value = {
+                                        ...user.value,
+                                        links: filled,
+                                    };
+                                    step.value = "registering";
+                                },
+                            }),
+                        ).classes("flex", "gap", "align-children"),
+                    ).build(),
+            ).build();
+    }
+
     static registeringBox(step: Signal<string>, user: Signal<AuthData>) {
         AuthApi.register(
             user.value.username,
             user.value.displayname,
             user.value.email,
             user.value.password,
+            user.value.userType,
+            user.value.links,
             () => (step.value = "complete"),
             () => (step.value = "register"),
         ).then();
@@ -726,7 +871,7 @@ export class AuthTemplates {
                         errors.value = [emailInUseError];
                     },
                     () => {
-                        step.value = "registering";
+                        step.value = "user-type";
                     },
                 );
             }

@@ -202,6 +202,10 @@ export class Api {
     //endregion
 
     //region Auth
+    static get<T>(url: string, params: Record<string, any> = {}, headers: Record<string, string> = {}) {
+        return get<T>(url, params, headers);
+    }
+
     static async login(email: string, password: string, challenge: string | undefined) {
         return post<{ user: User } | null>(ApiRoutes.login, {
             email,
@@ -216,12 +220,14 @@ export class Api {
         navigate(RoutePath.login);
     }
 
-    static async register(username: string, displayname: string, email: string, password: string) {
+    static async register(username: string, displayname: string, email: string, password: string, userType?: string, links?: { url: string; title?: string }[]) {
         await post(ApiRoutes.register, {
             username,
             displayname,
             email,
             password,
+            userType,
+            links,
         });
     }
 

@@ -56,7 +56,6 @@ export class PayoutTemplates {
         return create("div")
             .classes("flex-v", "card")
             .children(
-                StripeConnectTemplates.accountStatusCard(),
                 StripeConnectTemplates.balanceCard(),
                 compute(ri => ri ? PayoutTemplates.royaltyInfo(ri) : nullElement(), royaltyInfo),
                 when(royaltiesLoading, GenericTemplates.loadingSpinner()),

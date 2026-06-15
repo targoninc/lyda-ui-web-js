@@ -79,6 +79,7 @@ export class SettingsTemplates {
         }
 
         const searchQuery$ = signal("");
+        const navButtonsExpanded = signal(false);
 
         const sectionConfigs: { heading: () => Signal<string>; id: string }[] = [
             {heading: () => t("ACCOUNT"), id: SettingsTemplates.sectionId(t("ACCOUNT"))},
@@ -121,7 +122,12 @@ export class SettingsTemplates {
                     value: searchQuery$,
                     onchange: v => searchQuery$.value = v,
                 }),
-                ...navButtons,
+                button({
+                    icon: {icon: compute((e): string => e ? "expand_more" : "chevron_right", navButtonsExpanded)},
+                    classes: ["rounded-max"],
+                    onclick: () => navButtonsExpanded.value = !navButtonsExpanded.value,
+                }),
+                when(navButtonsExpanded, create("div").classes("flex", "flex-wrap", "small-gap", "align-children").children(...navButtons).build()),
             ).build(),
         ]);
 

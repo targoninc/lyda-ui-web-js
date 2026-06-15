@@ -8,7 +8,7 @@ import { t } from "../../../locales";
 import { TextSize } from "../../Enums/TextSize.ts";
 
 export class StripeConnectTemplates {
-    static accountStatusCard() {
+    static balanceCard() {
         const accountStatus = signal<{
             connected: boolean;
             stripeAccountId?: string;
@@ -19,6 +19,11 @@ export class StripeConnectTemplates {
             country?: string;
             pendingVerification?: string[];
         } | null>(null);
+        const balance = signal<{
+            available: number;
+            pending: number;
+            currency: string;
+        } | null>(null);
         const loading = signal(true);
         const error = signal("");
         const onboardingInProgress = signal(false);
@@ -27,7 +32,14 @@ export class StripeConnectTemplates {
             loading.value = true;
             error.value = "";
             StripeService.getAccountStatus()
-                .then(d => accountStatus.value = d)
+                .then(d => {
+                    accountStatus.value = d;
+                    if (d?.connected) {
+                        StripeService.getBalance()
+                            .then(b => balance.value = b)
+                            .catch(() => {});
+                    }
+                })
                 .catch(e => error.value = String(e.message ?? e))
                 .finally(() => loading.value = false);
         };
@@ -38,11 +50,12 @@ export class StripeConnectTemplates {
         const payoutsEnabled = compute(s => s?.payoutsEnabled ?? false, accountStatus);
         const detailsSubmitted = compute(s => s?.detailsSubmitted ?? false, accountStatus);
         const onboardingComplete = compute(s => s?.onboardingComplete ?? false, accountStatus);
+        const notLoadingNoError = compute((l, e) => !l && !e, loading, error);
 
         return create("div")
             .classes("flex-v", "card")
             .children(
-                create("h2").text(t("STRIPE_CONNECT")).build(),
+                create("h2").text(t("STRIPE_BALANCE")).build(),
                 when(loading, GenericTemplates.loadingSpinner()),
                 when(error, create("div").classes("flex-v", "small-gap").children(
                     create("span").classes("error").text(error).build(),
@@ -52,8 +65,22 @@ export class StripeConnectTemplates {
                         onclick: () => load(),
                     }),
                 ).build()),
-                when(compute((s, l, e) => !l && !e, accountStatus, loading, error), vertical(
+                when(notLoadingNoError, vertical(
                     when(connected, vertical(
+                        create("div")
+                            .classes("flex-v", "small-gap")
+                            .children(
+                                create("span")
+                                    .classes(TextSize.xxLarge)
+                                    .text(compute(b => `${(b?.available ?? 0) / 100} ${b?.currency?.toUpperCase() ?? "EUR"}`, balance))
+                                    .build(),
+                                create("span").classes("color-dim", "small").text(t("AVAILABLE")).build(),
+                                when(compute(b => (b?.pending ?? 0) > 0, balance),
+                                    create("span")
+                                        .classes("color-dim")
+                                        .text(compute(b => `${t("PENDING_BALANCE")}: ${(b?.pending ?? 0) / 100} ${b?.currency?.toUpperCase() ?? "EUR"}`, balance))
+                                        .build()),
+                            ).build(),
                         when(compute((o, c) => o && !c, onboardingComplete, chargesEnabled),
                             create("span").classes("warning", "padded").text(t("STRIPE_ONBOARDING_PENDING")).build()),
                         when(compute((o, c) => o && c, onboardingComplete, chargesEnabled),
@@ -74,18 +101,19 @@ export class StripeConnectTemplates {
                             .build()),
                         when(compute(s => !!(s?.pendingVerification?.length), accountStatus),
                             create("span").classes("warning", "small")
-                                .text(compute(s => t("STRIPE_PENDING_VERIFICATION", s?.pendingVerification?.join(", ") ?? ""), accountStatus))
+                                .text(compute(s => `${t("STRIPE_PENDING_VERIFICATION", s?.pendingVerification?.join(", ") ?? "")}`, accountStatus))
                                 .build()),
                         button({
-                            text: t("REFRESH_STATUS"),
+                            text: t("REFRESH"),
                             icon: { icon: "refresh" },
                             onclick: () => load(),
                         }),
                     ).build()),
                     when(compute(s => s && !s.connected, accountStatus), vertical(
                         when(compute(o => o, onboardingInProgress), GenericTemplates.loadingSpinner()),
+                        create("span").classes("color-dim").text(t("STRIPE_PAYOUT_DESCRIPTION")).build(),
                         button({
-                            text: compute(o => o ? t("OPENING_ONBOARDING") : t("CONNECT_STRIPE_ACCOUNT"), onboardingInProgress),
+                            text: compute(o => `${o ? t("OPENING_ONBOARDING") : t("CONNECT_STRIPE_ACCOUNT")}`, onboardingInProgress),
                             icon: { icon: "link" },
                             classes: ["special"],
                             disabled: onboardingInProgress,
@@ -105,62 +133,6 @@ export class StripeConnectTemplates {
                             },
                         }),
                     ).build()),
-                ).build()),
-            ).build();
-    }
-
-    static balanceCard() {
-        const balance = signal<{
-            available: number;
-            pending: number;
-            currency: string;
-        } | null>(null);
-        const loading = signal(true);
-        const error = signal("");
-
-        const load = () => {
-            loading.value = true;
-            error.value = "";
-            StripeService.getBalance()
-                .then(d => balance.value = d)
-                .catch(e => error.value = String(e.message ?? e))
-                .finally(() => loading.value = false);
-        };
-        load();
-
-        return create("div")
-            .classes("flex-v", "card")
-            .children(
-                create("h3").text(t("STRIPE_BALANCE")).build(),
-                when(loading, GenericTemplates.loadingSpinner()),
-                when(error, create("div").classes("flex-v", "small-gap").children(
-                    create("span").classes("error").text(error).build(),
-                    button({
-                        text: t("RETRY"),
-                        icon: { icon: "refresh" },
-                        onclick: () => load(),
-                    }),
-                ).build()),
-                when(compute((b, l, e) => !l && !e && !!b, balance, loading, error), vertical(
-                    create("div")
-                        .classes("flex-v", "small-gap")
-                        .children(
-                            create("span")
-                                .classes(TextSize.xxLarge)
-                                .text(compute(b => `${(b?.available ?? 0) / 100} ${b?.currency?.toUpperCase() ?? "EUR"}`, balance))
-                                .build(),
-                            create("span").classes("color-dim", "small").text(t("AVAILABLE")).build(),
-                            when(compute(b => (b?.pending ?? 0) > 0, balance),
-                                create("span")
-                                    .classes("color-dim")
-                                    .text(compute(b => `${t("PENDING_BALANCE")}: ${(b?.pending ?? 0) / 100} ${b?.currency?.toUpperCase() ?? "EUR"}`, balance))
-                                    .build()),
-                        ).build(),
-                    button({
-                        text: t("REFRESH"),
-                        icon: { icon: "refresh" },
-                        onclick: () => load(),
-                    }),
                 ).build()),
             ).build();
     }

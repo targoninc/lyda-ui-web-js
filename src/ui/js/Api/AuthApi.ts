@@ -18,9 +18,9 @@ export class AuthApi {
         }
     }
 
-    static async register(username: string, displayname: string, email: string, password: string, successCallback: Function, errorCallback: Function = () => {}) {
+    static async register(username: string, displayname: string, email: string, password: string, userType?: string, links?: { url: string; title?: string }[], successCallback: Function = () => {}, errorCallback: Function = () => {}) {
         try {
-            await Api.register(username, displayname, email, password);
+            await Api.register(username, displayname, email, password, userType, links);
         } catch (e) {
             errorCallback(e);
         }

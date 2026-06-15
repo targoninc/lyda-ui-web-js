@@ -278,10 +278,10 @@ export class UserTemplates {
     ) {
         const typeName = compute((ct, types) => types.find(t => t.id.toString() === ct)?.name ?? "", collab_type, collabTypes);
 
-        return create("a")
-            .classes("user-widget", "collaborator", "rounded", "flex-v", "padded-inline")
+        return create("div")
+            .classes("user-widget", "collaborator", "rounded", "flex-v", "padded-inline", "clickable")
             .attributes("user_id", user_id, "username", username)
-            .href(Links.PROFILE(username))
+            .onclick(() => navigate(Links.PROFILE(username)))
             .children(
                 create("div")
                     .classes("flex", "align-children")
