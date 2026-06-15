@@ -281,7 +281,7 @@ export class UserTemplates {
         return create("div")
             .classes("user-widget", "collaborator", "rounded", "flex-v", "padded-inline", "clickable")
             .attributes("user_id", user_id, "username", username)
-            .onclick(() => navigate(Links.PROFILE(username)))
+            .onclick(() => navigate(`${RoutePath.profile}/${username}`))
             .children(
                 create("div")
                     .classes("flex", "align-children")

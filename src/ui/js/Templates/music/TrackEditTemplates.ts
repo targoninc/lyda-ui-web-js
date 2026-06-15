@@ -82,10 +82,14 @@ export class TrackEditTemplates {
         const uploadInfo = signal<UploadInfo[]>([]);
 
         const el = create("div").children(
-            create("progress").classes("progress").attributes("max", "100", "value", "0").styles("display", "none").build(),
+            create("progress")
+                .classes("progress")
+                .attributes("max", "100", "value", "0")
+                .styles("display", "none")
+                .build(),
             create("div").classes("success").build(),
             create("div").classes("error").build(),
-            create("div").classes("flex-v").children(
+            vertical(
                 create("h3").text("Upload").build(),
                 TrackEditTemplates.upDownButtons(state, true),
                 TrackEditTemplates.trackUpload(state, errorSections),
@@ -180,9 +184,10 @@ export class TrackEditTemplates {
                     try {
                         const parsed = JSON.parse(d.metadata.genre_suggestions);
                         genrePredictions = parsed.map((p: any) => p.genre);
-                    } catch {}
+                    } catch {
+                    }
                 }
-                track.value = { ...d.track, genrePredictions } as any;
+                track.value = {...d.track, genrePredictions} as any;
                 document.title = `${t("EDIT_TRACK")} - ${d.track.title}`;
             }
         });
@@ -604,9 +609,9 @@ export class TrackEditTemplates {
 
         lyricsTab.subscribe(i => {
             if (i === 0) {
-                state.value = { ...state.value, lyrics_timed_file: null, lyrics_timed_format: null };
+                state.value = {...state.value, lyrics_timed_file: null, lyrics_timed_format: null};
             } else {
-                state.value = { ...state.value, lyrics_plain_text: null };
+                state.value = {...state.value, lyrics_plain_text: null};
             }
         });
 
@@ -618,7 +623,9 @@ export class TrackEditTemplates {
                     .build(),
                 GenericTemplates.combinedSelector(
                     [`${t("LYRICS_TEXT")}`, `${t("LYRICS_FILE")}`],
-                    i => { lyricsTab.value = i; },
+                    i => {
+                        lyricsTab.value = i;
+                    },
                     state.value.lyrics_timed_file ? 1 : 0,
                 ),
                 when(compute(i => i === 0, lyricsTab),
@@ -628,7 +635,7 @@ export class TrackEditTemplates {
                         placeholder: t("LYRICS_PLACEHOLDER"),
                         value: compute(s => s.lyrics_plain_text ?? "", state),
                         onchange: v => {
-                            state.value = { ...state.value, lyrics_plain_text: v || null };
+                            state.value = {...state.value, lyrics_plain_text: v || null};
                         },
                     }),
                 ),
@@ -672,7 +679,7 @@ export class TrackEditTemplates {
                     button({
                         text: t("REMOVE"),
                         classes: ["negative"],
-                        icon: { icon: "close" },
+                        icon: {icon: "close"},
                         onclick: () => {
                             lyricsTab.value = 0;
                             fileName.value = "";
