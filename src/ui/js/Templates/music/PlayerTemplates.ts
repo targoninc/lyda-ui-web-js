@@ -13,6 +13,7 @@ import { navigate } from "../../Routing/Router.ts";
 import {
     currentlyBuffered,
     currentQuality,
+    currentSecretCode,
     currentTrackId,
     currentTrackPosition,
     currentUser,
@@ -560,7 +561,8 @@ export class PlayerTemplates {
             horizontal(
                 PlayerTemplates.playerTrackTitle(track, () => {
                     playerExpanded.value = false;
-                    navigate(`/track/${track.id}`);
+                    const code = currentSecretCode.value;
+                    navigate(`/track/${track.id}${code ? `/${code}` : ""}`);
                 }),
                 create("div")
                     .classes("hideOnMidBreakpoint")

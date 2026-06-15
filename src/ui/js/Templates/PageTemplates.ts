@@ -510,7 +510,13 @@ export class PageTemplates {
         const trackId = parseInt(params["id"]);
         const code = params["code"] || "";
 
-        const track = await Api.getTrackById(trackId, code);
+        let track;
+        try {
+            track = await Api.getTrackById(trackId, code);
+        } catch {
+            track = await Api.getTrackById(trackId);
+        }
+
         if (!track) {
             return create("div")
                 .text(t("TRACK_NOT_FOUND"))
