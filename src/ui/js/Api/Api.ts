@@ -220,13 +220,13 @@ export class Api {
         navigate(RoutePath.login);
     }
 
-    static async register(username: string, displayname: string, email: string, password: string, userType?: string, links?: { url: string; title?: string }[]) {
+    static async register(username: string, displayname: string, email: string, password: string, userTypes?: string[], links?: { url: string; title?: string }[]) {
         await post(ApiRoutes.register, {
             username,
             displayname,
             email,
             password,
-            userType,
+            userType: userTypes,
             links,
         });
     }

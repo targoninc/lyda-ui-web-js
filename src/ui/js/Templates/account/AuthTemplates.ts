@@ -47,7 +47,7 @@ export interface AuthData {
     mfaMethod?: MfaOption;
     verification?: AuthenticationResponseJSON;
     challenge?: string;
-    userType?: string;
+    userTypes?: string[];
     links?: AuthLink[];
 }
 
@@ -322,26 +322,34 @@ export class AuthTemplates {
     }
 
     static userTypeBox(step: Signal<string>, user: Signal<AuthData>) {
-        const selected = signal<string | undefined>(user.value.userType);
-
-        selected.subscribe(s => {
-            if (!s) return;
-            user.value = {
-                ...user.value,
-                userType: s,
-            };
-            if (s === "artist") {
-                step.value = "artist-links";
-            } else {
-                step.value = "registering";
-            }
-        });
+        const selected = signal<string[]>(user.value.userTypes ?? []);
 
         const options = [
             { type: "artist", icon: "mic", label: t("ARTIST") },
             { type: "listener", icon: "headphones", label: t("LISTENER") },
             { type: "label", icon: "business", label: t("LABEL") },
         ];
+
+        const toggle = (type: string) => {
+            if (selected.value.includes(type)) {
+                selected.value = selected.value.filter(t => t !== type);
+            } else {
+                selected.value = [...selected.value, type];
+            }
+        };
+
+        const next = () => {
+            if (selected.value.length === 0) return;
+            user.value = {
+                ...user.value,
+                userTypes: selected.value,
+            };
+            if (selected.value.includes("artist")) {
+                step.value = "artist-links";
+            } else {
+                step.value = "registering";
+            }
+        };
 
         return create("div")
             .classes("flex-v")
@@ -358,17 +366,30 @@ export class AuthTemplates {
                         horizontal(
                             ...options.map(o =>
                                 create("button")
-                                    .classes("jess", "mfa-option", "fullHeight")
+                                    .classes("jess", "mfa-option", "fullHeight", selected.value.includes(o.type) ? "selected" : "")
                                     .children(
                                         vertical(
                                             GenericTemplates.icon(o.icon, true),
                                             create("span")
                                                 .text(o.label),
+                                            selected.value.includes(o.type)
+                                                ? create("span").text("✓").classes("checkmark").build()
+                                                : null,
                                         ).classes("align-children"),
-                                    ).onclick(() => (selected.value = o.type))
+                                    ).onclick(() => toggle(o.type))
                                     .build(),
                             ),
                         ).classes("flex", "gap", "align-children"),
+                        create("div")
+                            .classes("flex", "gap")
+                            .children(
+                                create("button")
+                                    .text(t("CONTINUE"))
+                                    .classes("positive")
+                                    .disabled(selected.value.length === 0)
+                                    .onclick(next)
+                                    .build(),
+                            ).build(),
                     ).build(),
             ).build();
     }
@@ -459,7 +480,7 @@ export class AuthTemplates {
             user.value.displayname,
             user.value.email,
             user.value.password,
-            user.value.userType,
+            user.value.userTypes,
             user.value.links,
             () => (step.value = "complete"),
             () => (step.value = "register"),
