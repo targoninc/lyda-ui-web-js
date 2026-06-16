@@ -57,6 +57,29 @@ const server = serve({
             }
         }
 
+        if (pathname === "/.well-known/apple-app-site-association") {
+            const association = {
+                applinks: {
+                    apps: [],
+                    details: [
+                        {
+                            appIDs: ["H3GTX7P884.com.targoninc.lyda"],
+                            components: [],
+                        },
+                    ],
+                },
+                webcredentials: {
+                    apps: ["H3GTX7P884.com.targoninc.lyda"],
+                },
+            };
+            return new Response(JSON.stringify(association), {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Cache-Control": "public, max-age=3600",
+                },
+            });
+        }
+
         if (pathname === "/api-url") {
             const apiUrl = process.env.API_URL ?? "https://api.lyda.app";
             return new Response(apiUrl, { headers: { "Content-Type": "text/plain" } });
