@@ -351,7 +351,7 @@ export class AuthTemplates {
             }
         };
 
-        return create("div")
+        return compute(s => create("div")
             .classes("flex-v")
             .children(
                 create("h1")
@@ -366,15 +366,12 @@ export class AuthTemplates {
                         horizontal(
                             ...options.map(o =>
                                 create("button")
-                                    .classes("jess", "mfa-option", "fullHeight", selected.value.includes(o.type) ? "selected" : "")
+                                    .classes("jess", "mfa-option", "fullHeight", s.includes(o.type) ? "positive" : "")
                                     .children(
                                         vertical(
                                             GenericTemplates.icon(o.icon, true),
                                             create("span")
                                                 .text(o.label),
-                                            selected.value.includes(o.type)
-                                                ? create("span").text("✓").classes("checkmark").build()
-                                                : null,
                                         ).classes("align-children"),
                                     ).onclick(() => toggle(o.type))
                                     .build(),
@@ -386,12 +383,12 @@ export class AuthTemplates {
                                 create("button")
                                     .text(t("CONTINUE"))
                                     .classes("positive")
-                                    .disabled(selected.value.length === 0)
+                                    .disabled(s.length === 0)
                                     .onclick(next)
                                     .build(),
                             ).build(),
                     ).build(),
-            ).build();
+            ).build(), selected);
     }
 
     static artistLinksBox(step: Signal<string>, user: Signal<AuthData>) {
