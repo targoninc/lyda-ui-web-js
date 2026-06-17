@@ -41,6 +41,9 @@ export class ApiRoutes {
     static sendActivationEmail = ApiRoutes.userActions + "/send-activation-email";
     static setUserPermission = ApiRoutes.userActions + "/set-permission";
     static trackClientError = ApiRoutes.userActions + "/track-client-error";
+    static importDiscography = ApiRoutes.userActions + "/import-discography";
+    static discographyPlatforms = ApiRoutes.userActions + "/discography-platforms";
+    static saveUserLink = ApiRoutes.userActions + "/save-user-link";
     static updateCacheKey = ApiRoutes.userActions + "/update-cache-key";
     static banUser = ApiRoutes.userActions + "/ban";
     static mutualFollowers = ApiRoutes.user + "/mutualFollowers";

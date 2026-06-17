@@ -48,6 +48,9 @@ import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 import {InteractionType} from "@targoninc/lyda-shared/src/Enums/InteractionType.ts";
 import {UserTaxinfo} from "@targoninc/lyda-shared/src/Models/db/lyda/UserTaxinfo.ts";
 import {SelectOption} from "@targoninc/jess-components/dist/jess-components/Types";
+import {ProgressPart} from "../../Models/ProgressPart.ts";
+import {ProgressState} from "@targoninc/lyda-shared/src/Enums/ProgressState";
+import {Config} from "../../Classes/Config.ts";
 import { StripeService } from "../../Services/StripeService.ts";
 
 export class SettingsTemplates {
@@ -69,6 +72,7 @@ export class SettingsTemplates {
         "e-mail-notifications": "notifications",
         "other": "more_horiz",
         "links": "link",
+        "discography": "album",
     };
 
     static settingsPage() {
@@ -93,6 +97,7 @@ export class SettingsTemplates {
             {heading: () => t("MY_PERMISSIONS"), id: SettingsTemplates.sectionId(t("MY_PERMISSIONS"))},
             {heading: () => t("BEHAVIOUR"), id: SettingsTemplates.sectionId(t("BEHAVIOUR"))},
             {heading: () => t("EMAIL_NOTIFICATIONS"), id: SettingsTemplates.sectionId(t("EMAIL_NOTIFICATIONS"))},
+            {heading: () => t("DISCOGRAPHY"), id: SettingsTemplates.sectionId(t("DISCOGRAPHY"))},
             {heading: () => t("OTHER"), id: SettingsTemplates.sectionId(t("OTHER"))},
             {heading: () => t("LINKS"), id: SettingsTemplates.sectionId(t("LINKS"))},
         ];
@@ -165,8 +170,9 @@ export class SettingsTemplates {
                 sectionWrapper(sectionConfigs[8].id, SettingsTemplates.permissionsSection(searchQuery$)),
                 sectionWrapper(sectionConfigs[9].id, SettingsTemplates.behaviourSection(user, searchQuery$)),
                 sectionWrapper(sectionConfigs[10].id, SettingsTemplates.notificationsSection(user, searchQuery$)),
-                sectionWrapper(sectionConfigs[11].id, SettingsTemplates.dangerSection(user, searchQuery$)),
-                sectionWrapper(sectionConfigs[12].id, SettingsTemplates.linksSection(searchQuery$)),
+                sectionWrapper(sectionConfigs[11].id, SettingsTemplates.discographySection(searchQuery$)),
+                sectionWrapper(sectionConfigs[12].id, SettingsTemplates.dangerSection(user, searchQuery$)),
+                sectionWrapper(sectionConfigs[13].id, SettingsTemplates.linksSection(searchQuery$)),
             ).build(),
         ).build();
     }
@@ -792,6 +798,142 @@ export class SettingsTemplates {
                     )),
                 ).build();
         }, searchQuery$);
+    }
+
+    private static discographySection(searchQuery$: Signal<string>) {
+        const heading = t("DISCOGRAPHY");
+        const platforms = signal<{ platform: string; label: string; apiConfigured: boolean; currentUrl: string }[]>([]);
+        Api.getDiscographyPlatforms().then(d => {
+            if (d?.platforms) platforms.value = d.platforms;
+        });
+
+        const allPlatforms = [
+            { key: "spotify", label: "Spotify" },
+            { key: "appleMusic", label: "Apple Music" },
+            { key: "youtubeMusic", label: "YouTube Music" },
+            { key: "tidal", label: "Tidal" },
+        ];
+
+        return compute((query, pfs) => {
+            const headingMatches = SettingsTemplates.matches(heading, query);
+            if (!headingMatches) return nullElement();
+
+            return create("div")
+                .classes("card", "flex-v")
+                .children(
+                    SettingsTemplates.sectionHeading(heading),
+                    create("p").classes("color-dim", "small").text(t("DISCOGRAPHY_DESCRIPTION")).build(),
+                    vertical(
+                        ...allPlatforms.map(p => {
+                            const platformInfo = pfs.find(pi => pi.platform === p.key);
+                            const urlSig = signal(platformInfo?.currentUrl ?? "");
+                            const progress = signal<ProgressPart | null>(null);
+
+                            return create("div")
+                                .classes("flex-v", "small-gap")
+                                .children(
+                                    create("div")
+                                        .classes("flex", "align-children", "small-gap")
+                                        .children(
+                                            GenericTemplates.icon("music_note", true),
+                                            create("span").text(p.label).build(),
+                                        ).build(),
+                                    create("div")
+                                        .classes("flex", "align-children", "small-gap")
+                                        .children(
+                                            input<string>({
+                                                type: InputType.text,
+                                                name: `link-${p.key}`,
+                                                placeholder: `https://${p.label.toLowerCase().replaceAll(" ", "")}.com/...`,
+                                                value: urlSig,
+                                            }),
+                                            button({
+                                                text: t("SAVE"),
+                                                icon: { icon: "save" },
+                                                classes: ["small", "rounded-max"],
+                                                onclick: async () => {
+                                                    await Api.saveUserLink(p.label, urlSig.value);
+                                                    notify(t("SUCCESS"), NotificationType.success);
+                                                },
+                                            }),
+                                            when(
+                                                compute((apiConf, url) => apiConf && url.trim().length > 0,
+                                                    signal(platformInfo?.apiConfigured ?? false), urlSig),
+                                                button({
+                                                    text: t("IMPORT"),
+                                                    icon: { icon: "download" },
+                                                    classes: ["small", "rounded-max", "positive"],
+                                                    onclick: async () => {
+                                                        progress.value = {
+                                                            icon: "cloud_download",
+                                                            text: t("DISCOGRAPHY_FETCHING"),
+                                                            state: ProgressState.inProgress,
+                                                            title: p.label,
+                                                        };
+
+                                                        const eventSource = new EventSource(
+                                                            `${Config.apiBaseUrl}/user/actions/import-discography-stream?platform=${p.key}&profileUrl=${encodeURIComponent(urlSig.value)}`,
+                                                            { withCredentials: true } as any
+                                                        );
+
+                                                        eventSource.onmessage = (event) => {
+                                                            const data = JSON.parse(event.data);
+                                                            if (data.type === "progress") {
+                                                                if (data.total) {
+                                                                    progress.value = {
+                                                                        icon: "download",
+                                                                        text: `${data.message}`,
+                                                                        state: ProgressState.inProgress,
+                                                                        title: p.label,
+                                                                        progress: data.current / data.total,
+                                                                    };
+                                                                } else {
+                                                                    progress.value = {
+                                                                        icon: "cloud_download",
+                                                                        text: data.message ?? t("DISCOGRAPHY_IMPORTING"),
+                                                                        state: ProgressState.inProgress,
+                                                                        title: p.label,
+                                                                    };
+                                                                }
+                                                            } else if (data.type === "done") {
+                                                                const hasErrors = (data.errors?.length ?? 0) > 0;
+                                                                progress.value = {
+                                                                    icon: hasErrors ? "warning" : "check_circle",
+                                                                    text: `${t("IMPORTED")} ${data.releasesImported} ${t("RELEASES")}, ${data.tracksImported} ${t("TRACKS")}${hasErrors ? `. ${t("ERROR")}: ${data.errors.length}` : ""}`,
+                                                                    state: hasErrors ? ProgressState.warning : ProgressState.done,
+                                                                    title: p.label,
+                                                                };
+                                                                eventSource.close();
+                                                            } else if (data.type === "error") {
+                                                                progress.value = {
+                                                                    icon: "error",
+                                                                    text: data.message ?? t("ERROR"),
+                                                                    state: ProgressState.error,
+                                                                    title: p.label,
+                                                                };
+                                                                eventSource.close();
+                                                            }
+                                                        };
+
+                                                        eventSource.onerror = () => {
+                                                            progress.value = {
+                                                                icon: "error",
+                                                                text: t("ERROR"),
+                                                                state: ProgressState.error,
+                                                                title: p.label,
+                                                            };
+                                                            eventSource.close();
+                                                        };
+                                                    },
+                                                }),
+                                            ),
+                                        ).build(),
+                                    GenericTemplates.progressSectionPart(progress),
+                                ).build();
+                        }),
+                    ).build(),
+                ).build();
+        }, searchQuery$, platforms);
     }
 
     private static userImageSettings(user: User) {

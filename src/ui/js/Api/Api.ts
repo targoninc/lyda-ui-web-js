@@ -56,6 +56,7 @@ import {UserIp} from "@targoninc/lyda-shared/src/Models/db/lyda/UserIp.ts";
 import {UserTaxinfo} from "@targoninc/lyda-shared/src/Models/db/lyda/UserTaxinfo.ts";
 import {PaymentProvider} from "@targoninc/lyda-shared/src/Enums/PaymentProvider";
 import {UserEmail} from "@targoninc/lyda-shared/src/Models/db/lyda/UserEmail";
+import {DiscographyImportResult} from "@targoninc/lyda-shared/src/Models/DiscographyImport";
 
 export class Api {
     //region Interactions
@@ -480,6 +481,18 @@ export class Api {
 
     static async trackClientError(error: ClientError) {
         await post(ApiRoutes.trackClientError, error);
+    }
+
+    static async importDiscography(platform: string, profileUrl: string) {
+        return await post<DiscographyImportResult>(ApiRoutes.importDiscography, { platform, profileUrl });
+    }
+
+    static async getDiscographyPlatforms() {
+        return await get<{ platforms: { platform: string; label: string; apiConfigured: boolean; currentUrl: string }[] }>(ApiRoutes.discographyPlatforms);
+    }
+
+    static async saveUserLink(title: string, url: string) {
+        return await post(ApiRoutes.saveUserLink, { title, url });
     }
 
     static async getUserCache(): Promise<KeyValue[] | null> {
