@@ -409,9 +409,9 @@ export class TrackEditTemplates {
             "info",
             [
                 TrackEditTemplates.toggles(isPrivate, state),
-                TrackEditTemplates.titleInput(state),
+                FormTemplates.titleInput(state),
                 TrackEditTemplates.artistNameInput(state),
-                TrackEditTemplates.descriptionInput(state),
+                FormTemplates.descriptionInput(state),
                 vertical(
                     create("div")
                         .classes("flex", "align-children", "clickable", "expandable")
@@ -432,7 +432,7 @@ export class TrackEditTemplates {
                         TrackEditTemplates.lyricsSection(state),
                         horizontal(
                             TrackEditTemplates.isrcInput(state),
-                            TrackEditTemplates.upcInput(state),
+                            FormTemplates.upcInput(state),
                         ),
                         TrackEditTemplates.genreTagsInput(state, genresExpanded),
                     ).classes("big-gap").build()),
@@ -445,18 +445,7 @@ export class TrackEditTemplates {
 
     private static toggles(isPrivate: Signal<boolean>, state: Signal<UploadableTrack>) {
         return horizontal(
-            toggle({
-                name: "visibility",
-                label: t("PRIVATE"),
-                text: t("PRIVATE"),
-                checked: isPrivate,
-                onchange: v => {
-                    state.value = {
-                        ...state.value,
-                        visibility: v ? Visibility.private : Visibility.public,
-                    };
-                },
-            }),
+            FormTemplates.visibilityToggle(isPrivate, state),
             toggle({
                 name: "wip",
                 label: t("WORK_IN_PROGRESS"),
@@ -509,21 +498,6 @@ export class TrackEditTemplates {
         });
     }
 
-    private static titleInput(state: Signal<UploadableTrack>) {
-        return input<string>({
-            type: InputType.text,
-            required: true,
-            name: "title",
-            label: t("TITLE_STAR"),
-            placeholder: t("TRACK_TITLE"),
-            value: compute(s => s.title ?? "", state),
-            validators: TrackValidators.titleValidators,
-            onchange: v => {
-                state.value = {...state.value, title: v};
-            },
-        });
-    }
-
     private static creditsInput(state: Signal<UploadableTrack>) {
         return input<string>({
             type: InputType.text,
@@ -534,34 +508,6 @@ export class TrackEditTemplates {
             value: compute(s => s.credits ?? "", state),
             onchange: v => {
                 state.value = {...state.value, credits: v};
-            },
-        });
-    }
-
-    private static descriptionInput(state: Signal<UploadableTrack>) {
-        return textarea({
-            name: "description",
-            label: t("DESCRIPTION"),
-            placeholder: t("EXAMPLE_TRACK_NAME"),
-            validators: TrackValidators.descriptionValidators,
-            value: compute(s => s.description ?? "", state),
-            onchange: v => {
-                state.value = {...state.value, description: v};
-            },
-        });
-    }
-
-    private static upcInput(state: Signal<UploadableTrack>) {
-        return input<string>({
-            type: InputType.text,
-            name: "upc",
-            placeholder: t("EXAMPLE_UPC"),
-            infoText: t("UPC"),
-            infoLink: "https://docs.lyda.app/terms/upc",
-            validators: TrackValidators.upcValidators,
-            value: compute(s => s.upc ?? "", state),
-            onchange: v => {
-                state.value = {...state.value, upc: v};
             },
         });
     }
@@ -1141,14 +1087,14 @@ export class TrackEditTemplates {
         return horizontal(
             vertical(
                 horizontal(
-                    TrackEditTemplates.titleInput(state),
+                FormTemplates.titleInput(state),
                     TrackEditTemplates.artistNameInput(state),
                     TrackEditTemplates.isrcInput(state),
                 ),
                 horizontal(
                     TrackEditTemplates.creditsInput(state),
                     TrackEditTemplates.priceInput(state),
-                    TrackEditTemplates.upcInput(state),
+                    FormTemplates.upcInput(state),
                 ),
                 horizontal(
                     TrackEditTemplates.addToAlbumsButton(track),
@@ -1210,10 +1156,6 @@ export class TrackEditTemplates {
             .finally(() => loading.value = false);
 
         return vertical(
-            heading({
-                level: 1,
-                text: t("EDIT_TRACKS"),
-            }),
             when(loading, GenericTemplates.loadingSpinner()),
             signalMap(tracks, vertical(), t => TrackEditTemplates.editableTrackInList(t, tracks)),
         ).build();

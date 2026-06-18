@@ -529,6 +529,8 @@ export const en = {
     IMPORT: "Import",
     IMPORTED: "Imported",
     RELEASES: "releases",
+    BATCH_EDIT: "Batch edit",
+    VIEW_IMPORTED: "View imported",
     CLOSE: "Close",
     CREATE_SOMETHING_NEW: "Create something new",
     NEW_TRACK: "New Track",

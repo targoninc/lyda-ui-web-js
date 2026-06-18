@@ -826,8 +826,11 @@ export class SettingsTemplates {
                     vertical(
                         ...allPlatforms.map(p => {
                             const platformInfo = pfs.find(pi => pi.platform === p.key);
+                            const originalUrlSig = signal(platformInfo?.currentUrl ?? "");
                             const urlSig = signal(platformInfo?.currentUrl ?? "");
                             const progress = signal<ProgressPart | null>(null);
+                            const importing = signal(false);
+                            const changed = compute((orig, curr) => orig !== curr, originalUrlSig, urlSig);
 
                             return create("div")
                                 .classes("flex-v", "small-gap")
@@ -851,19 +854,29 @@ export class SettingsTemplates {
                                                 text: t("SAVE"),
                                                 icon: { icon: "save" },
                                                 classes: ["small", "rounded-max"],
+                                                disabled: compute(c => !c, changed),
                                                 onclick: async () => {
                                                     await Api.saveUserLink(p.label, urlSig.value);
                                                     notify(t("SUCCESS"), NotificationType.success);
+                                                    originalUrlSig.value = urlSig.value;
                                                 },
                                             }),
+                                            when(changed, button({
+                                                text: t("REVERT"),
+                                                icon: { icon: "undo" },
+                                                classes: ["small", "rounded-max"],
+                                                onclick: () => { urlSig.value = originalUrlSig.value; },
+                                            })),
                                             when(
-                                                compute((apiConf, url) => apiConf && url.trim().length > 0,
-                                                    signal(platformInfo?.apiConfigured ?? false), urlSig),
+                                                compute((apiConf, url, imp) => apiConf && url.trim().length > 0 && !imp,
+                                                    signal(platformInfo?.apiConfigured ?? false), urlSig, importing),
                                                 button({
                                                     text: t("IMPORT"),
                                                     icon: { icon: "download" },
                                                     classes: ["small", "rounded-max", "positive"],
+                                                    disabled: importing,
                                                     onclick: async () => {
+                                                        importing.value = true;
                                                         progress.value = {
                                                             icon: "cloud_download",
                                                             text: t("DISCOGRAPHY_FETCHING"),
@@ -896,15 +909,18 @@ export class SettingsTemplates {
                                                                     };
                                                                 }
                                                             } else if (data.type === "done") {
+                                                                importing.value = false;
                                                                 const hasErrors = (data.errors?.length ?? 0) > 0;
                                                                 progress.value = {
                                                                     icon: hasErrors ? "warning" : "check_circle",
-                                                                    text: `${t("IMPORTED")} ${data.releasesImported} ${t("RELEASES")}, ${data.tracksImported} ${t("TRACKS")}${hasErrors ? `. ${t("ERROR")}: ${data.errors.length}` : ""}`,
-                                                                    state: hasErrors ? ProgressState.warning : ProgressState.done,
+                                                                    text: hasErrors ? `${t("IMPORTED")} ${data.releasesImported} ${t("RELEASES")}, ${data.tracksImported} ${t("TRACKS")} - ${data.errors.length} ${t("ERROR")}` : `${t("IMPORTED")} ${data.releasesImported} ${t("RELEASES")}, ${data.tracksImported} ${t("TRACKS")}`,
+                                                                    state: hasErrors ? ProgressState.error : ProgressState.complete,
                                                                     title: p.label,
+                                                                    retryFunction: hasErrors ? () => {} : () => navigate(RoutePath.batchEdit),
                                                                 };
                                                                 eventSource.close();
                                                             } else if (data.type === "error") {
+                                                                importing.value = false;
                                                                 progress.value = {
                                                                     icon: "error",
                                                                     text: data.message ?? t("ERROR"),
@@ -916,6 +932,7 @@ export class SettingsTemplates {
                                                         };
 
                                                         eventSource.onerror = () => {
+                                                            importing.value = false;
                                                             progress.value = {
                                                                 icon: "error",
                                                                 text: t("ERROR"),
@@ -929,6 +946,15 @@ export class SettingsTemplates {
                                             ),
                                         ).build(),
                                     GenericTemplates.progressSectionPart(progress),
+                                    when(
+                                        compute(p => p?.state === ProgressState.complete, progress),
+                                        button({
+                                            text: t("VIEW_IMPORTED"),
+                                            icon: { icon: "open_in_new" },
+                                            classes: ["small", "rounded-max"],
+                                            onclick: () => navigate(RoutePath.batchEdit),
+                                        }),
+                                    ),
                                 ).build();
                         }),
                     ).build(),
@@ -1288,19 +1314,19 @@ export class SettingsTemplates {
                     create("span").classes("positive-text").text(t("STRIPE_ACCOUNT_CONNECTED")).build(),
                     create("div").classes("flex", "flex-wrap", "small-gap").children(
                         GenericTemplates.pill({
-                            icon: compute(s => s?.chargesEnabled ? "check_circle" : "pending", accountStatus),
-                            text: compute(s => s?.chargesEnabled ? t("CHARGES_ENABLED") : t("CHARGES_DISABLED"), accountStatus),
+                            icon: compute((s): string => s?.chargesEnabled ? "check_circle" : "pending", accountStatus),
+                            text: compute(s => s?.chargesEnabled ? `${t("CHARGES_ENABLED")}` : `${t("CHARGES_DISABLED")}`, accountStatus),
                         }),
                         GenericTemplates.pill({
-                            icon: compute(s => s?.payoutsEnabled ? "check_circle" : "pending", accountStatus),
-                            text: compute(s => s?.payoutsEnabled ? t("PAYOUTS_ENABLED") : t("PAYOUTS_DISABLED"), accountStatus),
+                            icon: compute((s): string => s?.payoutsEnabled ? "check_circle" : "pending", accountStatus),
+                            text: compute(s => s?.payoutsEnabled ? `${t("PAYOUTS_ENABLED")}` : `${t("PAYOUTS_DISABLED")}`, accountStatus),
                         }),
                     ).build(),
                     when(compute(s => !s?.onboardingComplete && s?.connected, accountStatus),
                         create("span").classes("warning", "small").text(t("STRIPE_ONBOARDING_PENDING")).build()),
                     when(compute(s => !!(s?.pendingVerification?.length), accountStatus),
                         create("span").classes("warning", "small")
-                            .text(compute(s => t("STRIPE_PENDING_VERIFICATION", s?.pendingVerification?.join(", ") ?? ""), accountStatus))
+                            .text(compute(s => `${t("STRIPE_PENDING_VERIFICATION", s?.pendingVerification?.join(", ") ?? "")}`, accountStatus))
                             .build()),
                     button({
                         text: t("REFRESH_STATUS"),
@@ -1312,7 +1338,7 @@ export class SettingsTemplates {
                 when(compute(s => s && !s.connected, accountStatus), create("div").classes("flex-v", "small-gap").children(
                     when(compute(o => o, onboardingInProgress), GenericTemplates.loadingSpinner()),
                     button({
-                        text: compute(o => o ? t("OPENING_ONBOARDING") : t("CONNECT_STRIPE_ACCOUNT"), onboardingInProgress),
+                        text: compute(o => o ? `${t("OPENING_ONBOARDING")}` : `${t("CONNECT_STRIPE_ACCOUNT")}`, onboardingInProgress),
                         icon: { icon: "link" },
                         classes: ["special"],
                         disabled: onboardingInProgress,

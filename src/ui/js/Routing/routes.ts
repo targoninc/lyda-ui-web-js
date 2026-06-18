@@ -31,7 +31,7 @@ export enum RoutePath {
     faq = "faq",
     users = "users",
     history = "history",
-    editTracks = "edit-tracks",
+    batchEdit = "batch-edit",
     protocolHandler = "protocolHandler",
     transactions = "transactions",
     contentID = "content-id",
@@ -178,8 +178,8 @@ export const routes: Route[] = [
         title: "Protocol handler",
     },
     {
-        path: RoutePath.editTracks,
-        title: "Edit tracks",
+        path: RoutePath.batchEdit,
+        title: "Batch edit",
     },
     {
         path: RoutePath.transactions,

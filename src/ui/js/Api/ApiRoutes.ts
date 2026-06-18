@@ -146,6 +146,7 @@ export class ApiRoutes {
 
     private static playlistActions = ApiRoutes.playlists + "/actions";
     static newPlaylist = ApiRoutes.playlistActions + "/new";
+    static updatePlaylist = ApiRoutes.playlistActions + "/update";
     static deletePlaylist = ApiRoutes.playlistActions + "/delete";
     static addTrackToPlaylists = ApiRoutes.playlistActions + "/addTrack";
     static addAlbumToPlaylists = ApiRoutes.playlistActions + "/addAlbum";

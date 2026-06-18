@@ -1,6 +1,8 @@
-import { input, searchableSelect, SelectOption } from "@targoninc/jess-components";
+import { input, searchableSelect, SelectOption, textarea, toggle } from "@targoninc/jess-components";
 import { GenericTemplates } from "./GenericTemplates.ts";
-import { create, HtmlPropertyValue, InputType, signal, Signal, StringOrSignal, TypeOrSignal } from "@targoninc/jess";
+import { compute, create, HtmlPropertyValue, InputType, signal, Signal, StringOrSignal, TypeOrSignal } from "@targoninc/jess";
+import { t } from "../../../locales";
+import { Visibility } from "@targoninc/lyda-shared/src/Enums/Visibility";
 
 export class FormTemplates {
     static fileField(title: StringOrSignal, text: string, name: string, accept: string, required = false, onchange = (v: string, files: FileList | null) => {}) {
@@ -68,6 +70,59 @@ export class FormTemplates {
             onchange,
             attributes: ["autocomplete", name, "min", min.toString(), "max", max.toString(), "step", step.toString()],
             classes,
+        });
+    }
+
+    static titleInput(state: Signal<any>) {
+        return input<string>({
+            type: InputType.text,
+            required: true,
+            name: "title",
+            label: t("TITLE_STAR"),
+            placeholder: t("TITLE"),
+            value: compute(s => s.title ?? "", state),
+            onchange: v => {
+                state.value = {...state.value, title: v};
+            },
+        });
+    }
+
+    static upcInput(state: Signal<any>) {
+        return input<string>({
+            type: InputType.text,
+            name: "upc",
+            placeholder: t("UPC"),
+            infoText: t("UPC"),
+            infoLink: "https://docs.lyda.app/terms/upc",
+            value: compute(s => s.upc ?? "", state),
+            onchange: v => {
+                state.value = {...state.value, upc: v};
+            },
+        });
+    }
+
+    static descriptionInput(state: Signal<any>, fieldName: string = "description") {
+        return textarea({
+            name: fieldName,
+            label: t("DESCRIPTION"),
+            placeholder: t("DESCRIPTION"),
+            value: compute(s => s[fieldName] ?? "", state),
+            onchange: v => state.value = {...state.value, [fieldName]: v},
+        });
+    }
+
+    static visibilityToggle(isPrivate: Signal<boolean>, state: Signal<any>) {
+        return toggle({
+            name: "visibility",
+            label: t("PRIVATE"),
+            text: t("PRIVATE"),
+            checked: isPrivate,
+            onchange: v => {
+                state.value = {
+                    ...state.value,
+                    visibility: v ? Visibility.private : Visibility.public,
+                };
+            },
         });
     }
 }

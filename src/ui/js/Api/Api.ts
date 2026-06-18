@@ -830,6 +830,10 @@ export class Api {
         });
     }
 
+    static async updatePlaylist(playlist: Partial<Playlist>) {
+        return await post(ApiRoutes.updatePlaylist, playlist);
+    }
+
     static async createNewPlaylist(playlist: Partial<Playlist>) {
         const out = await post<number>(ApiRoutes.newPlaylist, playlist);
         notify(t("PLAYLIST_CREATED"), NotificationType.success);

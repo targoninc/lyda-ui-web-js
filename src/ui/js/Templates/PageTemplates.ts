@@ -1,61 +1,61 @@
-import { AuthActions } from "../Actions/AuthActions.ts";
-import { LandingPageTemplates } from "./LandingPageTemplates.ts";
-import { UserTemplates } from "./account/UserTemplates.ts";
-import { AnyElement, compute, create, InputType, nullElement, signal, signalMap, Signal, when } from "@targoninc/jess";
-import { SearchTemplates } from "./SearchTemplates.ts";
-import { SettingsTemplates } from "./account/SettingsTemplates.ts";
-import { RoadmapTemplates } from "./RoadmapTemplates.ts";
-import { EventsTemplates } from "./admin/EventsTemplates.ts";
-import { AlbumTemplates } from "./music/AlbumTemplates.ts";
-import { RoutePath } from "../Routing/routes.ts";
-import { DashboardTemplates } from "./admin/DashboardTemplates.ts";
-import { ModerationUsersTemplates } from "./admin/ModerationUsersTemplates.ts";
-import { ModerationCommentsTemplates } from "./admin/ModerationCommentsTemplates.ts";
-import { LogTemplates } from "./admin/LogTemplates.ts";
-import { RoyaltyTemplates } from "./admin/RoyaltyTemplates.ts";
-import { ContentIDTemplates } from "./admin/ContentIDTemplates.ts";
-import { SubscriptionPaymentsTemplates } from "./admin/SubscriptionPaymentsTemplates.ts";
-import { IpLogTemplates } from "./admin/IpLogTemplates.ts";
-import { PayoutTemplates } from "./money/PayoutTemplates.ts";
-import { FeedTemplates } from "./generic/FeedTemplates.ts";
-import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
-import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
-import { TrackEditTemplates } from "./music/TrackEditTemplates.ts";
-import { navigate, Route } from "../Routing/Router.ts";
-import { copy } from "../Classes/Util.ts";
-import { PlayManager } from "../Streaming/PlayManager.ts";
-import { currentSecretCode, currentTrackId, currentUser, playingHere } from "../state.ts";
-import { TrackTemplates } from "./music/TrackTemplates.ts";
-import { PlaylistTemplates } from "./music/PlaylistTemplates.ts";
-import { StatisticTemplates } from "./StatisticTemplates.ts";
-import { ParentGenreGroup } from "./generic/ParentGenreGroup.ts";
-import { notify } from "../Classes/Ui.ts";
-import { NotificationType } from "../Enums/NotificationType.ts";
-import { Api } from "../Api/Api.ts";
-import { GenericTemplates, horizontal, tabSelected, vertical } from "./generic/GenericTemplates.ts";
-import { InteractionTemplates } from "./InteractionTemplates.ts";
-import { FeedMenuAction } from "../Models/FeedConfig.ts";
-import { TrackList } from "../Models/TrackList.ts";
-import { Images } from "../Enums/Images.ts";
-import { DefaultImages } from "../Enums/DefaultImages.ts";
-import { Util } from "../Classes/Util.ts";
-import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType";
-import { UserWidgetContext } from "../Enums/UserWidgetContext.ts";
-import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
-import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
-import { AlbumActions } from "../Actions/AlbumActions.ts";
-import { PlaylistActions } from "../Actions/PlaylistActions.ts";
-import { QueueManager } from "../Streaming/QueueManager.ts";
-import { ApiRoutes } from "../Api/ApiRoutes.ts";
-import { heading, button } from "@targoninc/jess-components";
-import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
-import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
-import { Genre } from "@targoninc/lyda-shared/src/Enums/Genre";
-import { InteractionType } from "@targoninc/lyda-shared/src/Enums/InteractionType";
-import { SubscriptionTemplates } from "./money/SubscriptionTemplates.ts";
-import { t } from "../../locales";
-import { TransactionTemplates } from "./money/TransactionTemplates.ts";
-import { TagEditor } from "./generic/TagEditor.ts";
+import {AuthActions} from "../Actions/AuthActions.ts";
+import {LandingPageTemplates} from "./LandingPageTemplates.ts";
+import {UserTemplates} from "./account/UserTemplates.ts";
+import {AnyElement, compute, create, nullElement, signal, signalMap, when} from "@targoninc/jess";
+import {SearchTemplates} from "./SearchTemplates.ts";
+import {SettingsTemplates} from "./account/SettingsTemplates.ts";
+import {RoadmapTemplates} from "./RoadmapTemplates.ts";
+import {EventsTemplates} from "./admin/EventsTemplates.ts";
+import {AlbumTemplates} from "./music/AlbumTemplates.ts";
+import {RoutePath} from "../Routing/routes.ts";
+import {DashboardTemplates} from "./admin/DashboardTemplates.ts";
+import {ModerationUsersTemplates} from "./admin/ModerationUsersTemplates.ts";
+import {ModerationCommentsTemplates} from "./admin/ModerationCommentsTemplates.ts";
+import {LogTemplates} from "./admin/LogTemplates.ts";
+import {RoyaltyTemplates} from "./admin/RoyaltyTemplates.ts";
+import {ContentIDTemplates} from "./admin/ContentIDTemplates.ts";
+import {SubscriptionPaymentsTemplates} from "./admin/SubscriptionPaymentsTemplates.ts";
+import {IpLogTemplates} from "./admin/IpLogTemplates.ts";
+import {PayoutTemplates} from "./money/PayoutTemplates.ts";
+import {FeedTemplates} from "./generic/FeedTemplates.ts";
+import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {TrackEditTemplates} from "./music/TrackEditTemplates.ts";
+import {navigate, Route} from "../Routing/Router.ts";
+import {copy, Util} from "../Classes/Util.ts";
+import {PlayManager} from "../Streaming/PlayManager.ts";
+import {currentSecretCode, currentTrackId, currentUser, playingHere} from "../state.ts";
+import {TrackTemplates} from "./music/TrackTemplates.ts";
+import {PlaylistTemplates} from "./music/PlaylistTemplates.ts";
+import {StatisticTemplates} from "./StatisticTemplates.ts";
+import {ParentGenreGroup} from "./generic/ParentGenreGroup.ts";
+import {notify} from "../Classes/Ui.ts";
+import {NotificationType} from "../Enums/NotificationType.ts";
+import {Api} from "../Api/Api.ts";
+import {GenericTemplates, horizontal, tabSelected, vertical} from "./generic/GenericTemplates.ts";
+import {FormTemplates} from "./generic/FormTemplates.ts";
+import {InteractionTemplates} from "./InteractionTemplates.ts";
+import {FeedMenuAction} from "../Models/FeedConfig.ts";
+import {TrackList} from "../Models/TrackList.ts";
+import {Images} from "../Enums/Images.ts";
+import {DefaultImages} from "../Enums/DefaultImages.ts";
+import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
+import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
+import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import {Visibility} from "@targoninc/lyda-shared/src/Enums/Visibility";
+import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import {AlbumActions} from "../Actions/AlbumActions.ts";
+import {PlaylistActions} from "../Actions/PlaylistActions.ts";
+import {QueueManager} from "../Streaming/QueueManager.ts";
+import {ApiRoutes} from "../Api/ApiRoutes.ts";
+import {button, heading} from "@targoninc/jess-components";
+import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
+import {FeedType} from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
+import {Genre} from "@targoninc/lyda-shared/src/Enums/Genre";
+import {InteractionType} from "@targoninc/lyda-shared/src/Enums/InteractionType";
+import {SubscriptionTemplates} from "./money/SubscriptionTemplates.ts";
+import {t} from "../../locales";
+import {TransactionTemplates} from "./money/TransactionTemplates.ts";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, (route: Route, params: Record<string, string>) => Promise<AnyElement> | AnyElement> = {
@@ -82,7 +82,7 @@ export class PageTemplates {
         [RoutePath.verifyEmail]: LandingPageTemplates.newLandingPage,
         [RoutePath.search]: SearchTemplates.searchPage,
         [RoutePath.roadmap]: RoadmapTemplates.roadmapPage,
-        [RoutePath.editTracks]: TrackEditTemplates.batchEditTracksPage,
+        [RoutePath.batchEdit]: () => PageTemplates.batchEditPage(),
         [RoutePath.protocolHandler]: PageTemplates.protocolHandlerPage,
         [RoutePath.transactions]: TransactionTemplates.page,
         [RoutePath.createAlbum]: AlbumTemplates.createAlbumPage,
@@ -117,12 +117,146 @@ export class PageTemplates {
         RoutePath.users,
         RoutePath.events,
         RoutePath.contentID,
-        RoutePath.editTracks,
+        RoutePath.batchEdit,
         RoutePath.transactions,
         RoutePath.createAlbum,
         RoutePath.createAlbum,
         RoutePath.subscriptionPayments,
     ];
+
+    static batchEditPage() {
+        const tabs = [`${t("TRACKS")}`, `${t("ALBUMS")}`, `${t("PLAYLISTS")}`];
+        const urlTabs = ["tracks", "albums", "playlists"];
+        const urlParams = new URLSearchParams(window.location.search);
+        const initialTab = urlTabs.indexOf(urlParams.get("tab") ?? "");
+        const selectedTab = signal(initialTab === -1 ? 0 : initialTab);
+
+        selectedTab.subscribe(i => {
+            const url = new URL(window.location.href);
+            url.searchParams.set("tab", urlTabs[i]);
+            window.history.replaceState(null, "", url.toString());
+        });
+
+        return vertical(
+            heading({level: 1, text: t("BATCH_EDIT")}),
+            GenericTemplates.combinedSelector(tabs, (i) => selectedTab.value = i, selectedTab.value),
+            when(tabSelected(selectedTab, 0), TrackEditTemplates.batchEditTracksPage()),
+            when(tabSelected(selectedTab, 1), PageTemplates.batchEditAlbumsPage()),
+            when(tabSelected(selectedTab, 2), PageTemplates.batchEditPlaylistsPage()),
+        ).build();
+    }
+
+    static batchEditAlbumsPage() {
+        const albums = signal<Album[]>([]);
+        const loading = signal(true);
+        Api.getAlbumsByUserId(currentUser.value?.id ?? 0, "", 0, "")
+            .then(d => albums.value = d?.items ?? [])
+            .finally(() => loading.value = false);
+
+        return vertical(
+            when(loading, GenericTemplates.loadingSpinner()),
+            signalMap(albums, vertical(), album => {
+                const state = signal<Partial<Album>>({...album});
+                const changed = compute(s =>
+                        s.title !== album.title ||
+                        s.upc !== album.upc ||
+                        s.visibility !== album.visibility ||
+                        s.description !== album.description,
+                    state,
+                );
+                const saving = signal(false);
+
+                return create("div")
+                    .classes("card", "flex-v", "small-gap")
+                    .children(
+                        FormTemplates.titleInput(state),
+                        FormTemplates.upcInput(state),
+                        FormTemplates.descriptionInput(state, "description"),
+                        FormTemplates.visibilityToggle(
+                            compute(s => s.visibility === Visibility.private, state),
+                            state,
+                        ),
+                        when(changed, horizontal(
+                            button({
+                                text: t("SAVE"),
+                                icon: {icon: "save"},
+                                classes: ["positive", "small", "rounded-max"],
+                                disabled: saving,
+                                onclick: async () => {
+                                    saving.value = true;
+                                    await Api.updateAlbum(state.value);
+                                    saving.value = false;
+                                    albums.value = albums.value.map(a =>
+                                        a.id === album.id ? {...a, ...state.value} as Album : a,
+                                    );
+                                },
+                            }),
+                            button({
+                                text: t("REVERT"),
+                                icon: {icon: "undo"},
+                                classes: ["small", "rounded-max"],
+                                onclick: () => state.value = {...album},
+                            }),
+                        ).classes("align-children", "small-gap").build()),
+                    ).build();
+            }),
+        ).build();
+    }
+
+    static batchEditPlaylistsPage() {
+        const playlists = signal<Playlist[]>([]);
+        const loading = signal(true);
+        Api.getPlaylistsByUserId(currentUser.value?.id ?? 0, "", 0, "")
+            .then(d => playlists.value = d?.items ?? [])
+            .finally(() => loading.value = false);
+
+        return vertical(
+            when(loading, GenericTemplates.loadingSpinner()),
+            signalMap(playlists, vertical(), playlist => {
+                const state = signal<Partial<Playlist>>({...playlist});
+                const changed = compute(s =>
+                        s.title !== playlist.title ||
+                        s.description !== playlist.description ||
+                        s.visibility !== playlist.visibility,
+                    state,
+                );
+                const saving = signal(false);
+
+                return create("div")
+                    .classes("card", "flex-v", "small-gap")
+                    .children(
+                        FormTemplates.titleInput(state),
+                        FormTemplates.descriptionInput(state, "description"),
+                        FormTemplates.visibilityToggle(
+                            compute(s => s.visibility === Visibility.private, state),
+                            state,
+                        ),
+                        when(changed, horizontal(
+                            button({
+                                text: t("SAVE"),
+                                icon: {icon: "save"},
+                                classes: ["positive", "small", "rounded-max"],
+                                disabled: saving,
+                                onclick: async () => {
+                                    saving.value = true;
+                                    await Api.updatePlaylist(state.value);
+                                    saving.value = false;
+                                    playlists.value = playlists.value.map(p =>
+                                        p.id === playlist.id ? {...p, ...state.value} as Playlist : p,
+                                    );
+                                },
+                            }),
+                            button({
+                                text: t("REVERT"),
+                                icon: {icon: "undo"},
+                                classes: ["small", "rounded-max"],
+                                onclick: () => state.value = {...playlist},
+                            }),
+                        ).classes("align-children", "small-gap").build()),
+                    ).build();
+            }),
+        ).build();
+    }
 
     static async libraryPage(route: Route, params: Record<string, string>) {
         const selfUser = currentUser.value;
@@ -261,9 +395,13 @@ export class PageTemplates {
                             pageSize: 100,
                             noToolbar: true,
                             fetchPage: async (offset, limit, filter) => {
-                                const res = await Api.getFeed(ApiRoutes.exploreAlbumsFeed, { offset, limit, filter: filter || "" });
-                                if (!res) return { items: [], total: 0 };
-                                if (Array.isArray(res)) return { items: res, total: res.length };
+                                const res = await Api.getFeed(ApiRoutes.exploreAlbumsFeed, {
+                                    offset,
+                                    limit,
+                                    filter: filter || ""
+                                });
+                                if (!res) return {items: [], total: 0};
+                                if (Array.isArray(res)) return {items: res, total: res.length};
                                 return res;
                             },
                             buildMenuActions: (list): FeedMenuAction<TrackList>[] => [
@@ -302,9 +440,13 @@ export class PageTemplates {
                             pageSize: 100,
                             noToolbar: true,
                             fetchPage: async (offset, limit, filter) => {
-                                const res = await Api.getFeed(ApiRoutes.explorePlaylistsFeed, { offset, limit, filter: filter || "" });
-                                if (!res) return { items: [], total: 0 };
-                                if (Array.isArray(res)) return { items: res, total: res.length };
+                                const res = await Api.getFeed(ApiRoutes.explorePlaylistsFeed, {
+                                    offset,
+                                    limit,
+                                    filter: filter || ""
+                                });
+                                if (!res) return {items: [], total: 0};
+                                if (Array.isArray(res)) return {items: res, total: res.length};
                                 return res;
                             },
                             buildMenuActions: (list): FeedMenuAction<TrackList>[] => [
@@ -431,14 +573,14 @@ export class PageTemplates {
                 fetchPage: async (offset, limit) => {
                     const genres = selectedGenres$.value;
                     if (genres.length === 0) return [];
-                    const params: any = { offset, limit, genres: genres.join(",") };
+                    const params: any = {offset, limit, genres: genres.join(",")};
                     const res = await Api.getFeed(ApiRoutes.genreExploreFeed, params);
                     if (!res) return [];
                     if (Array.isArray(res)) return res;
                     return res;
                 },
                 buildMenuActions: (track): FeedMenuAction<Track>[] => [
-                    { label: t("QUEUE"), icon: "queue", onclick: () => QueueManager.addToManualQueue(track.id) },
+                    {label: t("QUEUE"), icon: "queue", onclick: () => QueueManager.addToManualQueue(track.id)},
                     {
                         label: t("COPY_LINK"),
                         icon: "link",
@@ -591,10 +733,10 @@ export class PageTemplates {
         const user = signal<User | null>(null);
 
         Api.getRandomUser()
-           .then(async data => user.value = data)
-           .catch(() => randomUserWidget.value = create("span")
-               .text(t("FAILED_LOADING_RANDOM_USER"))
-               .build());
+            .then(async data => user.value = data)
+            .catch(() => randomUserWidget.value = create("span")
+                .text(t("FAILED_LOADING_RANDOM_USER"))
+                .build());
 
         return create("div")
             .classes("flex-v")

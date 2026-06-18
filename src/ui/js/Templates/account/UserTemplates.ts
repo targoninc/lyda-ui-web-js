@@ -692,7 +692,7 @@ export class UserTemplates {
                             button({
                                 text: t("EDIT_TRACKS"),
                                 icon: {icon: "edit_note"},
-                                onclick: () => navigate(RoutePath.editTracks),
+                                onclick: () => navigate(RoutePath.batchEdit),
                                 classes: ["hideOnMidBreakpoint"],
                             }),
                             button({

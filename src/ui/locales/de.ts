@@ -141,6 +141,7 @@ export const de: Translation = {
     IMPORT: "Importieren",
     IMPORTED: "Importiert",
     RELEASES: "Veröffentlichungen",
+    VIEW_IMPORTED: "Importierte anzeigen",
     CLOSE: "Schließen",
     CODE: "Code",
     COLLABORATORS: "Mitwirkende",
