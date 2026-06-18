@@ -34,6 +34,8 @@ import {NotificationType} from "../Enums/NotificationType.ts";
 import {Api} from "../Api/Api.ts";
 import {GenericTemplates, horizontal, tabSelected, vertical} from "./generic/GenericTemplates.ts";
 import {FormTemplates} from "./generic/FormTemplates.ts";
+import {MusicTemplates} from "./music/MusicTemplates.ts";
+import {CoverContext} from "../Enums/CoverContext.ts";
 import {InteractionTemplates} from "./InteractionTemplates.ts";
 import {FeedMenuAction} from "../Models/FeedConfig.ts";
 import {TrackList} from "../Models/TrackList.ts";
@@ -165,39 +167,57 @@ export class PageTemplates {
                     state,
                 );
                 const saving = signal(false);
+                const coverLoading = signal(false);
+                const imageState = signal("");
 
                 return create("div")
-                    .classes("card", "flex-v", "small-gap")
+                    .classes("card", "flex", "space-between")
                     .children(
-                        FormTemplates.titleInput(state),
-                        FormTemplates.upcInput(state),
-                        FormTemplates.descriptionInput(state, "description"),
-                        FormTemplates.visibilityToggle(
-                            compute(s => s.visibility === Visibility.private, state),
-                            state,
+                        vertical(
+                            horizontal(
+                                FormTemplates.titleInput(state),
+                                FormTemplates.upcInput(state),
+                                vertical(
+                                    FormTemplates.visibilityToggle(
+                                        compute(s => s.visibility === Visibility.private, state),
+                                        state,
+                                    ),
+                                ).classes("align-end")
+                            ),
+                            FormTemplates.descriptionInput(state, "description"),
                         ),
-                        when(changed, horizontal(
-                            button({
-                                text: t("SAVE"),
-                                icon: {icon: "save"},
-                                classes: ["positive", "small", "rounded-max"],
-                                disabled: saving,
-                                onclick: async () => {
-                                    saving.value = true;
-                                    await Api.updateAlbum(state.value);
-                                    saving.value = false;
-                                    albums.value = albums.value.map(a =>
-                                        a.id === album.id ? {...a, ...state.value} as Album : a,
-                                    );
-                                },
-                            }),
-                            button({
-                                text: t("REVERT"),
-                                icon: {icon: "undo"},
-                                classes: ["small", "rounded-max"],
-                                onclick: () => state.value = {...album},
-                            }),
-                        ).classes("align-children", "small-gap").build()),
+                        vertical(
+                            horizontal(
+                                create("span")
+                                    .text(t("ARTWORK"))
+                                    .build(),
+                                MusicTemplates.entityCoverButtons(MediaFileType.albumCover, album, imageState, coverLoading),
+                                when(coverLoading, GenericTemplates.loadingSpinner()),
+                                MusicTemplates.cover(EntityType.album, album, CoverContext.inline),
+                            ).classes("align-children", "small-gap").build(),
+                            when(changed, horizontal(
+                                button({
+                                    text: t("SAVE"),
+                                    icon: {icon: "save"},
+                                    classes: ["positive", "small", "rounded-max"],
+                                    disabled: saving,
+                                    onclick: async () => {
+                                        saving.value = true;
+                                        await Api.updateAlbum(state.value);
+                                        saving.value = false;
+                                        albums.value = albums.value.map(a =>
+                                            a.id === album.id ? {...a, ...state.value} as Album : a,
+                                        );
+                                    },
+                                }),
+                                button({
+                                    text: t("REVERT"),
+                                    icon: {icon: "undo"},
+                                    classes: ["small", "rounded-max"],
+                                    onclick: () => state.value = {...album},
+                                }),
+                            ).classes("align-children", "small-gap").build()),
+                        )
                     ).build();
             }),
         ).build();
@@ -221,38 +241,56 @@ export class PageTemplates {
                     state,
                 );
                 const saving = signal(false);
+                const coverLoading = signal(false);
+                const imageState = signal("");
 
                 return create("div")
-                    .classes("card", "flex-v", "small-gap")
+                    .classes("card", "flex", "space-between")
                     .children(
-                        FormTemplates.titleInput(state),
-                        FormTemplates.descriptionInput(state, "description"),
-                        FormTemplates.visibilityToggle(
-                            compute(s => s.visibility === Visibility.private, state),
-                            state,
+                        vertical(
+                            horizontal(
+                                FormTemplates.titleInput(state),
+                                vertical(
+                                    FormTemplates.visibilityToggle(
+                                        compute(s => s.visibility === Visibility.private, state),
+                                        state,
+                                    ),
+                                ).classes("align-end")
+                            ),
+                            FormTemplates.descriptionInput(state, "description"),
                         ),
-                        when(changed, horizontal(
-                            button({
-                                text: t("SAVE"),
-                                icon: {icon: "save"},
-                                classes: ["positive", "small", "rounded-max"],
-                                disabled: saving,
-                                onclick: async () => {
-                                    saving.value = true;
-                                    await Api.updatePlaylist(state.value);
-                                    saving.value = false;
-                                    playlists.value = playlists.value.map(p =>
-                                        p.id === playlist.id ? {...p, ...state.value} as Playlist : p,
-                                    );
-                                },
-                            }),
-                            button({
-                                text: t("REVERT"),
-                                icon: {icon: "undo"},
-                                classes: ["small", "rounded-max"],
-                                onclick: () => state.value = {...playlist},
-                            }),
-                        ).classes("align-children", "small-gap").build()),
+                        vertical(
+                            horizontal(
+                                create("span")
+                                    .text(t("ARTWORK"))
+                                    .build(),
+                                MusicTemplates.entityCoverButtons(MediaFileType.playlistCover, playlist, imageState, coverLoading),
+                                when(coverLoading, GenericTemplates.loadingSpinner()),
+                                MusicTemplates.cover(EntityType.playlist, playlist, CoverContext.inline),
+                            ).classes("align-children", "small-gap").build(),
+                            when(changed, horizontal(
+                                button({
+                                    text: t("SAVE"),
+                                    icon: {icon: "save"},
+                                    classes: ["positive", "small", "rounded-max"],
+                                    disabled: saving,
+                                    onclick: async () => {
+                                        saving.value = true;
+                                        await Api.updatePlaylist(state.value);
+                                        saving.value = false;
+                                        playlists.value = playlists.value.map(p =>
+                                            p.id === playlist.id ? {...p, ...state.value} as Playlist : p,
+                                        );
+                                    },
+                                }),
+                                button({
+                                    text: t("REVERT"),
+                                    icon: {icon: "undo"},
+                                    classes: ["small", "rounded-max"],
+                                    onclick: () => state.value = {...playlist},
+                                }),
+                            ).classes("align-children", "small-gap").build()),
+                        )
                     ).build();
             }),
         ).build();
