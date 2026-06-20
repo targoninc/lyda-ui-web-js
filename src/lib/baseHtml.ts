@@ -220,7 +220,11 @@ export async function baseHtml(req: Request) {
                 banner.appendChild(label);
                 banner.appendChild(openBtn);
                 banner.appendChild(closeBtn);
-                document.body.appendChild(banner);
+                // The script runs in <head> before <body> is parsed, so
+                // document.body may be null. Append to whichever root
+                // element is available — the banner is position:fixed, so
+                // its placement in the DOM doesn't affect layout.
+                (document.body || document.documentElement).appendChild(banner);
 
                 // If the OS opens the app while the banner is on screen
                 // (e.g. via the AASA path on iOS), the page becomes
