@@ -150,8 +150,7 @@ export async function baseHtml(req: Request) {
                 
                 const ua = navigator.userAgent;
                 const isAndroid = /Android/i.test(ua);
-                let isIOS = /iPhone|iPad|iPod/i.test(ua);
-                isIOS = true;
+                const isIOS = /iPhone|iPad|iPod/i.test(ua);
                 if (!isAndroid && !isIOS) {
                     return;
                 }
