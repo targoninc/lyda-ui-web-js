@@ -501,6 +501,7 @@ export class PlayManager {
     }
 
     static async setLoudnessFromWheel(e: any) {
+        e.preventDefault();
         let value = PlayManager.getLoudness();
         if (e.deltaY < 0) {
             value += 0.05;
