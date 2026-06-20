@@ -6,6 +6,7 @@ import { UiActions } from "./js/Actions/UiActions.ts";
 import { notify, Ui } from "./js/Classes/Ui.ts";
 import { Util } from "./js/Classes/Util.ts";
 import { RoutePath, routes } from "./js/Routing/routes.js";
+import { create } from "@targoninc/jess";
 import { GenericTemplates } from "./js/Templates/generic/GenericTemplates.ts";
 import { TrackEditTemplates } from "./js/Templates/music/TrackEditTemplates.ts";
 import { contextQueue, currentUser, history, permissions, playingFrom } from "./js/state.ts";
@@ -87,6 +88,39 @@ if (currentUser.value) {
     if (tmpHistory) {
         history.value = tmpHistory;
     }
+}
+
+if ((window as any).__showAppBanner) {
+    const pathAndQuery = window.location.pathname + window.location.search;
+    const banner = create("div")
+        .classes("lyda-app-banner")
+        .attributes("role", "region", "aria-label", "Open in Lyda app")
+        .children(
+            create("span")
+                .classes("label")
+                .text("Continue in the Lyda app?")
+                .build(),
+            create("button")
+                .classes("open")
+                .type("button")
+                .text("Open")
+                .onclick(() => {
+                    window.location.href = "lyda://lyda.app" + pathAndQuery;
+                })
+                .build(),
+            create("button")
+                .classes("close")
+                .type("button")
+                .attributes("aria-label", "Dismiss")
+                .text("\u00d7")
+                .onclick(() => banner.remove())
+                .build(),
+        )
+        .build();
+    (document.body || document.documentElement).appendChild(banner);
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "hidden") banner.remove();
+    });
 }
 
 KeyBinds.initiate();

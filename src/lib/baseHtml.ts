@@ -166,76 +166,13 @@ export async function baseHtml(req: Request) {
                     window.location.replace(intent);
                 }
 
-                // 2) Always show the inline banner on every external-link
-                //    arrival. There's no delay, no sessionStorage
-                //    dismiss memory - if the user came in from a link, we
-                //    want to remind them they can open it in the app.
-                showOpenInAppBanner(isAndroid, isIOS);
+                // 2) On iOS, set a flag so the JESS app can render
+                //    the inline banner using its normal component flow.
+                if (isIOS) {
+                    window.__showAppBanner = true;
+                }
             } catch (e) { /* swallow — never break the page */ }
         })();
-
-        function showOpenInAppBanner(isAndroid, isIOS) {
-            try {
-                if (document.getElementById("lyda-app-banner")) return;
-                const u = new URL(window.location.href);
-                const pathAndQuery = u.pathname + u.search;
-                const css = ".lyda-app-banner{position:fixed;top:env(safe-area-inset-top,0);left:0;right:0;z-index:9999;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;background:rgba(32,32,37,0.96);color:#fff;font:14px/1.4 -apple-system,BlinkMacSystemFont,'Inter Tight',sans-serif;backdrop-filter:saturate(180%) blur(12px);-webkit-backdrop-filter:saturate(180%) blur(12px);box-shadow:0 1px 0 rgba(255,255,255,0.08);animation:lyda-app-banner-in .25s ease-out}.lyda-app-banner button{appearance:none;-webkit-appearance:none;border:0;background:transparent;color:inherit;font:inherit;cursor:pointer;padding:6px 8px;border-radius:8px}.lyda-app-banner .label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;opacity:.85}.lyda-app-banner .open{background:#fff;color:#000;font-weight:600;padding:8px 12px;border-radius:999px}.lyda-app-banner .close{opacity:.7;font-size:18px;line-height:1}@keyframes lyda-app-banner-in{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}";
-                const style = document.createElement("style");
-                style.textContent = css;
-                document.head.appendChild(style);
-                const banner = document.createElement("div");
-                banner.id = "lyda-app-banner";
-                banner.className = "lyda-app-banner";
-                banner.setAttribute("role", "region");
-                banner.setAttribute("aria-label", "Open in Lyda app");
-                const label = document.createElement("span");
-                label.className = "label";
-                label.textContent = "Continue in the Lyda app?";
-                const openBtn = document.createElement("button");
-                openBtn.className = "open";
-                openBtn.type = "button";
-                openBtn.textContent = "Open";
-                openBtn.addEventListener("click", function() {
-                    try {
-                        if (isAndroid) {
-                            const fallback = new URL(window.location.href);
-                            fallback.searchParams.set("inapp", "1");
-                            const intent = "intent://lyda.app" + pathAndQuery +
-                                "#Intent;scheme=https;package=com.targoninc.lyda;" +
-                                "S.browser_fallback_url=" + encodeURIComponent(fallback.toString()) + ";end";
-                            window.location.href = intent;
-                        } else if (isIOS) {
-                            window.location.href = "lyda://lyda.app" + pathAndQuery;
-                        }
-                    } catch (e) { /* swallow */ }
-                });
-                const closeBtn = document.createElement("button");
-                closeBtn.className = "close";
-                closeBtn.type = "button";
-                closeBtn.setAttribute("aria-label", "Dismiss");
-                closeBtn.textContent = "\u00d7";
-                closeBtn.addEventListener("click", function() {
-                    banner.remove();
-                });
-                banner.appendChild(label);
-                banner.appendChild(openBtn);
-                banner.appendChild(closeBtn);
-                // The script runs in <head> before <body> is parsed, so
-                // document.body may be null. Append to whichever root
-                // element is available — the banner is position:fixed, so
-                // its placement in the DOM doesn't affect layout.
-                (document.body || document.documentElement).appendChild(banner);
-
-                // If the OS opens the app while the banner is on screen
-                // (e.g. via the AASA path on iOS), the page becomes
-                // hidden. Remove the banner so it doesn't linger if the
-                // user comes back to the web later.
-                const onBannerHide = function() {
-                    if (document.visibilityState === "hidden") banner.remove();
-                };
-                document.addEventListener("visibilitychange", onBannerHide);
-            } catch (e) { /* swallow — never break the page */ }
-        }
     </script>
 
     <!-- Other -->
