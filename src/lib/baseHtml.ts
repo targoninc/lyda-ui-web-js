@@ -99,11 +99,60 @@ export async function baseHtml(req: Request) {
             if (!navigator.userAgent.toLowerCase().includes("firefox")) {
                 window.addEventListener("load", () => {
                     navigator.serviceWorker.register("/sw.js").catch(() => {});
-                });   
+                });
             }
         }
     </script>
-    
+
+    <!--
+        Hand off to the app early if the user arrived here from an external
+        link (messenger, email, share sheet, etc.) on a mobile device, and
+        the URL is something the app can deep-link into. Inline and
+        synchronous so the handoff happens before the page renders, which
+        keeps the web UI from flashing on the user's screen.
+
+        The check mirrors src/ui/js/Classes/Helpers/AppLink.ts: we only
+        attempt the handoff for entity paths (/track/, /album/,
+        /playlist/, /profile/, /user/), only on mobile, and only when the
+        referrer is empty or points at a different origin. A page tagged
+        with ?inapp=1 (the Android intent's browser fallback) is skipped
+        to avoid loops when the app isn't installed.
+    -->
+    <script>
+        (function() {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                if (params.get("inapp") === "1") return;
+                const path = window.location.pathname;
+                const prefixes = ["/track/", "/album/", "/playlist/", "/profile/", "/user/"];
+                const isEntity = prefixes.some(function(p) {
+                    return path === p.slice(0, -1) || path.indexOf(p) === 0;
+                });
+                if (!isEntity) return;
+                const ua = navigator.userAgent;
+                const isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
+                if (!isMobile) return;
+                const ref = document.referrer;
+                if (ref) {
+                    try {
+                        if (new URL(ref).origin === window.location.origin) return;
+                    } catch (e) { /* fall through */ }
+                }
+                if (/Android/i.test(ua)) {
+                    const u = new URL(window.location.href);
+                    const fallback = new URL(u.toString());
+                    fallback.searchParams.set("inapp", "1");
+                    const intent = "intent://lyda.app" + u.pathname + u.search +
+                        "#Intent;scheme=https;package=com.targoninc.lyda;" +
+                        "S.browser_fallback_url=" + encodeURIComponent(fallback.toString()) + ";end";
+                    window.location.replace(intent);
+                }
+                // iOS: no JS work needed. Universal Links are handled by the
+                // OS via the apple-app-site-association.
+            } catch (e) { /* swallow — never break the page */ }
+        })();
+    </script>
+
     <!-- Other -->
     <title>${title}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">

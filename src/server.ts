@@ -58,13 +58,18 @@ const server = serve({
         }
 
         if (pathname === "/.well-known/apple-app-site-association") {
+            // Only declare entity routes here so iOS only offers to open the
+            // app for links the app can actually handle. Other paths (e.g.
+            // /settings, /admin) stay on the web.
+            const entityPrefixes = ["/track/", "/album/", "/playlist/", "/profile/", "/user/"];
+            const components = entityPrefixes.map(p => ({ "/": p, comment: `Open ${p}* in the app` }));
             const association = {
                 applinks: {
                     apps: [],
                     details: [
                         {
                             appIDs: ["H3GTX7P884.com.targoninc.lyda"],
-                            components: [],
+                            components,
                         },
                     ],
                 },
@@ -72,7 +77,28 @@ const server = serve({
                     apps: ["H3GTX7P884.com.targoninc.lyda"],
                 },
             };
-            return new Response(JSON.stringify(association), {
+            return new Response(JSON.stringify(association, null, 2), {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Cache-Control": "public, max-age=3600",
+                },
+            });
+        }
+
+        if (pathname === "/.well-known/assetlinks.json") {
+            const assetLinks = [
+                {
+                    relation: ["delegate_permission/common.handle_all_urls"],
+                    target: {
+                        namespace: "android_app",
+                        package_name: "com.targoninc.lyda",
+                        sha256_cert_fingerprints: [
+                            "REPLACE_WITH_REAL_SHA256_FINGERPRINT_OF_ANDROID_APP_SIGNING_CERT",
+                        ],
+                    },
+                },
+            ];
+            return new Response(JSON.stringify(assetLinks, null, 2), {
                 headers: {
                     "Content-Type": "application/json",
                     "Cache-Control": "public, max-age=3600",
