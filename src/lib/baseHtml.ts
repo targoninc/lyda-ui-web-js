@@ -105,18 +105,31 @@ export async function baseHtml(req: Request) {
     </script>
 
     <!--
-        Hand off to the app early if the user arrived here from an external
-        link (messenger, email, share sheet, etc.) on a mobile device, and
-        the URL is something the app can deep-link into. Inline and
-        synchronous so the handoff happens before the page renders, which
-        keeps the web UI from flashing on the user's screen.
+        App-link handoff for external arrivals.
 
-        The check mirrors src/ui/js/Classes/Helpers/AppLink.ts: we only
-        attempt the handoff for entity paths (/track/, /album/,
-        /playlist/, /profile/, /user/), only on mobile, and only when the
-        referrer is empty or points at a different origin. A page tagged
-        with ?inapp=1 (the Android intent's browser fallback) is skipped
-        to avoid loops when the app isn't installed.
+        When the user opens a lyda.app URL from somewhere outside the site
+        itself (messenger, email, share sheet, etc.) on a mobile device, and
+        the URL is something the app can deep-link into, we:
+
+          1. On Android, immediately navigate to an intent:// URL. The OS
+             will switch to the app if installed or open the same web URL
+             as a fallback (tagged with ?inapp=1 to avoid loops).
+
+          2. On iOS, do nothing in JS - the OS handles Universal Links
+             automatically via the apple-app-site-association. If the user
+             has previously chosen "Open in browser" for this domain, iOS
+             will not show the prompt and the web page stays visible.
+
+          3. Show an inline "Open in app" banner at the top of the page on
+             every external-link arrival. The banner is a one-tap override
+             for iOS's per-domain "always open in browser" preference: it
+             fires lyda:// (iOS) or intent:// (Android) when tapped, which
+             forces the OS to switch to the app.
+
+        This is intentionally minimal: no banner on desktop, no banner for
+        in-site navigation (referrer is the site itself), no auto-skip or
+        memory of previous dismissals. The user always gets the choice; the
+        worst case is the no-op web page they were already on.
     -->
     <script>
         (function() {
@@ -130,15 +143,20 @@ export async function baseHtml(req: Request) {
                 });
                 if (!isEntity) return;
                 const ua = navigator.userAgent;
-                const isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
-                if (!isMobile) return;
+                const isAndroid = /Android/i.test(ua);
+                const isIOS = /iPhone|iPad|iPod/i.test(ua);
+                if (!isAndroid && !isIOS) return;
                 const ref = document.referrer;
                 if (ref) {
                     try {
                         if (new URL(ref).origin === window.location.origin) return;
                     } catch (e) { /* fall through */ }
                 }
-                if (/Android/i.test(ua)) {
+
+                // 1) Android: try the intent:// immediately. The page
+                //    unloads as the OS hands off, so the banner we add
+                //    below will never become visible on Android.
+                if (isAndroid) {
                     const u = new URL(window.location.href);
                     const fallback = new URL(u.toString());
                     fallback.searchParams.set("inapp", "1");
@@ -147,10 +165,73 @@ export async function baseHtml(req: Request) {
                         "S.browser_fallback_url=" + encodeURIComponent(fallback.toString()) + ";end";
                     window.location.replace(intent);
                 }
-                // iOS: no JS work needed. Universal Links are handled by the
-                // OS via the apple-app-site-association.
+
+                // 2) Always show the inline banner on every external-link
+                //    arrival. There's no delay, no sessionStorage
+                //    dismiss memory - if the user came in from a link, we
+                //    want to remind them they can open it in the app.
+                showOpenInAppBanner(isAndroid, isIOS);
             } catch (e) { /* swallow — never break the page */ }
         })();
+
+        function showOpenInAppBanner(isAndroid, isIOS) {
+            try {
+                if (document.getElementById("lyda-app-banner")) return;
+                const u = new URL(window.location.href);
+                const pathAndQuery = u.pathname + u.search;
+                const css = ".lyda-app-banner{position:fixed;top:env(safe-area-inset-top,0);left:0;right:0;z-index:9999;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;background:rgba(32,32,37,0.96);color:#fff;font:14px/1.4 -apple-system,BlinkMacSystemFont,'Inter Tight',sans-serif;backdrop-filter:saturate(180%) blur(12px);-webkit-backdrop-filter:saturate(180%) blur(12px);box-shadow:0 1px 0 rgba(255,255,255,0.08);animation:lyda-app-banner-in .25s ease-out}.lyda-app-banner button{appearance:none;-webkit-appearance:none;border:0;background:transparent;color:inherit;font:inherit;cursor:pointer;padding:6px 8px;border-radius:8px}.lyda-app-banner .label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;opacity:.85}.lyda-app-banner .open{background:#fff;color:#000;font-weight:600;padding:8px 12px;border-radius:999px}.lyda-app-banner .close{opacity:.7;font-size:18px;line-height:1}@keyframes lyda-app-banner-in{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}";
+                const style = document.createElement("style");
+                style.textContent = css;
+                document.head.appendChild(style);
+                const banner = document.createElement("div");
+                banner.id = "lyda-app-banner";
+                banner.className = "lyda-app-banner";
+                banner.setAttribute("role", "region");
+                banner.setAttribute("aria-label", "Open in Lyda app");
+                const label = document.createElement("span");
+                label.className = "label";
+                label.textContent = "Continue in the Lyda app?";
+                const openBtn = document.createElement("button");
+                openBtn.className = "open";
+                openBtn.type = "button";
+                openBtn.textContent = "Open";
+                openBtn.addEventListener("click", function() {
+                    try {
+                        if (isAndroid) {
+                            const fallback = new URL(window.location.href);
+                            fallback.searchParams.set("inapp", "1");
+                            const intent = "intent://lyda.app" + pathAndQuery +
+                                "#Intent;scheme=https;package=com.targoninc.lyda;" +
+                                "S.browser_fallback_url=" + encodeURIComponent(fallback.toString()) + ";end";
+                            window.location.href = intent;
+                        } else if (isIOS) {
+                            window.location.href = "lyda://lyda.app" + pathAndQuery;
+                        }
+                    } catch (e) { /* swallow */ }
+                });
+                const closeBtn = document.createElement("button");
+                closeBtn.className = "close";
+                closeBtn.type = "button";
+                closeBtn.setAttribute("aria-label", "Dismiss");
+                closeBtn.textContent = "\u00d7";
+                closeBtn.addEventListener("click", function() {
+                    banner.remove();
+                });
+                banner.appendChild(label);
+                banner.appendChild(openBtn);
+                banner.appendChild(closeBtn);
+                document.body.appendChild(banner);
+
+                // If the OS opens the app while the banner is on screen
+                // (e.g. via the AASA path on iOS), the page becomes
+                // hidden. Remove the banner so it doesn't linger if the
+                // user comes back to the web later.
+                const onBannerHide = function() {
+                    if (document.visibilityState === "hidden") banner.remove();
+                };
+                document.addEventListener("visibilitychange", onBannerHide);
+            } catch (e) { /* swallow — never break the page */ }
+        }
     </script>
 
     <!-- Other -->
