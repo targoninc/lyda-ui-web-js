@@ -46,6 +46,7 @@ export const ga: Translation = {
     IMPORT: "Iompórtáil",
     IMPORTED: "Iompórtáilte",
     RELEASES: "foilseacháin",
+    OPEN: "Oscail",
     SKIP: "Scipeáil",
     CONTINUE: "Lean ar aghaidh",
     CONNECT_STRIPE_ACCOUNT: "Ceangail cuntas Stripe",

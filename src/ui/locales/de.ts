@@ -644,6 +644,7 @@ export const de: Translation = {
     CUMULATIVE_TRACKS: "Kumulative Tracks",
     CUMULATIVE_USERS: "Kumulative Nutzer",
     COPY_LINK: "Link kopieren",
+    OPEN: "Öffnen",
     OPEN_IN_NEW_TAB: "In neuem Tab öffnen",
     BANNED: "Gesperrt",
     ADD_TRACK: "Track hinzufügen",

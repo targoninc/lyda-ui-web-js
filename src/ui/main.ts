@@ -7,7 +7,7 @@ import { notify, Ui } from "./js/Classes/Ui.ts";
 import { Util } from "./js/Classes/Util.ts";
 import { RoutePath, routes } from "./js/Routing/routes.js";
 import { create } from "@targoninc/jess";
-import { GenericTemplates } from "./js/Templates/generic/GenericTemplates.ts";
+import {GenericTemplates, horizontal, vertical} from "./js/Templates/generic/GenericTemplates.ts";
 import { TrackEditTemplates } from "./js/Templates/music/TrackEditTemplates.ts";
 import { contextQueue, currentUser, history, permissions, playingFrom } from "./js/state.ts";
 import { StreamingBroadcaster } from "./js/Streaming/StreamingBroadcaster.ts";
@@ -22,6 +22,7 @@ import { NotificationType } from "./js/Enums/NotificationType.ts";
 import { t } from "./locales";
 import { InteractionStateManager } from "./js/Classes/InteractionStateManager.ts";
 import { ColorExtractor } from "./js/Classes/ColorExtractor.ts";
+import {button} from "@targoninc/jess-components";
 
 initializeGlobalErrorHandler();
 
@@ -93,30 +94,27 @@ if (currentUser.value) {
 if ((window as any).__showAppBanner) {
     const pathAndQuery = window.location.pathname + window.location.search;
     const banner = create("div")
-        .classes("lyda-app-banner")
+        .classes("lyda-app-banner", "flex")
         .attributes("role", "region", "aria-label", "Open in Lyda app")
         .children(
-            create("span")
-                .classes("label")
-                .text("Continue in the Lyda app?")
-                .build(),
-            create("button")
-                .classes("open")
-                .type("button")
-                .text("Open")
-                .onclick(() => {
-                    window.location.href = "lyda://lyda.app" + pathAndQuery;
-                })
-                .build(),
-            create("button")
-                .classes("close")
-                .type("button")
-                .attributes("aria-label", "Dismiss")
-                .text("\u00d7")
-                .onclick(() => banner.remove())
-                .build(),
-        )
-        .build();
+            vertical(
+                horizontal(
+                    create("span")
+                        .classes("span")
+                        .text("Continue in the Lyda app?")
+                        .build(),
+                    button({
+                        text: t("OPEN"),
+                        icon: {icon: "exit_to_app"},
+                        classes: ["special", "rounded-max"],
+                        onclick: () => window.location.href = "lyda://lyda.app" + pathAndQuery
+                    }),
+                    GenericTemplates.roundIconButton({
+                        icon: "close",
+                    }, () => banner.remove()),
+                ).classes("align-children")
+            ).classes("align-children", "flex-grow"),
+        ).build();
     (document.body || document.documentElement).appendChild(banner);
     document.addEventListener("visibilitychange", () => {
         if (document.visibilityState === "hidden") banner.remove();

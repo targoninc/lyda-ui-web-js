@@ -1267,45 +1267,19 @@ img {
 
 .lyda-app-banner {
     position: fixed;
-    top: env(safe-area-inset-top, 0);
-    left: 0;
-    right: 0;
+    top: calc(var(--gap) * 2);
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 9999;
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 14px;
-    background: var(--bg-1);
+    padding: 10px 10px 10px 24px;
+    background: var(--bg-0);
     color: var(--contrast);
-    box-shadow: 0 1px 0 rgba(255,255,255,0.08);
-}
-.lyda-app-banner .label {
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-.lyda-app-banner .open {
-    background: var(--contrast);
-    color: var(--base);
-    font-weight: 600;
-    padding: 8px 12px;
+    width: max-content;
     border-radius: 999px;
-    border: 0;
-    cursor: pointer;
-    font: inherit;
-}
-.lyda-app-banner .close {
-    background: transparent;
-    border: 0;
-    color: inherit;
-    cursor: pointer;
-    font: inherit;
-    font-size: 18px;
-    line-height: 1;
-    opacity: .7;
-    padding: 6px 8px;
+    border: 1px solid var(--blue);
+    box-shadow: 0 0 30px -10px var(--blue);
 }
 
 @keyframes lyda-app-banner-in {

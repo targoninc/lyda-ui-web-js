@@ -135,17 +135,26 @@ export async function baseHtml(req: Request) {
         (function() {
             try {
                 const params = new URLSearchParams(window.location.search);
-                if (params.get("inapp") === "1") return;
+                if (params.get("inapp") === "1") {
+                    return;
+                }
+                
                 const path = window.location.pathname;
                 const prefixes = ["/track/", "/album/", "/playlist/", "/profile/", "/user/"];
                 const isEntity = prefixes.some(function(p) {
                     return path === p.slice(0, -1) || path.indexOf(p) === 0;
                 });
-                if (!isEntity) return;
+                if (!isEntity) {
+                    return;
+                }
+                
                 const ua = navigator.userAgent;
                 const isAndroid = /Android/i.test(ua);
-                const isIOS = /iPhone|iPad|iPod/i.test(ua);
-                if (!isAndroid && !isIOS) return;
+                let isIOS = /iPhone|iPad|iPod/i.test(ua);
+                isIOS = true;
+                if (!isAndroid && !isIOS) {
+                    return;
+                }
                 const ref = document.referrer;
                 if (ref) {
                     try {

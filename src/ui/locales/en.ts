@@ -607,6 +607,7 @@ export const en = {
     IMPRINT: "Imprint, Terms of Service and Privacy Policy",
     PAYMENT_INFO: "Payment Info",
     COPY_LINK: "Copy link",
+    OPEN: "Open",
     OPEN_IN_NEW_TAB: "Open in new tab",
     BUY: "Buy",
     BUY_ITEM: "Buy item",
