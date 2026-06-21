@@ -1,12 +1,18 @@
 import { ApiRoutes } from "./ApiRoutes.ts";
 import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 
+export interface UploadOptions {
+    versionIndex?: number;
+    newVersionName?: string;
+}
+
 export class MediaUploader {
     static upload(
         type: MediaFileType,
         referenceId: number,
         file: File,
-        onProgress?: (event: ProgressEvent) => void
+        onProgress?: (event: ProgressEvent) => void,
+        options?: UploadOptions
     ): Promise<string> {
         return new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
@@ -15,6 +21,12 @@ export class MediaUploader {
             formData.append("type", type);
             formData.append("referenceId", referenceId.toString());
             formData.append("file", file);
+            if (options?.versionIndex !== undefined) {
+                formData.append("versionIndex", options.versionIndex.toString());
+            }
+            if (options?.newVersionName) {
+                formData.append("newVersionName", options.newVersionName);
+            }
 
             xhr.open("POST", ApiRoutes.uploadMedia, true);
             xhr.withCredentials = true;

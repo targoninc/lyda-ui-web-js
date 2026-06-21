@@ -84,7 +84,7 @@ export class AudioUpload {
                 text: t("UPLOADING_AUDIO"),
                 progress: (event.loaded / event.total) * 100
             });
-        });
+        }, { versionIndex: 1 });
         if (error !== true) {
             this.setProgressPartState({
                 state: ProgressState.error,
@@ -172,9 +172,9 @@ export class AudioUpload {
         return Api.createTrack(state);
     }
 
-    private async uploadMedia(type: MediaFileType, id: number, file: File, onProgress?: (event: ProgressEvent) => void) {
+    private async uploadMedia(type: MediaFileType, id: number, file: File, onProgress?: (event: ProgressEvent) => void, options?: { versionIndex?: number }) {
         try {
-            await MediaUploader.upload(type, id, file, onProgress);
+            await MediaUploader.upload(type, id, file, onProgress, options);
             return true;
         } catch (e) {
             return e;

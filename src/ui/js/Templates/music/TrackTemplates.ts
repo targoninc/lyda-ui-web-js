@@ -118,7 +118,7 @@ export class TrackTemplates {
         return result;
     }
 
-    static waveform(track: Track, loudnessData: number[], small = false) {
+    static waveform(track: Track, loudnessData: number[], small = false, version?: number) {
         if (!track.processed) {
             return create("div")
                 .classes("waveform", small ? "waveform-small" : "_", "processing-box", "rounded-max", "relative")
@@ -190,12 +190,12 @@ export class TrackTemplates {
                     ).build(),
             )
             .onmousedown(async e => {
-                PlayManager.addStreamClientIfNotExists(track.id, track.length);
-                await PlayManager.scrubFromElement(e, track.id);
+                PlayManager.addStreamClientIfNotExists(track.id, track.length, version);
+                await PlayManager.scrubFromElement(e, track.id, version);
             })
             .onmousemove(async e => {
                 if (e.buttons === 1) {
-                    await PlayManager.scrubFromElement(e, track.id);
+                    await PlayManager.scrubFromElement(e, track.id, version);
                 }
             })
             .build();
@@ -384,6 +384,28 @@ export class TrackTemplates {
             throw new Error(`Track ${track.id} has no user`);
         }
 
+        const versions = (trackData.versions ?? []) as any[];
+        const latestVersionIdx = trackData.latestVersion;
+        const selectedVersion = signal(latestVersionIdx);
+        if (versions.length > 0 && latestVersionIdx === undefined) {
+            selectedVersion.value = versions[versions.length - 1].index;
+        }
+
+        const waveformEl = compute(() => {
+            const idx = selectedVersion.value;
+            const version = versions.find((v: any) => v.index === idx);
+            const processed = version ? version.processed : track.processed;
+            const raw = version?.loudness_data ?? track.loudness_data;
+            let data: number[];
+            try {
+                data = JSON.parse(raw) as number[];
+            } catch {
+                data = [];
+            }
+            const modifiedTrack = {...track, processed, length: version?.length ?? track.length} as Track;
+            return TrackTemplates.waveform(modifiedTrack, data, false, idx);
+        }, selectedVersion);
+
         const coverFile = signal(Images.DEFAULT_COVER_TRACK);
         if (track.has_cover) {
             coverFile.value = Util.getTrackCover(track.id);
@@ -447,8 +469,31 @@ export class TrackTemplates {
                             ).classes("track-info-container"),
                         ).classes("big-gap"),
                         horizontal(
-                            TrackTemplates.playButton(track),
-                            TrackTemplates.waveform(track, track.processed ? JSON.parse(track.loudness_data) : []),
+                            TrackTemplates.playButton(track, selectedVersion),
+                            when(versions.length > 1, (() => {
+                                const opts = versions.map((v: any) => ({
+                                    name: v.name ?? `v${v.index}`,
+                                    value: v.index.toString(),
+                                }));
+                                return create("select")
+                                    .classes("version-select")
+                                    .children(
+                                        ...opts.map((o: any) => {
+                                            const option = document.createElement("option");
+                                            option.value = o.value;
+                                            option.textContent = o.name;
+                                            if (parseInt(o.value) === selectedVersion.value) {
+                                                option.selected = true;
+                                            }
+                                            return option;
+                                        }),
+                                    )
+                                    .onchange((e: Event) => {
+                                        selectedVersion.value = parseInt((e.target as HTMLSelectElement).value);
+                                    })
+                                    .build();
+                            })()),
+                            waveformEl,
                         ).classes("align-children", "bordered", "glass", "rounded-max", "noflexwrap", "limitToContentWidth")
                             .styles("padding", "10px 20px 10px 10px"),
                     ).classes("big-gap").build(),
@@ -590,7 +635,7 @@ export class TrackTemplates {
         });
     }
 
-    static playButton(track: Track) {
+    static playButton(track: Track, selectedVersion?: Signal<number | undefined>) {
         const isPlaying = compute((id, ph) => id === track.id && ph, currentTrackId, playingHere);
         const text = compute((p): string => (p ? `${t("PAUSE")}` : `${t("PLAY")}`), isPlaying);
         const icon = getPlayIcon(isPlaying, loadingAudio);
@@ -606,13 +651,14 @@ export class TrackTemplates {
             id: track.id,
             disabled: loadingAudio,
             onclick: async () => {
+                const version = selectedVersion?.value;
                 if (isPlaying.value) {
                     await PlayManager.pauseAsync(track.id);
                 } else if (currentTrackId.value === track.id) {
                     await PlayManager.togglePlayAsync(track.id);
                 } else {
-                    PlayManager.addStreamClientIfNotExists(track.id, track.length);
-                    await PlayManager.startAsync(track.id);
+                    PlayManager.addStreamClientIfNotExists(track.id, track.length, version);
+                    await PlayManager.startAsync(track.id, true, false, version);
                 }
             },
         });
@@ -727,11 +773,14 @@ export class TrackTemplates {
 
     private static trackMenu(isPrivate: boolean, track: Track, trackData: any) {
         const popId = `track-menu-${track.id}`;
+        const versions = (trackData.versions ?? []) as any[];
+        const latestVersionIdx = trackData.latestVersion;
+        const versionCount = versions.length;
         const popover = PopoverTemplates.manualPopover(popId,
             when(trackData.canDownload, TrackEditTemplates.downloadAudioButton(track)),
             when(trackData.canEdit, vertical(
                 TrackEditTemplates.addToAlbumsButton(track),
-                TrackEditTemplates.replaceAudioButton(track),
+                TrackEditTemplates.replaceAudioButton(track, latestVersionIdx, versionCount),
                 TrackEditTemplates.openEditPageButton(track),
                 TrackEditTemplates.deleteTrackButton(track.id),
             ).build()),

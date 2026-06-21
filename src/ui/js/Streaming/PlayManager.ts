@@ -217,14 +217,17 @@ export class PlayManager {
         }
     }
 
-    static addStreamClientIfNotExists(id: number, duration: number) {
+    static addStreamClientIfNotExists(id: number, duration: number, version?: number) {
         let streamClient = PlayManager.getStreamClient(id);
         if (streamClient === undefined) {
-            streamClient = new StreamClient(id, currentSecretCode.value);
+            streamClient = new StreamClient(id, currentSecretCode.value, version);
             PlayManager.addStreamClient(id, streamClient);
             PlayManager.registerOnEnded(id, streamClient);
             PlayManager.pruneStaleStreamClients();
         } else {
+            if (version !== undefined) {
+                streamClient.setVersion(version);
+            }
             if (streamClient.duration === 0) {
                 streamClient.duration = duration;
                 StreamingUpdater.updateBuffers(streamClient.getBufferedLength(), streamClient.duration);
@@ -299,7 +302,7 @@ export class PlayManager {
         }
     }
 
-    static async startAsync(id: number, fromBeginning: boolean = false, force: boolean = false) {
+    static async startAsync(id: number, fromBeginning: boolean = false, force: boolean = false, version?: number) {
         loadingAudio.value = true;
         await PlayManager.stopAllAsync();
 
@@ -333,7 +336,7 @@ export class PlayManager {
                 }
             ]
         });
-        const streamClient = PlayManager.addStreamClientIfNotExists(id, d.track.length);
+        const streamClient = PlayManager.addStreamClientIfNotExists(id, d.track.length, version);
         PlayManager.registerOnEnded(id, streamClient);
 
         try {
@@ -407,11 +410,11 @@ export class PlayManager {
         await StreamingUpdater.updatePlayState();
     }
 
-    static async scrubFromElement(e: MouseEvent, id: number) {
+    static async scrubFromElement(e: MouseEvent, id: number, version?: number) {
         const rect = target(e).getBoundingClientRect();
         const value = e.offsetX / rect.width;
         if (id !== currentTrackId.value) {
-            await PlayManager.startAsync(id);
+            await PlayManager.startAsync(id, true, false, version);
         }
         await PlayManager.scrubTo(id, value);
     }

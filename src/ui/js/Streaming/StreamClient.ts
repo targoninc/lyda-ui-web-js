@@ -10,6 +10,7 @@ export class StreamClient implements IStreamClient {
 
     private readonly id: number;
     private readonly code: string;
+    private version?: number;
 
     private ctx?: AudioContext;
     private gain?: GainNode;
@@ -24,10 +25,19 @@ export class StreamClient implements IStreamClient {
     private totalBytes = 0;
     private abortController?: AbortController;
 
-    constructor(id: number, code: string) {
+    constructor(id: number, code: string, version?: number) {
         this.id = id;
         this.code = code;
+        this.version = version;
         initializeClient(this);
+    }
+
+    public setVersion(version: number | undefined) {
+        if (this.version !== version) {
+            this.version = version;
+            this.buffer = undefined;
+            this.loadingPromise = undefined;
+        }
     }
 
     setLoop(looping: boolean): void {
@@ -202,7 +212,11 @@ export class StreamClient implements IStreamClient {
     }
 
     private buildUrl(): string {
-        return `${ApiRoutes.getTrackAudio}?id=${this.id}&quality=${currentQuality.value}&code=${this.code}`;
+        let url = `${ApiRoutes.getTrackAudio}?id=${this.id}&quality=${currentQuality.value}&code=${this.code}`;
+        if (this.version !== undefined) {
+            url += `&version=${this.version}`;
+        }
+        return url;
     }
 
     private async loadAndDecode(): Promise<void> {

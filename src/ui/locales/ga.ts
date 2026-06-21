@@ -51,4 +51,8 @@ export const ga: Translation = {
     CONTINUE: "Lean ar aghaidh",
     CONNECT_STRIPE_ACCOUNT: "Ceangail cuntas Stripe",
     STRIPE_CONNECT: "Stripe Connect",
+
+    DROP_AUDIO_FILE_HERE: "Buail comhad fuaime anseo nó cliceáil chun brabhsáil",
+    DO_NOT_CREATE_NEW_VERSION: "Ná cruthaigh leagan nua",
+    VERSION_NAME: "Ainm an leagain",
 };

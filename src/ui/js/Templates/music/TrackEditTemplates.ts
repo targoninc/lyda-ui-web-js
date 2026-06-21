@@ -904,7 +904,7 @@ export class TrackEditTemplates {
             ).build();
     }
 
-    static replaceAudioButton(track: Track) {
+    static replaceAudioButton(track: Track, latestVersionIndex?: number, versionCount?: number) {
         const progress = signal<ProgressPart | null>(null);
         const loading = compute(p => p?.state === ProgressState.inProgress, progress);
 
@@ -917,7 +917,7 @@ export class TrackEditTemplates {
                     TrackActions.replaceAudio(track.id, true, progress, () => {
                         PlayManager.removeTrackFromAllStates(track.id);
                         reload();
-                    });
+                    }, latestVersionIndex, versionCount);
                 },
             }),
             GenericTemplates.progressSectionPart(progress),

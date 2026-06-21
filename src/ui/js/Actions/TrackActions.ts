@@ -1,11 +1,10 @@
 import { Util } from "../Classes/Util.ts";
 import { Icons } from "../Enums/Icons.ts";
 import { PlayManager } from "../Streaming/PlayManager.ts";
-import { notify, Ui } from "../Classes/Ui.ts";
+import { createModal, notify, Ui } from "../Classes/Ui.ts";
 import { navigate } from "../Routing/Router.ts";
-import { Signal } from "@targoninc/jess";
+import { compute, create, InputType, Signal, signal, when } from "@targoninc/jess";
 import { MediaUploader } from "../Api/MediaUploader.ts";
-import { currentQuality, playingHere } from "../state.ts";
 import { RoutePath } from "../Routing/routes.ts";
 import { NotificationType } from "../Enums/NotificationType.ts";
 import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
@@ -18,6 +17,8 @@ import { Api } from "../Api/Api.ts";
 import { t } from "../../locales";
 import { ProgressPart } from "../Models/ProgressPart.ts";
 import { ProgressState } from "@targoninc/lyda-shared/src/Enums/ProgressState";
+import { button, toggle } from "@targoninc/jess-components";
+import { GenericTemplates, horizontal, vertical } from "../Templates/generic/GenericTemplates.ts";
 
 export class TrackActions {
     static async deleteTrack(id: number) {
@@ -105,51 +106,123 @@ export class TrackActions {
         following.value = !following.value;
     }
 
-    static replaceAudio(id: number, canEdit: boolean, progress: Signal<ProgressPart | null>, onSuccess: () => void = () => {}) {
+    static replaceAudio(id: number, canEdit: boolean, progress: Signal<ProgressPart | null>, onSuccess: () => void = () => {}, latestVersionIndex?: number, versionCount?: number) {
         if (!canEdit) {
             return;
         }
-        const fileInput = document.createElement("input");
-        fileInput.type = "file";
-        fileInput.accept = "audio/*";
-        fileInput.onchange = async (e) => {
-            const fileTarget = e.target as HTMLInputElement;
-            const file = fileTarget.files![0];
-            if (!file) {
-                return;
-            }
-            progress.value = {
-                icon: "music_note",
-                text: t("UPLOADING_AUDIO"),
-                state: ProgressState.inProgress,
-                progress: 0,
-            };
-            try {
-                await MediaUploader.upload(MediaFileType.audio, id, file, (event: ProgressEvent) => {
-                    progress.value = {
-                        ...progress.value!,
-                        progress: (event.loaded / event.total) * 100,
-                    };
-                });
-                progress.value = {
-                    ...progress.value!,
-                    state: ProgressState.complete,
-                    text: t("AUDIO_UPLOADED"),
-                    progress: 100,
-                };
-                notify(`${t("AUDIO_UPLOADED")}`, NotificationType.success);
-                onSuccess();
-            } catch (e) {
-                progress.value = {
-                    ...progress.value!,
-                    state: ProgressState.error,
-                    text: t("FAILED_UPLOADING_AUDIO"),
-                    icon: "error",
-                };
-                notify(`${t("FAILED_UPLOADING_AUDIO")}`, NotificationType.error);
+
+        const selectedFile = signal<File | null>(null);
+        const importing = signal(false);
+        const doNotCreateNew = signal(false);
+        const nextVersionNum = (versionCount ?? 0) + 1;
+        const defaultName = !isNaN(nextVersionNum) ? `v${nextVersionNum}` : "v2";
+        const versionName = signal(defaultName);
+
+        const fileInput = create("input")
+            .type(InputType.file)
+            .styles("display", "none")
+            .attributes("accept", "audio/*")
+            .build() as HTMLInputElement;
+
+        fileInput.onchange = () => {
+            const file = fileInput.files?.[0];
+            if (file) {
+                selectedFile.value = file;
             }
         };
-        fileInput.click();
+
+        const fileName = compute(f => f ? f.name : "", selectedFile);
+        const uploadDisabled = compute(
+            (f, imp) => !f || imp,
+            selectedFile,
+            importing,
+        );
+
+        const modalContent = vertical(
+            create("h3").text(t("REPLACE_AUDIO")).build(),
+            GenericTemplates.fileInput("replace-audio-file", "replace-audio-file", "audio/*", t("DROP_AUDIO_FILE_HERE"), false, (_, files) => {
+                if (files?.[0]) {
+                    selectedFile.value = files[0];
+                }
+            }),
+            create("span").classes("color-dim").text(fileName).build(),
+            toggle({
+                name: "doNotCreateNewVersion",
+                label: t("DO_NOT_CREATE_NEW_VERSION"),
+                text: t("DO_NOT_CREATE_NEW_VERSION"),
+                checked: doNotCreateNew,
+                onchange: v => doNotCreateNew.value = v,
+            }),
+            when(compute(d => !d, doNotCreateNew), vertical(
+                create("label").text(t("VERSION_NAME")).build(),
+                create("input").type(InputType.text).value(versionName).onchange((e: Event) => {
+                    versionName.value = (e.target as HTMLInputElement).value;
+                }).build(),
+            ).build()),
+            horizontal(
+                button({
+                    text: t("CANCEL"),
+                    icon: {icon: "close"},
+                    classes: ["negative"],
+                    onclick: () => Util.removeModal(),
+                }),
+                button({
+                    text: t("UPLOAD"),
+                    icon: {icon: "upload"},
+                    classes: ["positive"],
+                    disabled: uploadDisabled,
+                    onclick: async () => {
+                        const file = selectedFile.value;
+                        if (!file) return;
+
+                        importing.value = true;
+
+                        progress.value = {
+                            icon: "music_note",
+                            text: t("UPLOADING_AUDIO"),
+                            state: ProgressState.inProgress,
+                            progress: 0,
+                        };
+
+                        try {
+                            const options: any = {};
+                            if (doNotCreateNew.value) {
+                                options.versionIndex = latestVersionIndex;
+                            } else {
+                                options.newVersionName = versionName.value;
+                            }
+
+                            await MediaUploader.upload(MediaFileType.audio, id, file, (event: ProgressEvent) => {
+                                progress.value = {
+                                    ...progress.value!,
+                                    progress: (event.loaded / event.total) * 100,
+                                };
+                            }, options);
+                            progress.value = {
+                                ...progress.value!,
+                                state: ProgressState.complete,
+                                text: t("AUDIO_UPLOADED"),
+                                progress: 100,
+                            };
+                            notify(`${t("AUDIO_UPLOADED")}`, NotificationType.success);
+                            Util.removeModal();
+                            onSuccess();
+                        } catch {
+                            progress.value = {
+                                ...progress.value!,
+                                state: ProgressState.error,
+                                text: t("FAILED_UPLOADING_AUDIO"),
+                                icon: "error",
+                            };
+                            notify(`${t("FAILED_UPLOADING_AUDIO")}`, NotificationType.error);
+                            importing.value = false;
+                        }
+                    },
+                }),
+            ).classes("align-end").build(),
+        );
+
+        createModal([modalContent], "replace-audio");
     }
 
     static moveTrackToPosition(idToMove: number, targetPosition: number, tracks: Signal<ListTrack[]>) {

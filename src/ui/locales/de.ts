@@ -716,4 +716,8 @@ export const de: Translation = {
     REFRESH_STATUS: "Status aktualisieren",
     PENDING_BALANCE: "Ausstehend",
     AVAILABLE: "Verfügbar",
+
+    DROP_AUDIO_FILE_HERE: "Audiodatei hier ablegen oder klicken zum Durchsuchen",
+    DO_NOT_CREATE_NEW_VERSION: "Keine neue Version erstellen",
+    VERSION_NAME: "Versionsname",
 };

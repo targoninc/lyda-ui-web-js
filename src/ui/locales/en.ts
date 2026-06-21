@@ -732,4 +732,8 @@ export const en = {
     REFRESH_STATUS: "Refresh status",
     PENDING_BALANCE: "Pending",
     AVAILABLE: "Available",
+
+    DROP_AUDIO_FILE_HERE: "Drop audio file here or click to browse",
+    DO_NOT_CREATE_NEW_VERSION: "Do not create a new version",
+    VERSION_NAME: "Version name",
 } satisfies BaseTranslation;
