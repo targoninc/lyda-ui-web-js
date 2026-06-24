@@ -145,9 +145,6 @@ export class SubscriptionTemplates {
                                     .children(
                                         when(gifted, GenericTemplates.giftIcon(t("GIFTED_SUBSCRIPTION"))),
                                     ).build(),
-                                create("span")
-                                    .text(option.description)
-                                    .build(),
                             ).build(),
                         create("div")
                             .classes("flex-v")
