@@ -53,6 +53,7 @@ import {BuyTemplates} from "../money/BuyTemplates.ts";
 import {CoverContext} from "../../Enums/CoverContext.ts";
 import {TextSize} from "../../Enums/TextSize.ts";
 import {ColorExtractor} from "../../Classes/ColorExtractor.ts";
+import {TrackDetailResponse} from "@targoninc/lyda-shared/src/Models/TrackDetailResponse.ts";
 
 export class TrackTemplates {
     static collabIndicator(collab: TrackCollaborator): any {
@@ -361,7 +362,7 @@ export class TrackTemplates {
             ).build();
     }
 
-    static trackPage(trackData: any) {
+    static trackPage(trackData: TrackDetailResponse) {
         if (!trackData.track) {
             console.log(trackData);
             console.error("Invalid track data");
@@ -391,8 +392,7 @@ export class TrackTemplates {
             selectedVersion.value = versions[versions.length - 1].index;
         }
 
-        const waveformEl = compute(() => {
-            const idx = selectedVersion.value;
+        const waveformEl = compute((idx) => {
             const version = versions.find((v: any) => v.index === idx);
             const processed = version ? version.processed : track.processed;
             const raw = version?.loudness_data ?? track.loudness_data;

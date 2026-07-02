@@ -23,6 +23,7 @@ import {
 } from "../state.ts";
 import {StreamingBroadcaster, StreamingEvent} from "./StreamingBroadcaster.ts";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {TrackDetailResponse} from "@targoninc/lyda-shared/src/Models/TrackDetailResponse";
 import {PlayingFrom} from "@targoninc/lyda-shared/src/Models/PlayingFrom";
 import {LoopMode} from "@targoninc/lyda-shared/src/Enums/LoopMode";
 import {TrackPosition} from "@targoninc/lyda-shared/src/Models/TrackPosition";
@@ -562,7 +563,7 @@ export class PlayManager {
         await PlayManager.setLoudness(streamClient.getVolume() / PlayManager.config.controls.volumeChangeRelative);
     }
 
-    static async cacheTrackData(trackData: { track: Track }) {
+    static async cacheTrackData(trackData: TrackDetailResponse) {
         setTrackInfo(trackData.track.id, trackData);
     }
 
@@ -575,7 +576,7 @@ export class PlayManager {
             throw new Error("id is missing");
         }
 
-        const data = await get<{ track: Track }>(ApiRoutes.getTrackById, {id});
+        const data = await get<TrackDetailResponse>(ApiRoutes.getTrackById, {id});
         if (data) {
             await PlayManager.cacheTrackData(data);
         }

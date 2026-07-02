@@ -8,6 +8,7 @@ import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { ListTrack } from "@targoninc/lyda-shared/src/Models/ListTrack";
+import { TrackDetailResponse } from "@targoninc/lyda-shared/src/Models/TrackDetailResponse";
 import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import { CollaboratorType } from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
 import { TrackCollaborator } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
@@ -752,16 +753,8 @@ export class Api {
     static async getTrackById(
         id: number,
         code: string = ""
-    ): Promise<{
-        track: Track;
-        metadata: { genre_suggestions?: string } | null;
-        canEdit: boolean;
-    } | null> {
-        return await get<{
-            track: Track;
-            metadata: { genre_suggestions?: string } | null;
-            canEdit: boolean;
-        }>(ApiRoutes.getTrackById, { id: id.toString(), code });
+    ): Promise<TrackDetailResponse | null> {
+        return await get<TrackDetailResponse>(ApiRoutes.getTrackById, { id: id.toString(), code });
     }
 
     static async updateTrackFull(track: Partial<Track>): Promise<any> {
