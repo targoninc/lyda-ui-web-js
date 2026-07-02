@@ -385,26 +385,12 @@ export class TrackTemplates {
             throw new Error(`Track ${track.id} has no user`);
         }
 
-        const versions = (trackData.versions ?? []) as any[];
+        const versions = (trackData.versions ?? []);
         const latestVersionIdx = trackData.latestVersion;
         const selectedVersion = signal(latestVersionIdx);
         if (versions.length > 0 && latestVersionIdx === undefined) {
             selectedVersion.value = versions[versions.length - 1].index;
         }
-
-        const waveformEl = compute((idx) => {
-            const version = versions.find((v: any) => v.index === idx);
-            const processed = version ? version.processed : track.processed;
-            const raw = version?.loudness_data ?? track.loudness_data;
-            let data: number[];
-            try {
-                data = JSON.parse(raw) as number[];
-            } catch {
-                data = [];
-            }
-            const modifiedTrack = {...track, processed, length: version?.length ?? track.length} as Track;
-            return TrackTemplates.waveform(modifiedTrack, data, false, idx);
-        }, selectedVersion);
 
         const coverFile = signal(Images.DEFAULT_COVER_TRACK);
         if (track.has_cover) {
@@ -493,7 +479,19 @@ export class TrackTemplates {
                                     })
                                     .build();
                             })()),
-                            waveformEl,
+                            compute((idx) => {
+                                const version = versions.find((v) => v.index === idx);
+                                const processed = version ? version.processed : track.processed;
+                                const raw = version?.loudness_data ?? track.loudness_data;
+                                let data: number[];
+                                try {
+                                    data = JSON.parse(raw) as number[];
+                                } catch {
+                                    data = [];
+                                }
+                                const modifiedTrack = {...track, processed, length: version?.length ?? track.length} as Track;
+                                return TrackTemplates.waveform(modifiedTrack, data, false, idx);
+                            }, selectedVersion),
                         ).classes("align-children", "bordered", "glass", "rounded-max", "noflexwrap", "limitToContentWidth")
                             .styles("padding", "10px 20px 10px 10px"),
                     ).classes("big-gap").build(),
