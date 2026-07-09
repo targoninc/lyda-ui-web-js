@@ -72,7 +72,13 @@ export class PayoutTemplates {
                 when(compute((sc, sl) => !sc && !sl, stripeConnected$, stripeLoading),
                     create("span").classes("color-dim").text(t("CONNECT_STRIPE_TO_RECEIVE_PAYOUTS")).build()),
                 when(compute((sc, spe, sl) => sc && !spe && !sl, stripeConnected$, stripePayoutsEnabled$, stripeLoading),
-                    create("span").classes("warning").text(t("STRIPE_PAYOUTS_DISABLED_MSG")).build()),
+                    create("a").classes("warning", "clickable").children(
+                        create("span").text(t("STRIPE_PAYOUTS_DISABLED_MSG")).build(),
+                        create("span").classes("small", "underline").text(t("STRIPE_COMPLETE_VERIFICATION")).build(),
+                    ).onclick(async (e: MouseEvent) => {
+                        e.preventDefault();
+                        await StripeService.startOnboarding();
+                    }).build()),
                 create("div")
                     .classes("flex")
                     .children(
