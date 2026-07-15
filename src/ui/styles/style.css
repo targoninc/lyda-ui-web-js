@@ -825,7 +825,7 @@ details > *:not(summary) {
     border: 1px solid var(--border);
 }
 
-button.disabled {
+.disabled {
     opacity: .2;
     cursor: not-allowed;
     pointer-events: none;

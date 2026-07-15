@@ -238,8 +238,10 @@ export class PlayerTemplates {
         bufferPercent: Signal<string>,
         positionPercent: Signal<string>,
     ) {
+        const disabledClass = compute((l): string => l ? "disabled" : "_", loadingAudio);
+
         return create("div")
-            .classes("audio-player-scrubber", "flex-grow", "flex", "rounded", "padded-inline")
+            .classes("audio-player-scrubber", "flex-grow", "flex", "rounded", "padded-inline", disabledClass)
             .id(track.id)
             .onmousedown(e => PlayManager.scrubFromElement(e, track.id))
             .onmousemove(async e => {
