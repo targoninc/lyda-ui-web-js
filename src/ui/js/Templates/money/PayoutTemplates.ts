@@ -6,7 +6,7 @@ import { RoyaltyInfo } from "@targoninc/lyda-shared/src/Models/RoyaltyInfo";
 import { button } from "@targoninc/jess-components";
 import { navigate, reload } from "../../Routing/Router.ts";
 import { RoutePath } from "../../Routing/routes.ts";
-import { notify } from "../../Classes/Ui.ts";
+import {notify, Ui} from "../../Classes/Ui.ts";
 import { NotificationType } from "../../Enums/NotificationType.ts";
 import { ChartTemplates } from "../generic/ChartTemplates.ts";
 import { yearAndMonthByOffset } from "../../Classes/Helpers/Date.ts";
@@ -72,7 +72,7 @@ export class PayoutTemplates {
                 when(compute((sc, sl) => !sc && !sl, stripeConnected$, stripeLoading),
                     create("span").classes("color-dim").text(t("CONNECT_STRIPE_TO_RECEIVE_PAYOUTS")).build()),
                 when(compute((sc, spe, sl) => sc && !spe && !sl, stripeConnected$, stripePayoutsEnabled$, stripeLoading),
-                    create("a").classes("warning", "clickable").children(
+                    create("a").classes("warning", "clickable", "flex").children(
                         create("span").text(t("STRIPE_PAYOUTS_DISABLED_MSG")).build(),
                         create("span").classes("small", "underline").text(t("STRIPE_COMPLETE_VERIFICATION")).build(),
                     ).onclick(async (e: MouseEvent) => {
@@ -119,7 +119,7 @@ export class PayoutTemplates {
                 when(compute((ri, pe) => pe && !!(ri && ri.personal.available && ri.personal.available < AVAILABLE_THRESHOLD_USD), royaltyInfo, paymentsEnabled),
                     create("span")
                         .classes("color-dim", "small")
-                        .text(compute(ri => ri ? t("PAYOUT_THRESHOLD_NOT_MET", currency(AVAILABLE_THRESHOLD_USD, "USD")) : "", royaltyInfo))
+                        .text(compute(ri => ri ? `${t("PAYOUT_THRESHOLD_NOT_MET", currency(AVAILABLE_THRESHOLD_USD, "USD"))}` : "", royaltyInfo))
                         .build()),
             ).build();
     }
