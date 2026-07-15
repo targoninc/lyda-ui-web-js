@@ -3,9 +3,11 @@ export class Config {
         return window.location.host;
     }
     static get apiBaseUrl() {
+        if (window.__desktopMode) return window.__desktopApiUrl ?? window.location.origin;
         return window.location.hostname === "localhost" ? "http://localhost:8081" : "https://api.lyda.app";
     }
     static get storageBaseUrl() {
+        if (window.__desktopMode) return window.__desktopApiUrl ?? window.location.origin;
         return window.location.hostname === "localhost" ? "http://localhost:8081" : "https://api.lyda.app";
     }
 

@@ -1,3 +1,5 @@
+import {notify} from "../../Classes/Ui.ts";
+import {NotificationType} from "../../Enums/NotificationType.ts";
 import {TrackActions} from "../../Actions/TrackActions.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
 import {copy, getPlayIcon, Util} from "../../Classes/Util.ts";
@@ -120,7 +122,7 @@ export class TrackTemplates {
     }
 
     static waveform(track: Track, loudnessData: number[], small = false, version?: number) {
-        if (!track.processed) {
+        if (!track.processed && (!loudnessData || loudnessData.length === 0)) {
             return create("div")
                 .classes("waveform", small ? "waveform-small" : "_", "processing-box", "rounded-max", "relative")
                 .title(t("STILL_PROCESSING_CHECK_LATER"))
@@ -246,11 +248,8 @@ export class TrackTemplates {
         }
 
         const graphics = [];
-        if (track.processed) {
-            graphics.push(TrackTemplates.waveform(track, JSON.parse(track.loudness_data), true));
-        } else {
-            graphics.push(TrackTemplates.waveform(track, [], true));
-        }
+        const trackLoudness = track.loudness_data ? (() => { try { return JSON.parse(track.loudness_data); } catch { return []; } })() : [];
+        graphics.push(TrackTemplates.waveform(track, trackLoudness, true));
 
         const dragData = {
             type: "track",
@@ -455,7 +454,7 @@ export class TrackTemplates {
                             ).classes("track-info-container"),
                         ).classes("big-gap"),
                         horizontal(
-                            TrackTemplates.playButton(track, selectedVersion),
+                            TrackTemplates.playButton(track, selectedVersion, versions),
                             when(versions.length > 1, (() => {
                                 const opts = versions.map((v: any) => ({
                                     name: v.name ?? `v${v.index}`,
@@ -633,7 +632,7 @@ export class TrackTemplates {
         });
     }
 
-    static playButton(track: Track, selectedVersion?: Signal<number | undefined>) {
+    static playButton(track: Track, selectedVersion?: Signal<number | undefined>, versions?: any[]) {
         const isPlaying = compute((id, ph) => id === track.id && ph, currentTrackId, playingHere);
         const text = compute((p): string => (p ? `${t("PAUSE")}` : `${t("PLAY")}`), isPlaying);
         const icon = getPlayIcon(isPlaying, loadingAudio);
@@ -650,6 +649,16 @@ export class TrackTemplates {
             disabled: loadingAudio,
             onclick: async () => {
                 const version = selectedVersion?.value;
+                if (version !== undefined && versions) {
+                    const v = versions.find(v => v.index === version);
+                    if (v && !v.processed) {
+                        notify(t("STILL_PROCESSING_CHECK_LATER"), NotificationType.warning);
+                        return;
+                    }
+                } else if (!track.processed) {
+                    notify(t("STILL_PROCESSING_CHECK_LATER"), NotificationType.warning);
+                    return;
+                }
                 if (isPlaying.value) {
                     await PlayManager.pauseAsync(track.id);
                 } else if (currentTrackId.value === track.id) {
