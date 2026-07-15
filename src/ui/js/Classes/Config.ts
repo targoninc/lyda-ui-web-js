@@ -1,13 +1,17 @@
 export class Config {
+    private static get isDesktopProxy() {
+        return window.__desktopMode || window.location.hostname === "127.0.0.1";
+    }
+
     static get appBaseUrl() {
         return window.location.host;
     }
     static get apiBaseUrl() {
-        if (window.__desktopMode) return window.__desktopApiUrl ?? window.location.origin;
+        if (Config.isDesktopProxy) return window.__desktopApiUrl ?? window.location.origin;
         return window.location.hostname === "localhost" ? "http://localhost:8081" : "https://api.lyda.app";
     }
     static get storageBaseUrl() {
-        if (window.__desktopMode) return window.__desktopApiUrl ?? window.location.origin;
+        if (Config.isDesktopProxy) return window.__desktopApiUrl ?? window.location.origin;
         return window.location.hostname === "localhost" ? "http://localhost:8081" : "https://api.lyda.app";
     }
 

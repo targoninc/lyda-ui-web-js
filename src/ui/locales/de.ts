@@ -704,6 +704,7 @@ export const de: Translation = {
     STRIPE_PAYOUT_DESCRIPTION: "Verbinde dein Stripe-Konto, um Auszahlungen aus Verkäufen und Tantiemen zu erhalten.",
     STRIPE_BALANCE: "Stripe-Guthaben",
     STRIPE_PAYOUTS_DISABLED_MSG: "Auszahlungen sind für dein Stripe-Konto noch nicht aktiviert. Bitte schließe die Verifizierung ab.",
+    STRIPE_COMPLETE_VERIFICATION: "Hier klicken, um die Verifizierung abzuschließen",
     STRIPE_VERIFICATION_NEEDED: "Zusätzliche Verifizierung erforderlich, um Zahlungen zu empfangen",
     STRIPE_PENDING_VERIFICATION: (fields: string) => `Ausstehende Verifizierung: ${fields}`,
     CONNECT_STRIPE_TO_RECEIVE_PAYOUTS: "Verbinde ein Stripe-Konto, um Auszahlungen zu erhalten",

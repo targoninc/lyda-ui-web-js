@@ -720,6 +720,7 @@ export const en = {
     STRIPE_PAYOUT_DESCRIPTION: "Connect your Stripe account to receive payouts from sales and royalties.",
     STRIPE_BALANCE: "Stripe balance",
     STRIPE_PAYOUTS_DISABLED_MSG: "Payouts are not yet enabled for your Stripe account. Please complete verification.",
+    STRIPE_COMPLETE_VERIFICATION: "Click here to complete verification",
     STRIPE_VERIFICATION_NEEDED: "Additional verification required to receive payments",
     STRIPE_PENDING_VERIFICATION: (fields: string) => `Pending verification: ${fields}`,
     CONNECT_STRIPE_TO_RECEIVE_PAYOUTS: "Connect a Stripe account to receive payouts",
