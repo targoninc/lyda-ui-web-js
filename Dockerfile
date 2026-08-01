@@ -11,7 +11,7 @@ RUN bun install
 RUN bun run build-prod
 
 # Make the app's ports available to the outside world
-EXPOSE 3000
+EXPOSE 3030
 
 # Define the command to run the app
 CMD ["bun", "run", "start-prod"]

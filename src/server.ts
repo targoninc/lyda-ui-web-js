@@ -22,7 +22,7 @@ const getMimeType = (filepath: string): string => {
 
 // Bun server handler
 const server = serve({
-    port: parseInt(process.env.PORT || "3000"),
+    port: parseInt(process.env.PORT || "3030"),
     async fetch(req) {
         const url = new URL(req.url);
         const pathname = url.pathname;
