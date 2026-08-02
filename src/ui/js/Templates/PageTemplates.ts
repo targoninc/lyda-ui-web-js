@@ -588,6 +588,11 @@ export class PageTemplates {
                     return res;
                 },
                 buildMenuActions: (track): FeedMenuAction<Track>[] => [
+                    {
+                        label: t("ADD_TO_PLAYLIST"),
+                        icon: "playlist_add",
+                        onclick: () => PlaylistActions.openAddToPlaylistModal(track, "track"),
+                    },
                     {label: t("QUEUE"), icon: "queue", onclick: () => QueueManager.addToManualQueue(track.id)},
                     {
                         label: t("COPY_LINK"),

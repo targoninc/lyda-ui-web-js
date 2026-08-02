@@ -27,6 +27,7 @@ import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { input } from "@targoninc/jess-components";
 import { TrackTemplates } from "../music/TrackTemplates.ts";
+import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
 import { pinState } from "../../Classes/PinState.ts";
 import {SearchTemplates} from "../SearchTemplates.ts";
 
@@ -733,6 +734,11 @@ export class FeedTemplates {
             buildMenuActions: (track): FeedMenuAction<Track>[] => {
                 const inQueue = manualQueue.value.includes(track.id);
                 const items: FeedMenuAction<Track>[] = [
+                    {
+                        label: t("ADD_TO_PLAYLIST"),
+                        icon: "playlist_add",
+                        onclick: () => PlaylistActions.openAddToPlaylistModal(track, "track"),
+                    },
                     { label: inQueue ? t("UNQUEUE") : t("QUEUE"), icon: inQueue ? "remove" : "queue", onclick: () => QueueManager.toggleInManualQueue(track.id) },
                 ];
                 if (track.visibility === "private" && track.secretcode) {
