@@ -2,7 +2,6 @@ import { notify } from "../Classes/Ui.ts";
 import { Signal } from "@targoninc/jess";
 import { ApiRoutes } from "./ApiRoutes.ts";
 import { currentUser } from "../state.ts";
-import { Log } from "@targoninc/lyda-shared/src/Models/db/lyda/Log";
 import { NotificationType } from "../Enums/NotificationType.ts";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
@@ -26,22 +25,11 @@ import { UploadableTrack } from "../Models/UploadableTrack.ts";
 import { InteractionType } from "@targoninc/lyda-shared/src/Enums/InteractionType";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 import { MonthIdentifier } from "../Classes/Helpers/Date.ts";
-import { PaypalWebhook } from "@targoninc/lyda-shared/src/Models/db/finance/PaypalWebhook";
-import { StripeWebhook } from "@targoninc/lyda-shared/src/Models/db/finance/StripeWebhook";
-
-export type WebhookEvent = (PaypalWebhook | StripeWebhook) & { provider: "stripe" | "paypal" };
 import { AvailableSubscription } from "@targoninc/lyda-shared/src/Models/db/finance/AvailableSubscription.ts";
 import { Subscription } from "@targoninc/lyda-shared/src/Models/db/finance/Subscription.ts";
 import { Statistic } from "@targoninc/lyda-shared/src/Models/Statistic";
 import { TypedStatistic } from "@targoninc/lyda-shared/src/Models/TypedStatistic";
-import { Payout } from "@targoninc/lyda-shared/src/Models/db/finance/Payout";
 import { Permission } from "@targoninc/lyda-shared/src/Models/db/lyda/Permission.ts";
-import { RoyaltyMonth } from "@targoninc/lyda-shared/src/Models/RoyaltyMonth";
-import { ArtistRoyaltySummary } from "@targoninc/lyda-shared/src/Models/ArtistRoyaltySummary.ts";
-import { ActionLog } from "@targoninc/lyda-shared/src/Models/db/lyda/ActionLog";
-import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
-import { CommentReport } from "@targoninc/lyda-shared/src/Models/db/lyda/CommentReport";
-import { ModerationFilter } from "../Models/ModerationFilter.ts";
 import { ClientError } from "@targoninc/lyda-shared/src/Models/db/lyda/ClientError";
 import { KeyValue } from "@targoninc/lyda-shared/src/Models/KeyValue";
 import { CreateOrderRequest } from "@targoninc/lyda-shared/src/Models/CreateOrderRequest";
@@ -49,14 +37,10 @@ import { CreateOrderResponse } from "@targoninc/lyda-shared/src/Models/CreateOrd
 import { CaptureOrderRequest } from "@targoninc/lyda-shared/src/Models/CaptureOrderRequest";
 import { Transaction } from "@targoninc/lyda-shared/src/Models/Transaction";
 import { t } from "../../locales";
-import { SubscriptionPayment } from "@targoninc/lyda-shared/src/Models/db/finance/SubscriptionPayment";
-import {ContentIDMatch} from "../Models/ContentIDMatch.ts";
 import { TransactionInfo } from "@targoninc/lyda-shared/src/Models/TransactionInfo.ts";
 import { TrackSale } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackSale.ts";
-import {UserIp} from "@targoninc/lyda-shared/src/Models/db/lyda/UserIp.ts";
 import {UserTaxinfo} from "@targoninc/lyda-shared/src/Models/db/lyda/UserTaxinfo.ts";
 import {PaymentProvider} from "@targoninc/lyda-shared/src/Enums/PaymentProvider";
-import {UserEmail} from "@targoninc/lyda-shared/src/Models/db/lyda/UserEmail";
 import {DiscographyImportResult} from "@targoninc/lyda-shared/src/Models/DiscographyImport";
 
 export class Api {
@@ -85,65 +69,9 @@ export class Api {
         });
     }
 
-    static async triggerEventHandling(eventId: string) {
-        return post(ApiRoutes.triggerEventHandling, {
-            id: eventId,
-        });
-    }
-
-    static async triggerStripeEventHandling(eventId: string) {
-        return post(ApiRoutes.triggerStripeEventHandling, {
-            id: eventId,
-        });
-    }
-
-    static async getEvents(skip: number, filter: any = {}) {
-        return get<WebhookEvent[]>(ApiRoutes.getEvents, {
-            skip,
-            ...filter,
-        });
-    }
-
-    static async retriggerContentID() {
-        return post(ApiRoutes.retriggerContentID);
-    }
-
-    static async getContentIDMatches() {
-        return get<ContentIDMatch[]>(ApiRoutes.contentIDMatches);
-    }
-
-    //endregion
-
-    //region logs
-    static async getActionLogs() {
-        return get<ActionLog[]>(ApiRoutes.getActionLogs);
-    }
-
-    static async getLogs(filter: any) {
-        return (await get<Log[]>(ApiRoutes.getLogs, {
-            logLevel: filter,
-            offset: 0,
-            limit: 50,
-        })) ?? [];
-    }
-
     //endregion
 
     //region Royalties
-    static async getPaymentHistory(skip: number, filter: any = {}) {
-        return get<SubscriptionPayment[]>(ApiRoutes.getPaymentHistory, {
-            skip,
-            ...filter,
-        });
-    }
-
-    static async getPayouts(skip: number, filter: any = {}) {
-        return get<Payout[]>(ApiRoutes.getPayouts, {
-            skip,
-            ...filter,
-        });
-    }
-
     static async getTransactions(skip: number, filter: any = {}) {
         return get<Transaction[]>(ApiRoutes.getTransactions, {
             skip,
@@ -153,21 +81,6 @@ export class Api {
 
     static async getGlobalTransactionInfo() {
         return get<TransactionInfo>(ApiRoutes.getGlobalTransactionInfo);
-    }
-
-    static async calculateRoyalties(month: MonthIdentifier) {
-        return post(ApiRoutes.calculateRoyalties, {
-            month: month.month,
-            year: month.year,
-        });
-    }
-
-    static async setRoyaltyActivation(month: MonthIdentifier, approved: boolean) {
-        return post(ApiRoutes.setRoyaltyActivation, {
-            month: month.month,
-            year: month.year,
-            approved,
-        });
     }
 
     static async getRoyaltiesForExport(month: MonthIdentifier, type: string) {
@@ -356,10 +269,6 @@ export class Api {
         await post(ApiRoutes.unsubscribe, { id });
     }
 
-    static async refundSubscriptionPayment(paymentId: number, refundAmount: number, note?: string) {
-        return post(ApiRoutes.refundSubscriptionPayment, { paymentId, refundAmount, note });
-    }
-
     //endregion
 
     //region User
@@ -372,14 +281,6 @@ export class Api {
     static async userExists(email: string) {
         return post<User>(ApiRoutes.userExists, {
             email,
-        });
-    }
-
-    static async setUserPermission(userId: number, permissionName: string, has: boolean) {
-        return post(ApiRoutes.setUserPermission, {
-            permissionName,
-            user_id: userId,
-            userHasPermission: has,
         });
     }
 
@@ -400,14 +301,6 @@ export class Api {
 
     static async searchUsers(search: string) {
         return get<SearchResult[]>(ApiRoutes.searchUsers, { search });
-    }
-
-    static async getUsers(query: string, offset: number = 0, limit = 100) {
-        return get<User[]>(ApiRoutes.getUsers, {
-            query,
-            offset,
-            limit,
-        });
     }
 
     static async getUserByName(name: string) {
@@ -462,24 +355,6 @@ export class Api {
         return await get<RoyaltyInfo>(ApiRoutes.getRoyaltyInfo);
     }
 
-    static async getRoyaltyCalculationInfo(month: MonthIdentifier): Promise<Partial<RoyaltyMonth> | null> {
-        return await get<Partial<RoyaltyMonth>>(ApiRoutes.getRoyaltyCalculationInfo, {
-            month: month.month,
-            year: month.year,
-        });
-    }
-
-    static async getRoyaltyArtistsByMonth(month: MonthIdentifier): Promise<ArtistRoyaltySummary[] | null> {
-        return await get<ArtistRoyaltySummary[]>(ApiRoutes.getRoyaltyArtistsByMonth, {
-            month: month.month,
-            year: month.year,
-        });
-    }
-
-    static async getRoyaltyArtistsAvailable(): Promise<ArtistRoyaltySummary[] | null> {
-        return await get<ArtistRoyaltySummary[]>(ApiRoutes.getRoyaltyArtistsAvailable);
-    }
-
     static async trackClientError(error: ClientError) {
         await post(ApiRoutes.trackClientError, error);
     }
@@ -502,34 +377,6 @@ export class Api {
 
     static async setCacheKey(key: string, value: string) {
         await post(ApiRoutes.updateCacheKey, { key, value });
-    }
-
-    static async banUser(id: number) {
-        await post(ApiRoutes.banUser, { id });
-    }
-
-    static async getUserIps(id: number) {
-        return await get<UserIp[]>(ApiRoutes.getIps, { id });
-    }
-
-    static async getUserEmails(id: number) {
-        return await get<UserEmail[]>(ApiRoutes.getEmails, { id });
-    }
-
-    static async getIpLogs(offset: number, limit: number, filter: string = "", ip: string = "") {
-        return await get<{items: any[], total: number}>(ApiRoutes.getIpLogs, { offset, limit, filter, ip });
-    }
-
-    static async getBannedIps() {
-        return await get<any[]>(ApiRoutes.getBannedIps, {});
-    }
-
-    static async banIp(ip: string, reason: string = "") {
-        await post(ApiRoutes.banIp, { ip, reason });
-    }
-
-    static async unbanIp(ip: string) {
-        await post(ApiRoutes.unbanIp, { ip });
     }
 
     //endregion
@@ -879,41 +726,12 @@ export class Api {
     //endregion
 
     //region Comments
-    static async getModerationComments(
-        filter: ModerationFilter,
-        loading: Signal<boolean>,
-    ) {
-        loading.value = true;
-        const res = await get<Comment[]>(ApiRoutes.getModerationComments, filter);
-        loading.value = false;
-        return res;
-    }
-
-    static async setPotentiallyHarmful(id: number, v: boolean) {
-        await post(ApiRoutes.setCommentPotentiallyHarmful, {
-            id,
-            potentiallyHarmful: v,
-        });
-    }
-
-    static async setHidden(id: number, v: boolean) {
-        await post(ApiRoutes.setCommentHidden, { id, hidden: v });
-    }
-
-    static async setCommentDeleted(id: number, v: boolean) {
-        await post(ApiRoutes.setCommentDeleted, { id, deleted: v });
-    }
-
     static async reportComment(commentId: number, reason: string, description: string) {
         return await post(ApiRoutes.reportComment, {
             comment_id: commentId,
             reason,
             description,
         });
-    }
-
-    static async getCommentReports(commentId: number) {
-        return await get<CommentReport[]>(ApiRoutes.getCommentReports, { comment_id: commentId });
     }
 
     //endregion

@@ -5,17 +5,8 @@ import {AnyElement, compute, create, nullElement, signal, signalMap, when} from 
 import {SearchTemplates} from "./SearchTemplates.ts";
 import {SettingsTemplates} from "./account/SettingsTemplates.ts";
 import {RoadmapTemplates} from "./RoadmapTemplates.ts";
-import {EventsTemplates} from "./admin/EventsTemplates.ts";
 import {AlbumTemplates} from "./music/AlbumTemplates.ts";
 import {RoutePath} from "../Routing/routes.ts";
-import {DashboardTemplates} from "./admin/DashboardTemplates.ts";
-import {ModerationUsersTemplates} from "./admin/ModerationUsersTemplates.ts";
-import {ModerationCommentsTemplates} from "./admin/ModerationCommentsTemplates.ts";
-import {LogTemplates} from "./admin/LogTemplates.ts";
-import {RoyaltyTemplates} from "./admin/RoyaltyTemplates.ts";
-import {ContentIDTemplates} from "./admin/ContentIDTemplates.ts";
-import {SubscriptionPaymentsTemplates} from "./admin/SubscriptionPaymentsTemplates.ts";
-import {IpLogTemplates} from "./admin/IpLogTemplates.ts";
 import {PayoutTemplates} from "./money/PayoutTemplates.ts";
 import {FeedTemplates} from "./generic/FeedTemplates.ts";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
@@ -90,17 +81,6 @@ export class PageTemplates {
         [RoutePath.createAlbum]: AlbumTemplates.createAlbumPage,
         [RoutePath.createPlaylist]: PlaylistTemplates.createPlaylistPage,
 
-        // admin pages
-        [RoutePath.admin]: DashboardTemplates.dashboardPage,
-        [RoutePath.royaltyManagement]: RoyaltyTemplates.royaltyManagementPage,
-        [RoutePath.moderation]: ModerationCommentsTemplates.commentModerationPage,
-        [RoutePath.logs]: LogTemplates.logsPage,
-        [RoutePath.actionLogs]: LogTemplates.actionLogsPage,
-        [RoutePath.users]: ModerationUsersTemplates.usersPage,
-        [RoutePath.events]: EventsTemplates.eventsPage,
-        [RoutePath.contentID]: ContentIDTemplates.contentIDPage,
-        [RoutePath.subscriptionPayments]: SubscriptionPaymentsTemplates.page,
-        [RoutePath.ipLogs]: IpLogTemplates.ipLogsPage,
     };
     static needLoginPages: RoutePath[] = [
         RoutePath.library,
@@ -109,21 +89,11 @@ export class PageTemplates {
         RoutePath.statistics,
         RoutePath.following,
         RoutePath.unapprovedTracks,
-        RoutePath.moderation,
         RoutePath.subscribe,
-        RoutePath.admin,
-        RoutePath.royaltyManagement,
-        RoutePath.moderation,
-        RoutePath.logs,
-        RoutePath.actionLogs,
-        RoutePath.users,
-        RoutePath.events,
-        RoutePath.contentID,
         RoutePath.batchEdit,
         RoutePath.transactions,
         RoutePath.createAlbum,
         RoutePath.createAlbum,
-        RoutePath.subscriptionPayments,
     ];
 
     static batchEditPage() {

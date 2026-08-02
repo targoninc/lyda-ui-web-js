@@ -1,3 +1,7 @@
+# Lyda Web
+
+This repository contains the public Lyda web application. Internal administration pages live in the `lyda-internal-dashboard` repository.
+
 # Preconditions
 
 It's recommended to use [bun](https://bun.sh/) to run this project.

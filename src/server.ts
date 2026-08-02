@@ -60,7 +60,7 @@ const server = serve({
         if (pathname === "/.well-known/apple-app-site-association") {
             // Only declare entity routes here so iOS only offers to open the
             // app for links the app can actually handle. Other paths (e.g.
-            // /settings, /admin) stay on the web.
+            // /settings) stay on the web.
             const entityPrefixes = ["/track/", "/album/", "/playlist/", "/profile/", "/user/"];
             const components = entityPrefixes.map(p => ({ "/": p, comment: `Open ${p}* in the app` }));
             const association = {

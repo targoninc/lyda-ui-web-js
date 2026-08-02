@@ -12,33 +12,23 @@ export enum RoutePath {
     editTrack = "edit-track",
     settings = "settings",
     statistics = "statistics",
-    royaltyManagement = "royalty-management",
     search = "search",
     upload = "upload",
     library = "library",
     logout = "logout",
     login = "login",
-    logs = "logs",
-    actionLogs = "action-logs",
     unapprovedTracks = "unapproved-tracks",
-    moderation = "moderation",
     test = "test",
     subscribe = "subscribe",
     passwordReset = "password-reset",
     verifyEmail = "verify-email",
-    events = "events",
-    admin = "admin",
     faq = "faq",
-    users = "users",
     history = "history",
     batchEdit = "batch-edit",
     protocolHandler = "protocolHandler",
     transactions = "transactions",
-    contentID = "content-id",
     createAlbum = "create-album",
     createPlaylist = "create-playlist",
-    subscriptionPayments = "subscription-payments",
-    ipLogs = "ip-logs",
 }
 
 export const routes: Route[] = [
@@ -118,20 +108,8 @@ export const routes: Route[] = [
         title: "Login",
     },
     {
-        path: RoutePath.logs,
-        title: "Logs",
-    },
-    {
-        path: RoutePath.actionLogs,
-        title: "Action Logs",
-    },
-    {
         path: RoutePath.unapprovedTracks,
         title: "Unapproved Tracks",
-    },
-    {
-        path: RoutePath.moderation,
-        title: "Moderation",
     },
     {
         path: RoutePath.test,
@@ -150,24 +128,8 @@ export const routes: Route[] = [
         title: "Verify Email",
     },
     {
-        path: RoutePath.events,
-        title: "Events",
-    },
-    {
-        path: RoutePath.admin,
-        title: "Admin",
-    },
-    {
         path: RoutePath.faq,
         title: "FAQ",
-    },
-    {
-        path: RoutePath.royaltyManagement,
-        title: "Royalties",
-    },
-    {
-        path: RoutePath.users,
-        title: "Users",
     },
     {
         path: RoutePath.history,
@@ -186,10 +148,6 @@ export const routes: Route[] = [
         title: "Transactions",
     },
     {
-        path: RoutePath.contentID,
-        title: "Content ID",
-    },
-    {
         path: RoutePath.createAlbum,
         title: "Create Album",
     },
@@ -197,12 +155,4 @@ export const routes: Route[] = [
         path: RoutePath.createPlaylist,
         title: "Create Playlist",
     },
-    {
-        path: RoutePath.subscriptionPayments,
-        title: "Subscription Payments",
-    },
-    {
-        path: RoutePath.ipLogs,
-        title: "Ip Logs",
-    }
 ];

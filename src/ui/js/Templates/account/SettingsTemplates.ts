@@ -17,7 +17,7 @@ import {
 } from "@targoninc/jess";
 import {navigate, reload} from "../../Routing/Router.ts";
 import {UserTemplates} from "./UserTemplates.ts";
-import {currentUser, permissions} from "../../state.ts";
+import {currentUser} from "../../state.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {
     button,
@@ -35,7 +35,6 @@ import {
 import {Theme} from "@targoninc/lyda-shared/src/Enums/Theme";
 import {UserSettings} from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import {StreamingQuality} from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
-import {Permission} from "@targoninc/lyda-shared/src/Models/db/lyda/Permission";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {UserEmail} from "@targoninc/lyda-shared/src/Models/db/lyda/UserEmail";
 import {NotificationType} from "../../Enums/NotificationType.ts";
@@ -67,7 +66,6 @@ export class SettingsTemplates {
         "interface-theme": "palette",
         "language": "translate",
         "streaming-quality": "edit_audio",
-        "my-permissions": "admin_panel_settings",
         "behaviour": "tune",
         "e-mail-notifications": "notifications",
         "other": "more_horiz",
@@ -94,7 +92,6 @@ export class SettingsTemplates {
             {heading: () => t("UI_THEME"), id: SettingsTemplates.sectionId(t("UI_THEME"))},
             {heading: () => t("LANGUAGE"), id: SettingsTemplates.sectionId(t("LANGUAGE"))},
             {heading: () => t("STREAMING_QUALITY"), id: SettingsTemplates.sectionId(t("STREAMING_QUALITY"))},
-            {heading: () => t("MY_PERMISSIONS"), id: SettingsTemplates.sectionId(t("MY_PERMISSIONS"))},
             {heading: () => t("BEHAVIOUR"), id: SettingsTemplates.sectionId(t("BEHAVIOUR"))},
             {heading: () => t("EMAIL_NOTIFICATIONS"), id: SettingsTemplates.sectionId(t("EMAIL_NOTIFICATIONS"))},
             {heading: () => t("DISCOGRAPHY"), id: SettingsTemplates.sectionId(t("DISCOGRAPHY"))},
@@ -167,12 +164,11 @@ export class SettingsTemplates {
                 sectionWrapper(sectionConfigs[5].id, SettingsTemplates.themeSection(getUserSettingValue<Theme>(user, UserSettings.theme), searchQuery$)),
                 sectionWrapper(sectionConfigs[6].id, SettingsTemplates.languageSection(searchQuery$)),
                 sectionWrapper(sectionConfigs[7].id, SettingsTemplates.qualitySection(getUserSettingValue<StreamingQuality>(user, UserSettings.streamingQuality) ?? "m", searchQuery$)),
-                sectionWrapper(sectionConfigs[8].id, SettingsTemplates.permissionsSection(searchQuery$)),
-                sectionWrapper(sectionConfigs[9].id, SettingsTemplates.behaviourSection(user, searchQuery$)),
-                sectionWrapper(sectionConfigs[10].id, SettingsTemplates.notificationsSection(user, searchQuery$)),
-                sectionWrapper(sectionConfigs[11].id, SettingsTemplates.discographySection(searchQuery$)),
-                sectionWrapper(sectionConfigs[12].id, SettingsTemplates.dangerSection(user, searchQuery$)),
-                sectionWrapper(sectionConfigs[13].id, SettingsTemplates.linksSection(searchQuery$)),
+                sectionWrapper(sectionConfigs[8].id, SettingsTemplates.behaviourSection(user, searchQuery$)),
+                sectionWrapper(sectionConfigs[9].id, SettingsTemplates.notificationsSection(user, searchQuery$)),
+                sectionWrapper(sectionConfigs[10].id, SettingsTemplates.discographySection(searchQuery$)),
+                sectionWrapper(sectionConfigs[11].id, SettingsTemplates.dangerSection(user, searchQuery$)),
+                sectionWrapper(sectionConfigs[12].id, SettingsTemplates.linksSection(searchQuery$)),
             ).build(),
         ).build();
     }
@@ -183,47 +179,6 @@ export class SettingsTemplates {
         }
         const t = (asSignal(text).value ?? "") as string;
         return t.toLowerCase().includes(query.toLowerCase());
-    }
-
-    static permissionsSection(searchQuery$: Signal<string>) {
-        const hasAnyPermissions = compute(p => p.length > 0, permissions);
-        const heading = t("MY_PERMISSIONS");
-        const adminBtnText = t("GO_TO_ADMINISTRATION");
-
-        return compute(query => {
-            const headingMatches = SettingsTemplates.matches(heading, query);
-            const btnMatches = SettingsTemplates.matches(adminBtnText, query);
-            const matchingPermissions = permissions.value.filter(p => SettingsTemplates.matches(p.name, query));
-
-            if (!headingMatches && !btnMatches && matchingPermissions.length === 0) {
-                return nullElement();
-            }
-
-            return create("div")
-                .children(
-                    when(
-                        hasAnyPermissions,
-                        create("div")
-                            .classes("card", "flex-v")
-                            .children(
-                                SettingsTemplates.sectionHeading(heading),
-                                when(headingMatches || btnMatches, button({
-                                    text: adminBtnText,
-                                    icon: {icon: "terminal"},
-                                    onclick: () => navigate(RoutePath.admin),
-                                })),
-                                ...matchingPermissions.map(p => SettingsTemplates.permissionCard(p)),
-                            ).build(),
-                    ),
-                ).build();
-        }, searchQuery$);
-    }
-
-    static permissionCard(permission: Permission) {
-        return create("div")
-            .classes("permission")
-            .text(permission.name)
-            .build();
     }
 
     static accountSection(user: User, searchQuery$: Signal<string>) {

@@ -3,15 +3,7 @@ import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 
 export class ApiRoutes {
     static base = Config.apiBaseUrl;
-    // region Audit
-    private static audit = ApiRoutes.base + "/audit";
-    static getLogs = ApiRoutes.audit + "/logs";
-    static getActionLogs = ApiRoutes.audit + "/actionLogs";
-    // endregion
-
     // region User
-    static getUsers = ApiRoutes.base + "/users";
-
     private static user = ApiRoutes.base + "/user";
     static getUser = ApiRoutes.user + "/get";
     static userPermissions = ApiRoutes.user + "/permissions";
@@ -19,9 +11,6 @@ export class ApiRoutes {
     static userExists = ApiRoutes.user + "/exists";
     static exportUser = ApiRoutes.user + "/export";
     static getUserCache = ApiRoutes.user + "/get-cache";
-    static getIps = ApiRoutes.user + "/ips";
-    static getEmails = ApiRoutes.user + "/emails";
-
     private static userActions = ApiRoutes.user + "/actions";
     static followUser = ApiRoutes.userActions + "/follow";
     static unfollowUser = ApiRoutes.userActions + "/unfollow";
@@ -39,13 +28,11 @@ export class ApiRoutes {
     static deleteUser = ApiRoutes.userActions + "/delete";
     static undeleteUser = ApiRoutes.userActions + "/undelete";
     static sendActivationEmail = ApiRoutes.userActions + "/send-activation-email";
-    static setUserPermission = ApiRoutes.userActions + "/set-permission";
     static trackClientError = ApiRoutes.userActions + "/track-client-error";
     static importDiscography = ApiRoutes.userActions + "/import-discography";
     static discographyPlatforms = ApiRoutes.userActions + "/discography-platforms";
     static saveUserLink = ApiRoutes.userActions + "/save-user-link";
     static updateCacheKey = ApiRoutes.userActions + "/update-cache-key";
-    static banUser = ApiRoutes.userActions + "/ban";
     static mutualFollowers = ApiRoutes.user + "/mutualFollowers";
     static getPins = ApiRoutes.user + "/pins";
     static addPin = ApiRoutes.user + "/pins/add";
@@ -60,8 +47,6 @@ export class ApiRoutes {
     // region Subscriptions
     private static subscriptions = ApiRoutes.base + "/subscriptions";
     static getSubscriptionOptions = ApiRoutes.subscriptions + "/options";
-    static getPaymentHistory = ApiRoutes.subscriptions + "/payments";
-    static refundSubscriptionPayment = ApiRoutes.subscriptions + "/refund";
 
     private static subscriptionActions = ApiRoutes.subscriptions + "/actions";
     static subscribe = ApiRoutes.subscriptionActions + "/subscribe";
@@ -95,7 +80,6 @@ export class ApiRoutes {
     static getTrackCollabTypes = ApiRoutes.tracks + "/collabTypes";
     static getUnapprovedCollabs = ApiRoutes.tracks + "/unapprovedCollabs";
     static createTrack = ApiRoutes.tracks + "/create";
-    static contentIDMatches = ApiRoutes.tracks + "/contentIDMatches";
     static getTrackBuyers = ApiRoutes.tracks + "/buyers";
 
     private static tracksActions = ApiRoutes.tracks + "/actions";
@@ -105,7 +89,6 @@ export class ApiRoutes {
     static addCollaborator = ApiRoutes.tracksActions + "/addCollaborator";
     static approveCollab = ApiRoutes.tracksActions + "/approveCollab";
     static denyCollab = ApiRoutes.tracksActions + "/denyCollab";
-    static retriggerContentID = ApiRoutes.tracksActions + "/retriggerContentID";
 
     static getTrackLyrics = ApiRoutes.tracks + "/lyrics";
 
@@ -160,17 +143,12 @@ export class ApiRoutes {
 
     // region Comments
     private static comments = ApiRoutes.base + "/comments";
-    static getModerationComments = ApiRoutes.comments + "/get";
     static getCommentsByTrackId = ApiRoutes.comments + "/byTrackId";
 
     private static commentActions = ApiRoutes.comments + "/actions";
     static newComment = ApiRoutes.commentActions + "/new";
     static deleteComment = ApiRoutes.commentActions + "/delete";
-    static setCommentPotentiallyHarmful = ApiRoutes.commentActions + "/setPotentiallyHarmful";
-    static setCommentHidden = ApiRoutes.commentActions + "/setHidden";
-    static setCommentDeleted = ApiRoutes.commentActions + "/setDeleted";
     static reportComment = ApiRoutes.commentActions + "/report";
-    static getCommentReports = ApiRoutes.comments + "/reports/get";
     // endregion
 
     // region Statistics
@@ -191,14 +169,8 @@ export class ApiRoutes {
 
     // region Royalties
     private static royalties = ApiRoutes.base + "/royalties";
-    static getPayouts = ApiRoutes.royalties + "/payouts";
     static getRoyaltyInfo = ApiRoutes.royalties + "/info";
-    static getRoyaltyCalculationInfo = ApiRoutes.royalties + "/calculationInfo";
-    static getRoyaltyArtistsByMonth = ApiRoutes.royalties + "/artistsByMonth";
-    static getRoyaltyArtistsAvailable = ApiRoutes.royalties + "/artistsAvailable";
     static requestPayout = ApiRoutes.royalties + "/requestPayout";
-    static calculateRoyalties = ApiRoutes.royalties + "/calculate";
-    static setRoyaltyActivation = ApiRoutes.royalties + "/setActivation";
     static royaltiesForExport = ApiRoutes.royalties + "/export";
     static getTransactions = ApiRoutes.royalties + "/transactions";
     static getGlobalTransactionInfo = ApiRoutes.royalties + "/globalTransactionInfo";
@@ -210,13 +182,6 @@ export class ApiRoutes {
     static searchAlbums = ApiRoutes.search + "/albums";
     static searchPlaylists = ApiRoutes.search + "/playlists";
     static searchUsers = ApiRoutes.search + "/users";
-    // endregion
-
-    // region Webhooks
-    private static webhooks = ApiRoutes.base + "/webhooks";
-    static getEvents = ApiRoutes.webhooks + "/events";
-    static triggerEventHandling = ApiRoutes.webhooks + "/triggerEventHandling";
-    static triggerStripeEventHandling = ApiRoutes.webhooks + "/triggerStripeEventHandling";
     // endregion
 
     // region MFA
@@ -241,16 +206,6 @@ export class ApiRoutes {
     static createOrder = ApiRoutes.orders + "/create";
     static captureOrder = ApiRoutes.orders + "/capture";
     static getPaymentProviders = ApiRoutes.orders + "/providers";
-    // endregion
-
-    // region Admin
-    private static admin = ApiRoutes.base + "/admin";
-    static getIpLogs = ApiRoutes.admin + "/ip-logs";
-    static getBannedIps = ApiRoutes.admin + "/banned-ips";
-
-    private static adminActions = ApiRoutes.admin + "/actions";
-    static banIp = ApiRoutes.adminActions + "/ban-ip";
-    static unbanIp = ApiRoutes.adminActions + "/unban-ip";
     // endregion
 
     // region Config

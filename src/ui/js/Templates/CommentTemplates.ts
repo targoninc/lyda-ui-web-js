@@ -10,10 +10,7 @@ import { button, input, textarea } from "@targoninc/jess-components";
 import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import { UserWidgetContext } from "../Enums/UserWidgetContext.ts";
 import { t } from "../../locales";
-import {permissions, currentUser, currentTrackId, currentTrackPosition, trackInfo} from "../state.ts";
-import {Permissions} from "@targoninc/lyda-shared/src/Enums/Permissions";
-import {RoutePath} from "../Routing/routes.ts";
-import {navigate} from "../Routing/Router.ts";
+import {currentUser, currentTrackId, currentTrackPosition, trackInfo} from "../state.ts";
 import {InteractionTemplates} from "./InteractionTemplates.ts";
 import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
 import {PlayManager} from "../Streaming/PlayManager.ts";
@@ -117,7 +114,6 @@ export class CommentTemplates {
         const replyInputShown = signal(false);
         const repliesShown = signal(false);
         const newComment = signal("");
-        const canModerate = compute(ps => ps.some(p => p.name === Permissions.canDeleteComments), permissions);
         const deleteBtn = button({
             text: t("DELETE"),
             icon: { icon: "delete" },
@@ -180,11 +176,6 @@ export class CommentTemplates {
                                 reportMoreBtn,
                                 reportPopover,
                             ).classes("relative").build()),
-                            when(canModerate, button({
-                                text: t("MODERATION"),
-                                icon: { icon: "gavel" },
-                                onclick: () => navigate(RoutePath.moderation)
-                            })),
                         ).classes("align-children"),
                     ).build(),
                 when(repliesShown, create("div")
