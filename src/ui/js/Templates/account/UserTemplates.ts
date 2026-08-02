@@ -1614,7 +1614,7 @@ export class UserTemplates {
         const description = create("span")
             .classes("break-lines")
             .id("user-description")
-            .html(CustomText.renderToHtml(user.description)).build();
+            .children(CustomText.renderToHtml(user.description)).build();
 
         setTimeout(() => {
             if (description.clientHeight < description.scrollHeight) {
@@ -1645,7 +1645,7 @@ export class UserTemplates {
                     if (!description) {
                         return;
                     }
-                    description.innerHTML = CustomText.renderToHtml(newDescription);
+                    description.replaceChildren(CustomText.renderToHtml(newDescription));
                     descState.value = newDescription;
                 });
             },

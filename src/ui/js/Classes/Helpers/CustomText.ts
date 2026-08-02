@@ -1,3 +1,5 @@
+import {navigate} from "../../Routing/Router.ts";
+
 export class CustomText {
     static escapeHtml(text: string): string {
         return text
@@ -8,9 +10,10 @@ export class CustomText {
             .replace(/'/g, "&#39;");
     }
 
-    static renderToHtml(text: string): string {
+    static renderToHtml(text: string): HTMLElement {
+        const container = document.createElement("span");
         if (!text) {
-            return "";
+            return container;
         }
 
         const httpPattern = /(https?:\/\/[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/[^\s<>"']*)?)/gmi;
@@ -44,16 +47,55 @@ export class CustomText {
             result += CustomText.escapeHtml(text.substring(lastIndex, m.start));
             if (m.type === "url") {
                 const escaped = CustomText.escapeHtml(m.url);
-                result += `<a href="${escaped}" target='_blank' class='inlineLink'>${escaped}</a>`;
+                const appPath = CustomText.entityPath(m.url);
+                if (appPath) {
+                    const escapedPath = CustomText.escapeHtml(appPath);
+                    result += `<a href="${escapedPath}" data-app-route="${escapedPath}" class='inlineLink'>${escaped}</a>`;
+                } else {
+                    result += `<a href="${escaped}" target='_blank' rel='noopener noreferrer' class='inlineLink'>${escaped}</a>`;
+                }
             } else {
                 const escaped = CustomText.escapeHtml(m.username);
-                result += `<a href="/profile/${escaped}" target='_blank' class='inlineLink'>@${escaped}</a>`;
+                const appPath = `/profile/${encodeURIComponent(m.username)}`;
+                result += `<a href="${appPath}" data-app-route="${appPath}" class='inlineLink'>@${escaped}</a>`;
             }
             lastIndex = m.end;
         }
         result += CustomText.escapeHtml(text.substring(lastIndex));
+        container.innerHTML = result;
 
-        return result;
+        container.querySelectorAll<HTMLAnchorElement>("a[data-app-route]").forEach(link => {
+            link.addEventListener("click", event => {
+                if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+                    return;
+                }
+
+                event.preventDefault();
+                navigate(link.dataset.appRoute ?? link.getAttribute("href") ?? "/");
+            });
+        });
+
+        return container;
+    }
+
+    private static entityPath(value: string): string | null {
+        let url: URL;
+        try {
+            url = new URL(value);
+        } catch {
+            return null;
+        }
+
+        if (url.origin !== window.location.origin && !["lyda.app", "www.lyda.app"].includes(url.hostname)) {
+            return null;
+        }
+
+        const match = url.pathname.match(/^\/(profile|user|track|album|playlist)(\/.*)?$/);
+        if (!match) {
+            return null;
+        }
+
+        return `${url.pathname}${url.search}${url.hash}`;
     }
 }
 

@@ -264,7 +264,7 @@ export class AlbumTemplates {
                 create("span")
                     .id("track-description")
                     .classes("description", "break-lines", "padded")
-                    .html(CustomText.renderToHtml(album.description))
+                    .children(CustomText.renderToHtml(album.description))
                     .build(),
                 MusicTemplates.tracksInList(tracks, canEdit, album, "album"),
                 when(canEdit, vertical(

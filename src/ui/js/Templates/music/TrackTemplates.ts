@@ -448,7 +448,7 @@ export class TrackTemplates {
                                 when(track.description.length > 0, create("span")
                                     .id("track-description")
                                     .classes("description", "break-lines")
-                                    .html(CustomText.renderToHtml(track.description))
+                                    .children(CustomText.renderToHtml(track.description))
                                     .build()),
                                 TrackTemplates.lyricsSection(track),
                             ).classes("track-info-container"),
