@@ -253,7 +253,7 @@ export class MusicTemplates {
             onclick: async () => {
                 for (const track of list.tracks!) {
                     if (!manualQueue.value.includes(track.track_id)) {
-                        QueueManager.addToManualQueue(track.track_id);
+                        QueueManager.addToManualQueue(track.track_id, track.track);
                     }
                 }
             },

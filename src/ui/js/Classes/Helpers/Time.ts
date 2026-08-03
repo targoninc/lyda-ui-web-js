@@ -114,8 +114,13 @@ export class Time {
     }
 
     static format(timeInSeconds: number): string {
-        const minutes = Math.floor(timeInSeconds / 60);
-        const seconds = Math.floor(timeInSeconds - minutes * 60);
+        if (!Number.isFinite(timeInSeconds)) {
+            return "0:00";
+        }
+
+        const safeTime = Math.max(0, timeInSeconds);
+        const minutes = Math.floor(safeTime / 60);
+        const seconds = Math.floor(safeTime - minutes * 60);
         return minutes + ":" + seconds.toString().padStart(2, "0");
     }
 

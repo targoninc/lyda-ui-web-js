@@ -222,7 +222,7 @@ export class PlayerTemplates {
 
     private static currentTrackTime(mobilePlayer = false) {
         return create("span")
-            .classes("nopointer", "align-center", mobilePlayer ? "_" : "hideOnMidBreakpoint")
+            .classes("audio-player-time", "nopointer", "align-center", mobilePlayer ? "_" : "hideOnMidBreakpoint")
             .text(compute(t => Time.format(t.absolute), currentTrackPosition)).build();
     }
 

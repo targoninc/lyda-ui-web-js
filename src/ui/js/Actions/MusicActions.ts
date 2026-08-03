@@ -19,5 +19,5 @@ export async function startItem(track: Track, newPlayingFrom?: PlayingFrom) {
         QueueManager.clearContextQueue();
     }
 
-    await PlayManager.startAtBeginningAsync(track.id);
+    await PlayManager.startAtBeginningAsync(track.id, track);
 }

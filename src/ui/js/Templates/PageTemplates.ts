@@ -593,7 +593,7 @@ export class PageTemplates {
                         icon: "playlist_add",
                         onclick: () => PlaylistActions.openAddToPlaylistModal(track, "track"),
                     },
-                    {label: t("QUEUE"), icon: "queue", onclick: () => QueueManager.addToManualQueue(track.id)},
+                    {label: t("QUEUE"), icon: "queue", onclick: () => QueueManager.addToManualQueue(track.id, track)},
                     {
                         label: t("COPY_LINK"),
                         icon: "link",
@@ -615,7 +615,7 @@ export class PageTemplates {
                     if (currentTrackId.value === track.id && playingHere.value) {
                         await PlayManager.pauseAsync(track.id);
                     } else {
-                        await PlayManager.startAsync(track.id);
+                        await PlayManager.startAtBeginningAsync(track.id, track);
                     }
                 },
                 isPlaying: (id) => compute((c, p) => c === id && p, currentTrackId, playingHere),
@@ -679,9 +679,7 @@ export class PageTemplates {
         }
 
         document.title = track.track.title;
-        if (code) {
-            currentSecretCode.value = code;
-        }
+        currentSecretCode.value = code;
 
         await PlayManager.cacheTrackData(track);
         const trackPage = await TrackTemplates.trackPage(track);

@@ -458,6 +458,11 @@ label {
     transform: translateY(-50%);
 }
 
+.audio-player-time,
+.audio-player-time-total {
+    font-variant-numeric: tabular-nums;
+}
+
 .audio-player-loudnessbar {
     background: var(--fg-0);
     position: absolute;

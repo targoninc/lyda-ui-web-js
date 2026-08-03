@@ -303,7 +303,7 @@ export class PlayManager {
         }
     }
 
-    static async startAsync(id: number, fromBeginning: boolean = false, force: boolean = false, version?: number) {
+    static async startAsync(id: number, fromBeginning: boolean = false, force: boolean = false, version?: number, track?: Track) {
         loadingAudio.value = true;
         await PlayManager.stopAllAsync();
 
@@ -320,9 +320,12 @@ export class PlayManager {
             ];
         }
 
-        const d = await PlayManager.getTrackData(id);
+        const d = track ? {track} : await PlayManager.getTrackData(id);
         if (!d) {
             return;
+        }
+        if (track) {
+            setTrackInfo(track.id, {track});
         }
 
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -354,8 +357,8 @@ export class PlayManager {
         await StreamingUpdater.updatePlayState();
     }
 
-    static async startAtBeginningAsync(id: number) {
-        await PlayManager.startAsync(id, true);
+    static async startAtBeginningAsync(id: number, track?: Track) {
+        await PlayManager.startAsync(id, true, false, undefined, track);
     }
 
     static async playNextInAutoQueue() {
@@ -576,7 +579,7 @@ export class PlayManager {
             throw new Error("id is missing");
         }
 
-        const data = await get<TrackDetailResponse>(ApiRoutes.getTrackById, {id});
+        const data = await get<TrackDetailResponse>(ApiRoutes.getTrackById, {id, code: currentSecretCode.value});
         if (data) {
             await PlayManager.cacheTrackData(data);
         }

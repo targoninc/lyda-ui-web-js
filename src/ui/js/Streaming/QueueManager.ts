@@ -1,9 +1,10 @@
 import {LydaCache} from "../Cache/LydaCache.ts";
-import {autoQueue, contextQueue, manualQueue} from "../state.ts";
+import {autoQueue, contextQueue, manualQueue, setTrackInfo, trackInfo} from "../state.ts";
 import {Api} from "../Api/Api.ts";
 import {PlayingFrom} from "@targoninc/lyda-shared/src/Models/PlayingFrom";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {shuffleArray} from "../Classes/Util.ts";
+import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 
 function resolveFeedResult(result: any): any[] {
     if (!result) return [];
@@ -23,9 +24,12 @@ export class QueueManager {
         autoQueue.value = queue;
     }
 
-    static addToManualQueue(id: number) {
+    static addToManualQueue(id: number, track?: Track) {
         if (!id) {
             return;
+        }
+        if (track && !trackInfo.value[id]) {
+            setTrackInfo(id, {track});
         }
         manualQueue.value = [...new Set([...manualQueue.value, id])];
     }
@@ -66,6 +70,12 @@ export class QueueManager {
         const tracks = resolveFeedResult(result);
         if (tracks.length === 0) return;
 
+        for (const track of tracks) {
+            if (track?.id && !trackInfo.value[track.id]) {
+                setTrackInfo(track.id, {track});
+            }
+        }
+
         let trackIds = tracks.map((t: any) => t.id);
         if (shuffle) {
             trackIds = shuffleArray(trackIds);
@@ -103,6 +113,11 @@ export class QueueManager {
             return autoQueue.value;
         }
         const queueToAdd = await Api.getNewAutoQueueTracks();
+        for (const track of queueToAdd) {
+            if (track?.id && !trackInfo.value[track.id]) {
+                setTrackInfo(track.id, {track});
+            }
+        }
         const ids = queueToAdd.map((item) => item.id);
         autoQueue.value = autoQueue.value.concat(ids);
         return autoQueue.value;
