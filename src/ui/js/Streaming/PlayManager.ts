@@ -320,13 +320,13 @@ export class PlayManager {
             ];
         }
 
-        const d = track ? {track} : await PlayManager.getTrackData(id);
+        const d = track?.user
+            ? {track}
+            : await PlayManager.getTrackData(id, false);
         if (!d) {
             return;
         }
-        if (track) {
-            setTrackInfo(track.id, {track});
-        }
+        setTrackInfo(d.track.id, {track: d.track});
 
         navigator.mediaSession.metadata = new MediaMetadata({
             album: playingFrom.value?.name ?? "",

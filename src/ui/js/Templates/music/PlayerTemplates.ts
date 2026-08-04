@@ -381,7 +381,7 @@ export class PlayerTemplates {
 
         return create("div")
             .children(
-                compute(t => t ? this.#player(t.track, t.track.user!) : nullElement(), currentTrack),
+                compute(t => t?.track?.user ? this.#player(t.track, t.track.user) : nullElement(), currentTrack),
             ).build();
     }
 
