@@ -716,7 +716,7 @@ button.unread:before {
 }
 
 .batch-selection-checkmark {
-    color: #fff;
+    color: var(--contrast);
     font-size: 3rem;
     font-weight: 700;
     line-height: 1;
@@ -724,7 +724,7 @@ button.unread:before {
 }
 
 .batch-selection-card.selected .batch-selection-checkmark {
-    color: #000;
+    color: var(--base);
 }
 
 .batch-edit-item {
