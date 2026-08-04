@@ -684,6 +684,54 @@ button.unread:before {
     border: 1px solid var(--green);
 }
 
+.batch-edit-list-row {
+    align-items: stretch;
+    flex-wrap: nowrap;
+}
+
+.batch-selection-card {
+    align-items: center;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    box-sizing: border-box;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    padding: var(--base-padding);
+    transition: background-color 100ms ease-in-out, border-color 100ms ease-in-out;
+    user-select: none;
+}
+
+.batch-selection-card:hover {
+    background: var(--bg-2);
+}
+
+.batch-selection-card.selected {
+    background: var(--green);
+    border: 1px solid var(--green-dark);
+}
+
+.batch-selection-card.selected:hover {
+    background: var(--green-dark);
+}
+
+.batch-selection-checkmark {
+    color: #fff;
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1;
+    pointer-events: none;
+}
+
+.batch-selection-card.selected .batch-selection-checkmark {
+    color: #000;
+}
+
+.batch-edit-item {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
 .card.secondary {
     background: var(--bg-0);
 }

@@ -26,7 +26,7 @@ import {
 import {AlbumActions} from "../../Actions/AlbumActions.ts";
 import {navigate, reload, Route} from "../../Routing/Router.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
-import {button, errorList, heading, input, select, SelectOption, textarea, toggle,} from "@targoninc/jess-components";
+import {button, errorList, input, select, SelectOption, textarea, toggle,} from "@targoninc/jess-components";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import {UploadInfo} from "../../Models/UploadInfo.ts";
 import {UploadableTrack} from "../../Models/UploadableTrack.ts";
@@ -49,6 +49,7 @@ import {CoverContext} from "../../Enums/CoverContext.ts";
 import {NotificationType} from "../../Enums/NotificationType.ts";
 import {ParentGenreGroup} from "../generic/ParentGenreGroup.ts";
 import {predictGenresFromFile} from "../../Classes/GenrePredictor.ts";
+import {BatchEditField, BatchEditTemplates} from "../generic/BatchEditTemplates.ts";
 
 let _uploadDragCleanup: (() => void) | null = null;
 
@@ -185,6 +186,7 @@ export class TrackEditTemplates {
                         const parsed = JSON.parse(d.metadata.genre_suggestions);
                         genrePredictions = parsed.map((p: any) => p.genre);
                     } catch {
+                        // Ignore malformed genre suggestions and keep the editor usable.
                     }
                 }
                 track.value = {...d.track, genrePredictions} as any;
@@ -1067,7 +1069,7 @@ export class TrackEditTemplates {
         ).build();
     }
 
-    static editableTrackInList(track: Track, tracks: Signal<Track[]>) {
+    static editableTrackInList(track: Track, tracks: Signal<Track[]>, selectedIds: Signal<Set<number>>) {
         const state = signal<UploadableTrack>(track as UploadableTrack);
         const changed = compute(s => {
             return s.title !== track.title ||
@@ -1085,79 +1087,186 @@ export class TrackEditTemplates {
         const isPrivate = compute(s => s.visibility === "private", state);
 
         return horizontal(
-            vertical(
-                horizontal(
-                FormTemplates.titleInput(state),
-                    TrackEditTemplates.artistNameInput(state),
-                    TrackEditTemplates.isrcInput(state),
+            BatchEditTemplates.selectionCard("track", track.id, selectedIds),
+            horizontal(
+                vertical(
+                    horizontal(
+                    FormTemplates.titleInput(state),
+                        TrackEditTemplates.artistNameInput(state),
+                        TrackEditTemplates.isrcInput(state),
+                    ),
+                    horizontal(
+                        TrackEditTemplates.creditsInput(state),
+                        TrackEditTemplates.priceInput(state),
+                        FormTemplates.upcInput(state),
+                    ),
+                    horizontal(
+                        TrackEditTemplates.addToAlbumsButton(track),
+                        TrackTemplates.addToPlaylistButton(track),
+                        TrackEditTemplates.toggles(isPrivate, state),
+                    ).classes("align-children"),
                 ),
-                horizontal(
-                    TrackEditTemplates.creditsInput(state),
-                    TrackEditTemplates.priceInput(state),
-                    FormTemplates.upcInput(state),
-                ),
-                horizontal(
-                    TrackEditTemplates.addToAlbumsButton(track),
-                    TrackTemplates.addToPlaylistButton(track),
-                    TrackEditTemplates.toggles(isPrivate, state),
-                ).classes("align-children"),
-            ),
-            vertical(
-                horizontal(
-                    TrackEditTemplates.replaceAudioButton(track),
-                    TrackEditTemplates.downloadAudioButton(track),
-                ).classes("align-end"),
-                horizontal(
-                    create("span")
-                        .text(t("ARTWORK"))
-                        .build(),
-                    MusicTemplates.entityCoverButtons(MediaFileType.trackCover, track, imageState, coverLoading),
-                    when(coverLoading, GenericTemplates.loadingSpinner()),
-                    MusicTemplates.cover(EntityType.track, track, CoverContext.inline),
-                ).classes("align-end"),
-                when(changed, horizontal(
-                    create("span")
-                        .classes("warning")
-                        .text(t("UNSAVED_CHANGES"))
-                        .build(),
-                    button({
-                        disabled: loading,
-                        classes: ["positive"],
-                        icon: {icon: "save"},
-                        text: t("SAVE"),
-                        onclick: async () => Api.updateTrackFull(state.value).then(() => {
-                            Api.getTrackById(track.id).then(t => {
-                                tracks.value = tracks.value.map(t2 => {
-                                    if (t2.id === track.id) {
-                                        return t?.track ?? t2;
-                                    }
-                                    return t2;
+                vertical(
+                    horizontal(
+                        TrackEditTemplates.replaceAudioButton(track),
+                        TrackEditTemplates.downloadAudioButton(track),
+                    ).classes("align-end"),
+                    horizontal(
+                        create("span")
+                            .text(t("ARTWORK"))
+                            .build(),
+                        MusicTemplates.entityCoverButtons(MediaFileType.trackCover, track, imageState, coverLoading),
+                        when(coverLoading, GenericTemplates.loadingSpinner()),
+                        MusicTemplates.cover(EntityType.track, track, CoverContext.inline),
+                    ).classes("align-end"),
+                    when(changed, horizontal(
+                        create("span")
+                            .classes("warning")
+                            .text(t("UNSAVED_CHANGES"))
+                            .build(),
+                        button({
+                            disabled: loading,
+                            classes: ["positive"],
+                            icon: {icon: "save"},
+                            text: t("SAVE"),
+                            onclick: async () => Api.updateTrackFull(state.value).then(() => {
+                                Api.getTrackById(track.id).then(t => {
+                                    tracks.value = tracks.value.map(t2 => {
+                                        if (t2.id === track.id) {
+                                            return t?.track ?? t2;
+                                        }
+                                        return t2;
+                                    });
                                 });
-                            });
+                            }),
                         }),
-                    }),
-                    button({
-                        disabled: loading,
-                        icon: {icon: "undo"},
-                        text: t("REVERT"),
-                        onclick: () => state.value = track as UploadableTrack,
-                    }),
-                ).classes("align-end", "align-children").build()),
-            ),
-        ).classes("card", "space-between")
+                        button({
+                            disabled: loading,
+                            icon: {icon: "undo"},
+                            text: t("REVERT"),
+                            onclick: () => state.value = track as UploadableTrack,
+                        }),
+                    ).classes("align-end", "align-children").build()),
+                ),
+            ).classes("card", "batch-edit-item", "space-between")
+                .build(),
+        ).classes("batch-edit-list-row")
             .build();
     }
 
     static batchEditTracksPage() {
         const tracks = signal<Track[]>([]);
         const loading = signal(true);
+        const selectedIds = signal<Set<number>>(new Set());
+        const bulkState = signal<UploadableTrack>({} as UploadableTrack);
+        selectedIds.subscribe(ids => {
+            if (ids.size === 0) {
+                bulkState.value = {} as UploadableTrack;
+            }
+        });
+        const bulkFields: BatchEditField[] = [
+            {key: "title", label: "Title"},
+            {key: "artistname", label: "Artist display name"},
+            {key: "isrc", label: "ISRC"},
+            {key: "credits", label: "Collaborators"},
+            {key: "price", label: "Price"},
+            {key: "upc", label: "UPC"},
+            {key: "visibility", label: "Visibility"},
+            {key: "wip", label: "Work in progress"},
+        ];
+        const changedBulkFields = BatchEditTemplates.changedFields(bulkState, bulkFields);
+        const savingBulk = signal(false);
+
+        const bulkPrice = input<string>({
+            type: InputType.number,
+            name: "batch-price",
+            label: t("MINIMUM_TRACK_PRICE_USD"),
+            placeholder: t("ONE_DOLLAR"),
+            value: compute(s => s.price === undefined ? "" : s.price.toString(), bulkState),
+            onchange: value => {
+                if (value === "") {
+                    const next = {...bulkState.value};
+                    delete next.price;
+                    bulkState.value = next;
+                    return;
+                }
+                bulkState.value = {...bulkState.value, price: Number(value)};
+            },
+        });
+
+        const saveBulk = async () => {
+            if (savingBulk.value || changedBulkFields.value.length === 0) {
+                return;
+            }
+
+            savingBulk.value = true;
+            const updates = {...bulkState.value};
+            let allSuccessful = true;
+            try {
+                for (const id of [...selectedIds.value]) {
+                    const track = tracks.value.find(t => t.id === id);
+                    if (!track) {
+                        continue;
+                    }
+
+                    try {
+                        await Api.updateTrackFull({...track, ...updates});
+                        tracks.value = tracks.value.map(t => t.id === id ? {...t, ...updates} as Track : t);
+                    } catch {
+                        allSuccessful = false;
+                    }
+                }
+                if (allSuccessful) {
+                    bulkState.value = {} as UploadableTrack;
+                }
+            } finally {
+                savingBulk.value = false;
+            }
+        };
+
+        const bulkEdit = () => horizontal(
+            vertical(
+                horizontal(
+                    FormTemplates.titleInput(bulkState),
+                    TrackEditTemplates.artistNameInput(bulkState),
+                    TrackEditTemplates.isrcInput(bulkState),
+                ),
+                horizontal(
+                    TrackEditTemplates.creditsInput(bulkState),
+                    bulkPrice,
+                    FormTemplates.upcInput(bulkState),
+                ),
+                TrackEditTemplates.toggles(
+                    compute(s => s.visibility === Visibility.private, bulkState),
+                    bulkState,
+                ),
+            ),
+            horizontal(
+                when(
+                    compute(fields => fields.length > 0, changedBulkFields),
+                    BatchEditTemplates.saveSummary(changedBulkFields, selectedIds, "tracks"),
+                ),
+                button({
+                    text: t("SAVE"),
+                    icon: {icon: "save"},
+                    classes: ["positive", "small", "rounded-max"],
+                    disabled: compute((saving, fields) => saving || fields.length === 0, savingBulk, changedBulkFields),
+                    onclick: saveBulk,
+                }),
+            ).classes("align-children", "small-gap"),
+        ).classes("card", "space-between").build();
+
         Api.getTracksByUser(currentUser.value?.username ?? "", currentUser.value?.id)
             .then(t => tracks.value = (t as any)?.items ?? [])
             .finally(() => loading.value = false);
 
         return vertical(
             when(loading, GenericTemplates.loadingSpinner()),
-            signalMap(tracks, vertical(), t => TrackEditTemplates.editableTrackInList(t, tracks)),
+            when(
+                compute(ids => ids.size > 0, selectedIds),
+                bulkEdit,
+            ),
+            signalMap(tracks, vertical(), t => TrackEditTemplates.editableTrackInList(t, tracks, selectedIds)),
         ).build();
     }
 }

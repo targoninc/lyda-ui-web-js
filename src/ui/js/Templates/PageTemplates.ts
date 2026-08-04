@@ -49,6 +49,7 @@ import {InteractionType} from "@targoninc/lyda-shared/src/Enums/InteractionType"
 import {SubscriptionTemplates} from "./money/SubscriptionTemplates.ts";
 import {t} from "../../locales";
 import {TransactionTemplates} from "./money/TransactionTemplates.ts";
+import {BatchEditTemplates, BatchEditField} from "./generic/BatchEditTemplates.ts";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, (route: Route, params: Record<string, string>) => Promise<AnyElement> | AnyElement> = {
@@ -121,12 +122,90 @@ export class PageTemplates {
     static batchEditAlbumsPage() {
         const albums = signal<Album[]>([]);
         const loading = signal(true);
+        const selectedIds = signal<Set<number>>(new Set());
+        const bulkState = signal<Partial<Album>>({});
+        selectedIds.subscribe(ids => {
+            if (ids.size === 0) {
+                bulkState.value = {};
+            }
+        });
+        const bulkFields: BatchEditField[] = [
+            {key: "title", label: "Title"},
+            {key: "upc", label: "UPC"},
+            {key: "description", label: "Description"},
+            {key: "visibility", label: "Visibility"},
+        ];
+        const changedBulkFields = BatchEditTemplates.changedFields(bulkState, bulkFields);
+        const savingBulk = signal(false);
+
+        const saveBulk = async () => {
+            if (savingBulk.value || changedBulkFields.value.length === 0) {
+                return;
+            }
+
+            savingBulk.value = true;
+            const updates = {...bulkState.value};
+            let allSuccessful = true;
+            try {
+                for (const id of [...selectedIds.value]) {
+                    const album = albums.value.find(a => a.id === id);
+                    if (!album) {
+                        continue;
+                    }
+
+                    try {
+                        await Api.updateAlbum({...album, ...updates});
+                        albums.value = albums.value.map(a => a.id === id ? {...a, ...updates} as Album : a);
+                    } catch {
+                        allSuccessful = false;
+                    }
+                }
+                if (allSuccessful) {
+                    bulkState.value = {};
+                }
+            } finally {
+                savingBulk.value = false;
+            }
+        };
         Api.getAlbumsByUserId(currentUser.value?.id ?? 0, "", 0, "")
             .then(d => albums.value = d?.items ?? [])
             .finally(() => loading.value = false);
 
         return vertical(
             when(loading, GenericTemplates.loadingSpinner()),
+            when(
+                compute(ids => ids.size > 0, selectedIds),
+                () => create("div")
+                    .classes("card", "flex", "space-between")
+                    .children(
+                        vertical(
+                            horizontal(
+                                FormTemplates.titleInput(bulkState),
+                                FormTemplates.upcInput(bulkState),
+                            ),
+                            horizontal(
+                                FormTemplates.descriptionInput(bulkState, "description"),
+                                FormTemplates.visibilityToggle(
+                                    compute(s => s.visibility === Visibility.private, bulkState),
+                                    bulkState,
+                                ),
+                            ).classes("align-children"),
+                        ),
+                        horizontal(
+                            when(
+                                compute(fields => fields.length > 0, changedBulkFields),
+                                BatchEditTemplates.saveSummary(changedBulkFields, selectedIds, "albums"),
+                            ),
+                            button({
+                                text: t("SAVE"),
+                                icon: {icon: "save"},
+                                classes: ["positive", "small", "rounded-max"],
+                                disabled: compute((saving, fields) => saving || fields.length === 0, savingBulk, changedBulkFields),
+                                onclick: saveBulk,
+                            }),
+                        ).classes("align-children", "small-gap"),
+                    ).build(),
+            ),
             signalMap(albums, vertical(), album => {
                 const state = signal<Partial<Album>>({...album});
                 const changed = compute(s =>
@@ -141,53 +220,58 @@ export class PageTemplates {
                 const imageState = signal("");
 
                 return create("div")
-                    .classes("card", "flex", "space-between")
+                    .classes("flex", "batch-edit-list-row")
                     .children(
-                        vertical(
-                            horizontal(
-                                FormTemplates.titleInput(state),
-                                FormTemplates.upcInput(state),
+                        BatchEditTemplates.selectionCard("album", album.id, selectedIds),
+                        create("div")
+                            .classes("card", "batch-edit-item", "flex", "space-between")
+                            .children(
                                 vertical(
-                                    FormTemplates.visibilityToggle(
-                                        compute(s => s.visibility === Visibility.private, state),
-                                        state,
+                                    horizontal(
+                                        FormTemplates.titleInput(state),
+                                        FormTemplates.upcInput(state),
+                                        vertical(
+                                            FormTemplates.visibilityToggle(
+                                                compute(s => s.visibility === Visibility.private, state),
+                                                state,
+                                            ),
+                                        ).classes("align-end")
                                     ),
-                                ).classes("align-end")
-                            ),
-                            FormTemplates.descriptionInput(state, "description"),
-                        ),
-                        vertical(
-                            horizontal(
-                                create("span")
-                                    .text(t("ARTWORK"))
-                                    .build(),
-                                MusicTemplates.entityCoverButtons(MediaFileType.albumCover, album, imageState, coverLoading),
-                                when(coverLoading, GenericTemplates.loadingSpinner()),
-                                MusicTemplates.cover(EntityType.album, album, CoverContext.inline),
-                            ).classes("align-children", "small-gap").build(),
-                            when(changed, horizontal(
-                                button({
-                                    text: t("SAVE"),
-                                    icon: {icon: "save"},
-                                    classes: ["positive", "small", "rounded-max"],
-                                    disabled: saving,
-                                    onclick: async () => {
-                                        saving.value = true;
-                                        await Api.updateAlbum(state.value);
-                                        saving.value = false;
-                                        albums.value = albums.value.map(a =>
-                                            a.id === album.id ? {...a, ...state.value} as Album : a,
-                                        );
-                                    },
-                                }),
-                                button({
-                                    text: t("REVERT"),
-                                    icon: {icon: "undo"},
-                                    classes: ["small", "rounded-max"],
-                                    onclick: () => state.value = {...album},
-                                }),
-                            ).classes("align-children", "small-gap").build()),
-                        )
+                                    FormTemplates.descriptionInput(state, "description"),
+                                ),
+                                vertical(
+                                    horizontal(
+                                        create("span")
+                                            .text(t("ARTWORK"))
+                                            .build(),
+                                        MusicTemplates.entityCoverButtons(MediaFileType.albumCover, album, imageState, coverLoading),
+                                        when(coverLoading, GenericTemplates.loadingSpinner()),
+                                        MusicTemplates.cover(EntityType.album, album, CoverContext.inline),
+                                    ).classes("align-children", "small-gap").build(),
+                                    when(changed, horizontal(
+                                        button({
+                                            text: t("SAVE"),
+                                            icon: {icon: "save"},
+                                            classes: ["positive", "small", "rounded-max"],
+                                            disabled: saving,
+                                            onclick: async () => {
+                                                saving.value = true;
+                                                await Api.updateAlbum(state.value);
+                                                saving.value = false;
+                                                albums.value = albums.value.map(a =>
+                                                    a.id === album.id ? {...a, ...state.value} as Album : a,
+                                                );
+                                            },
+                                        }),
+                                        button({
+                                            text: t("REVERT"),
+                                            icon: {icon: "undo"},
+                                            classes: ["small", "rounded-max"],
+                                            onclick: () => state.value = {...album},
+                                        }),
+                                    ).classes("align-children", "small-gap").build()),
+                                )
+                            ).build(),
                     ).build();
             }),
         ).build();
@@ -196,12 +280,86 @@ export class PageTemplates {
     static batchEditPlaylistsPage() {
         const playlists = signal<Playlist[]>([]);
         const loading = signal(true);
+        const selectedIds = signal<Set<number>>(new Set());
+        const bulkState = signal<Partial<Playlist>>({});
+        selectedIds.subscribe(ids => {
+            if (ids.size === 0) {
+                bulkState.value = {};
+            }
+        });
+        const bulkFields: BatchEditField[] = [
+            {key: "title", label: "Title"},
+            {key: "description", label: "Description"},
+            {key: "visibility", label: "Visibility"},
+        ];
+        const changedBulkFields = BatchEditTemplates.changedFields(bulkState, bulkFields);
+        const savingBulk = signal(false);
+
+        const saveBulk = async () => {
+            if (savingBulk.value || changedBulkFields.value.length === 0) {
+                return;
+            }
+
+            savingBulk.value = true;
+            const updates = {...bulkState.value};
+            let allSuccessful = true;
+            try {
+                for (const id of [...selectedIds.value]) {
+                    const playlist = playlists.value.find(p => p.id === id);
+                    if (!playlist) {
+                        continue;
+                    }
+
+                    try {
+                        await Api.updatePlaylist({...playlist, ...updates});
+                        playlists.value = playlists.value.map(p => p.id === id ? {...p, ...updates} as Playlist : p);
+                    } catch {
+                        allSuccessful = false;
+                    }
+                }
+                if (allSuccessful) {
+                    bulkState.value = {};
+                }
+            } finally {
+                savingBulk.value = false;
+            }
+        };
         Api.getPlaylistsByUserId(currentUser.value?.id ?? 0, "", 0, "")
             .then(d => playlists.value = d?.items ?? [])
             .finally(() => loading.value = false);
 
         return vertical(
             when(loading, GenericTemplates.loadingSpinner()),
+            when(
+                compute(ids => ids.size > 0, selectedIds),
+                () => create("div")
+                    .classes("card", "flex", "space-between")
+                    .children(
+                        vertical(
+                            horizontal(
+                                FormTemplates.titleInput(bulkState),
+                                FormTemplates.visibilityToggle(
+                                    compute(s => s.visibility === Visibility.private, bulkState),
+                                    bulkState,
+                                ),
+                            ).classes("align-children"),
+                            FormTemplates.descriptionInput(bulkState, "description"),
+                        ),
+                        horizontal(
+                            when(
+                                compute(fields => fields.length > 0, changedBulkFields),
+                                BatchEditTemplates.saveSummary(changedBulkFields, selectedIds, "playlists"),
+                            ),
+                            button({
+                                text: t("SAVE"),
+                                icon: {icon: "save"},
+                                classes: ["positive", "small", "rounded-max"],
+                                disabled: compute((saving, fields) => saving || fields.length === 0, savingBulk, changedBulkFields),
+                                onclick: saveBulk,
+                            }),
+                        ).classes("align-children", "small-gap"),
+                    ).build(),
+            ),
             signalMap(playlists, vertical(), playlist => {
                 const state = signal<Partial<Playlist>>({...playlist});
                 const changed = compute(s =>
@@ -215,52 +373,57 @@ export class PageTemplates {
                 const imageState = signal("");
 
                 return create("div")
-                    .classes("card", "flex", "space-between")
+                    .classes("flex", "batch-edit-list-row")
                     .children(
-                        vertical(
-                            horizontal(
-                                FormTemplates.titleInput(state),
+                        BatchEditTemplates.selectionCard("playlist", playlist.id, selectedIds),
+                        create("div")
+                            .classes("card", "batch-edit-item", "flex", "space-between")
+                            .children(
                                 vertical(
-                                    FormTemplates.visibilityToggle(
-                                        compute(s => s.visibility === Visibility.private, state),
-                                        state,
+                                    horizontal(
+                                        FormTemplates.titleInput(state),
+                                        vertical(
+                                            FormTemplates.visibilityToggle(
+                                                compute(s => s.visibility === Visibility.private, state),
+                                                state,
+                                            ),
+                                        ).classes("align-end")
                                     ),
-                                ).classes("align-end")
-                            ),
-                            FormTemplates.descriptionInput(state, "description"),
-                        ),
-                        vertical(
-                            horizontal(
-                                create("span")
-                                    .text(t("ARTWORK"))
-                                    .build(),
-                                MusicTemplates.entityCoverButtons(MediaFileType.playlistCover, playlist, imageState, coverLoading),
-                                when(coverLoading, GenericTemplates.loadingSpinner()),
-                                MusicTemplates.cover(EntityType.playlist, playlist, CoverContext.inline),
-                            ).classes("align-children", "small-gap").build(),
-                            when(changed, horizontal(
-                                button({
-                                    text: t("SAVE"),
-                                    icon: {icon: "save"},
-                                    classes: ["positive", "small", "rounded-max"],
-                                    disabled: saving,
-                                    onclick: async () => {
-                                        saving.value = true;
-                                        await Api.updatePlaylist(state.value);
-                                        saving.value = false;
-                                        playlists.value = playlists.value.map(p =>
-                                            p.id === playlist.id ? {...p, ...state.value} as Playlist : p,
-                                        );
-                                    },
-                                }),
-                                button({
-                                    text: t("REVERT"),
-                                    icon: {icon: "undo"},
-                                    classes: ["small", "rounded-max"],
-                                    onclick: () => state.value = {...playlist},
-                                }),
-                            ).classes("align-children", "small-gap").build()),
-                        )
+                                    FormTemplates.descriptionInput(state, "description"),
+                                ),
+                                vertical(
+                                    horizontal(
+                                        create("span")
+                                            .text(t("ARTWORK"))
+                                            .build(),
+                                        MusicTemplates.entityCoverButtons(MediaFileType.playlistCover, playlist, imageState, coverLoading),
+                                        when(coverLoading, GenericTemplates.loadingSpinner()),
+                                        MusicTemplates.cover(EntityType.playlist, playlist, CoverContext.inline),
+                                    ).classes("align-children", "small-gap").build(),
+                                    when(changed, horizontal(
+                                        button({
+                                            text: t("SAVE"),
+                                            icon: {icon: "save"},
+                                            classes: ["positive", "small", "rounded-max"],
+                                            disabled: saving,
+                                            onclick: async () => {
+                                                saving.value = true;
+                                                await Api.updatePlaylist(state.value);
+                                                saving.value = false;
+                                                playlists.value = playlists.value.map(p =>
+                                                    p.id === playlist.id ? {...p, ...state.value} as Playlist : p,
+                                                );
+                                            },
+                                        }),
+                                        button({
+                                            text: t("REVERT"),
+                                            icon: {icon: "undo"},
+                                            classes: ["small", "rounded-max"],
+                                            onclick: () => state.value = {...playlist},
+                                        }),
+                                    ).classes("align-children", "small-gap").build()),
+                                )
+                            ).build(),
                     ).build();
             }),
         ).build();

@@ -28,7 +28,7 @@ export class StreamingUpdater {
             return;
         }
         const currentTime = PlayManager.getCurrentTime(id);
-        if (streamClient.playing) {
+        if (streamClient.playing && Number.isFinite(currentTime.relative) && Number.isFinite(currentTime.absolute)) {
             currentTrackPosition.value = currentTime;
         }
 
@@ -36,6 +36,11 @@ export class StreamingUpdater {
     }
 
     static updateBuffers(bufferedLength: number, duration: number) {
+        if (!Number.isFinite(bufferedLength) || !Number.isFinite(duration) || duration <= 0) {
+            currentlyBuffered.value = 0;
+            return;
+        }
+
         currentlyBuffered.value = Math.min(Math.max(bufferedLength / duration, 0), 1);
     }
 

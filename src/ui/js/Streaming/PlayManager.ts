@@ -279,7 +279,7 @@ export class PlayManager {
     }
 
     static async togglePlayAsync(id: number) {
-        let streamClient = PlayManager.getStreamClient(id);
+        const streamClient = PlayManager.getStreamClient(id);
         if (streamClient === undefined) {
             return;
         }
@@ -463,9 +463,8 @@ export class PlayManager {
             relative: streamClient.getCurrentTime(true),
             absolute: streamClient.getCurrentTime(false)
         };
-        if (isNaN(trackPosition.relative)) {
-            trackPosition.relative = 0;
-        }
+        if (!Number.isFinite(trackPosition.relative)) trackPosition.relative = 0;
+        if (!Number.isFinite(trackPosition.absolute)) trackPosition.absolute = 0;
         return trackPosition;
     }
 

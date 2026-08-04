@@ -182,23 +182,60 @@ playingFrom.subscribe((playingFrom: PlayingFrom|null, changed: boolean) => {
     LydaCache.set("playingFrom", new CacheItem(playingFrom));
 });
 
-export const currentTrackPosition = signal<TrackPosition>(LydaCache.get<TrackPosition>(UserCacheKey.lastTrackPosition).content ?? { relative: 0, absolute: 0 });
+const normalizeTrackPosition = (position: Partial<TrackPosition> | null | undefined): TrackPosition => {
+    const relative = Number(position?.relative);
+    const absolute = Number(position?.absolute);
+
+    return {
+        relative: Number.isFinite(relative) ? Math.min(Math.max(relative, 0), 1) : 0,
+        absolute: Number.isFinite(absolute) ? Math.max(absolute, 0) : 0,
+    };
+};
+
+export const currentTrackPosition = signal<TrackPosition>(normalizeTrackPosition(
+    LydaCache.get<TrackPosition>(UserCacheKey.lastTrackPosition).content,
+));
 currentTrackPosition.subscribe((p, changed) => {
     if (!changed) {
         return;
     }
-    LydaCache.set(UserCacheKey.lastTrackPosition, new CacheItem(p));
+
+    const normalized = normalizeTrackPosition(p);
+    if (normalized.relative !== p.relative || normalized.absolute !== p.absolute) {
+        currentTrackPosition.value = normalized;
+        return;
+    }
+
+    LydaCache.set(UserCacheKey.lastTrackPosition, new CacheItem(normalized));
 
     if (currentTrackId.value) {
-        PlayManager.getTrackData(currentTrackId.value).then(d => {
-            if (d) {
+        const trackId = currentTrackId.value;
+        PlayManager.getTrackData(trackId).then(d => {
+            if (!d || currentTrackId.value !== trackId) {
+                return;
+            }
+
+            const duration = Number(d.track.length);
+            const position = Number(normalized.absolute);
+            if (!Number.isFinite(duration) || duration <= 0 || !Number.isFinite(position)) {
+                return;
+            }
+
+            const safePosition = Math.min(Math.max(position, 0), duration);
+            if (!Number.isFinite(safePosition) || !navigator.mediaSession?.setPositionState) {
+                return;
+            }
+
+            try {
                 navigator.mediaSession.setPositionState({
-                    position: Math.min(currentTrackPosition.value.absolute, d.track.length),
-                    duration: d.track.length,
+                    position: safePosition,
+                    duration,
                     playbackRate: 1,
                 });
+            } catch (error) {
+                console.warn("Unable to update Media Session position", error);
             }
-        })
+        });
     }
 });
 
