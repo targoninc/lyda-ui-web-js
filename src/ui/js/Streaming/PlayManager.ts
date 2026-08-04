@@ -570,7 +570,7 @@ export class PlayManager {
     }
 
     static async getTrackData(id: number, allowCache = true) {
-        if (trackInfo.value[id] && allowCache) {
+        if (trackInfo.value[id]?.track.user && allowCache) {
             return trackInfo.value[id];
         }
 

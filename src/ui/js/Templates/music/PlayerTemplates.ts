@@ -25,7 +25,6 @@ import {
     playingFrom,
     playingHere,
     shuffling,
-    trackInfo,
     volume,
 } from "../../state.ts";
 import { RoutePath } from "../../Routing/routes.ts";
@@ -371,12 +370,7 @@ export class PlayerTemplates {
                 return null;
             }
 
-            let t = trackInfo.value[id] as { track: Track } | null;
-            if (!t) {
-                t = await PlayManager.getTrackData(id);
-            }
-
-            return t;
+            return await PlayManager.getTrackData(id);
         }, currentTrackId);
 
         return create("div")

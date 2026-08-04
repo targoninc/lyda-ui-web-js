@@ -30,7 +30,7 @@ import { TextSize } from "../../Enums/TextSize.ts";
 export class QueueTemplates {
     static queueItem(track: Track, index: number, type: "manual" | "context" | "auto" | "current" | "history") {
         if (!track.user) {
-            throw new Error(`Track ${track.id} has no user`);
+            return nullElement();
         }
         const coverState = signal(Images.DEFAULT_COVER_TRACK);
         if (track.has_cover) {
