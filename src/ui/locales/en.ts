@@ -675,12 +675,10 @@ export const en = {
     WORK_IN_PROGRESS: "Work in progress",
     NO_WIPS: "No WIPs",
     WIP_ONLY: "WIP only",
-
     REPORT: "Report",
     REPORTED: "Reported",
     REPORT_COMMENT: "Report comment",
     REASON: "Reason",
-    DESCRIPTION: "Description",
     REASON_SPAM: "Spam",
     REASON_BULLYING: "Bullying",
     REASON_SEXUAL_CONTENT: "Sexual Content",
