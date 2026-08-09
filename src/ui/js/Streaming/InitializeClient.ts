@@ -1,23 +1,16 @@
 import { IStreamClient } from "./IStreamClient.ts";
-import { currentQuality, currentTrackId, currentTrackPosition, muted, volume } from "../state.ts";
+import { currentQuality, currentTrackId, muted, volume } from "../state.ts";
 import { PlayManager } from "./PlayManager.ts";
 
 export function initializeClient(client: IStreamClient) {
     const cleanupKey = `init-client-${Math.random()}`;
 
-    currentQuality.subscribe(async q => {
-        if (client.playing) {
-            client.stopAsync();
-            const interval = setInterval(async () => {
-                if (client.getBufferedLength() >= client.duration) {
-                    console.log("Starting because buffer loaded");
-                    await client.scrubTo(currentTrackPosition.value.absolute, false, false);
-                    await client.startAsync();
-                    clearInterval(interval);
-                }
-            }, 100);
-        } else {
-            client.stopAsync();
+    currentQuality.subscribe(async _q => {
+        const wasPlaying = client.playing;
+        client.stopAsync();
+        client.reloadSource();
+        if (wasPlaying) {
+            await client.startAsync();
         }
     }, cleanupKey);
 

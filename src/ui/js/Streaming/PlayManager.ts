@@ -39,7 +39,27 @@ import {t} from "../../locales";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {TrackLyrics} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackLyrics.ts";
 
+interface NextTrackResolution {
+    kind: "track";
+    type: "manual" | "context";
+    id: number;
+    force: boolean;
+    sliceIfSame: boolean;
+}
+
+interface NextAutoResolution {
+    kind: "auto";
+    clearContext: boolean;
+}
+
 export class PlayManager {
+    // Length of the crossfade used for gapless track transitions. Short enough
+    // to be inaudible on continuous music, long enough to mask any browser
+    // gap between media elements and prevent clicks.
+    private static readonly CROSSFADE_MS = 10;
+    private static gaplessWatchId: number | null = null;
+    private static transitionInProgress = false;
+
     static async playCheck(track: Track) {
         if (PlayManager.isPlaying(track.id)) {
             StreamingUpdater.updateScrubber(track.id);
@@ -48,51 +68,89 @@ export class PlayManager {
 
     static async playNextFromQueues(finishedId: number | null = null) {
         console.log(`[PlayManager] playNextFromQueues called with finishedId: ${finishedId}`);
+        const currentId = finishedId ?? currentTrackId.value;
+        const resolved = PlayManager.resolveNextFromQueues(currentId);
+        if (resolved.kind === "auto") {
+            if (resolved.clearContext) {
+                QueueManager.clearContextQueue();
+                PlayManager.clearPlayFrom();
+            }
+            // Context queue is empty, play from auto queue
+            await PlayManager.playNextInAutoQueueOrStop();
+            return;
+        }
+
+        await PlayManager.startAsync(resolved.id, true, resolved.force);
+        PlayManager.applyQueueConsumption(resolved, currentId);
+    }
+
+    private static applyQueueConsumption(resolved: NextTrackResolution, currentId: number) {
+        if (resolved.type === "manual") {
+            QueueManager.removeFromManualQueue(resolved.id);
+        } else if (resolved.sliceIfSame && resolved.id === currentId) {
+            QueueManager.setContextQueue(QueueManager.getContextQueue().slice(1));
+        }
+    }
+
+    /**
+     * Pure queue decision: which track plays next after `currentId` finishes.
+     * Does not mutate queue state — the caller applies consumption.
+     */
+    private static resolveNextFromQueues(currentId: number): NextTrackResolution | NextAutoResolution {
         const manualQueue = QueueManager.getManualQueue();
         const nextTrackIdFromManual = manualQueue[0];
-        const currentId = finishedId ?? currentTrackId.value;
         if (nextTrackIdFromManual !== undefined) {
-            // Prioritize manual queue
-            await PlayManager.startAsync(nextTrackIdFromManual, true, nextTrackIdFromManual === currentId);
-            QueueManager.removeFromManualQueue(nextTrackIdFromManual);
-        } else {
-            const loopingContext = PlayManager.isLoopingContext();
-            const contextQueue = QueueManager.getContextQueue();
-            if (contextQueue.length > 0) {
-                const index = contextQueue.findIndex(id => id === currentId);
-                let nextTrackId = null;
-
-                if (index !== -1 && index < contextQueue.length - 1) {
-                    nextTrackId = contextQueue[index + 1];
-                }
-
-                if (nextTrackId !== null) {
-                    // Play next track in context queue
-                    await PlayManager.startAsync(nextTrackId, true, nextTrackId === currentId);
-                    if (nextTrackId === currentId) {
-                        QueueManager.setContextQueue(QueueManager.getContextQueue().slice(1));
-                    }
-                } else if (index === -1) {
-                    // Current track not in context queue (e.g. from manual queue), just play first item of context
-                    const nextId = contextQueue[0];
-                    await PlayManager.startAsync(nextId, true, nextId === currentId);
-                } else {
-                    // End of context queue reached
-                    if (loopingContext) {
-                        nextTrackId = contextQueue[0];
-                        await PlayManager.startAsync(nextTrackId, true, nextTrackId === currentId);
-                    } else {
-                        // Clear the context queue and play from the auto queue
-                        QueueManager.clearContextQueue();
-                        PlayManager.clearPlayFrom();
-                        await PlayManager.playNextInAutoQueueOrStop();
-                    }
-                }
-            } else {
-                // Context queue is empty, play from auto queue
-                await PlayManager.playNextInAutoQueueOrStop();
-            }
+            return {
+                kind: "track",
+                type: "manual",
+                id: nextTrackIdFromManual,
+                force: nextTrackIdFromManual === currentId,
+                sliceIfSame: false,
+            };
         }
+
+        const loopingContext = PlayManager.isLoopingContext();
+        const contextQueue = QueueManager.getContextQueue();
+        if (contextQueue.length > 0) {
+            const index = contextQueue.findIndex(id => id === currentId);
+
+            if (index !== -1 && index < contextQueue.length - 1) {
+                const id = contextQueue[index + 1];
+                return {
+                    kind: "track",
+                    type: "context",
+                    id,
+                    force: id === currentId,
+                    sliceIfSame: true,
+                };
+            }
+
+            if (index === -1) {
+                const id = contextQueue[0];
+                return {
+                    kind: "track",
+                    type: "context",
+                    id,
+                    force: id === currentId,
+                    sliceIfSame: false,
+                };
+            }
+
+            if (loopingContext) {
+                const id = contextQueue[0];
+                return {
+                    kind: "track",
+                    type: "context",
+                    id,
+                    force: id === currentId,
+                    sliceIfSame: false,
+                };
+            }
+
+            return {kind: "auto", clearContext: true};
+        }
+
+        return {kind: "auto", clearContext: false};
     }
 
     private static async playNextInAutoQueueOrStop() {
@@ -133,6 +191,10 @@ export class PlayManager {
         console.log(`[PlayManager] Registering onEnded for track ${id}. streamClient instance:`, streamClient);
         streamClient.onEnded = async () => {
             console.log(`[PlayManager] streamClient.onEnded callback triggered for track ${id}. currentTrackId: ${currentTrackId.value}`);
+            if (PlayManager.transitionInProgress) {
+                console.log(`[PlayManager] streamClient.onEnded: gapless transition in progress for track ${id}, ignoring`);
+                return;
+            }
             if (id !== currentTrackId.value) {
                 console.log(`[PlayManager] streamClient.onEnded: id mismatch (${id} !== ${currentTrackId.value}), returning`);
                 return;
@@ -276,6 +338,175 @@ export class PlayManager {
     private static afterStart(id: number) {
         StreamingBroadcaster.send(StreamingEvent.trackStart, id);
         playingHere.value = true;
+        PlayManager.preloadNextTrack(id);
+        PlayManager.watchForGaplessTransition(id);
+    }
+
+    /**
+     * Starts buffering the next queued track so the gapless transition at the
+     * end of the current one starts instantly instead of after a network round
+     * trip.
+     */
+    private static preloadNextTrack(currentId: number) {
+        const resolved = PlayManager.resolveNextFromQueues(currentId);
+        if (resolved.kind === "auto" || resolved.id === currentId) {
+            return;
+        }
+
+        const existing = PlayManager.getStreamClient(resolved.id);
+        if (existing) {
+            existing.preload();
+            return;
+        }
+
+        const client = new StreamClient(resolved.id, currentSecretCode.value);
+        PlayManager.addStreamClient(resolved.id, client);
+        PlayManager.registerOnEnded(resolved.id, client);
+        client.preload();
+    }
+
+    /**
+     * Watches the playing track and starts the next one slightly before the
+     * current one ends, crossfading the two so the transition is gapless and
+     * click-free. Falls back to the plain `ended` path when no next track is
+     * queued or the watch misses its window.
+     */
+    private static watchForGaplessTransition(id: number) {
+        if (PlayManager.gaplessWatchId !== null) {
+            cancelAnimationFrame(PlayManager.gaplessWatchId);
+            PlayManager.gaplessWatchId = null;
+        }
+        PlayManager.transitionInProgress = false;
+
+        const tick = () => {
+            PlayManager.gaplessWatchId = null;
+
+            const client = PlayManager.getStreamClient(id);
+            if (!client || !client.playing || id !== currentTrackId.value) {
+                return;
+            }
+
+            // Single-track loop restarts itself via `ended`; don't intercept.
+            if (PlayManager.isLoopingSingle()) {
+                return;
+            }
+
+            if (client.duration > 0) {
+                const remaining = client.duration - client.getCurrentTime(false);
+                if (remaining <= PlayManager.CROSSFADE_MS / 1000) {
+                    PlayManager.transitionInProgress = true;
+                    PlayManager.gaplessTransition(id).catch(() => {
+                        PlayManager.transitionInProgress = false;
+                    });
+                    return;
+                }
+            }
+
+            PlayManager.gaplessWatchId = requestAnimationFrame(tick);
+        };
+
+        PlayManager.gaplessWatchId = requestAnimationFrame(tick);
+    }
+
+    private static async gaplessTransition(prevId: number) {
+        const resolved = PlayManager.resolveNextFromQueues(prevId);
+        if (resolved.kind === "auto") {
+            if (resolved.clearContext) {
+                QueueManager.clearContextQueue();
+                PlayManager.clearPlayFrom();
+            }
+            // No next track queued: let `ended` handle the auto queue / stop.
+            PlayManager.transitionInProgress = false;
+            return;
+        }
+
+        if (resolved.id === prevId) {
+            // Same track again (duplicate in queue): plain restart.
+            PlayManager.transitionInProgress = false;
+            await PlayManager.startAsync(resolved.id, true, resolved.force);
+            PlayManager.applyQueueConsumption(resolved, prevId);
+            return;
+        }
+
+        try {
+            await PlayManager.startWithCrossfade(prevId, resolved.id, resolved.force);
+            PlayManager.applyQueueConsumption(resolved, prevId);
+        } catch (e) {
+            console.error("[PlayManager] gapless transition failed:", e);
+            PlayManager.transitionInProgress = false;
+            // Fall back to the normal ended path so playback continues.
+            await PlayManager.playNextFromQueues(prevId);
+        }
+    }
+
+    /**
+     * Starts `nextId` while the previous track is still audible and ramps the
+     * two gains in opposite directions, producing a seamless transition.
+     * The previous client is closed once the fade completes.
+     */
+    private static async startWithCrossfade(prevId: number, nextId: number, force: boolean) {
+        loadingAudio.value = true;
+        try {
+            if (nextId !== currentTrackId.value || force) {
+                history.value = [
+                    ...history.value,
+                    {
+                        id: -1,
+                        user_id: -1,
+                        track_id: nextId,
+                        created_at: new Date(),
+                        quality: currentQuality.value
+                    }
+                ];
+            }
+
+            const d = await PlayManager.getTrackData(nextId, false);
+            if (!d) {
+                throw new Error(`Track ${nextId} not found`);
+            }
+            setTrackInfo(d.track.id, {track: d.track});
+
+            navigator.mediaSession.metadata = new MediaMetadata({
+                album: playingFrom.value?.name ?? "",
+                title: d.track.title,
+                artist: d.track.artistname ?? d.track.user?.displayname ?? "",
+                artwork: [
+                    {
+                        src: d.track.has_cover ? Util.getTrackCover(nextId) : Util.defaultImage("track"),
+                        type: "image/webp",
+                        sizes: "500x500"
+                    }
+                ]
+            });
+
+            const nextClient = PlayManager.addStreamClientIfNotExists(nextId, d.track.length);
+            PlayManager.registerOnEnded(nextId, nextClient);
+            const prevClient = PlayManager.getStreamClient(prevId);
+
+            // Start the next track at zero gain, then crossfade both
+            // directions so there is no gap and no click.
+            nextClient.preload();
+            nextClient.rampVolume(0, 0);
+            await nextClient.startAsync(true);
+
+            const targetVolume = muted.value ? 0 : volume.value;
+            const fadeSeconds = PlayManager.CROSSFADE_MS / 1000;
+            prevClient?.rampVolume(0, fadeSeconds);
+            nextClient.rampVolume(targetVolume, fadeSeconds);
+
+            setTimeout(() => {
+                if (prevClient) {
+                    prevClient.close();
+                    PlayManager.removeStreamClient(prevId);
+                }
+            }, PlayManager.CROSSFADE_MS + 50);
+        } catch (e) {
+            loadingAudio.value = false;
+            throw e;
+        }
+        loadingAudio.value = false;
+        PlayManager.afterStart(nextId);
+        await StreamingUpdater.updatePlayState();
     }
 
     static async togglePlayAsync(id: number) {
@@ -306,7 +537,10 @@ export class PlayManager {
     static async startAsync(id: number, fromBeginning: boolean = false, force: boolean = false, version?: number, track?: Track) {
         loadingAudio.value = true;
         await PlayManager.stopAllAsync();
+        await PlayManager.startTrackAsync(id, fromBeginning, force, version, track);
+    }
 
+    private static async startTrackAsync(id: number, fromBeginning: boolean, force: boolean, version?: number, track?: Track) {
         if (id !== currentTrackId.value || force) {
             history.value = [
                 ...history.value,
@@ -324,6 +558,7 @@ export class PlayManager {
             ? {track}
             : await PlayManager.getTrackData(id, false);
         if (!d) {
+            loadingAudio.value = false;
             return;
         }
         setTrackInfo(d.track.id, {track: d.track});

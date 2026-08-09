@@ -1,7 +1,19 @@
 import { IStreamClient } from "./IStreamClient.ts";
 import { ApiRoutes } from "../Api/ApiRoutes.ts";
-import { currentQuality, currentTrackId, currentTrackPosition, loadingAudio, muted, playingHere, volume } from "../state.ts";
+import { currentQuality, currentTrackId, currentTrackPosition, loadingAudio, muted, volume } from "../state.ts";
 import { initializeClient } from "./InitializeClient.ts";
+
+let sharedCtx: AudioContext | null = null;
+
+function getSharedAudioContext(): AudioContext {
+    if (!sharedCtx) {
+        sharedCtx = new AudioContext();
+    }
+    if (sharedCtx.state === "suspended") {
+        sharedCtx.resume().catch(() => {});
+    }
+    return sharedCtx;
+}
 
 export class StreamClient implements IStreamClient {
     public duration = 0;
@@ -14,16 +26,10 @@ export class StreamClient implements IStreamClient {
 
     private ctx?: AudioContext;
     private gain?: GainNode;
-    private source?: AudioBufferSourceNode;
-    private buffer?: AudioBuffer;
+    private audio?: HTMLAudioElement;
+    private elementSource?: MediaElementAudioSourceNode;
 
-    private startCtxTime = 0;  // AudioContext.currentTime when playback started
-    private offset = 0;        // seconds into the buffer where playback is/was
-    private loadingPromise?: Promise<void>;
-
-    private bytesReceived = 0;
-    private totalBytes = 0;
-    private abortController?: AbortController;
+    private offset = 0; // seconds where playback should resume when started
 
     constructor(id: number, code: string, version?: number) {
         this.id = id;
@@ -35,68 +41,79 @@ export class StreamClient implements IStreamClient {
     public setVersion(version: number | undefined) {
         if (this.version !== version) {
             this.version = version;
-            this.buffer = undefined;
-            this.loadingPromise = undefined;
+            this.reloadSource();
         }
     }
 
     setLoop(looping: boolean): void {
-        if (this.source) {
-            this.source.loop = looping;
+        if (this.audio) {
+            this.audio.loop = looping;
         }
     }
 
     public async startAsync(fromBeginning: boolean = false): Promise<void> {
         try {
-            await this.ensureAudioContext();
+            this.ensureAudioContext();
 
             if (fromBeginning) {
                 this.offset = 0;
                 currentTrackPosition.value = { relative: 0, absolute: 0 };
             }
 
-            // If not loaded yet, start loading/decoding
-            if (!this.buffer) {
-                this.loadingPromise ??= this.loadAndDecode();
-                await this.loadingPromise;
-            }
-
+            const freshElement = this.ensureAudioElement();
             if (this.playing) {
                 return;
             }
 
-            this.startFromOffset(this.offset);
+            if (freshElement) {
+                // The element was just created: wait until metadata is known
+                // before seeking, otherwise the browser may ignore currentTime.
+                await this.waitForMetadata();
+            }
+
+            const target = this.clampTime(this.offset);
+            if (Math.abs(this.audio!.currentTime - target) > 0.05) {
+                this.audio!.currentTime = target;
+            }
+
+            await this.audio!.play();
+            this.playing = true;
+            currentTrackId.value = this.id;
         } catch (e) {
             console.error("[StreamClient] startAsync failed:", e);
-            this.loadingPromise = undefined;
             throw e;
         }
     }
 
     public stopAsync(): void {
-        if (this.playing && this.ctx && this.source) {
-            const elapsed = Math.max(0, this.ctx.currentTime - this.startCtxTime);
-            this.offset = this.clampTime(this.offset + elapsed);
-        }
-
-        if (this.source) {
+        if (this.audio) {
+            const t = this.audio.currentTime;
+            if (isFinite(t)) {
+                this.offset = this.clampTime(t);
+            }
             try {
-                this.source.stop();
+                this.audio.pause();
             } catch (e: any) {
                 console.warn(e);
             }
-            this.source.disconnect();
-            this.source = undefined;
         }
         this.playing = false;
-
-        this.abortController?.abort();
-        this.abortController = undefined;
-        this.loadingPromise = undefined;
     }
 
     public close(): void {
         this.stopAsync();
+
+        if (this.audio) {
+            // Drop the source to stop network activity and free the buffer.
+            try {
+                this.audio.removeAttribute("src");
+                this.audio.load();
+            } catch (e: any) {
+                console.warn(e);
+            }
+            this.audio = undefined;
+        }
+        this.elementSource = undefined;
 
         if (this.gain) {
             try {
@@ -106,19 +123,44 @@ export class StreamClient implements IStreamClient {
             }
             this.gain = undefined;
         }
-
-        this.buffer = undefined;
+        this.ctx = undefined;
         this.duration = 0;
+        this.offset = 0;
+    }
 
-        if (this.ctx && this.ctx.state !== "closed") {
-            this.ctx.close().catch(() => {});
-            this.ctx = undefined;
+    /**
+     * Preloads the track without starting playback. The element begins
+     * fetching (and buffering) the beginning of the file, so a later
+     * startAsync starts almost immediately.
+     */
+    public preload(): void {
+        this.ensureAudioContext();
+        this.ensureAudioElement();
+    }
+
+    /**
+     * Drops the current media element so the next startAsync re-fetches
+     * with the current quality/version. The resume position is preserved.
+     */
+    public reloadSource(): void {
+        if (this.playing) {
+            this.offset = this.getCurrentTime(false);
         }
+        if (this.audio) {
+            try {
+                this.audio.removeAttribute("src");
+                this.audio.load();
+            } catch (e: any) {
+                console.warn(e);
+            }
+            this.audio = undefined;
+        }
+        this.elementSource = undefined;
     }
 
     public async scrubTo(time: number, relative: boolean): Promise<void> {
         try {
-            await this.ensureAudioContext();
+            this.ensureAudioContext();
 
             // Interpret `relative` as "time is a 0..1 fraction of duration"
             const targetSeconds = relative
@@ -126,39 +168,42 @@ export class StreamClient implements IStreamClient {
                 : time;
             const target = this.clampTime(targetSeconds);
 
-            this.stopSourceOnly();
+            const freshElement = this.ensureAudioElement();
+            if (freshElement) {
+                await this.waitForMetadata();
+            }
+
+            const wasPlaying = this.playing;
+            this.audio!.currentTime = target;
             this.offset = target;
 
-            if (!this.buffer) {
-                this.loadingPromise ??= this.loadAndDecode();
-                await this.loadingPromise;
+            if (wasPlaying) {
+                await this.audio!.play();
             }
-            this.startFromOffset(this.offset);
         } catch (e) {
             console.error("[StreamClient] scrubTo failed:", e);
-            this.loadingPromise = undefined;
             throw e;
         }
     }
 
     public getCurrentTime(relative: boolean): number {
-        if (!this.ctx) {
-            return relative ? 0 : 0;
+        let base: number;
+        if (this.audio) {
+            const t = this.audio.currentTime;
+            base = isFinite(t) ? t : this.offset;
+        } else {
+            base = this.offset;
         }
-
-        const baseOffset = this.playing
-            ? this.clampTime(this.offset + (this.ctx.currentTime - this.startCtxTime))
-            : this.offset;
 
         if (relative) {
             if (this.duration <= 0) {
                 return 0;
             }
 
-            return Math.max(0, Math.min(1, baseOffset / this.duration));
+            return Math.max(0, Math.min(1, base / this.duration));
         }
 
-        return this.duration > 0 ? Math.min(baseOffset, this.duration) : baseOffset;
+        return this.duration > 0 ? Math.min(base, this.duration) : base;
     }
 
     public getVolume(): number {
@@ -173,41 +218,57 @@ export class StreamClient implements IStreamClient {
         this.gain.gain.value = Math.max(0, Math.min(1, volume * volume));
     }
 
+    /**
+     * Smoothly ramps the volume (0..1) over durationSeconds on the shared
+     * AudioContext clock. Used for gapless crossfades between tracks.
+     */
+    public rampVolume(targetVolume: number, durationSeconds: number): void {
+        if (!this.gain || !this.ctx) {
+            return;
+        }
+
+        const target = Math.max(0, Math.min(1, targetVolume * targetVolume));
+        const now = this.ctx.currentTime;
+        if (durationSeconds <= 0) {
+            this.gain.gain.setValueAtTime(target, now);
+        } else {
+            this.gain.gain.cancelScheduledValues(now);
+            this.gain.gain.setValueAtTime(this.gain.gain.value, now);
+            this.gain.gain.linearRampToValueAtTime(target, now + durationSeconds);
+        }
+    }
+
     public getBufferedLength(): number {
-        // If fully decoded, all duration is available.
-        if (this.buffer && this.duration > 0) {
-            return this.duration;
+        if (!this.audio) {
+            return 0;
         }
 
-        // Otherwise, estimate based on response Content-Length (if known).
-        if (this.totalBytes > 0 && this.duration > 0) {
-            return Math.max(0, Math.min(this.duration, (this.bytesReceived / this.totalBytes) * this.duration));
+        try {
+            const buffered = this.audio.buffered;
+            if (buffered.length > 0) {
+                const end = buffered.end(buffered.length - 1);
+                if (isFinite(end) && end > 0) {
+                    return this.duration > 0 ? Math.min(end, this.duration) : end;
+                }
+            }
+        } catch {
+            // TimeRanges access can throw while the media is loading.
         }
 
-        // Unknown length.
         return 0;
     }
 
     // Internals
 
-    private async ensureAudioContext(): Promise<void> {
+    private ensureAudioContext(): void {
         if (!this.ctx) {
-            try {
-                this.ctx = new AudioContext();
-                await this.ctx.resume().catch(() => {});
-            } catch {
-                this.ctx = undefined;
-            }
-        }
-
-        if (!this.ctx) {
-            throw new Error("Failed to create AudioContext");
-        }
-
-        if (!this.gain) {
+            this.ctx = getSharedAudioContext();
             this.gain = this.ctx.createGain();
             this.gain.gain.value = 1;
             this.gain.connect(this.ctx.destination);
+            // Apply the current volume once; setVolume is called again on
+            // every volume/mute change via initializeClient.
+            this.setVolume(muted.value ? 0 : volume.value);
         }
     }
 
@@ -219,154 +280,100 @@ export class StreamClient implements IStreamClient {
         return url;
     }
 
-    private async loadAndDecode(): Promise<void> {
-        if (!this.ctx) {
+    /**
+     * Creates (once) the HTMLAudioElement that streams the track via HTTP
+     * range requests. The browser starts playback as soon as the first part
+     * is buffered and lazily downloads the rest.
+     * @returns true when a new element was created.
+     */
+    private ensureAudioElement(): boolean {
+        if (this.audio) {
+            return false;
+        }
+        if (!this.ctx || !this.gain) {
             throw new Error("AudioContext not initialized");
         }
 
-        this.abortController = new AbortController();
-        const signal = this.abortController.signal;
+        const audio = new Audio();
+        audio.preload = "auto";
+        audio.crossOrigin = "use-credentials";
 
-        const url = this.buildUrl();
-        let res: Response;
-        try {
-            res = await fetch(url, {
-                credentials: "include",
-                signal,
-            });
-        } catch {
-            if (signal.aborted) return;
-            throw new Error("Failed to fetch stream");
-        }
+        // Route the element through our gain node. Must be called before the
+        // element starts playing; the element is exclusively controlled here.
+        this.elementSource = this.ctx.createMediaElementSource(audio);
+        this.elementSource.connect(this.gain);
 
-        if (!res.ok || !res.body) {
-            throw new Error(`Failed to fetch stream: ${res.status} ${res.statusText}`);
-        }
-
-        const contentLength = res.headers.get("Content-Length");
-        this.totalBytes = contentLength ? parseInt(contentLength, 10) || 0 : 0;
-
-        // Accumulate the stream into a single buffer for decodeAudioData
-        const reader = res.body.getReader();
-        const chunks: Uint8Array[] = [];
-        let received = 0;
-        currentTrackId.value = this.id;
-        loadingAudio.value = true;
-
-        while (true) {
-            try {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                if (value) {
-                    chunks.push(value);
-                    received += value.byteLength;
-                    this.bytesReceived = received;
-                }
-            } catch {
-                if (signal.aborted) return;
-                throw new Error("Failed to read stream");
+        audio.addEventListener("loadedmetadata", () => {
+            if (isFinite(audio.duration) && audio.duration > 0) {
+                this.duration = audio.duration;
             }
-        }
-
-        if (signal.aborted) return;
-
-        const merged = new Uint8Array(received);
-        let offset = 0;
-        for (const c of chunks) {
-            merged.set(c, offset);
-            offset += c.byteLength;
-        }
-
-        const arrayBuffer = merged.buffer as ArrayBuffer;
-
-        // Decode to AudioBuffer
-        const buf = await this.ctx.decodeAudioData(arrayBuffer.slice(0));
-        this.buffer = buf;
-        this.duration = buf.duration;
-
-        // Track selection might've changed during loading
-        if (currentTrackId.value === this.id) {
-            loadingAudio.value = false;
-        }
-    }
-
-    private startFromOffset(offsetSeconds: number): void {
-        console.log(`[StreamClient] startFromOffset called for track ${this.id} at ${offsetSeconds}s. duration: ${this.duration}`);
-        if (!this.ctx || !this.gain || !this.buffer) {
-            console.log(`[StreamClient] startFromOffset: missing ctx, gain, or buffer for track ${this.id}`);
-            return;
-        }
-
-        // Clean existing source if any
-        this.stopSourceOnly();
-
-        const src = this.ctx.createBufferSource();
-        src.buffer = this.buffer;
-        src.connect(this.gain);
-
-        const startAt = this.clampTime(offsetSeconds);
-        this.offset = startAt;
-        this.startCtxTime = this.ctx.currentTime;
-        this.playing = true;
-        this.source = src;
-
-        src.onended = () => {
-            console.log(`[StreamClient] src.onended triggered for track ${this.id}`);
-            // When natural end occurs, update state
-            if (this.source !== src) {
-                console.log(`[StreamClient] src.onended: source mismatch for track ${this.id}, ignoring`);
-                return;
+        });
+        audio.addEventListener("durationchange", () => {
+            if (isFinite(audio.duration) && audio.duration > 0) {
+                this.duration = audio.duration;
             }
-
+        });
+        audio.addEventListener("playing", () => {
+            this.playing = true;
+            if (currentTrackId.value === this.id) {
+                loadingAudio.value = false;
+            }
+        });
+        audio.addEventListener("waiting", () => {
+            if (currentTrackId.value === this.id) {
+                loadingAudio.value = true;
+            }
+        });
+        audio.addEventListener("pause", () => {
             this.playing = false;
-            // Move offset to end
+        });
+        audio.addEventListener("ended", () => {
+            this.playing = false;
             this.offset = this.duration;
+            this.onEnded?.();
+        });
 
-            if (this.onEnded) {
-                console.log(`[StreamClient] calling this.onEnded for track ${this.id}`);
-                this.onEnded();
-            } else {
-                console.log(`[StreamClient] no onEnded callback registered for track ${this.id}. Current this:`, this);
-            }
-        };
-
-        this.setVolume(muted.value ? 0 : volume.value);
-
-        // Start immediately at the desired offset
-        try {
-            src.start(0, startAt);
-            currentTrackId.value = this.id;
-        } catch (e) {
-            // If invalid offset is passed, clamp and retry
-            const clamped = this.clampTime(startAt);
-            this.offset = clamped;
-            src.start(0, clamped);
+        audio.src = this.buildUrl();
+        if (currentTrackId.value === this.id) {
+            loadingAudio.value = true;
         }
+        this.audio = audio;
+        return true;
     }
 
-    private stopSourceOnly(): void {
-        if (this.source) {
-            try {
-                this.source.stop();
-            } catch (e: any) {
-                console.warn(e);
-            }
-            try {
-                this.source.disconnect();
-            } catch (e: any) {
-                console.warn(e);
-            }
-            this.source = undefined;
+    private waitForMetadata(): Promise<void> {
+        const audio = this.audio;
+        if (!audio) {
+            return Promise.resolve();
+        }
+        if (isFinite(audio.duration) && audio.duration > 0) {
+            return Promise.resolve();
         }
 
-        this.playing = false;
+        return new Promise<void>((resolve, reject) => {
+            const timeout = setTimeout(() => {
+                cleanup();
+                reject(new Error("Timed out waiting for audio metadata"));
+            }, 10_000);
 
-        // Update offset to where we stopped
-        if (this.ctx) {
-            const elapsed = Math.max(0, this.ctx.currentTime - this.startCtxTime);
-            this.offset = this.clampTime(this.offset + elapsed);
-        }
+            const onMeta = () => {
+                clearTimeout(timeout);
+                cleanup();
+                resolve();
+            };
+            const onError = () => {
+                clearTimeout(timeout);
+                cleanup();
+                reject(new Error("Failed to load audio metadata"));
+            };
+            const cleanup = () => {
+                audio.removeEventListener("loadedmetadata", onMeta);
+                audio.removeEventListener("error", onError);
+            };
+
+            audio.addEventListener("loadedmetadata", onMeta);
+            audio.addEventListener("error", onError);
+        });
     }
 
     private clampTime(t: number): number {
