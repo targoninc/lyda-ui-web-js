@@ -89,6 +89,7 @@ export class StripeService {
     }
 
     static async startOnboarding(): Promise<{ url: string } | { completed: boolean }> {
+        const returnPath = window.location.pathname + window.location.search + window.location.hash;
         const response = await Api.get<{
             url?: string;
             completed: boolean;
@@ -96,7 +97,7 @@ export class StripeService {
             chargesEnabled?: boolean;
             payoutsEnabled?: boolean;
             detailsSubmitted?: boolean;
-        }>(ApiRoutes.stripeOnboarding);
+        }>(ApiRoutes.stripeOnboarding, { returnPath });
 
         if (!response) {
             throw new Error("Failed to start Stripe onboarding");

@@ -51,6 +51,8 @@ export class StripeConnectTemplates {
         const detailsSubmitted = compute(s => s?.detailsSubmitted ?? false, accountStatus);
         const onboardingComplete = compute(s => s?.onboardingComplete ?? false, accountStatus);
         const notLoadingNoError = compute((l, e) => !l && !e, loading, error);
+        const verificationNeeded = compute((c, d, ch, s) => !!c && (!d || !ch || !!(s?.pendingVerification?.length)),
+            connected, detailsSubmitted, chargesEnabled, accountStatus);
 
         return create("div")
             .classes("flex-v", "card")
@@ -82,9 +84,9 @@ export class StripeConnectTemplates {
                                         .build()),
                             ).build(),
                         when(compute((o, c) => o && !c, onboardingComplete, chargesEnabled),
-                            create("span").classes("warning", "padded").text(t("STRIPE_ONBOARDING_PENDING")).build()),
+                            create("span").classes("warning").text(t("STRIPE_ONBOARDING_PENDING")).build()),
                         when(compute((o, c) => o && c, onboardingComplete, chargesEnabled),
-                            create("span").classes("positive-text", "padded").text(t("STRIPE_ACCOUNT_READY")).build()),
+                            create("span").text(t("STRIPE_ACCOUNT_READY")).build()),
                         horizontal(
                             GenericTemplates.pill({
                                 icon: chargesEnabled ? "check_circle" : "pending",
@@ -103,11 +105,33 @@ export class StripeConnectTemplates {
                             create("span").classes("warning", "small")
                                 .text(compute(s => `${t("STRIPE_PENDING_VERIFICATION", s?.pendingVerification?.join(", ") ?? "")}`, accountStatus))
                                 .build()),
-                        button({
-                            text: t("REFRESH"),
-                            icon: { icon: "refresh" },
-                            onclick: () => load(),
-                        }),
+                        horizontal(
+                            button({
+                                text: t("REFRESH"),
+                                icon: { icon: "refresh" },
+                                onclick: () => load(),
+                            }),
+                            when(verificationNeeded, button({
+                                text: compute(o => `${o ? t("OPENING_ONBOARDING") : t("VERIFY_NOW")}`, onboardingInProgress),
+                                icon: { icon: "verified_user" },
+                                classes: ["positive"],
+                                disabled: onboardingInProgress,
+                                onclick: async () => {
+                                    onboardingInProgress.value = true;
+                                    try {
+                                        const result = await StripeService.startOnboarding();
+                                        if ("completed" in result && result.completed) {
+                                            notify(t("STRIPE_ONBOARDING_COMPLETE"), NotificationType.success);
+                                            load();
+                                        }
+                                    } catch {
+                                        notify(t("STRIPE_ONBOARDING_FAILED"), NotificationType.error);
+                                    } finally {
+                                        onboardingInProgress.value = false;
+                                    }
+                                },
+                            })),
+                        ).build(),
                     ).build()),
                     when(compute(s => s && !s.connected, accountStatus), vertical(
                         when(compute(o => o, onboardingInProgress), GenericTemplates.loadingSpinner()),

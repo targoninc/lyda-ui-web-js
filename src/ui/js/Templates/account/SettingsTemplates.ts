@@ -1243,6 +1243,8 @@ export class SettingsTemplates {
         } | null>(null);
         const error = signal("");
         const onboardingInProgress = signal(false);
+        const verificationNeeded = compute((s, l, e) => !!s?.connected && !l && !e && (!s.detailsSubmitted || !s.chargesEnabled || !!(s.pendingVerification?.length)),
+            accountStatus, loading, error);
 
         const load = () => {
             loading.value = true;
@@ -1283,12 +1285,34 @@ export class SettingsTemplates {
                         create("span").classes("warning", "small")
                             .text(compute(s => `${t("STRIPE_PENDING_VERIFICATION", s?.pendingVerification?.join(", ") ?? "")}`, accountStatus))
                             .build()),
-                    button({
-                        text: t("REFRESH_STATUS"),
-                        icon: { icon: "refresh" },
-                        classes: ["small"],
-                        onclick: () => load(),
-                    }),
+                    create("div").classes("flex", "small-gap").children(
+                        button({
+                            text: t("REFRESH_STATUS"),
+                            icon: { icon: "refresh" },
+                            classes: ["small"],
+                            onclick: () => load(),
+                        }),
+                        when(verificationNeeded, button({
+                            text: compute(o => `${o ? t("OPENING_ONBOARDING") : t("VERIFY_NOW")}`, onboardingInProgress),
+                            icon: { icon: "verified_user" },
+                            classes: ["positive", "small"],
+                            disabled: onboardingInProgress,
+                            onclick: async () => {
+                                onboardingInProgress.value = true;
+                                try {
+                                    const result = await StripeService.startOnboarding();
+                                    if ("completed" in result && result.completed) {
+                                        notify(t("STRIPE_ONBOARDING_COMPLETE"), NotificationType.success);
+                                        load();
+                                    }
+                                } catch {
+                                    notify(t("STRIPE_ONBOARDING_FAILED"), NotificationType.error);
+                                } finally {
+                                    onboardingInProgress.value = false;
+                                }
+                            },
+                        })),
+                    ).build(),
                 ).build()),
                 when(compute(s => s && !s.connected, accountStatus), create("div").classes("flex-v", "small-gap").children(
                     when(compute(o => o, onboardingInProgress), GenericTemplates.loadingSpinner()),

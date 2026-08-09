@@ -665,6 +665,10 @@ button.unread:before {
     color: var(--orange);
 }
 
+span.positive {
+    color: var(--green);
+}
+
 .card, .tight-border-card {
     padding: 20px;
     border-radius: var(--large-border-radius);
