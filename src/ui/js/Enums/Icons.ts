@@ -113,10 +113,6 @@ export class Icons {
         return Icons.ICON("verified");
     }
 
-    static get PAYPAL() {
-        return Icons.ICON("paypal");
-    }
-
     static get PEN() {
         return Icons.ICON("pen");
     }

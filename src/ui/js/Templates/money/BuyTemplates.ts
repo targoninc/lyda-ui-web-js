@@ -13,13 +13,6 @@ import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType";
 import { PaymentProvider } from "@targoninc/lyda-shared/src/Enums/PaymentProvider";
 import { CoverContext } from "../../Enums/CoverContext.ts";
 import { TextSize } from "../../Enums/TextSize.ts";
-import { loadScript } from "@paypal/paypal-js";
-import {
-    CreateOrderActions,
-    CreateOrderData,
-    OnApproveActions,
-    OnApproveData,
-} from "@paypal/paypal-js/types/components/buttons";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import { StripeService } from "../../Services/StripeService.ts";
@@ -102,10 +95,6 @@ export class BuyTemplates {
                             bought.value = true;
                             onSuccess();
                         })),
-                        when(compute(p => p.includes(PaymentProvider.paypal), providers), BuyTemplates.paypalButton(item, estTotal, inCheckout, () => {
-                            bought.value = true;
-                            onSuccess();
-                        })),
                     ).classes("space-between"),
                     when(compute(a => a !== null && a > price * 100, amount), create("span")
                         .classes("warning")
@@ -146,84 +135,6 @@ export class BuyTemplates {
         });
     }
 
-    static paypalButton(item: BuyableEntity, amount: Signal<number>, inCheckout: Signal<boolean>, onSuccess: () => void) {
-        const id = `buy-button-${item.type}-${item.entity.id}`;
-        const visibleClass = compute((v): string => v ? "visible" : "hidden", inCheckout);
 
-        async function initPaypal(selector: string) {
-            let paypal;
-            try {
-                paypal = await loadScript({
-                    clientId: "AUw6bB-HQTIfqy5fhk-s5wZOaEQdaCIjRnCyIC3WDCRxVKc9Qvz1c6xLw7etCit1CD1qSHY5Pv-3xgQN",
-                });
-            } catch (error) {
-                console.error("failed to load the PayPal JS SDK script", error);
-            }
-
-            if (paypal) {
-                try {
-                    if (paypal.Buttons) {
-                        await paypal.Buttons({
-                            createOrder: async (data: CreateOrderData, actions: CreateOrderActions) => {
-                                return actions.order.create({
-                                    purchase_units: [{
-                                        amount: {
-                                            value: amount.value.toFixed(2),
-                                        },
-                                    }],
-                                });
-                            },
-                            onApprove: async (data: OnApproveData, actions: OnApproveActions) => {
-                                return actions.order.capture().then(async function(details: any) {
-                                    console.log("Transaction completed by " + details.payer.name.given_name);
-
-                                    await Api.createOrder({
-                                        type: item.type,
-                                        orderId: data.orderID,
-                                        paymentProvider: PaymentProvider.paypal,
-                                        entityId: item.entity.id,
-                                    });
-
-                                    onSuccess();
-
-                                    return details;
-                                });
-                            },
-                            style: {
-                                layout: "horizontal",
-                                color: "gold",
-                                shape: "pill",
-                                label: "paypal",
-                                tagline: false,
-                            },
-                        }).render(selector);
-                    }
-                } catch (error) {
-                    console.error("failed to render the PayPal Buttons", error);
-                }
-            }
-        }
-
-        setTimeout(() => initPaypal(`#${id}`).then(), 100);
-
-        return vertical()
-            .classes(visibleClass)
-            .children(
-                horizontal(
-                    GenericTemplates.roundIconButton({
-                        icon: "arrow_back_ios_new",
-                        adaptive: true,
-                    }, () => inCheckout.value = false, "Go back", ["align-children"]),
-                    heading({
-                        text: compute(a => `${t("CHOOSE_CHECKOUT_OPTION", a)}`, amount),
-                        level: 3,
-                    }),
-                ).classes("align-children"),
-                horizontal()
-                    .classes("align-children", "flex-grow")
-                    .styles("max-width", "300px")
-                    .id(id),
-            ).build();
-    }
 }
 

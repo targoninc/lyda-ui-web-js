@@ -63,17 +63,9 @@ export class StripeService {
             throw new Error(result.error.message);
         }
 
-        if (result.paymentIntent?.status === "succeeded") {
-            await Api.createOrder({
-                type,
-                entityId,
-                paymentProvider: PaymentProvider.stripe,
-                orderId: id!
-            });
-            return true;
-        }
-
-        return false;
+        // The order is created by the payment_intent.succeeded webhook, so the
+        // frontend does not need to call the API again after paying.
+        return result.paymentIntent?.status === "succeeded";
     }
 
     static async subscribe(id: number, planId: string, targetUserId?: number) {

@@ -4,8 +4,7 @@ import { AvailableSubscription } from "@targoninc/lyda-shared/src/Models/db/fina
 import { Subscription } from "@targoninc/lyda-shared/src/Models/db/finance/Subscription";
 import { SubscriptionStatus } from "@targoninc/lyda-shared/src/Enums/SubscriptionStatus";
 import { PaymentProvider } from "@targoninc/lyda-shared/src/Enums/PaymentProvider";
-import { getSubscriptionLink, SubscriptionActions } from "../../Actions/SubscriptionActions.ts";
-import { GenericTemplates, vertical } from "../generic/GenericTemplates.ts";
+import { SubscriptionActions } from "../../Actions/SubscriptionActions.ts";import { GenericTemplates, vertical } from "../generic/GenericTemplates.ts";
 import { navigate } from "../../Routing/Router.ts";
 import { RoutePath } from "../../Routing/routes.ts";
 import { currency } from "../../Classes/Helpers/Num.ts";
@@ -103,31 +102,20 @@ export class SubscriptionTemplates {
             ).build();
     }
 
-    static paypalButton(button_id: string) {
-        return create("div")
-            .classes("paypalButton")
-            .children(
-                create("div")
-                    .id(button_id)
-                    .build(),
-            ).build();
-    }
-
     static option(currentSubscription: Signal<Subscription | null>, selectedOption: Signal<number | null>, cur: string, option: AvailableSubscription, providers: Signal<PaymentProvider[]>) {
-        const active = compute(sub => sub && sub.subscription_id === option.id && sub.status === SubscriptionStatus.active, currentSubscription);
-        const pending = compute(sub => sub && sub.subscription_id === option.id && sub.status === SubscriptionStatus.pending, currentSubscription);
+        const active = compute(sub => sub && sub.available_subscription_id === option.id && sub.status === SubscriptionStatus.active, currentSubscription);
+        const pending = compute(sub => sub && sub.available_subscription_id === option.id && sub.status === SubscriptionStatus.pending, currentSubscription);
         const enabled = compute((a, p, pe) => pe && !a && !p, active, pending, paymentsEnabled);
         const activeClass = compute((a): string => a ? "active" : "_", active);
         const pendingClass = compute((a): string => a ? "pending" : "_", pending);
         const isSelectedOption = compute(selected => selected === option.id, selectedOption);
         const selectedClass = compute((s): string => s === option.id ? "selected" : "_", selectedOption);
-        const gifted = compute(s => (s && s.gifted_by_user_id !== null && s.subscription_id === option.id), currentSubscription);
+        const gifted = compute(s => (s && s.gifted_by_user_id !== null && s.available_subscription_id === option.id), currentSubscription);
         const createdAt = compute(s => s && new Date(s.created_at), currentSubscription);
         const previousId = compute(s => s && s.previous_subscription, currentSubscription);
         const startSubClass = compute(p => "startSubscription_" + option.id + "_" + p, previousId);
         const optionMessage = signal(`${t("AVAILABLE_PAYMENT_PROVIDERS")}`);
         const buttonText = compute((a): string => a ? `${t("SWITCH_PLAN")}` : `${t("SUBSCRIBE")}`, currentSubscription);
-        const link = compute(sub => getSubscriptionLink(sub), currentSubscription);
 
         return create("div")
             .classes("flex-v", "card", "relative", "subscription-option", selectedClass, activeClass, pendingClass)
@@ -172,7 +160,6 @@ export class SubscriptionTemplates {
                         create("div")
                             .classes("flex-v", startSubClass)
                             .children(
-                                when(active, GenericTemplates.inlineLink(link, t("MANAGE_SUBSCRIPTION"))),
                                 create("div")
                                     .classes("flex", "small-gap", "align-children")
                                     .children(
@@ -196,7 +183,7 @@ export class SubscriptionTemplates {
                                             id: option.id,
                                             onclick: async () => {
                                                 selectedOption.value = option.id;
-                                                await SubscriptionActions.startSubscription(option.id, option.plan_id, optionMessage);
+                                                await SubscriptionActions.startStripeSubscription(option.id, option.plan_id, optionMessage);
                                             },
                                         })),
                                         when(isSelectedOption, button({
@@ -212,17 +199,6 @@ export class SubscriptionTemplates {
                                     .classes("color-dim")
                                     .text(optionMessage)
                                     .build()),
-                                when(compute((selected, p) => selected && p.includes(PaymentProvider.paypal), isSelectedOption, providers), SubscriptionTemplates.paypalButton("paypal-button-" + option.id)),
-                                when(compute((selected, p) => selected && p.includes(PaymentProvider.stripe), isSelectedOption, providers),
-                                    button({
-                                        text: "Pay with Stripe",
-                                        icon: { icon: "credit_card" },
-                                        classes: ["rounded-max", "stripe-button", "margin-top"],
-                                        onclick: async () => {
-                                            await SubscriptionActions.startStripeSubscription(option.id, option.plan_id, optionMessage);
-                                        }
-                                    })
-                                ),
                             ).build(),
                     ).build(),
             ).build();
