@@ -1,5 +1,5 @@
 import { AnyElement, compute, create, signal, Signal, when } from "@targoninc/jess";
-import { button, heading } from "@targoninc/jess-components";
+import { button } from "@targoninc/jess-components";
 import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
 import { MusicTemplates } from "../music/MusicTemplates.ts";
 import { FormTemplates } from "../generic/FormTemplates.ts";
@@ -33,7 +33,7 @@ export class BuyTemplates {
         return item.entity.price;
     }
 
-    static openBuyModal(item: BuyableEntity, onSuccess: () => void) {
+    static openBuyModal(item: BuyableEntity) {
         const price = BuyTemplates.getMinPrice(item);
         const entityType = item.type === "track" ? EntityType.track : EntityType.album;
         const title = item.type === "track" ? item.entity.title : item.entity.title;
@@ -47,7 +47,6 @@ export class BuyTemplates {
         let modal: AnyElement | null = null;
         const onClose = () => modal ? Util.removeModal(modal) : undefined;
         const inCheckout = signal(false);
-        const bought = signal(false);
         const estTotal = compute(a => (a ?? price) * 1.19, amount);
 
         modal = createModal([
@@ -60,7 +59,7 @@ export class BuyTemplates {
                         onclick: onClose,
                     }),
                 ).classes("space-between"),
-                when(bought, vertical(
+                vertical(
                     horizontal(
                         MusicTemplates.cover(entityType, item.entity, CoverContext.inline),
                         MusicTemplates.title(entityType, title, id, [], TextSize.large, false),
@@ -91,41 +90,76 @@ export class BuyTemplates {
                             disabled: compute(v => !v, amountValid),
                             onclick: async () => inCheckout.value = true,
                         }), true),
-                        when(compute((checkingOut, p) => checkingOut && p.includes(PaymentProvider.stripe), inCheckout, providers), BuyTemplates.stripeButton(item, estTotal, () => {
-                            bought.value = true;
-                            onSuccess();
-                        })),
+                        when(compute((checkingOut, p) => checkingOut && p.includes(PaymentProvider.stripe), inCheckout, providers), BuyTemplates.stripeButton(item, estTotal, onClose)),
                     ).classes("space-between"),
                     when(compute(a => a !== null && a > price * 100, amount), create("span")
                         .classes("warning")
                         .text(t("AMOUNT_MUST_BE_BETWEEN", currency(price), currency(price * 100)))
                         .build()),
-                ).build(), true),
-                when(bought, vertical(
-                    horizontal(
-                        heading({
-                            level: 2,
-                            text: t("ITEM_BOUGHT"),
-                        }),
-                    ).classes("align-children", "card", TextSize.large, "animated-background"),
-                    create("p")
-                        .text(t("ITEM_BOUGHT_INFO"))
-                        .build(),
-                ).build()),
+                ).build(),
             ).styles("max-width", "500px"),
         ], `buy-${item.type}`);
     }
 
-    static stripeButton(item: BuyableEntity, amount: Signal<number>, onSuccess: () => void) {
+    /**
+     * Shows the purchase confirmation when the user returns from the hosted
+     * Stripe checkout (success_url carries ?purchase=success) and strips the
+     * param so a refresh does not re-show it. Shared by the track and album
+     * pages.
+     */
+    static handlePurchaseSuccessIfPresent(params: Record<string, string>, item: BuyableEntity) {
+        if (params.purchase !== "success") {
+            return;
+        }
+        BuyTemplates.showPurchaseSuccessModal(item);
+        history.replaceState({}, "", window.location.pathname + window.location.hash);
+    }
+
+    /**
+     * Confirmation shown after a purchase when the user returns from the
+     * hosted Stripe checkout (success_url carries ?purchase=success).
+     */
+    static showPurchaseSuccessModal(item: BuyableEntity) {
+        const entityType = item.type === "track" ? EntityType.track : EntityType.album;
+        const title = item.entity.title;
+        const id = item.entity.id;
+
+        let modal: AnyElement | null = null;
+        modal = createModal([
+            vertical(
+                horizontal(
+                    GenericTemplates.title(t("ITEM_BOUGHT")),
+                    button({
+                        text: t("CLOSE"),
+                        icon: { icon: "close" },
+                        onclick: () => modal ? Util.removeModal(modal) : undefined,
+                    }),
+                ).classes("space-between"),
+                horizontal(
+                    MusicTemplates.cover(entityType, item.entity, CoverContext.inline),
+                    MusicTemplates.title(entityType, title, id, [], TextSize.large, false),
+                ).classes("align-children"),
+                create("p")
+                    .text(t("ITEM_BOUGHT_INFO"))
+                    .build(),
+                create("p")
+                    .text(t("BUY_ITEM_DELETE_WARNING"))
+                    .build(),
+            ).styles("max-width", "500px"),
+        ], `bought-${item.type}`);
+    }
+
+    static stripeButton(item: BuyableEntity, amount: Signal<number>, onClose: () => void) {
         return button({
             text: "Pay with Stripe",
             icon: { icon: "credit_card" },
             classes: ["rounded-max", TextSize.medium, "align-end", "stripe-button"],
             onclick: async () => {
                 try {
+                    notify(t("REDIRECTING_TO_STRIPE"), NotificationType.info);
                     const success = await StripeService.checkout(item.type, item.entity.id, amount.value);
                     if (success) {
-                        onSuccess();
+                        onClose();
                     }
                 } catch (e: any) {
                     console.error("Stripe checkout failed", e);

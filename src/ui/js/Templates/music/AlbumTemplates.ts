@@ -330,6 +330,8 @@ export class AlbumTemplates {
                 if (res) {
                     data.value = res;
                     document.title = res.album.title;
+
+                    BuyTemplates.handlePurchaseSuccessIfPresent(params, {type: "album", entity: res.album});
                     return;
                 }
                 data.value = {
@@ -408,9 +410,7 @@ export class AlbumTemplates {
                     icon: { icon: "attach_money" },
                     text: t("BUY"),
                     onclick: () => {
-                        BuyTemplates.openBuyModal({ type: "album", entity: album }, () => {
-                            window.location.reload();
-                        });
+                        BuyTemplates.openBuyModal({ type: "album", entity: album });
                     },
                 })),
                 when(canEdit, button({

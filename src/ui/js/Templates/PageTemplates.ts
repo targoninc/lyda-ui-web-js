@@ -1,6 +1,7 @@
 import {AuthActions} from "../Actions/AuthActions.ts";
 import {LandingPageTemplates} from "./LandingPageTemplates.ts";
 import {UserTemplates} from "./account/UserTemplates.ts";
+import {BuyTemplates} from "./money/BuyTemplates.ts";
 import {AnyElement, compute, create, nullElement, signal, signalMap, when} from "@targoninc/jess";
 import {SearchTemplates} from "./SearchTemplates.ts";
 import {SettingsTemplates} from "./account/SettingsTemplates.ts";
@@ -845,6 +846,8 @@ export class PageTemplates {
         currentSecretCode.value = code;
 
         await PlayManager.cacheTrackData(track);
+        BuyTemplates.handlePurchaseSuccessIfPresent(params, {type: "track", entity: track.track});
+
         const trackPage = await TrackTemplates.trackPage(track);
 
         if (!trackPage) {

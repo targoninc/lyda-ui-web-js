@@ -1,45 +1,9 @@
-import { loadStripe, Stripe } from "@stripe/stripe-js";
 import { Api } from "../Api/Api.ts";
 import { ApiRoutes } from "../Api/ApiRoutes.ts";
 import { PaymentProvider } from "@targoninc/lyda-shared/src/Enums/PaymentProvider";
 
 export class StripeService {
-    private static stripe: Stripe | null = null;
-    private static publicKey: string = "";
-
-    static async init() {
-        try {
-            const res = await fetch(ApiRoutes.getStripePublicKey);
-            const data = await res.json();
-            if (data?.publicKey) {
-                this.publicKey = data.publicKey;
-            }
-        } catch {
-            console.warn("Stripe public key not available");
-        }
-    }
-
-    static setPublicKey(key: string) {
-        this.publicKey = key;
-    }
-
-    static async getStripe() {
-        if (!this.stripe) {
-            if (!this.publicKey) {
-                await this.init();
-            }
-            if (!this.publicKey) {
-                throw new Error("Stripe public key not configured");
-            }
-            this.stripe = await loadStripe(this.publicKey);
-        }
-        return this.stripe;
-    }
-
-    static async checkout(type: "album" | "track", entityId: number, amount: number) {
-        const stripe = await this.getStripe();
-        if (!stripe) throw new Error("Stripe failed to load");
-
+    static async checkout(type: "album" | "track", entityId: number, amount: number): Promise<boolean> {
         const initResponse = await Api.createOrder({
             type,
             entityId,
@@ -51,21 +15,21 @@ export class StripeService {
         if (!initResponse) {
             throw new Error("Failed to get order creation response");
         }
-        const { clientSecret, id } = initResponse;
 
-        if (!clientSecret) {
-            throw new Error("Missing client secret from backend");
+        const url = initResponse.url;
+        if (!url) {
+            throw new Error("Missing checkout url from backend");
         }
 
-        const result = await stripe.confirmCardPayment(clientSecret);
-
-        if (result.error) {
-            throw new Error(result.error.message);
+        // Hosted Checkout: Stripe collects the card on its own page. The order
+        // is fulfilled by the payment_intent.succeeded webhook, so there is
+        // nothing to confirm client-side.
+        const opened = window.open(url, "_blank");
+        if (!opened) {
+            throw new Error("Popup blocked. Allow popups for this site to start checkout.");
         }
 
-        // The order is created by the payment_intent.succeeded webhook, so the
-        // frontend does not need to call the API again after paying.
-        return result.paymentIntent?.status === "succeeded";
+        return true;
     }
 
     static async subscribe(id: number, planId: string, targetUserId?: number) {

@@ -509,9 +509,7 @@ export class TrackTemplates {
                                                 icon: {icon: "attach_money"},
                                                 text: t("BUY"),
                                                 onclick: () => {
-                                                    BuyTemplates.openBuyModal({type: "track", entity: track}, () => {
-                                                        window.location.reload();
-                                                    });
+                                                    BuyTemplates.openBuyModal({type: "track", entity: track});
                                                 },
                                             })),
                                         ).classes("align-children").build(),
