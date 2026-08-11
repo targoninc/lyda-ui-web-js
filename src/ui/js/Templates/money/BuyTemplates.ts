@@ -91,7 +91,7 @@ export class BuyTemplates {
                             disabled: compute(v => !v, amountValid),
                             onclick: async () => inCheckout.value = true,
                         }), true),
-                        when(compute(p => p.includes(PaymentProvider.stripe), providers), BuyTemplates.stripeButton(item, estTotal, () => {
+                        when(compute((checkingOut, p) => checkingOut && p.includes(PaymentProvider.stripe), inCheckout, providers), BuyTemplates.stripeButton(item, estTotal, () => {
                             bought.value = true;
                             onSuccess();
                         })),
