@@ -51,6 +51,8 @@ import {SubscriptionTemplates} from "./money/SubscriptionTemplates.ts";
 import {t} from "../../locales";
 import {TransactionTemplates} from "./money/TransactionTemplates.ts";
 import {BatchEditTemplates, BatchEditField} from "./generic/BatchEditTemplates.ts";
+import {ComponentGalleryTemplates} from "./Development/ComponentGalleryTemplates.ts";
+
 
 export class PageTemplates {
     static mapping: Record<RoutePath, (route: Route, params: Record<string, string>) => Promise<AnyElement> | AnyElement> = {
@@ -82,6 +84,7 @@ export class PageTemplates {
         [RoutePath.transactions]: TransactionTemplates.page,
         [RoutePath.createAlbum]: AlbumTemplates.createAlbumPage,
         [RoutePath.createPlaylist]: PlaylistTemplates.createPlaylistPage,
+        [RoutePath.componentGallery]: ComponentGalleryTemplates.page,
 
     };
     static needLoginPages: RoutePath[] = [

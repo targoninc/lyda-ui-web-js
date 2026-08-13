@@ -28,7 +28,7 @@ export enum RoutePath {
     protocolHandler = "protocolHandler",
     transactions = "transactions",
     createAlbum = "create-album",
-    createPlaylist = "create-playlist",
+    componentGallery = "component-gallery",
 }
 
 export const routes: Route[] = [
@@ -154,5 +154,9 @@ export const routes: Route[] = [
     {
         path: RoutePath.createPlaylist,
         title: "Create Playlist",
+    },
+    {
+        path: RoutePath.componentGallery,
+        title: "Component Gallery",
     },
 ];
