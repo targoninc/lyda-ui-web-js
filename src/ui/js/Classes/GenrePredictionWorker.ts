@@ -1,3 +1,23 @@
+declare function importScripts(...urls: string[]): void;
+declare const tf: unknown;
+
+declare module "https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia-wasm.es.js" {
+    const EssentiaWASM: unknown;
+    export default EssentiaWASM;
+    export { EssentiaWASM };
+}
+
+declare module "https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia.js-model.es.js" {
+    export class EssentiaTFInputExtractor {
+        constructor(wasm: unknown, modelName: string, isMusiCNN: boolean);
+    }
+    export class TensorflowMusiCNN {
+        constructor(tf: unknown, modelUrl: string);
+        initialize(): Promise<unknown>;
+        predict(input: unknown, useBackend: boolean): Promise<unknown>;
+    }
+}
+
 importScripts("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js");
 
 const PATCH_SIZE = 128;

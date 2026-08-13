@@ -14,7 +14,7 @@ export type TranslationValue = string | TranslationFunction;
 export type BaseTranslation = Record<string, TranslationValue>;
 
 type TranslationKey = keyof (typeof en);
-export type Translation = Record<TranslationKey, TranslationValue>;
+export type Translation = Partial<Record<TranslationKey, TranslationValue>>;
 
 export enum Language {
     en = "en",
@@ -70,8 +70,9 @@ export function getTranslation(lookup: TranslationKey | string, lang: Language) 
         return getTranslation(lookup, Language.en);
     }
 
-    if (l[lookup as TranslationKey]) {
-        return l[lookup as TranslationKey];
+    const value = l[lookup as TranslationKey];
+    if (value) {
+        return value;
     }
 
     const foundKey = Object.keys(en).find((key) => en[key as TranslationKey] === lookup);

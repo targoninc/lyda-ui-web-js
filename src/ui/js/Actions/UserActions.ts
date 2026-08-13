@@ -120,7 +120,7 @@ export class UserActions {
         await Api.updateUserSetting(UserSettings.theme, themeName);
     }
 
-    static async toggleBooleanUserSetting(key: string) {
+    static async toggleBooleanUserSetting(key: UserSettings) {
         const user = await Util.getUserAsync();
         const newValue = !getUserSettingValue(user, key);
         await Api.updateUserSetting(key, newValue);
@@ -139,7 +139,7 @@ export class UserActions {
     }
 
     static async toggleNotificationSetting(key: string) {
-        const settingKey = "notification_" + key;
+        const settingKey = `notification_${key}` as UserSettings;
         return await UserActions.toggleBooleanUserSetting(settingKey);
     }
 

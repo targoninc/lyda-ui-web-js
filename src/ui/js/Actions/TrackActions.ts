@@ -140,7 +140,7 @@ export class TrackActions {
 
         const modalContent = vertical(
             create("h3").text(t("REPLACE_AUDIO")).build(),
-            GenericTemplates.fileInput("replace-audio-file", "replace-audio-file", "audio/*", t("DROP_AUDIO_FILE_HERE"), false, (_, files) => {
+            GenericTemplates.fileInput("replace-audio-file", "replace-audio-file", "audio/*", `${t("DROP_AUDIO_FILE_HERE")}`, false, (_, files) => {
                 if (files?.[0]) {
                     selectedFile.value = files[0];
                 }

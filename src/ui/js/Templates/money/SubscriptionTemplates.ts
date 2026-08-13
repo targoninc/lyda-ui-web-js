@@ -131,7 +131,7 @@ export class SubscriptionTemplates {
                                     .classes("limitToContentWidth", "flex")
                                     .text(option.name)
                                     .children(
-                                        when(gifted, GenericTemplates.giftIcon(t("GIFTED_SUBSCRIPTION"))),
+                                        when(gifted, () => GenericTemplates.giftIcon(t("GIFTED_SUBSCRIPTION")).value),
                                     ).build(),
                             ).build(),
                         create("div")

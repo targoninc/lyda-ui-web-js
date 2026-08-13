@@ -32,6 +32,7 @@ import { ApiRoutes } from "../../Api/ApiRoutes.ts";
 import { BuyTemplates } from "../money/BuyTemplates.ts";
 import { FormTemplates } from "../generic/FormTemplates.ts";
 import { ColorExtractor } from "../../Classes/ColorExtractor.ts";
+import { SearchResult } from "@targoninc/lyda-shared/src/Models/SearchResult";
 
 export class AlbumTemplates {
     static async addToAlbumModal(track: Track, albums: Album[]) {
@@ -292,7 +293,7 @@ export class AlbumTemplates {
                         );
                         tracks.subscribe(() => {
                             const trackIds = new Set(tracks.value.map(t => t.track_id));
-                            searchEl.searchResults.value = searchEl.searchResults.value.filter(r => !trackIds.has(r.id));
+                            searchEl.searchResults.value = searchEl.searchResults.value.filter((r: SearchResult) => !trackIds.has(r.id));
                         });
                         return create("div").children(searchEl).build();
                     })()

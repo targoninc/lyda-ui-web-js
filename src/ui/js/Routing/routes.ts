@@ -28,6 +28,7 @@ export enum RoutePath {
     protocolHandler = "protocolHandler",
     transactions = "transactions",
     createAlbum = "create-album",
+    createPlaylist = "create-playlist",
     componentGallery = "component-gallery",
 }
 

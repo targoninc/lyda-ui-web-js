@@ -29,6 +29,7 @@ import { SearchTemplates } from "../SearchTemplates.ts";
 import { SearchContext } from "@targoninc/lyda-shared/src/Enums/SearchContext";
 import { ApiRoutes } from "../../Api/ApiRoutes.ts";
 import { ColorExtractor } from "../../Classes/ColorExtractor.ts";
+import { SearchResult } from "@targoninc/lyda-shared/src/Models/SearchResult";
 
 export class PlaylistTemplates {
     static addTrackToPlaylistModal(track: Track, playlists: Playlist[]) {
@@ -251,7 +252,7 @@ export class PlaylistTemplates {
                         );
                         tracks.subscribe(() => {
                             const trackIds = new Set(tracks.value.map(t => t.track_id));
-                            searchEl.searchResults.value = searchEl.searchResults.value.filter(r => !trackIds.has(r.id));
+                            searchEl.searchResults.value = searchEl.searchResults.value.filter((r: SearchResult) => !trackIds.has(r.id));
                         });
                         return create("div").children(searchEl).build();
                     })()

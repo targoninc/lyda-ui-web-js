@@ -1,8 +1,8 @@
-import { compute, create, signal, when, Signal } from "@targoninc/jess";
+import { compute, create, signal, when } from "@targoninc/jess";
 import { button } from "@targoninc/jess-components";
 import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
 import { StripeService } from "../../Services/StripeService.ts";
-import { notify, Ui } from "../../Classes/Ui.ts";
+import { notify } from "../../Classes/Ui.ts";
 import { NotificationType } from "../../Enums/NotificationType.ts";
 import { t } from "../../../locales";
 import { TextSize } from "../../Enums/TextSize.ts";
@@ -90,11 +90,11 @@ export class StripeConnectTemplates {
                         horizontal(
                             GenericTemplates.pill({
                                 icon: chargesEnabled ? "check_circle" : "pending",
-                                text: compute(c => c ? t("CHARGES_ENABLED") : t("CHARGES_DISABLED"), chargesEnabled),
+                                text: compute(c => c ? `${t("CHARGES_ENABLED")}` : `${t("CHARGES_DISABLED")}`, chargesEnabled),
                             }),
                             GenericTemplates.pill({
                                 icon: payoutsEnabled ? "check_circle" : "pending",
-                                text: compute(p => p ? t("PAYOUTS_ENABLED") : t("PAYOUTS_DISABLED"), payoutsEnabled),
+                                text: compute(p => p ? `${t("PAYOUTS_ENABLED")}` : `${t("PAYOUTS_DISABLED")}`, payoutsEnabled),
                             }),
                         ).build(),
                         when(compute(d => !d, detailsSubmitted), create("span")

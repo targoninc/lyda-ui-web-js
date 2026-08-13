@@ -487,7 +487,8 @@ export class PlayerTemplates {
                             when(showImage$, create("img")
                                 .classes("tiny-cover")
                                 .src(img$)
-                                .onerror((e: Event) => {
+                                .onerror((e: string | Event) => {
+                                    if (typeof e === "string") return;
                                     (e.target as HTMLImageElement).src = defaultImg$.value;
                                 })
                                 .build()),

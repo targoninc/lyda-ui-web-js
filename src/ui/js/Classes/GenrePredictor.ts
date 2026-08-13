@@ -167,7 +167,7 @@ export async function predictGenresFromFile(audioFile: File): Promise<GenrePredi
                 const startTime = Date.now();
                 const promises = chunks.map((chunk, i) => {
                     const pw = pool[i];
-                    const audioData = chunk.buffer.slice(0);
+                    const audioData = chunk.buffer.slice(0) as ArrayBuffer;
                     return predictOnWorker(pw, audioData);
                 });
 

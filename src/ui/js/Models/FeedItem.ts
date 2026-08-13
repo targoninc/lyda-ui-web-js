@@ -1,4 +1,4 @@
-import { Visibility } from "@targoninc/lyda-shared/dist/Enums/Visibility";
+import { Visibility } from "@targoninc/lyda-shared/src/Enums/Visibility";
 import { Repost } from "@targoninc/lyda-shared/src/Models/db/lyda/Repost";
 import { ListTrack } from "@targoninc/lyda-shared/src/Models/ListTrack";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";

@@ -62,12 +62,12 @@ export class TrackEditTemplates {
     static uploadPage() {
         TrackEditTemplates.clearUploadDragState();
 
-        const state = signal({
+        const state = signal<UploadableTrack>({
             title: "",
             credits: "",
             artistname: "",
             release_date: new Date(),
-            visibility: "public",
+            visibility: Visibility.public,
             genres: [],
             isrc: "",
             upc: "",

@@ -1,4 +1,4 @@
-import { compute, create, nullElement, signal, Signal } from "@targoninc/jess";
+import { compute, create, nullElement, signal } from "@targoninc/jess";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { currentTrackId, currentTrackPosition } from "../../state.ts";
 import { PlayManager } from "../../Streaming/PlayManager.ts";
@@ -110,7 +110,7 @@ export class LyricsTemplates {
         return container;
     }
 
-    static #parseTimed(content: string, format: "lrc" | "srt"): TimedLine[] {
+    static #parseTimed(content: string, format: string): TimedLine[] {
         switch (format) {
             case "lrc":
                 return LyricsTemplates.#parseLRC(content);

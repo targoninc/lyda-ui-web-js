@@ -1,7 +1,7 @@
 import { t } from "../../../locales";
 import { FeedType } from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 
-export function getFeedDisplayName(type: FeedType, userName?: string, filter?: string): string {
+export function getFeedDisplayName(type: FeedType, userName?: string, filter?: string): string | null {
     let name: string;
     switch (type) {
         case FeedType.following:

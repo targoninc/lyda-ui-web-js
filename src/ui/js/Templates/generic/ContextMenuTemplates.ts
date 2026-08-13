@@ -5,7 +5,7 @@ import { PopoverTemplates } from "./PopoverTemplates.ts";
 export interface ContextMenuAction<T> {
     label: StringOrSignal;
     icon?: StringOrSignal;
-    onclick: (item: T) => void;
+    onclick: (item: T, e: Event) => void;
     show?: (item: T) => boolean;
 }
 

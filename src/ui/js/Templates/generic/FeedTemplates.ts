@@ -25,7 +25,6 @@ import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
-import { input } from "@targoninc/jess-components";
 import { TrackTemplates } from "../music/TrackTemplates.ts";
 import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
 import { pinState } from "../../Classes/PinState.ts";
@@ -828,7 +827,7 @@ export class FeedTemplates {
         const playing = config.isPlaying(item.id);
         const loading = config.isLoading ? config.isLoading(item.id) : signal(false);
         const icon = getPlayIcon(playing, loading) as Signal<string>;
-        const isSelected = compute(() => selectedIds$.value.has(item.id), selectedIds$);
+        const isSelected = compute((ids) => ids.has(item.id), selectedIds$);
         const cls = compute((p): string => (p ? "playing" : "_"), playing);
         const selCls = compute((s): string => (s ? "selected" : "_"), isSelected);
         const popId = `${feedId}-pop-${item.id}`;
@@ -888,10 +887,10 @@ export class FeedTemplates {
                         .children(c.render(item, index))
                         .build();
                 }),
-                ...(!!config.dateRender ? [create("td").classes("feed-cell", "feed-cell-date", "hideOnMidBreakpoint")
+                ...(config.dateRender ? [create("td").classes("feed-cell", "feed-cell-date", "hideOnMidBreakpoint")
                     .children(config.dateRender(item))
                     .build()] : []),
-                ...(!!config.actionDateRender ? [create("td").classes("feed-cell", "feed-cell-actiondate", "hideOnMidBreakpoint")
+                ...(config.actionDateRender ? [create("td").classes("feed-cell", "feed-cell-actiondate", "hideOnMidBreakpoint")
                     .children(config.actionDateRender(item))
                     .build()] : []),
                 create("td").classes("feed-interact-cell", "hideOnSmallBreakpoint")

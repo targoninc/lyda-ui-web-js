@@ -6,7 +6,7 @@ import { chartColor } from "../../state.ts";
 import { button } from "@targoninc/jess-components";
 import { Statistic } from "@targoninc/lyda-shared/src/Models/Statistic";
 import { Api } from "../../Api/Api.ts";
-import { BoxPlotValues } from "@targoninc/lyda-shared/dist/Models/BoxPlotValues";
+import { BoxPlotValues } from "@targoninc/lyda-shared/src/Models/BoxPlotValues";
 import { t } from "../../../locales";
 
 Chart.register(...registerables);
@@ -76,9 +76,11 @@ export class ChartTemplates {
             options: ChartOptions.defaultOptions,
         };
 
-        config.options.scales.y.max = values.max * 1.1;
-        config.options.indexAxis = "y";
-        config.options.responsive = true;
+        // Chart.js config types don't express the full options surface; widen to mutate.
+        const options = config.options as unknown as { scales: { y: { max?: number } }; indexAxis?: string; responsive?: boolean };
+        options.scales.y.max = values.max * 1.1;
+        options.indexAxis = "y";
+        options.responsive = true;
 
         //@ts-expect-error bc Chart.js stupid
         new BoxPlotChart(ctx, config);

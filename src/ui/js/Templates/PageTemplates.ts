@@ -98,7 +98,7 @@ export class PageTemplates {
         RoutePath.batchEdit,
         RoutePath.transactions,
         RoutePath.createAlbum,
-        RoutePath.createAlbum,
+        RoutePath.createPlaylist,
     ];
 
     static batchEditPage() {

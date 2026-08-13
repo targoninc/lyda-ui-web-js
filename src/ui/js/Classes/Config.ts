@@ -1,3 +1,10 @@
+declare global {
+    interface Window {
+        __desktopMode?: boolean;
+        __desktopApiUrl?: string;
+    }
+}
+
 export class Config {
     private static get isDesktopProxy() {
         return window.__desktopMode || window.location.hostname === "127.0.0.1";

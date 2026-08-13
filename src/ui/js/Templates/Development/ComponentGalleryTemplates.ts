@@ -40,6 +40,7 @@ const sampleUser: User = {
     description: "",
     emails: [],
     password_hash: "",
+    password_token: null,
     verified: true,
     verification_status: "",
     created_at: new Date(),
@@ -221,7 +222,7 @@ export class ComponentGalleryTemplates {
                 FormTemplates.dropDownField("Visibility", signal([
                     {id: Visibility.public, name: "Public"},
                     {id: Visibility.private, name: `${t("PRIVATE")}`},
-                ]), signal(Visibility.public)),
+                ]), signal<string>(Visibility.public)),
                 FormTemplates.checkBoxField("agree", `${t("CONFIRM")}`, true, false, () => {}),
                 FormTemplates.visibilityToggle(isPrivate, formState),
             ),
@@ -435,7 +436,7 @@ export class ComponentGalleryTemplates {
     }
 
     static #tablesAndCharts() {
-        const sortState = signal<string | null>(null);
+        const sortState = signal<keyof GalleryItem | null>(null);
         const rows = feedItems.map(item => TableTemplates.tr({
             cellClasses: ["padded-inline"],
             data: [

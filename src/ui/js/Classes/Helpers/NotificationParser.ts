@@ -4,11 +4,13 @@ import {Notification} from "@targoninc/lyda-shared/src/Models/db/lyda/Notificati
 import {NotificationReference} from "@targoninc/lyda-shared/src/Models/NotificationReference";
 import {NotificationPart} from "@targoninc/lyda-shared/src/Models/NotifcationPart";
 
+type MessagePart = NotificationPart | { type: "text"; text: string };
+
 export class NotificationParser {
     static parse(notification: Notification) {
         const messageParts = NotificationParser.getMessageParts(notification.message);
         const elements = [];
-        for (let part of messageParts) {
+        for (const part of messageParts) {
             if (part.type === "text") {
                 elements.push(GenericTemplates.textWithHtml(part.text));
             } else {
@@ -43,16 +45,15 @@ export class NotificationParser {
         return id;
     }
 
-    static getMessageParts(message: string): NotificationPart[] {
-        const entities: { [key: string]: string } = {
+    static getMessageParts(message: string): MessagePart[] {
+        const entities: Record<string, NotificationPart["type"]> = {
             "u": "profile",
             "t": "track",
             "a": "album",
             "p": "playlist",
         };
 
-        const result: NotificationPart[] = [];
-
+        const result: MessagePart[] = [];
         // Regex to match `{entity:id|text}` pattern
         const regex = /\{([utap]:\d+)}/g;
 

@@ -81,7 +81,7 @@ export class CommentTemplates {
                             classes: ["positive"],
                             onclick: () => TrackActions.newComment(newComment, comments, track_id),
                         }),
-                    ).on("focusin", (e: FocusEvent) => {
+                    ).on("focusin", () => {
                         if (newComment.value !== "" || currentTrackId.value !== track_id) {
                             return;
                         }
@@ -93,8 +93,9 @@ export class CommentTemplates {
                         const mins = Math.floor(pos / 60);
                         const secs = Math.floor(pos % 60);
                         newComment.value = `${mins}:${secs.toString().padStart(2, "0")} `;
-                    }).on("keydown", (e: KeyboardEvent) => {
-                        if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                    }).on("keydown", (e: Event) => {
+                        const key = e as KeyboardEvent;
+                        if ((key.ctrlKey || key.metaKey) && key.key === "Enter") {
                             TrackActions.newComment(newComment, comments, track_id);
                         }
                     }).build()),

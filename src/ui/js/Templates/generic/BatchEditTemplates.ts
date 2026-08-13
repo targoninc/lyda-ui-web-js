@@ -8,7 +8,7 @@ export interface BatchEditField {
 export class BatchEditTemplates {
     static selectionCard(kind: string, id: number, selectedIds: Signal<Set<number>>) {
         const selected = compute(ids => ids.has(id), selectedIds);
-        const selectedClass = compute(isSelected => isSelected ? "selected" : "_", selected);
+        const selectedClass = compute((isSelected): string => isSelected ? "selected" : "_", selected);
 
         return create("button")
             .classes("card", "batch-selection-card", selectedClass)

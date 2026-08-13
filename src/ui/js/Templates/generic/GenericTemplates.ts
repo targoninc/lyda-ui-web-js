@@ -140,7 +140,7 @@ export class GenericTemplates {
             .build();
     }
 
-    static title(title: HtmlPropertyValue, icons = []) {
+    static title(title: HtmlPropertyValue, icons: AnyElement[] = []) {
         return create("div")
             .classes("flex", "nopointer")
             .children(

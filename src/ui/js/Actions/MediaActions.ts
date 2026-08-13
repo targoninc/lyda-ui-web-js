@@ -19,6 +19,7 @@ export class MediaActions {
             [MediaFileType.audio]: Images.DEFAULT_COVER_TRACK,
             [MediaFileType.albumCover]: Images.DEFAULT_COVER_ALBUM,
             [MediaFileType.playlistCover]: Images.DEFAULT_COVER_PLAYLIST,
+            [MediaFileType.lyrics]: Images.DEFAULT_COVER_TRACK,
         };
         const defaultImage = defaultImageForTypes[type];
 

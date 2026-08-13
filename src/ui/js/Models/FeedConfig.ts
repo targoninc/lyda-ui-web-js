@@ -1,4 +1,4 @@
-import { Signal, StringOrSignal, AnyNode, isSignal } from "@targoninc/jess";
+import { Signal, StringOrSignal, AnyNode } from "@targoninc/jess";
 
 export interface FeedColumn<T> {
     key: string;
@@ -44,6 +44,6 @@ export interface FeedConfig<T extends { id: number }> {
     noToolbar?: boolean;
 }
 
-export function resolveColumns<T>(columns: FeedConfig<T>["columns"]): FeedColumn<T>[] {
-    return isSignal(columns) ? columns.value : columns;
+export function resolveColumns<T extends { id: number }>(columns: FeedConfig<T>["columns"]): FeedColumn<T>[] {
+    return columns instanceof Signal ? columns.value : columns;
 }

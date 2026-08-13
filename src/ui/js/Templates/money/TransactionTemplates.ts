@@ -4,7 +4,7 @@ import { GenericTemplates, horizontal, tabSelected, text, vertical } from "../ge
 import { compute, create, signal, signalMap, StringOrSignal, when } from "@targoninc/jess";
 import { Api } from "../../Api/Api.ts";
 import { Time } from "../../Classes/Helpers/Time.ts";
-import { Transaction } from "@targoninc/lyda-shared/dist/Models/Transaction";
+import { Transaction } from "@targoninc/lyda-shared/src/Models/Transaction";
 import { currency } from "../../Classes/Helpers/Num.ts";
 import { navigate } from "../../Routing/Router.ts";
 import { RoutePath } from "../../Routing/routes.ts";

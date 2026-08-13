@@ -1,4 +1,5 @@
 import {
+    AnyElement,
     AnyNode,
     compute,
     create,
@@ -51,12 +52,11 @@ export interface AuthData {
     links?: AuthLink[];
 }
 
+type AuthTemplate = (step: Signal<string>, user: Signal<AuthData>) => AnyNode | Signal<AnyElement>;
+
 export class AuthTemplates {
     static registrationLoginBox() {
-        const templateMap: Record<
-            string,
-            (step: Signal<string>, user: Signal<AuthData>) => AnyNode
-        > = {
+        const templateMap: Record<string, AuthTemplate> = {
             email: AuthTemplates.emailBox,
             "check-email": AuthTemplates.checkEmailBox,
             register: AuthTemplates.registerBox,
@@ -119,7 +119,7 @@ export class AuthTemplates {
         return template;
     }
 
-    private static templatedLandingPageBox(pageMap: Record<string, string>, history: Signal<string[]>, step: Signal<keyof Record<string, (step: Signal<string>, user: Signal<AuthData>) => AnyNode>>, templateMap: Record<string, (step: Signal<string>, user: Signal<AuthData>) => AnyNode>, newStep: string, user: Signal<AuthData>) {
+    private static templatedLandingPageBox(pageMap: Record<string, string>, history: Signal<string[]>, step: Signal<keyof Record<string, AuthTemplate>>, templateMap: Record<string, AuthTemplate>, newStep: string, user: Signal<AuthData>) {
         return vertical(
             create("div")
                 .classes("flex")
