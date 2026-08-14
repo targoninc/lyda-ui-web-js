@@ -106,7 +106,7 @@ export class StatisticTemplates {
         Api.getRoyaltyInfo().then(ri => royaltyInfo.value = ri);
 
         const statistics: Array<AnyElement | Signal<AnyElement>> = StatisticsWrapper.getGlobalStatistics();
-        statistics.splice(1, 0, compute(ri => ri
+        statistics.push(compute(ri => ri
             ? ChartTemplates.boxPlotChart(ri.global.trackRoyaltyValues, `${t("TRACK_ROYALTY_SPREAD")}`, "globalTrackRoyaltySpreadChart", undefined, true)
             : ChartTemplates.noData(`${t("TRACK_ROYALTY_SPREAD")}`), royaltyInfo));
 
