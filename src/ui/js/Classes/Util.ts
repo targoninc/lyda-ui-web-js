@@ -3,7 +3,7 @@ import { Images } from "../Enums/Images.ts";
 import { LydaCache } from "../Cache/LydaCache.ts";
 import { CacheItem } from "../Cache/CacheItem.ts";
 import { ApiRoutes } from "../Api/ApiRoutes.ts";
-import { chartColor, currentUser, permissions } from "../state.ts";
+import { currentUser, permissions } from "../state.ts";
 import { AnyElement, asSignal, compute, signal, Signal } from "@targoninc/jess";
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
@@ -273,10 +273,6 @@ export class Util {
         return buildNestedComments(0);
     }
 
-    static setForeGroundColor() {
-        const rootElement = document.documentElement;
-        chartColor.value = getComputedStyle(rootElement).getPropertyValue('--fg-0').trim();
-    }
 }
 
 export function shuffleArray<T>(array: T[]): T[] {

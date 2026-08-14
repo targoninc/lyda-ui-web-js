@@ -10,7 +10,7 @@ import { t } from "../../locales";
 
 export class StatisticTemplates {
     static playCountByMonthChart() {
-        return ChartTemplates.paginatedBarChart({
+        return ChartTemplates.paginatedLineChart({
             title: `${t("PLAYCOUNT_BY_MONTH")}`,
             endpoint: ApiRoutes.getPlayCountByMonth,
             timeType: "month"
@@ -18,7 +18,7 @@ export class StatisticTemplates {
     }
 
     static royaltiesByMonthChart() {
-        return ChartTemplates.paginatedBarChart({
+        return ChartTemplates.paginatedLineChart({
             title: `${t("ROYALTIES_BY_MONTH")}`,
             endpoint: ApiRoutes.getRoyaltiesByMonth,
             timeType: "month"
@@ -26,7 +26,7 @@ export class StatisticTemplates {
     }
 
     static globalPlayCountByMonthChart() {
-        return ChartTemplates.paginatedBarChart({
+        return ChartTemplates.paginatedLineChart({
             title: `${t("PLAYCOUNT_BY_MONTH")}`,
             endpoint: ApiRoutes.getGlobalPlayCountByMonth,
             timeType: "month",
@@ -34,7 +34,7 @@ export class StatisticTemplates {
     }
 
     static globalRoyaltiesByMonthChart() {
-        return ChartTemplates.paginatedBarChart({
+        return ChartTemplates.paginatedLineChart({
             title: `${t("ROYALTIES_BY_MONTH")}`,
             endpoint: ApiRoutes.getGlobalRoyaltiesByMonth,
             timeType: "month",
@@ -42,7 +42,7 @@ export class StatisticTemplates {
     }
 
     static globalSalesByMonthChart() {
-        return ChartTemplates.paginatedBarChart({
+        return ChartTemplates.paginatedLineChart({
             title: `${t("SALES_BY_MONTH")}`,
             endpoint: ApiRoutes.getGlobalSalesByMonth,
             timeType: "month",
@@ -50,7 +50,7 @@ export class StatisticTemplates {
     }
 
     static globalCumulativeTracksByMonthChart() {
-        return ChartTemplates.paginatedBarChart({
+        return ChartTemplates.paginatedLineChart({
             title: `${t("CUMULATIVE_TRACKS")}`,
             endpoint: ApiRoutes.getGlobalCumulativeTracksByMonth,
             timeType: "month",
@@ -58,7 +58,7 @@ export class StatisticTemplates {
     }
 
     static globalCumulativeUsersByMonthChart() {
-        return ChartTemplates.paginatedBarChart({
+        return ChartTemplates.paginatedLineChart({
             title: `${t("CUMULATIVE_USERS")}`,
             endpoint: ApiRoutes.getGlobalCumulativeUsersByMonth,
             timeType: "month",

@@ -112,7 +112,7 @@ export class UserActions {
             Util.removeStylesheet("/styles/themes/" + t + ".css");
         });
         Util.includeStylesheet(`/styles/themes/${themeName}.css`);
-        Util.setForeGroundColor();
+
         if (onlyLocal) {
             return;
         }

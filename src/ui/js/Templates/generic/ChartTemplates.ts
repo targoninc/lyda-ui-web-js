@@ -1,15 +1,20 @@
-import { Chart, registerables } from "chart.js";
-import { BoxPlotChart } from "@sgratzl/chartjs-chart-boxplot";
-import { compute, create, HtmlPropertyValue, signal } from "@targoninc/jess";
-import { ChartOptions } from "../../Classes/ChartOptions.ts";
-import { chartColor } from "../../state.ts";
+import { compute, create, HtmlPropertyValue, nullElement, signal } from "@targoninc/jess";
 import { button } from "@targoninc/jess-components";
 import { Statistic } from "@targoninc/lyda-shared/src/Models/Statistic";
-import { Api } from "../../Api/Api.ts";
 import { BoxPlotValues } from "@targoninc/lyda-shared/src/Models/BoxPlotValues";
+import { Api } from "../../Api/Api.ts";
+import {
+    barChart as svgBarChart,
+    boxPlotChart as svgBoxPlotChart,
+    formatNumber,
+    formatPeriodLabel,
+    lineChart as svgLineChart,
+    metadataTable,
+} from "../../Classes/SvgChart.ts";
+import { ChartDatum } from "../../Models/ChartDatum.ts";
+import { MetadataRow } from "../../Models/MetadataRow.ts";
+import { PaginatedLineChartOptions } from "../../Models/PaginatedLineChartOptions.ts";
 import { t } from "../../../locales";
-
-Chart.register(...registerables);
 
 export class ChartTemplates {
     static barChart(
@@ -18,77 +23,51 @@ export class ChartTemplates {
         valueTitle: string,
         title: string,
         id: string,
+        metadata?: MetadataRow[],
     ) {
-        const ctx = create("canvas").classes("chart").id(id).build();
-
-        const data = {
-            labels: labels,
-            datasets: [
-                {
-                    label: valueTitle,
-                    data: values,
-                    backgroundColor: chartColor.value,
-                    hoverOffset: 4,
-                },
-            ],
-        };
-
-        const config = {
-            type: "bar",
-            data: data,
-            options: ChartOptions.defaultOptions,
-        };
-
-        //@ts-expect-error bc Chart.js stupid
-        new Chart(ctx, config);
-
+        const data: ChartDatum[] = labels.map((label, i) => ({ label, value: values[i] ?? 0 }));
+        const chart = svgBarChart(data, id, { valueTitle, title });
         return create("div")
             .classes("chart-container-full", "card", "flex-v")
-            .children(create("h4").classes("chart-title").text(title).build(), ctx).build();
+            .children(
+                create("h4").classes("chart-title").text(title).build(),
+                chart,
+                ...(metadata && metadata.length > 0 ? [metadataTable(metadata)] : []),
+            ).build();
     }
 
-    static boxPlotChart(values: BoxPlotValues, title: string, id: string) {
-        const ctx = create("canvas").classes("chart").id(id).build();
+    static lineChart(
+        labels: string[],
+        values: number[],
+        valueTitle: string,
+        title: string,
+        id: string,
+        metadata?: MetadataRow[],
+        baseline?: number | null,
+    ) {
+        const data: ChartDatum[] = labels.map((label, i) => ({ label, value: values[i] ?? 0 }));
+        const chart = svgLineChart(data, id, {
+            valueTitle,
+            title,
+            baseline: baseline === undefined ? (data[0]?.value ?? null) : baseline,
+        });
+        return create("div")
+            .classes("chart-container-full", "card", "flex-v")
+            .children(
+                create("h4").classes("chart-title").text(title).build(),
+                chart,
+                ...(metadata && metadata.length > 0 ? [metadataTable(metadata)] : []),
+            ).build();
+    }
 
-        const data = {
-            labels: [title],
-            datasets: [
-                {
-                    label: title,
-                    data: [
-                        {
-                            "whiskerMin": values.min,
-                            "q1": values.q1,
-                            "median": values.median,
-                            "q3": values.q3,
-                            "whiskerMax": values.max,
-                        },
-                    ],
-                    backgroundColor: chartColor.value,
-                    borderColor: chartColor.value,
-                },
-            ],
-        };
-
-        const config = {
-            type: "boxplot",
-            data: data,
-            options: ChartOptions.defaultOptions,
-        };
-
-        // Chart.js config types don't express the full options surface; widen to mutate.
-        const options = config.options as unknown as { scales: { y: { max?: number } }; indexAxis?: string; responsive?: boolean };
-        options.scales.y.max = values.max * 1.1;
-        options.indexAxis = "y";
-        options.responsive = true;
-
-        //@ts-expect-error bc Chart.js stupid
-        new BoxPlotChart(ctx, config);
-
+    static boxPlotChart(values: BoxPlotValues, title: string, id: string, metadata?: MetadataRow[]) {
+        const chart = svgBoxPlotChart(values, id, { title });
         return create("div")
             .classes("chart-container-vertical", "flex-v")
-            .children(ctx)
-            .build();
+            .children(
+                chart,
+                ...(metadata && metadata.length > 0 ? [metadataTable(metadata)] : []),
+            ).build();
     }
 
     static noData(title: HtmlPropertyValue) {
@@ -106,44 +85,53 @@ export class ChartTemplates {
             ).build();
     }
 
-    static paginatedBarChart(options: PaginatedBarChartOptions) {
+    static paginatedLineChart(options: PaginatedLineChartOptions) {
         const skip = signal(0);
         const take = signal(12);
         const data = signal<Statistic[]>([]);
         const update = async () => {
-            data.value = (await Api.getStatistic(options.endpoint, options.params, skip.value, take.value)) ?? [];
+            try {
+                data.value = (await Api.getStatistic(options.endpoint, options.params, skip.value, take.value)) ?? [];
+            } catch {
+                data.value = [];
+            }
         };
         skip.subscribe(update);
         take.subscribe(update);
         update().then();
 
+        const id = options.title.replaceAll(/\s/g, "").toLowerCase();
+
         const chart = compute((d: Statistic[]) => {
-            const ctx = create("canvas")
-                .classes("chart")
-                .id(options.title.replaceAll(/\s/g, "").toLowerCase())
-                .build();
+            if (d.length === 0) {
+                return create("div")
+                    .classes("chart-empty")
+                    .children(
+                        create("span")
+                            .text(t("NO_DATA_YET"))
+                            .build()
+                    ).build();
+            }
+            const chartData: ChartDatum[] = d.map(e => ({ label: e.label, value: e.value }));
+            return svgLineChart(chartData, id, {
+                baseline: chartData[0].value,
+                valueTitle: options.title,
+                title: options.title,
+            });
+        }, data);
 
-            const data = {
-                labels: d.map(e => e.label),
-                datasets: [
-                    {
-                        data: d.map(e => e.value),
-                        backgroundColor: chartColor.value,
-                        hoverOffset: 4,
-                    },
-                ],
-            };
-
-            const config = {
-                type: "bar",
-                data: data,
-                options: ChartOptions.defaultOptions,
-            };
-
-            //@ts-expect-error bc Chart.js stupid
-            new Chart(ctx, config);
-
-            return ctx;
+        const metadata = compute((d: Statistic[]) => {
+            if (d.length === 0) {
+                return nullElement();
+            }
+            const total = d.reduce((sum, e) => sum + e.value, 0);
+            const average = total / d.length;
+            const best = d.reduce((a, b) => (b.value > a.value ? b : a), d[0]);
+            return metadataTable([
+                { label: `${t("TOTAL")}`, value: formatNumber(total) },
+                { label: `${t("AVERAGE")}`, value: formatNumber(average) },
+                { label: `${t("BEST")} (${formatPeriodLabel(best.label)})`, value: formatNumber(best.value) },
+            ]);
         }, data);
 
         return create("div")
@@ -167,39 +155,25 @@ export class ChartTemplates {
                     )
                     .build(),
                 chart,
+                metadata,
             ).build();
     }
-}
-
-export interface PaginatedBarChartOptions {
-    title: string;
-    endpoint: string;
-    params?: Record<string, any>;
-    timeType?: "year" | "month" | "day" | string;
 }
 
 function getNextByTimeType(timeType?: "year" | "month" | "day" | string) {
     switch (timeType) {
         case "year":
-            return `${t("NEXT_DECADE")}`;
-        case "month":
-            return `${t("NEXT_YEAR")}`;
-        case "day":
-            return `${t("NEXT_MONTH")}`;
+            return t("NEXT_YEAR");
         default:
-            return `${t("NEXT")}`;
+            return t("NEXT_MONTH");
     }
 }
 
 function getPreviousByTimeType(timeType?: "year" | "month" | "day" | string) {
     switch (timeType) {
         case "year":
-            return `${t("PREVIOUS_DECADE")}`;
-        case "month":
-            return `${t("PREVIOUS_YEAR")}`;
-        case "day":
-            return `${t("PREVIOUS_MONTH")}`;
+            return t("PREVIOUS_YEAR");
         default:
-            return `${t("PREVIOUS")}`;
+            return t("PREVIOUS_MONTH");
     }
 }

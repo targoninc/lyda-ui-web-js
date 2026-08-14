@@ -18,6 +18,7 @@ import {ContextMenuTemplates} from "../generic/ContextMenuTemplates.ts";
 import {TableTemplates} from "../generic/TableTemplates.ts";
 import {ChartTemplates} from "../generic/ChartTemplates.ts";
 import {FormTemplates} from "../generic/FormTemplates.ts";
+import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
@@ -466,6 +467,32 @@ export class ComponentGalleryTemplates {
                     "gallery-chart",
                 ),
                 ChartTemplates.noData("Nothing here"),
+            ),
+            ComponentGalleryTemplates.#row(
+                ChartTemplates.lineChart(
+                    ["2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07", "2026-08"],
+                    [120, 95, 140, 130, 175, 150, 210],
+                    `${t("PLAYS")}`,
+                    "Monthly plays",
+                    "gallery-line-chart",
+                    [
+                        { label: `${t("TOTAL")}`, value: "1,020" },
+                        { label: `${t("AVERAGE")}`, value: "146" },
+                        { label: `${t("BEST")}`, value: "210" },
+                    ],
+                ),
+                ChartTemplates.boxPlotChart(
+                    { min: 3, q1: 12, median: 18, q3: 27, max: 45 },
+                    "Royalty spread",
+                    "gallery-box-chart",
+                ),
+            ),
+            ComponentGalleryTemplates.#row(
+                ChartTemplates.paginatedLineChart({
+                    title: `${t("PLAYCOUNT_BY_MONTH")}`,
+                    endpoint: ApiRoutes.getPlayCountByMonth,
+                    timeType: "month",
+                }),
             ),
         );
     }

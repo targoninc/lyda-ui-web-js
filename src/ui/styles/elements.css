@@ -834,7 +834,112 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     max-width: 100% !important;
 }
 
+.chart-plot {
+    position: relative;
+    width: 100%;
+}
+
+.chart-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    pointer-events: none;
+}
+
+.chart-svg text {
+    font-family: var(--default-font-family);
+}
+
+.chart-overlay {
+    position: absolute;
+    inset: 0;
+    cursor: crosshair;
+}
+
+.chart-tooltip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 3;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 150px;
+    padding: 6px 10px;
+    background: var(--background-readable-glass);
+    border: 1px solid var(--border);
+    border-radius: var(--large-border-radius);
+
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.chart-tooltip-header {
+    font-size: var(--font-size-xsmall);
+    font-weight: 600;
+    color: var(--fg-0);
+    white-space: nowrap;
+}
+
+.chart-tooltip-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    font-size: var(--font-size-xsmall);
+}
+
+.chart-tooltip-label {
+    color: var(--fg-2);
+}
+
+.chart-tooltip-value {
+    font-weight: 500;
+    color: var(--fg-0);
+    white-space: nowrap;
+}
+
+.chart-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+    color: var(--fg-2);
+    font-size: var(--font-size-small);
+}
+
+.chart-metadata {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1px;
+    margin-top: var(--layout-gap);
+    overflow: hidden;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius);
+}
+
+.chart-metadata-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--base-padding);
+    background: var(--bg-1);
+}
+
+.chart-metadata-label {
+    font-size: var(--font-size-xsmall);
+    color: var(--fg-2);
+}
+
+.chart-metadata-value {
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    color: var(--fg-0);
+}
+
 .queue-list {
+
     position: absolute;
     bottom: 100%;
     right: 0;
