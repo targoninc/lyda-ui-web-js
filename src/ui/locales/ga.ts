@@ -51,7 +51,7 @@ export const ga: Translation = {
     CONTINUE: "Lean ar aghaidh",
     CONNECT_STRIPE_ACCOUNT: "Ceangail cuntas Stripe",
     STRIPE_CONNECT: "Stripe Connect",
-    VS_START: "vs tús",
+
     AVERAGE: "Meán",
     BEST: "Is fearr",
     MIN: "Íos",

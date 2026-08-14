@@ -21,8 +21,6 @@ const GRID_STROKE = "var(--fg-4)";
 const LABEL_FILL = "var(--fg-4)";
 const CROSSHAIR_STROKE = "var(--fg-3)";
 const ACCENT = "var(--blue)";
-const POSITIVE = "var(--green)";
-const NEGATIVE = "var(--red)";
 const BOX_FILL = "color-mix(in oklab, var(--blue), var(--bg-1) 70%)";
 
 export function formatNumber(value: number): string {
@@ -104,13 +102,9 @@ function ticks(scale: { min: number; max: number }, count = 4): number[] {
     return result;
 }
 
-function domainFor(values: number[], baseline: number | null, includeZero: boolean) {
-    const all = [...values];
-    if (baseline !== null) {
-        all.push(baseline);
-    }
-    let min = Math.min(...all);
-    let max = Math.max(...all);
+function domainFor(values: number[], includeZero: boolean) {
+    let min = Math.min(...values);
+    let max = Math.max(...values);
     if (includeZero) {
         min = Math.min(0, min);
     }
@@ -132,64 +126,10 @@ function evenlySpacedIndices(n: number, count: number): number[] {
     return result;
 }
 
-function signColor(value: number, baseline: number): string {
-    return value >= baseline ? POSITIVE : NEGATIVE;
-}
-
 /**
- * Horizontal gradient that colors the line green/red depending on whether each
- * point sits above or below the baseline, with duplicated stops at crossings —
- * the same scheme Perplexity uses on their finance charts.
+ * Vertical opacity mask that fades the area fill toward the bottom of the plot.
  */
-function buildSignGradient(id: string, values: number[], baseline: number): SVGLinearGradientElement | null {
-    const n = values.length;
-    if (n < 2) {
-        return null;
-    }
-    let allAbove = true;
-    let allBelow = true;
-    for (const v of values) {
-        if (v >= baseline) {
-            allBelow = false;
-        } else {
-            allAbove = false;
-        }
-    }
-    if (allAbove || allBelow) {
-        return null;
-    }
-    const gradient = svgWith("linearGradient", {
-        id,
-        x1: PAD_LEFT,
-        x2: CHART_WIDTH - PAD_RIGHT,
-        y1: 0,
-        y2: 0,
-        gradientUnits: "userSpaceOnUse",
-    });
-    const addStop = (offsetPct: number, color: string) => {
-        gradient.appendChild(svgWith("stop", { offset: `${offsetPct}%`, "stop-color": color }));
-    };
-    addStop(0, signColor(values[0], baseline));
-    for (let i = 1; i < n; i++) {
-        const prev = values[i - 1];
-        const current = values[i];
-        if ((prev >= baseline) !== (current >= baseline)) {
-            const t = (baseline - prev) / (current - prev);
-            const crossingX = xAt(i - 1, n) + (xAt(i, n) - xAt(i - 1, n)) * t;
-            const crossingOffset = (crossingX / CHART_WIDTH) * 100;
-            addStop(crossingOffset, signColor(prev, baseline));
-            addStop(crossingOffset, signColor(current, baseline));
-        }
-        addStop((xAt(i, n) / CHART_WIDTH) * 100, signColor(current, baseline));
-    }
-    return gradient;
-}
-
-/**
- * Vertical opacity mask that fades the area fill with distance from the
- * baseline (or from the top of the plot when there is no baseline).
- */
-function buildAreaMask(id: string, baselineY: number | null): SVGMaskElement {
+function buildAreaMask(id: string): SVGMaskElement {
     const gradientId = `${id}-gradient`;
     const gradient = svgWith("linearGradient", {
         id: gradientId,
@@ -199,17 +139,10 @@ function buildAreaMask(id: string, baselineY: number | null): SVGMaskElement {
         y2: CHART_HEIGHT,
         gradientUnits: "userSpaceOnUse",
     });
-    const stops: [number, number][] =
-        baselineY === null
-            ? [
-                  [0, 0.35],
-                  [100, 0],
-              ]
-            : [
-                  [0, 0.3],
-                  [(baselineY / CHART_HEIGHT) * 100, 0],
-                  [100, 0.3],
-              ];
+    const stops: [number, number][] = [
+        [0, 0.35],
+        [100, 0],
+    ];
     for (const [offset, opacity] of stops) {
         gradient.appendChild(
             svgWith("stop", { offset: `${offset}%`, "stop-color": "var(--contrast)", "stop-opacity": opacity }),
@@ -367,9 +300,8 @@ export function lineChart(data: ChartDatum[], id: string, config: LineChartConfi
     const defs = svgEl("defs");
     svgRoot.appendChild(defs);
 
-    const baseline = config.baseline ?? null;
     const values = data.map(d => d.value);
-    const scale = domainFor(values, baseline, config.includeZero ?? false);
+    const scale = domainFor(values, config.includeZero ?? false);
     const points: [number, number][] = data.map((d, i) => [xAt(i, data.length), yAt(d.value, scale)]);
 
     const grid = svgEl("g");
@@ -413,43 +345,18 @@ export function lineChart(data: ChartDatum[], id: string, config: LineChartConfi
     });
     svgRoot.appendChild(grid);
 
-    let stroke: string = ACCENT;
-    if (baseline !== null && data.length >= 2) {
-        const gradient = buildSignGradient(`chart-gradient-${id}`, values, baseline);
-        if (gradient) {
-            defs.appendChild(gradient);
-            stroke = `url(#chart-gradient-${id})`;
-        } else {
-            stroke = signColor(values[0], baseline);
-        }
-    }
-
-    const baselineY = baseline !== null ? yAt(baseline, scale) : null;
+    const stroke: string = ACCENT;
     if (data.length >= 2) {
-        const mask = buildAreaMask(`chart-area-mask-${id}`, baselineY);
+        const mask = buildAreaMask(`chart-area-mask-${id}`);
         defs.appendChild(mask);
         const areaGen = area<[number, number]>()
             .x(p => p[0])
-            .y0(baselineY ?? CHART_HEIGHT - PAD_BOTTOM)
+            .y0(CHART_HEIGHT - PAD_BOTTOM)
             .y1(p => p[1])
             .curve(curveMonotoneX);
         const areaPath = areaGen(points);
         if (areaPath) {
             svgRoot.appendChild(svgWith("path", { d: areaPath, fill: stroke, mask: `url(#chart-area-mask-${id})` }));
-        }
-
-        if (baselineY !== null) {
-            svgRoot.appendChild(
-                svgWith("line", {
-                    x1: 0,
-                    y1: baselineY,
-                    x2: CHART_WIDTH,
-                    y2: baselineY,
-                    stroke: GRID_STROKE,
-                    "stroke-width": 1,
-                    "stroke-dasharray": "4 4",
-                }),
-            );
         }
 
         const lineGen = line<[number, number]>()
@@ -479,16 +386,9 @@ export function lineChart(data: ChartDatum[], id: string, config: LineChartConfi
         },
         (i: number) => {
             const d = data[i];
-            const rows: TooltipRow[] = [{ label: config.valueTitle, value: formatNumber(d.value) }];
-            if (baseline !== null) {
-                const delta = d.value - baseline;
-                rows.push({
-                    label: `${t("VS_START")}`,
-                    value: `${delta >= 0 ? "+" : ""}${formatNumber(delta)}`,
-                    color: delta >= 0 ? POSITIVE : NEGATIVE,
-                });
-            }
-            return buildTooltip(formatTooltipHeader(d.label), rows);
+            return buildTooltip(formatTooltipHeader(d.label), [
+                { label: config.valueTitle, value: formatNumber(d.value) },
+            ]);
         },
     );
     return container;
@@ -502,7 +402,7 @@ export function barChart(data: ChartDatum[], id: string, config: BarChartConfig)
     svgRoot.setAttribute("aria-label", config.title);
 
     const values = data.map(d => d.value);
-    const scale = domainFor(values, null, true);
+    const scale = domainFor(values, true);
     const band = plotWidth() / Math.max(1, data.length);
     const barWidth = Math.min(band * 0.62, 48);
     const bottom = CHART_HEIGHT - 22;
@@ -589,7 +489,7 @@ export function boxPlotChart(values: BoxPlotValues, id: string, config: BoxPlotC
     svgRoot.setAttribute("role", "img");
     svgRoot.setAttribute("aria-label", config.title);
 
-    const scale = domainFor([values.min, values.q1, values.median, values.q3, values.max], null, false);
+    const scale = domainFor([values.min, values.q1, values.median, values.q3, values.max], false);
     const centerY = CHART_HEIGHT / 2;
     const boxHeight = 60;
 

@@ -546,7 +546,7 @@ export const en = {
     SALES_BY_MONTH: "Sales by month",
     CUMULATIVE_TRACKS: "Cumulative tracks",
     CUMULATIVE_USERS: "Cumulative users",
-    VS_START: "vs start",
+
     AVERAGE: "Average",
     BEST: "Best",
     MIN: "Min",

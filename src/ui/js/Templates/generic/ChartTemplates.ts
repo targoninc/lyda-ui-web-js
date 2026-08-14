@@ -43,13 +43,11 @@ export class ChartTemplates {
         title: string,
         id: string,
         metadata?: MetadataRow[],
-        baseline?: number | null,
     ) {
         const data: ChartDatum[] = labels.map((label, i) => ({ label, value: values[i] ?? 0 }));
         const chart = svgLineChart(data, id, {
             valueTitle,
             title,
-            baseline: baseline === undefined ? (data[0]?.value ?? null) : baseline,
         });
         return create("div")
             .classes("chart-container-full", "card", "flex-v")
@@ -114,7 +112,6 @@ export class ChartTemplates {
             }
             const chartData: ChartDatum[] = d.map(e => ({ label: e.label, value: e.value }));
             return svgLineChart(chartData, id, {
-                baseline: chartData[0].value,
                 valueTitle: options.title,
                 title: options.title,
             });

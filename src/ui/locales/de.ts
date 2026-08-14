@@ -632,7 +632,7 @@ export const de: Translation = {
     SALES_BY_MONTH: "Verkäufe pro Monat",
     CUMULATIVE_TRACKS: "Kumulative Tracks",
     CUMULATIVE_USERS: "Kumulative Nutzer",
-    VS_START: "vs. Start",
+
     AVERAGE: "Durchschnitt",
     BEST: "Bester",
     MIN: "Min",
