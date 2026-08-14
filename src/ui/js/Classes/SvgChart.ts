@@ -424,6 +424,7 @@ export function barChart(data: ChartDatum[], id: string, config: BarChartConfig)
     const scale = domainFor(values, true);
     const band = plotWidth() / Math.max(1, data.length);
     const barWidth = Math.min(band * 0.62, 48);
+    const xBar = (i: number) => PAD_LEFT + band * (i + 0.5);
     const bottom = BAR_HEIGHT - 54;
     const yAtBar = (value: number) => bottom - ((value - scale.min) / (scale.max - scale.min)) * (bottom - PAD_TOP);
 
@@ -446,7 +447,7 @@ export function barChart(data: ChartDatum[], id: string, config: BarChartConfig)
     }
     const labelIndices = Array.from({ length: data.length }, (_, i) => i);
     labelIndices.forEach(i => {
-        const x = xAt(i, data.length);
+        const x = xBar(i);
         grid.appendChild(
             svgWith("line", {
                 x1: x,
@@ -472,7 +473,7 @@ export function barChart(data: ChartDatum[], id: string, config: BarChartConfig)
 
     const zeroY = yAtBar(0);
     data.forEach((d, i) => {
-        const x = xAt(i, data.length);
+        const x = xBar(i);
         const y = yAtBar(d.value);
         svgRoot.appendChild(
             svgWith("rect", {
@@ -498,7 +499,7 @@ export function barChart(data: ChartDatum[], id: string, config: BarChartConfig)
             }
             const step = plotWidth() / Math.max(1, data.length);
             const i = Math.min(data.length - 1, Math.max(0, Math.floor((vx - PAD_LEFT) / step)));
-            return { index: i, x: xAt(i, data.length), y: yAtBar(data[i].value) };
+            return { index: i, x: xBar(i), y: yAtBar(data[i].value) };
         },
         (i: number) => {
             const d = data[i];
