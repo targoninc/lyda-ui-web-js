@@ -133,12 +133,12 @@ export class ChartTemplates {
                     .classes("flex", "align-children")
                     .children(
                         button({
-                            text: getPreviousByTimeType(options.timeType),
+                            text: getPreviousStepLabel(options.timeType, take.value),
                             icon: { icon: "arrow_left" },
                             onclick: () => (skip.value = skip.value + take.value),
                         }),
                         button({
-                            text: getNextByTimeType(options.timeType),
+                            text: getNextStepLabel(options.timeType, take.value),
                             icon: { icon: "arrow_right" },
                             onclick: () => (skip.value = Math.max(0, skip.value - take.value)),
                             disabled: compute(s => s <= 0, skip),
@@ -151,20 +151,65 @@ export class ChartTemplates {
     }
 }
 
-function getNextByTimeType(timeType?: "year" | "month" | "day" | string) {
-    switch (timeType) {
+function getNextStepLabel(timeType?: "year" | "month" | "day" | string, take = 1) {
+    switch (paginationStep(timeType, take)) {
+        case "day":
+            return t("NEXT_DAY");
         case "year":
             return t("NEXT_YEAR");
+        case "decade":
+            return t("NEXT_DECADE");
+        case "century":
+            return t("NEXT_CENTURY");
         default:
             return t("NEXT_MONTH");
     }
 }
 
-function getPreviousByTimeType(timeType?: "year" | "month" | "day" | string) {
-    switch (timeType) {
+function getPreviousStepLabel(timeType?: "year" | "month" | "day" | string, take = 1) {
+    switch (paginationStep(timeType, take)) {
+        case "day":
+            return t("PREVIOUS_DAY");
         case "year":
             return t("PREVIOUS_YEAR");
+        case "decade":
+            return t("PREVIOUS_DECADE");
+        case "century":
+            return t("PREVIOUS_CENTURY");
         default:
             return t("PREVIOUS_MONTH");
+    }
+}
+
+/**
+ * The page step in human terms, derived from the bucket size and the number of
+ * buckets per page. E.g. 12 monthly buckets advance the window by a year.
+ */
+function paginationStep(timeType?: "year" | "month" | "day" | string, take = 1): "day" | "month" | "year" | "decade" | "century" {
+    switch (timeType) {
+        case "day":
+            if (take >= 365) {
+                return "year";
+            }
+            if (take >= 28) {
+                return "month";
+            }
+            return "day";
+        case "year":
+            if (take >= 100) {
+                return "century";
+            }
+            if (take >= 10) {
+                return "decade";
+            }
+            return "year";
+        default:
+            if (take >= 120) {
+                return "decade";
+            }
+            if (take >= 12 && take % 12 === 0) {
+                return "year";
+            }
+            return "month";
     }
 }

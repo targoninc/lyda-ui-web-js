@@ -466,6 +466,13 @@ export class ComponentGalleryTemplates {
                     "Sample chart",
                     "gallery-chart",
                 ),
+                ChartTemplates.barChart(
+                    ["First Light", "Paper Boats", "Static Bloom", "Low Tide", "Nightjars", "Aurora Lane"],
+                    [12, 19, 7, 25, 31, 8],
+                    `${t("PLAYS")}`,
+                    "Sample chart with long labels",
+                    "gallery-chart-long-labels",
+                ),
                 ChartTemplates.noData("Nothing here"),
             ),
             ComponentGalleryTemplates.#row(

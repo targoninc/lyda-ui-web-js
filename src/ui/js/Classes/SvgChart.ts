@@ -12,8 +12,7 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 
 const CHART_WIDTH = 727;
 const CHART_HEIGHT = 225;
-const BAR_HEIGHT = 250;
-
+const BAR_HEIGHT = 264;
 const PAD_LEFT = 8;
 const PAD_RIGHT = 12;
 const PAD_TOP = 26;
@@ -141,7 +140,6 @@ function domainFor(values: number[], includeZero: boolean) {
     const pad = (max - min) * 0.08;
     return includeZero ? { min: 0, max: max + pad } : { min: min - pad, max: max + pad };
 }
-
 
 /**
  * Vertical opacity mask that fades the area fill toward the bottom of the plot.
@@ -426,7 +424,7 @@ export function barChart(data: ChartDatum[], id: string, config: BarChartConfig)
     const scale = domainFor(values, true);
     const band = plotWidth() / Math.max(1, data.length);
     const barWidth = Math.min(band * 0.62, 48);
-    const bottom = BAR_HEIGHT - 44;
+    const bottom = BAR_HEIGHT - 54;
     const yAtBar = (value: number) => bottom - ((value - scale.min) / (scale.max - scale.min)) * (bottom - PAD_TOP);
 
     const grid = svgEl("g");
@@ -464,8 +462,10 @@ export function barChart(data: ChartDatum[], id: string, config: BarChartConfig)
         const label = data[i].label;
         const maxChars = data.length > 15 ? 7 : 10;
         const short = label.length > maxChars ? `${label.slice(0, maxChars - 1)}…` : label;
-        const text = svgText(short, x, bottom + 6, { anchor: "middle" });
-        text.setAttribute("transform", `rotate(-45 ${x} ${bottom + 6})`);
+        const extendX = short.length * 4.1;
+        const labelX = Math.min(Math.max(x - extendX / 2, PAD_LEFT + 2), CHART_WIDTH - PAD_RIGHT - extendX - 7);
+        const text = svgText(short, labelX, bottom + 10, { anchor: "start", size: 10 });
+        text.setAttribute("transform", `rotate(45 ${labelX} ${bottom + 10})`);
         grid.appendChild(text);
     });
     svgRoot.appendChild(grid);
