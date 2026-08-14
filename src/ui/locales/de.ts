@@ -634,6 +634,8 @@ export const de: Translation = {
     CUMULATIVE_USERS: "Kumulative Nutzer",
 
     AVERAGE: "Durchschnitt",
+    CURRENT_VALUE: "Aktueller Wert",
+    AVERAGE_GROWTH: "Ø Wachstum",
     BEST: "Bester",
     MIN: "Min",
     MAX: "Max",

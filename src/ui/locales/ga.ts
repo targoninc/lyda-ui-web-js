@@ -53,6 +53,8 @@ export const ga: Translation = {
     STRIPE_CONNECT: "Stripe Connect",
 
     AVERAGE: "Meán",
+    CURRENT_VALUE: "Luach reatha",
+    AVERAGE_GROWTH: "Meánfhás",
     BEST: "Is fearr",
     MIN: "Íos",
     MAX: "Uas",

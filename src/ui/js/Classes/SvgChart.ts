@@ -12,6 +12,8 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 
 const CHART_WIDTH = 727;
 const CHART_HEIGHT = 225;
+const BAR_HEIGHT = 250;
+
 const PAD_LEFT = 8;
 const PAD_RIGHT = 12;
 const PAD_TOP = 26;
@@ -102,6 +104,31 @@ function ticks(scale: { min: number; max: number }, count = 4): number[] {
     return result;
 }
 
+export function buildStatisticMetadata(data: ChartDatum[], cumulative: boolean): MetadataRow[] {
+    if (data.length === 0) {
+        return [];
+    }
+    if (cumulative) {
+        const deltas = data.slice(1).map((d, i) => ({ label: d.label, value: d.value - data[i].value }));
+        const bestDelta = deltas.reduce((a, b) => (b.value > a.value ? b : a), deltas[0]);
+        const averageDelta = deltas.reduce((sum, d) => sum + d.value, 0) / Math.max(1, deltas.length);
+        const signed = (value: number) => `${value >= 0 ? "+" : ""}${formatNumber(value)}`;
+        return [
+            { label: `${t("CURRENT_VALUE")}`, value: formatNumber(data[data.length - 1].value) },
+            { label: `${t("BEST")} (${formatPeriodLabel(bestDelta.label)})`, value: signed(bestDelta.value) },
+            { label: `${t("AVERAGE_GROWTH")}`, value: signed(averageDelta) },
+        ];
+    }
+    const total = data.reduce((sum, d) => sum + d.value, 0);
+    const average = total / data.length;
+    const best = data.reduce((a, b) => (b.value > a.value ? b : a), data[0]);
+    return [
+        { label: `${t("TOTAL")}`, value: formatNumber(total) },
+        { label: `${t("AVERAGE")}`, value: formatNumber(average) },
+        { label: `${t("BEST")} (${formatPeriodLabel(best.label)})`, value: formatNumber(best.value) },
+    ];
+}
+
 function domainFor(values: number[], includeZero: boolean) {
     let min = Math.min(...values);
     let max = Math.max(...values);
@@ -115,16 +142,6 @@ function domainFor(values: number[], includeZero: boolean) {
     return includeZero ? { min: 0, max: max + pad } : { min: min - pad, max: max + pad };
 }
 
-function evenlySpacedIndices(n: number, count: number): number[] {
-    if (n <= count) {
-        return Array.from({ length: n }, (_, i) => i);
-    }
-    const result: number[] = [];
-    for (let i = 0; i < count; i++) {
-        result.push(Math.round((i * (n - 1)) / (count - 1)));
-    }
-    return result;
-}
 
 /**
  * Vertical opacity mask that fades the area fill toward the bottom of the plot.
@@ -209,6 +226,8 @@ interface SnapResult {
 function attachHover(
     container: AnyElement,
     svgRoot: SVGElement,
+    width: number,
+    height: number,
     snap: (vx: number, vy: number) => SnapResult | null,
     content: (index: number) => AnyElement,
 ): void {
@@ -226,8 +245,8 @@ function attachHover(
             if (rect.width === 0 || rect.height === 0) {
                 return;
             }
-            const vx = ((me.clientX - rect.left) / rect.width) * CHART_WIDTH;
-            const vy = ((me.clientY - rect.top) / rect.height) * CHART_HEIGHT;
+            const vx = ((me.clientX - rect.left) / rect.width) * width;
+            const vy = ((me.clientY - rect.top) / rect.height) * height;
             const snapped = snap(vx, vy);
             if (!snapped) {
                 index.value = null;
@@ -236,8 +255,8 @@ function attachHover(
             index.value = snapped.index;
             crossX.value = String(snapped.x);
             crossY.value = String(snapped.y);
-            const px = (snapped.x / CHART_WIDTH) * rect.width;
-            const py = (snapped.y / CHART_HEIGHT) * rect.height;
+            const px = (snapped.x / width) * rect.width;
+            const py = (snapped.y / height) * rect.height;
             const tipWidth = 200;
             const tipLeft = px > rect.width * 0.55 ? px - tipWidth - 16 : px + 16;
             tipX.value = Math.max(0, tipLeft);
@@ -253,7 +272,7 @@ function attachHover(
             "x1", crossX,
             "x2", crossX,
             "y1", 0,
-            "y2", CHART_HEIGHT,
+            "y2", height,
             "stroke", CROSSHAIR_STROKE,
             "stroke-width", 1,
             "opacity", compute((i): string => (i === null ? "0" : "1"), index),
@@ -262,7 +281,7 @@ function attachHover(
     const horizontalLine = create("line")
         .attributes(
             "x1", 0,
-            "x2", CHART_WIDTH,
+            "x2", width,
             "y1", crossY,
             "y2", crossY,
             "stroke", CROSSHAIR_STROKE,
@@ -321,7 +340,7 @@ export function lineChart(data: ChartDatum[], id: string, config: LineChartConfi
         );
         grid.appendChild(svgText(formatNumber(tick), PAD_LEFT, y - 5));
     }
-    const labelIndices = evenlySpacedIndices(data.length, 5);
+    const labelIndices = Array.from({ length: data.length }, (_, i) => i);
     labelIndices.forEach((i, pos) => {
         const isLast = pos === labelIndices.length - 1;
         const x = xAt(i, data.length);
@@ -375,6 +394,8 @@ export function lineChart(data: ChartDatum[], id: string, config: LineChartConfi
     attachHover(
         container,
         svgRoot,
+        CHART_WIDTH,
+        CHART_HEIGHT,
         (vx) => {
             if (data.length === 0) {
                 return null;
@@ -396,7 +417,7 @@ export function lineChart(data: ChartDatum[], id: string, config: LineChartConfi
 
 export function barChart(data: ChartDatum[], id: string, config: BarChartConfig): AnyElement {
     const svgRoot = svgEl("svg");
-    svgRoot.setAttribute("viewBox", `0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`);
+    svgRoot.setAttribute("viewBox", `0 0 ${CHART_WIDTH} ${BAR_HEIGHT}`);
     svgRoot.setAttribute("class", "chart-svg");
     svgRoot.setAttribute("role", "img");
     svgRoot.setAttribute("aria-label", config.title);
@@ -405,7 +426,7 @@ export function barChart(data: ChartDatum[], id: string, config: BarChartConfig)
     const scale = domainFor(values, true);
     const band = plotWidth() / Math.max(1, data.length);
     const barWidth = Math.min(band * 0.62, 48);
-    const bottom = CHART_HEIGHT - 22;
+    const bottom = BAR_HEIGHT - 44;
     const yAtBar = (value: number) => bottom - ((value - scale.min) / (scale.max - scale.min)) * (bottom - PAD_TOP);
 
     const grid = svgEl("g");
@@ -425,7 +446,7 @@ export function barChart(data: ChartDatum[], id: string, config: BarChartConfig)
         );
         grid.appendChild(svgText(formatNumber(tick), PAD_LEFT, y - 5));
     }
-    const labelIndices = evenlySpacedIndices(data.length, 6);
+    const labelIndices = Array.from({ length: data.length }, (_, i) => i);
     labelIndices.forEach(i => {
         const x = xAt(i, data.length);
         grid.appendChild(
@@ -441,8 +462,11 @@ export function barChart(data: ChartDatum[], id: string, config: BarChartConfig)
             }),
         );
         const label = data[i].label;
-        const short = label.length > 12 ? `${label.slice(0, 11)}…` : label;
-        grid.appendChild(svgText(short, x, CHART_HEIGHT - 5, { anchor: "middle" }));
+        const maxChars = data.length > 15 ? 7 : 10;
+        const short = label.length > maxChars ? `${label.slice(0, maxChars - 1)}…` : label;
+        const text = svgText(short, x, bottom + 6, { anchor: "middle" });
+        text.setAttribute("transform", `rotate(-45 ${x} ${bottom + 6})`);
+        grid.appendChild(text);
     });
     svgRoot.appendChild(grid);
 
@@ -466,6 +490,8 @@ export function barChart(data: ChartDatum[], id: string, config: BarChartConfig)
     attachHover(
         container,
         svgRoot,
+        CHART_WIDTH,
+        BAR_HEIGHT,
         (vx) => {
             if (data.length === 0) {
                 return null;
@@ -569,6 +595,8 @@ export function boxPlotChart(values: BoxPlotValues, id: string, config: BoxPlotC
     attachHover(
         container,
         svgRoot,
+        CHART_WIDTH,
+        CHART_HEIGHT,
         (vx, vy) => ({ index: 0, x: vx, y: Math.min(Math.max(vy, 0), CHART_HEIGHT) }),
         () =>
             buildTooltip(config.title, [

@@ -53,7 +53,7 @@ export class StatisticTemplates {
         return ChartTemplates.paginatedLineChart({
             title: `${t("CUMULATIVE_TRACKS")}`,
             endpoint: ApiRoutes.getGlobalCumulativeTracksByMonth,
-            timeType: "month",
+            cumulative: true,
         });
     }
 
@@ -61,7 +61,7 @@ export class StatisticTemplates {
         return ChartTemplates.paginatedLineChart({
             title: `${t("CUMULATIVE_USERS")}`,
             endpoint: ApiRoutes.getGlobalCumulativeUsersByMonth,
-            timeType: "month",
+            cumulative: true,
         });
     }
 

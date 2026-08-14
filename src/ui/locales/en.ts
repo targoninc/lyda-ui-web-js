@@ -548,6 +548,8 @@ export const en = {
     CUMULATIVE_USERS: "Cumulative users",
 
     AVERAGE: "Average",
+    CURRENT_VALUE: "Current value",
+    AVERAGE_GROWTH: "Avg. growth",
     BEST: "Best",
     MIN: "Min",
     MAX: "Max",

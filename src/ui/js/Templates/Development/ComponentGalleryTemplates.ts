@@ -493,6 +493,12 @@ export class ComponentGalleryTemplates {
                     endpoint: ApiRoutes.getPlayCountByMonth,
                     timeType: "month",
                 }),
+                ChartTemplates.paginatedLineChart({
+                    title: `${t("CUMULATIVE_TRACKS")}`,
+                    endpoint: ApiRoutes.getGlobalCumulativeTracksByMonth,
+                    timeType: "month",
+                    cumulative: true,
+                }),
             ),
         );
     }

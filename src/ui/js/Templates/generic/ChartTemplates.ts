@@ -6,8 +6,8 @@ import { Api } from "../../Api/Api.ts";
 import {
     barChart as svgBarChart,
     boxPlotChart as svgBoxPlotChart,
-    formatNumber,
-    formatPeriodLabel,
+    buildStatisticMetadata,
+
     lineChart as svgLineChart,
     metadataTable,
 } from "../../Classes/SvgChart.ts";
@@ -121,14 +121,8 @@ export class ChartTemplates {
             if (d.length === 0) {
                 return nullElement();
             }
-            const total = d.reduce((sum, e) => sum + e.value, 0);
-            const average = total / d.length;
-            const best = d.reduce((a, b) => (b.value > a.value ? b : a), d[0]);
-            return metadataTable([
-                { label: `${t("TOTAL")}`, value: formatNumber(total) },
-                { label: `${t("AVERAGE")}`, value: formatNumber(average) },
-                { label: `${t("BEST")} (${formatPeriodLabel(best.label)})`, value: formatNumber(best.value) },
-            ]);
+            const chartData: ChartDatum[] = d.map(e => ({ label: e.label, value: e.value }));
+            return metadataTable(buildStatisticMetadata(chartData, options.cumulative ?? false));
         }, data);
 
         return create("div")
