@@ -24,9 +24,10 @@ export class ChartTemplates {
         title: string,
         id: string,
         metadata?: MetadataRow[],
+        currency?: boolean,
     ) {
         const data: ChartDatum[] = labels.map((label, i) => ({ label, value: values[i] ?? 0 }));
-        const chart = svgBarChart(data, id, { valueTitle, title });
+        const chart = svgBarChart(data, id, { valueTitle, title, currency });
         return create("div")
             .classes("chart-container-full", "card", "flex-v")
             .children(
@@ -43,11 +44,13 @@ export class ChartTemplates {
         title: string,
         id: string,
         metadata?: MetadataRow[],
+        currency?: boolean,
     ) {
         const data: ChartDatum[] = labels.map((label, i) => ({ label, value: values[i] ?? 0 }));
         const chart = svgLineChart(data, id, {
             valueTitle,
             title,
+            currency,
         });
         return create("div")
             .classes("chart-container-full", "card", "flex-v")
@@ -58,11 +61,15 @@ export class ChartTemplates {
             ).build();
     }
 
-    static boxPlotChart(values: BoxPlotValues, title: string, id: string, metadata?: MetadataRow[]) {
-        const chart = svgBoxPlotChart(values, id, { title });
+    static boxPlotChart(values: BoxPlotValues | null | undefined, title: string, id: string, metadata?: MetadataRow[], currency?: boolean) {
+        if (!values || ![values.min, values.q1, values.median, values.q3, values.max].every(v => Number.isFinite(v))) {
+            return ChartTemplates.noData(title);
+        }
+        const chart = svgBoxPlotChart(values, id, { title, currency });
         return create("div")
-            .classes("chart-container-vertical", "flex-v")
+            .classes("chart-container-vertical", "card", "flex-v")
             .children(
+                create("h4").classes("chart-title").text(title).build(),
                 chart,
                 ...(metadata && metadata.length > 0 ? [metadataTable(metadata)] : []),
             ).build();
@@ -114,6 +121,7 @@ export class ChartTemplates {
             return svgLineChart(chartData, id, {
                 valueTitle: options.title,
                 title: options.title,
+                currency: options.currency,
             });
         }, data);
 

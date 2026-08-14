@@ -492,6 +492,8 @@ export class ComponentGalleryTemplates {
                     { min: 3, q1: 12, median: 18, q3: 27, max: 45 },
                     "Royalty spread",
                     "gallery-box-chart",
+                    undefined,
+                    true,
                 ),
             ),
             ComponentGalleryTemplates.#row(

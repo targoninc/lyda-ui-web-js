@@ -8,7 +8,7 @@ import { navigate, reload } from "../../Routing/Router.ts";
 import { RoutePath } from "../../Routing/routes.ts";
 import {notify, Ui} from "../../Classes/Ui.ts";
 import { NotificationType } from "../../Enums/NotificationType.ts";
-import { ChartTemplates } from "../generic/ChartTemplates.ts";
+
 import { yearAndMonthByOffset } from "../../Classes/Helpers/Date.ts";
 import { downloadFile } from "../../Classes/Util.ts";
 import { t } from "../../../locales";
@@ -56,8 +56,10 @@ export class PayoutTemplates {
         return create("div")
             .classes("flex-v", "card")
             .children(
-                StripeConnectTemplates.balanceCard(),
-                compute(ri => ri ? PayoutTemplates.royaltyInfo(ri) : nullElement(), royaltyInfo),
+                horizontal(
+                    StripeConnectTemplates.balanceCard(),
+                    compute(ri => ri ? PayoutTemplates.royaltyInfo(ri) : nullElement(), royaltyInfo),
+                ),
                 when(royaltiesLoading, GenericTemplates.loadingSpinner()),
                 when(hasTaxInfo$, create("a")
                     .classes("error", "clickable")
@@ -141,9 +143,7 @@ export class PayoutTemplates {
                         .text(t("MEDIAN_TRACK_ROYALTY", currency(royaltyInfo.personal.meanTrackRoyalty)))
                         .build(),
                 ).build(),
-            vertical(
-                ChartTemplates.boxPlotChart(royaltyInfo.personal.trackRoyaltyValues, `${t("AVERAGE_TRACK_ROYALTY")}`, "averageTrackRoyaltyChart"),
-            ).build(),
+
         ).build();
     }
 
@@ -181,7 +181,7 @@ export class PayoutTemplates {
                     text: t("AMOUNT_PLAYLISTS", royaltyInfo.global.counts.playlists),
                 }),
             ).build(),
-            ChartTemplates.boxPlotChart(royaltyInfo.global.trackRoyaltyValues, `${t("AVERAGE_TRACK_ROYALTY")}`, "averageTrackRoyaltyChart"),
+
         ).build();
     }
 

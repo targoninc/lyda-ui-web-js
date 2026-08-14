@@ -2,6 +2,7 @@ import { area, curveMonotoneX, line } from "d3-shape";
 import { AnyElement, compute, create, nullElement, signal } from "@targoninc/jess";
 import { BoxPlotValues } from "@targoninc/lyda-shared/src/Models/BoxPlotValues";
 import { t } from "../../locales";
+import { currency } from "./Helpers/Num.ts";
 import { ChartDatum } from "../Models/ChartDatum.ts";
 import { MetadataRow } from "../Models/MetadataRow.ts";
 import { LineChartConfig } from "../Models/LineChartConfig.ts";
@@ -86,7 +87,7 @@ const yAt = (value: number, scale: { min: number; max: number }) =>
 function niceStep(rawStep: number): number {
     const exp = Math.floor(Math.log10(rawStep));
     const frac = rawStep / 10 ** exp;
-    const niceFrac = frac <= 1 ? 1 : frac <= 2 ? 2 : frac <= 2.5 ? 2.5 : frac <= 5 ? 5 : 10;
+    const niceFrac = frac < 1.5 ? 1 : frac < 3 ? 2 : frac < 7 ? 5 : 10;
     return niceFrac * 10 ** exp;
 }
 
@@ -388,6 +389,7 @@ export function lineChart(data: ChartDatum[], id: string, config: LineChartConfi
         svgRoot.appendChild(svgWith("circle", { cx: points[0][0], cy: points[0][1], r: 3, fill: stroke }));
     }
 
+    const formatValue = config.currency ? currency : formatNumber;
     const container = chartContainer(svgRoot);
     attachHover(
         container,
@@ -406,7 +408,7 @@ export function lineChart(data: ChartDatum[], id: string, config: LineChartConfi
         (i: number) => {
             const d = data[i];
             return buildTooltip(formatTooltipHeader(d.label), [
-                { label: config.valueTitle, value: formatNumber(d.value) },
+                { label: config.valueTitle, value: formatValue(d.value) },
             ]);
         },
     );
@@ -486,7 +488,7 @@ export function barChart(data: ChartDatum[], id: string, config: BarChartConfig)
             }),
         );
     });
-
+    const formatValue = config.currency ? currency : formatNumber;
     const container = chartContainer(svgRoot);
     attachHover(
         container,
@@ -503,7 +505,7 @@ export function barChart(data: ChartDatum[], id: string, config: BarChartConfig)
         },
         (i: number) => {
             const d = data[i];
-            return buildTooltip(d.label, [{ label: config.valueTitle, value: formatNumber(d.value) }]);
+            return buildTooltip(d.label, [{ label: config.valueTitle, value: formatValue(d.value) }]);
         },
     );
     return container;
@@ -517,63 +519,79 @@ export function boxPlotChart(values: BoxPlotValues, id: string, config: BoxPlotC
     svgRoot.setAttribute("aria-label", config.title);
 
     const scale = domainFor([values.min, values.q1, values.median, values.q3, values.max], false);
-    const centerY = CHART_HEIGHT / 2;
-    const boxHeight = 60;
+    const centerX = CHART_WIDTH / 2;
+    const boxWidth = 72;
+    const formatValue = config.currency ? currency : formatNumber;
 
     const grid = svgEl("g");
-    for (const tick of ticks(scale)) {
-        const x = xAtValue(tick, scale);
+    for (const edgeY of [PAD_TOP, CHART_HEIGHT - PAD_BOTTOM]) {
         grid.appendChild(
             svgWith("line", {
-                x1: x,
-                y1: 0,
-                x2: x,
-                y2: CHART_HEIGHT,
+                x1: 0,
+                y1: edgeY,
+                x2: CHART_WIDTH,
+                y2: edgeY,
                 stroke: GRID_STROKE,
                 "stroke-width": 1,
                 opacity: 0.1,
                 "shape-rendering": "crispEdges",
             }),
         );
-        grid.appendChild(svgText(formatNumber(tick), x, CHART_HEIGHT - 4, { anchor: "middle" }));
+    }
+    for (const tick of ticks(scale)) {
+        const y = yAt(tick, scale);
+        grid.appendChild(
+            svgWith("line", {
+                x1: 0,
+                y1: y,
+                x2: CHART_WIDTH,
+                y2: y,
+                stroke: GRID_STROKE,
+                "stroke-width": 1,
+                opacity: 0.1,
+                "shape-rendering": "crispEdges",
+            }),
+        );
+        grid.appendChild(svgText(formatValue(tick), PAD_LEFT, y - 5));
     }
     svgRoot.appendChild(grid);
 
-    const minX = xAtValue(values.min, scale);
-    const q1X = xAtValue(values.q1, scale);
-    const medianX = xAtValue(values.median, scale);
-    const q3X = xAtValue(values.q3, scale);
-    const maxX = xAtValue(values.max, scale);
+    const minY = yAt(values.min, scale);
+    const q1Y = yAt(values.q1, scale);
+    const medianY = yAt(values.median, scale);
+    const q3Y = yAt(values.q3, scale);
+    const maxY = yAt(values.max, scale);
 
     svgRoot.appendChild(
         svgWith("line", {
-            x1: minX,
-            y1: centerY,
-            x2: maxX,
-            y2: centerY,
+            x1: centerX,
+            y1: minY,
+            x2: centerX,
+            y2: maxY,
             stroke: ACCENT,
             "stroke-width": 1.25,
         }),
     );
-    for (const capX of [minX, maxX]) {
+    for (const capY of [minY, maxY]) {
         svgRoot.appendChild(
             svgWith("line", {
-                x1: capX,
-                y1: centerY - 8,
-                x2: capX,
-                y2: centerY + 8,
+                x1: centerX - boxWidth / 2 - 20,
+                y1: capY,
+                x2: centerX + boxWidth / 2 + 20,
+                y2: capY,
                 stroke: ACCENT,
-                "stroke-width": 1.25,
+                "stroke-width": 2,
             }),
         );
     }
-    if (q3X > q1X) {
+
+    if (q1Y > q3Y) {
         svgRoot.appendChild(
             svgWith("rect", {
-                x: q1X,
-                y: centerY - boxHeight / 2,
-                width: q3X - q1X,
-                height: boxHeight,
+                x: centerX - boxWidth / 2,
+                y: q3Y,
+                width: boxWidth,
+                height: q1Y - q3Y,
                 rx: 3,
                 fill: BOX_FILL,
                 stroke: ACCENT,
@@ -583,10 +601,10 @@ export function boxPlotChart(values: BoxPlotValues, id: string, config: BoxPlotC
     }
     svgRoot.appendChild(
         svgWith("line", {
-            x1: medianX,
-            y1: centerY - boxHeight / 2,
-            x2: medianX,
-            y2: centerY + boxHeight / 2,
+            x1: centerX - boxWidth / 2,
+            y1: medianY,
+            x2: centerX + boxWidth / 2,
+            y2: medianY,
             stroke: "var(--fg-0)",
             "stroke-width": 2,
         }),
@@ -598,22 +616,20 @@ export function boxPlotChart(values: BoxPlotValues, id: string, config: BoxPlotC
         svgRoot,
         CHART_WIDTH,
         CHART_HEIGHT,
-        (vx, vy) => ({ index: 0, x: vx, y: Math.min(Math.max(vy, 0), CHART_HEIGHT) }),
+        () => ({ index: 0, x: centerX, y: CHART_HEIGHT / 2 }),
         () =>
             buildTooltip(config.title, [
-                { label: `${t("MIN")}`, value: formatNumber(values.min) },
-                { label: `${t("Q1")}`, value: formatNumber(values.q1) },
-                { label: `${t("MEDIAN")}`, value: formatNumber(values.median) },
-                { label: `${t("Q3")}`, value: formatNumber(values.q3) },
-                { label: `${t("MAX")}`, value: formatNumber(values.max) },
+                { label: `${t("MIN")}`, value: formatValue(values.min) },
+                { label: `${t("Q1")}`, value: formatValue(values.q1) },
+                { label: `${t("MEDIAN")}`, value: formatValue(values.median) },
+                { label: `${t("Q3")}`, value: formatValue(values.q3) },
+                { label: `${t("MAX")}`, value: formatValue(values.max) },
             ]),
     );
     return container;
 }
 
-function xAtValue(value: number, scale: { min: number; max: number }): number {
-    return PAD_LEFT + ((value - scale.min) / (scale.max - scale.min)) * plotWidth();
-}
+
 
 export function metadataTable(rows: MetadataRow[]): AnyElement {
     const cells = rows.map(row =>

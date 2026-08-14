@@ -829,7 +829,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .chart-container-vertical {
-    height: 180px !important;
+    height: 240px !important;
     width: 600px !important;
     max-width: 100% !important;
 }

@@ -636,6 +636,7 @@ export const de: Translation = {
     CUMULATIVE_TRACKS: "Kumulative Tracks",
     CUMULATIVE_USERS: "Kumulative Nutzer",
 
+    TRACK_ROYALTY_SPREAD: "Track-Tantiemen-Verteilung",
     AVERAGE: "Durchschnitt",
     CURRENT_VALUE: "Aktueller Wert",
     AVERAGE_GROWTH: "Ø Wachstum",

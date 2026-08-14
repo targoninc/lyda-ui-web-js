@@ -55,6 +55,7 @@ export const ga: Translation = {
     AVERAGE: "Meán",
     CURRENT_VALUE: "Luach reatha",
     AVERAGE_GROWTH: "Meánfhás",
+    TRACK_ROYALTY_SPREAD: "Leathadh ríchíosanna rianta",
     BEST: "Is fearr",
     MIN: "Íos",
     MAX: "Uas",

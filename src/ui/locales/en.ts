@@ -550,6 +550,7 @@ export const en = {
     CUMULATIVE_TRACKS: "Cumulative tracks",
     CUMULATIVE_USERS: "Cumulative users",
 
+    TRACK_ROYALTY_SPREAD: "Track royalty spread",
     AVERAGE: "Average",
     CURRENT_VALUE: "Current value",
     AVERAGE_GROWTH: "Avg. growth",

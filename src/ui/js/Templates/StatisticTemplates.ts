@@ -1,4 +1,4 @@
-import { compute, create, nullElement, signal } from "@targoninc/jess";
+import { AnyElement, compute, create, nullElement, signal, Signal } from "@targoninc/jess";
 import { ApiRoutes } from "../Api/ApiRoutes.ts";
 import { ChartTemplates } from "./generic/ChartTemplates.ts";
 import { StatisticsWrapper } from "../Classes/StatisticsWrapper.ts";
@@ -21,7 +21,7 @@ export class StatisticTemplates {
         return ChartTemplates.paginatedLineChart({
             title: `${t("ROYALTIES_BY_MONTH")}`,
             endpoint: ApiRoutes.getRoyaltiesByMonth,
-            timeType: "month"
+            currency: true,
         });
     }
 
@@ -37,7 +37,7 @@ export class StatisticTemplates {
         return ChartTemplates.paginatedLineChart({
             title: `${t("ROYALTIES_BY_MONTH")}`,
             endpoint: ApiRoutes.getGlobalRoyaltiesByMonth,
-            timeType: "month",
+            currency: true,
         });
     }
 
@@ -45,7 +45,7 @@ export class StatisticTemplates {
         return ChartTemplates.paginatedLineChart({
             title: `${t("SALES_BY_MONTH")}`,
             endpoint: ApiRoutes.getGlobalSalesByMonth,
-            timeType: "month",
+            currency: true,
         });
     }
 
@@ -76,7 +76,7 @@ export class StatisticTemplates {
         if (labels.length === 0) {
             return ChartTemplates.noData(t("ROYALTIES_BY_TRACK"));
         }
-        return ChartTemplates.barChart(labels, values, `${t("ROYALTIES")}`, `${t("ROYALTIES_BY_TRACK")}`, "royaltiesByTrackChart");
+        return ChartTemplates.barChart(labels, values, `${t("ROYALTIES")}`, `${t("ROYALTIES_BY_TRACK")}`, "royaltiesByTrackChart", undefined, true);
     }
 
     static playCountByTrackChart(trackNames: string[], playCounts: number[]) {
@@ -87,10 +87,16 @@ export class StatisticTemplates {
     }
 
     static allStats() {
+        const royaltyInfo = signal<RoyaltyInfo | null>(null);
+        Api.getRoyaltyInfo().then(ri => royaltyInfo.value = ri);
+
         return create("div")
             .classes("flex", "fullWidth")
             .children(
                 ...StatisticsWrapper.getStatistics(),
+                compute(ri => ri
+                    ? ChartTemplates.boxPlotChart(ri.personal.trackRoyaltyValues, `${t("TRACK_ROYALTY_SPREAD")}`, "personalTrackRoyaltySpreadChart", undefined, true)
+                    : ChartTemplates.noData(`${t("TRACK_ROYALTY_SPREAD")}`), royaltyInfo),
                 PayoutTemplates.dataExport(),
             ).build();
     }
@@ -99,6 +105,11 @@ export class StatisticTemplates {
         const royaltyInfo = signal<RoyaltyInfo | null>(null);
         Api.getRoyaltyInfo().then(ri => royaltyInfo.value = ri);
 
+        const statistics: Array<AnyElement | Signal<AnyElement>> = StatisticsWrapper.getGlobalStatistics();
+        statistics.splice(1, 0, compute(ri => ri
+            ? ChartTemplates.boxPlotChart(ri.global.trackRoyaltyValues, `${t("TRACK_ROYALTY_SPREAD")}`, "globalTrackRoyaltySpreadChart", undefined, true)
+            : ChartTemplates.noData(`${t("TRACK_ROYALTY_SPREAD")}`), royaltyInfo));
+
         return vertical(
             horizontal(
                 compute(ri => ri ? PayoutTemplates.globalRoyaltyInfo(ri) : nullElement(), royaltyInfo),
@@ -106,7 +117,7 @@ export class StatisticTemplates {
             create("div")
                 .classes("flex", "fullWidth")
                 .children(
-                    ...StatisticsWrapper.getGlobalStatistics(),
+                    ...statistics,
                 ).build(),
         ).build();
     }
