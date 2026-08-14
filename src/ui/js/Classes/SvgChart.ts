@@ -13,6 +13,7 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 
 const CHART_WIDTH = 727;
 const CHART_HEIGHT = 225;
+const BAR_PAD_LEFT = 64;
 const BAR_HEIGHT = 264;
 const PAD_LEFT = 8;
 const PAD_RIGHT = 12;
@@ -424,9 +425,9 @@ export function barChart(data: ChartDatum[], id: string, config: BarChartConfig)
 
     const values = data.map(d => d.value);
     const scale = domainFor(values, true);
-    const band = plotWidth() / Math.max(1, data.length);
+    const band = (CHART_WIDTH - BAR_PAD_LEFT - PAD_RIGHT) / Math.max(1, data.length);
     const barWidth = Math.min(band * 0.62, 48);
-    const xBar = (i: number) => PAD_LEFT + band * (i + 0.5);
+    const xBar = (i: number) => BAR_PAD_LEFT + band * (i + 0.5);
     const bottom = BAR_HEIGHT - 54;
     const yAtBar = (value: number) => bottom - ((value - scale.min) / (scale.max - scale.min)) * (bottom - PAD_TOP);
 
@@ -499,8 +500,8 @@ export function barChart(data: ChartDatum[], id: string, config: BarChartConfig)
             if (data.length === 0) {
                 return null;
             }
-            const step = plotWidth() / Math.max(1, data.length);
-            const i = Math.min(data.length - 1, Math.max(0, Math.floor((vx - PAD_LEFT) / step)));
+            const step = band;
+            const i = Math.min(data.length - 1, Math.max(0, Math.floor((vx - BAR_PAD_LEFT) / step)));
             return { index: i, x: xBar(i), y: yAtBar(data[i].value) };
         },
         (i: number) => {
