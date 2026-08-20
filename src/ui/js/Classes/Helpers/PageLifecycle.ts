@@ -63,11 +63,12 @@ export function disposePageRender(): void {
 }
 
 /** Releases jess subscriptions bound to elements that left the document.
- *  Call after the page container has been emptied. Both the jess registry and
- *  the one bundled inside jess-components need sweeping. */
+ *  Call after the page container has been emptied — those elements are
+ *  certain garbage, so the grace period is bypassed. Both the jess registry
+ *  and the one bundled inside jess-components need sweeping. */
 export function releaseDetachedSubscriptions(): void {
-    sweepDetachedSubscriptions();
-    sweepComponentsDetachedSubscriptions();
+    sweepDetachedSubscriptions(true);
+    sweepComponentsDetachedSubscriptions(true);
 }
 
 /** Registers an interval to be cleared when the current page is disposed. */
