@@ -71,8 +71,6 @@ export class UserActions {
     private static notificationsIntervalStarted = false;
 
     static getNotificationsPeriodically() {
-        // The account section is rebuilt on login/logout; only ever start
-        // one polling interval for the lifetime of the page.
         if (UserActions.notificationsIntervalStarted) {
             return;
         }

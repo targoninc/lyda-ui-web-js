@@ -147,8 +147,6 @@ export class TrackTemplates {
         const onResize = () => { windowWidth$.value = window.innerWidth; };
         const abortController = new AbortController();
         window.addEventListener("resize", onResize, { signal: abortController.signal });
-        // The abort controller was never aborted: every rendered waveform
-        // kept a window resize listener (and its reactive closures) alive.
         trackCleanup(() => abortController.abort());
 
         const pathD = compute(

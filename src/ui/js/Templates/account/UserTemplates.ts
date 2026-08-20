@@ -84,10 +84,6 @@ export class UserTemplates {
 
         if (user.constructor === Signal) {
             const userSignal = user as Signal<User | null>;
-            // currentUser is reassigned to a fresh object on every navigation;
-            // rebuilding the widget (and leaking the previous one) on every
-            // identical assignment is pure churn. Rebuild only when a field
-            // the widget displays actually changed.
             const signature = (u: User | null) =>
                 u ? `${u.id}|${u.username}|${u.displayname}|${u.has_avatar}|${u.has_banner}` : "";
             let lastSignature = signature(userSignal.value);

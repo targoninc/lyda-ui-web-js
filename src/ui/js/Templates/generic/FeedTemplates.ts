@@ -567,9 +567,6 @@ export class FeedTemplates {
                 const mo = new MutationObserver(setupObservers);
                 mo.observe(rowsEl, { childList: true });
 
-                // Observers keep their targets (the whole feed DOM) alive via
-                // the document's observer registry even after the page is
-                // discarded; disconnect them with the page.
                 trackCleanup(() => {
                     mo.disconnect();
                     obs.disconnect();

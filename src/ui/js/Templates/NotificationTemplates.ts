@@ -29,9 +29,6 @@ export class NotificationTemplates {
                             .classes("flex", "align-children", "small-gap")
                             .children(...elements)
                             .build(),
-                        // Live timestamp: updates every second while under a
-                        // minute, then every minute. The jess sweep stops the
-                        // updating chain when the item leaves the document.
                         GenericTemplates.timestamp(notification.created_at)
                     ).build()
             ).build();

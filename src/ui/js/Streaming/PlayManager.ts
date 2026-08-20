@@ -61,8 +61,6 @@ export class PlayManager {
     private static gaplessWatchId: number | null = null;
     private static transitionInProgress = false;
 
-    // Playback history only feeds "previous track" and the last-100 cache
-    // entry; unbounded growth here leaks ~100B per played track.
     private static readonly HISTORY_MAX = 100;
 
     private static pushToHistory(trackId: number) {

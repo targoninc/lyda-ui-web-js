@@ -117,9 +117,6 @@ export class Time {
             timeoutId = setTimeout(update, updateInterval);
         };
         update();
-        // The chain reschedules itself forever; stop it once the element that
-        // renders this label leaves the document (jess drops the bound
-        // subscription, this fires, the chain dies and everything is freed).
         state.onNoSubscribers(stop);
 
         return state;

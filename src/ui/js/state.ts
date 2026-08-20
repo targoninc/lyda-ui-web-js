@@ -302,13 +302,11 @@ export function setNotifications(value: Notification[]) {
 }
 
 export function appendNotifications(newNotifs: Notification[], oldNotifs: Notification[]) {
-    // Reassigning the array (even with identical content) makes every
-    // subscriber rebuild; the nav's signalMap re-renders all items and leaks
-    // the previous ones' bindings. Skip when there is nothing new.
     const fresh = newNotifs.filter(n => !oldNotifs.find(on => on.id === n.id));
     if (fresh.length === 0) {
         return;
     }
+
     const merged = oldNotifs
         .concat(fresh)
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
