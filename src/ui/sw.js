@@ -27,6 +27,11 @@ self.addEventListener("fetch", (event) => {
 
     const url = new URL(req.url);
 
+    // Never touch cross-origin requests: the API (and its responses) lives on
+    // a different origin, and cache-firsting API GETs serves stale data (e.g.
+    // notifications) long after they changed.
+    if (url.origin !== self.location.origin) return;
+
     // Network-first for navigation requests (HTML)
     if (req.mode === "navigate") {
         event.respondWith(

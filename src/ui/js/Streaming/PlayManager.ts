@@ -38,6 +38,7 @@ import {notify} from "../Classes/Ui.ts";
 import {t} from "../../locales";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {TrackLyrics} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackLyrics.ts";
+import {ListeningHistory} from "@targoninc/lyda-shared/src/Models/db/lyda/ListeningHistory";
 
 interface NextTrackResolution {
     kind: "track";
@@ -59,6 +60,21 @@ export class PlayManager {
     private static readonly CROSSFADE_MS = 10;
     private static gaplessWatchId: number | null = null;
     private static transitionInProgress = false;
+
+    // Playback history only feeds "previous track" and the last-100 cache
+    // entry; unbounded growth here leaks ~100B per played track.
+    private static readonly HISTORY_MAX = 100;
+
+    private static pushToHistory(trackId: number) {
+        const entry: ListeningHistory = {
+            id: -1,
+            user_id: -1,
+            track_id: trackId,
+            created_at: new Date(),
+            quality: currentQuality.value,
+        };
+        history.value = [...history.value, entry].slice(-PlayManager.HISTORY_MAX);
+    }
 
     static async playCheck(track: Track) {
         if (PlayManager.isPlaying(track.id)) {
@@ -448,16 +464,7 @@ export class PlayManager {
         loadingAudio.value = true;
         try {
             if (nextId !== currentTrackId.value || force) {
-                history.value = [
-                    ...history.value,
-                    {
-                        id: -1,
-                        user_id: -1,
-                        track_id: nextId,
-                        created_at: new Date(),
-                        quality: currentQuality.value
-                    }
-                ];
+                PlayManager.pushToHistory(nextId);
             }
 
             const d = await PlayManager.getTrackData(nextId, false);
@@ -542,16 +549,7 @@ export class PlayManager {
 
     private static async startTrackAsync(id: number, fromBeginning: boolean, force: boolean, version?: number, track?: Track) {
         if (id !== currentTrackId.value || force) {
-            history.value = [
-                ...history.value,
-                {
-                    id: -1,
-                    user_id: -1,
-                    track_id: id,
-                    created_at: new Date(),
-                    quality: currentQuality.value
-                }
-            ];
+            PlayManager.pushToHistory(id);
         }
 
         const d = track?.user
@@ -638,10 +636,15 @@ export class PlayManager {
             if (key === exclusionId) {
                 continue;
             }
-            streamClients.value[key].stopAsync();
-            if (typeof (streamClients.value[key] as any).close === "function") {
-                (streamClients.value[key] as any).close();
+            const streamClient = streamClients.value[key];
+            streamClient.stopAsync();
+            if (typeof (streamClient as any)._cleanup === "function") {
+                (streamClient as any)._cleanup();
             }
+            if (typeof (streamClient as any).close === "function") {
+                (streamClient as any).close();
+            }
+            this.streamClientLastUsed.delete(Number(key));
             delete streamClients.value[key];
         }
         playingHere.value = false;

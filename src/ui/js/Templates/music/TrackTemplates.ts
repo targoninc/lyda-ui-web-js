@@ -36,8 +36,9 @@ import {InteractionType} from "@targoninc/lyda-shared/src/Enums/InteractionType"
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import {Repost} from "@targoninc/lyda-shared/src/Models/db/lyda/Repost";
 import {ListTrack} from "@targoninc/lyda-shared/src/Models/ListTrack";
-import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
-import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import { Playlist } from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
+import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import { trackCleanup } from "../../Classes/Helpers/PageLifecycle.ts";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
 import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
 import {Comment} from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
@@ -146,6 +147,9 @@ export class TrackTemplates {
         const onResize = () => { windowWidth$.value = window.innerWidth; };
         const abortController = new AbortController();
         window.addEventListener("resize", onResize, { signal: abortController.signal });
+        // The abort controller was never aborted: every rendered waveform
+        // kept a window resize listener (and its reactive closures) alive.
+        trackCleanup(() => abortController.abort());
 
         const pathD = compute(
             w => {

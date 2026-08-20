@@ -28,6 +28,7 @@ import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { TrackTemplates } from "../music/TrackTemplates.ts";
 import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
 import { pinState } from "../../Classes/PinState.ts";
+import { trackInterval, trackCleanup } from "../../Classes/Helpers/PageLifecycle.ts";
 import {SearchTemplates} from "../SearchTemplates.ts";
 
 export { FeedColumn, FeedMenuAction, FeedConfig };
@@ -566,8 +567,21 @@ export class FeedTemplates {
                 const mo = new MutationObserver(setupObservers);
                 mo.observe(rowsEl, { childList: true });
 
+                // Observers keep their targets (the whole feed DOM) alive via
+                // the document's observer registry even after the page is
+                // discarded; disconnect them with the page.
+                trackCleanup(() => {
+                    mo.disconnect();
+                    obs.disconnect();
+                    lastRowObs.disconnect();
+                });
+
                 // Periodic check for skeleton rows that scrolled into view fast
                 const viewportCheck = setInterval(() => {
+                    if (!el.isConnected) {
+                        clearInterval(viewportCheck);
+                        return;
+                    }
                     const skeletons = rowsEl.querySelectorAll("tr.skeleton-row[data-page]");
                     skeletons.forEach(tr => {
                         const rect = tr.getBoundingClientRect();
@@ -580,7 +594,7 @@ export class FeedTemplates {
                     });
                 }, 1000);
 
-                el.addEventListener("remove", () => clearInterval(viewportCheck));
+                trackInterval(viewportCheck);
             }
         });
 

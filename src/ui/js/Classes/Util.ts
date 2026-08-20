@@ -87,11 +87,14 @@ export class Util {
         return response.status === 200;
     }
 
-    static async updateImage(newSrc: string, oldSrc: string) {
+    static async updateImage(newSrc: string, oldSrc: string, retriesLeft = 60) {
         const fileExists = await this.fileExists(newSrc);
         if (!fileExists) {
+            if (retriesLeft <= 0) {
+                return;
+            }
             setTimeout(() => {
-                this.updateImage(newSrc, oldSrc);
+                this.updateImage(newSrc, oldSrc, retriesLeft - 1);
             }, 1000);
         } else {
             const images = document.querySelectorAll("img");
@@ -170,7 +173,7 @@ export class Util {
 
                 if (foundModal && !foundModal.contains(target(e)) && !blockList.includes(target(e).tagName.toLowerCase())) {
                     Util.removeModal(modalContainer);
-                } else {
+                } else if (modalContainer.isConnected) {
                     Util.initializeModalRemove(modalContainer);
                 }
             }, {once: true});

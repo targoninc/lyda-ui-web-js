@@ -39,8 +39,8 @@ export class NavTemplates {
                         NavTemplates.navButton(RoutePath.explore, t("EXPLORE"), "explore"),
                         SearchTemplates.search(SearchContext.navBar),
                     ).build(),
-                when(currentUser, NavTemplates.accountSection()),
-                when(currentUser, NavTemplates.notSignedInNote(), true)
+                when(currentUser, () => NavTemplates.accountSection()),
+                when(currentUser, () => NavTemplates.notSignedInNote(), true)
             ).build();
     }
 

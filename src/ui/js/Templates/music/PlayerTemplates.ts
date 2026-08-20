@@ -398,7 +398,7 @@ export class PlayerTemplates {
                 ),
                 when(
                     playingElsewhere,
-                    horizontal(
+                    () => horizontal(
                         horizontal(
                             MusicTemplates.cover(EntityType.track, track, CoverContext.desktopPlayer, () => {
                                 const windowWidth = window.innerWidth;
@@ -409,7 +409,7 @@ export class PlayerTemplates {
                                 }
                             }),
                         ).classes("hideOnSmallBreakpoint"),
-                        when(playerExpanded, PlayerTemplates.smallPlayerLayout(track), true),
+                        when(playerExpanded, () => PlayerTemplates.smallPlayerLayout(track), true),
                         PlayerTemplates.bigPlayerLayout(track, trackUser),
                     ).classes("fullWidth")
                      .build(),
@@ -471,7 +471,7 @@ export class PlayerTemplates {
 
         return when(
             playingFrom,
-            create("div")
+            () => create("div")
                 .classes("playing-from", "flex")
                 .children(
                     create("a")

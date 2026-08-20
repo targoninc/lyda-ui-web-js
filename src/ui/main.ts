@@ -22,6 +22,7 @@ import { NotificationType } from "./js/Enums/NotificationType.ts";
 import { t } from "./locales";
 import { InteractionStateManager } from "./js/Classes/InteractionStateManager.ts";
 import { ColorExtractor } from "./js/Classes/ColorExtractor.ts";
+import { beginPageRender, disposePageRender, releaseDetachedSubscriptions } from "./js/Classes/Helpers/PageLifecycle.ts";
 import {button} from "@targoninc/jess-components";
 
 initializeGlobalErrorHandler();
@@ -48,6 +49,7 @@ export const router = new Router(routes, async (route: Route, params: any) => {
     const page = route.path.replace("/", "") as RoutePath;
     console.log(`Navigating to ${page} with params`, params);
 
+    disposePageRender();
     ColorExtractor.clearPageBackground();
     TrackEditTemplates.clearUploadDragState();
     InteractionStateManager.clearContextType("list");
@@ -57,6 +59,8 @@ export const router = new Router(routes, async (route: Route, params: any) => {
 
     currentUser.value = await Util.getUserAsync(null, false);
     pageContainer.innerHTML = "";
+    releaseDetachedSubscriptions();
+    beginPageRender();
     const template = await PageTemplates.mapping[page](route, params);
     if (!currentUser.value && PageTemplates.needLoginPages.includes(page)) {
         navigate(RoutePath.login);

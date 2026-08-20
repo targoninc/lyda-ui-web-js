@@ -1,4 +1,4 @@
-import { compute, signal } from "@targoninc/jess";
+import { lazyCompute, signal } from "@targoninc/jess";
 import { en } from "./en.ts";
 import { de } from "./de.ts";
 import { SelectOption } from "@targoninc/jess-components";
@@ -88,7 +88,7 @@ export function getTranslation(lookup: TranslationKey | string, lang: Language) 
 }
 
 export function t(lookup: TranslationKey, ...args: any[]) {
-    return compute(l => {
+    return lazyCompute((l: Language) => {
         const tl = getTranslation(lookup, l);
         if (tl.constructor === Function) {
             return (tl as Function)(...args);

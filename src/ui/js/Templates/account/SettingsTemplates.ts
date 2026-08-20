@@ -33,6 +33,7 @@ import {
     toggle,
 } from "@targoninc/jess-components";
 import {Theme} from "@targoninc/lyda-shared/src/Enums/Theme";
+import {trackInterval} from "../../Classes/Helpers/PageLifecycle.ts";
 import {UserSettings} from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import {StreamingQuality} from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
@@ -1064,8 +1065,10 @@ export class SettingsTemplates {
                                             }
                                         }
                                     }, 10 * 1000);
+                                    trackInterval(interval);
 
                                     setTimeout(() => {
+                                        clearInterval(interval);
                                         activationTimedOut.value = false;
                                     }, 60 * 1000);
                                 },

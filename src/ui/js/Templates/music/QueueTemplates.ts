@@ -170,7 +170,7 @@ export class QueueTemplates {
             compute(id => QueueTemplates.queueList([id], t("CURRENT_TRACK"), "current"), currentTrackId),
             compute((q) => QueueTemplates.queueList(q, t("MANUAL_QUEUE"), "manual"), manualQueue),
             compute((q) => QueueTemplates.queueList(q, t("CONTEXT_QUEUE"), "context"), contextQueue),
-            when(playFromAutoEnabled, vertical(
+            when(playFromAutoEnabled, () => vertical(
                 compute((q) => QueueTemplates.queueList(q, t("AUTO_QUEUE"), "auto"), autoQueue),
             ).build()),
             create("div")

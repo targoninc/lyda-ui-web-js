@@ -100,15 +100,27 @@ export class Time {
 
     static agoUpdating(time: number|string|Date, useShort = false) {
         const state = signal(Time.ago(time, useShort));
+        let timeoutId: ReturnType<typeof setTimeout> | null = null;
+        const stop = () => {
+            if (timeoutId !== null) {
+                clearTimeout(timeoutId);
+                timeoutId = null;
+            }
+        };
         const update = () => {
             state.value = Time.ago(time, useShort);
-            const updateInterval = Time.#shouldUpdateInSeconds(state.value) ? 1000 : 60000;
             if (state.value.includes("hours")) {
+                timeoutId = null;
                 return;
             }
-            setTimeout(update, updateInterval);
+            const updateInterval = Time.#shouldUpdateInSeconds(state.value) ? 1000 : 60000;
+            timeoutId = setTimeout(update, updateInterval);
         };
         update();
+        // The chain reschedules itself forever; stop it once the element that
+        // renders this label leaves the document (jess drops the bound
+        // subscription, this fires, the chain dies and everything is freed).
+        state.onNoSubscribers(stop);
 
         return state;
     }

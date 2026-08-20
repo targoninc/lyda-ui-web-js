@@ -294,12 +294,23 @@ export function setNotifications(value: Notification[]) {
     if (value.length > NOTIFICATIONS_MAX) {
         value = value.slice(0, NOTIFICATIONS_MAX);
     }
+    const current = notifications.value;
+    if (current.length === value.length && current.every((n, i) => n.id === value[i].id)) {
+        return;
+    }
     notifications.value = value;
 }
 
 export function appendNotifications(newNotifs: Notification[], oldNotifs: Notification[]) {
+    // Reassigning the array (even with identical content) makes every
+    // subscriber rebuild; the nav's signalMap re-renders all items and leaks
+    // the previous ones' bindings. Skip when there is nothing new.
+    const fresh = newNotifs.filter(n => !oldNotifs.find(on => on.id === n.id));
+    if (fresh.length === 0) {
+        return;
+    }
     const merged = oldNotifs
-        .concat(newNotifs.filter(n => !oldNotifs.find(on => on.id === n.id)))
+        .concat(fresh)
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     if (merged.length > NOTIFICATIONS_MAX) {
         merged.length = NOTIFICATIONS_MAX;

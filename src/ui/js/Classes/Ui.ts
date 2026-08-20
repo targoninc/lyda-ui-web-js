@@ -18,7 +18,7 @@ export class Ui {
         if (document.getElementById("navTop") === null) {
             const burgerMenuOpen = signal(false);
             document.body.prepend(NavTemplates.navTop(burgerMenuOpen));
-            document.body.prepend(vertical(when(burgerMenuOpen, NavTemplates.burgerMenuContent(burgerMenuOpen))).build())
+            document.body.prepend(vertical(when(burgerMenuOpen, () => NavTemplates.burgerMenuContent(burgerMenuOpen))).build())
         }
     }
 

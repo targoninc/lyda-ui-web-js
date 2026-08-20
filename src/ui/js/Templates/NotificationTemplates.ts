@@ -10,8 +10,8 @@ import {Notification} from "@targoninc/lyda-shared/src/Models/db/lyda/Notificati
 import {NotificationPart} from "@targoninc/lyda-shared/src/Models/NotifcationPart";
 import {Api} from "../Api/Api.ts";
 import {t} from "../../locales";
-import { GenericTemplates } from "./generic/GenericTemplates.ts";
 import { PopoverTemplates } from "./generic/PopoverTemplates.ts";
+import { GenericTemplates } from "./generic/GenericTemplates.ts";
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 
 export class NotificationTemplates {
@@ -29,6 +29,9 @@ export class NotificationTemplates {
                             .classes("flex", "align-children", "small-gap")
                             .children(...elements)
                             .build(),
+                        // Live timestamp: updates every second while under a
+                        // minute, then every minute. The jess sweep stops the
+                        // updating chain when the item leaves the document.
                         GenericTemplates.timestamp(notification.created_at)
                     ).build()
             ).build();

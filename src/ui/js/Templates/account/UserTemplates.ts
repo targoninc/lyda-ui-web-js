@@ -42,6 +42,7 @@ import {TrackList} from "../../Models/TrackList.ts";
 import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import {pinState} from "../../Classes/PinState.ts";
+import {trackCleanup} from "../../Classes/Helpers/PageLifecycle.ts";
 import {Badge} from "@targoninc/lyda-shared/src/Models/db/lyda/Badge";
 import {NotificationType} from "../../Enums/NotificationType.ts";
 import {ColorExtractor} from "../../Classes/ColorExtractor.ts";
@@ -82,8 +83,22 @@ export class UserTemplates {
         };
 
         if (user.constructor === Signal) {
-            (user as Signal<User | null>).subscribe(getWidget);
-            getWidget((user as Signal<User | null>).value);
+            const userSignal = user as Signal<User | null>;
+            // currentUser is reassigned to a fresh object on every navigation;
+            // rebuilding the widget (and leaking the previous one) on every
+            // identical assignment is pure churn. Rebuild only when a field
+            // the widget displays actually changed.
+            const signature = (u: User | null) =>
+                u ? `${u.id}|${u.username}|${u.displayname}|${u.has_avatar}|${u.has_banner}` : "";
+            let lastSignature = signature(userSignal.value);
+            userSignal.subscribe((newUser: User | null) => {
+                const nextSignature = signature(newUser);
+                if (nextSignature !== lastSignature) {
+                    lastSignature = nextSignature;
+                    getWidget(newUser);
+                }
+            });
+            getWidget(userSignal.value);
         } else {
             getWidget(user as User);
         }
@@ -947,6 +962,11 @@ export class UserTemplates {
         };
         fetchPins();
         pinState.changeCount.subscribe(() => fetchPins(), subKey);
+        // pinState is module-level and outlives the page; drop the keyed
+        // subscription (and its closure over this page's pins) on dispose.
+        trackCleanup(() => {
+            pinState.changeCount.unsubscribeKey(subKey);
+        });
 
         const defaultCover = (type: string) => {
             if (type === EntityType.track) return Images.DEFAULT_COVER_TRACK;
