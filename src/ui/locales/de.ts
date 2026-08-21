@@ -636,6 +636,10 @@ export const de: Translation = {
     SALES_BY_MONTH: "Verkäufe pro Monat",
     CUMULATIVE_TRACKS: "Kumulative Tracks",
     CUMULATIVE_USERS: "Kumulative Nutzer",
+    CUMULATIVE_PLAYS: "Kumulative Wiedergaben",
+    CUMULATIVE_LIKES: "Kumulative Likes",
+    CUMULATIVE_REPOSTS: "Kumulative Reposts",
+    CUMULATIVE_BUYERS: "Kumulative Käufer*innen",
 
     TRACK_ROYALTY_SPREAD: "Track-Tantiemen-Verteilung",
     AVERAGE: "Durchschnitt",

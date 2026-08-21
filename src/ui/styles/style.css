@@ -63,7 +63,7 @@
     --icon-filter-2: sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%) invert(100%);
     --icon-filter: invert(1);
 
-    --breakpoint-big: 1301px;
+    --breakpoint-big: 1334px;
     --breakpoint-mid: 1110px;
     --breakpoint-small: 300px;
     --font-size-xsmall: 12px;

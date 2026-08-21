@@ -72,6 +72,10 @@ export const ga: Translation = {
     PREVIOUS_CENTURY: "An chéad bliain roimhe",
     NEXT_DAY: "An lá dar gcionn",
     PREVIOUS_DAY: "An lá roimhe",
+    CUMULATIVE_PLAYS: "Seinm charnacha",
+    CUMULATIVE_LIKES: "Likes carnacha",
+    CUMULATIVE_REPOSTS: "Athphoist charnacha",
+    CUMULATIVE_BUYERS: "Ceannaitheoirí carnacha",
 
     DROP_AUDIO_FILE_HERE: "Buail comhad fuaime anseo nó cliceáil chun brabhsáil",
     DO_NOT_CREATE_NEW_VERSION: "Ná cruthaigh leagan nua",

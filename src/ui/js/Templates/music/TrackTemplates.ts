@@ -13,6 +13,7 @@ import {DragActions} from "../../Actions/DragActions.ts";
 import {Images} from "../../Enums/Images.ts";
 import {TrackEditTemplates} from "./TrackEditTemplates.ts";
 import {LyricsTemplates} from "./LyricsTemplates.ts";
+import {StatisticTemplates} from "../StatisticTemplates.ts";
 import {CustomText} from "../../Classes/Helpers/CustomText.ts";
 import {navigate} from "../../Routing/Router.ts";
 import {AnyElement, compute, create, nullElement, Signal, signal, signalMap, when,} from "@targoninc/jess";
@@ -460,7 +461,7 @@ export class TrackTemplates {
         const backgroundImage = compute(c => trackData.canDownload ? `url(${c})` : "none", coverFile);
         const bought = trackData.canDownload && !trackData.canEdit;
         const selectedTab$ = signal(0);
-        const tabs = [t("COMMENTS"), t("ALBUMS"), t("PLAYLISTS"), t("BUYERS")];
+        const tabs = [t("COMMENTS"), t("ALBUMS"), t("PLAYLISTS"), t("BUYERS"), t("STATISTICS")];
 
         const pageEl = create("div")
             .classes("single-page", "rounded-large", "relative")
@@ -589,6 +590,10 @@ export class TrackTemplates {
                             when(
                                 tabSelected(selectedTab$, 3),
                                 TrackTemplates.buyersList(track),
+                            ),
+                            when(
+                                tabSelected(selectedTab$, 4),
+                                TrackTemplates.trackStats(track.id),
                             ),
                         ).build(),
                 ).classes("padded-large").styles("position", "inherit").build(),
@@ -858,6 +863,19 @@ export class TrackTemplates {
             btn,
             popover,
         ).classes("relative", "align-children").build();
+    }
+
+    private static trackStats(trackId: number) {
+        return vertical(
+            horizontal(
+                StatisticTemplates.trackPlayCountByMonthChart(trackId),
+                StatisticTemplates.trackLikesByMonthChart(trackId),
+            ).classes("fullWidth").build(),
+            horizontal(
+                StatisticTemplates.trackRepostsByMonthChart(trackId),
+                StatisticTemplates.trackSalesByMonthChart(trackId),
+            ).classes("fullWidth").build(),
+        ).classes("fullWidth").build();
     }
 
     private static buyersList(track: Track) {

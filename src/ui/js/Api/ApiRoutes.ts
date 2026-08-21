@@ -165,6 +165,12 @@ export class ApiRoutes {
     static getGlobalSalesByMonth = ApiRoutes.globalStatistics + "/salesByMonth";
     static getGlobalCumulativeTracksByMonth = ApiRoutes.globalStatistics + "/cumulativeTracksByMonth";
     static getGlobalCumulativeUsersByMonth = ApiRoutes.globalStatistics + "/cumulativeUsersByMonth";
+
+    private static trackStatistics = ApiRoutes.statistics + "/track";
+    static getPlayCountByMonthByTrack = ApiRoutes.trackStatistics + "/playCountByMonth";
+    static getLikesByMonthByTrack = ApiRoutes.trackStatistics + "/likesByMonth";
+    static getRepostsByMonthByTrack = ApiRoutes.trackStatistics + "/repostsByMonth";
+    static getSalesByMonthByTrack = ApiRoutes.trackStatistics + "/salesByMonth";
     // endregion
 
     // region Royalties

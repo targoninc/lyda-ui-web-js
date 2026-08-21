@@ -65,6 +65,46 @@ export class StatisticTemplates {
         });
     }
 
+    static trackPlayCountByMonthChart(trackId: number) {
+        return ChartTemplates.paginatedLineChart({
+            title: `${t("CUMULATIVE_PLAYS")}`,
+            endpoint: ApiRoutes.getPlayCountByMonthByTrack,
+            params: {track_id: trackId},
+            cumulative: true,
+            timeType: "month",
+        });
+    }
+
+    static trackLikesByMonthChart(trackId: number) {
+        return ChartTemplates.paginatedLineChart({
+            title: `${t("CUMULATIVE_LIKES")}`,
+            endpoint: ApiRoutes.getLikesByMonthByTrack,
+            params: {track_id: trackId},
+            cumulative: true,
+            timeType: "month",
+        });
+    }
+
+    static trackRepostsByMonthChart(trackId: number) {
+        return ChartTemplates.paginatedLineChart({
+            title: `${t("CUMULATIVE_REPOSTS")}`,
+            endpoint: ApiRoutes.getRepostsByMonthByTrack,
+            params: {track_id: trackId},
+            cumulative: true,
+            timeType: "month",
+        });
+    }
+
+    static trackSalesByMonthChart(trackId: number) {
+        return ChartTemplates.paginatedLineChart({
+            title: `${t("CUMULATIVE_BUYERS")}`,
+            endpoint: ApiRoutes.getSalesByMonthByTrack,
+            params: {track_id: trackId},
+            cumulative: true,
+            timeType: "month",
+        });
+    }
+
     static likesByTrackChart(trackNames: string[], likeCounts: number[]) {
         if (trackNames.length === 0) {
             return ChartTemplates.noData(t("LIKES_BY_TRACK"));

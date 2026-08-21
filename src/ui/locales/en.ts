@@ -550,6 +550,10 @@ export const en = {
     SALES_BY_MONTH: "Sales by month",
     CUMULATIVE_TRACKS: "Cumulative tracks",
     CUMULATIVE_USERS: "Cumulative users",
+    CUMULATIVE_PLAYS: "Cumulative plays",
+    CUMULATIVE_LIKES: "Cumulative likes",
+    CUMULATIVE_REPOSTS: "Cumulative reposts",
+    CUMULATIVE_BUYERS: "Cumulative buyers",
 
     TRACK_ROYALTY_SPREAD: "Track royalty spread",
     AVERAGE: "Average",
