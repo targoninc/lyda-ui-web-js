@@ -1,4 +1,5 @@
 import { Signal, StringOrSignal, AnyNode } from "@targoninc/jess";
+import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom";
 
 export interface FeedColumn<T> {
     key: string;
@@ -38,6 +39,8 @@ export interface FeedConfig<T extends { id: number }> {
     actionDateHeader?: StringOrSignal;
     actionDateRender?: (item: T) => AnyNode;
     header?: AnyNode;
+    playingFrom?: PlayingFrom;
+    playingUserId?: number;
     filterState?: Signal<string>;
     wipFilterState?: Signal<string>;
     searchOverride$?: Signal<string>;

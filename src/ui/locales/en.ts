@@ -354,6 +354,7 @@ export const en = {
     LYRICS_TEXT: "Plain text",
     LYRICS_FILE: "Upload file",
     LYRICS_PLACEHOLDER: "Enter lyrics as plain text...",
+    SHUFFLE_FEED: "Shuffle this feed",
     PLAYER: "Player",
     NO_PLAYLISTS_FOUND: "No playlists found",
     ADD_TITLE_TO_PLAYLIST: title => `Add ${title} to playlist`,

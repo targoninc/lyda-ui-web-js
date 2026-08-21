@@ -40,6 +40,7 @@ export const de: Translation = {
     PAYMENT_PROCESSOR: "Zahlungsdienstleister",
     RECEIVER: "Empfänger",
     TOGGLE_SHUFFLE: "Zufällige Wiedergabe",
+    SHUFFLE_FEED: "Feed mischen",
     TOTAL_PAID: "Gesamt bezahlt",
     TOTAL_RECEIVED: "Gesamt erhalten",
     TRACK_BOUGHT: "Track gekauft",

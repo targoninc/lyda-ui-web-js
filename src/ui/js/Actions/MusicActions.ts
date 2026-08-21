@@ -21,3 +21,10 @@ export async function startItem(track: Track, newPlayingFrom?: PlayingFrom) {
 
     await PlayManager.startAtBeginningAsync(track.id, track);
 }
+
+/**
+ * Plays a feed context from its beginning, or from a random position when shuffling.
+ */
+export async function playFeed(newPlayingFrom: PlayingFrom, shuffle: boolean) {
+    await PlayManager.playFeed(newPlayingFrom, shuffle);
+}

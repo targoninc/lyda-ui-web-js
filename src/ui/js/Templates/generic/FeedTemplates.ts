@@ -1,5 +1,5 @@
 import {compute, create, Signal, signal, signalMap, AnyNode, nullElement, when} from "@targoninc/jess";
-import { GenericTemplates } from "./GenericTemplates.ts";
+import { GenericTemplates, horizontal } from "./GenericTemplates.ts";
 import { getPlayIcon, copy, Util } from "../../Classes/Util.ts";
 import { t } from "../../../locales";
 import { FeedColumn, FeedMenuAction, FeedConfig, resolveColumns } from "../../Models/FeedConfig.ts";
@@ -371,7 +371,10 @@ export class FeedTemplates {
             : create("div")
                 .classes("flex", "space-between", "align-children")
                 .children(
-                    config.header ?? nullElement(),
+                    horizontal(
+                        config.playingFrom ? TrackTemplates.feedPlayButtons(config.playingFrom, config.playingUserId, config.filterState) : nullElement(),
+                        config.header ?? nullElement(),
+                    ).classes("align-children", "small-gap").build(),
                     create("div").classes("flex", "align-children", "small-gap")
                         .children(
                             searchEl,
@@ -628,6 +631,12 @@ export class FeedTemplates {
             });
         }
 
+        overrides?.search$?.subscribe(s => {
+            if (!isFollowing) {
+                pf.filter = s;
+            }
+        });
+
         if (isFollowing) {
             filterState.subscribe(f => {
                 const url = new URL(window.location.href);
@@ -719,6 +728,8 @@ export class FeedTemplates {
             header: isFollowing && !overrides?.noToolbar
                 ? TrackTemplates.feedFilters(filterState)
                 : undefined,
+            playingFrom: pf,
+            playingUserId: user?.id,
             filterState: isFollowing ? filterState : undefined,
             wipFilterState: supportsWip ? wipFilterState : undefined,
             searchOverride$: overrides?.search$,

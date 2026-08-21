@@ -1494,16 +1494,28 @@ export class UserTemplates {
                 filterPopover,
             ).build();
 
+        const trackTabSelected = compute(i => i === 0 || (isSelf && i === tabs.length - 1), currentIndex);
+        const feedPlayButtons = when(
+            trackTabSelected,
+            TrackTemplates.feedPlayButtons({
+                type: FeedType.likedTracks,
+                name: String(t("LIKED_TRACKS")),
+            }, user.value?.id, pageSearch$),
+        );
+
         const tabRow = create("div")
             .classes("flex", "space-between", "align-children")
             .children(
-                GenericTemplates.combinedSelector(
-                    tabs,
-                    (i: number) => {
-                        currentIndex.value = i;
-                    },
-                    currentIndex.value,
-                ),
+                horizontal(
+                    feedPlayButtons,
+                    GenericTemplates.combinedSelector(
+                        tabs,
+                        (i: number) => {
+                            currentIndex.value = i;
+                        },
+                        currentIndex.value,
+                    ),
+                ).classes("align-children", "small-gap").build(),
                 create("div").classes("flex", "align-children", "small-gap")
                     .children(
                         SearchTemplates.searchInputWidget(pageSearch$),

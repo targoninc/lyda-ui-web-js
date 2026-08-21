@@ -15,6 +15,7 @@ import {
     muted,
     playingFrom,
     playingHere,
+    shuffling,
     streamClients,
     trackInfo,
     setTrackInfo,
@@ -250,6 +251,44 @@ export class PlayManager {
             username: options?.username,
             entity: options?.entity as (Album | Playlist),
         };
+    }
+
+    /**
+     * Starts playback of a feed context from its beginning, or resumes the current
+     * track when this context is already active with an intact queue.
+     * With shuffle, starts from a random position in the context.
+     */
+    static async playFeed(newPlayingFrom: PlayingFrom, shuffle: boolean) {
+        const currentPf = playingFrom.value;
+        const isSameContext = !!currentPf && currentPf.type === newPlayingFrom.type && currentPf.id === newPlayingFrom.id;
+        playingFrom.value = newPlayingFrom;
+        if (!shuffle) {
+            const queue = QueueManager.getContextQueue();
+            const canResume = isSameContext
+                && queue.length > 0
+                && currentTrackId.value !== 0
+                && queue.includes(currentTrackId.value);
+            if (canResume) {
+                if (!PlayManager.isPlaying(currentTrackId.value)) {
+                    const position = PlayManager.getCurrentTime(currentTrackId.value);
+                    await PlayManager.startAsync(currentTrackId.value);
+                    if (position.relative > 0) {
+                        await PlayManager.scrubTo(currentTrackId.value, position.relative);
+                    }
+                }
+                return;
+            }
+        }
+        if (shuffling.value !== shuffle) {
+            shuffling.value = shuffle;
+        }
+        await QueueManager.populateContextQueue(playingFrom.value, shuffle);
+        const nextQueue = QueueManager.getContextQueue();
+        if (nextQueue.length === 0) {
+            return;
+        }
+        const nextId = shuffle ? nextQueue[Math.floor(Math.random() * nextQueue.length)] : nextQueue[0];
+        await PlayManager.startAtBeginningAsync(nextId);
     }
 
     static clearPlayFrom() {

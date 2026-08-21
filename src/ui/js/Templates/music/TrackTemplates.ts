@@ -23,8 +23,13 @@ import {
     loadingAudio,
     manualQueue,
     paymentsEnabled,
+    playingFrom,
     playingHere,
+    shuffling,
 } from "../../state.ts";
+import { playFeed } from "../../Actions/MusicActions.ts";
+import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom.ts";
+import { Icons } from "../../Enums/Icons.ts";
 import {InteractionStateManager} from "../../Classes/InteractionStateManager.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {RoutePath} from "../../Routing/routes.ts";
@@ -82,6 +87,55 @@ export class TrackTemplates {
             },
             initialIndex,
         );
+    }
+
+    /**
+     * Round play and shuffle buttons for a feed context. The play button toggles
+     * between play and pause while this context is playing; the shuffle button
+     * always (re)starts this context from a random position with shuffle enabled.
+     */
+    static feedPlayButtons(newPlayingFrom: PlayingFrom, userId?: number, filter?: Signal<string>) {
+        const isPlayingHere = compute((p, pf) => p && !!pf && pf.type === newPlayingFrom.type && pf.id === newPlayingFrom.id, playingHere, playingFrom);
+        const playIcon = getPlayIcon(isPlayingHere, loadingAudio);
+        const playButton = GenericTemplates.roundIconButton(
+            {
+                icon: playIcon,
+                isUrl: true,
+                classes: ["inline-icon"],
+            },
+            async () => {
+                if (isPlayingHere.value) {
+                    await PlayManager.pauseAsync(currentTrackId.value);
+                } else {
+                    await playFeed(TrackTemplates.feedPlayingFrom(newPlayingFrom, userId, filter), shuffling.value);
+                }
+            },
+            t("PLAY_PAUSE"),
+            ["positive"],
+        );
+        const shuffleButton = GenericTemplates.roundIconButton(
+            {
+                icon: Icons.SHUFFLE_ON,
+                isUrl: true,
+                classes: ["inline-icon"],
+            },
+            async () => {
+                await playFeed(TrackTemplates.feedPlayingFrom(newPlayingFrom, userId, filter), true);
+            },
+            t("SHUFFLE_FEED"),
+            ["special"],
+        );
+        return horizontal(playButton, shuffleButton).classes("align-children", "small-gap").build();
+    }
+
+    private static feedPlayingFrom(newPlayingFrom: PlayingFrom, userId?: number, filter?: Signal<string>): PlayingFrom {
+        return {
+            type: newPlayingFrom.type,
+            name: newPlayingFrom.name,
+            id: userId,
+            username: newPlayingFrom.username,
+            filter: filter?.value,
+        };
     }
 
     static wipFilter(wipState: Signal<string>) {
