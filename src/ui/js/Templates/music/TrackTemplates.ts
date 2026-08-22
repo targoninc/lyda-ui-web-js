@@ -461,7 +461,11 @@ export class TrackTemplates {
         const backgroundImage = compute(c => trackData.canDownload ? `url(${c})` : "none", coverFile);
         const bought = trackData.canDownload && !trackData.canEdit;
         const selectedTab$ = signal(0);
-        const tabs = [t("COMMENTS"), t("ALBUMS"), t("PLAYLISTS"), t("BUYERS"), t("STATISTICS")];
+        const isUploader = currentUser.value?.id === track.user.id;
+        const tabs = [t("COMMENTS"), t("ALBUMS"), t("PLAYLISTS"), t("BUYERS")];
+        if (isUploader) {
+            tabs.push(t("STATISTICS"));
+        }
 
         const pageEl = create("div")
             .classes("single-page", "rounded-large", "relative")
@@ -591,10 +595,12 @@ export class TrackTemplates {
                                 tabSelected(selectedTab$, 3),
                                 TrackTemplates.buyersList(track),
                             ),
-                            when(
-                                tabSelected(selectedTab$, 4),
-                                TrackTemplates.trackStats(track.id),
-                            ),
+                            ...(isUploader ? [
+                                when(
+                                    tabSelected(selectedTab$, 4),
+                                    TrackTemplates.trackStats(track.id),
+                                ),
+                            ] : []),
                         ).build(),
                 ).classes("padded-large").styles("position", "inherit").build(),
             ).build() as HTMLElement;
