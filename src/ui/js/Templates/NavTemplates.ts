@@ -47,7 +47,9 @@ export class NavTemplates {
     static navLogo() {
         return create("div")
             .classes("nav-logo", "hideOnMidBreakpoint", "pointer")
-            .onclick(reload)
+            .onclick(async () => {
+                navigate("explore");
+            })
             .children(
                 GenericTemplates.icon(Icons.LYDA, true, ["icon", "svg"]),
             ).build();
