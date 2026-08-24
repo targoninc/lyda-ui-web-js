@@ -74,9 +74,9 @@ export function ParentGenreGroup(options: ParentGenreGroupOptions) {
         .classes("parent-genre-group", "flex-v", "small-gap")
         .children(
             when(label, create("label").text(label).build()),
-            selectedGenresRow(selectedGenres, maxGenres, placeholder, searchQuery, removeGenre, analyzing, toggleBtn),
+            selectedGenresRow(selectedGenres, maxGenres, placeholder, searchQuery, removeGenre, addGenre, analyzing, toggleBtn),
             suggestionsRow(suggestedGenres, addGenre),
-            when(listVisible ?? signal(true), genreGroupList(expandedParents, searchQuery, selectedGenres, addGenre, removeGenre, toggleParent, getFilteredGenres, hasMatchingGenres)),
+            when(listVisible ?? signal(true), () => genreGroupList(expandedParents, searchQuery, selectedGenres, addGenre, removeGenre, toggleParent, getFilteredGenres, hasMatchingGenres)),
         ).build();
 }
 
@@ -86,6 +86,7 @@ function selectedGenresRow(
     placeholder: StringOrSignal,
     searchQuery: Signal<string>,
     removeGenre: (g: Genre) => void,
+    addGenre: (g: Genre) => void,
     analyzing: Signal<boolean>,
     toggleBtn: AnyElement | null,
 ) {
@@ -108,6 +109,21 @@ function selectedGenresRow(
                 .placeholder(placeholder)
                 .value(searchQuery)
                 .oninput(e => searchQuery.value = (e.target as HTMLInputElement).value)
+                .onkeydown((e: KeyboardEvent) => {
+                    if (e.key !== "Enter") return;
+                    e.preventDefault();
+                    const val = searchQuery.value.trim().toLowerCase();
+                    if (!val) return;
+                    const allGenres = Object.values(Genre);
+                    const match =
+                        allGenres.find(g => g.toLowerCase() === val) ??
+                        allGenres.find(g => getSubgenreDisplay(g).toLowerCase() === val) ??
+                        allGenres.find(g => g.toLowerCase().includes(val) || getSubgenreDisplay(g).toLowerCase().includes(val));
+                    if (match) {
+                        addGenre(match);
+                    }
+                    searchQuery.value = "";
+                })
                 .build(),
         ),
         when(
@@ -128,7 +144,7 @@ function selectedGenresRow(
 function suggestionsRow(suggestedGenres: Signal<Genre[]>, addGenre: (g: Genre) => void) {
     return when(
         compute(s => s.length > 0, suggestedGenres),
-        create("div").classes("flex-v", "small-gap").children(
+        () => create("div").classes("flex-v", "small-gap").children(
             create("span").classes("color-dim", "small").text(t("SUGGESTIONS")),
             signalMap(
                 suggestedGenres,
@@ -182,7 +198,7 @@ function parentGenreSection(
         parentGenreHeader(parent, isExpanded, toggleParent),
         when(
             isExpanded,
-            horizontal(
+            () => horizontal(
                 signalMap(
                     compute(() => getFilteredGenres(parent)),
                     create("div").classes("flex", "flex-wrap", "small-gap"),

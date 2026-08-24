@@ -50,7 +50,7 @@ export class GenericTemplates {
             icon$,
         );
         const svgClass = compute((m): string => (m ? "_" : "svg"), isMaterial);
-        const actual = compute((i, m) => (!i && m ? "" : i), icon$, isMaterial);
+        const actual = compute((i, _m) => i || "", icon$, isMaterial);
 
         return icon({
             icon: actual,
@@ -785,22 +785,21 @@ export class GenericTemplates {
     }
 
     static progressSectionPart(part: Signal<ProgressPart | null>) {
-        const retryable = compute((p): boolean => {
-            return (p && p.state && p.state === ProgressState.error && p.retryFunction !== undefined) ?? false;
-        }, part);
-        const title = compute(p => p?.title, part) as StringOrSignal;
-        const state = compute(p => p?.state, part) as StringOrSignal;
-        const icon = compute(p => p?.icon, part) as StringOrSignal;
-        const text = compute(p => p?.text, part) as StringOrSignal;
-        const progress = compute(p => p?.progress ?? 0, part);
-        const retryFunction = compute(p => p?.retryFunction, part);
+        return when(part, () => {
+            const retryable = compute((p): boolean => {
+                return (p && p.state && p.state === ProgressState.error && p.retryFunction !== undefined) ?? false;
+            }, part);
+            const title = compute(p => p?.title, part) as StringOrSignal;
+            const state = compute(p => p?.state, part) as StringOrSignal;
+            const icon = compute(p => p?.icon, part) as StringOrSignal;
+            const text = compute(p => p?.text, part) as StringOrSignal;
+            const progress = compute(p => p?.progress ?? 0, part);
+            const retryFunction = compute(p => p?.retryFunction, part);
 
-        return when(
-            part,
-            create("div").classes("flex", "relative", "progress-section", state, "align-children", "no-gap").title(title).children(
+            return create("div").classes("flex", "relative", "progress-section", state, "align-children", "no-gap").title(title).children(
                 when(
                     progress,
-                    create("div").classes("progress-circle").styles(
+                    () => create("div").classes("progress-circle").styles(
                         "background",
                         compute(
                             p => `conic-gradient(var(--progress-color) ${p}%, transparent 0%)`,
@@ -814,7 +813,7 @@ export class GenericTemplates {
                 ).build(),
                 when(
                     retryable,
-                    create("div").classes("progress-section-retry", "flex", "small-gap").children(
+                    () => create("div").classes("progress-section-retry", "flex", "small-gap").children(
                         GenericTemplates.icon("refresh", true, [state]),
                         create("span")
                             .classes("progress-section-part-text")
@@ -822,8 +821,8 @@ export class GenericTemplates {
                         })).build(),
                     ).build(),
                 ),
-            ).build(),
-        );
+            ).build();
+        });
     }
 
     static verticalDragIndicator() {

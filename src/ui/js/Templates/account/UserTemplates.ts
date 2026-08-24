@@ -165,14 +165,17 @@ export class UserTemplates {
 
         UserTemplates.#popoverUid += 1;
         const popId = `user-preview-${user.id}-${UserTemplates.#popoverUid}`;
+        const following$ = signal(!!Util.isFollowing(user).value);
+        const followedBy$ = signal(!!Util.isFollowedBy(user).value);
+        let followStateRefreshed = false;
         const preview = PopoverTemplates.manualPopover(popId,
-            UserTemplates.userPreview(user, context),
+            UserTemplates.userPreview(user, context, following$, followedBy$),
         );
 
         const link = create("a")
             .classes("page-link", "color-dim", "flex", "align-children", "small-gap", "noflexwrap")
             .onclick((e: MouseEvent) => {
-                if (e.button === 0) {
+                if (e.button === 0 && !preview.contains(e.target as Node)) {
                     e.preventDefault();
                     navigate(`${RoutePath.profile}/${user.username}`);
                 }
@@ -193,6 +196,10 @@ export class UserTemplates {
                 if (hideTimeout) clearTimeout(hideTimeout);
                 if (timeout) clearTimeout(timeout);
                 timeout = setTimeout(() => {
+                    if (!followStateRefreshed) {
+                        followStateRefreshed = true;
+                        UserTemplates.#refreshFollowState(user, following$, followedBy$);
+                    }
                     PopoverTemplates.show(preview, container, context === UserWidgetContext.player);
                 }, 500);
             })
@@ -1680,7 +1687,9 @@ export class UserTemplates {
         });
     }
 
-    private static userPreview(user: User, context: UserWidgetContext) {
+    private static userPreview(user: User, context: UserWidgetContext, following$: Signal<boolean>, followedBy$: Signal<boolean>) {
+        const canShowFollow = compute(u => !!u && u.id !== user.id, currentUser);
+
         return create("div")
             .classes("user-preview", "flex-v", "small-gap")
             .children(
@@ -1689,6 +1698,27 @@ export class UserTemplates {
                     compute(u => u?.id === user.id, currentUser),
                 ),
                 vertical(UserTemplates.displayname(user), UserTemplates.usernameAndIcons(user)).classes("no-gap"),
+                when(
+                    canShowFollow,
+                    horizontal(
+                        when(followedBy$, UserTemplates.followsBackIndicator()),
+                        UserTemplates.followButton(following$, user.id),
+                    ).classes("align-children", "small-gap").build(),
+                ),
             ).build();
+    }
+
+    static #refreshFollowState(user: User, following$: Signal<boolean>, followedBy$: Signal<boolean>) {
+        const self = currentUser.value;
+        if (!self || self.id === user.id) {
+            return;
+        }
+        Api.getUserById(user.id).then(fresh => {
+            if (!fresh) {
+                return;
+            }
+            following$.value = !!Util.isFollowing(fresh).value;
+            followedBy$.value = !!Util.isFollowedBy(fresh).value;
+        }).catch(() => {});
     }
 }

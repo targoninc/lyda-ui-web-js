@@ -559,7 +559,7 @@ export class PageTemplates {
                 create("div").classes("fixed-bar-content").children(
                     when(
                         tabSelected(selectedTab, 0),
-                        FeedTemplates.feed(FeedType.explore, undefined, {noToolbar: true}),
+                        FeedTemplates.feed(FeedType.explore, undefined, {noToolbar: true, sortable: false}),
                     ),
                     when(
                         tabSelected(selectedTab, 1),
@@ -569,6 +569,7 @@ export class PageTemplates {
                             compact: true,
                             pageSize: 100,
                             noToolbar: true,
+                            sortable: false,
                             fetchPage: async (offset, limit, filter) => {
                                 const res = await Api.getFeed(ApiRoutes.exploreAlbumsFeed, {
                                     offset,
@@ -614,6 +615,7 @@ export class PageTemplates {
                             compact: true,
                             pageSize: 100,
                             noToolbar: true,
+                            sortable: false,
                             fetchPage: async (offset, limit, filter) => {
                                 const res = await Api.getFeed(ApiRoutes.explorePlaylistsFeed, {
                                     offset,
@@ -696,6 +698,7 @@ export class PageTemplates {
                 compact: true,
                 pageSize: 100,
                 noToolbar: true,
+                sortable: false,
                 searchOverride$: compute(_ => `reload-${reloadTrigger$.value}`, reloadTrigger$),
                 columns: [
                     {
