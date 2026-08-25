@@ -79,6 +79,7 @@ export class CommentTemplates {
                             text: t("POST"),
                             icon: { icon: "send" },
                             classes: ["positive"],
+                            disabled: compute((c) => c.trim() === "", newComment),
                             onclick: () => TrackActions.newComment(newComment, comments, track_id),
                         }),
                     ).on("focusin", () => {
@@ -202,12 +203,13 @@ export class CommentTemplates {
                 placeholder: t("REPLY_TO_NAME", comment.user!.username),
                 value: newComment,
                 attributes: ["track_id", comment.track_id.toString()],
+                disabled: compute((c) => c.trim() === "", newComment),
                 onchange: v => {
                     newComment.value = v;
                 },
                 onkeydown: (e: KeyboardEvent) => {
                     if (e.ctrlKey && e.key === "Enter") {
-                        TrackActions.newComment(newComment, comments, comment.track_id, comment.id);
+                        TrackActions.newComment(newComment, comments, comment.track_id, comment.id).then();
                     }
                 },
             })),
@@ -215,6 +217,7 @@ export class CommentTemplates {
                 text: t("POST"),
                 icon: { icon: "send" },
                 classes: ["positive"],
+                disabled: compute((c) => c.trim() === "", newComment),
                 onclick: () => TrackActions.newComment(newComment, comments, comment.track_id, comment.id),
             })),
             when(len > 0, GenericTemplates.textButton(
