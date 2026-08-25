@@ -17,6 +17,7 @@ import {PlayManager} from "../Streaming/PlayManager.ts";
 import {createModal, notify} from "../Classes/Ui.ts";
 import {Api} from "../Api/Api.ts";
 
+const COMMENT_MAX_LENGTH = 1000;
 export class CommentTemplates {
     static commentListFullWidth(track_id: number, comments: Signal<Comment[]>, showComments: Signal<boolean>) {
         const hasComments = compute(c => c.length > 0, comments);
@@ -75,13 +76,16 @@ export class CommentTemplates {
                             ta.querySelector("textarea")?.removeAttribute("autofocus");
                             return ta;
                         })(),
-                        button({
-                            text: t("POST"),
-                            icon: { icon: "send" },
-                            classes: ["positive"],
-                            disabled: compute((c) => c.trim() === "", newComment),
-                            onclick: () => TrackActions.newComment(newComment, comments, track_id),
-                        }),
+                        horizontal(
+                            button({
+                                text: t("POST"),
+                                icon: { icon: "send" },
+                                classes: ["positive"],
+                                disabled: compute((c) => c.trim() === "" || c.trim().length > 1000, newComment),
+                                onclick: () => TrackActions.newComment(newComment, comments, track_id),
+                            }),
+                            CommentTemplates.characterCounter(newComment),
+                        )
                     ).on("focusin", () => {
                         if (newComment.value !== "" || currentTrackId.value !== track_id) {
                             return;
@@ -101,6 +105,13 @@ export class CommentTemplates {
                         }
                     }).build()),
             ).build();
+    }
+
+    private static characterCounter(newComment: Signal<string>) {
+        return create("span")
+            .classes(compute((c): string => c.length > COMMENT_MAX_LENGTH ? "error" : "color-dim", newComment))
+            .text(compute((c) => `${t("CHARACTER_COUNT", c.length, COMMENT_MAX_LENGTH)}`, newComment))
+            .build();
     }
 
     static commentInList(comment: Comment, comments: Signal<Comment[]>, isInModeration = false): AnyElement {
@@ -213,13 +224,16 @@ export class CommentTemplates {
                     }
                 },
             })),
-            when(replyInputShown, button({
-                text: t("POST"),
-                icon: { icon: "send" },
-                classes: ["positive"],
-                disabled: compute((c) => c.trim() === "", newComment),
-                onclick: () => TrackActions.newComment(newComment, comments, comment.track_id, comment.id),
-            })),
+            when(replyInputShown, () => horizontal(
+                button({
+                    text: t("POST"),
+                    icon: { icon: "send" },
+                    classes: ["positive"],
+                    disabled: compute((c) => c.trim() === "" || c.trim().length > 1000, newComment),
+                    onclick: () => TrackActions.newComment(newComment, comments, comment.track_id, comment.id),
+                }),
+                CommentTemplates.characterCounter(newComment),
+            ).build()),
             when(len > 0, GenericTemplates.textButton(
                 compute((r): string => `${t("REPLIES_SHOWN_HIDDEN", len, r)}`, repliesShown),
                 () => repliesShown.value = !repliesShown.value,

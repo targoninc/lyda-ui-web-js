@@ -447,6 +447,7 @@ export const en = {
     REPLIES_SHOWN_HIDDEN: (amount, shown) => `${amount} repl${amount === 1 ? "y" : "ies"} ${shown ? "shown" : "hidden"}`,
     REPLY: "Reply",
     REPLY_TO_NAME: name => `Reply to ${name}...`,
+    CHARACTER_COUNT: (count, max) => `${count}/${max} characters`,
     COMMENT_IS_HIDDEN: "This comment has been hidden. Click to show anyway.",
     EMAIL: "E-Mail",
     REGISTER: "Register",
