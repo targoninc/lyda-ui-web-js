@@ -1,9 +1,8 @@
 import { input, searchableSelect, SelectOption, textarea, toggle } from "@targoninc/jess-components";
 import { GenericTemplates } from "./GenericTemplates.ts";
-import { compute, create, HtmlPropertyValue, InputType, signal, Signal, StringOrSignal, TypeOrSignal } from "@targoninc/jess";
 import { t } from "../../../locales";
 import { Visibility } from "@targoninc/lyda-shared/src/Enums/Visibility";
-
+import { asSignal, compute, create, HtmlPropertyValue, InputType, isSignal, signal, Signal, StringOrSignal, TypeOrSignal } from "@targoninc/jess";
 export class FormTemplates {
     static fileField(title: StringOrSignal, text: string, name: string, accept: string, required = false, onchange = (v: string, files: FileList | null) => {}) {
         return create("div")
@@ -65,9 +64,8 @@ export class FormTemplates {
             label: title,
             name,
             placeholder,
-            value,
-            required,
-            onchange,
+            value: isSignal(value) ? asSignal(value).value : value,
+            onchange: v => onchange(Number(v)),
             attributes: ["autocomplete", name, "min", min.toString(), "max", max.toString(), "step", step.toString()],
             classes,
         });
