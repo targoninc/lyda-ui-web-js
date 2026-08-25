@@ -50,6 +50,8 @@ export class BuyTemplates {
         const onClose = () => modal ? Util.removeModal(modal) : undefined;
         const inCheckout = signal(false);
         const estTotal = compute(a => (a ?? price) * 1.19, amount);
+        const rangeErrorText = t("AMOUNT_MUST_BE_BETWEEN", currency(price), currency(price * MAX_PRICE_FACTOR));
+        const amountOutOfRange = compute(a => a !== null && (a < price || a > price * MAX_PRICE_FACTOR), amount);
 
         modal = createModal([
             vertical(
@@ -82,8 +84,13 @@ export class BuyTemplates {
                                     .text("$"),
                                 FormTemplates.moneyField(t("AMOUNT_IN_USD"), "amount", currency(price) + "+", amount, false, val => amount.value = val, price, price * MAX_PRICE_FACTOR, 0.10, ["bigger-input"]),
                             ),
-                            create("span")
-                                .text(compute(total => `${t("EST_TOTAL", currency(total))}`, estTotal)),
+                        when(amountOutOfRange, create("span")
+                            .classes("warning")
+                            .text(rangeErrorText)
+                            .build()),
+                        when(compute(o => !o, amountOutOfRange), create("span")
+                            .text(compute(total => `${t("EST_TOTAL", currency(total))}`, estTotal))
+                            .build()),
                         ).build(), true),
                         when(inCheckout, button({
                             text: t("CONTINUE_TO_CHECKOUT"),
@@ -94,10 +101,6 @@ export class BuyTemplates {
                         }), true),
                         when(compute((checkingOut, p) => checkingOut && p.includes(PaymentProvider.stripe), inCheckout, providers), BuyTemplates.stripeButton(item, amount, onClose)),
                     ).classes("space-between"),
-                    when(compute(a => a !== null && a > price * MAX_PRICE_FACTOR, amount), create("span")
-                        .classes("warning")
-                        .text(t("AMOUNT_MUST_BE_BETWEEN", currency(price), currency(price * MAX_PRICE_FACTOR)))
-                        .build()),
                 ).build(),
             ).styles("max-width", "500px"),
         ], `buy-${item.type}`);
