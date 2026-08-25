@@ -60,15 +60,16 @@ export class TrackActions {
     }
 
     static async newComment(content: Signal<string>, comments: Signal<Comment[]>, track_id: number, parentCommentId: number | null = null) {
-        if (!content.value || content.value === "") {
+        const cont = content.value.trim();
+        if (!cont || cont.length === 0) {
             return;
         }
-        if (content.value.length > 1000) {
+        if (cont.length > 1000) {
             notify(`${t("ERROR_MUST_BE_SHORTER_N", 1000)}`, NotificationType.error);
             return;
         }
 
-        const createdId = await Api.newComment(track_id, content.value, parentCommentId);
+        const createdId = await Api.newComment(track_id, cont, parentCommentId);
 
         if (createdId === null) {
             return;
@@ -82,7 +83,7 @@ export class TrackActions {
 
         const comment = <Comment>{
             id: createdId,
-            content: content.value,
+            content: cont,
             user: user,
             user_id: user.id,
             track_id: track_id,
