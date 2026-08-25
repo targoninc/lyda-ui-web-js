@@ -209,7 +209,7 @@ export class PlaylistTemplates {
                 vertical(
                     vertical(
                         MusicTemplates.title(EntityType.playlist, playlist.title, playlist.id, icons, TextSize.xxLarge, false),
-                        UserTemplates.userWidget(a_user, [], [], UserWidgetContext.singlePage),
+                        UserTemplates.userLink(UserWidgetContext.singlePage, a_user),
                     ).classes("nogap").build(),
                     horizontal(
                         GenericTemplates.timestamp(playlist.created_at),

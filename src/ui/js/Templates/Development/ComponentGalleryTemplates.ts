@@ -322,7 +322,7 @@ export class ComponentGalleryTemplates {
             "gallery-users",
             "User widgets",
             ComponentGalleryTemplates.#row(
-                UserTemplates.userWidget(sampleUser, [], [], UserWidgetContext.list),
+                UserTemplates.userLink(UserWidgetContext.list, sampleUser),
                 UserTemplates.username(sampleUser, false),
                 UserTemplates.displayname(sampleUser),
                 UserTemplates.verificationBadge(),
@@ -331,14 +331,14 @@ export class ComponentGalleryTemplates {
                 UserTemplates.followsBackIndicator(),
             ),
             ComponentGalleryTemplates.#row(
-                UserTemplates.userWidget(sampleUser, [], [], UserWidgetContext.singlePage),
-                UserTemplates.userWidget(sampleUser, [], [], UserWidgetContext.player),
+                UserTemplates.userLink(UserWidgetContext.singlePage, sampleUser),
+                UserTemplates.userLink(UserWidgetContext.player, sampleUser),
                 UserTemplates.followButton(signal(false), 1, true),
                 UserTemplates.badge({name: "vip", description: "VIP"} as Badge),
             ),
             ComponentGalleryTemplates.#row(
-                UserTemplates.userWidget(sampleUser, [], [], UserWidgetContext.card),
-                UserTemplates.userWidget(sampleUser, [], [], UserWidgetContext.comment),
+                UserTemplates.userLink(UserWidgetContext.card, sampleUser),
+                UserTemplates.userLink(UserWidgetContext.comment, sampleUser),
                 UserTemplates.badges([
                     {name: "staff", description: "Staff"} as Badge,
                     {name: "cute", description: "Cute"} as Badge,
@@ -346,7 +346,7 @@ export class ComponentGalleryTemplates {
                 ]),
             ),
             ComponentGalleryTemplates.#row(
-                UserTemplates.userWidget(sampleUser, [], [], UserWidgetContext.nav),
+                UserTemplates.userLink(UserWidgetContext.nav, sampleUser),
                 UserTemplates.username(sampleUser, true),
                 UserTemplates.followsBackIndicator(),
                 UserTemplates.verificationBadge(),

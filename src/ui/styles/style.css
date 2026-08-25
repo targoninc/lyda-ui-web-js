@@ -435,6 +435,10 @@ input, textarea, select {
     height: max-content;
 }
 
+textarea {
+    min-height: calc(1lh + 2 * var(--jessc-input-padding-y) + 2px);
+}
+
 input.round-input, textarea.round-input, select.round-input {
     border-radius: 999px;
 }

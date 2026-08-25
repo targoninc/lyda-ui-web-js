@@ -50,7 +50,7 @@ import {InteractionType} from "@targoninc/lyda-shared/src/Enums/InteractionType"
 import {SubscriptionTemplates} from "./money/SubscriptionTemplates.ts";
 import {t} from "../../locales";
 import {TransactionTemplates} from "./money/TransactionTemplates.ts";
-import {BatchEditTemplates, BatchEditField} from "./generic/BatchEditTemplates.ts";
+import {BatchEditField, BatchEditTemplates} from "./generic/BatchEditTemplates.ts";
 import {ComponentGalleryTemplates} from "./Development/ComponentGalleryTemplates.ts";
 
 
@@ -921,25 +921,21 @@ export class PageTemplates {
                 .text(t("FAILED_LOADING_RANDOM_USER"))
                 .build());
 
-        return create("div")
-            .classes("flex-v")
-            .children(
-                create("h1")
-                    .styles("font-size", "10vw", "line-height", "1", "font-weight", "bold")
-                    .text("404")
-                    .build(),
-                create("h2")
-                    .text(t("NOTHING_HERE"))
-                    .build(),
-                create("span")
-                    .text(t("RANDOM_USER"))
-                    .build(),
-                when(user, create("div")
-                    .classes("flex")
-                    .children(
-                        UserTemplates.userWidget(user),
-                    ).build()),
-            ).build();
+        return vertical(
+            create("h1")
+                .styles("font-size", "10vw", "line-height", "1", "font-weight", "bold")
+                .text("404")
+                .build(),
+            create("h2")
+                .text(t("NOTHING_HERE"))
+                .build(),
+            create("span")
+                .text(t("RANDOM_USER"))
+                .build(),
+            when(user, horizontal(
+                compute(u => u ? UserTemplates.userLink(UserWidgetContext.singlePage, u) : nullElement(), user),
+            ).build()),
+        ).build();
     }
 
     static async unapprovedTracksPage() {

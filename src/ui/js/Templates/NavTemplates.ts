@@ -4,7 +4,7 @@ import { UserActions } from "../Actions/UserActions.ts";
 import { GenericTemplates } from "./generic/GenericTemplates.ts";
 import { SearchTemplates } from "./SearchTemplates.ts";
 import { navigate, reload } from "../Routing/Router.ts";
-import { compute, create, Signal, StringOrSignal, when } from "@targoninc/jess";
+import {compute, create, nullElement, Signal, StringOrSignal, when} from "@targoninc/jess";
 import { router } from "../../main.ts";
 import { currentUser } from "../state.ts";
 import { RoutePath } from "../Routing/routes.ts";
@@ -153,7 +153,7 @@ export class NavTemplates {
                     }
                 }),
                 NotificationTemplates.notifications(),
-                UserTemplates.userWidget(currentUser, [], [], UserWidgetContext.nav),
+                compute(u => u ? UserTemplates.userLink(UserWidgetContext.nav, u) : nullElement(), currentUser),
             ).build();
     }
 

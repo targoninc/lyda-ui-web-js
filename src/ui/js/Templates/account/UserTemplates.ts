@@ -58,100 +58,6 @@ import {TextSize} from "../../Enums/TextSize.ts";
 export class UserTemplates {
     static #popoverUid = 0;
 
-    static userWidget(
-        user: User | Signal<User | null>,
-        extraAttributes: HtmlPropertyValue[] = [],
-        extraClasses: StringOrSignal[] = [],
-        context: UserWidgetContext = UserWidgetContext.unknown,
-        overrideArtistName?: string | null
-    ) {
-        const out = signal<AnyElement>(nullElement());
-
-        const getWidget = (newUser: User | null) => {
-            if (!newUser) {
-                return nullElement();
-            }
-
-            const base = create("button");
-            if (extraAttributes) {
-                base.attributes(...extraAttributes);
-            }
-            if (extraClasses) {
-                base.classes(...extraClasses);
-            }
-            out.value = this.userWidgetInternal(context, newUser, base, Util.isFollowing(user), overrideArtistName);
-        };
-
-        if (user.constructor === Signal) {
-            const userSignal = user as Signal<User | null>;
-            const signature = (u: User | null) =>
-                u ? `${u.id}|${u.username}|${u.displayname}|${u.has_avatar}|${u.has_banner}` : "";
-            let lastSignature = signature(userSignal.value);
-            userSignal.subscribe((newUser: User | null) => {
-                const nextSignature = signature(newUser);
-                if (nextSignature !== lastSignature) {
-                    lastSignature = nextSignature;
-                    getWidget(newUser);
-                }
-            });
-            getWidget(userSignal.value);
-        } else {
-            getWidget(user as User);
-        }
-        return out;
-    }
-
-    private static userWidgetInternal(
-        context: UserWidgetContext,
-        user: User,
-        base: DomNode,
-        following: boolean | Signal<boolean>,
-        overrideArtistName?: string | null
-    ) {
-        const maxDisplaynameLength = [UserWidgetContext.singlePage, UserWidgetContext.list].includes(context)
-            ? 100
-            : 15;
-        const avatarState = signal(Images.DEFAULT_AVATAR);
-        if (user.has_avatar) {
-            Util.getCachedUserAvatar(user.id).then(url => {
-                avatarState.value = url;
-            });
-        }
-        if (following.constructor !== Signal) {
-            following = signal(following as boolean);
-        }
-        const showFollowButton = compute(u => u && u.id && u.id !== user.id && !following.value, currentUser);
-        if (overrideArtistName?.trim().length === 0) {
-            overrideArtistName = null;
-        }
-
-        return base
-            .classes("user-widget", "jess", "round-on-tiny-breakpoint")
-            .attributes("user_id", user.id, "username", user.username)
-            .onclick((e: MouseEvent) => {
-                if (e.button === 0 && target(e).tagName.toLowerCase() === "button") {
-                    e.preventDefault();
-                    navigate(`${RoutePath.profile}/` + user.username);
-                }
-            })
-            .href(Links.PROFILE(user.username))
-            .title(user.displayname + " (@" + user.username + ")")
-            .children(
-                UserTemplates.userIcon(user.id, avatarState),
-                create("span")
-                    .classes("text", "align-center", "nopointer", "hideOnTinyBreakpoint")
-                    .text(truncateText(overrideArtistName ?? user.displayname, maxDisplaynameLength))
-                    .attributes("data-user-id", user.id)
-                    .build(),
-                create("span")
-                    .classes("text", "align-center", TextSize.xSmall, "nopointer", "user-name", "hideOnSmallBreakpoint")
-                    .text("@" + user.username)
-                    .attributes("data-user-id", user.id)
-                    .build(),
-                when(showFollowButton, UserTemplates.followButton(following, user.id, true)),
-            ).build();
-    }
-
     public static userLink(context: UserWidgetContext, user: User, overrideArtistName?: string | null) {
         const maxDisplaynameLength = [UserWidgetContext.singlePage, UserWidgetContext.list].includes(context)
             ? 100
@@ -361,9 +267,9 @@ export class UserTemplates {
             following = signal(following as boolean);
         }
         const text = noText ? "" : compute((f): string => (f ? `${t("UNFOLLOW")}` : `${t("FOLLOW")}`), following);
+        const icon = compute((f): string => (f ? "person_cancel" : "person_add"), following);
 
-        return GenericTemplates.textButton(text, async () => TrackActions.toggleFollow(user_id, following),
-            compute((f): string => (f ? "person_cancel" : "person_add"), following));
+        return GenericTemplates.textButton(text, async () => TrackActions.toggleFollow(user_id, following), icon, text);
     }
 
     static followsBackIndicator() {

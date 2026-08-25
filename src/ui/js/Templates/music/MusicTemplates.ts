@@ -95,7 +95,10 @@ export class MusicTemplates {
                     .src(imageState)
                     .alt(item.title)
                     .onclick(() => {
-                        Ui.showImageModal(imageState);
+                        // A blob URL from the caching service can be revoked at any time
+                        // (LRU eviction), which breaks right-click -> open in new tab.
+                        // The modal needs a stable URL that also works as a top-level navigation.
+                        Ui.showImageModal(item.has_cover ? Util.getImage(item.id, fileType) : imageState.value);
                     }).build(),
                 when(
                     isOwnItem,

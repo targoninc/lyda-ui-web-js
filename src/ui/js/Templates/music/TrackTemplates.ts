@@ -461,7 +461,7 @@ export class TrackTemplates {
         const backgroundImage = compute(c => trackData.canDownload ? `url(${c})` : "none", coverFile);
         const bought = trackData.canDownload && !trackData.canEdit;
         const selectedTab$ = signal(0);
-        const isUploader = currentUser.value?.id === track.user.id;
+        const isUploader = currentUser.value?.id === track.user?.id;
         const tabs = [t("COMMENTS"), t("ALBUMS"), t("PLAYLISTS"), t("BUYERS")];
         if (isUploader) {
             tabs.push(t("STATISTICS"));
@@ -488,7 +488,7 @@ export class TrackTemplates {
                                             },
                                             text: t("BOUGHT"),
                                         })),
-                                        UserTemplates.userWidget(trackUser, [], [], UserWidgetContext.singlePage, track.artistname),
+                                        UserTemplates.userLink(UserWidgetContext.singlePage, trackUser, track.artistname),
                                     ).classes("align-children"),
                                 ).classes("nogap"),
                                 TrackTemplates.collaboratorSection(track$, linkedUserState),
@@ -760,7 +760,7 @@ export class TrackTemplates {
                 vertical(
                     MusicTemplates.title(EntityType.track, data.track.title, data.track.id, [], TextSize.large, true, false, data.track.wip),
                     horizontal(
-                        UserTemplates.userWidget(data.user, [], [], UserWidgetContext.card),
+                        UserTemplates.userLink(UserWidgetContext.card, data.user),
                         create("span")
                             .text(t("REQUESTED_YOU_TO_BE"))
                             .build(),
@@ -905,7 +905,7 @@ export class TrackTemplates {
                 buyers$,
                 vertical(),
                 sale => vertical(
-                    UserTemplates.userWidget(sale.user!, [], [], UserWidgetContext.singlePage),
+                    UserTemplates.userLink(UserWidgetContext.list, sale.user!),
                     horizontal(
                         TransactionTemplates.amount("in", sale.amount_ct / 100),
                         GenericTemplates.timestamp(sale.created_at),

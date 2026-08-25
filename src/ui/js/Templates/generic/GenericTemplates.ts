@@ -880,11 +880,12 @@ export class GenericTemplates {
             .build();
     }
 
-    static textButton(text: StringOrSignal, onclick: (e: MouseEvent) => void, icon: StringOrSignal) {
+    static textButton(text: StringOrSignal, onclick: (e: MouseEvent) => void, icon: StringOrSignal, title: StringOrSignal = "") {
         return button({
             classes: ["color-dim"],
             onclick,
             icon: { icon, adaptive: true },
+            title,
             text
         });
     }

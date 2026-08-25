@@ -243,7 +243,7 @@ export class AlbumTemplates {
                                 onclick: () => {},
                                 text: t("BOUGHT"),
                             })),
-                            UserTemplates.userWidget(albumUser, [], [], UserWidgetContext.singlePage),
+                            UserTemplates.userLink(UserWidgetContext.singlePage, albumUser),
                         ).classes("align-children"),
                     ).build(),
                 horizontal(

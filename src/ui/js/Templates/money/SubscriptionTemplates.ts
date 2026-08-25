@@ -1,4 +1,4 @@
-import { compute, create, Signal, signal, signalMap, when } from "@targoninc/jess";
+import {compute, create, nullElement, Signal, signal, signalMap, when} from "@targoninc/jess";
 import { button, heading } from "@targoninc/jess-components";
 import { AvailableSubscription } from "@targoninc/lyda-shared/src/Models/db/finance/AvailableSubscription";
 import { Subscription } from "@targoninc/lyda-shared/src/Models/db/finance/Subscription";
@@ -18,6 +18,7 @@ import { TableTemplates } from "../generic/TableTemplates.ts";
 import { sortByProperty } from "../../Classes/Helpers/Sorting.ts";
 import { TextSize } from "../../Enums/TextSize.ts";
 import {Api} from "../../Api/Api.ts";
+import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
 
 export class SubscriptionTemplates {
     static page() {
@@ -223,7 +224,7 @@ export class SubscriptionTemplates {
 
         return TableTemplates.tr({
             data: [
-                UserTemplates.userWidget(user),
+                compute(u => u ? UserTemplates.userLink(UserWidgetContext.singlePage, u) : nullElement(), user),
                 create("span")
                     .text(Time.agoUpdating(giftedSub.created_at))
                     .build(),
