@@ -17,6 +17,8 @@ import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import { StripeService } from "../../Services/StripeService.ts";
 
+const MAX_PRICE_FACTOR = 100;
+
 export type BuyableEntity = {
     type: "track";
     entity: Track;
@@ -40,7 +42,7 @@ export class BuyTemplates {
         const id = item.entity.id;
 
         const amount = signal<number>(0);
-        const amountValid = compute(a => a !== null && a >= price && a <= price * 100, amount);
+        const amountValid = compute(a => a !== null && a >= price && a <= price * MAX_PRICE_FACTOR, amount);
         const providers = signal<PaymentProvider[]>([]);
         Api.getPaymentProviders().then(p => providers.value = p ?? []);
 
@@ -78,7 +80,7 @@ export class BuyTemplates {
                                     .classes(TextSize.xxLarge, "align-end")
                                     .styles("line-height", "1")
                                     .text("$"),
-                                FormTemplates.moneyField(t("AMOUNT_IN_USD"), "amount", currency(price) + "+", amount, false, val => amount.value = val, price, price * 100, 0.10, ["bigger-input"]),
+                                FormTemplates.moneyField(t("AMOUNT_IN_USD"), "amount", currency(price) + "+", amount, false, val => amount.value = val, price, price * MAX_PRICE_FACTOR, 0.10, ["bigger-input"]),
                             ),
                             create("span")
                                 .text(compute(total => `${t("EST_TOTAL", currency(total))}`, estTotal)),
@@ -90,11 +92,11 @@ export class BuyTemplates {
                             disabled: compute(v => !v, amountValid),
                             onclick: async () => inCheckout.value = true,
                         }), true),
-                        when(compute((checkingOut, p) => checkingOut && p.includes(PaymentProvider.stripe), inCheckout, providers), BuyTemplates.stripeButton(item, estTotal, onClose)),
+                        when(compute((checkingOut, p) => checkingOut && p.includes(PaymentProvider.stripe), inCheckout, providers), BuyTemplates.stripeButton(item, amount, onClose)),
                     ).classes("space-between"),
-                    when(compute(a => a !== null && a > price * 100, amount), create("span")
+                    when(compute(a => a !== null && a > price * MAX_PRICE_FACTOR, amount), create("span")
                         .classes("warning")
-                        .text(t("AMOUNT_MUST_BE_BETWEEN", currency(price), currency(price * 100)))
+                        .text(t("AMOUNT_MUST_BE_BETWEEN", currency(price), currency(price * MAX_PRICE_FACTOR)))
                         .build()),
                 ).build(),
             ).styles("max-width", "500px"),
