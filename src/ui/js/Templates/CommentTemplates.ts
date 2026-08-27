@@ -76,16 +76,7 @@ export class CommentTemplates {
                             ta.querySelector("textarea")?.removeAttribute("autofocus");
                             return ta;
                         })(),
-                        horizontal(
-                            button({
-                                text: t("POST"),
-                                icon: { icon: "send" },
-                                classes: ["positive"],
-                                disabled: compute((c) => c.trim() === "" || c.trim().length > 1000, newComment),
-                                onclick: () => TrackActions.newComment(newComment, comments, track_id),
-                            }),
-                            CommentTemplates.characterCounter(newComment),
-                        )
+                        CommentTemplates.postCommentSection(newComment, comments, track_id)
                     ).on("focusin", () => {
                         if (newComment.value !== "" || currentTrackId.value !== track_id) {
                             return;
@@ -105,6 +96,19 @@ export class CommentTemplates {
                         }
                     }).build()),
             ).build();
+    }
+
+    private static postCommentSection(newComment: Signal<string>, comments: Signal<Comment[]>, track_id: number, parentCommentId: number | null = null) {
+        return horizontal(
+            button({
+                text: t("POST"),
+                icon: {icon: "send"},
+                classes: ["positive"],
+                disabled: compute((c) => c.trim() === "" || c.trim().length > 1000, newComment),
+                onclick: () => TrackActions.newComment(newComment, comments, track_id, parentCommentId),
+            }),
+            CommentTemplates.characterCounter(newComment),
+        ).classes("align-children").build();
     }
 
     private static characterCounter(newComment: Signal<string>) {
@@ -224,16 +228,7 @@ export class CommentTemplates {
                     }
                 },
             })),
-            when(replyInputShown, () => horizontal(
-                button({
-                    text: t("POST"),
-                    icon: { icon: "send" },
-                    classes: ["positive"],
-                    disabled: compute((c) => c.trim() === "" || c.trim().length > 1000, newComment),
-                    onclick: () => TrackActions.newComment(newComment, comments, comment.track_id, comment.id),
-                }),
-                CommentTemplates.characterCounter(newComment),
-            ).build()),
+            when(replyInputShown, () => CommentTemplates.postCommentSection(newComment, comments, comment.track_id, comment.id)),
             when(len > 0, GenericTemplates.textButton(
                 compute((r): string => `${t("REPLIES_SHOWN_HIDDEN", len, r)}`, repliesShown),
                 () => repliesShown.value = !repliesShown.value,
