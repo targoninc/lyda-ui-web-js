@@ -23,6 +23,7 @@ import { t } from "./locales";
 import { InteractionStateManager } from "./js/Classes/InteractionStateManager.ts";
 import { ColorExtractor } from "./js/Classes/ColorExtractor.ts";
 import { beginPageRender, disposePageRender, releaseDetachedSubscriptions } from "./js/Classes/Helpers/PageLifecycle.ts";
+import { initializeFixedBarRadius } from "./js/Classes/Helpers/FixedBarRadius.ts";
 import {button} from "@targoninc/jess-components";
 
 initializeGlobalErrorHandler();
@@ -129,5 +130,6 @@ KeyBinds.initiate();
 UiActions.runMobileCheck();
 StreamingBroadcaster.initializeReceiver();
 initializeMediaSessionCallbacks();
+initializeFixedBarRadius();
 
 //startUpdateCheck();
