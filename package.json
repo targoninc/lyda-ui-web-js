@@ -30,7 +30,7 @@
   "dependencies": {
     "@stripe/stripe-js": "^8.11.0",
     "@targoninc/jess": "^0.0.38",
-    "@targoninc/jess-components": "^0.0.53",
+    "@targoninc/jess-components": "^0.0.54",
     "@targoninc/lyda-shared": "^0.0.121",
     "@types/bun": "^1.3.11",
     "@typescript/native-preview": "^7.0.0-dev.20260319.1",
@@ -38,5 +38,5 @@
     "dotenv": "^17.3.1",
     "express": "^5.2.1"
   },
-  "version": "0.0.945"
+  "version": "0.0.946"
 }

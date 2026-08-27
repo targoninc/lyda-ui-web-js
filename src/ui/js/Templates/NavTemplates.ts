@@ -32,7 +32,7 @@ export class NavTemplates {
                 NavTemplates.navLogo(),
                 NavTemplates.burgerMenu(burgerMenuOpen),
                 create("div")
-                    .classes("flex", "flex-grow")
+                    .classes("flex", "flex-grow", "noflexwrap")
                     .children(
                         NavTemplates.navButton(RoutePath.library, t("LIBRARY"), "category"),
                         NavTemplates.navButton(RoutePath.following, t("FEED"), "rss_feed"),
@@ -108,7 +108,7 @@ export class NavTemplates {
                 classes: ["inline-icon", "svg", "nopointer"]
             },
             onclick: () => navigate(pageRoute),
-            classes: ["hideOnMidBreakpoint", activeClass],
+            classes: ["hideOnSmallBreakpoint", activeClass],
             id: pageRoute,
         });
     }
@@ -135,9 +135,10 @@ export class NavTemplates {
             .classes("widest-fill-right", "relative")
             .children(
                 button({
-                    classes: ["hideOnMidBreakpoint", "fullHeight", uploadActiveClass],
+                    classes: ["hideOnSmallBreakpoint", "fullHeight", uploadActiveClass],
                     icon: { icon: "upload" },
                     disabled: isUploadPage,
+                    title: t("UPLOAD"),
                     onclick: async (e: MouseEvent) => {
                         e.preventDefault();
                         navigate(RoutePath.upload);
@@ -147,6 +148,7 @@ export class NavTemplates {
                     classes: ["hideOnMidBreakpoint", "fullHeight", uploadActiveClass],
                     icon: { icon: "docs_add_on" },
                     disabled: isPlaylistPage,
+                    title: t("NEW_PLAYLIST"),
                     onclick: async (e: MouseEvent) => {
                         e.preventDefault();
                         navigate(RoutePath.createPlaylist);
