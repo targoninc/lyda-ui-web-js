@@ -232,7 +232,9 @@ body {
 }
 
 .loader {
+    border: 1px solid transparent;
     border-top: 1px solid var(--fg-0);
+    background: color-mix(in oklab, var(--bg-0), transparent 50%);
     border-radius: 100%;
     width: 20px;
     height: 20px;

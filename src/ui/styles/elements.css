@@ -485,7 +485,7 @@ label {
     user-select: none;
 }
 
-.loudness-control:hover .loudness-bar, .loudness-bar:hover {
+.loudness-control:hover .loudness-bar, .loudness-bar:hover, .loudness-bar:active {
     display: initial;
 }
 
@@ -783,7 +783,6 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 #banner-loader, #avatar-loader {
-    border-color: var(--bg-1);
     width: 30px;
     height: 30px;
 }

@@ -654,7 +654,7 @@ export class UserTemplates {
     }
 
     static profileHeader(user: User, isOwnProfile: Signal<boolean>) {
-        const avatarLoading = signal(false);
+        const avatarLoading = signal(true);
         const bannerLoading = signal(false);
         const userBanner = signal(Images.DEFAULT_BANNER);
         if (user.has_banner) {
@@ -667,27 +667,25 @@ export class UserTemplates {
             });
         }
 
-        const bannerContainer = create("div")
-            .classes(
-                "banner-container",
-                "relative",
-                compute((i): string => (i ? "clickable" : "_"), isOwnProfile),
-                compute((i): string => (i ? "blurOnParentHover" : "_"), isOwnProfile),
-            )
-            .onclick(() => Ui.showImageModal(userBanner))
-            .children(
-                create("img")
-                    .classes("nopointer", "user-banner", "banner-image")
-                    .attributes("data-user-id", user.id)
-                    .src(userBanner)
-                    .alt(user.username)
-                    .build(),
-            ).build();
-
         return create("div")
             .classes("profile-header")
             .children(
-                bannerContainer,
+                create("div")
+                    .classes(
+                        "banner-container",
+                        "relative",
+                        compute((i): string => (i ? "clickable" : "_"), isOwnProfile),
+                        compute((i): string => (i ? "blurOnParentHover" : "_"), isOwnProfile),
+                    )
+                    .onclick(() => Ui.showImageModal(userBanner))
+                    .children(
+                        create("img")
+                            .classes("nopointer", "user-banner", "banner-image")
+                            .attributes("data-user-id", user.id)
+                            .src(userBanner)
+                            .alt(user.username)
+                            .build(),
+                    ).build(),
                 when(
                     isOwnProfile,
                     create("div")
@@ -700,7 +698,7 @@ export class UserTemplates {
                 when(
                     bannerLoading,
                     create("div")
-                        .classes("loader", "loader-small", "centeredInParent", "hidden")
+                        .classes("loader", "loader-small", "centeredInParent")
                         .attributes("id", "banner-loader")
                         .build(),
                 ),
@@ -740,7 +738,7 @@ export class UserTemplates {
                                 when(
                                     avatarLoading,
                                     create("div")
-                                        .classes("loader", "loader-small", "centeredInParent", "hidden")
+                                        .classes("loader", "loader-small", "centeredInParent")
                                         .attributes("id", "avatar-loader")
                                         .build(),
                                 ),
