@@ -3,7 +3,7 @@ import { UserTemplates } from "./account/UserTemplates.ts";
 import { UserActions } from "../Actions/UserActions.ts";
 import { GenericTemplates } from "./generic/GenericTemplates.ts";
 import { SearchTemplates } from "./SearchTemplates.ts";
-import { navigate, reload } from "../Routing/Router.ts";
+import { navigate } from "../Routing/Router.ts";
 import {compute, create, nullElement, Signal, StringOrSignal, when} from "@targoninc/jess";
 import { router } from "../../main.ts";
 import { currentUser } from "../state.ts";
@@ -29,18 +29,22 @@ export class NavTemplates {
         return create("nav")
             .id("navTop")
             .children(
-                NavTemplates.navLogo(),
-                NavTemplates.burgerMenu(burgerMenuOpen),
                 create("div")
-                    .classes("flex", "flex-grow", "noflexwrap")
+                    .classes("nav-content")
                     .children(
-                        NavTemplates.navButton(RoutePath.library, t("LIBRARY"), "category"),
-                        NavTemplates.navButton(RoutePath.following, t("FEED"), "rss_feed"),
-                        NavTemplates.navButton(RoutePath.explore, t("EXPLORE"), "explore"),
-                        SearchTemplates.search(SearchContext.navBar),
-                    ).build(),
-                when(currentUser, () => NavTemplates.accountSection()),
-                when(currentUser, () => NavTemplates.notSignedInNote(), true)
+                        NavTemplates.navLogo(),
+                        NavTemplates.burgerMenu(burgerMenuOpen),
+                        create("div")
+                            .classes("flex", "flex-grow", "noflexwrap")
+                            .children(
+                                NavTemplates.navButton(RoutePath.library, t("LIBRARY"), "category"),
+                                NavTemplates.navButton(RoutePath.following, t("FEED"), "rss_feed"),
+                                NavTemplates.navButton(RoutePath.explore, t("EXPLORE"), "explore"),
+                                SearchTemplates.search(SearchContext.navBar),
+                            ).build(),
+                        when(currentUser, () => NavTemplates.accountSection()),
+                        when(currentUser, () => NavTemplates.notSignedInNote(), true)
+                    ).build()
             ).build();
     }
 
