@@ -654,7 +654,7 @@ export class UserTemplates {
     }
 
     static profileHeader(user: User, isOwnProfile: Signal<boolean>) {
-        const avatarLoading = signal(true);
+        const avatarLoading = signal(false);
         const bannerLoading = signal(false);
         const userBanner = signal(Images.DEFAULT_BANNER);
         if (user.has_banner) {
