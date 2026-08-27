@@ -26,6 +26,22 @@
     display: flex;
 }
 
+.nav-button {
+    border-top: none !important;
+    padding-top: 26px !important;
+    margin-top: -20px;
+    border-radius: 0 0 var(--large-border-radius) var(--large-border-radius) !important;
+    transition: transform 0.2s ease;
+}
+
+.nav-button:hover {
+    transform: translateY(2px);
+}
+
+.nav-button.active {
+    box-shadow: 0 0 20px -10px inset var(--blue);
+}
+
 .mfa-option {
     padding: var(--layout-gap) !important;
     flex-direction: column;

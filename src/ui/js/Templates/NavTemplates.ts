@@ -46,7 +46,7 @@ export class NavTemplates {
 
     static navLogo() {
         return create("div")
-            .classes("nav-logo", "hideOnMidBreakpoint", "pointer")
+            .classes("nav-logo", "hideOnSmallBreakpoint", "pointer")
             .onclick(async () => {
                 navigate("explore");
             })
@@ -57,7 +57,7 @@ export class NavTemplates {
 
     static burgerMenu(open: Signal<boolean>) {
         return create("div")
-            .classes("burger-menu", "flexOnMidBreakpoint", "flex", "clickable")
+            .classes("burger-menu", "flexOnSmallBreakpoint", "flex", "clickable")
             .onclick(() => open.value = true)
             .children(
                 GenericTemplates.icon(Icons.BURGER, true, ["nopointer", "icon", "svg", "align-center"], t("OPEN_MENU")),
@@ -108,7 +108,7 @@ export class NavTemplates {
                 classes: ["inline-icon", "svg", "nopointer"]
             },
             onclick: () => navigate(pageRoute),
-            classes: ["hideOnSmallBreakpoint", activeClass],
+            classes: ["hideOnSmallBreakpoint", "nav-button", activeClass],
             id: pageRoute,
         });
     }

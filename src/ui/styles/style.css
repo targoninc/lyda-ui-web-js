@@ -1179,7 +1179,7 @@ td:last-child, th:last-child {
     z-index: 4;
 }
 
-.flexOnMidBreakpoint {
+.flexOnMidBreakpoint, .flexOnSmallBreakpoint {
     display: none;
 }
 
