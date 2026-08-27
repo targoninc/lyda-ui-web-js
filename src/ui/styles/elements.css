@@ -794,7 +794,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     width: calc(100% - 40px);
     height: calc(100% - 40px);
     background: var(--bg-0);
-    z-index: 3;
+    z-index: 11;
 }
 
 .burger-menu-button {
@@ -1544,13 +1544,14 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .mobile-menu-close {
     padding: var(--base-padding);
-    background: var(--bg-5);
+    background: var(--bg-1);
     border-radius: 999px;
     height: 3em;
     width: 3em;
     align-items: center;
     display: flex;
     justify-content: center;
+    border: 1px solid var(--border);
 }
 
 .benefit-item {
