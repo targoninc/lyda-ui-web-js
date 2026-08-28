@@ -1,5 +1,5 @@
 // Adjusts the top corners of sticky .fixed-bar elements as they scroll under
-// the sticky nav: the top border-radius goes from the pill start (999px,
+// the sticky nav: the top border-radius goes from the pill start (29px,
 // capped at half the bar's own height) to 0px while the bar's top edge
 // travels from the nav's bottom edge to its sticky position beneath it.
 // Bars that have not reached the nav keep their full pill shape, no matter
@@ -13,7 +13,7 @@
 //
 // STICKY_TOP must match `.fixed-bar { top: ... }` in styles/elements.css.
 const STICKY_TOP = 43;
-const START_RADIUS = 999;
+const START_RADIUS = 29;
 
 export function initializeFixedBarRadius() {
     const update = () => {

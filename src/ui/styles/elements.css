@@ -1318,7 +1318,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     top: 43px;
     z-index: 1;
     padding: var(--base-padding);
-    border-radius: 999px;
+    border-radius: 29px;
     border: 1px solid var(--border);
     box-shadow: 0 10px 20px -7px var(--bg-0);
     width: 100%;
