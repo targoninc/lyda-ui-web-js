@@ -11,6 +11,8 @@ export async function baseHtml(req: Request) {
     let description = "Stream the music you love.";
     let image = "https://lyda.app/img/lyda_banner.png";
     const apiUrl = process.env.API_URL ?? "https://api.lyda.app";
+    // Android "open in app" handoff is disabled until an Android app ships.
+    const enableAndroidOpenInApp = process.env.ENABLE_ANDROID_OPEN_IN_APP === "true";
     let ogType = "website";
 
     let id, newimage, res, type, optionalTags = "";
@@ -113,7 +115,9 @@ export async function baseHtml(req: Request) {
 
           1. On Android, immediately navigate to an intent:// URL. The OS
              will switch to the app if installed or open the same web URL
-             as a fallback (tagged with ?inapp=1 to avoid loops).
+             as a fallback (tagged with ?inapp=1 to avoid loops). Gated
+             behind ENABLE_ANDROID_OPEN_IN_APP=true — off until an
+             Android app exists to hand off to.
 
           2. On iOS, do nothing in JS - the OS handles Universal Links
              automatically via the apple-app-site-association. If the user
@@ -164,7 +168,9 @@ export async function baseHtml(req: Request) {
                 // 1) Android: try the intent:// immediately. The page
                 //    unloads as the OS hands off, so the banner we add
                 //    below will never become visible on Android.
-                if (isAndroid) {
+                //    Disabled by default (ENABLE_ANDROID_OPEN_IN_APP=true)
+                //    until an Android app exists to hand off to.
+                if (isAndroid && ${enableAndroidOpenInApp}) {
                     const u = new URL(window.location.href);
                     const fallback = new URL(u.toString());
                     fallback.searchParams.set("inapp", "1");
