@@ -162,16 +162,18 @@ export class StreamClient implements IStreamClient {
         try {
             this.ensureAudioContext();
 
+            // A brand-new element has no duration yet, so the fraction-to-
+            // seconds conversion must happen after metadata is known.
+            const freshElement = this.ensureAudioElement();
+            if (freshElement) {
+                await this.waitForMetadata();
+            }
+
             // Interpret `relative` as "time is a 0..1 fraction of duration"
             const targetSeconds = relative
                 ? (this.duration > 0 ? time * this.duration : 0)
                 : time;
             const target = this.clampTime(targetSeconds);
-
-            const freshElement = this.ensureAudioElement();
-            if (freshElement) {
-                await this.waitForMetadata();
-            }
 
             const wasPlaying = this.playing;
             this.audio!.currentTime = target;

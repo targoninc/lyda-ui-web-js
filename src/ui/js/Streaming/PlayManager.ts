@@ -556,6 +556,10 @@ export class PlayManager {
     static async togglePlayAsync(id: number) {
         const streamClient = PlayManager.getStreamClient(id);
         if (streamClient === undefined) {
+            // The client was disposed (e.g. the track ended with nothing
+            // queued and stopAllAsync tore it down). Restart the track from
+            // the beginning instead of leaving the play button dead.
+            await PlayManager.startAtBeginningAsync(id);
             return;
         }
 
@@ -719,9 +723,16 @@ export class PlayManager {
         value = Math.min(Math.max(value, 0), 1);
 
         //await PlayManager.stopAllAsync(id);
-        const streamClient = PlayManager.getStreamClient(id);
+        let streamClient = PlayManager.getStreamClient(id);
         if (!streamClient) {
-            return;
+            // The client was disposed (e.g. the track ended with nothing
+            // queued and stopAllAsync tore it down). Recreate it so seeking
+            // still works.
+            const d = await PlayManager.getTrackData(id);
+            if (!d) {
+                return;
+            }
+            streamClient = PlayManager.addStreamClientIfNotExists(id, d.track.length);
         }
         await streamClient.scrubTo(value, true);
 
@@ -761,6 +772,9 @@ export class PlayManager {
 
     static toggleMute(id: number) {
         const streamClient = PlayManager.getStreamClient(id);
+        if (streamClient === undefined) {
+            return;
+        }
         if (streamClient.getVolume() > 0) {
             volume.value = streamClient.getVolume();
             muted.value = true;
@@ -794,6 +808,9 @@ export class PlayManager {
 
     static getLoudness() {
         const streamClient = PlayManager.getStreamClient(currentTrackId.value);
+        if (streamClient === undefined) {
+            return 0;
+        }
         return streamClient.getVolume();
     }
 
@@ -810,6 +827,9 @@ export class PlayManager {
 
     static async skipForward(id: number) {
         const streamClient = PlayManager.getStreamClient(id);
+        if (streamClient === undefined) {
+            return;
+        }
         const newTime = Math.max(0, streamClient.getCurrentTime(false) + 5);
         await streamClient.scrubTo(newTime, false);
         StreamingUpdater.updateScrubber(id);
@@ -818,6 +838,9 @@ export class PlayManager {
 
     static async skipBackward(id: number) {
         const streamClient = PlayManager.getStreamClient(id);
+        if (streamClient === undefined) {
+            return;
+        }
         const newTime = Math.max(0, streamClient.getCurrentTime(false) - 5);
         await streamClient.scrubTo(newTime, false);
         StreamingUpdater.updateScrubber(id);
@@ -832,11 +855,17 @@ export class PlayManager {
 
     static async volumeUp() {
         const streamClient = PlayManager.getStreamClient(currentTrackId.value);
+        if (streamClient === undefined) {
+            return;
+        }
         await PlayManager.setLoudness(streamClient.getVolume() * PlayManager.config.controls.volumeChangeRelative);
     }
 
     static async volumeDown() {
         const streamClient = PlayManager.getStreamClient(currentTrackId.value);
+        if (streamClient === undefined) {
+            return;
+        }
         await PlayManager.setLoudness(streamClient.getVolume() / PlayManager.config.controls.volumeChangeRelative);
     }
 
