@@ -162,8 +162,6 @@ export class StreamClient implements IStreamClient {
         try {
             this.ensureAudioContext();
 
-            // A brand-new element has no duration yet, so the fraction-to-
-            // seconds conversion must happen after metadata is known.
             const freshElement = this.ensureAudioElement();
             if (freshElement) {
                 await this.waitForMetadata();

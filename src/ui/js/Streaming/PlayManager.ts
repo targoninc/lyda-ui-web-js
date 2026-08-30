@@ -556,9 +556,6 @@ export class PlayManager {
     static async togglePlayAsync(id: number) {
         const streamClient = PlayManager.getStreamClient(id);
         if (streamClient === undefined) {
-            // The client was disposed (e.g. the track ended with nothing
-            // queued and stopAllAsync tore it down). Restart the track from
-            // the beginning instead of leaving the play button dead.
             await PlayManager.startAtBeginningAsync(id);
             return;
         }
@@ -722,12 +719,8 @@ export class PlayManager {
     static async scrubTo(id: number, value: number) {
         value = Math.min(Math.max(value, 0), 1);
 
-        //await PlayManager.stopAllAsync(id);
         let streamClient = PlayManager.getStreamClient(id);
         if (!streamClient) {
-            // The client was disposed (e.g. the track ended with nothing
-            // queued and stopAllAsync tore it down). Recreate it so seeking
-            // still works.
             const d = await PlayManager.getTrackData(id);
             if (!d) {
                 return;

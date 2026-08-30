@@ -31,6 +31,7 @@ export const paymentsEnabled = signal(true);
 Api.getPaymentsEnabled().then(r => paymentsEnabled.value = r?.enabled ?? false);
 
 export const currentUser = signal<User|null>(null);
+export const userLoading = signal(false);
 let cacheFetched = false;
 currentUser.subscribe(u => {
     if (u) {

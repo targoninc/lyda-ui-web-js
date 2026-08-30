@@ -11,10 +11,14 @@ import { NotificationType } from "../Enums/NotificationType.ts";
 import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import { Api } from "../Api/Api.ts";
 import { Icons } from "../Enums/Icons.ts";
-import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import { language, localeByLanguage } from "../../locales";
 import { cachingService } from "../Cache/CachingService.ts";
+import {RoutePath} from "../Routing/routes.ts";
+import {Route} from "../Routing/Router.ts";
+import {FeedTemplates} from "../Templates/generic/FeedTemplates.ts";
+import {FeedType} from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
+import {AlbumTemplates} from "../Templates/music/AlbumTemplates.ts";
 
 export class Util {
     static capitalizeFirstLetter(string: string) {
@@ -337,10 +341,6 @@ export async function copy(text: string) {
     notify("Copied to clipboard", NotificationType.success);
 }
 
-export function getAppLink(entityType: EntityType, id: number) {
-    return `web+music://${entityType}/${id}`;
-}
-
 export function updateImagesWithSource(newSrc: string, oldSrc: string) {
     oldSrc = oldSrc.replace(/&t=\d+/, "");
     const imgs = document.querySelectorAll("img") as NodeListOf<HTMLImageElement>;
@@ -372,6 +372,15 @@ export function getPlayIcon(isPlaying: Signal<boolean>, isLoading: Signal<boolea
     return compute((p, l) => (p ? Icons.PAUSE : (l ? Icons.SPINNER : Icons.PLAY)), isPlaying, isLoading);
 }
 
-export function isDev() {
-    return window.location.href.includes("localhost");
+export function getTabFromUrl(urlTabs: string[]) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialTab = urlTabs.indexOf(urlParams.get("tab") ?? "");
+    const selectedTab = signal(initialTab === -1 ? 0 : initialTab);
+
+    selectedTab.subscribe(i => {
+        const url = new URL(window.location.href);
+        url.searchParams.set("tab", urlTabs[i]);
+        window.history.replaceState(null, "", url.toString());
+    });
+    return selectedTab;
 }

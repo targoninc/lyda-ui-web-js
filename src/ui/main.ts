@@ -9,7 +9,7 @@ import { RoutePath, routes } from "./js/Routing/routes.js";
 import { create } from "@targoninc/jess";
 import {GenericTemplates, horizontal, vertical} from "./js/Templates/generic/GenericTemplates.ts";
 import { TrackEditTemplates } from "./js/Templates/music/TrackEditTemplates.ts";
-import { contextQueue, currentUser, history, permissions, playingFrom } from "./js/state.ts";
+import { contextQueue, currentUser, history, permissions, playingFrom, userLoading } from "./js/state.ts";
 import { StreamingBroadcaster } from "./js/Streaming/StreamingBroadcaster.ts";
 import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom";
 import { ListeningHistory } from "@targoninc/lyda-shared/src/Models/db/lyda/ListeningHistory";
@@ -58,14 +58,19 @@ export const router = new Router(routes, async (route: Route, params: any) => {
 
     await Ui.windowResize();
 
-    currentUser.value = await Util.getUserAsync(null, false);
+    if (!userLoading.value) {
+        userLoading.value = true;
+        Util.getUserAsync(null, false).then(user => {
+            currentUser.value = user;
+            userLoading.value = false;
+        });
+    }
     pageContainer.innerHTML = "";
     releaseDetachedSubscriptions();
     beginPageRender();
-    const template = await PageTemplates.mapping[page](route, params);
-    if (!currentUser.value && PageTemplates.needLoginPages.includes(page)) {
-        navigate(RoutePath.login);
-    }
+    const template = PageTemplates.needLoginPages.includes(page)
+        ? PageTemplates.needsLoginPage(page, route, params, userLoading)
+        : await PageTemplates.mapping[page](route, params);
     pageContainer.appendChild(template);
     pageContainer.setAttribute("page", page);
     window.scrollTo(0, 0);

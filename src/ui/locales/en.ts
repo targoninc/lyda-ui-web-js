@@ -151,6 +151,7 @@ export const en = {
     PLAYLIST_NOT_FOUND: "Playlist not found",
     LOGIN_TO_VIEW_PLAYLISTS: "You need to be logged in to view playlists",
     LOGIN_TO_VIEW_LIBRARY: "You need to be logged in to view your library",
+    LOGIN_TO_VIEW_PAGE: "You need to be logged in to view this page",
     LOG_OUT: "Log out",
     PRIVATE: "Private",
     NOTHING_FOR_YOU_HERE: "Nothing for you here 🤖",
