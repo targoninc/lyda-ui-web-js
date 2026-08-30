@@ -91,7 +91,7 @@ export class UserTemplates {
             .children(
                 UserTemplates.userIcon(user.id, avatarState),
                 create("span")
-                    .classes("text", "align-center", "nopointer")
+                    .classes("text", "align-center", "nopointer", "no-text-wrap")
                     .text(truncateText(overrideArtistName ?? user.displayname, maxDisplaynameLength))
                     .attributes("data-user-id", user.id)
                     .build(),

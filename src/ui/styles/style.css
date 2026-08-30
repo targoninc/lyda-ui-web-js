@@ -1163,6 +1163,10 @@ td:last-child, th:last-child {
     gap: 0;
 }
 
+.no-text-wrap {
+    text-wrap: nowrap;
+}
+
 .modal {
     position: fixed;
     border: 1px solid var(--border);
