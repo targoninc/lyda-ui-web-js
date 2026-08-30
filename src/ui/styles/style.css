@@ -1034,7 +1034,7 @@ td:last-child, th:last-child {
     height: calc(100dvh - 50px);
     border: 1px solid var(--border);
     border-radius: var(--large-border-radius);
-    transition: height 100ms ease-in-out;
+    transition: height .2s ease-in-out;
     overflow: hidden;
     padding: calc(var(--base-padding) * 2);
     box-sizing: border-box;
@@ -1069,7 +1069,7 @@ td:last-child, th:last-child {
     max-height: 50dvh;
     border: 1px solid var(--border);
     border-radius: var(--large-border-radius);
-    transition: height 100ms ease-in-out;
+    transition: height .2s ease-in-out;
     overflow: auto;
     user-select: none;
     background: color-mix(in oklab, var(--bg-0), transparent 2%);
