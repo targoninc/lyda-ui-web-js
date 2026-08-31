@@ -3,6 +3,7 @@ import {StreamingUpdater} from "./StreamingUpdater.ts";
 import {QueueManager} from "./QueueManager.ts";
 import {StreamClient} from "./StreamClient.ts";
 import {target, userHasSettingValue, Util} from "../Classes/Util.ts";
+import {FeatureDetector} from "../Classes/Helpers/FeatureDetector.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {
     currentQuality,
@@ -769,7 +770,9 @@ export class PlayManager {
             return;
         }
         if (streamClient.getVolume() > 0) {
-            volume.value = streamClient.getVolume();
+            if (!FeatureDetector.isMobile()) {
+                volume.value = streamClient.getVolume();
+            }
             muted.value = true;
             streamClient.setVolume(0);
         } else {
@@ -808,6 +811,9 @@ export class PlayManager {
     }
 
     static async setLoudness(value: number) {
+        if (FeatureDetector.isMobile()) {
+            return;
+        }
         value = Math.min(Math.max(value, 0), 1);
         const streamClients = PlayManager.getAllStreamClients();
         for (const client of streamClients) {

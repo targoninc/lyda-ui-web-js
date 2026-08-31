@@ -1721,6 +1721,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 .feed-table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
 }
 
 .feed-header {
@@ -1733,6 +1734,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .feed-header .feed-idx-h {
+    width: 50px;
     text-align: center;
 }
 
@@ -1817,7 +1819,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .feed-interact-h {
-    width: 1%;
+    width: 90px;
 }
 
 .feed-menu-cell {
@@ -1838,8 +1840,21 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .feed-date-h {
-    width: 1%;
+    width: 100px;
     white-space: nowrap;
+}
+
+.feed-col-artist {
+    width: 20%;
+}
+
+.feed-col-tracks {
+    width: 40px;
+    text-align: center;
+}
+
+.feed-col-reposted_by {
+    width: 15%;
 }
 
 .feed-title {
@@ -1856,6 +1871,11 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 .feed-cell-title .flex, .feed-cell-title .flex-v {
     min-width: 0;
     overflow: hidden;
+}
+
+.feed-cell-title .flex-v {
+    align-items: stretch;
+    flex-wrap: nowrap;
 }
 
 .feed-cell-tracks {

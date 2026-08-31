@@ -406,7 +406,7 @@ export class FeedTemplates {
                                     const extraClasses = c.key === "artist" ? ["hideOnSmallBreakpoint"] : [];
                                     const th = sortable
                                         ? FeedTemplates.#sortableTh(c.key, c.header, sb, sd, cycleSort, extraClasses)
-                                        : create("th").classes("feed-col-h", ...extraClasses).text(c.header).build();
+                                        : create("th").classes("feed-col-h", `feed-col-${c.key}`, ...extraClasses).text(c.header).build();
                                     ths.push(th);
                                 }
                                 ths.push(
@@ -829,7 +829,7 @@ export class FeedTemplates {
         const isSorted = sortBy === key;
         const arrow = isSorted ? (sortDir === 'asc' ? ' ▲' : ' ▼') : '';
         const th = create("th")
-            .classes("feed-col-h", ...extraClasses)
+            .classes("feed-col-h", `feed-col-${key}`, ...extraClasses)
             .text(`${label}${arrow}`)
             .build() as HTMLElement;
         th.style.cursor = "pointer";

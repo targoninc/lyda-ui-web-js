@@ -14,6 +14,7 @@ import { QueueManager } from "./Streaming/QueueManager.ts";
 import { IStreamClient } from "./Streaming/IStreamClient.ts";
 import { Language, language } from "../locales";
 import {getUserSettingValue} from "./Classes/Util.ts";
+import { FeatureDetector } from "./Classes/Helpers/FeatureDetector.ts";
 import { Api } from "./Api/Api.ts";
 import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import { UserCacheKey } from "@targoninc/lyda-shared/src/Enums/UserCacheKey";
@@ -47,7 +48,7 @@ currentUser.subscribe(u => {
                 for (const entry of cache) {
                     switch (entry.key as UserCacheKey) {
                         case UserCacheKey.volume:
-                            if (entry.value) {
+                            if (entry.value && !FeatureDetector.isMobile()) {
                                 volume.value = parseFloat(entry.value);
                             }
                             break;
@@ -140,9 +141,9 @@ export function removeTrackInfo(id: number) {
     trackInfo.value = current;
 }
 
-export const volume = signal(LydaCache.get<number>(UserCacheKey.volume).content ?? 0.25);
+export const volume = signal(FeatureDetector.isMobile() ? 1 : (LydaCache.get<number>(UserCacheKey.volume).content ?? 0.25));
 volume.subscribe((newValue, changed) => {
-    if (!changed) {
+    if (!changed || FeatureDetector.isMobile()) {
         return;
     }
     LydaCache.set(UserCacheKey.volume, new CacheItem(newValue));

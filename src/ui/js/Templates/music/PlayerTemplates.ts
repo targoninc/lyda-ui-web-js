@@ -44,6 +44,7 @@ import { CoverContext } from "../../Enums/CoverContext.ts";
 import { TextSize } from "../../Enums/TextSize.ts";
 import { PlayingFromResolver } from "../../Classes/PlayingFromResolver.ts";
 import { ColorExtractor } from "../../Classes/ColorExtractor.ts";
+import { FeatureDetector } from "../../Classes/Helpers/FeatureDetector.ts";
 
 
 export class PlayerTemplates {
@@ -289,30 +290,34 @@ export class PlayerTemplates {
                     t("MUTE_UNMUTE"),
                     ["horizontal-volume-button"],
                 ),
-                create("div")
-                    .classes("horizontal-volume-track", "flex-grow", "rounded", "relative")
-                    .onwheel(PlayManager.setLoudnessFromWheel)
-                    .onmousedown(async e => {
-                        await PlayManager.setLoudnessFromHorizontalElement(e);
-                    })
-                    .onmousemove(async e => {
-                        if (e.buttons === 1) {
-                            await PlayManager.setLoudnessFromHorizontalElement(e);
-                        }
-                    })
-                    .children(
+                ...(FeatureDetector.isMobile()
+                    ? []
+                    : [
                         create("div")
-                            .classes("horizontal-volume-bar", "rounded", "nopointer")
-                            .build(),
-                        create("div")
-                            .classes("horizontal-volume-fill", "rounded", "nopointer")
-                            .styles("width", volumePercent)
-                            .build(),
-                        create("div")
-                            .classes("horizontal-volume-head", "rounded", "nopointer")
-                            .styles("left", volumePercent)
-                            .build(),
-                    ).build(),
+                            .classes("horizontal-volume-track", "flex-grow", "rounded", "relative")
+                            .onwheel(PlayManager.setLoudnessFromWheel)
+                            .onmousedown(async e => {
+                                await PlayManager.setLoudnessFromHorizontalElement(e);
+                            })
+                            .onmousemove(async e => {
+                                if (e.buttons === 1) {
+                                    await PlayManager.setLoudnessFromHorizontalElement(e);
+                                }
+                            })
+                            .children(
+                                create("div")
+                                    .classes("horizontal-volume-bar", "rounded", "nopointer")
+                                    .build(),
+                                create("div")
+                                    .classes("horizontal-volume-fill", "rounded", "nopointer")
+                                    .styles("width", volumePercent)
+                                    .build(),
+                                create("div")
+                                    .classes("horizontal-volume-head", "rounded", "nopointer")
+                                    .styles("left", volumePercent)
+                                    .build(),
+                            ).build(),
+                    ]),
             ).build();
     }
 
@@ -336,31 +341,35 @@ export class PlayerTemplates {
                     t("MUTE_UNMUTE"),
                     ["loudness-button"],
                 ),
-                create("div")
-                    .classes("loudness-bar", "rounded", "padded", "relative", "hidden")
-                    .id(track.id)
-                    .children(
+                ...(FeatureDetector.isMobile()
+                    ? []
+                    : [
                         create("div")
-                            .classes("audio-player-loudnessbackground", "nopointer")
-                            .build(),
-                        create("div")
-                            .classes("audio-player-loudnesstracker")
-                            .onmousemove(async e => {
-                                if (e.buttons === 1) {
-                                    await PlayManager.setLoudnessFromElement(e);
-                                }
-                            })
-                            .onclick(e => PlayManager.setLoudnessFromElement(e))
-                            .build(),
-                        create("div")
-                            .classes("audio-player-loudnessbar", "rounded", "nopointer")
-                            .build(),
-                        create("div")
-                            .classes("audio-player-loudnesshead", "rounded", "nopointer")
-                            .styles("bottom", volumePercent)
+                            .classes("loudness-bar", "rounded", "padded", "relative", "hidden")
                             .id(track.id)
-                            .build(),
-                    ).build(),
+                            .children(
+                                create("div")
+                                    .classes("audio-player-loudnessbackground", "nopointer")
+                                    .build(),
+                                create("div")
+                                    .classes("audio-player-loudnesstracker")
+                                    .onmousemove(async e => {
+                                        if (e.buttons === 1) {
+                                            await PlayManager.setLoudnessFromElement(e);
+                                        }
+                                    })
+                                    .onclick(e => PlayManager.setLoudnessFromElement(e))
+                                    .build(),
+                                create("div")
+                                    .classes("audio-player-loudnessbar", "rounded", "nopointer")
+                                    .build(),
+                                create("div")
+                                    .classes("audio-player-loudnesshead", "rounded", "nopointer")
+                                    .styles("bottom", volumePercent)
+                                    .id(track.id)
+                                    .build(),
+                            ).build(),
+                    ]),
             ).build();
     }
 

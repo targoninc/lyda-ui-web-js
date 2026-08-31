@@ -70,14 +70,14 @@ export class QueueTemplates {
             .children(
                 horizontal(
                     when(type === "manual", GenericTemplates.verticalDragIndicator()),
-                    MusicTemplates.cover(EntityType.track, track, CoverContext.queue, async () => {
+                    when(queueVisible, () => MusicTemplates.cover(EntityType.track, track, CoverContext.queue, async () => {
                         if (type === "context" && playingFrom.value) {
                             await startItem(track, playingFrom.value);
                         } else {
                             await startItem(track);
                         }
                         QueueManager.removeIndexFromManualQueue(index);
-                    }),
+                    })),
                     vertical(
                         MusicTemplates.title(EntityType.track, track.title, track.id, PlayerTemplates.trackIcons(track), TextSize.medium, true, false, track.wip),
                         UserTemplates.userLink(UserWidgetContext.player, track.user!),
