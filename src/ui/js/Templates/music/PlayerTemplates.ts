@@ -272,6 +272,9 @@ export class PlayerTemplates {
     }
 
     static horizontalVolumeSlider(track: Track) {
+        if (FeatureDetector.isMobile()) {
+            return nullElement();
+        }
         const volumePercent = compute(vol => `${vol * 100}%`, volume);
 
         return create("div")
@@ -322,6 +325,9 @@ export class PlayerTemplates {
     }
 
     static loudnessControl(track: Track) {
+        if (FeatureDetector.isMobile()) {
+            return nullElement();
+        }
         const volumePercent = compute(vol => `${vol * 100}%`, volume);
 
         return create("div")
