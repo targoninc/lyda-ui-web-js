@@ -27,7 +27,7 @@ export class SubscriptionTemplates {
         const providers = signal<PaymentProvider[]>([]);
 
         SubscriptionActions.loadSubscriptionOptions().then(res => {
-            options.value = res.options;
+            options.value = res.options.filter(o => o.service === PaymentProvider.stripe);
             currentSubscription.value = res.currentSubscription;
         });
         Api.getPaymentProviders().then(p => providers.value = p ?? []);
