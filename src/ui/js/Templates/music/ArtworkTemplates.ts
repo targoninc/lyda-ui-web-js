@@ -103,8 +103,9 @@ export function artworkDisplay(url: string, opts: ArtworkOptions = {}): AnyEleme
         );
     }
 
+    const overlayChildren: (AnyElement | Signal<AnyElement>)[] = [];
     if (opts.showStickers !== false) {
-        children.push(
+        overlayChildren.push(
             when(bought$, () => artworkSticker({
                 icon: null,
                 text: compute(
@@ -148,8 +149,13 @@ export function artworkDisplay(url: string, opts: ArtworkOptions = {}): AnyEleme
         toBooleanSignal(opts.topFan),
         bought$,
     );
-    children.push(
+    overlayChildren.push(
         when(signed$, () => artworkSignature(opts.signatureText ?? null, rand)),
+    );
+    // Optional parallax rotates this plane with the same angles as the 3D
+    // model, so stickers/signature track the case instead of detaching.
+    children.push(
+        create("div").classes("artwork-overlays").children(...overlayChildren).build(),
     );
 
     const root = create("div")
@@ -177,25 +183,18 @@ export function artworkDisplay(url: string, opts: ArtworkOptions = {}): AnyEleme
 }
 
 /**
- * Pointer parallax for the overlay elements (stickers + signature) so they
- * move along with the rotated 3D model. The canvas (the model itself) is
- * rotated inside Artwork3D; only the HTML overlays are shifted here.
+ * Pointer parallax on the whole artwork container (case + stickers +
+ * signature as one unit), so nothing can detach or drift away.
  */
 function attachArtworkParallax(root: HTMLElement) {
-    const artSize = parseFloat(getComputedStyle(root).getPropertyValue("--artwork-size")) || 200;
-    const overlays = Array.from(root.querySelectorAll<HTMLElement>(".artwork-sticker, .artwork-signature"))
-        .map(el => ({ el, base: el.style.transform }));
-    if (overlays.length === 0) {
-        return;
-    }
     const state = { targetX: 0, targetY: 0, x: 0, y: 0 };
     let frameId = 0;
     const onPointerMove = (event: PointerEvent) => {
         const rect = root.getBoundingClientRect();
         const nx = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
         const ny = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
-        state.targetX = nx * artSize * 0.04;
-        state.targetY = ny * artSize * 0.04;
+        state.targetX = (-ny * 0.12 * 180) / Math.PI;
+        state.targetY = (nx * 0.3 * 180) / Math.PI;
     };
     const onPointerLeave = () => {
         state.targetX = 0;
@@ -206,11 +205,7 @@ function attachArtworkParallax(root: HTMLElement) {
         const ease = 0.08;
         state.x += (state.targetX - state.x) * ease;
         state.y += (state.targetY - state.y) * ease;
-        const dx = state.x.toFixed(2);
-        const dy = state.y.toFixed(2);
-        for (const overlay of overlays) {
-            overlay.el.style.transform = `translate(${dx}px, ${dy}px) ${overlay.base}`;
-        }
+        root.style.transform = `perspective(700px) rotateX(${state.x.toFixed(3)}deg) rotateY(${state.y.toFixed(3)}deg)`;
     };
     tick();
     root.addEventListener("pointermove", onPointerMove);
@@ -219,9 +214,7 @@ function attachArtworkParallax(root: HTMLElement) {
         cancelAnimationFrame(frameId);
         root.removeEventListener("pointermove", onPointerMove);
         root.removeEventListener("pointerleave", onPointerLeave);
-        for (const overlay of overlays) {
-            overlay.el.style.transform = overlay.base;
-        }
+        root.style.transform = "";
     });
 }
 
@@ -488,7 +481,7 @@ function fitRectSticker(shell: HTMLElement) {
  * ends before it on the sides/bottom, so the clamp respects those insets.
  */
 function clampStickerToArtwork(shell: HTMLElement) {
-    const art = shell.parentElement;
+    const art = shell.closest<HTMLElement>(".artwork");
     const rotation = (shell as ArtworkStickerElement).__artworkStickerRotation ?? 0;
     const w = shell.offsetWidth;
     const h = shell.offsetHeight;

@@ -60,26 +60,9 @@ function initialize(canvas: HTMLCanvasElement, coverUrl: string, size: number | 
     const observer = new ResizeObserver(setSize);
     observer.observe(container);
 
-    let targetYaw = { y: baseRotation.y, x: baseRotation.x };
-    canvas.addEventListener("pointermove", onPointerMove);
-    canvas.addEventListener("pointerleave", onPointerLeave);
-
-    function onPointerMove(event: PointerEvent) {
-        const rect = canvas.getBoundingClientRect();
-        const nx = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
-        const ny = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
-        targetYaw = { y: baseRotation.y + nx * 0.3, x: baseRotation.x - ny * 0.12 };
-    }
-
-    function onPointerLeave() {
-        targetYaw = { y: baseRotation.y, x: baseRotation.x };
-    }
-
     let frameId = 0;
     const animate = () => {
         frameId = requestAnimationFrame(animate);
-        group.rotation.y += (targetYaw.y - group.rotation.y) * 0.06;
-        group.rotation.x += (targetYaw.x - group.rotation.x) * 0.06;
         renderer.render(scene, camera);
     };
     animate();
@@ -88,8 +71,6 @@ function initialize(canvas: HTMLCanvasElement, coverUrl: string, size: number | 
         dispose: () => {
             cancelAnimationFrame(frameId);
             observer.disconnect();
-            canvas.removeEventListener("pointermove", onPointerMove);
-            canvas.removeEventListener("pointerleave", onPointerLeave);
             disposeScene(scene);
             environmentRT.dispose();
             pmrem.dispose();

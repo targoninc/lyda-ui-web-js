@@ -2440,6 +2440,12 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     display: block;
 }
 
+.artwork-overlays {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
 .artwork-sticker {
     position: absolute;
     z-index: 2;
