@@ -2314,3 +2314,252 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     50% { filter: blur(var(--blob-blur)) hue-rotate(180deg); }
     100% { filter: blur(var(--blob-blur)) hue-rotate(360deg); }
 }
+
+/* Artwork display */
+.artwork {
+    --artwork-size: 200px;
+    width: var(--artwork-size);
+    height: var(--artwork-size);
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.artwork-disc {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    transform: perspective(650px) rotateX(5deg) rotateY(-7deg);
+    transition: transform .3s ease;
+}
+
+/* Cover/vinyl hover tilt applies to the whole container so stickers move along. */
+.artwork:not(.artwork-format-cd) {
+    transition: transform .3s ease;
+}
+
+.artwork:hover:not(.artwork-format-cd) {
+    transform: perspective(650px) rotateX(6deg) rotateY(-9deg);
+}
+
+.artwork-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.artwork-format-vinyl .artwork-disc {
+    border-radius: var(--border-radius);
+    overflow: visible;
+    background: transparent;
+}
+
+.artwork-format-vinyl .artwork-image {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--border-radius);
+    object-fit: cover;
+    box-shadow: 0 1px 2px color-mix(in oklab, var(--fg-0), transparent 70%);
+}
+
+.artwork-vinyl-disc {
+    position: absolute;
+    top: 50%;
+    right: calc(var(--artwork-size) * -0.14);
+    width: calc(var(--artwork-size) * 0.82);
+    height: calc(var(--artwork-size) * 0.82);
+    border-radius: 50%;
+    transform: translateY(-50%) rotate(-9deg);
+    z-index: 0;
+    background:
+        radial-gradient(circle at 34% 28%, color-mix(in oklab, var(--fg-0), transparent 78%) 0%, transparent 22%),
+        repeating-radial-gradient(
+            circle at center,
+            color-mix(in oklab, var(--fg-0), var(--bg-0) 86%) 0 3px,
+            color-mix(in oklab, var(--fg-0), var(--bg-0) 92%) 3px 6px
+        ),
+        color-mix(in oklab, var(--bg-0), var(--fg-0) 4%);
+    box-shadow: 0 1px 3px color-mix(in oklab, var(--fg-0), transparent 65%);
+}
+
+.artwork-vinyl-disc::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 9%;
+    height: 9%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: color-mix(in oklab, var(--bg-1), var(--base-color) 8%);
+    box-shadow: 0 0 0 2px color-mix(in oklab, var(--fg-0), transparent 78%);
+}
+
+.artwork-vinyl-wrap {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border-radius: var(--border-radius);
+    pointer-events: none;
+    /* plastic wrap: crinkled sheen lines + soft scattered reflections */
+    background:
+        repeating-linear-gradient(
+            98deg,
+            transparent 0 22px,
+            color-mix(in oklab, var(--contrast), transparent 94%) 24px,
+            transparent 26px 34px,
+            color-mix(in oklab, var(--contrast), transparent 96%) 36px,
+            transparent 38px
+        ),
+        linear-gradient(
+            105deg,
+            transparent 38%,
+            color-mix(in oklab, var(--contrast), transparent 85%) 44%,
+            transparent 50%,
+            color-mix(in oklab, var(--contrast), transparent 90%) 58%,
+            transparent 64%
+        ),
+        linear-gradient(
+            75deg,
+            color-mix(in oklab, var(--contrast), transparent 94%) 0%,
+            transparent 34%
+        );
+}
+
+.artwork-format-cd .artwork-disc {
+    background: transparent;
+    transform: none;
+    border-radius: var(--border-radius);
+}
+
+.artwork-3d-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.artwork-sticker {
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Fixed sticker size with exact 1:1 proportions; the content is scaled to fit. */
+    width: calc(var(--artwork-size) * 0.1467);
+    height: calc(var(--artwork-size) * 0.1467);
+    background: var(--sticker-bg, var(--green));
+    box-shadow: 1px 1px 0 0 #000;
+}
+
+/* Shaped stickers use layered clipped children instead of a box-shadow (a
+   box-shadow would render as a square behind the shape). */
+.artwork-sticker-shaped {
+    box-shadow: none;
+    background: transparent;
+}
+
+.artwork-sticker-shadow {
+    position: absolute;
+    inset: 0;
+    background: #000;
+}
+
+.artwork-sticker-body {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--sticker-bg, var(--green));
+}
+
+.artwork-sticker-liked {
+    --sticker-bg: var(--red);
+}
+
+.artwork-sticker-reposted {
+    --sticker-bg: var(--purple);
+}
+
+.artwork-sticker-content {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--artwork-size) * 0.02);
+    color: var(--contrast);
+    font-size: calc(var(--artwork-size) * 0.075);
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.artwork-sticker-icon {
+    width: calc(var(--artwork-size) * 0.11);
+    height: calc(var(--artwork-size) * 0.11);
+}
+
+.artwork-sticker-price {
+    background: var(--contrast);
+    border-radius: calc(var(--artwork-size) * 0.02);
+}
+
+.artwork-sticker-price .artwork-sticker-content {
+    color: var(--base);
+}
+
+.artwork-sticker-extra {
+    background: var(--red);
+    border-radius: calc(var(--artwork-size) * 0.02);
+}
+
+.artwork-sticker-extra-content {
+    flex-direction: column;
+    gap: 0;
+}
+
+.artwork-extra-label,
+.artwork-extra-amount {
+    padding: calc(var(--artwork-size) * 0.012) calc(var(--artwork-size) * 0.024);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.artwork-extra-label {
+    background: var(--red);
+    color: var(--contrast);
+    text-transform: uppercase;
+}
+
+.artwork-extra-amount {
+    background: var(--contrast);
+    color: var(--red);
+}
+
+.artwork-signature {
+    position: absolute;
+    bottom: 6%;
+    left: 6%;
+    width: 55%;
+    z-index: 2;
+    color: var(--fg-0);
+    opacity: .8;
+    transform: rotate(-7deg);
+    pointer-events: none;
+}
+
+.artwork-signature svg {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.artwork-signature-text span {
+    font-family: "Segoe Script", "Bradley Hand", "Comic Sans MS", cursive;
+    font-style: italic;
+    font-weight: 700;
+    font-size: calc(var(--artwork-size) * 0.14);
+    text-shadow: 0 0 4px var(--bg-0);
+}

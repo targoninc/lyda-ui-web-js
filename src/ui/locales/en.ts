@@ -633,6 +633,7 @@ export const en = {
     ITEM_BOUGHT: "Item bought",
     ITEM_BOUGHT_INFO: "You have successfully bought this item. You can now download it!",
     BOUGHT: "Bought",
+    EXTRA: "Extra",
     RECEIVER: "Receiver",
     DATE: "Date",
     USER: "User",

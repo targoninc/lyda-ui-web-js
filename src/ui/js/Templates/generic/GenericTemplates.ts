@@ -300,8 +300,8 @@ export class GenericTemplates {
         return create("div").classes("card").build();
     }
 
-    static notification(type: NotificationType = NotificationType.success, text: HtmlPropertyValue = t("SUCCESS")) {
-        return create("div").classes("notification", "out-of-frame", type).text(text).build();
+    static notification(type: NotificationType = NotificationType.success, text: HtmlPropertyValue = t("SUCCESS"), outOfFrame = true) {
+        return create("div").classes("notification", ...(outOfFrame ? ["out-of-frame"] : []), type).text(text).build();
     }
 
     static fileInput(

@@ -1,4 +1,4 @@
-import {AnyElement, AnyNode, create, InputType, Signal, signal} from "@targoninc/jess";
+import {AnyElement, AnyNode, create, InputType, Signal, signal, when} from "@targoninc/jess";
 import {
     button,
     checkbox as jessCheckbox,
@@ -10,7 +10,8 @@ import {
     textarea,
     toggle as jessToggle,
 } from "@targoninc/jess-components";
-import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
+import {GenericTemplates, horizontal, tabSelected, vertical} from "../generic/GenericTemplates.ts";
+import {artworkDisplay, ArtworkFormat, ArtworkOptions} from "../music/ArtworkTemplates.ts";
 import {InteractionTemplates} from "../InteractionTemplates.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
 import {FeedTemplates} from "../generic/FeedTemplates.ts";
@@ -19,6 +20,9 @@ import {TableTemplates} from "../generic/TableTemplates.ts";
 import {ChartTemplates} from "../generic/ChartTemplates.ts";
 import {FormTemplates} from "../generic/FormTemplates.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
+import {Api} from "../../Api/Api.ts";
+import {Util} from "../../Classes/Util.ts";
+import {currentUser} from "../../state.ts";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
@@ -26,12 +30,15 @@ import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import {Comment} from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import {Badge} from "@targoninc/lyda-shared/src/Models/db/lyda/Badge";
 import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
+import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import {Visibility} from "@targoninc/lyda-shared/src/Enums/Visibility";
 import {ProgressState} from "@targoninc/lyda-shared/src/Enums/ProgressState";
 import {ProgressPart} from "../../Models/ProgressPart.ts";
 import {PillOption} from "../../Models/PillOption.ts";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
 import {NotificationType} from "../../Enums/NotificationType.ts";
+import {DefaultImages} from "../../Enums/DefaultImages.ts";
+import {TextSize} from "../../Enums/TextSize.ts";
 import {t} from "../../../locales";
 
 const sampleUser: User = {
@@ -77,6 +84,32 @@ const feedItems: GalleryItem[] = [
     {id: 4, title: "Low Tide", artist: "Aurora Lane"},
 ];
 
+type ArtworkCover = { type: EntityType; id: number; title: string };
+
+/** Random track, album and playlist covers from the logged-in user's profile. */
+async function loadUserArtworkCovers(): Promise<ArtworkCover[]> {
+    const user = currentUser.value;
+    if (!user) {
+        return [];
+    }
+    const [tracks, albums, playlists] = await Promise.all([
+        Api.getFeed(ApiRoutes.profileTracksFeed, {offset: 0, limit: 30, id: user.id}),
+        Api.getAlbumsByUserId(user.id, ""),
+        Api.getPlaylistsByUserId(user.id, ""),
+    ]);
+    const trackList: Track[] = Array.isArray(tracks) ? tracks : tracks?.items ?? [];
+    const covers: ArtworkCover[] = [
+        ...trackList.filter(t => t.has_cover).map(t => ({type: EntityType.track, id: t.id, title: t.title})),
+        ...(albums?.items ?? []).filter(a => a.has_cover).map(a => ({type: EntityType.album, id: a.id, title: a.title})),
+        ...(playlists?.items ?? []).filter(p => p.has_cover).map(p => ({type: EntityType.playlist, id: p.id, title: p.title})),
+    ];
+    for (let i = covers.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [covers[i], covers[j]] = [covers[j], covers[i]];
+    }
+    return covers;
+}
+
 export class ComponentGalleryTemplates {
     static page() {
         // The player footer is fixed to the viewport bottom and would overlap
@@ -102,23 +135,37 @@ export class ComponentGalleryTemplates {
             {text: `${t("ALBUMS")}`, value: "albums"},
         ];
 
+        const tabs = [
+            "jess-components",
+            "Generic",
+            "Forms",
+            "Display",
+            "Interactions",
+            "User widgets",
+            "Feed",
+            "Menus & modals",
+            "Tables & charts",
+        ];
+        const selectedTab = signal(0);
+
         return vertical(
             heading({level: 1, text: "Component gallery"}),
             GenericTemplates.text("Screenshots for the development docs. Not linked anywhere."),
+            GenericTemplates.combinedSelector(tabs, i => selectedTab.value = i, selectedTab.value),
 
-            ComponentGalleryTemplates.#jessComponents(pillState, pills),
-            ComponentGalleryTemplates.#layoutAndButtons(pills, pillState),
-            ComponentGalleryTemplates.#forms(),
-            ComponentGalleryTemplates.#display(),
-            ComponentGalleryTemplates.#interactions(),
-            ComponentGalleryTemplates.#users(),
-            ComponentGalleryTemplates.#feed(),
-            ComponentGalleryTemplates.#menusAndModals(),
-            ComponentGalleryTemplates.#tablesAndCharts(),
+            when(tabSelected(selectedTab, 0), ComponentGalleryTemplates.#jessComponents(pillState, pills)),
+            when(tabSelected(selectedTab, 1), ComponentGalleryTemplates.#layoutAndButtons(pills, pillState)),
+            when(tabSelected(selectedTab, 2), ComponentGalleryTemplates.#forms()),
+            when(tabSelected(selectedTab, 3), ComponentGalleryTemplates.#display()),
+            when(tabSelected(selectedTab, 4), ComponentGalleryTemplates.#interactions()),
+            when(tabSelected(selectedTab, 5), ComponentGalleryTemplates.#users()),
+            when(tabSelected(selectedTab, 6), ComponentGalleryTemplates.#feed()),
+            when(tabSelected(selectedTab, 7), ComponentGalleryTemplates.#menusAndModals()),
+            when(tabSelected(selectedTab, 8), ComponentGalleryTemplates.#tablesAndCharts()),
         ).classes("gallery-page", "padded-page", "flex-v", "gap").build();
     }
 
-    static #section(id: string, title: string, ...rows: AnyNode[]) {
+    static #section(id: string, title: string, ...rows: (AnyNode | Signal<AnyElement>)[]) {
         return create("div")
             .classes("flex-v", "gap")
             .id(id)
@@ -255,6 +302,10 @@ export class ComponentGalleryTemplates {
             title: "Upload",
             progress: 100,
         });
+        const artworkCovers = signal<ArtworkCover[] | null | undefined>(undefined);
+        loadUserArtworkCovers().then(covers => {
+            artworkCovers.value = covers;
+        });
 
         return ComponentGalleryTemplates.#section(
             "gallery-display",
@@ -289,7 +340,44 @@ export class ComponentGalleryTemplates {
                 create("div").styles("width", "500px", "height", "280px", "overflow", "hidden").children(GenericTemplates.noTracks()).build(),
                 create("div").styles("max-width", "280px").children(GenericTemplates.missingPermission()).build(),
             ),
+            when(artworkCovers, () => ComponentGalleryTemplates.#artworkRows(artworkCovers.value ?? [])),
         );
+    }
+
+    static #artworkRows(covers: ArtworkCover[]) {
+        const coverAt = (i: number) => covers.length > 0 ? covers[i % covers.length] : undefined;
+        return create("div")
+            .classes("flex-v", "gap")
+            .children(
+                ComponentGalleryTemplates.#row(
+                    ComponentGalleryTemplates.#artworkVariant("cover", "cover", {}, coverAt(0)),
+                    ComponentGalleryTemplates.#artworkVariant("cd", "cd", {}, coverAt(1)),
+                    ComponentGalleryTemplates.#artworkVariant("vinyl", "vinyl", {}, coverAt(2)),
+                ),
+                ComponentGalleryTemplates.#row(
+                    ComponentGalleryTemplates.#artworkVariant("cover", "cover, stickers", {bought: true, liked: true, reposted: true, topFan: true, signatureText: "Aurora Lane", price: 4.99, paidAmount: 6.29, seed: 2}, coverAt(3)),
+                    ComponentGalleryTemplates.#artworkVariant("cd", "cd, stickers", {bought: true, liked: true, reposted: true, topFan: true, price: 4.99, paidAmount: 6.29, seed: 3}, coverAt(4)),
+                    ComponentGalleryTemplates.#artworkVariant("vinyl", "vinyl, stickers", {bought: true, liked: true, reposted: true, topFan: true, price: 4.99, paidAmount: 6.29, seed: 4}, coverAt(5)),
+                ),
+                ComponentGalleryTemplates.#row(
+                    ComponentGalleryTemplates.#artworkVariant("vinyl", "bought", {bought: true, price: 4.99, paidAmount: 6.29, seed: 5}, coverAt(6)),
+                    ComponentGalleryTemplates.#artworkVariant("vinyl", "liked", {liked: true, seed: 6}, coverAt(7)),
+                    ComponentGalleryTemplates.#artworkVariant("vinyl", "reposted", {reposted: true, seed: 7}, coverAt(8)),
+                    ComponentGalleryTemplates.#artworkVariant("cover", "signature (top fan + bought)", {topFan: true, bought: true, price: 4.99, signatureText: "Aurora Lane", seed: 8}, coverAt(9)),
+                    ComponentGalleryTemplates.#artworkVariant("cover", "signature, artist-made", {topFan: true, bought: true, price: 4.99, seed: 9}, coverAt(10)),
+                ),
+            ).build();
+    }
+
+    static #artworkVariant(format: ArtworkFormat, label: string, opts: ArtworkOptions, cover?: ArtworkCover) {
+        const url = cover
+            ? Util.getImage(cover.id, `${cover.type}Cover` as MediaFileType)
+            : DefaultImages[EntityType.album];
+        return vertical(
+            // Same size as the standalone cover on track/album/playlist pages (--cover-size: 200px).
+            artworkDisplay(url, {format, size: 200, ...opts}),
+            create("span").classes("color-dim", TextSize.small).text(label).build(),
+        ).classes("small-gap", "align-center").build();
     }
 
     static #interactions() {
@@ -409,9 +497,9 @@ export class ComponentGalleryTemplates {
                 ctxContainer,
             ),
             ComponentGalleryTemplates.#row(
-                GenericTemplates.notification(NotificationType.success, `${t("SUCCESS")}`),
-                GenericTemplates.notification(NotificationType.error, "Something went wrong"),
-                GenericTemplates.notification(NotificationType.info, "Heads up"),
+                GenericTemplates.notification(NotificationType.success, `${t("SUCCESS")}`, false),
+                GenericTemplates.notification(NotificationType.error, "Something went wrong", false),
+                GenericTemplates.notification(NotificationType.info, "Heads up", false),
             ),
             ComponentGalleryTemplates.#row(
                 // The content only. Rendering GenericTemplates.modal() here would put a
