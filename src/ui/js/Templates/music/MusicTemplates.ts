@@ -1,5 +1,5 @@
 import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
-import {AnyNode, compute, create, Signal, signal, signalMap, when} from "@targoninc/jess";
+import {AnyElement, AnyNode, compute, create, Signal, signal, signalMap, StringOrSignal, when} from "@targoninc/jess";
 import {currentTrackId, currentUser, loadingAudio, manualQueue, playingFrom, playingHere} from "../../state.ts";
 import {InteractionStateManager} from "../../Classes/InteractionStateManager.ts";
 import {getPlayIcon, Util} from "../../Classes/Util.ts";
@@ -31,6 +31,8 @@ import {PlaylistActions} from "../../Actions/PlaylistActions.ts";
 import {CoverContext} from "../../Enums/CoverContext.ts";
 import {TextSize} from "../../Enums/TextSize.ts";
 import {startItem} from "../../Actions/MusicActions.ts";
+import {artworkDisplay} from "./ArtworkTemplates.ts";
+import {InteractionType} from "@targoninc/lyda-shared/src/Enums/InteractionType";
 
 export class MusicTemplates {
 
@@ -90,13 +92,14 @@ export class MusicTemplates {
             .attributes(`${type}_id`, item.id)
             .id(item.id)
             .children(
-                create("img")
-                    .classes("cover", "blurOnParentHover")
-                    .src(imageState)
-                    .alt(item.title)
-                    .onclick(() => {
+                artworkDisplay(imageState, {
+                    alt: item.title,
+                    liked: MusicTemplates.interactionSignal(type, item, InteractionType.like),
+                    reposted: MusicTemplates.interactionSignal(type, item, InteractionType.repost),
+                    onclick: () => {
                         Ui.showImageModal(item.has_cover ? Util.getImage(item.id, fileType) : imageState.value);
-                    }).build(),
+                    },
+                }),
                 when(
                     isOwnItem,
                     create("div")
@@ -118,6 +121,24 @@ export class MusicTemplates {
                         .build(),
                 ),
             ).build();
+    }
+
+    /** Shared reactive signal for an interaction (like/repost) of an entity. */
+    static interactionSignal(type: EntityType, item: FeedItem, interactionType: InteractionType): Signal<boolean> {
+        const meta = (item as any)[`${interactionType}s`];
+        return InteractionStateManager.getOrCreate(
+            type, item.id, interactionType, meta?.interacted ?? false, meta?.count ?? 0,
+        ).interacted$;
+    }
+
+    /** Small (40px) artwork cover used in feed tables. */
+    static feedCover(type: EntityType, item: FeedItem, image: StringOrSignal): AnyElement {
+        return artworkDisplay(image, {
+            alt: item.title,
+            size: 40,
+            liked: MusicTemplates.interactionSignal(type, item, InteractionType.like),
+            reposted: MusicTemplates.interactionSignal(type, item, InteractionType.repost),
+        });
     }
 
     static entityCoverButtons(fileType: MediaFileType, item: FeedItem, imageState: Signal<string>, coverLoading: Signal<boolean>) {

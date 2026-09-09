@@ -1,4 +1,4 @@
-import { AnyElement, compute, create, HtmlPropertyValue, isSignal, signal, Signal, TypeOrSignal, when } from "@targoninc/jess";
+import { AnyElement, compute, create, HtmlPropertyValue, isSignal, signal, Signal, StringOrSignal, TypeOrSignal, when } from "@targoninc/jess";
 import { GenericTemplates } from "../generic/GenericTemplates.ts";
 import { Icons } from "../../Enums/Icons.ts";
 import { getTranslation, language, t } from "../../../locales";
@@ -43,9 +43,9 @@ export interface ArtworkOptions {
     classes?: string[];
 }
 
-export function artworkDisplay(url: string, opts: ArtworkOptions = {}): AnyElement {
+export function artworkDisplay(url: StringOrSignal, opts: ArtworkOptions = {}): AnyElement {
     const format = opts.format ?? "cover";
-    const rand = mulberry32(opts.seed ?? hashString(url));
+    const rand = mulberry32(opts.seed ?? hashString(urlValue(url)));
     const artSize = opts.size ?? 200;
     const bought$ = toBooleanSignal(opts.bought);
     const liked$ = toBooleanSignal(opts.liked);
@@ -173,7 +173,7 @@ export function artworkDisplay(url: string, opts: ArtworkOptions = {}): AnyEleme
     if (format === "cd") {
         const canvas = node.querySelector("canvas") as HTMLCanvasElement | null;
         if (canvas) {
-            const handle = createCdJewelCase3D(canvas, url, opts.size);
+            const handle = createCdJewelCase3D(canvas, urlValue(url), opts.size);
             trackCleanup(handle.dispose);
             (node as ArtworkWithCleanup).__artwork3dDispose = handle.dispose;
         }
@@ -436,7 +436,7 @@ function fitSticker(shell: HTMLElement) {
     const corner = Math.atan2(contentH, contentW);
     const boundary = boundaryDistance(data.points, corner);
     const magnitude = Math.sqrt((contentW / size) ** 2 + (contentH / size) ** 2);
-    const scale = Math.min(1.6, (0.9 * boundary) / magnitude);
+    const scale = Math.min(1.6, (0.65 * boundary) / magnitude);
     content.style.transform = `scale(${scale.toFixed(3)})`;
     clampStickerToArtwork(shell);
 }
@@ -572,6 +572,10 @@ function signaturePath(rand: () => number): string {
 }
 
 /** Deterministic PRNG so sticker shapes/signature stay stable for the same artwork. */
+function urlValue(url: StringOrSignal): string {
+    return typeof url === "string" ? url : (url as Signal<string>).value;
+}
+
 function mulberry32(seed: number): () => number {
     let a = seed >>> 0;
     return () => {

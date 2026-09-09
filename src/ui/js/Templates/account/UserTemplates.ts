@@ -54,6 +54,9 @@ import {t} from "../../../locales";
 import {FeedType} from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 import {CardFeedType} from "../../Enums/CardFeedType.ts";
 import {TextSize} from "../../Enums/TextSize.ts";
+import {artworkDisplay} from "../music/ArtworkTemplates.ts";
+import {InteractionType} from "@targoninc/lyda-shared/src/Enums/InteractionType";
+import {MusicTemplates} from "../music/MusicTemplates.ts";
 
 export class UserTemplates {
     static #popoverUid = 0;
@@ -425,7 +428,7 @@ export class UserTemplates {
                     return create("div")
                         .classes("flex", "align-children", "small-gap")
                         .children(
-                            create("img").classes("feed-inline-cover").src(coverSrc).alt(list.title).build(),
+                            MusicTemplates.feedCover(EntityType.album, list, coverSrc),
                             create("span").classes("feed-title", "clickable", "pointer")
                                 .text(list.title)
                                 .onclick((e: Event) => {
@@ -462,7 +465,7 @@ export class UserTemplates {
                     return create("div")
                         .classes("flex", "align-children", "small-gap")
                         .children(
-                            create("img").classes("feed-inline-cover").src(coverSrc).alt(list.title).build(),
+                            MusicTemplates.feedCover(EntityType.playlist, list, coverSrc),
                             create("span").classes("feed-title", "clickable", "pointer")
                                 .text(list.title)
                                 .onclick((e: Event) => {
@@ -1072,11 +1075,12 @@ export class UserTemplates {
                         PopoverTemplates.showContextMenu(popover, e.clientX, e.clientY);
                     })
                     .children(
-                        create("img")
-                            .classes("rounded")
-                            .src(coverSrc)
-                            .alt(entity.title)
-                            .build(),
+                        artworkDisplay(coverSrc, {
+                            alt: entity.title,
+                            size: 110,
+                            liked: MusicTemplates.interactionSignal(pin.entity_type as EntityType, entity, InteractionType.like),
+                            reposted: MusicTemplates.interactionSignal(pin.entity_type as EntityType, entity, InteractionType.repost),
+                        }),
                         create("span")
                             .classes("nopointer", "break-lines", "pin-title")
                             .text(entity.title)
@@ -1319,7 +1323,7 @@ export class UserTemplates {
                     return create("div")
                         .classes("flex", "align-children", "small-gap")
                         .children(
-                            create("img").classes("feed-inline-cover").src(coverSrc).alt(list.title).build(),
+                            MusicTemplates.feedCover(EntityType.album, list, coverSrc),
                             create("span").classes("feed-title", "clickable", "pointer")
                                 .text(list.title)
                                 .onclick((e: Event) => {
@@ -1356,7 +1360,7 @@ export class UserTemplates {
                     return create("div")
                         .classes("flex", "align-children", "small-gap")
                         .children(
-                            create("img").classes("feed-inline-cover").src(coverSrc).alt(list.title).build(),
+                            MusicTemplates.feedCover(EntityType.playlist, list, coverSrc),
                             create("span").classes("feed-title", "clickable", "pointer")
                                 .text(list.title)
                                 .onclick((e: Event) => {

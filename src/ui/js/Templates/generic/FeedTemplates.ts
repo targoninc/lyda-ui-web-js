@@ -26,6 +26,7 @@ import { UserTemplates } from "../account/UserTemplates.ts";
 import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { TrackTemplates } from "../music/TrackTemplates.ts";
+import { MusicTemplates } from "../music/MusicTemplates.ts";
 import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
 import { pinState } from "../../Classes/PinState.ts";
 import { trackInterval, trackCleanup } from "../../Classes/Helpers/PageLifecycle.ts";
@@ -674,11 +675,7 @@ export class FeedTemplates {
                     return create("div")
                         .classes("flex", "align-children", "small-gap", "noflexwrap")
                         .children(
-                            create("img")
-                                .classes("feed-inline-cover")
-                                .src(coverSrc)
-                                .alt(track.title)
-                                .build(),
+                            MusicTemplates.feedCover(EntityType.track, track, coverSrc),
                             create("div").classes("flex-v", "no-gap")
                                 .children(
                                     create("div").classes("flex", "align-children", "small-gap")

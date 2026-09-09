@@ -17,6 +17,8 @@ import { InteractionTemplates } from "../InteractionTemplates.ts";
 import { currentUser, loadingAudio, playingFrom, playingHere } from "../../state.ts";
 import { InteractionStateManager } from "../../Classes/InteractionStateManager.ts";
 import { MusicTemplates } from "./MusicTemplates.ts";
+import { artworkDisplay } from "./ArtworkTemplates.ts";
+import { InteractionType } from "@targoninc/lyda-shared/src/Enums/InteractionType";
 import { Api } from "../../Api/Api.ts";
 import { t } from "../../../locales";
 import { Visibility } from "@targoninc/lyda-shared/src/Enums/Visibility.ts";
@@ -154,12 +156,11 @@ export class PlaylistTemplates {
             coverState.value = Util.getPlaylistCover(playlist.id);
         }
 
-        return create("img")
-            .classes("cover", "rounded", "nopointer", "blurOnParentHover")
-            .styles("height", "20px")
-            .src(coverState)
-            .alt(playlist.title)
-            .build();
+        return artworkDisplay(coverState, {
+            alt: playlist.title,
+            size: 20,
+            liked: MusicTemplates.interactionSignal(EntityType.playlist, playlist, InteractionType.like),
+        });
     }
 
     static async playlistPage(route: Route, params: Record<string, string>) {

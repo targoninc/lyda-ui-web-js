@@ -500,7 +500,7 @@ export class PageTemplates {
                     return create("div")
                         .classes("flex", "align-children", "small-gap")
                         .children(
-                            create("img").classes("feed-inline-cover").src(coverSrc).alt(list.title).build(),
+                            MusicTemplates.feedCover(EntityType.album, list, coverSrc),
                             create("span").classes("feed-title", "clickable", "pointer")
                                 .text(list.title)
                                 .onclick((e: Event) => {
@@ -537,7 +537,7 @@ export class PageTemplates {
                     return create("div")
                         .classes("flex", "align-children", "small-gap")
                         .children(
-                            create("img").classes("feed-inline-cover").src(coverSrc).alt(list.title).build(),
+                            MusicTemplates.feedCover(EntityType.playlist, list, coverSrc),
                             create("span").classes("feed-title", "clickable", "pointer")
                                 .text(list.title)
                                 .onclick((e: Event) => {
@@ -924,11 +924,7 @@ export class PageTemplates {
                             return create("div")
                                 .classes("flex", "align-children", "small-gap", "noflexwrap")
                                 .children(
-                                    create("img")
-                                        .classes("feed-inline-cover")
-                                        .src(coverSrc)
-                                        .alt(track.title)
-                                        .build(),
+                                    MusicTemplates.feedCover(EntityType.track, track, coverSrc),
                                     create("div").classes("flex-v", "no-gap")
                                         .children(
                                             create("div").classes("flex", "align-children", "small-gap")

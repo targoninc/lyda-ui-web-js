@@ -798,6 +798,20 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     --cover-size: var(--small-track-height);
 }
 
+/* The artwork template inherits the cover size of its context. */
+.cover-container .artwork {
+    --artwork-size: var(--cover-size);
+}
+
+/* Keep the same cover hover dimming when the play button appears. */
+.cover-container .artwork-image {
+    transition: filter .5s ease;
+}
+
+.cover-container:hover .artwork-image {
+    filter: brightness(.3) blur(1px);
+}
+
 #banner-loader, #avatar-loader {
     width: 30px;
     height: 30px;
@@ -2501,8 +2515,8 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .artwork-sticker-icon {
-    width: calc(var(--artwork-size) * 0.11);
-    height: calc(var(--artwork-size) * 0.11);
+    width: calc(var(--artwork-size) * 0.08);
+    height: calc(var(--artwork-size) * 0.08);
 }
 
 .artwork-sticker-price {
