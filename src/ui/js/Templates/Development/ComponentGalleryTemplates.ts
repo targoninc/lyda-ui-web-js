@@ -85,7 +85,14 @@ export class ComponentGalleryTemplates {
         // The nav and fixed-bar widgets are position:sticky; they would stick
         // to the viewport top and overlay section screenshots. Render them
         // statically on this page.
-        const style = create("style").text("nav { position: static !important; } .fixed-bar { position: static !important; }").build();
+        // Flex columns must not wrap: with flex-wrap:wrap, the chart rows end up
+        // sized to their max-content, so the fixed-width chart cards stretch the
+        // section beyond the viewport and the tall cards overlap their rows.
+        const style = create("style").text(
+            "nav { position: static !important; } .fixed-bar { position: static !important; }" +
+            ".gallery-page, .gallery-page .flex-v { flex-wrap: nowrap !important; }" +
+            ".gallery-page > .flex-v, .gallery-page > .flex-v > .flex { min-width: 0 !important; }",
+        ).build();
         document.head.appendChild(style);
 
         const pillState = signal("all");
@@ -108,7 +115,7 @@ export class ComponentGalleryTemplates {
             ComponentGalleryTemplates.#feed(),
             ComponentGalleryTemplates.#menusAndModals(),
             ComponentGalleryTemplates.#tablesAndCharts(),
-        ).classes("padded-page", "flex-v", "gap").build();
+        ).classes("gallery-page", "padded-page", "flex-v", "gap").build();
     }
 
     static #section(id: string, title: string, ...rows: AnyNode[]) {

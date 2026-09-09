@@ -835,11 +835,13 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     width: 600px !important;
     max-width: 100% !important;
     max-height: 400px;
+    min-width: 0;
 }
 
 .chart-container-full {
     width: 600px !important;
     max-width: 100% !important;
+    min-width: 0;
     flex-grow: 1;
 }
 
@@ -847,6 +849,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     height: 240px !important;
     width: 600px !important;
     max-width: 100% !important;
+    min-width: 0;
 }
 
 .chart-plot {
