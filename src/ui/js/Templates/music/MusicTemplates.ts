@@ -31,7 +31,7 @@ import {PlaylistActions} from "../../Actions/PlaylistActions.ts";
 import {CoverContext} from "../../Enums/CoverContext.ts";
 import {TextSize} from "../../Enums/TextSize.ts";
 import {startItem} from "../../Actions/MusicActions.ts";
-import {artworkDisplay} from "./ArtworkTemplates.ts";
+import {artworkDisplay, ArtworkOptions} from "./ArtworkTemplates.ts";
 import {InteractionType} from "@targoninc/lyda-shared/src/Enums/InteractionType";
 
 export class MusicTemplates {
@@ -41,6 +41,7 @@ export class MusicTemplates {
         item: FeedItem,
         coverContext: CoverContext,
         onclickOverride: Function | null = null,
+        artworkOptions: Partial<ArtworkOptions> = {},
     ) {
         const imageState = signal(DefaultImages[type]);
         const fileType = `${type}Cover` as MediaFileType;
@@ -96,6 +97,7 @@ export class MusicTemplates {
                     alt: item.title,
                     liked: MusicTemplates.interactionSignal(type, item, InteractionType.like),
                     reposted: MusicTemplates.interactionSignal(type, item, InteractionType.repost),
+                    ...artworkOptions,
                     onclick: () => {
                         Ui.showImageModal(item.has_cover ? Util.getImage(item.id, fileType) : imageState.value);
                     },

@@ -477,7 +477,10 @@ export class TrackTemplates {
                 vertical(
                     vertical(
                         horizontal(
-                            MusicTemplates.cover(EntityType.track, track, CoverContext.standalone),
+                            MusicTemplates.cover(EntityType.track, track, CoverContext.standalone, null, {
+                                bought,
+                                price: track.price || undefined,
+                            }),
                             vertical(
                                 vertical(
                                     MusicTemplates.title(EntityType.track, track.title, track.id, icons, TextSize.xxLarge, false, false, track.wip),

@@ -243,13 +243,18 @@ function artworkSticker(opts: {
             opts.icon ? GenericTemplates.icon(opts.icon, false, ["artwork-sticker-icon"]) : null,
             ...textChildren,
         ).build();
+    const outlineScale = 1.12;
     const childNodes = spec
         ? [
             // Layered clip so the hard black shadow renders behind the body in
             // every browser (no filter/pseudo paint-order surprises).
             create("div").classes("artwork-sticker-shadow").styles(
                 "clip-path", `polygon(${spec.clip})`,
-                "transform", "translate(1px, 1px)",
+                "transform", `translate(1px, 1px) scale(${outlineScale})`,
+            ).build(),
+            create("div").classes("artwork-sticker-outline").styles(
+                "clip-path", `polygon(${spec.clip})`,
+                "transform", `scale(${outlineScale})`,
             ).build(),
             create("div").classes("artwork-sticker-body").styles(
                 "clip-path", `polygon(${spec.clip})`,

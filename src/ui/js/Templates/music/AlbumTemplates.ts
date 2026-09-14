@@ -256,7 +256,10 @@ export class AlbumTemplates {
                 create("div")
                     .classes("album-info-container", "flex")
                     .children(
-                        MusicTemplates.cover(EntityType.album, album, CoverContext.standalone),
+                        MusicTemplates.cover(EntityType.album, album, CoverContext.standalone, null, {
+                            bought: canDownload && !canEdit,
+                            price: BuyTemplates.getMinPrice({type: "album", entity: album}) || undefined,
+                        }),
                         vertical(
                             AlbumTemplates.audioActions(album, canEdit, canBuy, reload),
                             InteractionTemplates.interactions(EntityType.album, album),

@@ -2486,6 +2486,12 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     background: #000;
 }
 
+.artwork-sticker-outline {
+    position: absolute;
+    inset: 0;
+    background: var(--contrast);
+}
+
 .artwork-sticker-body {
     position: absolute;
     inset: 0;
