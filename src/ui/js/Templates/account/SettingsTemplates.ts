@@ -246,21 +246,11 @@ export class SettingsTemplates {
                 },
                 {
                     match: (headingMatches || SettingsTemplates.matches(manageSubText, query)) && !!user.subscription,
-                    template: () => button({
-                        icon: {icon: "payments"},
-                        text: manageSubText,
-                        classes: ["positive"],
-                        onclick: () => navigate(RoutePath.subscribe),
-                    })
+                    template: () => UserTemplates.subscriptionButton(user)
                 },
                 {
                     match: (headingMatches || SettingsTemplates.matches(subscribeMoreText, query)) && !user.subscription,
-                    template: () => button({
-                        icon: {icon: "payments"},
-                        text: subscribeMoreText,
-                        classes: ["special", "bigger-input", "rounded-max"],
-                        onclick: () => navigate(RoutePath.subscribe),
-                    })
+                    template: () => UserTemplates.subscriptionButton(user)
                 },
                 {
                     match: headingMatches,

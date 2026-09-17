@@ -44,13 +44,16 @@ import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import {pinState} from "../../Classes/PinState.ts";
 import {trackCleanup} from "../../Classes/Helpers/PageLifecycle.ts";
 import {Badge} from "@targoninc/lyda-shared/src/Models/db/lyda/Badge";
+import {Subscription} from "@targoninc/lyda-shared/src/Models/db/finance/Subscription";
+import {SubscriptionStatus} from "@targoninc/lyda-shared/src/Enums/SubscriptionStatus";
 import {NotificationType} from "../../Enums/NotificationType.ts";
 import {ColorExtractor} from "../../Classes/ColorExtractor.ts";
 import {Api} from "../../Api/Api.ts";
 import {TrackCollaborator} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
 import {TrackEditTemplates} from "../music/TrackEditTemplates.ts";
 import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType.ts";
-import {t} from "../../../locales";
+import {t, language, localeByLanguage} from "../../../locales";
+import {Time} from "../../Classes/Helpers/Time.ts";
 import {FeedType} from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 import {CardFeedType} from "../../Enums/CardFeedType.ts";
 import {TextSize} from "../../Enums/TextSize.ts";
@@ -131,6 +134,106 @@ export class UserTemplates {
         });
 
         return container;
+    }
+
+    public static userMenu(user: User) {
+        const popover = PopoverTemplates.manualPopover(`user-menu-${user.id}`, UserTemplates.userMenuContent(user));
+        const link = create("a")
+            .classes("page-link", "color-dim", "flex", "align-children", "small-gap", "noflexwrap")
+            .onclick((e: MouseEvent) => {
+                if (e.button === 0) {
+                    e.preventDefault();
+                    PopoverTemplates.toggle(popover, container, true);
+                }
+            })
+            .href(`${RoutePath.profile}/${user.username}`)
+            .title(user.displayname + " (@" + user.username + ")")
+            .children(
+                UserTemplates.userIcon(user.id, getAvatar(user)),
+                create("span")
+                    .classes("text", "align-center", "nopointer", "no-text-wrap")
+                    .text(truncateText(user.displayname, 15))
+                    .attributes("data-user-id", user.id)
+                    .build(),
+            ).build();
+
+        const container = horizontal(link, popover)
+            .classes("relative")
+            .build() as HTMLElement;
+
+        return container;
+    }
+
+    private static userMenuContent(user: User) {
+        return vertical(
+            UserTemplates.subscriptionSection(user),
+            button({
+                text: t("GO_TO_PROFILE"),
+                icon: {icon: "person"},
+                classes: ["fullWidth"],
+                onclick: () => navigate(`${RoutePath.profile}/${user.username}`),
+            }),
+            UserTemplates.settingsButton(["roundIconOnSmallBreakpoint", "fullWidth"]),
+        ).classes("small-gap", "padded").build();
+    }
+
+    private static subscriptionSection(user: User) {
+        const subscriptionBadge = user.badges?.find(badge => badge.name === "support_listener");
+
+        return vertical(
+            horizontal(
+                subscriptionBadge ? UserTemplates.badge(subscriptionBadge) : nullElement(),
+                create("span")
+                    .classes("text", "align-center")
+                    .text(user.subscription ? t("SUBSCRIBED") : t("FREE"))
+                    .build(),
+                UserTemplates.subscriptionInfo(user.subscription),
+            ).classes("align-children", "small-gap", "noflexwrap").build(),
+            UserTemplates.subscriptionButton(user, ["fullWidth"]),
+        ).classes("small-gap").build();
+    }
+
+    private static subscriptionInfo(subscription: Subscription | undefined) {
+        if (!subscription) {
+            return nullElement();
+        }
+
+        if (subscription.status === SubscriptionStatus.cancelled) {
+            const end = subscription.next_billing_time ?? subscription.cancelled_at;
+            return end
+                ? create("span").classes("color-dim").text(t("CANCELLED_TO", Util.formatDate(end))).build()
+                : nullElement();
+        }
+
+        if (!subscription.next_billing_time) {
+            return nullElement();
+        }
+
+        const days = Math.max(1, Math.ceil((Time.adjust(subscription.next_billing_time).getTime() - Date.now()) / 86400000));
+        const remaining = new Intl.RelativeTimeFormat(localeByLanguage[language.value], {numeric: "auto"}).format(days, "day");
+
+        return create("span").classes("color-dim").text(t("RENEWS_IN", remaining)).build();
+    }
+
+    static settingsButton(classes: StringOrSignal[] = ["roundIconOnSmallBreakpoint"]) {
+        return button({
+            text: t("SETTINGS"),
+            icon: {icon: "settings"},
+            classes,
+            onclick: () => navigate(RoutePath.settings),
+        });
+    }
+
+    static subscriptionButton(user: User, classes: StringOrSignal[] = []) {
+        const hasSubscription = !!user.subscription;
+        return button({
+            icon: {icon: "payments"},
+            text: hasSubscription ? t("MANAGE_SUBSCRIPTION") : t("SUBSCRIBE_MORE_FEATURES"),
+            classes: hasSubscription
+                ? ["positive", ...classes]
+                : ["special", "bigger-input", "rounded-max", ...classes],
+            onclick: () => navigate(RoutePath.subscribe),
+        });
     }
 
     static editableLinkedUser(
@@ -631,12 +734,7 @@ export class UserTemplates {
                             UserTemplates.unapprovedTracksLink(),
                         ).classes("align-children").build(),
                         horizontal(
-                            button({
-                                text: t("SETTINGS"),
-                                icon: {icon: "settings"},
-                                classes: ["roundIconOnSmallBreakpoint"],
-                                onclick: () => navigate(RoutePath.settings),
-                            }),
+                            UserTemplates.settingsButton(),
                             GenericTemplates.logoutButton(["hideOnSmallBreakpoint"]),
                         ).build(),
                     ).build(),

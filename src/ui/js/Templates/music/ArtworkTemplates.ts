@@ -104,7 +104,8 @@ export function artworkDisplay(url: StringOrSignal, opts: ArtworkOptions = {}): 
     }
 
     const overlayChildren: (AnyElement | Signal<AnyElement>)[] = [];
-    if (opts.showStickers !== false) {
+    const stickersEnabled = false;
+    if (stickersEnabled) {
         overlayChildren.push(
             when(bought$, () => artworkSticker({
                 icon: null,
@@ -144,14 +145,16 @@ export function artworkDisplay(url: StringOrSignal, opts: ArtworkOptions = {}): 
         );
     }
 
-    const signed$ = compute(
-        (topFan, bought) => Boolean(topFan && bought),
-        toBooleanSignal(opts.topFan),
-        bought$,
-    );
-    overlayChildren.push(
-        when(signed$, () => artworkSignature(opts.signatureText ?? null, rand)),
-    );
+    if (stickersEnabled) {
+        const signed$ = compute(
+            (topFan, bought) => Boolean(topFan && bought),
+            toBooleanSignal(opts.topFan),
+            bought$,
+        );
+        overlayChildren.push(
+            when(signed$, () => artworkSignature(opts.signatureText ?? null, rand)),
+        );
+    }
     // Optional parallax rotates this plane with the same angles as the 3D
     // model, so stickers/signature track the case instead of detaching.
     children.push(

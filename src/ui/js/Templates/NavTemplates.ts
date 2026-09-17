@@ -11,7 +11,6 @@ import { RoutePath } from "../Routing/routes.ts";
 import { NotificationTemplates } from "./NotificationTemplates.ts";
 import { button } from "@targoninc/jess-components";
 import { SearchContext } from "@targoninc/lyda-shared/src/Enums/SearchContext";
-import { UserWidgetContext } from "../Enums/UserWidgetContext.ts";
 import { t } from "../../locales";
 import { TextSize } from "../Enums/TextSize.ts";
 
@@ -159,7 +158,7 @@ export class NavTemplates {
                     }
                 }),
                 NotificationTemplates.notifications(),
-                compute(u => u ? UserTemplates.userLink(UserWidgetContext.nav, u) : nullElement(), currentUser),
+                compute(u => u ? UserTemplates.userMenu(u) : nullElement(), currentUser),
             ).build();
     }
 
