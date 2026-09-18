@@ -77,6 +77,7 @@ export class TrackEditTemplates {
             collaborators: [],
             termsOfService: false,
             wip: false,
+            free_download: false,
         });
         const errorSections = signal<string[]>([]);
         const errorFields = signal<string[]>([]);
@@ -457,6 +458,18 @@ export class TrackEditTemplates {
                     state.value = {
                         ...state.value,
                         wip: v,
+                    };
+                },
+            }),
+            toggle({
+                name: "free_download",
+                label: t("FREE_DOWNLOAD"),
+                text: t("FREE_DOWNLOAD"),
+                checked: compute(s => s.free_download ?? false, state),
+                onchange: v => {
+                    state.value = {
+                        ...state.value,
+                        free_download: v,
                     };
                 },
             }),
@@ -1079,7 +1092,8 @@ export class TrackEditTemplates {
                 s.isrc !== track.isrc ||
                 s.upc !== track.upc ||
                 s.price !== track.price ||
-                s.wip !== track.wip;
+                s.wip !== track.wip ||
+                s.free_download !== track.free_download;
         }, state);
         const loading = signal(false);
         const coverLoading = signal(false);
@@ -1173,6 +1187,7 @@ export class TrackEditTemplates {
             {key: "upc", label: "UPC"},
             {key: "visibility", label: "Visibility"},
             {key: "wip", label: "Work in progress"},
+            {key: "free_download", label: "Free download"},
         ];
         const changedBulkFields = BatchEditTemplates.changedFields(bulkState, bulkFields);
         const savingBulk = signal(false);

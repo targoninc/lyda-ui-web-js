@@ -473,6 +473,7 @@ export class Api {
             description: track.description,
             price: track.price,
             wip: track.wip,
+            free_download: track.free_download,
         });
     }
 
@@ -618,6 +619,7 @@ export class Api {
             upc: track.upc,
             price: track.price,
             wip: track.wip,
+            free_download: (track as any).free_download,
             lyrics_plain_text: (track as any).lyrics_plain_text,
             lyrics_timed_file: (track as any).lyrics_timed_file,
             lyrics_timed_format: (track as any).lyrics_timed_format,
@@ -747,12 +749,14 @@ export class Api {
     /**
      * Will only be called when directly downloading tracks, which is why we're requesting source quality
      * @param id
+     * @param code
      */
-    static async getTrackAudio(id: number) {
+    static async getTrackAudio(id: number, code: string = "") {
         return await get<Blob>(ApiRoutes.getTrackAudio, {
             id,
             quality: "source",
             download: true,
+            code,
         });
     }
 

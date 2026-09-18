@@ -19,6 +19,7 @@ import { ProgressPart } from "../Models/ProgressPart.ts";
 import { ProgressState } from "@targoninc/lyda-shared/src/Enums/ProgressState";
 import { button, toggle } from "@targoninc/jess-components";
 import { GenericTemplates, horizontal, vertical } from "../Templates/generic/GenericTemplates.ts";
+import { getTrackSecretCode } from "../state.ts";
 
 export class TrackActions {
     static async deleteTrack(id: number) {
@@ -304,7 +305,7 @@ export class TrackActions {
         const start = performance.now();
         let res;
         try {
-            res = await Api.getTrackAudio(track.id);
+            res = await Api.getTrackAudio(track.id, getTrackSecretCode(track.id));
         } catch (e: any) {
             notify(e.toString(), NotificationType.error);
             return;
@@ -314,8 +315,6 @@ export class TrackActions {
         console.log(`Download took ${diff}ms`);
 
         let blob: Blob | null = null;
-        const fileName: string = `${track.artistname?.length > 0 ? track.artistname : track.user?.displayname} - ${track.title || "track"}.mp3`;
-        console.log(`Downloading ${fileName}`, res);
 
         if (res instanceof Blob) {
             blob = res;
@@ -325,6 +324,9 @@ export class TrackActions {
             return;
         }
 
+        const fileName: string = `${track.artistname?.length > 0 ? track.artistname : track.user?.displayname} - ${track.title || "track"}.${TrackActions.downloadExtensionFor(blob.type)}`;
+        console.log(`Downloading ${fileName}`, res);
+
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -333,5 +335,19 @@ export class TrackActions {
         a.click();
         a.remove();
         URL.revokeObjectURL(url);
+    }
+
+    private static downloadExtensionFor(mimeType: string): string {
+        const extensions: Record<string, string> = {
+            "audio/mpeg": "mp3",
+            "audio/ogg": "ogg",
+            "audio/wav": "wav",
+            "audio/x-wav": "wav",
+            "audio/flac": "flac",
+            "audio/mp4": "m4a",
+            "audio/aac": "aac",
+        };
+
+        return extensions[mimeType] ?? "mp3";
     }
 }

@@ -689,6 +689,7 @@ export const en = {
     WILL_BE_PUBLICLY_VISIBLE: "This track will be publicly visible",
     WIP: "WIP",
     WORK_IN_PROGRESS: "Work in progress",
+    FREE_DOWNLOAD: "Free download",
     NO_WIPS: "No WIPs",
     WIP_ONLY: "WIP only",
     REPORT: "Report",

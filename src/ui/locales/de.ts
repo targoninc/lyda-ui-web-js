@@ -676,6 +676,7 @@ export const de: Translation = {
     WILL_BE_PUBLICLY_VISIBLE: "Dieser Track wird öffentlich sichtbar sein",
     WIP: "WIP",
     WORK_IN_PROGRESS: "In Arbeit",
+    FREE_DOWNLOAD: "Kostenloser Download",
     NO_WIPS: "Keine WIPs",
     WIP_ONLY: "Nur WIPs",
 

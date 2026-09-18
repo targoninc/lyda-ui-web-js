@@ -38,6 +38,11 @@ if (currentUser.value?.deleted_at) {
     notify(t("SCHEDULED_FOR_DELETION"), NotificationType.error);
 }
 
+if (!currentUser.value && window.location.pathname === "/") {
+    const { search, hash } = window.location;
+    history.replaceState({}, "", `/${RoutePath.explore}${search}${hash}`);
+}
+
 const footer = document.querySelector("footer");
 if (!footer) {
     throw new Error("No footer found");
