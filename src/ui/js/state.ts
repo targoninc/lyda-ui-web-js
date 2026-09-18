@@ -287,7 +287,18 @@ shuffling.subscribe((p, changed) => {
     }
 });
 
-export const currentSecretCode = signal<string>("");
+function getSecretCodeFromUrl(): string {
+    const segments = window.location.pathname.split("/").filter(p => p.length > 0);
+    if (segments[0] === "track") {
+        const code = segments[2];
+        if (code) {
+            return code;
+        }
+    }
+    return new URLSearchParams(window.location.search).get("code") ?? "";
+}
+
+export const currentSecretCode = signal<string>(getSecretCodeFromUrl());
 
 export const notifications = signal<Notification[]>([]);
 const NOTIFICATIONS_MAX = 50;

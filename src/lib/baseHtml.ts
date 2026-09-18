@@ -6,6 +6,9 @@ const cssCacheBuster = Date.now();
 
 export async function baseHtml(req: Request) {
     const url = req.url;
+    const requestUrl = new URL(url);
+    const pathname = requestUrl.pathname;
+    const segments = pathname.split("/").filter(p => p.length > 0);
 
     let title = "Lyda";
     let description = "Stream the music you love.";
@@ -15,19 +18,25 @@ export async function baseHtml(req: Request) {
     const enableAndroidOpenInApp = process.env.ENABLE_ANDROID_OPEN_IN_APP === "true";
     let ogType = "website";
 
+    // Private tracks are shared as /track/{id}/{secretCode}; the secret code
+    // unlocks track metadata (title, artist, cover) for the embed metadata.
+    let code = requestUrl.searchParams.get("code") ?? "";
     let id, newimage, res, type, optionalTags = "";
-    if (url.includes("/track/")) {
-        id = url.split("/").at(-1);
-        newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.trackCover}&quality=500`;
+    if (pathname.includes("/track/")) {
+        const index = segments.indexOf("track");
+        id = segments[index + 1];
+        code = segments[index + 2] ?? code;
+        const codeParam = code ? `&code=${encodeURIComponent(code)}` : "";
+        newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.trackCover}&quality=500${codeParam}`;
         type = "track";
         ogType = "music.song";
-    } else if (url.includes("/album/")) {
-        id = url.split("/").at(-1);
+    } else if (pathname.includes("/album/")) {
+        id = segments[segments.indexOf("album") + 1];
         newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.albumCover}&quality=500`;
         type = "album";
         ogType = "music.album";
-    } else if (url.includes("/playlist/")) {
-        id = url.split("/").at(-1);
+    } else if (pathname.includes("/playlist/")) {
+        id = segments[segments.indexOf("playlist") + 1];
         newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.playlistCover}&quality=500`;
         type = "playlist";
         ogType = "music.playlist";
@@ -35,7 +44,8 @@ export async function baseHtml(req: Request) {
 
     if (newimage) {
         newimage = encodeURI(newimage);
-        res = await fetch(`${apiUrl}/${type}s/byId?id=${id}`);
+        const codeParam = type === "track" && code ? `&code=${encodeURIComponent(code)}` : "";
+        res = await fetch(`${apiUrl}/${type}s/byId?id=${id}${codeParam}`);
         if (res?.ok && type) {
             const body: Record<string, any> = await res.json();
             let entity = body[type];
