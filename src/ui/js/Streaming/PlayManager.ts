@@ -7,9 +7,9 @@ import {FeatureDetector} from "../Classes/Helpers/FeatureDetector.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {
     currentQuality,
-    currentSecretCode,
     currentTrackId,
     currentTrackPosition,
+    getTrackSecretCode,
     history,
     loadingAudio,
     loopMode,
@@ -337,7 +337,7 @@ export class PlayManager {
     static addStreamClientIfNotExists(id: number, duration: number, version?: number) {
         let streamClient = PlayManager.getStreamClient(id);
         if (streamClient === undefined) {
-            streamClient = new StreamClient(id, currentSecretCode.value, version);
+            streamClient = new StreamClient(id, getTrackSecretCode(id), version);
             PlayManager.addStreamClient(id, streamClient);
             PlayManager.registerOnEnded(id, streamClient);
             PlayManager.pruneStaleStreamClients();
@@ -413,7 +413,7 @@ export class PlayManager {
             return;
         }
 
-        const client = new StreamClient(resolved.id, currentSecretCode.value);
+        const client = new StreamClient(resolved.id, getTrackSecretCode(resolved.id));
         PlayManager.addStreamClient(resolved.id, client);
         PlayManager.registerOnEnded(resolved.id, client);
         client.preload();
@@ -881,7 +881,7 @@ export class PlayManager {
             throw new Error("id is missing");
         }
 
-        const data = await get<TrackDetailResponse>(ApiRoutes.getTrackById, {id, code: currentSecretCode.value});
+        const data = await get<TrackDetailResponse>(ApiRoutes.getTrackById, {id, code: getTrackSecretCode(id)});
         if (data) {
             await PlayManager.cacheTrackData(data);
         }

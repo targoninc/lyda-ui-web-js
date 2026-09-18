@@ -16,7 +16,7 @@ import {TrackEditTemplates} from "./music/TrackEditTemplates.ts";
 import {navigate, Route} from "../Routing/Router.ts";
 import {copy, getTabFromUrl, Util} from "../Classes/Util.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
-import {currentSecretCode, currentTrackId, currentUser, playingHere} from "../state.ts";
+import {currentTrackId, currentUser, playingHere, setTrackSecretCode} from "../state.ts";
 import {TrackTemplates} from "./music/TrackTemplates.ts";
 import {PlaylistTemplates} from "./music/PlaylistTemplates.ts";
 import {StatisticTemplates} from "./StatisticTemplates.ts";
@@ -705,6 +705,7 @@ export class PageTemplates {
     static async trackPage(route: Route, params: Record<string, string>) {
         const trackId = parseInt(params["id"]);
         const code = params["code"] || "";
+        setTrackSecretCode(trackId, code);
 
         let track;
         try {
@@ -720,7 +721,6 @@ export class PageTemplates {
         }
 
         document.title = track.track.title;
-        currentSecretCode.value = code;
 
         await PlayManager.cacheTrackData(track);
         BuyTemplates.handlePurchaseSuccessIfPresent(params, {type: "track", entity: track.track});

@@ -13,10 +13,10 @@ import { navigate } from "../../Routing/Router.ts";
 import {
     currentlyBuffered,
     currentQuality,
-    currentSecretCode,
     currentTrackId,
     currentTrackPosition,
     currentUser,
+    getTrackSecretCode,
     loadingAudio,
     loopMode,
     muted,
@@ -573,7 +573,7 @@ export class PlayerTemplates {
             horizontal(
                 PlayerTemplates.playerTrackTitle(track, () => {
                     playerExpanded.value = false;
-                    const code = currentSecretCode.value;
+                    const code = getTrackSecretCode(track.id);
                     navigate(`/track/${track.id}${code ? `/${code}` : ""}`);
                 }),
                 create("div")
