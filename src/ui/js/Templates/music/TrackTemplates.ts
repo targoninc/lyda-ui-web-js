@@ -569,6 +569,7 @@ export class TrackTemplates {
                                         horizontal(
                                             TrackTemplates.addToPlaylistButton(track),
                                             TrackTemplates.addToQueueButton(track),
+                                            when(trackData.canDownload, TrackEditTemplates.downloadAudioButton(track)),
                                             when(trackData.canBuy && paymentsEnabled.value, button({
                                                 icon: {icon: "attach_money"},
                                                 text: t("BUY"),
@@ -852,7 +853,6 @@ export class TrackTemplates {
         const latestVersionIdx = trackData.latestVersion;
         const versionCount = versions.length;
         const popover = PopoverTemplates.manualPopover(popId,
-            when(trackData.canDownload, TrackEditTemplates.downloadAudioButton(track)),
             when(trackData.canEdit, vertical(
                 TrackEditTemplates.addToAlbumsButton(track),
                 TrackEditTemplates.replaceAudioButton(track, latestVersionIdx, versionCount),
