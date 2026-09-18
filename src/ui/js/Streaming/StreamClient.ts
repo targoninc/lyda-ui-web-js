@@ -174,10 +174,11 @@ export class StreamClient implements IStreamClient {
             const target = this.clampTime(targetSeconds);
 
             const wasPlaying = this.playing;
+            const wasEnded = this.audio!.ended;
             this.audio!.currentTime = target;
             this.offset = target;
 
-            if (wasPlaying) {
+            if (wasPlaying || wasEnded) {
                 await this.audio!.play();
             }
         } catch (e) {
