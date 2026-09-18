@@ -40,7 +40,7 @@ if (currentUser.value?.deleted_at) {
 
 if (!currentUser.value && window.location.pathname === "/") {
     const { search, hash } = window.location;
-    history.replaceState({}, "", `/${RoutePath.explore}${search}${hash}`);
+    window.history.replaceState({}, "", `/${RoutePath.explore}${search}${hash}`);
 }
 
 const footer = document.querySelector("footer");
