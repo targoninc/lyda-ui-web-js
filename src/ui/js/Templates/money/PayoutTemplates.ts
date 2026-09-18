@@ -48,7 +48,7 @@ export class PayoutTemplates {
         const stripeConnected$ = compute(s => s?.connected ?? false, stripeStatus);
         const stripePayoutsEnabled$ = compute(s => s?.payoutsEnabled ?? false, stripeStatus);
         const canRequestPayout$ = compute((ri, sc, spe, sl, hpr) => {
-            if (!ri || !ri.personal.hasTaxInfo || sl || hpr) return false;
+            if (!ri || !ri.personal.hasTaxInfo || sl || !hpr) return false;
             if (sc && spe) return true;
             return false;
         }, royaltyInfo, stripeConnected$, stripePayoutsEnabled$, stripeLoading, hasPayableRoyalties);
