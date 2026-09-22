@@ -80,4 +80,10 @@ export const ga: Translation = {
     DROP_AUDIO_FILE_HERE: "Buail comhad fuaime anseo nó cliceáil chun brabhsáil",
     DO_NOT_CREATE_NEW_VERSION: "Ná cruthaigh leagan nua",
     VERSION_NAME: "Ainm an leagain",
+    EDIT_VERSIONS: "Leaganacha a chur in eagar",
+    DELETE_VERSION: "Scrios an leagan",
+    SURE_DELETE_VERSION: (name: string) => `An bhfuil tú cinnte gur mhaith leat an leagan "${name}" a scriosadh?`,
+    CANNOT_DELETE_ONLY_VERSION: "Ní féidir an leagan deireanach a scriosadh",
+    VERSION_RENAMED: "Leagan athainmnithe",
+    VERSION_DELETED: "Leagan scriosta",
 };

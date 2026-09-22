@@ -45,6 +45,10 @@ export class StreamClient implements IStreamClient {
         }
     }
 
+    public getVersion(): number | undefined {
+        return this.version;
+    }
+
     setLoop(looping: boolean): void {
         if (this.audio) {
             this.audio.loop = looping;

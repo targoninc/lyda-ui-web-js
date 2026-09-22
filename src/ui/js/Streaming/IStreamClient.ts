@@ -20,6 +20,8 @@ export interface IStreamClient {
 
     setVersion(version: number | undefined): void;
 
+    getVersion(): number | undefined;
+
     /** Releases the client's audio graph and network resources. */
     close(): void;
 

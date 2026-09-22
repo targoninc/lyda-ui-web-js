@@ -856,6 +856,7 @@ export class TrackTemplates {
             when(trackData.canEdit, vertical(
                 TrackEditTemplates.addToAlbumsButton(track),
                 TrackEditTemplates.replaceAudioButton(track, latestVersionIdx, versionCount),
+                TrackEditTemplates.editVersionsButton(track, versions),
                 TrackEditTemplates.openEditPageButton(track),
                 TrackEditTemplates.deleteTrackButton(track.id),
             ).build()),

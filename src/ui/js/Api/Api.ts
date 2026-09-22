@@ -495,6 +495,18 @@ export class Api {
         return true;
     }
 
+    static async renameTrackVersion(trackId: number, versionIndex: number, name: string): Promise<boolean> {
+        await post(ApiRoutes.renameTrackVersion, { trackId, versionIndex, name });
+        notify(t("VERSION_RENAMED"), NotificationType.success);
+        return true;
+    }
+
+    static async deleteTrackVersion(trackId: number, versionIndex: number): Promise<boolean> {
+        await post(ApiRoutes.deleteTrackVersion, { trackId, versionIndex });
+        notify(t("VERSION_DELETED"), NotificationType.success);
+        return true;
+    }
+
     static async deleteComment(commentId: number): Promise<boolean> {
         await post(ApiRoutes.deleteComment, {
             id: commentId,

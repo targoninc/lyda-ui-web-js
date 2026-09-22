@@ -751,4 +751,10 @@ export const en = {
     DROP_AUDIO_FILE_HERE: "Drop audio file here or click to browse",
     DO_NOT_CREATE_NEW_VERSION: "Do not create a new version",
     VERSION_NAME: "Version name",
+    EDIT_VERSIONS: "Edit versions",
+    DELETE_VERSION: "Delete version",
+    SURE_DELETE_VERSION: (name: string) => `Are you sure you want to delete version "${name}"?`,
+    CANNOT_DELETE_ONLY_VERSION: "A track must keep at least one version",
+    VERSION_RENAMED: "Version renamed",
+    VERSION_DELETED: "Version deleted",
 } satisfies BaseTranslation;

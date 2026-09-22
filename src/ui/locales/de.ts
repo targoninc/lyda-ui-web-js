@@ -734,4 +734,10 @@ export const de: Translation = {
     DROP_AUDIO_FILE_HERE: "Audiodatei hier ablegen oder klicken zum Durchsuchen",
     DO_NOT_CREATE_NEW_VERSION: "Keine neue Version erstellen",
     VERSION_NAME: "Versionsname",
+    EDIT_VERSIONS: "Versionen bearbeiten",
+    DELETE_VERSION: "Version löschen",
+    SURE_DELETE_VERSION: (name: string) => `Bist du sicher, dass du die Version "${name}" löschen willst?`,
+    CANNOT_DELETE_ONLY_VERSION: "Ein Track muss mindestens eine Version behalten",
+    VERSION_RENAMED: "Version umbenannt",
+    VERSION_DELETED: "Version gelöscht",
 };

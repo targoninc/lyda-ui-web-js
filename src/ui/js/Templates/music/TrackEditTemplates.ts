@@ -6,7 +6,7 @@ import {Images} from "../../Enums/Images.ts";
 import {TrackActions} from "../../Actions/TrackActions.ts";
 import {downloadFile, target, Util} from "../../Classes/Util.ts";
 import {AudioUpload} from "../../Classes/AudioUpload.ts";
-import {notify, Ui} from "../../Classes/Ui.ts";
+import {notify, Ui, createModal} from "../../Classes/Ui.ts";
 import {
     AnyElement,
     AnyNode,
@@ -50,6 +50,7 @@ import {NotificationType} from "../../Enums/NotificationType.ts";
 import {ParentGenreGroup} from "../generic/ParentGenreGroup.ts";
 import {predictGenresFromFile} from "../../Classes/GenrePredictor.ts";
 import {BatchEditField, BatchEditTemplates} from "../generic/BatchEditTemplates.ts";
+import {TrackVersion} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackVersion";
 
 let _uploadDragCleanup: (() => void) | null = null;
 
@@ -937,6 +938,134 @@ export class TrackEditTemplates {
             }),
             GenericTemplates.progressSectionPart(progress),
         ).classes("align-children").build();
+    }
+
+    static editVersionsButton(track: Track, versions: TrackVersion[]) {
+        return button({
+            text: t("EDIT_VERSIONS"),
+            icon: {icon: "library_music"},
+            onclick: () => TrackEditTemplates.openEditVersionsModal(track, versions),
+        });
+    }
+
+    private static openEditVersionsModal(track: Track, versions: TrackVersion[]) {
+        const versions$ = signal([...versions]);
+        const pendingDelete$ = signal<number | null>(null);
+        const changed = {value: false};
+        const openPath = window.location.pathname;
+
+        const content = create("div")
+            .classes("flex-v", "small-gap")
+            .children(
+                create("h3").text(t("EDIT_VERSIONS")).build(),
+                signalMap(
+                    versions$,
+                    vertical(),
+                    version => TrackEditTemplates.versionRow(track, version, versions$, pendingDelete$, () => changed.value = true),
+                ),
+                horizontal(GenericTemplates.modalCancelButton()).classes("align-end").build(),
+            ).build();
+
+        const modal = createModal([content], "edit-versions");
+        if (!modal) {
+            return;
+        }
+
+        // The page must only be reloaded once the modal is gone: disposePageRender
+        // removes open modals on reload, which would close the dialog on every edit.
+        const observer = new MutationObserver(() => {
+            if (modal.isConnected) {
+                return;
+            }
+
+            observer.disconnect();
+            if (changed.value && window.location.pathname === openPath) {
+                reload();
+            }
+        });
+        observer.observe(document.body, {childList: true});
+    }
+
+    private static versionRow(track: Track, version: TrackVersion, versions$: Signal<TrackVersion[]>, pendingDelete$: Signal<number | null>, markChanged: () => void) {
+        const displayName = version.name ?? `v${version.index}`;
+        const name$ = signal(displayName);
+        const savedName$ = signal(version.name ?? "");
+        const saving$ = signal(false);
+        const deleting$ = signal(false);
+        const confirming$ = compute(pending => pending === version.index, pendingDelete$);
+        const changed$ = compute((name, saved) => name.trim() !== (saved ?? ""), name$, savedName$);
+        const onlyVersion = versions$.value.length <= 1;
+
+        const row = create("div")
+            .classes("flex", "align-children", "small-gap", "fullWidth")
+            .children(
+                create("span")
+                    .classes("color-dim", "no-text-wrap")
+                    .children(
+                        create("span").text(`v${version.index} (`).build(),
+                        GenericTemplates.timestamp(version.created_at),
+                        create("span").text(")").build(),
+                    ).build(),
+                input<string>({
+                    type: InputType.text,
+                    name: `version-name-${track.id}-${version.index}`,
+                    placeholder: displayName,
+                    value: name$,
+                    wrapperClasses: ["flex-grow"],
+                }),
+                button({
+                    text: t("SAVE"),
+                    icon: {icon: "check"},
+                    classes: ["positive"],
+                    disabled: compute((c, s) => !c || s, changed$, saving$),
+                    onclick: async () => {
+                        saving$.value = true;
+                        try {
+                            const newName = name$.value.trim();
+                            await Api.renameTrackVersion(track.id, version.index, newName);
+                            savedName$.value = newName;
+                            versions$.value = versions$.value.map(v => v.index === version.index ? {...v, name: newName || null} : v);
+                            markChanged();
+                        } finally {
+                            saving$.value = false;
+                        }
+                    },
+                }),
+                button({
+                    text: compute((c, cancel, del) => c ? cancel : del, confirming$, t("CANCEL"), t("DELETE")),
+                    icon: {icon: compute((c): string => c ? "close" : "delete", confirming$)},
+                    classes: [compute((c): string => c ? "_" : "negative", confirming$)],
+                    disabled: onlyVersion,
+                    title: compute((c, del, cannot) => onlyVersion ? cannot : (c ? "" : del), confirming$, t("DELETE_VERSION"), t("CANNOT_DELETE_ONLY_VERSION")),
+                    onclick: () => pendingDelete$.value = confirming$.value ? null : version.index,
+                }),
+            ).build();
+
+        const confirmation = when(confirming$, horizontal(
+            create("span").classes("color-dim").text(t("SURE_DELETE_VERSION", displayName)).build(),
+            button({
+                text: t("DELETE"),
+                icon: {icon: "delete"},
+                classes: ["negative"],
+                disabled: deleting$,
+                onclick: async () => {
+                    deleting$.value = true;
+                    try {
+                        await Api.deleteTrackVersion(track.id, version.index);
+                        versions$.value = versions$.value.filter(v => v.index !== version.index);
+                        pendingDelete$.value = null;
+                        if (PlayManager.getStreamClient(track.id)?.getVersion() === version.index) {
+                            await PlayManager.removeTrackFromAllStates(track.id);
+                        }
+                        markChanged();
+                    } finally {
+                        deleting$.value = false;
+                    }
+                },
+            }),
+        ).classes("align-children", "small-gap").build());
+
+        return vertical(row, confirmation).classes("fullWidth", "small-gap").build();
     }
 
     static downloadAudioButton(track: Track, classes: StringOrSignal[] = []) {

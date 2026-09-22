@@ -2344,7 +2344,6 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     height: 100%;
     border-radius: var(--border-radius);
     overflow: hidden;
-    transform: perspective(650px) rotateX(5deg) rotateY(-7deg);
     transition: transform .3s ease;
 }
 
@@ -2368,6 +2367,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     border-radius: var(--border-radius);
     overflow: visible;
     background: transparent;
+    transform: perspective(650px) rotateX(5deg) rotateY(-7deg);
 }
 
 .artwork-format-vinyl .artwork-image {
