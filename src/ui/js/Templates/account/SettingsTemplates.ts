@@ -100,31 +100,35 @@ export class SettingsTemplates {
             {heading: () => t("LINKS"), id: SettingsTemplates.sectionId(t("LINKS"))},
         ];
 
+        const scrollToSection = (id: string) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.scrollIntoView({behavior: "smooth", block: "center"});
+            }
+        };
+
+        const searchInput = () => input({
+            type: InputType.text,
+            name: "search",
+            placeholder: t("SEARCH_SETTINGS"),
+            debounce: 200,
+            value: searchQuery$,
+            onchange: v => searchQuery$.value = v,
+        });
+
         const navButtons = sectionConfigs.map(({heading, id}) => {
             const text = heading();
             return button({
                 text,
                 icon: {icon: SettingsTemplates.sectionIcons[id] ?? "settings"},
                 classes: ["rounded-max"],
-                onclick: () => {
-                    const el = document.getElementById(id);
-                    if (el) {
-                        el.scrollIntoView({behavior: "smooth", block: "center"});
-                    }
-                },
+                onclick: () => scrollToSection(id),
             });
         });
 
         const fixedBar = GenericTemplates.fixedBar([
             create("div").classes("flex", "align-children", "small-gap", "flex-wrap").children(
-                input({
-                    type: InputType.text,
-                    name: "search",
-                    placeholder: t("SEARCH_SETTINGS"),
-                    debounce: 200,
-                    value: searchQuery$,
-                    onchange: v => searchQuery$.value = v,
-                }),
+                searchInput(),
                 button({
                     icon: {icon: compute((e): string => e ? "expand_more" : "chevron_right", navButtonsExpanded)},
                     classes: ["rounded-max"],
@@ -133,6 +137,19 @@ export class SettingsTemplates {
                 when(navButtonsExpanded, create("div").classes("flex", "flex-wrap", "small-gap", "align-children").children(...navButtons).build()),
             ).build(),
         ]);
+
+        const sidebar = create("div")
+            .classes("settings-nav")
+            .children(
+                searchInput(),
+                create("div")
+                    .classes("settings-nav-links", "flex-v")
+                    .children(...sectionConfigs.map(({heading, id}) => GenericTemplates.inlineLink(
+                        () => scrollToSection(id),
+                        heading(),
+                    )))
+                    .build(),
+            ).build();
 
         const url = new URL(window.location.href);
         if (url.hash.length > 0) {
@@ -155,21 +172,26 @@ export class SettingsTemplates {
                 level: 1,
                 text: t("SETTINGS"),
             }),
-            fixedBar,
-            vertical(
-                sectionWrapper(sectionConfigs[0].id, SettingsTemplates.accountSection(user, searchQuery$)),
-                sectionWrapper(sectionConfigs[1].id, SettingsTemplates.totpSection(searchQuery$)),
-                sectionWrapper(sectionConfigs[2].id, WebauthnTemplates.devicesSection(searchQuery$)),
-                sectionWrapper(sectionConfigs[3].id, SettingsTemplates.paymentSection(searchQuery$)),
-                sectionWrapper(sectionConfigs[4].id, SettingsTemplates.taxinfoSection(searchQuery$)),
-                sectionWrapper(sectionConfigs[5].id, SettingsTemplates.themeSection(getUserSettingValue<Theme>(user, UserSettings.theme), searchQuery$)),
-                sectionWrapper(sectionConfigs[6].id, SettingsTemplates.languageSection(searchQuery$)),
-                sectionWrapper(sectionConfigs[7].id, SettingsTemplates.qualitySection(getUserSettingValue<StreamingQuality>(user, UserSettings.streamingQuality) ?? "m", searchQuery$)),
-                sectionWrapper(sectionConfigs[8].id, SettingsTemplates.behaviourSection(user, searchQuery$)),
-                sectionWrapper(sectionConfigs[9].id, SettingsTemplates.notificationsSection(user, searchQuery$)),
-                sectionWrapper(sectionConfigs[10].id, SettingsTemplates.discographySection(searchQuery$)),
-                sectionWrapper(sectionConfigs[11].id, SettingsTemplates.dangerSection(user, searchQuery$)),
-                sectionWrapper(sectionConfigs[12].id, SettingsTemplates.linksSection(searchQuery$)),
+            create("div").classes("settings-layout").children(
+                sidebar,
+                vertical(
+                    fixedBar,
+                    vertical(
+                        sectionWrapper(sectionConfigs[0].id, SettingsTemplates.accountSection(user, searchQuery$)),
+                        sectionWrapper(sectionConfigs[1].id, SettingsTemplates.totpSection(searchQuery$)),
+                        sectionWrapper(sectionConfigs[2].id, WebauthnTemplates.devicesSection(searchQuery$)),
+                        sectionWrapper(sectionConfigs[3].id, SettingsTemplates.paymentSection(searchQuery$)),
+                        sectionWrapper(sectionConfigs[4].id, SettingsTemplates.taxinfoSection(searchQuery$)),
+                        sectionWrapper(sectionConfigs[5].id, SettingsTemplates.themeSection(getUserSettingValue<Theme>(user, UserSettings.theme), searchQuery$)),
+                        sectionWrapper(sectionConfigs[6].id, SettingsTemplates.languageSection(searchQuery$)),
+                        sectionWrapper(sectionConfigs[7].id, SettingsTemplates.qualitySection(getUserSettingValue<StreamingQuality>(user, UserSettings.streamingQuality) ?? "m", searchQuery$)),
+                        sectionWrapper(sectionConfigs[8].id, SettingsTemplates.behaviourSection(user, searchQuery$)),
+                        sectionWrapper(sectionConfigs[9].id, SettingsTemplates.notificationsSection(user, searchQuery$)),
+                        sectionWrapper(sectionConfigs[10].id, SettingsTemplates.discographySection(searchQuery$)),
+                        sectionWrapper(sectionConfigs[11].id, SettingsTemplates.dangerSection(user, searchQuery$)),
+                        sectionWrapper(sectionConfigs[12].id, SettingsTemplates.linksSection(searchQuery$)),
+                    ).build(),
+                ).classes("settings-content").build(),
             ).build(),
         ).build();
     }

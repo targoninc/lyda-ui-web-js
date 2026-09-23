@@ -1342,6 +1342,46 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     box-sizing: border-box;
 }
 
+.settings-nav {
+    display: none;
+}
+
+.settings-nav input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Matches --breakpoint-big: on wide screens the settings get a sticky side
+   navigation (search + on-page links) and drop the fixed bar. */
+@media only screen and (min-width: 1334px) {
+    .settings-layout {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--large-padding);
+    }
+
+    .settings-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .settings-nav {
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        gap: var(--layout-gap);
+        width: 240px;
+        position: sticky;
+        top: 60px;
+        max-height: calc(100dvh - 70px);
+        overflow-y: auto;
+    }
+
+    .settings-content .fixed-bar {
+        display: none;
+    }
+}
+
 .log-properties {
     resize: both;
     overflow: auto;
@@ -2169,13 +2209,18 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .pin-card {
-    width: 140px;
+    --artwork-size: 150px;
+    width: var(--artwork-size);
     flex-shrink: 0;
     padding: var(--mid-padding);
     border: 1px solid var(--border);
     border-radius: var(--large-border-radius);
     perspective: 800px;
     transition: outline 0.15s ease-out;
+}
+
+.pin-card .artwork {
+    --artwork-size: inherit;
 }
 
 .pin-card.drag-over {
@@ -2206,6 +2251,8 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .pin-card .pin-title {
     font-weight: bold;
+    max-width: var(--artwork-size);
+    overflow-wrap: anywhere;
 }
 
 .pin-card .pin-type {

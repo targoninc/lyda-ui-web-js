@@ -1175,7 +1175,6 @@ export class UserTemplates {
                     .children(
                         artworkDisplay(coverSrc, {
                             alt: entity.title,
-                            size: 110,
                             liked: MusicTemplates.interactionSignal(pin.entity_type as EntityType, entity, InteractionType.like),
                             reposted: MusicTemplates.interactionSignal(pin.entity_type as EntityType, entity, InteractionType.repost),
                         }),
