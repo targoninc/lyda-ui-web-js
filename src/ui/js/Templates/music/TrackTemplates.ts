@@ -459,7 +459,7 @@ export class TrackTemplates {
         });
         const hasMenu = Util.isLoggedIn() && (trackData.canEdit || trackData.canDownload);
         const backgroundImage = compute(c => trackData.canDownload ? `url(${c})` : "none", coverFile);
-        const bought = trackData.canDownload && !trackData.canEdit;
+        const bought = trackData.bought;
         const selectedTab$ = signal(0);
         const isUploader = currentUser.value?.id === track.user?.id;
         const tabs = [t("COMMENTS"), t("ALBUMS"), t("PLAYLISTS"), t("BUYERS")];
