@@ -100,6 +100,15 @@
     background: var(--fg-0);
 }
 
+.vertical-drag-indicator.tall {
+    height: auto;
+    align-self: stretch;
+}
+
+.vertical-drag-indicator.tall::before {
+    height: calc(100% - 1em);
+}
+
 .dragIndicator.dragover, .dragIndicator.active {
     position: absolute;
     z-index: 5;

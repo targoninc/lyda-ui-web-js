@@ -753,6 +753,7 @@ export const en = {
     VERSION_NAME: "Version name",
     EDIT_VERSIONS: "Edit versions",
     DRAG_TO_REORDER_VERSIONS: "Drag versions by the handle to change their order",
+    LATEST_VERSION: "Latest",
     DELETE_VERSION: "Delete version",
     SURE_DELETE_VERSION: (name: string) => `Are you sure you want to delete version "${name}"?`,
     CANNOT_DELETE_ONLY_VERSION: "A track must keep at least one version",

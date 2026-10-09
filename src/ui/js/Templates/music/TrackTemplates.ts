@@ -216,14 +216,25 @@ export class TrackTemplates {
             windowWidth$,
         );
 
+        const versionActive$ = compute((id, _position, _playing) => {
+            if (id !== track.id) {
+                return false;
+            }
+            const playingVersion = PlayManager.getStreamClient(track.id)?.getVersion();
+            if (playingVersion === undefined) {
+                return true;
+            }
+            return version === undefined || playingVersion === version;
+        }, currentTrackId, currentTrackPosition, playingHere);
+
         const clipInset = compute(
             (pos, isCurrent): string => isCurrent ? `inset(0 ${(1 - pos.relative) * 100}% 0 0)` : "none",
-            currentTrackPosition, compute(id => id === track.id, currentTrackId),
+            currentTrackPosition, versionActive$,
         );
 
         const blueDisplay = compute(
-            (id, ph): string => id === track.id && ph ? "" : "none",
-            currentTrackId, playingHere,
+            (isCurrent, ph): string => isCurrent && ph ? "" : "none",
+            versionActive$, playingHere,
         );
 
         const el = create("div")

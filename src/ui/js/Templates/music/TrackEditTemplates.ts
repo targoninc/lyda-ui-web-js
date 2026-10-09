@@ -4,7 +4,7 @@ import {Icons} from "../../Enums/Icons.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
 import {Images} from "../../Enums/Images.ts";
 import {TrackActions} from "../../Actions/TrackActions.ts";
-import {downloadFile, target, Util} from "../../Classes/Util.ts";
+import {downloadFile, getPlayIcon, target, Util} from "../../Classes/Util.ts";
 import {AudioUpload} from "../../Classes/AudioUpload.ts";
 import {notify, Ui, createModal} from "../../Classes/Ui.ts";
 import {
@@ -38,7 +38,7 @@ import {ProgressState} from "@targoninc/lyda-shared/src/Enums/ProgressState";
 import {CollaboratorType} from "@targoninc/lyda-shared/src/Models/db/lyda/CollaboratorType";
 import {Api} from "../../Api/Api.ts";
 import {SearchResult} from "@targoninc/lyda-shared/src/Models/SearchResult";
-import {currentUser} from "../../state.ts";
+import {currentTrackId, currentTrackPosition, currentUser, loadingAudio, playingHere} from "../../state.ts";
 import {MusicTemplates} from "./MusicTemplates.ts";
 import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
 import {t} from "../../../locales";
@@ -1025,25 +1025,27 @@ export class TrackEditTemplates {
         const deleting$ = signal(false);
         const confirming$ = compute(pending => pending === version.index, pendingDelete$);
         const changed$ = compute((name, saved) => name.trim() !== (saved ?? ""), name$, savedName$);
+        const latest$ = compute((vs: TrackVersion[]) => vs.length > 0 && vs[vs.length - 1].index === version.index, versions$);
         const onlyVersion = versions$.value.length <= 1;
+
+        const dragHandle = create("div")
+            .classes("vertical-drag-indicator", "tall")
+            .attributes("draggable", "true")
+            .ondragstart((e: DragEvent) => {
+                DragActions.showDragTargets();
+                e.dataTransfer!.setData("text/plain", JSON.stringify({type: "version", versionIndex: version.index}));
+                e.dataTransfer!.effectAllowed = "move";
+                e.stopPropagation();
+            })
+            .ondragend((e: DragEvent) => {
+                DragActions.hideDragTargets();
+                e.preventDefault();
+                e.stopPropagation();
+            }).build();
 
         const row = create("div")
             .classes("flex", "align-children", "small-gap", "fullWidth")
             .children(
-                create("div")
-                    .classes("vertical-drag-indicator")
-                    .attributes("draggable", "true")
-                    .ondragstart((e: DragEvent) => {
-                        DragActions.showDragTargets();
-                        e.dataTransfer!.setData("text/plain", JSON.stringify({type: "version", versionIndex: version.index}));
-                        e.dataTransfer!.effectAllowed = "move";
-                        e.stopPropagation();
-                    })
-                    .ondragend((e: DragEvent) => {
-                        DragActions.hideDragTargets();
-                        e.preventDefault();
-                        e.stopPropagation();
-                    }).build(),
                 create("span")
                     .classes("color-dim", "no-text-wrap")
                     .children(
@@ -1051,6 +1053,10 @@ export class TrackEditTemplates {
                         GenericTemplates.timestamp(version.created_at),
                         create("span").text(")").build(),
                     ).build(),
+                when(latest$, GenericTemplates.pill({
+                    text: t("LATEST_VERSION"),
+                    onclick: () => {},
+                })),
                 input<string>({
                     type: InputType.text,
                     name: `version-name-${track.id}-${version.index}`,
@@ -1110,7 +1116,64 @@ export class TrackEditTemplates {
             }),
         ).classes("align-children", "small-gap").build());
 
-        return vertical(row, confirmation).classes("fullWidth", "small-gap").build();
+        return horizontal(
+            dragHandle,
+            vertical(row, TrackEditTemplates.versionPlayer(track, version, latest$), confirmation).classes("flex-grow", "small-gap").build(),
+        ).classes("fullWidth", "small-gap", "noflexwrap").build();
+    }
+
+    private static versionPlayer(track: Track, version: TrackVersion, latest$: Signal<boolean>) {
+        const isPlaying$ = compute((id, ph, latest, _position) => {
+            if (id !== track.id || !ph) {
+                return false;
+            }
+            const playingVersion = PlayManager.getStreamClient(track.id)?.getVersion();
+            if (playingVersion === undefined) {
+                return latest;
+            }
+            return playingVersion === version.index;
+        }, currentTrackId, playingHere, latest$, currentTrackPosition);
+        const icon = getPlayIcon(isPlaying$, loadingAudio);
+
+        const onPlay = async () => {
+            if (!version.processed) {
+                notify(t("STILL_PROCESSING_CHECK_LATER"), NotificationType.warning);
+                return;
+            }
+
+            const playingVersion = PlayManager.getStreamClient(track.id)?.getVersion();
+            const versionLoaded = playingVersion === version.index || (playingVersion === undefined && latest$.value);
+            if (isPlaying$.value && versionLoaded) {
+                await PlayManager.pauseAsync(track.id);
+                return;
+            }
+            if (versionLoaded && currentTrackId.value === track.id) {
+                await PlayManager.togglePlayAsync(track.id);
+                return;
+            }
+
+            await PlayManager.startAsync(track.id, true, false, version.index);
+        };
+
+        let loudnessData: number[] = [];
+        try {
+            loudnessData = JSON.parse(version.loudness_data) as number[];
+        } catch {
+            loudnessData = [];
+        }
+        const versionTrack = {...track, processed: version.processed, length: version.length} as Track;
+
+        return horizontal(
+            GenericTemplates.roundIconButton(
+                {icon, isUrl: true, classes: ["inline-icon"]},
+                onPlay,
+                t("PLAY_PAUSE"),
+            ),
+            create("div")
+                .classes("flex-grow")
+                .children(TrackTemplates.waveform(versionTrack, loudnessData, true, version.index))
+                .build(),
+        ).classes("align-children", "small-gap", "fullWidth").build();
     }
 
     static downloadAudioButton(track: Track, classes: StringOrSignal[] = []) {

@@ -82,6 +82,7 @@ export const ga: Translation = {
     VERSION_NAME: "Ainm an leagain",
     EDIT_VERSIONS: "Leaganacha a chur in eagar",
     DRAG_TO_REORDER_VERSIONS: "Tarraing na leaganacha de láimhseáil chun a n-ord a athrú",
+    LATEST_VERSION: "Is déanaí",
     DELETE_VERSION: "Scrios an leagan",
     SURE_DELETE_VERSION: (name: string) => `An bhfuil tú cinnte gur mhaith leat an leagan "${name}" a scriosadh?`,
     CANNOT_DELETE_ONLY_VERSION: "Ní féidir an leagan deireanach a scriosadh",
