@@ -507,6 +507,11 @@ export class Api {
         return true;
     }
 
+    static async reorderTrackVersions(trackId: number, versionIndices: number[]): Promise<boolean> {
+        await post(ApiRoutes.reorderTrackVersions, { trackId, versionIndices });
+        return true;
+    }
+
     static async deleteComment(commentId: number): Promise<boolean> {
         await post(ApiRoutes.deleteComment, {
             id: commentId,

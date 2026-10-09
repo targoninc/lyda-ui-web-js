@@ -51,6 +51,7 @@ import {ParentGenreGroup} from "../generic/ParentGenreGroup.ts";
 import {predictGenresFromFile} from "../../Classes/GenrePredictor.ts";
 import {BatchEditField, BatchEditTemplates} from "../generic/BatchEditTemplates.ts";
 import {TrackVersion} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackVersion";
+import {DragActions} from "../../Actions/DragActions.ts";
 
 let _uploadDragCleanup: (() => void) | null = null;
 
@@ -954,14 +955,44 @@ export class TrackEditTemplates {
         const changed = {value: false};
         const openPath = window.location.pathname;
 
+        const moveVersion = async (versionIndex: number, targetPosition: number) => {
+            const current = versions$.value;
+            const from = current.findIndex(v => v.index === versionIndex);
+            if (from === -1 || from === targetPosition) {
+                return;
+            }
+
+            const reordered = [...current];
+            const [moved] = reordered.splice(from, 1);
+            reordered.splice(targetPosition, 0, moved);
+            versions$.value = reordered;
+
+            try {
+                await Api.reorderTrackVersions(track.id, reordered.map(v => v.index));
+                changed.value = true;
+            } catch {
+                versions$.value = current;
+            }
+        };
+
         const content = create("div")
             .classes("flex-v", "small-gap")
             .children(
                 create("h3").text(t("EDIT_VERSIONS")).build(),
+                create("span").classes("color-dim").text(t("DRAG_TO_REORDER_VERSIONS")).build(),
                 signalMap(
                     versions$,
                     vertical(),
-                    version => TrackEditTemplates.versionRow(track, version, versions$, pendingDelete$, () => changed.value = true),
+                    (version, i) => create("div")
+                        .classes("flex-v", "relative", "fullWidth")
+                        .children(
+                            GenericTemplates.dragTargetInList(
+                                (data: any) => moveVersion(data.versionIndex, i),
+                                i.toString(),
+                            ).classes("fullWidth").children(
+                                TrackEditTemplates.versionRow(track, version, versions$, pendingDelete$, () => changed.value = true),
+                            ).build(),
+                        ).build(),
                 ),
                 horizontal(GenericTemplates.modalCancelButton()).classes("align-end").build(),
             ).build();
@@ -999,6 +1030,20 @@ export class TrackEditTemplates {
         const row = create("div")
             .classes("flex", "align-children", "small-gap", "fullWidth")
             .children(
+                create("div")
+                    .classes("vertical-drag-indicator")
+                    .attributes("draggable", "true")
+                    .ondragstart((e: DragEvent) => {
+                        DragActions.showDragTargets();
+                        e.dataTransfer!.setData("text/plain", JSON.stringify({type: "version", versionIndex: version.index}));
+                        e.dataTransfer!.effectAllowed = "move";
+                        e.stopPropagation();
+                    })
+                    .ondragend((e: DragEvent) => {
+                        DragActions.hideDragTargets();
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }).build(),
                 create("span")
                     .classes("color-dim", "no-text-wrap")
                     .children(

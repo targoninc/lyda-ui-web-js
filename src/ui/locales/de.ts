@@ -735,6 +735,7 @@ export const de: Translation = {
     DO_NOT_CREATE_NEW_VERSION: "Keine neue Version erstellen",
     VERSION_NAME: "Versionsname",
     EDIT_VERSIONS: "Versionen bearbeiten",
+    DRAG_TO_REORDER_VERSIONS: "Versionen am Griff ziehen, um ihre Reihenfolge zu ändern",
     DELETE_VERSION: "Version löschen",
     SURE_DELETE_VERSION: (name: string) => `Bist du sicher, dass du die Version "${name}" löschen willst?`,
     CANNOT_DELETE_ONLY_VERSION: "Ein Track muss mindestens eine Version behalten",
