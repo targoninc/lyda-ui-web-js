@@ -1,4 +1,4 @@
-import {create, AnyNode, AnyElement, DomNode, Signal} from "@targoninc/jess";
+import {create, AnyNode, AnyElement, Signal} from "@targoninc/jess";
 
 export class PopoverTemplates {
     static popover(id: string, ...children: AnyNode[]): HTMLElement {
@@ -48,8 +48,16 @@ export class PopoverTemplates {
         popover.showPopover();
     }
 
+    static closeOthers(popover: HTMLElement): void {
+        document.querySelectorAll<HTMLElement>("[popover]:popover-open").forEach(open => {
+            if (open !== popover) open.hidePopover();
+        });
+    }
+
     static showContextMenu(popover: HTMLElement, x: number, y: number): void {
-        if (popover.matches(":popover-open") || !popover.isConnected) return;
+        if (!popover.isConnected) return;
+        PopoverTemplates.closeOthers(popover);
+        if (popover.matches(":popover-open")) return;
         popover.style.position = "fixed";
         popover.style.top = `${y}px`;
         popover.style.left = `${x}px`;
