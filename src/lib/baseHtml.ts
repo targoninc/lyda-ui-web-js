@@ -4,15 +4,21 @@ import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 
 const cssCacheBuster = Date.now();
 
+function getBaseUrl(requestUrl: URL): string {
+    const configured = process.env.BASE_URL?.trim();
+    return (configured && configured.length > 0 ? configured : requestUrl.origin).replace(/\/$/, "");
+}
+
 export async function baseHtml(req: Request) {
     const url = req.url;
     const requestUrl = new URL(url);
     const pathname = requestUrl.pathname;
     const segments = pathname.split("/").filter(p => p.length > 0);
+    const baseUrl = getBaseUrl(requestUrl);
 
     let title = "Lyda";
     let description = "Stream the music you love.";
-    let image = "https://lyda.app/img/lyda_banner.png";
+    let image = `${baseUrl}/img/lyda_banner.png`;
     const apiUrl = process.env.API_URL ?? "https://api.lyda.app";
     // Android "open in app" handoff is disabled until an Android app ships.
     const enableAndroidOpenInApp = process.env.ENABLE_ANDROID_OPEN_IN_APP === "true";
@@ -21,7 +27,7 @@ export async function baseHtml(req: Request) {
     // Private tracks are shared as /track/{id}/{secretCode}; the secret code
     // unlocks track metadata (title, artist, cover) for the embed metadata.
     let code = requestUrl.searchParams.get("code") ?? "";
-    let id, newimage, res, type, optionalTags = "";
+    let id, newimage = "", res, type, optionalTags = "";
     if (pathname.includes("/track/")) {
         const index = segments.indexOf("track");
         id = segments[index + 1];
@@ -71,11 +77,16 @@ export async function baseHtml(req: Request) {
 
     const uniqid = Math.random().toString(36).substring(7);
     image += `?_=${uniqid}`;
-    newimage += `&_=${uniqid}`;
+    if (newimage) {
+        newimage += `&_=${uniqid}`;
+    }
 
     const baseImage = `<meta property="og:image" content="${image}" />
     <meta property="og:image:width" content="1080" />
     <meta property="og:image:height" content="720" />`;
+    const entityImage = newimage ? `<meta property="og:image" content="${newimage}" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="500" />` : "";
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -205,15 +216,13 @@ export async function baseHtml(req: Request) {
     <meta name="description" content="${description}">
     <meta name="theme-color" content="#202025">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta property="og:url" content="${url}"/>
+    <script>window.__baseUrl = ${JSON.stringify(baseUrl)};</script>
+    <meta property="og:url" content="${baseUrl}${pathname}${requestUrl.search}"/>
     <meta property="og:type" content="${ogType}"/>
     <meta property="og:title" content="${title}"/>
     <meta property="og:description" content="${description}"/>
     ${optionalTags ?? ""}
-    <meta property="og:image" content="${newimage}" />
-    <meta property="og:image:width" content="500" />
-    <meta property="og:image:height" content="500" />
-    ${newimage ? "" : baseImage}
+    ${entityImage || baseImage}
     <script src="/main.js?v=${cssCacheBuster}" type="module"></script>
 </head>
 <body>

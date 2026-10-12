@@ -1,6 +1,8 @@
+import {Config} from "../Classes/Config.ts";
+
 export class Links {
     static get BASE_URL() {
-        return window.location.origin;
+        return Config.baseUrl;
     }
 	
     static LINK(path: string) {

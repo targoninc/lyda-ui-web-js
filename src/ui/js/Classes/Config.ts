@@ -2,6 +2,7 @@ declare global {
     interface Window {
         __desktopMode?: boolean;
         __desktopApiUrl?: string;
+        __baseUrl?: string;
     }
 }
 
@@ -10,6 +11,9 @@ export class Config {
         return window.__desktopMode || window.location.hostname === "127.0.0.1";
     }
 
+    static get baseUrl() {
+        return (window.__baseUrl ?? window.location.origin).replace(/\/$/, "");
+    }
     static get appBaseUrl() {
         return window.location.host;
     }

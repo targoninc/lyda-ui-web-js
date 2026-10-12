@@ -111,6 +111,11 @@ const server = serve({
             return new Response(apiUrl, { headers: { "Content-Type": "text/plain" } });
         }
 
+        if (pathname === "/base-url") {
+            const baseUrl = (process.env.BASE_URL?.trim() || url.origin).replace(/\/$/, "");
+            return new Response(baseUrl, { headers: { "Content-Type": "text/plain" } });
+        }
+
         // Handle dynamic routes (fallback to baseHtml render)
         try {
             const html = await baseHtml(req);
