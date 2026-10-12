@@ -19,7 +19,7 @@ export async function baseHtml(req: Request) {
     let title = "Lyda";
     let description = "Stream the music you love.";
     let image = `${baseUrl}/img/lyda_banner.png`;
-    const apiUrl = process.env.API_URL ?? "https://api.lyda.app";
+    const apiUrl = (process.env.API_URL ?? "https://api.lyda.app").replace(/\/$/, "");
     // Android "open in app" handoff is disabled until an Android app ships.
     const enableAndroidOpenInApp = process.env.ENABLE_ANDROID_OPEN_IN_APP === "true";
     let ogType = "website";
@@ -217,6 +217,7 @@ export async function baseHtml(req: Request) {
     <meta name="theme-color" content="#202025">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <script>window.__baseUrl = ${JSON.stringify(baseUrl)};</script>
+    <script>window.__apiUrl = ${JSON.stringify(apiUrl)};</script>
     <meta property="og:url" content="${baseUrl}${pathname}${requestUrl.search}"/>
     <meta property="og:type" content="${ogType}"/>
     <meta property="og:title" content="${title}"/>

@@ -3,6 +3,7 @@ declare global {
         __desktopMode?: boolean;
         __desktopApiUrl?: string;
         __baseUrl?: string;
+        __apiUrl?: string;
     }
 }
 
@@ -19,10 +20,12 @@ export class Config {
     }
     static get apiBaseUrl() {
         if (Config.isDesktopProxy) return window.__desktopApiUrl ?? window.location.origin;
+        if (window.__apiUrl) return window.__apiUrl.replace(/\/$/, "");
         return window.location.hostname === "localhost" ? "http://localhost:8081" : "https://api.lyda.app";
     }
     static get storageBaseUrl() {
         if (Config.isDesktopProxy) return window.__desktopApiUrl ?? window.location.origin;
+        if (window.__apiUrl) return window.__apiUrl.replace(/\/$/, "");
         return window.location.hostname === "localhost" ? "http://localhost:8081" : "https://api.lyda.app";
     }
 

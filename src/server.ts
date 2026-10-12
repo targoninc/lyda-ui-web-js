@@ -107,7 +107,7 @@ const server = serve({
         }
 
         if (pathname === "/api-url") {
-            const apiUrl = process.env.API_URL ?? "https://api.lyda.app";
+            const apiUrl = (process.env.API_URL ?? "https://api.lyda.app").replace(/\/$/, "");
             return new Response(apiUrl, { headers: { "Content-Type": "text/plain" } });
         }
 
