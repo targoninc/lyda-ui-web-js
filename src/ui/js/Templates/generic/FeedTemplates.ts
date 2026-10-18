@@ -818,7 +818,7 @@ export class FeedTemplates {
                 return GenericTemplates.timestamp(date, ["hideOnSmallBreakpoint"]);
             },
             ...(type === FeedType.history ? {
-                actionDateHeader: t("LISTENED_AT"),
+                actionDateHeader: t("LISTENED"),
                 actionDateRender: (track: Track) => {
                     const listenedAt = (track as Track & { listened_at?: string }).listened_at;
                     return listenedAt ? GenericTemplates.timestamp(listenedAt, ["hideOnSmallBreakpoint"]) : nullElement();
