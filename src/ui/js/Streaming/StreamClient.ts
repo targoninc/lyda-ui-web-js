@@ -278,7 +278,7 @@ export class StreamClient implements IStreamClient {
     }
 
     private buildUrl(): string {
-        let url = `${ApiRoutes.getTrackAudio}?id=${this.id}&quality=${currentQuality.value}&code=${this.code}`;
+        let url = `${ApiRoutes.getTrackAudio}?id=${this.id}&quality=${currentQuality.value}&code=${this.code}&client=web`;
         if (this.version !== undefined) {
             url += `&version=${this.version}`;
         }

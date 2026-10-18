@@ -33,6 +33,7 @@ import {Album} from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
 import {Playlist} from "@targoninc/lyda-shared/src/Models/db/lyda/Playlist";
 import {UserSettings} from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import {get} from "../Api/ApiClient.ts";
+import {Api} from "../Api/Api.ts";
 import {IStreamClient} from "./IStreamClient.ts";
 import {FeedType} from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 import {FeedItem} from "../Models/FeedItem.ts";
@@ -389,9 +390,12 @@ export class PlayManager {
         await StreamingUpdater.updatePlayState();
     }
 
-    private static afterStart(id: number) {
+    private static afterStart(id: number, recordPlay: boolean = false) {
         StreamingBroadcaster.send(StreamingEvent.trackStart, id);
         playingHere.value = true;
+        if (recordPlay) {
+            Api.recordPlay(id, currentQuality.value).catch(e => console.error("[PlayManager] Failed to record play:", e));
+        }
         PlayManager.preloadNextTrack(id);
         PlayManager.watchForGaplessTransition(id);
     }
@@ -500,8 +504,9 @@ export class PlayManager {
      */
     private static async startWithCrossfade(prevId: number, nextId: number, force: boolean) {
         loadingAudio.value = true;
+        const isNewPlay = nextId !== currentTrackId.value || force;
         try {
-            if (nextId !== currentTrackId.value || force) {
+            if (isNewPlay) {
                 PlayManager.pushToHistory(nextId);
             }
 
@@ -550,7 +555,7 @@ export class PlayManager {
             throw e;
         }
         loadingAudio.value = false;
-        PlayManager.afterStart(nextId);
+        PlayManager.afterStart(nextId, isNewPlay);
         await StreamingUpdater.updatePlayState();
     }
 
@@ -587,7 +592,8 @@ export class PlayManager {
     }
 
     private static async startTrackAsync(id: number, fromBeginning: boolean, force: boolean, version?: number, track?: Track) {
-        if (id !== currentTrackId.value || force) {
+        const isNewPlay = id !== currentTrackId.value || force;
+        if (isNewPlay) {
             PlayManager.pushToHistory(id);
         }
 
@@ -625,7 +631,7 @@ export class PlayManager {
             return;
         }
         loadingAudio.value = false;
-        PlayManager.afterStart(id);
+        PlayManager.afterStart(id, isNewPlay);
         await StreamingUpdater.updatePlayState();
     }
 

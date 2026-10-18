@@ -817,6 +817,13 @@ export class FeedTemplates {
                 const date = (track as any).release_date || track.created_at;
                 return GenericTemplates.timestamp(date, ["hideOnSmallBreakpoint"]);
             },
+            ...(type === FeedType.history ? {
+                actionDateHeader: t("LISTENED_AT"),
+                actionDateRender: (track: Track) => {
+                    const listenedAt = (track as Track & { listened_at?: string }).listened_at;
+                    return listenedAt ? GenericTemplates.timestamp(listenedAt, ["hideOnSmallBreakpoint"]) : nullElement();
+                },
+            } : {}),
             onNavigate: (track) => window.open(`/track/${track.id}`, "_blank"),
         });
     }

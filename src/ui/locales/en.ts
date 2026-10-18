@@ -175,6 +175,7 @@ export const en = {
     UPDATE_AVAILABLE_VERSION: version => `Update available (v${version})`,
     NEW_VERSION_AVAILABLE: "New version available",
     RELEASE_DATE: "Release date",
+    LISTENED_AT: "Listened at",
     RELOAD: "Reload",
     SECTION_HAS_ERRORS: "This section has errors",
     UNFOLLOW: "Unfollow",

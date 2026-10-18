@@ -603,6 +603,7 @@ export const de: Translation = {
     NOTHING_FOR_YOU_HERE: "Hier ist nichts für dich 🤖",
     PRIVATE: "Privat",
     RELEASE_DATE: "Veröffentlichungsdatum",
+    LISTENED_AT: "Gehört am",
     RELOAD: "Neu laden",
     RETRY: "Erneut versuchen",
     SUCCESS: "Erfolg",
