@@ -94,6 +94,7 @@ export class ApiRoutes {
     static denyCollab = ApiRoutes.tracksActions + "/denyCollab";
 
     static getTrackLyrics = ApiRoutes.tracks + "/lyrics";
+    static availableGenres = ApiRoutes.tracks + "/availableGenres";
 
     public static trackFeed = ApiRoutes.tracks + "/feeds";
     static followingFeed = ApiRoutes.trackFeed + `/${FeedType.following}`;

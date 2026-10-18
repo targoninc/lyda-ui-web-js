@@ -24,6 +24,7 @@ import { MfaOption } from "@targoninc/lyda-shared/src/Enums/MfaOption.ts";
 import { UploadableTrack } from "../Models/UploadableTrack.ts";
 import { InteractionType } from "@targoninc/lyda-shared/src/Enums/InteractionType";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
+import { Genre } from "@targoninc/lyda-shared/src/Enums/Genre";
 import { MonthIdentifier } from "../Classes/Helpers/Date.ts";
 import { AvailableSubscription } from "@targoninc/lyda-shared/src/Models/db/finance/AvailableSubscription.ts";
 import { Subscription } from "@targoninc/lyda-shared/src/Models/db/finance/Subscription.ts";
@@ -576,6 +577,10 @@ export class Api {
 
     static async getCollabTypes(): Promise<CollaboratorType[] | null> {
         return await get<CollaboratorType[]>(ApiRoutes.getTrackCollabTypes);
+    }
+
+    static async getAvailableGenres(): Promise<Genre[] | null> {
+        return await get<Genre[]>(ApiRoutes.availableGenres);
     }
 
     static async removeCollaboratorFromTrack(trackId: number, userId: number): Promise<boolean> {

@@ -13,6 +13,7 @@ export interface ParentGenreGroupOptions {
     suggestedGenres?: Signal<Genre[]>;
     analyzing?: Signal<boolean>;
     listVisible?: Signal<boolean>;
+    availableGenres?: Signal<Genre[] | null>;
 }
 
 export function ParentGenreGroup(options: ParentGenreGroupOptions) {
@@ -24,6 +25,7 @@ export function ParentGenreGroup(options: ParentGenreGroupOptions) {
         suggestedGenres = signal<Genre[]>([]),
         analyzing = signal(false),
         listVisible,
+        availableGenres = signal<Genre[] | null>(null),
     } = options;
 
     const expandedParents = signal<Set<DiscogsParentGenre>>(new Set());
@@ -50,14 +52,21 @@ export function ParentGenreGroup(options: ParentGenreGroupOptions) {
         selectedGenres.value = selectedGenres.value.filter(g => g !== genre);
     };
 
+    const isGenreAvailable = (genre: Genre): boolean => {
+        const available = availableGenres.value;
+        return !available || available.includes(genre);
+    };
+
     const getFilteredGenres = (parent: DiscogsParentGenre): Genre[] => {
         const allGenres = GenreByParent[parent] ?? [];
         const query = searchQuery.value.toLowerCase();
-        if (!query) return allGenres;
-        return allGenres.filter(g =>
-            g.toLowerCase().includes(query) ||
-            getSubgenreDisplay(g).toLowerCase().includes(query)
-        );
+        const matching = query
+            ? allGenres.filter(g =>
+                g.toLowerCase().includes(query) ||
+                getSubgenreDisplay(g).toLowerCase().includes(query)
+            )
+            : allGenres;
+        return matching.filter(isGenreAvailable);
     };
 
     const hasMatchingGenres = (parent: DiscogsParentGenre): boolean => {
@@ -74,9 +83,9 @@ export function ParentGenreGroup(options: ParentGenreGroupOptions) {
         .classes("parent-genre-group", "flex-v", "small-gap")
         .children(
             when(label, create("label").text(label).build()),
-            selectedGenresRow(selectedGenres, maxGenres, placeholder, searchQuery, removeGenre, addGenre, analyzing, toggleBtn),
+            selectedGenresRow(selectedGenres, maxGenres, placeholder, searchQuery, removeGenre, addGenre, analyzing, toggleBtn, isGenreAvailable),
             suggestionsRow(suggestedGenres, addGenre),
-            when(listVisible ?? signal(true), () => genreGroupList(expandedParents, searchQuery, selectedGenres, addGenre, removeGenre, toggleParent, getFilteredGenres, hasMatchingGenres)),
+            when(listVisible ?? signal(true), () => genreGroupList(expandedParents, searchQuery, availableGenres, selectedGenres, addGenre, removeGenre, toggleParent, getFilteredGenres, hasMatchingGenres)),
         ).build();
 }
 
@@ -89,6 +98,7 @@ function selectedGenresRow(
     addGenre: (g: Genre) => void,
     analyzing: Signal<boolean>,
     toggleBtn: AnyElement | null,
+    isGenreAvailable: (g: Genre) => boolean,
 ) {
     return create("div").classes("flex", "flex-wrap", "small-gap", "align-children").children(
         signalMap(
@@ -114,7 +124,7 @@ function selectedGenresRow(
                     e.preventDefault();
                     const val = searchQuery.value.trim().toLowerCase();
                     if (!val) return;
-                    const allGenres = Object.values(Genre);
+                    const allGenres = Object.values(Genre).filter(isGenreAvailable);
                     const match =
                         allGenres.find(g => g.toLowerCase() === val) ??
                         allGenres.find(g => getSubgenreDisplay(g).toLowerCase() === val) ??
@@ -162,6 +172,7 @@ function suggestionsRow(suggestedGenres: Signal<Genre[]>, addGenre: (g: Genre) =
 function genreGroupList(
     expandedParents: Signal<Set<DiscogsParentGenre>>,
     searchQuery: Signal<string>,
+    availableGenres: Signal<Genre[] | null>,
     selectedGenres: Signal<Genre[]>,
     addGenre: (g: Genre) => void,
     removeGenre: (g: Genre) => void,
@@ -170,12 +181,9 @@ function genreGroupList(
     hasMatchingGenres: (p: DiscogsParentGenre) => boolean,
 ) {
     return signalMap(
-        compute((sq) => sq
-                ? [...DISCOGS_PARENT_GENRES.filter(p => hasMatchingGenres(p))]
-                : [...DISCOGS_PARENT_GENRES],
-            searchQuery),
+        compute((_query, _available) => DISCOGS_PARENT_GENRES.filter(p => hasMatchingGenres(p)), searchQuery, availableGenres),
         vertical().classes("card", "genre-groups", "noflexwrap"),
-        (parent) => parentGenreSection(parent, expandedParents, searchQuery, selectedGenres, addGenre, removeGenre, toggleParent, getFilteredGenres),
+        (parent) => parentGenreSection(parent, expandedParents, searchQuery, availableGenres, selectedGenres, addGenre, removeGenre, toggleParent, getFilteredGenres),
     );
 }
 
@@ -183,6 +191,7 @@ function parentGenreSection(
     parent: DiscogsParentGenre,
     expandedParents: Signal<Set<DiscogsParentGenre>>,
     searchQuery: Signal<string>,
+    availableGenres: Signal<Genre[] | null>,
     selectedGenres: Signal<Genre[]>,
     addGenre: (g: Genre) => void,
     removeGenre: (g: Genre) => void,
@@ -195,12 +204,12 @@ function parentGenreSection(
     );
 
     return vertical(
-        parentGenreHeader(parent, isExpanded, toggleParent),
+        parentGenreHeader(parent, isExpanded, toggleParent, availableGenres),
         when(
             isExpanded,
             () => horizontal(
                 signalMap(
-                    compute(() => getFilteredGenres(parent)),
+                    compute((_query, _available) => getFilteredGenres(parent), searchQuery, availableGenres),
                     create("div").classes("flex", "flex-wrap", "small-gap"),
                     (genre) => genreTag(genre, selectedGenres, addGenre, removeGenre),
                 ),
@@ -209,11 +218,15 @@ function parentGenreSection(
     ).build();
 }
 
-function parentGenreHeader(parent: DiscogsParentGenre, isExpanded: Signal<boolean>, toggleParent: (p: DiscogsParentGenre) => void) {
+function parentGenreHeader(parent: DiscogsParentGenre, isExpanded: Signal<boolean>, toggleParent: (p: DiscogsParentGenre) => void, availableGenres: Signal<Genre[] | null>) {
     return button({
         onclick: () => toggleParent(parent),
         icon: {icon: "folder"},
-        text: `${parent} (${GenreByParent[parent]?.length ?? 0})`,
+        text: compute((avail) => {
+            const genres = GenreByParent[parent] ?? [];
+            const count = avail ? genres.filter(genre => avail.includes(genre)).length : genres.length;
+            return `${parent} (${count})`;
+        }, availableGenres),
         classes: [compute((i): string => i ? "active" : "_", isExpanded)]
     });
 }

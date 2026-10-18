@@ -889,12 +889,18 @@ export class PageTemplates {
 
         const hasGenres = compute(s => s.length > 0, selectedGenres$);
 
+        const availableGenres = signal<Genre[] | null>(null);
+        Api.getAvailableGenres().then(genres => {
+            availableGenres.value = genres;
+        });
+
         const genreGroup = ParentGenreGroup({
             selectedGenres: selectedGenres$,
             maxGenres: 10,
             placeholder: t("FILTER_GENRES"),
             label: t("GENRE"),
             listVisible: expanded,
+            availableGenres,
         });
 
         const noGenres = compute(g => g.length === 0, selectedGenres$);
