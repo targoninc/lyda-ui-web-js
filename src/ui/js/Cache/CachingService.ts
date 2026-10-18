@@ -49,7 +49,7 @@ export class CachingService {
         this.blobAccessOrder.set(key, ++this.blobAccessCounter);
     }
 
-    private evictBlobUrl(): string | null {
+    private dropOldestCacheEntry(): string | null {
         if (this.blobUrlCache.size < CachingService.BLOB_CACHE_MAX) {
             return null;
         }
@@ -62,8 +62,11 @@ export class CachingService {
             }
         }
         if (oldestKey) {
-            const url = this.blobUrlCache.get(oldestKey)!;
-            URL.revokeObjectURL(url);
+            // Do not revoke the object URL here: elements that already loaded
+            // it keep displaying the image, but any element created later
+            // (e.g. an image modal reusing an avatar's cached URL) would get
+            // a broken image. Dropping the entry only means the next request
+            // for this image resolves to a fresh URL.
             this.blobUrlCache.delete(oldestKey);
             this.blobAccessOrder.delete(oldestKey);
         }
@@ -121,7 +124,7 @@ export class CachingService {
             });
 
             if (cached && Date.now() - cached.fetchedAt < CachingService.IMAGE_TTL) {
-                this.evictBlobUrl();
+                this.dropOldestCacheEntry();
                 const url = URL.createObjectURL(cached.blob);
                 this.blobUrlCache.set(key, url);
                 this.touchBlobUrl(key);
@@ -154,7 +157,7 @@ export class CachingService {
                 // storage failed, use blob URL without cache
             }
 
-            this.evictBlobUrl();
+            this.dropOldestCacheEntry();
             const url = URL.createObjectURL(blob);
             this.blobUrlCache.set(key, url);
             this.touchBlobUrl(key);
