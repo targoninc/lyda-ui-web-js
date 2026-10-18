@@ -782,6 +782,10 @@ export class Api {
         });
     }
 
+    static async recordPlay(id: number, quality?: string) {
+        return await post<{success: boolean}>(ApiRoutes.recordPlay, {id, quality});
+    }
+
     //endregion
 
     // region Orders

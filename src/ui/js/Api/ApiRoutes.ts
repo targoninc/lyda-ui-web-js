@@ -77,6 +77,7 @@ export class ApiRoutes {
     private static tracks = ApiRoutes.base + "/tracks";
     static getTrackById = ApiRoutes.tracks + "/byId";
     static getTrackAudio = ApiRoutes.tracks + "/audio";
+    static recordPlay = ApiRoutes.tracks + "/played";
     static getTrackCollabTypes = ApiRoutes.tracks + "/collabTypes";
     static getUnapprovedCollabs = ApiRoutes.tracks + "/unapprovedCollabs";
     static createTrack = ApiRoutes.tracks + "/create";
