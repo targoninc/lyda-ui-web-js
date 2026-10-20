@@ -62,6 +62,7 @@ const sampleUser: User = {
     has_banner: false,
     email_mfa_code: "",
     passkey_user_id: "",
+    ddex_delivery_id: null,
 };
 
 const sampleTrack = {

@@ -1,7 +1,6 @@
 import { router } from "../../main.ts";
 import { signal } from "@targoninc/jess";
 import {
-    AppNavigateEvent,
     getNavigation,
     isAbortError,
     isSameOrigin,
@@ -30,7 +29,7 @@ export class Router {
     init() {
         const navigation = getNavigation();
         if (navigation) {
-            navigation.addEventListener("navigate", event => this.handleNavigateEvent(event as AppNavigateEvent));
+            navigation.addEventListener("navigate", event => this.handleNavigateEvent(event));
         } else {
             window.onpopstate = () => this.handleRouteChange();
         }
@@ -45,7 +44,7 @@ export class Router {
      * tabs and search keep the same path and are not rendered again; those
      * views already reflect their own state and rendering would loop.
      */
-    private handleNavigateEvent(event: AppNavigateEvent) {
+    private handleNavigateEvent(event: NavigateEvent) {
         if (!event.canIntercept || event.hashChange || event.downloadRequest !== null) {
             return;
         }
@@ -129,7 +128,7 @@ export class Router {
         const navigation = getNavigation();
         if (navigation) {
             try {
-                await navigation.navigate(url, {info: {source: Router.navigationSource}});
+                await navigation.navigate(url, {info: {source: Router.navigationSource}}).finished;
             } catch (e) {
                 if (!isAbortError(e)) {
                     throw e;
