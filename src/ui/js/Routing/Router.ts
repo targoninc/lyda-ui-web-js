@@ -1,7 +1,14 @@
 import { router } from "../../main.ts";
 import { signal } from "@targoninc/jess";
+import {
+    getNavigation,
+    isAbortError,
+    isSameOrigin,
+} from "./NavigationApi.ts";
 
 export class Router {
+    private static readonly navigationSource = "lyda-router";
+
     public currentRoute = signal<Route|null>(null);
     public currentParams = signal<{
         [key: string]: string;
@@ -20,8 +27,44 @@ export class Router {
     }
 
     init() {
-        window.onpopstate = () => this.handleRouteChange();
+        const navigation = getNavigation();
+        if (navigation) {
+            navigation.addEventListener("navigate", event => this.handleNavigateEvent(event));
+        } else {
+            window.onpopstate = () => this.handleRouteChange();
+        }
         this.handleRouteChange().then();
+    }
+
+    /**
+     * Same-document navigations (links, back/forward, explicit navigate calls)
+     * are intercepted so the app renders the route instead of reloading the
+     * document. Cross-origin, download, reload and hash-only navigations are
+     * left to the browser. pushState/replaceState URL updates for filters,
+     * tabs and search keep the same path and are not rendered again; those
+     * views already reflect their own state and rendering would loop.
+     */
+    private handleNavigateEvent(event: NavigateEvent) {
+        if (!event.canIntercept || event.hashChange || event.downloadRequest !== null) {
+            return;
+        }
+        if (event.navigationType === "reload" || !isSameOrigin(event.destination.url)) {
+            return;
+        }
+
+        const info = event.info as { source?: string } | undefined;
+        const routerInitiated = info?.source === Router.navigationSource;
+        if (!routerInitiated && event.navigationType !== "traverse") {
+            const currentPath = new URL(window.location.href).pathname;
+            const destinationPath = new URL(event.destination.url).pathname;
+            if (currentPath === destinationPath && !event.userInitiated) {
+                return;
+            }
+        }
+
+        event.intercept({
+            handler: () => this.handleRouteChange(),
+        });
     }
 
     async handleRouteChange() {
@@ -39,12 +82,20 @@ export class Router {
             document.title = route.title;
             const params = this.getParams(path, route);
             this.currentParams.value = params;
-            this.preRouteChange && await this.preRouteChange(route, params);
-            route.handler && await route.handler(route, params);
-            this.postRouteChange && await this.postRouteChange(route,params);
+            if (this.preRouteChange) {
+                await this.preRouteChange(route, params);
+            }
+            if (route.handler) {
+                await route.handler(route, params);
+            }
+            if (this.postRouteChange) {
+                await this.postRouteChange(route, params);
+            }
         } else {
             document.title = "Page not found";
-            this.onNoRouteFound && await this.onNoRouteFound();
+            if (this.onNoRouteFound) {
+                await this.onNoRouteFound();
+            }
             this.currentParams.value = {};
         }
     }
@@ -73,7 +124,20 @@ export class Router {
         if (!path.startsWith("/")) {
             path = "/" + path;
         }
-        history.pushState({}, "", window.location.origin + path);
+        const url = new URL(path, window.location.origin).toString();
+        const navigation = getNavigation();
+        if (navigation) {
+            try {
+                await navigation.navigate(url, {info: {source: Router.navigationSource}}).finished;
+            } catch (e) {
+                if (!isAbortError(e)) {
+                    throw e;
+                }
+            }
+            return;
+        }
+
+        history.pushState({}, "", url);
         await this.handleRouteChange();
     }
 

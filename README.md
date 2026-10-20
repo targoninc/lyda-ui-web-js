@@ -42,6 +42,7 @@ You can also run these tools manually:
 
 - `bun run lint` - Check for linting issues
 - `bun run lint:fix` - Fix linting issues automatically
+- `bun run typecheck` - Type-check with the native TypeScript compiler (tsgo)
 - `bun run format` - Format all code files
 - `bun run format:check` - Check if all files are properly formatted
 
