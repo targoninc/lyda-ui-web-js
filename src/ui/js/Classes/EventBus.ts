@@ -285,7 +285,10 @@ export class EventBus {
 
         socket.onmessage = (event) => {
             if (typeof event.data === "string") {
-                this.handleMessage(event.data);
+                event.data
+                    .split("\n")
+                    .filter(line => line.length > 0)
+                    .forEach(line => this.handleMessage(line));
             }
         };
 
