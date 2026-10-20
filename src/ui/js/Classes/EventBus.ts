@@ -11,11 +11,6 @@ interface InternalSubscription {
     callback: EventCallback;
 }
 
-interface RealtimeCertificateHash {
-    algorithm: string;
-    value: string;
-}
-
 interface RealtimeConfigResponse {
     websocket: {
         enabled: boolean;
@@ -25,7 +20,6 @@ interface RealtimeConfigResponse {
         enabled: boolean;
         port: number;
         path: string;
-        serverCertificateHashes: RealtimeCertificateHash[];
     };
 }
 
@@ -140,7 +134,7 @@ export class EventBus {
 
     private async connectWebTransport(config: RealtimeConfigResponse, generation: number): Promise<void> {
         const url = this.webTransportUrl(config);
-        const transport = new WebTransport(url, this.webTransportOptions(config));
+        const transport = new WebTransport(url);
         try {
             await transport.ready;
         } catch (e) {
@@ -182,22 +176,6 @@ export class EventBus {
             url.port = String(port);
         }
         return url.toString();
-    }
-
-    private webTransportOptions(config: RealtimeConfigResponse): WebTransportOptions | undefined {
-        const hashes = config.webtransport.serverCertificateHashes;
-        if (hashes.length === 0) {
-            return undefined;
-        }
-
-        return {
-            serverCertificateHashes: hashes
-                .filter(hash => hash.algorithm === "sha-256")
-                .map(hash => ({
-                    algorithm: "sha-256",
-                    value: Uint8Array.from(atob(hash.value), c => c.charCodeAt(0)),
-                })),
-        };
     }
 
     private async openCommandStream(transport: WebTransport): Promise<void> {
