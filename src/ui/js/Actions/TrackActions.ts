@@ -113,6 +113,7 @@ export class TrackActions {
             return;
         }
 
+        progress.value = null;
         const selectedFile = signal<File | null>(null);
         const importing = signal(false);
         const doNotCreateNew = signal(false);
@@ -161,6 +162,7 @@ export class TrackActions {
                     versionName.value = (e.target as HTMLInputElement).value;
                 }).build(),
             ).build()),
+            GenericTemplates.progressSectionPart(progress),
             horizontal(
                 button({
                     text: t("CANCEL"),
