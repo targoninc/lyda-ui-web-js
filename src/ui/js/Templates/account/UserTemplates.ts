@@ -173,7 +173,7 @@ export class UserTemplates {
                 classes: ["fullWidth"],
                 onclick: () => navigate(`${RoutePath.profile}/${user.username}`),
             }),
-            UserTemplates.settingsButton(["roundIconOnSmallBreakpoint", "fullWidth"]),
+            UserTemplates.settingsButton(["fullWidth"]),
         ).classes("small-gap", "padded").build();
     }
 
