@@ -2,6 +2,7 @@ declare global {
     interface Window {
         __desktopMode?: boolean;
         __desktopApiUrl?: string;
+        __desktopRealtimeApiUrl?: string;
         __baseUrl?: string;
         __apiUrl?: string;
     }
@@ -22,6 +23,10 @@ export class Config {
         if (Config.isDesktopProxy) return window.__desktopApiUrl ?? window.location.origin;
         if (window.__apiUrl) return window.__apiUrl.replace(/\/$/, "");
         return window.location.hostname === "localhost" ? "http://localhost:8081" : "https://api.lyda.app";
+    }
+    static get realtimeBaseUrl() {
+        if (Config.isDesktopProxy) return window.__desktopRealtimeApiUrl ?? Config.apiBaseUrl;
+        return Config.apiBaseUrl;
     }
     static get storageBaseUrl() {
         if (Config.isDesktopProxy) return window.__desktopApiUrl ?? window.location.origin;
