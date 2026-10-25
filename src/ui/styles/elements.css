@@ -1040,21 +1040,24 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .track-player-row {
-    max-width: 720px;
+    width: fit-content;
+    max-width: 100%;
     overflow: hidden;
 }
 
 .track-player-row .waveform {
-    flex: 1 1 0;
+    flex: 0 1 auto;
     width: auto;
     min-width: 0;
     max-width: 100%;
 }
 
+.track-player-row .waveform-svg {
+    max-width: 100%;
+}
+
 .track-player-row .waveform-scrubber {
-    flex: 1 1 auto;
-    width: auto;
-    min-width: 140px;
+    flex: 0 1 auto;
     max-width: 100%;
 }
 
