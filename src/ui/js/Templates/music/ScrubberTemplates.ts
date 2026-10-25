@@ -9,11 +9,12 @@ export class ScrubberTemplates {
         bufferPercent: Signal<string>,
         positionPercent: Signal<string>,
         version?: number,
+        classes: string[] = [],
     ) {
         const disabledClass = compute((l): string => l ? "disabled" : "_", loadingAudio);
 
         return create("div")
-            .classes("audio-player-scrubber", "flex-grow", "flex", "rounded", "padded-inline", disabledClass)
+            .classes("audio-player-scrubber", "flex-grow", "flex", "rounded", "padded-inline", ...classes, disabledClass)
             .id(track.id)
             .onmousedown(e => PlayManager.scrubFromElement(e, track.id, version))
             .onmousemove(async e => {

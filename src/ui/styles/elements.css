@@ -425,6 +425,12 @@ label {
     cursor: pointer;
 }
 
+.waveform-scrubber {
+    width: 360px;
+    min-width: 180px;
+    max-width: 60vw;
+}
+
 .audio-player-scrubhead {
     width: var(--border-radius);
     height: 16px;

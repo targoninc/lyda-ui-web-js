@@ -192,7 +192,7 @@ export class TrackTemplates {
                 compute(
                     show => show
                         ? TrackTemplates.waveformVisual(track, loudnessData, small, version)
-                        : TrackTemplates.waveformSlider(track, version),
+                        : TrackTemplates.waveformSlider(track, small, version),
                     showWaveforms$,
                 ),
             ).build();
@@ -863,7 +863,7 @@ export class TrackTemplates {
         });
     }
 
-    private static waveformSlider(track: Track, version?: number) {
+    private static waveformSlider(track: Track, small: boolean, version?: number) {
         const versionActive$ = compute((id, _position, _playing) => {
             if (id !== track.id) {
                 return false;
@@ -886,7 +886,13 @@ export class TrackTemplates {
             versionActive$,
         );
 
-        return ScrubberTemplates.scrubbar(track, bufferPercent, positionPercent, version);
+        return ScrubberTemplates.scrubbar(
+            track,
+            bufferPercent,
+            positionPercent,
+            version,
+            small ? [] : ["waveform-scrubber"],
+        );
     }
 
     private static waveformPath(data: number[], w: number, h: number): string {
