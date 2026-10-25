@@ -1183,7 +1183,7 @@ export class TrackEditTemplates {
             text: t("DOWNLOAD_AUDIO"),
             icon: {icon: "download"},
             disabled: loading,
-            classes,
+            classes: [...classes, "hideTextOnSmallBreakpointButton"],
             onclick: async () => {
                 if (loading.value) {
                     return;
