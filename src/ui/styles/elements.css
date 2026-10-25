@@ -1040,6 +1040,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .track-player-row {
+    max-width: 720px;
     overflow: hidden;
 }
 
