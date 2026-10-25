@@ -587,7 +587,7 @@ export class TrackTemplates {
                                 const modifiedTrack = {...track, processed, length: version?.length ?? track.length} as Track;
                                 return TrackTemplates.waveform(modifiedTrack, data, false, idx);
                             }, selectedVersion),
-                        ).classes("align-children", "bordered", "glass", "rounded-max", "noflexwrap", "limitToContentWidth")
+                        ).classes("align-children", "bordered", "glass", "rounded-max", "noflexwrap", "limitToContentWidth", "track-player-row")
                             .styles("padding", "10px 20px 10px 10px"),
                     ).classes("big-gap").build(),
                     create("div")
@@ -614,7 +614,7 @@ export class TrackTemplates {
                                     when(hasMenu, TrackTemplates.trackMenu(isPrivate, track, trackData)),
                                 ).classes("align-end"),
                                 GenericTemplates.combinedSelector(tabs, (newTabIndex) => selectedTab$.value = newTabIndex, 0),
-                            ).classes("space-between", "align-children"),
+                            ).classes("space-between", "align-children", "track-tabs-row"),
                             when(
                                 tabSelected(selectedTab$, 0),
                                 CommentTemplates.commentListFullWidth(track.id, comments, showComments),

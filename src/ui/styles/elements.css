@@ -1029,6 +1029,35 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     height: 2em;
 }
 
+.track-player-row {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.track-player-row .waveform {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.track-player-row .waveform-scrubber {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 140px;
+    max-width: 100%;
+}
+
+.track-tabs-row {
+    max-width: 100%;
+    flex-wrap: wrap;
+}
+
+.track-tabs-row .tab-selector {
+    min-width: 0;
+    max-width: 100%;
+}
+
 .processing-box {
     background: linear-gradient(45deg, var(--bg-5), var(--bg-4));
     position: relative;
