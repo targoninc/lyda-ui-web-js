@@ -35,6 +35,7 @@ import {
 import {Theme} from "@targoninc/lyda-shared/src/Enums/Theme";
 import {trackInterval} from "../../Classes/Helpers/PageLifecycle.ts";
 import {UserSettings} from "@targoninc/lyda-shared/src/Enums/UserSettings";
+import {hideWaveformsSetting} from "../../Enums/UserSettingKeys.ts";
 import {StreamingQuality} from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {UserEmail} from "@targoninc/lyda-shared/src/Models/db/lyda/UserEmail";
@@ -412,6 +413,10 @@ export class SettingsTemplates {
                 text: t("MAKE_LIBRARY_PUBLIC"),
                 template: () => SettingsTemplates.publicLikesToggle(getUserSettingValue(user, UserSettings.publicLikes))
             },
+            {
+                text: t("HIDE_WAVEFORMS"),
+                template: () => SettingsTemplates.hideWaveformsToggle(getUserSettingValue(user, hideWaveformsSetting) === true)
+            },
         ];
 
         return compute(query => {
@@ -581,6 +586,16 @@ export class SettingsTemplates {
             UserSettings.publicLikes,
             async () => {
                 await UserActions.togglePublicLikes();
+            }, [], currentValue,
+        );
+    }
+
+    static hideWaveformsToggle(currentValue: boolean) {
+        return GenericTemplates.toggle(
+            t("HIDE_WAVEFORMS"),
+            hideWaveformsSetting,
+            async () => {
+                await UserActions.toggleHideWaveforms();
             }, [], currentValue,
         );
     }

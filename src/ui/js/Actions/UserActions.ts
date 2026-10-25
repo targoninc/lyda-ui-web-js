@@ -13,6 +13,7 @@ import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts
 import { NotificationType } from "../Enums/NotificationType.ts";
 import { StreamingQuality } from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
 import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
+import { hideWaveformsSetting } from "../Enums/UserSettingKeys.ts";
 import { Theme } from "@targoninc/lyda-shared/src/Enums/Theme";
 import { t } from "../../locales";
 
@@ -142,6 +143,10 @@ export class UserActions {
 
     static async togglePublicLikes() {
         return await UserActions.toggleBooleanUserSetting(UserSettings.publicLikes);
+    }
+
+    static async toggleHideWaveforms() {
+        return await UserActions.toggleBooleanUserSetting(hideWaveformsSetting);
     }
 
     static async toggleNotificationSetting(key: string) {

@@ -54,6 +54,7 @@ export const en = {
     INTERACTIONS_DELETED: (entityType, interactionType) => `Deleted all ${interactionType}s for ${entityType}s`,
     MAKE_LIBRARY_PUBLIC: "Make my library public",
     PLAY_FROM_AUTO_QUEUE: "Play from auto queue when music is finished",
+    HIDE_WAVEFORMS: "Hide waveforms",
     SUBSCRIBE_FOR_HIGHER_QUALITY: "Subscribe for higher quality",
     MEDIUM_HIGH_ONLY_SUBSCRIPTION: "Medium and high qualities are only available with a subscription.",
     QUALITY_LOW: "low",

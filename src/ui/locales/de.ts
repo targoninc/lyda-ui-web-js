@@ -503,6 +503,7 @@ export const de: Translation = {
     ACCOUNT_DELETED: "Konto gelöscht",
     MAKE_LIBRARY_PUBLIC: "Mache meine Lieblingsinhalte öffentlich einsehbar",
     PLAY_FROM_AUTO_QUEUE: "Spiele nach Ende automatisch weiter Musik ab",
+    HIDE_WAVEFORMS: "Wellenformen ausblenden",
     SUBSCRIBE_FOR_HIGHER_QUALITY: "Abonniere für höhere Qualität",
     MEDIUM_HIGH_ONLY_SUBSCRIPTION: "Mittlere und hohe Qualität sind nur mit einem Abonnement verfügbar.",
     QUALITY_LOW: "niedrig",

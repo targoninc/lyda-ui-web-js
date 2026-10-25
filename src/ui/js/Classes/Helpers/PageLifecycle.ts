@@ -52,7 +52,11 @@ export function disposePageRender(): void {
     // hidden. Hide open ones so their hide handlers run before the container
     // is wiped.
     document.querySelectorAll<HTMLElement>("[popover]:popover-open").forEach(popover => {
-        popover.hidePopover();
+        try {
+            popover.hidePopover();
+        } catch {
+            // The popover may already be detached or closing during navigation.
+        }
     });
 
     // Modals live on <body> (outside the page container); they must not
