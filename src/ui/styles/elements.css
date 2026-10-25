@@ -1029,8 +1029,17 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     height: 2em;
 }
 
+.single-page .flex-v.big-gap,
+.single-page .flex.big-gap,
+.single-page .flex-v.noflexwrap,
 .track-player-row {
+    width: 100%;
     max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.track-player-row {
     overflow: hidden;
 }
 
@@ -1056,6 +1065,29 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 .track-tabs-row .tab-selector {
     min-width: 0;
     max-width: 100%;
+}
+
+.track-tab-content {
+    max-width: 100%;
+    min-width: 0;
+}
+
+.comment-box-input {
+    width: 100%;
+    min-width: 0;
+}
+
+.listFromStatsIndicator.comments {
+    min-width: 0;
+    max-width: 100%;
+}
+
+@media only screen and (max-width: 480px) {
+    .track-tabs-row .tab-selector {
+        flex-wrap: wrap;
+        overflow-x: visible;
+        border-radius: var(--border-radius);
+    }
 }
 
 .processing-box {

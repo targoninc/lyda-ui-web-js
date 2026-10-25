@@ -591,7 +591,7 @@ export class TrackTemplates {
                             .styles("padding", "10px 20px 10px 10px"),
                     ).classes("big-gap").build(),
                     create("div")
-                        .classes("flex-v", "noflexwrap")
+                        .classes("flex-v", "noflexwrap", "track-tab-content")
                         .children(
                             horizontal(
                                 horizontal(
