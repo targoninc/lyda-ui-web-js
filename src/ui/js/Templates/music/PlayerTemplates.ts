@@ -30,6 +30,7 @@ import {
 import { RoutePath } from "../../Routing/routes.ts";
 import { heading } from "@targoninc/jess-components";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import { ScrubberTemplates } from "./ScrubberTemplates.ts";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { UserWidgetContext } from "../../Enums/UserWidgetContext.ts";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType";
@@ -104,7 +105,7 @@ export class PlayerTemplates {
                             .styles("display", "none")
                             .build(),
                         PlayerTemplates.currentTrackTime(),
-                        PlayerTemplates.trackScrubbar(track, bufferPercent, positionPercent),
+                        ScrubberTemplates.scrubbar(track, bufferPercent, positionPercent),
                         PlayerTemplates.totalTrackTime(track),
                     ).build(),
             ).build();
@@ -184,7 +185,7 @@ export class PlayerTemplates {
                             .styles("display", "none")
                             .build(),
                         PlayerTemplates.currentTrackTime(true),
-                        PlayerTemplates.trackScrubbar(track, bufferPercent, positionPercent),
+                        ScrubberTemplates.scrubbar(track, bufferPercent, positionPercent),
                         PlayerTemplates.totalTrackTime(track, true),
                     ).build(),
             ).build();
@@ -233,43 +234,6 @@ export class PlayerTemplates {
             .build();
     }
 
-    private static trackScrubbar(
-        track: Track,
-        bufferPercent: Signal<string>,
-        positionPercent: Signal<string>,
-    ) {
-        const disabledClass = compute((l): string => l ? "disabled" : "_", loadingAudio);
-
-        return create("div")
-            .classes("audio-player-scrubber", "flex-grow", "flex", "rounded", "padded-inline", disabledClass)
-            .id(track.id)
-            .onmousedown(e => PlayManager.scrubFromElement(e, track.id))
-            .onmousemove(async e => {
-                if (e.buttons === 1) {
-                    await PlayManager.scrubFromElement(e, track.id);
-                }
-            })
-            .on("pointerdown", async e => {
-                await PlayManager.scrubFromElement(e as PointerEvent, track.id);
-            })
-            .children(
-                create("div")
-                    .id(track.id)
-                    .classes("audio-player-buffer-indicator", "rounded", "nopointer")
-                    .styles("left", bufferPercent)
-                    .build(),
-                create("div").classes("audio-player-scrubbar", "rounded", "nopointer").build(),
-                create("div")
-                    .classes("audio-player-scrubbar-time", "rounded", "nopointer")
-                    .styles("width", positionPercent)
-                    .build(),
-                create("div")
-                    .id(track.id)
-                    .classes("audio-player-scrubhead", "rounded", "nopointer")
-                    .styles("left", positionPercent)
-                    .build(),
-            ).build();
-    }
 
     static horizontalVolumeSlider(track: Track) {
         if (FeatureDetector.isMobile()) {
@@ -467,7 +431,7 @@ export class PlayerTemplates {
                 vertical(PlayerTemplates.roundPlayButton(track)).classes("align-center"),
                 vertical(
                     PlayerTemplates.playerTrackTitle(track, () => { playerExpanded.value = !playerExpanded.value; }),
-                    PlayerTemplates.trackScrubbar(track, bufferPercent, positionPercent),
+                    ScrubberTemplates.scrubbar(track, bufferPercent, positionPercent),
                 ).classes("flex-grow", "no-gap")
                  .build(),
             ).build();

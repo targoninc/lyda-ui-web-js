@@ -2,7 +2,7 @@ import {notify} from "../../Classes/Ui.ts";
 import {NotificationType} from "../../Enums/NotificationType.ts";
 import {TrackActions} from "../../Actions/TrackActions.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
-import {copy, getPlayIcon, Util} from "../../Classes/Util.ts";
+import {copy, getPlayIcon, getUserSettingValue, Util} from "../../Classes/Util.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
 import {GenericTemplates, horizontal, tabSelected, vertical} from "../generic/GenericTemplates.ts";
 import {PopoverTemplates} from "../generic/PopoverTemplates.ts";
@@ -12,6 +12,8 @@ import {PlaylistActions} from "../../Actions/PlaylistActions.ts";
 import {DragActions} from "../../Actions/DragActions.ts";
 import {Images} from "../../Enums/Images.ts";
 import {TrackEditTemplates} from "./TrackEditTemplates.ts";
+import {ScrubberTemplates} from "./ScrubberTemplates.ts";
+import {hideWaveformsSetting} from "../../Enums/UserSettingKeys.ts";
 import {LyricsTemplates} from "./LyricsTemplates.ts";
 import {StatisticTemplates} from "../StatisticTemplates.ts";
 import {CustomText} from "../../Classes/Helpers/CustomText.ts";
@@ -21,6 +23,7 @@ import {
     currentTrackId,
     currentTrackPosition,
     currentUser,
+    currentlyBuffered,
     loadingAudio,
     manualQueue,
     paymentsEnabled,
@@ -178,6 +181,24 @@ export class TrackTemplates {
     }
 
     static waveform(track: Track, loudnessData: number[], small = false, version?: number) {
+        const showWaveforms$ = compute(
+            user => !user || getUserSettingValue<boolean>(user, hideWaveformsSetting) !== true,
+            currentUser,
+        );
+
+        return create("div")
+            .styles("display", "contents")
+            .children(
+                compute(
+                    show => show
+                        ? TrackTemplates.waveformVisual(track, loudnessData, small, version)
+                        : TrackTemplates.waveformSlider(track, version),
+                    showWaveforms$,
+                ),
+            ).build();
+    }
+
+    private static waveformVisual(track: Track, loudnessData: number[], small = false, version?: number) {
         if (!track.processed && (!loudnessData || loudnessData.length === 0)) {
             return create("div")
                 .classes("waveform", small ? "waveform-small" : "_", "processing-box", "rounded-max", "relative")
@@ -840,6 +861,32 @@ export class TrackTemplates {
             icon: {icon: "link"},
             onclick: async () => copy(window.location.origin + "/track/" + id + "/" + code),
         });
+    }
+
+    private static waveformSlider(track: Track, version?: number) {
+        const versionActive$ = compute((id, _position, _playing) => {
+            if (id !== track.id) {
+                return false;
+            }
+            const playingVersion = PlayManager.getStreamClient(track.id)?.getVersion();
+            if (playingVersion === undefined) {
+                return true;
+            }
+            return version === undefined || playingVersion === version;
+        }, currentTrackId, currentTrackPosition, playingHere);
+
+        const positionPercent = compute(
+            (pos, active) => active ? `${pos.relative * 100}%` : "0%",
+            currentTrackPosition,
+            versionActive$,
+        );
+        const bufferPercent = compute(
+            (buf, active) => active ? `${buf * 100}%` : "0%",
+            currentlyBuffered,
+            versionActive$,
+        );
+
+        return ScrubberTemplates.scrubbar(track, bufferPercent, positionPercent, version);
     }
 
     private static waveformPath(data: number[], w: number, h: number): string {
