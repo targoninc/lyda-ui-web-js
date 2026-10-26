@@ -934,36 +934,49 @@ export class GenericTemplates {
     ) {
         const steps = (max - min) / step;
         const currentStep = compute(v => Math.round((v - min) / step), value);
+        const progress = compute(v => Math.max(0, Math.min(100, ((v - min) / (max - min)) * 100)), value);
+        const progressWidth = compute(p => `${p}%`, progress);
+        const valueDisplay = displayValueUnderneath ?? compute(v => String(v), value);
+        const dotPositions = [0, 25, 50, 75, 100];
 
         return create("div")
-            .classes("flex-v", "small-gap", "stepped-slider-container")
+            .classes("pretty-slider")
             .children(
-                create("label").text(label).build(),
+                create("span").classes("pretty-slider-label").text(label).build(),
                 create("div")
-                    .classes("relative", "stepped-slider-wrapper")
+                    .classes("pretty-slider-control")
                     .children(
                         create("div")
-                            .classes("flex", "space-between", "stepped-slider-display", "nogap")
+                            .classes("pretty-slider-line")
                             .children(
-                                ...Array.from({ length: steps + 1 }).map((_, i) =>
-                                    create("div")
-                                        .classes("stepped-slider-step", compute((cs): string => cs >= i ? "active" : "_", currentStep))
-                                        .build(),
-                                ),
+                                create("div")
+                                    .classes("pretty-slider-fill")
+                                    .styles("width", progressWidth)
+                                    .build(),
                             ).build(),
-                        input<number>({
-                            type: InputType.range,
-                            name: "stepped-slider",
-                            value: currentStep,
-                            onchange: v => onchange(min + v * step),
-                            attributes: ["min", "0", "max", steps.toString(), "step", "1"],
-                            classes: ["stepped-slider-input"],
-                        }),
+                        create("div")
+                            .classes("pretty-slider-dots")
+                            .children(...dotPositions.map(position => create("span")
+                                .classes("pretty-slider-dot", compute(p => p >= position - 0.01 ? "active" : "_", progress))
+                                .build()))
+                            .build(),
+                        create("input")
+                            .type(InputType.range)
+                            .classes("pretty-slider-input")
+                            .attributes(
+                                "min", "0",
+                                "max", steps.toString(),
+                                "step", "1",
+                                "aria-label", typeof label === "string" ? label : "Slider",
+                            )
+                            .value(currentStep)
+                            .oninput(event => {
+                                const input = event.target as HTMLInputElement;
+                                onchange(min + Number(input.value) * step);
+                            })
+                            .build(),
                     ).build(),
-                when(displayValueUnderneath, create("span")
-                    .classes(TextSize.small, "color-dim", "align-center")
-                    .text(displayValueUnderneath)
-                    .build()),
+                create("span").classes("pretty-slider-value").text(valueDisplay).build(),
             ).build();
     }
 }
