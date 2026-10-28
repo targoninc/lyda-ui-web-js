@@ -1,4 +1,4 @@
-import { lazyCompute, signal } from "@targoninc/jess";
+import { compute, signal } from "@targoninc/jess";
 import { en } from "./en.ts";
 import { de } from "./de.ts";
 import { SelectOption } from "@targoninc/jess-components";
@@ -6,6 +6,7 @@ import { LydaCache } from "../js/Cache/LydaCache.ts";
 import { CacheItem } from "../js/Cache/CacheItem.ts";
 import { Api } from "../js/Api/Api.ts";
 import { ga } from "./ga.ts";
+import { es } from "./es.ts";
 import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
 
 export type TranslationFunction = (...args: any[]) => void;
@@ -20,24 +21,28 @@ export enum Language {
     en = "en",
     de = "de",
     ga = "ga",
+    es = "es",
 }
 
 export const localeByLanguage: Record<Language, string> = {
     [Language.en]: "en-US",
     [Language.de]: "de-DE",
     [Language.ga]: "ga-IE",
+    [Language.es]: "es-ES",
 }
 
 export const LanguageOptions: SelectOption<Language>[] = [
     { id: Language.en, name: "English" },
     { id: Language.de, name: "Deutsch" },
     { id: Language.ga, name: "Gaeilge" },
+    { id: Language.es, name: "Español" },
 ];
 
 const translations: Record<Language, Translation> = {
     [Language.en]: en,
     [Language.de]: de,
     [Language.ga]: ga,
+    [Language.es]: es,
 };
 
 const url = new URL(window.location.href);
@@ -88,7 +93,7 @@ export function getTranslation(lookup: TranslationKey | string, lang: Language) 
 }
 
 export function t(lookup: TranslationKey, ...args: any[]) {
-    return lazyCompute((l: Language) => {
+    return compute((l: Language) => {
         const tl = getTranslation(lookup, l);
         if (tl.constructor === Function) {
             return (tl as Function)(...args);
