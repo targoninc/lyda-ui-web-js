@@ -101,7 +101,10 @@ export class BulkUploadTemplates {
             ).classes("small-gap").build(),
             compute(value => value.length === 0 ? nullElement() : vertical(
                 ...value.map(item => horizontal(
-                    create("div").classes("flex-grow").children(FormTemplates.titleInput(item.state)).build(),
+                    create("div").classes("flex-grow").children(FormTemplates.titleInput(
+                        item.state,
+                        item.status === "uploading" || item.status === "done",
+                    )).build(),
                     GenericTemplates.progressSectionPart(item.progress),
                     item.status === "uploading" || item.status === "done"
                         ? nullElement()

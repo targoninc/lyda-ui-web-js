@@ -71,13 +71,14 @@ export class FormTemplates {
         });
     }
 
-    static titleInput(state: Signal<any>) {
+    static titleInput(state: Signal<any>, disabled: TypeOrSignal<boolean> = false) {
         return input<string>({
             type: InputType.text,
             required: true,
             name: "title",
             label: t("TITLE_STAR"),
             placeholder: t("TITLE"),
+            disabled,
             value: compute(s => s.title ?? "", state),
             onchange: v => {
                 state.value = {...state.value, title: v};
