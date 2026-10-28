@@ -25,6 +25,7 @@ import {
 } from "@targoninc/jess";
 import {AlbumActions} from "../../Actions/AlbumActions.ts";
 import {navigate, reload, Route} from "../../Routing/Router.ts";
+import {RoutePath} from "../../Routing/routes.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
 import {button, errorList, input, select, SelectOption, textarea, toggle,} from "@targoninc/jess-components";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
@@ -69,7 +70,7 @@ export class TrackEditTemplates {
             credits: "",
             artistname: "",
             release_date: new Date(),
-            visibility: Visibility.public,
+            visibility: Visibility.private,
             genres: [],
             isrc: "",
             upc: "",
@@ -95,7 +96,7 @@ export class TrackEditTemplates {
             create("div").classes("error").build(),
             vertical(
                 create("h3").text("Upload").build(),
-                TrackEditTemplates.upDownButtons(state, true),
+                TrackEditTemplates.upDownButtons(state, true, true),
                 TrackEditTemplates.trackUpload(state, errorSections),
                 TrackEditTemplates.uploadButton(state, errorSections, errorFields),
                 TrackEditTemplates.uploadInfo(uploadInfo),
@@ -253,7 +254,7 @@ export class TrackEditTemplates {
         });
     }
 
-    static upDownButtons(state: Signal<any>, uploadEnabled = false) {
+    static upDownButtons(state: Signal<any>, uploadEnabled = false, bulkEnabled = false) {
         const buttons = [
             button({
                 text: t("DOWNLOAD_INFO"),
@@ -278,12 +279,38 @@ export class TrackEditTemplates {
                             const reader = new FileReader();
                             reader.onload = async e => {
                                 const jsonString = target<FileReader>(e).result as string;
-                                state.value = JSON.parse(jsonString);
+                                try {
+                                    const imported = JSON.parse(jsonString);
+                                    state.value = {
+                                        ...state.value,
+                                        ...imported,
+                                        audioFiles: state.value.audioFiles,
+                                        coverArtFiles: state.value.coverArtFiles,
+                                        audioFileName: state.value.audioFiles?.length
+                                            ? state.value.audioFileName
+                                            : imported.audioFileName,
+                                        coverArtFileName: state.value.coverArtFiles?.length
+                                            ? state.value.coverArtFileName
+                                            : imported.coverArtFileName,
+                                    };
+                                } catch {
+                                    notify(`${t("INVALID_UPLOAD_INFO")}`, NotificationType.error);
+                                }
                             };
                             reader.readAsText(file);
                         };
                         fileInput.click();
                     },
+                }),
+            );
+        }
+
+        if (bulkEnabled) {
+            buttons.push(
+                button({
+                    text: t("BULK_UPLOAD"),
+                    icon: {icon: "library_add"},
+                    onclick: () => navigate(RoutePath.bulkUpload),
                 }),
             );
         }
@@ -322,16 +349,19 @@ export class TrackEditTemplates {
         const errors = signal<string[]>([]);
         const disabled = compute((s: UploadableTrack) => {
             const newErrors = [];
-            const requiredProps = [
-                {section: "audio", field: "audioFileName"},
-                {section: "info", field: "title"},
-                {section: "monetization", field: "termsOfService"},
-            ];
-            if (requiredProps.some(p => !s[p.field])) {
+            const missing = [
+                {
+                    section: "audio",
+                    field: "audioFiles",
+                    missing: !s.audioFiles || typeof s.audioFiles.length !== "number" || s.audioFiles.length === 0,
+                },
+                {section: "info", field: "title", missing: !s.title},
+                {section: "monetization", field: "termsOfService", missing: !s.termsOfService},
+            ].filter(entry => entry.missing);
+            if (missing.length > 0) {
                 newErrors.push(`${t("MISSING_REQUIRED_FIELDS")}`);
-                const errorProps = requiredProps.filter(p => !s[p.field]);
-                errorSections.value = errorProps.map(p => p.section);
-                errorFields.value = errorProps.map(p => p.field);
+                errorSections.value = missing.map(entry => entry.section);
+                errorFields.value = missing.map(entry => entry.field);
             } else {
                 errorSections.value = [];
                 errorFields.value = [];

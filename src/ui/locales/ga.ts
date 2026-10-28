@@ -1,6 +1,14 @@
 import { Translation } from "./index.ts";
 
 export const ga: Translation = {
+    BULK_UPLOAD: "Uaslódáil baisce",
+    BULK_UPLOAD_DESCRIPTION: "Scaoil comhaid fuaime nó fillteáin anseo. Cruthaítear rianta go príobháideach agus is féidir iad a chur in eagar ina dhiaidh sin.",
+    CHOOSE_FILES: "Roghnaigh comhaid",
+    CHOOSE_FOLDER: "Roghnaigh fillteán",
+    START_UPLOAD: "Uaslódáil go léir",
+    QUEUED: "Sa scuaine",
+    UPLOAD_FAILED: "Theip ar uaslódáil",
+    INVALID_UPLOAD_INFO: "Comhad eolais uaslódála neamhbhailí",
     REPORT: "Tuarascáil",
     REPORTED: "Tuairiscithe",
     REPORT_COMMENT: "Tuairiscigh trácht",

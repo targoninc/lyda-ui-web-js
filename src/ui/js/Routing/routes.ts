@@ -14,6 +14,7 @@ export enum RoutePath {
     statistics = "statistics",
     search = "search",
     upload = "upload",
+    bulkUpload = "bulk-upload",
     library = "library",
     logout = "logout",
     login = "login",
@@ -94,6 +95,10 @@ export const routes: Route[] = [
     {
         path: RoutePath.upload,
         title: "Upload",
+    },
+    {
+        path: RoutePath.bulkUpload,
+        title: "Bulk upload",
     },
     {
         path: RoutePath.library,

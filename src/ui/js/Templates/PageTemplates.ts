@@ -13,6 +13,7 @@ import {FeedTemplates} from "./generic/FeedTemplates.ts";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import {TrackEditTemplates} from "./music/TrackEditTemplates.ts";
+import {BulkUploadTemplates} from "./music/BulkUploadTemplates.ts";
 import {navigate, Route} from "../Routing/Router.ts";
 import {copy, getTabFromUrl, Util} from "../Classes/Util.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
@@ -66,6 +67,7 @@ export class PageTemplates {
         [RoutePath.track]: PageTemplates.trackPage,
         [RoutePath.editTrack]: TrackEditTemplates.editTrackPage,
         [RoutePath.upload]: TrackEditTemplates.uploadPage,
+        [RoutePath.bulkUpload]: BulkUploadTemplates.page,
         [RoutePath.library]: PageTemplates.libraryPage,
         [RoutePath.logout]: PageTemplates.logoutPage,
         [RoutePath.login]: LandingPageTemplates.newLandingPage,
@@ -89,6 +91,7 @@ export class PageTemplates {
     static needLoginPages: RoutePath[] = [
         RoutePath.library,
         RoutePath.upload,
+        RoutePath.bulkUpload,
         RoutePath.settings,
         RoutePath.statistics,
         RoutePath.following,

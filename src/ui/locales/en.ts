@@ -4,6 +4,14 @@ import { currency } from "../js/Classes/Helpers/Num.ts";
 
 export const en = {
     UPLOAD: "Upload",
+    BULK_UPLOAD: "Bulk upload",
+    BULK_UPLOAD_DESCRIPTION: "Drop audio files or folders. Tracks are created private and can be edited in batch afterwards.",
+    CHOOSE_FILES: "Choose files",
+    CHOOSE_FOLDER: "Choose folder",
+    START_UPLOAD: "Upload all",
+    QUEUED: "Queued",
+    UPLOAD_FAILED: "Upload failed",
+    INVALID_UPLOAD_INFO: "Invalid upload info file",
     ACCOUNT: "Account",
     MY_PERMISSIONS: "My permissions",
     EMAIL_NOTIFICATIONS: "E-Mail Notifications",
