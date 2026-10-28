@@ -2849,6 +2849,9 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 .bulk-upload-dropzone {
     display: flex;
     flex-direction: column;
+    flex-shrink: 0;
+    width: 100%;
+    box-sizing: border-box;
     align-items: center;
     justify-content: center;
     gap: var(--gap);

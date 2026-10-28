@@ -326,7 +326,7 @@ export class BulkUploadTemplates {
         });
 
         return create("div")
-            .classes("flex-v", "big-gap")
+            .classes("flex-v", "noflexwrap", "big-gap")
             .children(
                 heading({level: 1, text: t("BULK_UPLOAD")}),
                 create("span")
