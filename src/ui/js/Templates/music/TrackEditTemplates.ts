@@ -6,6 +6,12 @@ import {Images} from "../../Enums/Images.ts";
 import {TrackActions} from "../../Actions/TrackActions.ts";
 import {downloadFile, getPlayIcon, target, Util} from "../../Classes/Util.ts";
 import {AudioUpload} from "../../Classes/AudioUpload.ts";
+import {
+    AUDIO_ACCEPT,
+    defaultUploadState,
+    isAudioFile,
+    setPendingBulkFiles,
+} from "../../Classes/UploadFileUtils.ts";
 import {notify, Ui, createModal} from "../../Classes/Ui.ts";
 import {
     AnyElement,
@@ -25,6 +31,7 @@ import {
 } from "@targoninc/jess";
 import {AlbumActions} from "../../Actions/AlbumActions.ts";
 import {navigate, reload, Route} from "../../Routing/Router.ts";
+import {RoutePath} from "../../Routing/routes.ts";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
 import {button, errorList, input, select, SelectOption, textarea, toggle,} from "@targoninc/jess-components";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
@@ -53,34 +60,9 @@ import {BatchEditField, BatchEditTemplates} from "../generic/BatchEditTemplates.
 import {TrackVersion} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackVersion";
 import {DragActions} from "../../Actions/DragActions.ts";
 
-let _uploadDragCleanup: (() => void) | null = null;
-
 export class TrackEditTemplates {
-    static clearUploadDragState() {
-        _uploadDragCleanup?.();
-        _uploadDragCleanup = null;
-    }
-
     static uploadPage() {
-        TrackEditTemplates.clearUploadDragState();
-
-        const state = signal<UploadableTrack>({
-            title: "",
-            credits: "",
-            artistname: "",
-            release_date: new Date(),
-            visibility: Visibility.public,
-            genres: [],
-            isrc: "",
-            upc: "",
-            description: "",
-            monetization: true,
-            price: 1,
-            collaborators: [],
-            termsOfService: false,
-            wip: false,
-            free_download: false,
-        });
+        const state = signal<UploadableTrack>(defaultUploadState());
         const errorSections = signal<string[]>([]);
         const errorFields = signal<string[]>([]);
         const uploadInfo = signal<UploadInfo[]>([]);
@@ -95,75 +77,34 @@ export class TrackEditTemplates {
             create("div").classes("error").build(),
             vertical(
                 create("h3").text("Upload").build(),
-                TrackEditTemplates.upDownButtons(state, true),
+                TrackEditTemplates.upDownButtons(state, true, true),
                 TrackEditTemplates.trackUpload(state, errorSections),
                 TrackEditTemplates.uploadButton(state, errorSections, errorFields),
                 TrackEditTemplates.uploadInfo(uploadInfo),
             ).build(),
         ).build() as HTMLElement;
 
-        const overlay = create("div")
-            .classes("upload-drag-overlay")
-            .children(
-                create("div")
-                    .classes("upload-drag-target")
-                    .text("Drop file to upload")
-                    .build(),
-            )
-            .build() as HTMLElement;
-
-        document.body.appendChild(overlay);
-
-        let dragCounter = 0;
-
-        const onDragEnter = () => {
-            dragCounter++;
-            if (dragCounter === 1) {
-                overlay.style.display = "block";
+        GenericTemplates.uploadDropOverlay(files => {
+            const audioFiles = files.filter(isAudioFile);
+            if (audioFiles.length > 1) {
+                setPendingBulkFiles(audioFiles);
+                navigate(RoutePath.bulkUpload);
+                return;
             }
-        };
 
-        const onDragOver = (e: DragEvent) => {
-            e.preventDefault();
-        };
-
-        const onDragLeave = () => {
-            dragCounter--;
-            if (dragCounter <= 0) {
-                dragCounter = 0;
-                overlay.style.display = "none";
+            const file = audioFiles[0];
+            if (!file) {
+                return;
             }
-        };
 
-        const onDrop = (e: DragEvent) => {
-            e.preventDefault();
-            dragCounter = 0;
-            overlay.style.display = "none";
-
-            const files = e.dataTransfer?.files;
-            if (files && files.length > 0) {
-                const fileInput = document.getElementById("audio-file") as HTMLInputElement;
-                if (fileInput) {
-                    const dt = new DataTransfer();
-                    dt.items.add(files[0]);
-                    fileInput.files = dt.files;
-                    fileInput.dispatchEvent(new Event("change", {bubbles: true}));
-                }
+            const fileInput = document.getElementById("audio-file") as HTMLInputElement;
+            if (fileInput) {
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                fileInput.files = dt.files;
+                fileInput.dispatchEvent(new Event("change", {bubbles: true}));
             }
-        };
-
-        document.addEventListener("dragenter", onDragEnter);
-        document.addEventListener("dragover", onDragOver);
-        document.addEventListener("dragleave", onDragLeave);
-        document.addEventListener("drop", onDrop);
-
-        _uploadDragCleanup = () => {
-            overlay.remove();
-            document.removeEventListener("dragenter", onDragEnter);
-            document.removeEventListener("dragover", onDragOver);
-            document.removeEventListener("dragleave", onDragLeave);
-            document.removeEventListener("drop", onDrop);
-        };
+        });
 
         return el;
     }
@@ -253,7 +194,7 @@ export class TrackEditTemplates {
         });
     }
 
-    static upDownButtons(state: Signal<any>, uploadEnabled = false) {
+    static upDownButtons(state: Signal<any>, uploadEnabled = false, bulkEnabled = false) {
         const buttons = [
             button({
                 text: t("DOWNLOAD_INFO"),
@@ -278,12 +219,38 @@ export class TrackEditTemplates {
                             const reader = new FileReader();
                             reader.onload = async e => {
                                 const jsonString = target<FileReader>(e).result as string;
-                                state.value = JSON.parse(jsonString);
+                                try {
+                                    const imported = JSON.parse(jsonString);
+                                    state.value = {
+                                        ...state.value,
+                                        ...imported,
+                                        audioFiles: state.value.audioFiles,
+                                        coverArtFiles: state.value.coverArtFiles,
+                                        audioFileName: state.value.audioFiles?.length
+                                            ? state.value.audioFileName
+                                            : imported.audioFileName,
+                                        coverArtFileName: state.value.coverArtFiles?.length
+                                            ? state.value.coverArtFileName
+                                            : imported.coverArtFileName,
+                                    };
+                                } catch {
+                                    notify(`${t("INVALID_UPLOAD_INFO")}`, NotificationType.error);
+                                }
                             };
                             reader.readAsText(file);
                         };
                         fileInput.click();
                     },
+                }),
+            );
+        }
+
+        if (bulkEnabled) {
+            buttons.push(
+                button({
+                    text: t("BULK_UPLOAD"),
+                    icon: {icon: "library_add"},
+                    onclick: () => navigate(RoutePath.bulkUpload),
                 }),
             );
         }
@@ -322,16 +289,19 @@ export class TrackEditTemplates {
         const errors = signal<string[]>([]);
         const disabled = compute((s: UploadableTrack) => {
             const newErrors = [];
-            const requiredProps = [
-                {section: "audio", field: "audioFileName"},
-                {section: "info", field: "title"},
-                {section: "monetization", field: "termsOfService"},
-            ];
-            if (requiredProps.some(p => !s[p.field])) {
+            const missing = [
+                {
+                    section: "audio",
+                    field: "audioFiles",
+                    missing: !s.audioFiles || typeof s.audioFiles.length !== "number" || s.audioFiles.length === 0,
+                },
+                {section: "info", field: "title", missing: !s.title},
+                {section: "monetization", field: "termsOfService", missing: !s.termsOfService},
+            ].filter(entry => entry.missing);
+            if (missing.length > 0) {
                 newErrors.push(`${t("MISSING_REQUIRED_FIELDS")}`);
-                const errorProps = requiredProps.filter(p => !s[p.field]);
-                errorSections.value = errorProps.map(p => p.section);
-                errorFields.value = errorProps.map(p => p.field);
+                errorSections.value = missing.map(entry => entry.section);
+                errorFields.value = missing.map(entry => entry.field);
             } else {
                 errorSections.value = [];
                 errorFields.value = [];
@@ -735,7 +705,7 @@ export class TrackEditTemplates {
             t("AUDIO_FILE"),
             `${t("CHOOSE_AUDIO_FILE")}`,
             "audio-file",
-            "audio/*",
+            AUDIO_ACCEPT,
             true,
             async (fileName: string, files) => {
                 if (canOverwriteTitle) {

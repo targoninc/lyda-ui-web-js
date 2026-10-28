@@ -4,6 +4,14 @@ import { currency } from "../js/Classes/Helpers/Num.ts";
 
 export const en = {
     UPLOAD: "Upload",
+    BULK_UPLOAD: "Bulk upload",
+    CHOOSE_FILES: "Choose files",
+    CHOOSE_FOLDER: "Choose folder",
+    START_UPLOAD: "Upload all",
+    SINGLE_UPLOAD: "Single upload",
+    QUEUED: "Queued",
+    UPLOAD_FAILED: "Upload failed",
+    INVALID_UPLOAD_INFO: "Invalid upload info file",
     ACCOUNT: "Account",
     MY_PERMISSIONS: "My permissions",
     EMAIL_NOTIFICATIONS: "E-Mail Notifications",

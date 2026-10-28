@@ -16,6 +16,8 @@ import {
     when,
 } from "@targoninc/jess";
 import { getPlayIcon, Util } from "../../Classes/Util.ts";
+import { filesFromDataTransfer } from "../../Classes/UploadFileUtils.ts";
+import { trackCleanup } from "../../Classes/Helpers/PageLifecycle.ts";
 import { navigate } from "../../Routing/Router.ts";
 import { currentTrackId, loadingAudio, playingHere } from "../../state.ts";
 import { PillOption } from "../../Models/PillOption.ts";
@@ -312,16 +314,29 @@ export class GenericTemplates {
         required = false,
         changeCallback = (_: string, _2: FileList | null) => {
         },
+        options: {multiple?: boolean; directory?: boolean; icon?: string; onInput?: (input: HTMLInputElement) => void} = {},
     ) {
         const text = signal(initialText);
         const fileButton = button({
             text: text,
+            icon: options.icon ? {icon: options.icon} : undefined,
             onclick: () => {
                 text.value = `${t("CHOOSING_FILE")}`;
                 input.click();
             },
         }) as HTMLButtonElement;
-        const input = create("input").type(InputType.file).styles("display", "none").id(id).name(name).required(required).attributes("accept", accept).onchange(_ => {
+        const input = create("input")
+            .type(InputType.file)
+            .styles("display", "none")
+            .id(id)
+            .name(name)
+            .required(required)
+            .attributes(
+                "accept", accept,
+                ...(options.multiple ? ["multiple", ""] : []),
+                ...(options.directory ? ["webkitdirectory", ""] : []),
+            )
+            .onchange(_ => {
             const fileName = input.value;
             if (accept && !accept.includes("*")) {
                 const accepts = accept.split(",").map(a => a.replace(/^\./, ""));
@@ -347,8 +362,54 @@ export class GenericTemplates {
                 return text.length > 20 ? text.substring(0, 20) + "..." : text;
             }
         }).build() as HTMLInputElement;
+        options.onInput?.(input);
 
         return create("div").children(fileButton, input).build();
+    }
+
+    static uploadDropOverlay(
+        onFiles: (files: File[]) => void,
+        text: StringOrSignal = t("DROP_AUDIO_FILE_HERE"),
+    ) {
+        const depth = signal(0);
+        const overlay = create("div")
+            .classes("upload-drag-overlay")
+            .styles("display", compute(d => d > 0 ? "block" : "none", depth) as any)
+            .children(create("div").classes("upload-drag-target").text(text).build())
+            .build() as HTMLElement;
+
+        document.body.appendChild(overlay);
+
+        const onDragEnter = () => depth.value++;
+        const onDragOver = (event: DragEvent) => event.preventDefault();
+        const onDragLeave = () => depth.value = Math.max(0, depth.value - 1);
+        const onDrop = async (event: DragEvent) => {
+            event.preventDefault();
+            depth.value = 0;
+            if (!event.dataTransfer) {
+                return;
+            }
+            try {
+                onFiles(await filesFromDataTransfer(event.dataTransfer));
+            } catch (e) {
+                console.error("Could not read dropped files", e);
+            }
+        };
+
+        document.addEventListener("dragenter", onDragEnter);
+        document.addEventListener("dragover", onDragOver);
+        document.addEventListener("dragleave", onDragLeave);
+        document.addEventListener("drop", onDrop);
+
+        const cleanup = () => {
+            overlay.remove();
+            document.removeEventListener("dragenter", onDragEnter);
+            document.removeEventListener("dragover", onDragOver);
+            document.removeEventListener("dragleave", onDragLeave);
+            document.removeEventListener("drop", onDrop);
+        };
+        trackCleanup(cleanup);
+        return cleanup;
     }
 
     static checkbox(
@@ -957,7 +1018,7 @@ export class GenericTemplates {
                         create("div")
                             .classes("pretty-slider-dots")
                             .children(...dotPositions.map(position => create("span")
-                                .classes("pretty-slider-dot", compute(p => p >= position - 0.01 ? "active" : "_", progress))
+                                .classes("pretty-slider-dot", compute(p => p >= position - 0.01 ? "active" : "_", progress) as any)
                                 .build()))
                             .build(),
                         create("input")
@@ -969,7 +1030,7 @@ export class GenericTemplates {
                                 "step", "1",
                                 "aria-label", typeof label === "string" ? label : "Slider",
                             )
-                            .value(currentStep)
+                            .value(currentStep as any)
                             .oninput(event => {
                                 const input = event.target as HTMLInputElement;
                                 onchange(min + Number(input.value) * step);

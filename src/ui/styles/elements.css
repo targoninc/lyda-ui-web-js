@@ -521,6 +521,8 @@ label {
 }
 
 .round-button {
+    box-sizing: border-box;
+    padding: 0;
     min-width: var(--round-button-size);
     min-height: var(--round-button-size);
     max-width: var(--round-button-size);
@@ -2844,3 +2846,5 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     font-size: calc(var(--artwork-size) * 0.14);
     text-shadow: 0 0 4px var(--bg-0);
 }
+
+

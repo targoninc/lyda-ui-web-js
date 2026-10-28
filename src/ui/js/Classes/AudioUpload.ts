@@ -12,27 +12,68 @@ import { ProgressPart } from "../Models/ProgressPart.ts";
 import { Api } from "../Api/Api.ts";
 import { t } from "../../locales";
 
+interface AudioUploadOptions {
+    trackId?: number;
+    navigateOnSuccess?: boolean;
+    notifyOnComplete?: boolean;
+    notifyOnError?: boolean;
+    skipCover?: boolean;
+    enableRetry?: boolean;
+}
+
+export interface AudioUploadResult {
+    id?: number;
+    error?: string;
+}
+
 export class AudioUpload {
-    triggerEvent: Event;
+    triggerEvent: Event | null;
     state: Signal<UploadableTrack>;
     id: number | undefined;
-    private progress: Signal<ProgressPart|null>;
+    private readonly progress: Signal<ProgressPart|null>;
+    private readonly options: AudioUploadOptions;
+    private readonly completion: Promise<string | undefined>;
 
-    constructor(e: Event, state: Signal<UploadableTrack>, progress: Signal<ProgressPart | null>, loadingUpdate: (loading: boolean) => void) {
+    constructor(
+        e: Event | null,
+        state: Signal<UploadableTrack>,
+        progress: Signal<ProgressPart | null>,
+        loadingUpdate: (loading: boolean) => void,
+        options: AudioUploadOptions = {},
+    ) {
         this.triggerEvent = e;
         this.state = state;
         this.progress = progress;
+        this.options = options;
+        this.id = options.trackId;
         loadingUpdate(true);
 
         this.progress.value = <ProgressPart>{
             icon: "info",
             text: t("DETAILS"),
             state: ProgressState.notStarted,
-            retryFunction: () => this.createTrackThenNext()
+            retryFunction: this.options.enableRetry === false ? undefined : () => this.createTrackThenNext()
         };
 
-        this.uploadTrack().then()
-            .finally(() => loadingUpdate(false));
+        this.completion = this.uploadTrack().finally(() => loadingUpdate(false));
+    }
+
+    /** Upload a track without navigating; used by the bulk upload queue. */
+    static async upload(
+        state: Signal<UploadableTrack>,
+        progress: Signal<ProgressPart | null>,
+        options: Pick<AudioUploadOptions, "trackId"> = {},
+    ): Promise<AudioUploadResult> {
+        const uploader = new AudioUpload(null, state, progress, () => {}, {
+            ...options,
+            navigateOnSuccess: false,
+            notifyOnComplete: false,
+            notifyOnError: false,
+            skipCover: true,
+            enableRetry: false,
+        });
+        const error = await uploader.completion;
+        return {id: uploader.id, error};
     }
 
     setProgressPartState(update: Partial<ProgressPart>) {
@@ -42,18 +83,25 @@ export class AudioUpload {
         };
     }
 
-    async uploadTrack() {
+    async uploadTrack(): Promise<string | undefined> {
         const error = await this.createTrackThenNext();
         if (error) {
-            notify(`${t("FAILED_TO_CREATE_TRACK_ERROR", error)}`, NotificationType.error);
-            return;
+            if (this.options.notifyOnError !== false) {
+                notify(`${t("FAILED_TO_CREATE_TRACK_ERROR", error)}`, NotificationType.error);
+            }
+            return error;
         }
 
-        notify(`${t("TRACK_UPLOAD_COMPLETED")}`, NotificationType.success);
-        navigate(`${RoutePath.track}/${this.id}`);
+        if (this.options.notifyOnComplete !== false) {
+            notify(`${t("TRACK_UPLOAD_COMPLETED")}`, NotificationType.success);
+        }
+        if (this.options.navigateOnSuccess !== false) {
+            navigate(`${RoutePath.track}/${this.id}`);
+        }
+        return undefined;
     }
 
-    async uploadAudioThenNext() {
+    async uploadAudioThenNext(): Promise<string | undefined> {
         this.setProgressPartState({
             state: ProgressState.inProgress,
             text: t("UPLOADING_AUDIO"),
@@ -102,7 +150,16 @@ export class AudioUpload {
         }
     }
 
-    async uploadCoverThenNext() {
+    async uploadCoverThenNext(): Promise<string | undefined> {
+        if (this.options.skipCover) {
+            this.setProgressPartState({
+                state: ProgressState.complete,
+                text: t("AUDIO_UPLOADED"),
+                progress: 100
+            });
+            return;
+        }
+
         this.setProgressPartState({
             state: ProgressState.inProgress,
             text: t("UPLOADING_COVER"),
@@ -142,14 +199,26 @@ export class AudioUpload {
         });
     }
 
-    async createTrackThenNext() {
+    async createTrackThenNext(): Promise<string | undefined> {
+        if (this.id !== undefined) {
+            return await this.uploadAudioThenNext();
+        }
+
         this.setProgressPartState({
             state: ProgressState.inProgress,
             text: `Creating track...`,
             progress: 0
         });
         const result = await this.createTrack();
-        if (result && result.constructor === String) {
+        if (!result) {
+            const error = `${t("FAILED_TO_CREATE_TRACK_ERROR", "")}`;
+            this.setProgressPartState({
+                state: ProgressState.error,
+                text: error,
+                icon: "error"
+            });
+            return error;
+        } else if (result.constructor === String) {
             this.setProgressPartState({
                 state: ProgressState.error,
                 text: result,

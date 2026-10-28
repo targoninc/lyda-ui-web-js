@@ -8,7 +8,6 @@ import { Util } from "./js/Classes/Util.ts";
 import { RoutePath, routes } from "./js/Routing/routes.js";
 import { create } from "@targoninc/jess";
 import {GenericTemplates, horizontal, vertical} from "./js/Templates/generic/GenericTemplates.ts";
-import { TrackEditTemplates } from "./js/Templates/music/TrackEditTemplates.ts";
 import { contextQueue, currentUser, history, permissions, playingFrom, userLoading } from "./js/state.ts";
 import { StreamingBroadcaster } from "./js/Streaming/StreamingBroadcaster.ts";
 import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom";
@@ -57,7 +56,6 @@ export const router = new Router(routes, async (route: Route, params: any) => {
 
     disposePageRender();
     ColorExtractor.clearPageBackground();
-    TrackEditTemplates.clearUploadDragState();
     InteractionStateManager.clearContextType("list");
     InteractionStateManager.clearContextType("page");
 

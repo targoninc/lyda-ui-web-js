@@ -130,9 +130,13 @@ export class NavTemplates {
     }
 
     static accountSection() {
-        const isUploadPage = compute(r => r?.path === RoutePath.upload, router.currentRoute);
+        const isUploadPage = compute(
+            r => r?.path === RoutePath.upload || r?.path === RoutePath.bulkUpload,
+            router.currentRoute,
+        );
         const isPlaylistPage = compute(r => r?.path === RoutePath.createPlaylist, router.currentRoute);
         const uploadActiveClass = compute((i): string => i ? "active" : "inactive", isUploadPage);
+        const playlistActiveClass = compute((i): string => i ? "active" : "inactive", isPlaylistPage);
 
         return create("div")
             .classes("widest-fill-right", "relative")
@@ -148,7 +152,7 @@ export class NavTemplates {
                     }
                 }),
                 button({
-                    classes: ["hideOnMidBreakpoint", "fullHeight", uploadActiveClass],
+                    classes: ["hideOnMidBreakpoint", "fullHeight", playlistActiveClass],
                     icon: { icon: "docs_add_on" },
                     disabled: isPlaylistPage,
                     title: t("NEW_PLAYLIST"),
