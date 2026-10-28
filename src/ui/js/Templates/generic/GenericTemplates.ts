@@ -314,11 +314,12 @@ export class GenericTemplates {
         required = false,
         changeCallback = (_: string, _2: FileList | null) => {
         },
-        options: {multiple?: boolean; directory?: boolean; onInput?: (input: HTMLInputElement) => void} = {},
+        options: {multiple?: boolean; directory?: boolean; icon?: string; onInput?: (input: HTMLInputElement) => void} = {},
     ) {
         const text = signal(initialText);
         const fileButton = button({
             text: text,
+            icon: options.icon ? {icon: options.icon} : undefined,
             onclick: () => {
                 text.value = `${t("CHOOSING_FILE")}`;
                 input.click();

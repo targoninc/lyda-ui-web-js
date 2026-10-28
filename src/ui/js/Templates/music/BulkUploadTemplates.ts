@@ -1,6 +1,7 @@
 import {compute, create, nullElement, signal, Signal} from "@targoninc/jess";
 import {button} from "@targoninc/jess-components";
 import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
+import {FormTemplates} from "../generic/FormTemplates.ts";
 import {navigate} from "../../Routing/Router.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {t} from "../../../locales";
@@ -71,7 +72,7 @@ export class BulkUploadTemplates {
                     fileInput.value = "";
                 }
             },
-            {multiple: true, onInput: input => fileInput = input},
+            {multiple: true, icon: "audio_file", onInput: input => fileInput = input},
         );
         const folderPicker = GenericTemplates.fileInput(
             "bulk-folder",
@@ -85,7 +86,7 @@ export class BulkUploadTemplates {
                     folderInput.value = "";
                 }
             },
-            {multiple: true, directory: true, onInput: input => folderInput = input},
+            {multiple: true, directory: true, icon: "folder_open", onInput: input => folderInput = input},
         );
 
         const uploadAll = async () => {
@@ -122,7 +123,7 @@ export class BulkUploadTemplates {
 
         const list = compute(value => value.length === 0 ? nullElement() : vertical(
             ...value.map(item => horizontal(
-                create("span").classes("bold", "flex-grow").text(item.file.name).build(),
+                create("div").classes("flex-grow").children(FormTemplates.titleInput(item.state)).build(),
                 GenericTemplates.progressSectionPart(item.progress),
                 item.status === "uploading" || item.status === "done"
                     ? nullElement()
