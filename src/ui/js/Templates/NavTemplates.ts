@@ -185,7 +185,7 @@ export class NavTemplates {
     static guestSettingsButton() {
         return button({
             icon: { icon: "settings" },
-            classes: ["roundIconOnSmallBreakpoint"],
+            classes: ["roundIconOnSmallBreakpoint", "fullHeight"],
             title: t("SETTINGS"),
             onclick: () => NavTemplates.showGuestSettings(),
         });
