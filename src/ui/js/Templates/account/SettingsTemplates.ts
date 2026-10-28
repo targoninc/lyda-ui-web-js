@@ -513,10 +513,7 @@ export class SettingsTemplates {
                     select({
                         options: signal(options),
                         value: language,
-                        onchange: value => {
-                            language.value = value as Language;
-                            reload();
-                        },
+                        onchange: value => language.value = value as Language,
                     }),
                 ).build();
         }, searchQuery$);
