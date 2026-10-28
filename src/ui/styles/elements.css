@@ -947,6 +947,10 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     filter: brightness(.3) blur(1px);
 }
 
+.single-page .cover-container:hover .artwork-image {
+    filter: none;
+}
+
 #banner-loader, #avatar-loader {
     width: 30px;
     height: 30px;
@@ -2601,6 +2605,10 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 .artwork:hover:not(.artwork-format-cd) {
     transform: perspective(650px) rotateX(6deg) rotateY(-9deg);
+}
+
+.artwork.artwork-parallax {
+    transition: none;
 }
 
 .artwork-image {

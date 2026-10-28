@@ -39,6 +39,8 @@ export interface ArtworkOptions {
     seed?: number;
     /** Master switch for the decorative stickers (default true). */
     showStickers?: boolean;
+    /** Follow the pointer with a subtle 3D tilt. */
+    parallax?: boolean;
     onclick?: Function;
     classes?: string[];
 }
@@ -180,6 +182,8 @@ export function artworkDisplay(url: StringOrSignal, opts: ArtworkOptions = {}): 
             trackCleanup(handle.dispose);
             (node as ArtworkWithCleanup).__artwork3dDispose = handle.dispose;
         }
+    }
+    if (format === "cd" || opts.parallax) {
         attachArtworkParallax(node as HTMLElement);
     }
     return node;
@@ -190,6 +194,7 @@ export function artworkDisplay(url: StringOrSignal, opts: ArtworkOptions = {}): 
  * signature as one unit), so nothing can detach or drift away.
  */
 function attachArtworkParallax(root: HTMLElement) {
+    root.classList.add("artwork-parallax");
     const state = { targetX: 0, targetY: 0, x: 0, y: 0 };
     let frameId = 0;
     const onPointerMove = (event: PointerEvent) => {
@@ -218,6 +223,7 @@ function attachArtworkParallax(root: HTMLElement) {
         root.removeEventListener("pointermove", onPointerMove);
         root.removeEventListener("pointerleave", onPointerLeave);
         root.style.transform = "";
+        root.classList.remove("artwork-parallax");
     });
 }
 
