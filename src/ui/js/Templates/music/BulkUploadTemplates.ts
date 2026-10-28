@@ -1,7 +1,5 @@
 import {compute, create, InputType, nullElement, signal, Signal, when} from "@targoninc/jess";
 import {button} from "@targoninc/jess-components";
-import {Api} from "../../Api/Api.ts";
-import {MediaUploader} from "../../Api/MediaUploader.ts";
 import {NotificationType} from "../../Enums/NotificationType.ts";
 import {TextSize} from "../../Enums/TextSize.ts";
 import {GenericTemplates} from "../generic/GenericTemplates.ts";
@@ -9,9 +7,10 @@ import {navigate} from "../../Routing/Router.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {notify} from "../../Classes/Ui.ts";
 import {t} from "../../../locales";
-import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import {ProgressPart} from "../../Models/ProgressPart.ts";
 import {ProgressState} from "@targoninc/lyda-shared/src/Enums/ProgressState";
+import {AudioUpload} from "../../Classes/AudioUpload.ts";
+import {UploadableTrack} from "../../Models/UploadableTrack.ts";
 import {
     AUDIO_ACCEPT,
     cleanTitle,
@@ -30,6 +29,7 @@ interface BulkUploadItem {
     file: File;
     title: string;
     status: BulkUploadStatus;
+    state: Signal<UploadableTrack>;
     progress: Signal<ProgressPart | null>;
     error?: string;
     trackId?: number;
@@ -65,6 +65,7 @@ export class BulkUploadTemplates {
                     file,
                     title: cleanTitle(file.name),
                     status: "queued",
+                    state: signal<UploadableTrack>(defaultState(file)),
                     progress: signal<ProgressPart | null>({
                         icon: "schedule",
                         text: `${t("QUEUED")}`,
@@ -153,44 +154,13 @@ export class BulkUploadTemplates {
                 }
 
                 updateItem(item.id, {status: "uploading", error: undefined});
-                item.progress.value = {
-                    icon: "cloud_upload",
-                    text: `${t("UPLOADING_AUDIO")}`,
-                    state: ProgressState.inProgress,
-                    progress: 0,
-                };
                 try {
-                    let trackId = item.trackId;
-                    if (trackId === undefined) {
-                        const track = await Api.createTrack(defaultState(item.file));
-                        if (!track || track.id === undefined) {
-                            throw new Error(`${t("FAILED_TO_CREATE_TRACK_ERROR", "")}`);
-                        }
-                        trackId = track.id;
-                        updateItem(item.id, {trackId});
-                    }
-
-                    await MediaUploader.upload(
-                        MediaFileType.audio,
-                        trackId,
-                        item.file,
-                        event => {
-                            item.progress.value = {
-                                icon: "cloud_upload",
-                                text: `${t("UPLOADING_AUDIO")}`,
-                                state: ProgressState.inProgress,
-                                progress: event.total > 0 ? (event.loaded / event.total) * 100 : 0,
-                            };
-                        },
-                        {versionIndex: 1},
-                    );
-                    item.progress.value = {
-                        icon: "check",
-                        text: `${t("AUDIO_UPLOADED")}`,
-                        state: ProgressState.complete,
-                        progress: 100,
-                    };
-                    updateItem(item.id, {status: "done"});
+                    const result = await AudioUpload.upload(item.state, item.progress, {trackId: item.trackId});
+                    updateItem(item.id, {
+                        trackId: result.id,
+                        status: result.error ? "error" : "done",
+                        error: result.error,
+                    });
                 } catch (e) {
                     console.error("Bulk upload failed", e);
                     item.progress.value = {
