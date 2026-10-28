@@ -80,14 +80,14 @@ export class TrackTemplates {
     }
 
     static feedFilters(filterState: Signal<string>) {
+        const values = ["all", "originals", "reposts"];
         const tabs = [`${t("ALL")}`, `${t("ORIGINALS")}`, `${t("REPOSTS")}`];
-        const lowerTabs = tabs.map(t => t.toLowerCase());
-        const initialIndex = Math.max(0, lowerTabs.indexOf(filterState.value));
+        const initialIndex = Math.max(0, values.indexOf(filterState.value));
 
         return GenericTemplates.combinedSelector(
             tabs,
             (i: number) => {
-                filterState.value = tabs[i].toLowerCase();
+                filterState.value = values[i];
             },
             initialIndex,
         );
