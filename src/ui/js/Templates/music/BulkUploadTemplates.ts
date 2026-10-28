@@ -11,6 +11,7 @@ import {t} from "../../../locales";
 import {Visibility} from "@targoninc/lyda-shared/src/Enums/Visibility.ts";
 import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import {UploadableTrack} from "../../Models/UploadableTrack.ts";
+import {TrackEditTemplates} from "./TrackEditTemplates.ts";
 
 type BulkUploadStatus = "queued" | "uploading" | "done" | "error";
 
@@ -130,6 +131,7 @@ function statusText(status: BulkUploadStatus) {
 
 export class BulkUploadTemplates {
     static page() {
+        TrackEditTemplates.clearUploadDragState();
         const items = signal<BulkUploadItem[]>([]);
         const uploading = signal(false);
 
