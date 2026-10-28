@@ -155,6 +155,14 @@ export class BulkUploadTemplates {
                     create("span").classes("color-dim").text(item.file.name).build(),
                 ).classes("flex-grow").build(),
                 GenericTemplates.progressSectionPart(item.progress),
+                item.status === "uploading" || item.status === "done"
+                    ? nullElement()
+                    : GenericTemplates.roundIconButton(
+                        {icon: "close"},
+                        () => items.value = items.value.filter(entry => entry.id !== item.id),
+                        t("REMOVE"),
+                        ["negative"],
+                    ),
             ).classes("card", "bulk-upload-row").build()),
         ).classes("bulk-upload-list").build(), items);
 
