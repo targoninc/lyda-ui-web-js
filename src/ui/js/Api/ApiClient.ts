@@ -16,7 +16,7 @@ const refetch = async <T>(
         body: body instanceof FormData ? body : JSON.stringify(body),
     });
 
-    if (url.includes("/audio?")) {
+    if (url.includes("/audio?") && !url.includes("signed=true")) {
         return await res.blob() as T;
     }
 
