@@ -97,6 +97,7 @@ export class MusicTemplates {
                     alt: item.title,
                     liked: MusicTemplates.interactionSignal(type, item, InteractionType.like),
                     reposted: MusicTemplates.interactionSignal(type, item, InteractionType.repost),
+                    parallax: coverContext === CoverContext.standalone,
                     ...artworkOptions,
                     onclick: () => {
                         Ui.showImageModal(item.has_cover ? Util.getImage(item.id, fileType) : imageState.value);

@@ -538,6 +538,13 @@ export class TrackTemplates {
                                             .classes("playcount", TextSize.small)
                                             .text(t("PLAYS_AMOUNT", track.plays))
                                             .build(),
+                                        create("span")
+                                            .classes("track-length", TextSize.small)
+                                            .text(compute(idx => {
+                                                const version = versions.find(v => v.index === idx);
+                                                return Time.format(version?.length ?? track.length);
+                                            }, selectedVersion))
+                                            .build(),
                                     ).classes("align-children"),
                                 ).classes("small-gap"),
                                 TrackTemplates.genreTags(track),
