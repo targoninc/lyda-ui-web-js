@@ -471,6 +471,7 @@ export const de: Translation = {
     CHOOSE_FILES: "Dateien auswählen",
     CHOOSE_FOLDER: "Ordner auswählen",
     START_UPLOAD: "Alle hochladen",
+    SINGLE_UPLOAD: "Einzel-Upload",
     QUEUED: "In Warteschlange",
     UPLOAD_FAILED: "Upload fehlgeschlagen",
     INVALID_UPLOAD_INFO: "Ungültige Upload-Info-Datei",

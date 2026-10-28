@@ -149,7 +149,15 @@ export class BulkUploadTemplates {
         return vertical(
             create("h3").text(t("BULK_UPLOAD")).build(),
             create("span").classes("color-dim").text(t("BULK_UPLOAD_DESCRIPTION")).build(),
-            horizontal(filePicker, folderPicker).classes("small-gap").build(),
+            horizontal(
+                filePicker,
+                folderPicker,
+                button({
+                    text: t("SINGLE_UPLOAD"),
+                    icon: {icon: "upload"},
+                    onclick: () => navigate(RoutePath.upload),
+                }),
+            ).classes("small-gap").build(),
             list,
             startButton,
         ).classes("noflexwrap", "big-gap").build();

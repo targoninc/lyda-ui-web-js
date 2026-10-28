@@ -6,6 +6,7 @@ export const ga: Translation = {
     CHOOSE_FILES: "Roghnaigh comhaid",
     CHOOSE_FOLDER: "Roghnaigh fillteán",
     START_UPLOAD: "Uaslódáil go léir",
+    SINGLE_UPLOAD: "Uaslódáil aonair",
     QUEUED: "Sa scuaine",
     UPLOAD_FAILED: "Theip ar uaslódáil",
     INVALID_UPLOAD_INFO: "Comhad eolais uaslódála neamhbhailí",

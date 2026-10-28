@@ -9,6 +9,7 @@ export const en = {
     CHOOSE_FILES: "Choose files",
     CHOOSE_FOLDER: "Choose folder",
     START_UPLOAD: "Upload all",
+    SINGLE_UPLOAD: "Single upload",
     QUEUED: "Queued",
     UPLOAD_FAILED: "Upload failed",
     INVALID_UPLOAD_INFO: "Invalid upload info file",
