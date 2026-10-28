@@ -467,7 +467,6 @@ export const de: Translation = {
     YES_DELETE_ACCOUNT: "Ja, lösche mein Konto",
     UPLOAD: "Hochladen",
     BULK_UPLOAD: "Massen-Upload",
-    BULK_UPLOAD_DESCRIPTION: "Audiodateien oder Ordner hier ablegen. Tracks werden privat erstellt und können danach gesammelt bearbeitet werden.",
     CHOOSE_FILES: "Dateien auswählen",
     CHOOSE_FOLDER: "Ordner auswählen",
     START_UPLOAD: "Alle hochladen",
