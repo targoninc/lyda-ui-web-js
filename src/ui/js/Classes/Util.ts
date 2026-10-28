@@ -70,6 +70,15 @@ export class Util {
         return ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${type}&t=${Date.now()}`;
     }
 
+    static updateUserImage(userId: number, type: "avatar" | "banner", newSrc: string) {
+        const selector = type === "avatar"
+            ? ".user-icon, .user-icon-big, .avatar-image"
+            : ".user-banner";
+        document.querySelectorAll<HTMLImageElement>(`${selector}[data-user-id='${userId}']`).forEach(img => {
+            img.src = newSrc;
+        });
+    }
+
     static async getCachedImage(id: number, type: MediaFileType): Promise<string> {
         return cachingService.getImageUrl(id, type, 500);
     }
@@ -92,6 +101,9 @@ export class Util {
     }
 
     static async updateImage(newSrc: string, oldSrc: string, retriesLeft = 60) {
+        if (!oldSrc) {
+            return;
+        }
         const fileExists = await this.fileExists(newSrc);
         if (!fileExists) {
             if (retriesLeft <= 0) {
@@ -103,7 +115,7 @@ export class Util {
         } else {
             const images = document.querySelectorAll("img");
             images.forEach((i) => {
-                if (i.src === oldSrc) {
+                if (!isAppIcon(i) && i.src === oldSrc) {
                     i.src = newSrc;
                 }
             });
@@ -342,13 +354,30 @@ export async function copy(text: string) {
 }
 
 export function updateImagesWithSource(newSrc: string, oldSrc: string) {
-    oldSrc = oldSrc.replace(/&t=\d+/, "");
+    if (!oldSrc) {
+        return;
+    }
+    const normalizedOldSrc = withoutCacheBuster(oldSrc);
     const imgs = document.querySelectorAll("img") as NodeListOf<HTMLImageElement>;
     imgs.forEach(img => {
-        if (img.src.includes(oldSrc)) {
+        if (!isAppIcon(img) && withoutCacheBuster(img.src) === normalizedOldSrc) {
             img.src = newSrc;
         }
     });
+}
+
+function isAppIcon(img: HTMLImageElement) {
+    return img.closest(".nav-logo") !== null;
+}
+
+function withoutCacheBuster(url: string) {
+    try {
+        const parsed = new URL(url, window.location.href);
+        parsed.searchParams.delete("t");
+        return parsed.href;
+    } catch {
+        return url;
+    }
 }
 
 export function getAvatar(user: User | null | undefined) {
