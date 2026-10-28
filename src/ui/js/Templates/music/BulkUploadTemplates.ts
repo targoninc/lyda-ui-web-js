@@ -1,9 +1,10 @@
-import {compute, create, InputType, nullElement, signal, when} from "@targoninc/jess";
+import {compute, create, InputType, nullElement, signal, Signal, when} from "@targoninc/jess";
 import {button, heading} from "@targoninc/jess-components";
 import {Api} from "../../Api/Api.ts";
 import {MediaUploader} from "../../Api/MediaUploader.ts";
 import {NotificationType} from "../../Enums/NotificationType.ts";
 import {TextSize} from "../../Enums/TextSize.ts";
+import {GenericTemplates} from "../generic/GenericTemplates.ts";
 import {navigate} from "../../Routing/Router.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {notify} from "../../Classes/Ui.ts";
@@ -11,6 +12,8 @@ import {t} from "../../../locales";
 import {Visibility} from "@targoninc/lyda-shared/src/Enums/Visibility.ts";
 import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import {UploadableTrack} from "../../Models/UploadableTrack.ts";
+import {ProgressPart} from "../../Models/ProgressPart.ts";
+import {ProgressState} from "@targoninc/lyda-shared/src/Enums/ProgressState";
 import {TrackEditTemplates} from "./TrackEditTemplates.ts";
 
 type BulkUploadStatus = "queued" | "uploading" | "done" | "error";
@@ -20,7 +23,7 @@ interface BulkUploadItem {
     file: File;
     title: string;
     status: BulkUploadStatus;
-    progress: number;
+    progress: Signal<ProgressPart | null>;
     error?: string;
     trackId?: number;
 }
@@ -116,18 +119,6 @@ function defaultState(file: File): UploadableTrack {
     };
 }
 
-function statusText(status: BulkUploadStatus) {
-    switch (status) {
-        case "uploading":
-            return t("UPLOADING_AUDIO");
-        case "done":
-            return t("AUDIO_UPLOADED");
-        case "error":
-            return t("UPLOAD_FAILED");
-        default:
-            return t("QUEUED");
-    }
-}
 
 export class BulkUploadTemplates {
     static page() {
@@ -154,7 +145,11 @@ export class BulkUploadTemplates {
                     file,
                     title: cleanTitle(file.name),
                     status: "queued",
-                    progress: 0,
+                    progress: signal<ProgressPart | null>({
+                        icon: "schedule",
+                        text: `${t("QUEUED")}`,
+                        state: ProgressState.notStarted,
+                    }),
                 });
             }
             items.value = next;
@@ -235,7 +230,13 @@ export class BulkUploadTemplates {
                     continue;
                 }
 
-                updateItem(item.id, {status: "uploading", progress: 0, error: undefined});
+                updateItem(item.id, {status: "uploading", error: undefined});
+                item.progress.value = {
+                    icon: "cloud_upload",
+                    text: `${t("UPLOADING_AUDIO")}`,
+                    state: ProgressState.inProgress,
+                    progress: 0,
+                };
                 try {
                     let trackId = item.trackId;
                     if (trackId === undefined) {
@@ -252,15 +253,29 @@ export class BulkUploadTemplates {
                         trackId,
                         item.file,
                         event => {
-                            updateItem(item.id, {
+                            item.progress.value = {
+                                icon: "cloud_upload",
+                                text: `${t("UPLOADING_AUDIO")}`,
+                                state: ProgressState.inProgress,
                                 progress: event.total > 0 ? (event.loaded / event.total) * 100 : 0,
-                            });
+                            };
                         },
                         {versionIndex: 1},
                     );
-                    updateItem(item.id, {status: "done", progress: 100});
+                    item.progress.value = {
+                        icon: "check",
+                        text: `${t("AUDIO_UPLOADED")}`,
+                        state: ProgressState.complete,
+                        progress: 100,
+                    };
+                    updateItem(item.id, {status: "done"});
                 } catch (e) {
                     console.error("Bulk upload failed", e);
+                    item.progress.value = {
+                        icon: "error",
+                        text: `${t("UPLOAD_FAILED")}`,
+                        state: ProgressState.error,
+                    };
                     updateItem(item.id, {
                         status: "error",
                         error: e instanceof Error ? e.message : String(e),
@@ -299,16 +314,7 @@ export class BulkUploadTemplates {
                         create("div")
                             .classes("flex", "align-children", "small-gap")
                             .children(
-                                create("span")
-                                    .classes("color-dim", TextSize.small)
-                                    .text(statusText(item.status))
-                                    .build(),
-                                item.status === "uploading"
-                                    ? create("span")
-                                        .classes("color-dim", TextSize.small)
-                                        .text(`${Math.round(item.progress)}%`)
-                                        .build()
-                                    : nullElement(),
+                                GenericTemplates.progressSectionPart(item.progress),
                                 when(item.status === "queued", button({
                                     icon: {icon: "close"},
                                     text: t("REMOVE"),
