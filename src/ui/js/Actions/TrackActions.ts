@@ -1,4 +1,5 @@
 import { Util } from "../Classes/Util.ts";
+import { AUDIO_ACCEPT } from "../Classes/UploadFileUtils.ts";
 import { Icons } from "../Enums/Icons.ts";
 import { PlayManager } from "../Streaming/PlayManager.ts";
 import { createModal, notify, Ui } from "../Classes/Ui.ts";
@@ -124,7 +125,7 @@ export class TrackActions {
         const fileInput = create("input")
             .type(InputType.file)
             .styles("display", "none")
-            .attributes("accept", "audio/*")
+            .attributes("accept", AUDIO_ACCEPT)
             .build() as HTMLInputElement;
 
         fileInput.onchange = () => {
@@ -143,7 +144,7 @@ export class TrackActions {
 
         const modalContent = vertical(
             create("h3").text(t("REPLACE_AUDIO")).build(),
-            GenericTemplates.fileInput("replace-audio-file", "replace-audio-file", "audio/*", `${t("DROP_AUDIO_FILE_HERE")}`, false, (_, files) => {
+            GenericTemplates.fileInput("replace-audio-file", "replace-audio-file", AUDIO_ACCEPT, `${t("DROP_AUDIO_FILE_HERE")}`, false, (_, files) => {
                 if (files?.[0]) {
                     selectedFile.value = files[0];
                 }

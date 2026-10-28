@@ -6,6 +6,13 @@ import {Images} from "../../Enums/Images.ts";
 import {TrackActions} from "../../Actions/TrackActions.ts";
 import {downloadFile, getPlayIcon, target, Util} from "../../Classes/Util.ts";
 import {AudioUpload} from "../../Classes/AudioUpload.ts";
+import {
+    AUDIO_ACCEPT,
+    defaultUploadState,
+    filesFromDataTransfer,
+    isAudioFile,
+    setPendingBulkFiles,
+} from "../../Classes/UploadFileUtils.ts";
 import {notify, Ui, createModal} from "../../Classes/Ui.ts";
 import {
     AnyElement,
@@ -65,23 +72,7 @@ export class TrackEditTemplates {
     static uploadPage() {
         TrackEditTemplates.clearUploadDragState();
 
-        const state = signal<UploadableTrack>({
-            title: "",
-            credits: "",
-            artistname: "",
-            release_date: new Date(),
-            visibility: Visibility.private,
-            genres: [],
-            isrc: "",
-            upc: "",
-            description: "",
-            monetization: true,
-            price: 1,
-            collaborators: [],
-            termsOfService: false,
-            wip: false,
-            free_download: false,
-        });
+        const state = signal<UploadableTrack>(defaultUploadState());
         const errorSections = signal<string[]>([]);
         const errorFields = signal<string[]>([]);
         const uploadInfo = signal<UploadInfo[]>([]);
@@ -136,20 +127,39 @@ export class TrackEditTemplates {
             }
         };
 
-        const onDrop = (e: DragEvent) => {
+        const onDrop = async (e: DragEvent) => {
             e.preventDefault();
             dragCounter = 0;
             overlay.style.display = "none";
+            if (!e.dataTransfer) {
+                return;
+            }
 
-            const files = e.dataTransfer?.files;
-            if (files && files.length > 0) {
-                const fileInput = document.getElementById("audio-file") as HTMLInputElement;
-                if (fileInput) {
-                    const dt = new DataTransfer();
-                    dt.items.add(files[0]);
-                    fileInput.files = dt.files;
-                    fileInput.dispatchEvent(new Event("change", {bubbles: true}));
-                }
+            let files: File[] = [];
+            try {
+                files = await filesFromDataTransfer(e.dataTransfer);
+            } catch {
+                files = Array.from(e.dataTransfer.files);
+            }
+            const audioFiles = files.filter(isAudioFile);
+
+            if (audioFiles.length > 1) {
+                setPendingBulkFiles(audioFiles);
+                navigate(RoutePath.bulkUpload);
+                return;
+            }
+
+            const file = audioFiles[0];
+            if (!file) {
+                return;
+            }
+
+            const fileInput = document.getElementById("audio-file") as HTMLInputElement;
+            if (fileInput) {
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                fileInput.files = dt.files;
+                fileInput.dispatchEvent(new Event("change", {bubbles: true}));
             }
         };
 
@@ -765,7 +775,7 @@ export class TrackEditTemplates {
             t("AUDIO_FILE"),
             `${t("CHOOSE_AUDIO_FILE")}`,
             "audio-file",
-            "audio/*",
+            AUDIO_ACCEPT,
             true,
             async (fileName: string, files) => {
                 if (canOverwriteTitle) {

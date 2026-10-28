@@ -9,11 +9,18 @@ import {navigate} from "../../Routing/Router.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {notify} from "../../Classes/Ui.ts";
 import {t} from "../../../locales";
-import {Visibility} from "@targoninc/lyda-shared/src/Enums/Visibility.ts";
 import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
-import {UploadableTrack} from "../../Models/UploadableTrack.ts";
 import {ProgressPart} from "../../Models/ProgressPart.ts";
 import {ProgressState} from "@targoninc/lyda-shared/src/Enums/ProgressState";
+import {
+    AUDIO_ACCEPT,
+    cleanTitle,
+    defaultUploadState,
+    filesFromDataTransfer,
+    formatSize,
+    isAudioFile,
+    takePendingBulkFiles,
+} from "../../Classes/UploadFileUtils.ts";
 import {TrackEditTemplates} from "./TrackEditTemplates.ts";
 
 type BulkUploadStatus = "queued" | "uploading" | "done" | "error";
@@ -28,97 +35,9 @@ interface BulkUploadItem {
     trackId?: number;
 }
 
-const AUDIO_EXTENSIONS = new Set([
-    "mp3", "wav", "flac", "ogg", "oga", "opus", "m4a", "aac", "aiff", "aif", "wma", "alac",
-]);
-
-function isAudioFile(file: File): boolean {
-    const extension = file.name.split(".").pop()?.toLowerCase() ?? "";
-    return file.type.startsWith("audio/") || AUDIO_EXTENSIONS.has(extension);
+function defaultState(file: File) {
+    return {...defaultUploadState(true), title: cleanTitle(file.name)};
 }
-
-function cleanTitle(name: string): string {
-    return name.replace(/\.[^/.]+$/, "").trim();
-}
-
-function formatSize(bytes: number): string {
-    if (bytes < 1024 * 1024) {
-        return `${Math.max(1, Math.round(bytes / 1024))} KB`;
-    }
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function readDirectory(entry: any): Promise<any[]> {
-    const reader = entry.createReader();
-    return new Promise((resolve, reject) => {
-        const entries: any[] = [];
-        const readBatch = () => {
-            reader.readEntries((batch: any[]) => {
-                if (batch.length === 0) {
-                    resolve(entries);
-                    return;
-                }
-                entries.push(...batch);
-                readBatch();
-            }, reject);
-        };
-        readBatch();
-    });
-}
-
-async function filesFromEntry(entry: any, files: File[]): Promise<void> {
-    if (entry.isFile) {
-        await new Promise<void>((resolve, reject) => {
-            entry.file((file: File) => {
-                files.push(file);
-                resolve();
-            }, reject);
-        });
-        return;
-    }
-    if (entry.isDirectory) {
-        for (const child of await readDirectory(entry)) {
-            await filesFromEntry(child, files);
-        }
-    }
-}
-
-async function filesFromDataTransfer(dataTransfer: DataTransfer): Promise<File[]> {
-    const entries = Array.from(dataTransfer.items)
-        .map(item => (item as any).webkitGetAsEntry?.())
-        .filter(Boolean);
-
-    if (entries.length === 0) {
-        return Array.from(dataTransfer.files);
-    }
-
-    const files: File[] = [];
-    for (const entry of entries) {
-        await filesFromEntry(entry, files);
-    }
-    return files;
-}
-
-function defaultState(file: File): UploadableTrack {
-    return {
-        title: cleanTitle(file.name),
-        credits: "",
-        artistname: "",
-        release_date: new Date(),
-        visibility: Visibility.private,
-        genres: [],
-        isrc: "",
-        upc: "",
-        description: "",
-        monetization: true,
-        price: 1,
-        collaborators: [],
-        termsOfService: true,
-        wip: false,
-        free_download: false,
-    };
-}
-
 
 export class BulkUploadTemplates {
     static page() {
@@ -130,6 +49,7 @@ export class BulkUploadTemplates {
             items.value = items.value.map(item => item.id === id ? {...item, ...update} : item);
         };
 
+        const pendingFiles = takePendingBulkFiles();
         const addFiles = (files: File[]) => {
             const existing = new Set(items.value.map(item =>
                 `${item.file.name}:${item.file.size}:${item.file.lastModified}`));
@@ -155,13 +75,15 @@ export class BulkUploadTemplates {
             items.value = next;
         };
 
+        addFiles(pendingFiles);
+
         const resetInput = (input: HTMLInputElement) => {
             input.value = "";
         };
 
         const fileInput = create("input")
             .type(InputType.file)
-            .attributes("accept", "audio/*", "multiple", "")
+            .attributes("accept", AUDIO_ACCEPT, "multiple", "")
             .styles("display", "none")
             .onchange(event => {
                 const input = event.target as HTMLInputElement;
@@ -172,7 +94,7 @@ export class BulkUploadTemplates {
 
         const folderInput = create("input")
             .type(InputType.file)
-            .attributes("accept", "audio/*", "multiple", "", "webkitdirectory", "")
+            .attributes("accept", AUDIO_ACCEPT, "multiple", "", "webkitdirectory", "")
             .styles("display", "none")
             .onchange(event => {
                 const input = event.target as HTMLInputElement;
