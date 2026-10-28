@@ -12,15 +12,16 @@ export function isAudioFile(file: File): boolean {
     return file.type.startsWith("audio/") || AUDIO_EXTENSIONS.has(extension);
 }
 
-export function cleanTitle(name: string): string {
-    return name.replace(/\.[^/.]+$/, "").trim();
+export function toFileList(files: File[]): FileList {
+    const dataTransfer = new DataTransfer();
+    for (const file of files) {
+        dataTransfer.items.add(file);
+    }
+    return dataTransfer.files;
 }
 
-export function formatSize(bytes: number): string {
-    if (bytes < 1024 * 1024) {
-        return `${Math.max(1, Math.round(bytes / 1024))} KB`;
-    }
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+export function cleanTitle(name: string): string {
+    return name.replace(/\.[^/.]+$/, "").trim();
 }
 
 export function defaultUploadState(termsOfService = false): UploadableTrack {
