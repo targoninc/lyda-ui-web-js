@@ -1,4 +1,4 @@
-import {compute, create, InputType, nullElement, signal, Signal} from "@targoninc/jess";
+import {compute, create, nullElement, signal, Signal} from "@targoninc/jess";
 import {button} from "@targoninc/jess-components";
 import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
 import {navigate} from "../../Routing/Router.ts";
@@ -60,50 +60,61 @@ export class BulkUploadTemplates {
             items.value = [...items.value, ...additions];
         };
 
-        const makeInput = (directory: boolean) => create("input")
-            .type(InputType.file)
-            .attributes("accept", AUDIO_ACCEPT, "multiple", "", ...(directory ? ["webkitdirectory", ""] : []))
-            .styles("display", "none")
-            .onchange(event => {
-                const input = event.target as HTMLInputElement;
-                addFiles(Array.from(input.files ?? []));
-                input.value = "";
-            })
-            .build() as HTMLInputElement;
+        let fileInput: HTMLInputElement | undefined;
+        let folderInput: HTMLInputElement | undefined;
+        const filePicker = GenericTemplates.fileInput(
+            "bulk-files",
+            "bulk-files",
+            AUDIO_ACCEPT,
+            `${t("CHOOSE_FILES")}`,
+            false,
+            (_, files) => {
+                addFiles(Array.from(files ?? []));
+                if (fileInput) {
+                    fileInput.value = "";
+                }
+            },
+            {multiple: true, onInput: input => fileInput = input},
+        );
+        const folderPicker = GenericTemplates.fileInput(
+            "bulk-folder",
+            "bulk-folder",
+            AUDIO_ACCEPT,
+            `${t("CHOOSE_FOLDER")}`,
+            false,
+            (_, files) => {
+                addFiles(Array.from(files ?? []));
+                if (folderInput) {
+                    folderInput.value = "";
+                }
+            },
+            {multiple: true, directory: true, onInput: input => folderInput = input},
+        );
 
-        const fileInput = makeInput(false);
-        const folderInput = makeInput(true);
-
-        let dragDepth = 0;
+        const dragDepth = signal(0);
+        const dragging = compute(depth => depth > 0, dragDepth);
         const dropzone = vertical(
             create("span").classes("material-symbols-outlined", "bulk-upload-icon").text("upload_file").build(),
             create("span").classes("bold").text(t("BULK_UPLOAD")).build(),
             create("span").classes("color-dim").text(t("DROP_AUDIO_FILE_HERE")).build(),
-        ).classes("bulk-upload-dropzone")
-            .onclick(() => fileInput.click())
+        ).classes("bulk-upload-dropzone", compute(drag => drag ? "bulk-upload-drag-over" : "_", dragging) as any)
+            .onclick(() => fileInput?.click())
             .ondragenter((event: DragEvent) => {
                 event.preventDefault();
-                dragDepth++;
-                (event.currentTarget as HTMLElement).classList.add("bulk-upload-drag-over");
+                dragDepth.value++;
             })
             .ondragover((event: DragEvent) => event.preventDefault())
-            .ondragleave((event: DragEvent) => {
-                if (--dragDepth > 0) {
-                    return;
-                }
-                dragDepth = 0;
-                (event.currentTarget as HTMLElement).classList.remove("bulk-upload-drag-over");
-            })
+            .ondragleave(() => dragDepth.value = Math.max(0, dragDepth.value - 1))
             .ondrop(async (event: DragEvent) => {
                 event.preventDefault();
-                dragDepth = 0;
-                (event.currentTarget as HTMLElement).classList.remove("bulk-upload-drag-over");
-                if (event.dataTransfer) {
-                    try {
-                        addFiles(await filesFromDataTransfer(event.dataTransfer));
-                    } catch (e) {
-                        console.error("Could not read dropped files", e);
-                    }
+                dragDepth.value = 0;
+                if (!event.dataTransfer) {
+                    return;
+                }
+                try {
+                    addFiles(await filesFromDataTransfer(event.dataTransfer));
+                } catch (e) {
+                    console.error("Could not read dropped files", e);
                 }
             }).build();
 
@@ -161,12 +172,7 @@ export class BulkUploadTemplates {
             create("h3").text(t("BULK_UPLOAD")).build(),
             create("span").classes("color-dim").text(t("BULK_UPLOAD_DESCRIPTION")).build(),
             dropzone,
-            horizontal(
-                button({text: t("CHOOSE_FILES"), icon: {icon: "audio_file"}, onclick: () => fileInput.click()}),
-                button({text: t("CHOOSE_FOLDER"), icon: {icon: "folder_open"}, onclick: () => folderInput.click()}),
-                fileInput,
-                folderInput,
-            ).classes("small-gap").build(),
+            horizontal(filePicker, folderPicker).classes("small-gap").build(),
             list,
             startButton,
         ).classes("noflexwrap", "big-gap").build();

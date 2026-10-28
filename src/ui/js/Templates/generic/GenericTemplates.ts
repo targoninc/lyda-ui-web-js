@@ -312,6 +312,7 @@ export class GenericTemplates {
         required = false,
         changeCallback = (_: string, _2: FileList | null) => {
         },
+        options: {multiple?: boolean; directory?: boolean; onInput?: (input: HTMLInputElement) => void} = {},
     ) {
         const text = signal(initialText);
         const fileButton = button({
@@ -321,7 +322,18 @@ export class GenericTemplates {
                 input.click();
             },
         }) as HTMLButtonElement;
-        const input = create("input").type(InputType.file).styles("display", "none").id(id).name(name).required(required).attributes("accept", accept).onchange(_ => {
+        const input = create("input")
+            .type(InputType.file)
+            .styles("display", "none")
+            .id(id)
+            .name(name)
+            .required(required)
+            .attributes(
+                "accept", accept,
+                ...(options.multiple ? ["multiple", ""] : []),
+                ...(options.directory ? ["webkitdirectory", ""] : []),
+            )
+            .onchange(_ => {
             const fileName = input.value;
             if (accept && !accept.includes("*")) {
                 const accepts = accept.split(",").map(a => a.replace(/^\./, ""));
@@ -347,6 +359,7 @@ export class GenericTemplates {
                 return text.length > 20 ? text.substring(0, 20) + "..." : text;
             }
         }).build() as HTMLInputElement;
+        options.onInput?.(input);
 
         return create("div").children(fileButton, input).build();
     }
@@ -957,7 +970,7 @@ export class GenericTemplates {
                         create("div")
                             .classes("pretty-slider-dots")
                             .children(...dotPositions.map(position => create("span")
-                                .classes("pretty-slider-dot", compute(p => p >= position - 0.01 ? "active" : "_", progress))
+                                .classes("pretty-slider-dot", compute(p => p >= position - 0.01 ? "active" : "_", progress) as any)
                                 .build()))
                             .build(),
                         create("input")
@@ -969,7 +982,7 @@ export class GenericTemplates {
                                 "step", "1",
                                 "aria-label", typeof label === "string" ? label : "Slider",
                             )
-                            .value(currentStep)
+                            .value(currentStep as any)
                             .oninput(event => {
                                 const input = event.target as HTMLInputElement;
                                 onchange(min + Number(input.value) * step);
