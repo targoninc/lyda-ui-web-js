@@ -4,15 +4,16 @@ import { UserActions } from "../Actions/UserActions.ts";
 import { GenericTemplates } from "./generic/GenericTemplates.ts";
 import { SearchTemplates } from "./SearchTemplates.ts";
 import { navigate } from "../Routing/Router.ts";
-import {compute, create, nullElement, Signal, StringOrSignal, when} from "@targoninc/jess";
+import {compute, create, nullElement, signal, Signal, StringOrSignal, when} from "@targoninc/jess";
 import { router } from "../../main.ts";
 import { currentUser } from "../state.ts";
 import { RoutePath } from "../Routing/routes.ts";
 import { NotificationTemplates } from "./NotificationTemplates.ts";
-import { button } from "@targoninc/jess-components";
+import { button, select } from "@targoninc/jess-components";
 import { SearchContext } from "@targoninc/lyda-shared/src/Enums/SearchContext";
-import { t } from "../../locales";
+import { Language, LanguageOptions, language, setLanguage, t } from "../../locales";
 import { TextSize } from "../Enums/TextSize.ts";
+import { createModal } from "../Classes/Ui.ts";
 
 export class NavTemplates {
     static navTop(burgerMenuOpen: Signal<boolean>) {
@@ -170,6 +171,7 @@ export class NavTemplates {
         return create("div")
             .classes("widest-fill-right")
             .children(
+                NavTemplates.guestSettingsButton(),
                 button({
                     text: t("LOGIN"),
                     icon: { icon: "login" },
@@ -178,5 +180,35 @@ export class NavTemplates {
                     onclick: () => navigate(RoutePath.login)
                 })
             ).build();
+    }
+
+    static guestSettingsButton() {
+        return button({
+            icon: { icon: "settings" },
+            classes: ["roundIconOnSmallBreakpoint", "fullHeight"],
+            title: t("SETTINGS"),
+            onclick: () => NavTemplates.showGuestSettings(),
+        });
+    }
+
+    static showGuestSettings() {
+        createModal([
+            create("div")
+                .classes("flex", "space-between", "align-children", "fullWidth")
+                .children(
+                    create("h2").text(t("SETTINGS")).build(),
+                    GenericTemplates.modalCancelButton(),
+                ).build(),
+            create("div")
+                .classes("card", "flex-v")
+                .children(
+                    create("span").text(t("LANGUAGE")).build(),
+                    select({
+                        options: signal(LanguageOptions),
+                        value: language,
+                        onchange: value => setLanguage(value as Language, false),
+                    }),
+                ).build(),
+        ], "guest-settings");
     }
 }

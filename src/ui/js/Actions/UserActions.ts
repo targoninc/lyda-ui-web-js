@@ -1,4 +1,4 @@
-import { getUserSettingValue, updateImagesWithSource, updateUserSetting, Util } from "../Classes/Util.ts";
+import { getUserSettingValue, updateUserSetting, Util } from "../Classes/Util.ts";
 import { notify, Ui } from "../Classes/Ui.ts";
 import { LydaCache } from "../Cache/LydaCache.ts";
 import { CacheItem } from "../Cache/CacheItem.ts";
@@ -44,7 +44,7 @@ export class UserActions {
                 );
                 const newSrc =
                     type === "avatar" ? Util.getUserAvatar(user.id) : Util.getUserBanner(user.id);
-                updateImagesWithSource(newSrc, imageSignal.value);
+                Util.updateUserImage(user.id, type, newSrc);
                 imageSignal.value = newSrc;
             } catch (e: any) {
                 notify(`${t("FAILED_UPLOAD_ERROR")}`, NotificationType.error);

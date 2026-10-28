@@ -28,7 +28,11 @@ export class MediaActions {
             await Api.deleteMedia(type, referenceId);
             loading.value = false;
             notify(`${t("IMAGE_REMOVED")}`, NotificationType.success);
-            updateImagesWithSource(defaultImage, image.value);
+            if (type === MediaFileType.userAvatar || type === MediaFileType.userBanner) {
+                Util.updateUserImage(referenceId, type === MediaFileType.userAvatar ? "avatar" : "banner", defaultImage);
+            } else {
+                updateImagesWithSource(defaultImage, image.value);
+            }
             image.value = defaultImage;
         }, () => {
         }, Icons.WARNING);

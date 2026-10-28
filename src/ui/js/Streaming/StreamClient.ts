@@ -1,5 +1,6 @@
 import { IStreamClient } from "./IStreamClient.ts";
 import { ApiRoutes } from "../Api/ApiRoutes.ts";
+import { get } from "../Api/ApiClient.ts";
 import { currentQuality, currentTrackId, currentTrackPosition, loadingAudio, muted, volume } from "../state.ts";
 import { initializeClient } from "./InitializeClient.ts";
 
@@ -23,6 +24,10 @@ export class StreamClient implements IStreamClient {
     private readonly id: number;
     private readonly code: string;
     private version?: number;
+    private signedUrl?: string;
+    private signedUrlKey?: string;
+    private audioPromise?: Promise<boolean>;
+    private generation = 0;
 
     private ctx?: AudioContext;
     private gain?: GainNode;
@@ -64,7 +69,7 @@ export class StreamClient implements IStreamClient {
                 currentTrackPosition.value = { relative: 0, absolute: 0 };
             }
 
-            const freshElement = this.ensureAudioElement();
+            const freshElement = await this.ensureAudioElement();
             if (this.playing) {
                 return;
             }
@@ -106,6 +111,9 @@ export class StreamClient implements IStreamClient {
 
     public close(): void {
         this.stopAsync();
+        this.generation++;
+        this.signedUrl = undefined;
+        this.signedUrlKey = undefined;
 
         if (this.audio) {
             // Drop the source to stop network activity and free the buffer.
@@ -139,7 +147,7 @@ export class StreamClient implements IStreamClient {
      */
     public preload(): void {
         this.ensureAudioContext();
-        this.ensureAudioElement();
+        this.ensureAudioElement().catch(console.error);
     }
 
     /**
@@ -150,6 +158,9 @@ export class StreamClient implements IStreamClient {
         if (this.playing) {
             this.offset = this.getCurrentTime(false);
         }
+        this.generation++;
+        this.signedUrl = undefined;
+        this.signedUrlKey = undefined;
         if (this.audio) {
             try {
                 this.audio.removeAttribute("src");
@@ -166,7 +177,7 @@ export class StreamClient implements IStreamClient {
         try {
             this.ensureAudioContext();
 
-            const freshElement = this.ensureAudioElement();
+            const freshElement = await this.ensureAudioElement();
             if (freshElement) {
                 await this.waitForMetadata();
             }
@@ -285,13 +296,52 @@ export class StreamClient implements IStreamClient {
         return url;
     }
 
+    private async resolveSourceUrl(): Promise<string> {
+        const key = `${currentQuality.value}:${this.version ?? ""}`;
+        if (this.signedUrl && this.signedUrlKey === key) {
+            return this.signedUrl;
+        }
+        this.signedUrl = undefined;
+        this.signedUrlKey = undefined;
+
+        try {
+            const result = await get<{url?: string | null}>(ApiRoutes.getTrackAudio, {
+                id: this.id,
+                quality: currentQuality.value,
+                code: this.code,
+                client: "web",
+                signed: "true",
+                ...(this.version !== undefined ? {version: this.version} : {}),
+            });
+            if (result?.url) {
+                this.signedUrl = result.url;
+                this.signedUrlKey = key;
+                return result.url;
+            }
+        } catch (e) {
+            console.warn("[StreamClient] Could not get signed audio URL, falling back to proxy:", e);
+        }
+
+        return this.buildUrl();
+    }
+
     /**
      * Creates (once) the HTMLAudioElement that streams the track via HTTP
      * range requests. The browser starts playback as soon as the first part
      * is buffered and lazily downloads the rest.
      * @returns true when a new element was created.
      */
-    private ensureAudioElement(): boolean {
+    private ensureAudioElement(): Promise<boolean> {
+        if (this.audio) {
+            return Promise.resolve(false);
+        }
+        if (!this.audioPromise) {
+            this.audioPromise = this.createAudioElement().finally(() => this.audioPromise = undefined);
+        }
+        return this.audioPromise;
+    }
+
+    private async createAudioElement(): Promise<boolean> {
         if (this.audio) {
             return false;
         }
@@ -299,9 +349,15 @@ export class StreamClient implements IStreamClient {
             throw new Error("AudioContext not initialized");
         }
 
+        const generation = this.generation;
+        const url = await this.resolveSourceUrl();
+        if (generation !== this.generation || this.audio) {
+            return false;
+        }
+
         const audio = new Audio();
         audio.preload = "auto";
-        audio.crossOrigin = "use-credentials";
+        audio.crossOrigin = this.signedUrl ? "anonymous" : "use-credentials";
 
         // Route the element through our gain node. Must be called before the
         // element starts playing; the element is exclusively controlled here.
@@ -338,7 +394,7 @@ export class StreamClient implements IStreamClient {
             this.onEnded?.();
         });
 
-        audio.src = this.buildUrl();
+        audio.src = url;
         if (currentTrackId.value === this.id) {
             loadingAudio.value = true;
         }
