@@ -47,23 +47,31 @@ const translations: Record<Language, Translation> = {
 
 const url = new URL(window.location.href);
 const param = url.searchParams.get("lang");
-let guessedLang;
-if (!param) {
-    guessedLang = navigator.language.split("-").at(0);
-}
-const defaultLanguage = (param ?? guessedLang ?? Language.en) as Language;
-if (!Object.values(Language).includes(defaultLanguage)) {
-    guessedLang = Language.en;
-}
+const cachedLanguage = LydaCache.get<Language>(UserSettings.language).content;
+const guessedLang = navigator.language.split("-").at(0);
+const requestedLanguage = param ?? cachedLanguage ?? guessedLang ?? Language.en;
+const defaultLanguage: Language = Object.values(Language).includes(requestedLanguage as Language)
+    ? requestedLanguage as Language
+    : Language.en;
 
 export const language = signal(defaultLanguage);
+let persistLanguageChanges = true;
 language.subscribe((lang, changed) => {
     if (!changed) {
         return;
     }
     LydaCache.set(UserSettings.language, new CacheItem(lang));
-    Api.updateUserSetting(UserSettings.language, lang).then();
+    if (persistLanguageChanges) {
+        Api.updateUserSetting(UserSettings.language, lang).then();
+    }
 });
+
+export function setLanguage(lang: Language, persist = true) {
+    const previous = persistLanguageChanges;
+    persistLanguageChanges = persist;
+    language.value = lang;
+    persistLanguageChanges = previous;
+}
 
 export function getTranslation(lookup: TranslationKey | string, lang: Language) {
     const l = translations[lang];
