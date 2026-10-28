@@ -1,5 +1,5 @@
 import {compute, create, InputType, nullElement, signal, Signal, when} from "@targoninc/jess";
-import {button, heading} from "@targoninc/jess-components";
+import {button} from "@targoninc/jess-components";
 import {Api} from "../../Api/Api.ts";
 import {MediaUploader} from "../../Api/MediaUploader.ts";
 import {NotificationType} from "../../Enums/NotificationType.ts";
@@ -249,7 +249,7 @@ export class BulkUploadTemplates {
 
         const startButton = button({
             text: compute(isUploading => isUploading ? `${t("UPLOADING_AUDIO")}` : `${t("START_UPLOAD")}`, uploading),
-            icon: {icon: "cloud_upload"},
+            icon: {icon: "upload"},
             classes: ["positive", "bigger-input", "rounded-max"],
             disabled: compute((_, isUploading) => isUploading || items.value.length === 0, items, uploading),
             onclick: uploadAll,
@@ -258,7 +258,7 @@ export class BulkUploadTemplates {
         return create("div")
             .classes("flex-v", "noflexwrap", "big-gap")
             .children(
-                heading({level: 1, text: t("BULK_UPLOAD")}),
+                create("h3").text(t("BULK_UPLOAD")).build(),
                 create("span")
                     .classes("color-dim")
                     .text(t("BULK_UPLOAD_DESCRIPTION"))
