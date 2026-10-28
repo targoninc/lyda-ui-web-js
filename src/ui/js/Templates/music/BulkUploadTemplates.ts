@@ -193,7 +193,7 @@ export class BulkUploadTemplates {
             .ondragenter((event: DragEvent) => {
                 event.preventDefault();
                 dragDepth++;
-                (event.currentTarget as HTMLElement).classList.add("dragging");
+                (event.currentTarget as HTMLElement).classList.add("bulk-upload-drag-over");
             })
             .ondragover((event: DragEvent) => {
                 event.preventDefault();
@@ -202,13 +202,13 @@ export class BulkUploadTemplates {
                 dragDepth--;
                 if (dragDepth <= 0) {
                     dragDepth = 0;
-                    (event.currentTarget as HTMLElement).classList.remove("dragging");
+                    (event.currentTarget as HTMLElement).classList.remove("bulk-upload-drag-over");
                 }
             })
             .ondrop(async (event: DragEvent) => {
                 event.preventDefault();
                 dragDepth = 0;
-                (event.currentTarget as HTMLElement).classList.remove("dragging");
+                (event.currentTarget as HTMLElement).classList.remove("bulk-upload-drag-over");
                 if (!event.dataTransfer) {
                     return;
                 }

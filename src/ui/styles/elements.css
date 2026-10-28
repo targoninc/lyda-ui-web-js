@@ -2866,7 +2866,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .bulk-upload-dropzone:hover,
-.bulk-upload-dropzone.dragging {
+.bulk-upload-dropzone.bulk-upload-drag-over {
     border-color: var(--base-color);
     background: var(--bg-2);
 }
