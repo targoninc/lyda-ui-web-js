@@ -16,6 +16,8 @@ import {
     when,
 } from "@targoninc/jess";
 import { getPlayIcon, Util } from "../../Classes/Util.ts";
+import { filesFromDataTransfer } from "../../Classes/UploadFileUtils.ts";
+import { trackCleanup } from "../../Classes/Helpers/PageLifecycle.ts";
 import { navigate } from "../../Routing/Router.ts";
 import { currentTrackId, loadingAudio, playingHere } from "../../state.ts";
 import { PillOption } from "../../Models/PillOption.ts";
@@ -362,6 +364,51 @@ export class GenericTemplates {
         options.onInput?.(input);
 
         return create("div").children(fileButton, input).build();
+    }
+
+    static uploadDropOverlay(
+        onFiles: (files: File[]) => void,
+        text: StringOrSignal = t("DROP_AUDIO_FILE_HERE"),
+    ) {
+        const depth = signal(0);
+        const overlay = create("div")
+            .classes("upload-drag-overlay")
+            .styles("display", compute(d => d > 0 ? "block" : "none", depth) as any)
+            .children(create("div").classes("upload-drag-target").text(text).build())
+            .build() as HTMLElement;
+
+        document.body.appendChild(overlay);
+
+        const onDragEnter = () => depth.value++;
+        const onDragOver = (event: DragEvent) => event.preventDefault();
+        const onDragLeave = () => depth.value = Math.max(0, depth.value - 1);
+        const onDrop = async (event: DragEvent) => {
+            event.preventDefault();
+            depth.value = 0;
+            if (!event.dataTransfer) {
+                return;
+            }
+            try {
+                onFiles(await filesFromDataTransfer(event.dataTransfer));
+            } catch (e) {
+                console.error("Could not read dropped files", e);
+            }
+        };
+
+        document.addEventListener("dragenter", onDragEnter);
+        document.addEventListener("dragover", onDragOver);
+        document.addEventListener("dragleave", onDragLeave);
+        document.addEventListener("drop", onDrop);
+
+        const cleanup = () => {
+            overlay.remove();
+            document.removeEventListener("dragenter", onDragEnter);
+            document.removeEventListener("dragover", onDragOver);
+            document.removeEventListener("dragleave", onDragLeave);
+            document.removeEventListener("drop", onDrop);
+        };
+        trackCleanup(cleanup);
+        return cleanup;
     }
 
     static checkbox(

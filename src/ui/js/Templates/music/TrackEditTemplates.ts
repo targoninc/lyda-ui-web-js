@@ -9,7 +9,6 @@ import {AudioUpload} from "../../Classes/AudioUpload.ts";
 import {
     AUDIO_ACCEPT,
     defaultUploadState,
-    filesFromDataTransfer,
     isAudioFile,
     setPendingBulkFiles,
 } from "../../Classes/UploadFileUtils.ts";
@@ -61,17 +60,8 @@ import {BatchEditField, BatchEditTemplates} from "../generic/BatchEditTemplates.
 import {TrackVersion} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackVersion";
 import {DragActions} from "../../Actions/DragActions.ts";
 
-let _uploadDragCleanup: (() => void) | null = null;
-
 export class TrackEditTemplates {
-    static clearUploadDragState() {
-        _uploadDragCleanup?.();
-        _uploadDragCleanup = null;
-    }
-
     static uploadPage() {
-        TrackEditTemplates.clearUploadDragState();
-
         const state = signal<UploadableTrack>(defaultUploadState());
         const errorSections = signal<string[]>([]);
         const errorFields = signal<string[]>([]);
@@ -94,55 +84,8 @@ export class TrackEditTemplates {
             ).build(),
         ).build() as HTMLElement;
 
-        const overlay = create("div")
-            .classes("upload-drag-overlay")
-            .children(
-                create("div")
-                    .classes("upload-drag-target")
-                    .text("Drop file to upload")
-                    .build(),
-            )
-            .build() as HTMLElement;
-
-        document.body.appendChild(overlay);
-
-        let dragCounter = 0;
-
-        const onDragEnter = () => {
-            dragCounter++;
-            if (dragCounter === 1) {
-                overlay.style.display = "block";
-            }
-        };
-
-        const onDragOver = (e: DragEvent) => {
-            e.preventDefault();
-        };
-
-        const onDragLeave = () => {
-            dragCounter--;
-            if (dragCounter <= 0) {
-                dragCounter = 0;
-                overlay.style.display = "none";
-            }
-        };
-
-        const onDrop = async (e: DragEvent) => {
-            e.preventDefault();
-            dragCounter = 0;
-            overlay.style.display = "none";
-            if (!e.dataTransfer) {
-                return;
-            }
-
-            let files: File[] = [];
-            try {
-                files = await filesFromDataTransfer(e.dataTransfer);
-            } catch {
-                files = Array.from(e.dataTransfer.files);
-            }
+        GenericTemplates.uploadDropOverlay(files => {
             const audioFiles = files.filter(isAudioFile);
-
             if (audioFiles.length > 1) {
                 setPendingBulkFiles(audioFiles);
                 navigate(RoutePath.bulkUpload);
@@ -161,20 +104,7 @@ export class TrackEditTemplates {
                 fileInput.files = dt.files;
                 fileInput.dispatchEvent(new Event("change", {bubbles: true}));
             }
-        };
-
-        document.addEventListener("dragenter", onDragEnter);
-        document.addEventListener("dragover", onDragOver);
-        document.addEventListener("dragleave", onDragLeave);
-        document.addEventListener("drop", onDrop);
-
-        _uploadDragCleanup = () => {
-            overlay.remove();
-            document.removeEventListener("dragenter", onDragEnter);
-            document.removeEventListener("dragover", onDragOver);
-            document.removeEventListener("dragleave", onDragLeave);
-            document.removeEventListener("drop", onDrop);
-        };
+        });
 
         return el;
     }

@@ -12,12 +12,10 @@ import {
     AUDIO_ACCEPT,
     cleanTitle,
     defaultUploadState,
-    filesFromDataTransfer,
     isAudioFile,
     takePendingBulkFiles,
     toFileList,
 } from "../../Classes/UploadFileUtils.ts";
-import {TrackEditTemplates} from "./TrackEditTemplates.ts";
 
 type BulkUploadStatus = "queued" | "uploading" | "done" | "error";
 
@@ -32,7 +30,6 @@ interface BulkUploadItem {
 
 export class BulkUploadTemplates {
     static page() {
-        TrackEditTemplates.clearUploadDragState();
         const items = signal<BulkUploadItem[]>([]);
         const uploading = signal(false);
 
@@ -91,33 +88,6 @@ export class BulkUploadTemplates {
             {multiple: true, directory: true, onInput: input => folderInput = input},
         );
 
-        const dragDepth = signal(0);
-        const dragging = compute(depth => depth > 0, dragDepth);
-        const dropzone = vertical(
-            create("span").classes("material-symbols-outlined", "bulk-upload-icon").text("upload_file").build(),
-            create("span").classes("bold").text(t("BULK_UPLOAD")).build(),
-            create("span").classes("color-dim").text(t("DROP_AUDIO_FILE_HERE")).build(),
-        ).classes("bulk-upload-dropzone", compute(drag => drag ? "bulk-upload-drag-over" : "_", dragging) as any)
-            .onclick(() => fileInput?.click())
-            .ondragenter((event: DragEvent) => {
-                event.preventDefault();
-                dragDepth.value++;
-            })
-            .ondragover((event: DragEvent) => event.preventDefault())
-            .ondragleave(() => dragDepth.value = Math.max(0, dragDepth.value - 1))
-            .ondrop(async (event: DragEvent) => {
-                event.preventDefault();
-                dragDepth.value = 0;
-                if (!event.dataTransfer) {
-                    return;
-                }
-                try {
-                    addFiles(await filesFromDataTransfer(event.dataTransfer));
-                } catch (e) {
-                    console.error("Could not read dropped files", e);
-                }
-            }).build();
-
         const uploadAll = async () => {
             if (uploading.value || items.value.length === 0) {
                 return;
@@ -148,6 +118,8 @@ export class BulkUploadTemplates {
             }
         };
 
+        GenericTemplates.uploadDropOverlay(files => addFiles(files));
+
         const list = compute(value => value.length === 0 ? nullElement() : vertical(
             ...value.map(item => horizontal(
                 vertical(
@@ -163,8 +135,8 @@ export class BulkUploadTemplates {
                         t("REMOVE"),
                         ["negative"],
                     ),
-            ).classes("card", "bulk-upload-row").build()),
-        ).classes("bulk-upload-list").build(), items);
+            ).classes("card").build()),
+        ).build(), items);
 
         const startButton = button({
             text: compute(isUploading => isUploading ? `${t("UPLOADING_AUDIO")}` : `${t("START_UPLOAD")}`, uploading),
@@ -179,7 +151,6 @@ export class BulkUploadTemplates {
         return vertical(
             create("h3").text(t("BULK_UPLOAD")).build(),
             create("span").classes("color-dim").text(t("BULK_UPLOAD_DESCRIPTION")).build(),
-            dropzone,
             horizontal(filePicker, folderPicker).classes("small-gap").build(),
             list,
             startButton,
