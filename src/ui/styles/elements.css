@@ -2858,7 +2858,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     min-height: 180px;
     padding: var(--base-padding);
     border: 2px dashed var(--border);
-    border-radius: var(--border-radius);
+    border-radius: var(--large-border-radius);
     background: var(--bg-1);
     text-align: center;
     cursor: pointer;
