@@ -122,10 +122,7 @@ export class BulkUploadTemplates {
 
         const list = compute(value => value.length === 0 ? nullElement() : vertical(
             ...value.map(item => horizontal(
-                vertical(
-                    create("span").classes("bold").text(cleanTitle(item.file.name)).build(),
-                    create("span").classes("color-dim").text(item.file.name).build(),
-                ).classes("flex-grow").build(),
+                create("span").classes("bold", "flex-grow").text(item.file.name).build(),
                 GenericTemplates.progressSectionPart(item.progress),
                 item.status === "uploading" || item.status === "done"
                     ? nullElement()

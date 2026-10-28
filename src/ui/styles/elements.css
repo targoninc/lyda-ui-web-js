@@ -521,6 +521,8 @@ label {
 }
 
 .round-button {
+    box-sizing: border-box;
+    padding: 0;
     min-width: var(--round-button-size);
     min-height: var(--round-button-size);
     max-width: var(--round-button-size);
