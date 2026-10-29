@@ -35,7 +35,7 @@ import {
 import {Theme} from "@targoninc/lyda-shared/src/Enums/Theme";
 import {trackInterval} from "../../Classes/Helpers/PageLifecycle.ts";
 import {UserSettings} from "@targoninc/lyda-shared/src/Enums/UserSettings";
-import {hideWaveformsSetting} from "../../Enums/UserSettingKeys.ts";
+import {hideWaveformsSetting, subscriptionPriceNotificationSetting} from "../../Enums/UserSettingKeys.ts";
 import {StreamingQuality} from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {UserEmail} from "@targoninc/lyda-shared/src/Models/db/lyda/UserEmail";
@@ -376,6 +376,7 @@ export class SettingsTemplates {
             {text: t("NOTIFS_COLLAB"), key: "collaboration", value: UserSettings.notificationCollaboration},
             {text: t("NOTIFS_SALE"), key: "sale", value: UserSettings.notificationSale},
             {text: t("NOTIFS_TRACK_DELETED"), key: "track_deleted", value: UserSettings.notificationTrackDeleted},
+            {text: t("NOTIFS_SUBSCRIPTION_PRICE"), key: "subscription_price_change", value: subscriptionPriceNotificationSetting},
         ];
 
         return compute(query => {
@@ -388,11 +389,14 @@ export class SettingsTemplates {
                 .classes("card", "flex-v")
                 .children(
                     SettingsTemplates.sectionHeading(heading),
-                    ...matchingItems.map(item => SettingsTemplates.notificationToggle(
-                        item.text,
-                        item.key,
-                        getUserSettingValue(user, item.value),
-                    )),
+                    ...matchingItems.map(item => {
+                        const value = getUserSettingValue<boolean>(user, item.value);
+                        return SettingsTemplates.notificationToggle(
+                            item.text,
+                            item.key,
+                            item.key === "subscription_price_change" ? value ?? true : value ?? false,
+                        );
+                    }),
                 ).build();
         }, searchQuery$);
     }

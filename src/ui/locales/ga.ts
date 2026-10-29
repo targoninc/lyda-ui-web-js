@@ -766,4 +766,5 @@ export const ga: Translation = {
     CANNOT_DELETE_ONLY_VERSION: "Ní mór rian a choinneáil ar leagan amháin ar a laghad",
     VERSION_RENAMED: "Athainmníodh an leagan",
     VERSION_DELETED: "Scriosadh an leagan",
+    NOTIFS_SUBSCRIPTION_PRICE: "Faigh ríomhphost nuair a athraíonn praghsáil síntiúis",
 };
