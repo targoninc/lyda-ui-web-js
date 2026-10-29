@@ -130,7 +130,7 @@ export class GenericTemplates {
             classes: ["negative", ...classes],
             icon: { icon: "logout" },
             onclick: async () => {
-                await AuthActions.logOut();
+                await AuthActions.loginLogout();
             },
         });
     }
