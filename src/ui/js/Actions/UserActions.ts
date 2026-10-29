@@ -127,9 +127,9 @@ export class UserActions {
         await Api.updateUserSetting(UserSettings.theme, themeName);
     }
 
-    static async toggleBooleanUserSetting(key: UserSettings, defaultValue = false) {
+    static async toggleBooleanUserSetting(key: UserSettings) {
         const user = await Util.getUserAsync();
-        const newValue = !(getUserSettingValue(user, key) ?? defaultValue);
+        const newValue = !getUserSettingValue(user, key);
         await Api.updateUserSetting(key, newValue);
         user.settings = updateUserSetting(user, key, newValue.toString());
         LydaCache.set("user", new CacheItem(user));
@@ -151,7 +151,7 @@ export class UserActions {
 
     static async toggleNotificationSetting(key: string) {
         const settingKey = `notification_${key}` as UserSettings;
-        return await UserActions.toggleBooleanUserSetting(settingKey, key === "subscription_price_change");
+        return await UserActions.toggleBooleanUserSetting(settingKey);
     }
 
     static editDescription(currentDescription: string, successCallback: Function) {

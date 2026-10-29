@@ -766,5 +766,4 @@ export const es: Translation = {
     CANNOT_DELETE_ONLY_VERSION: "Una pista debe conservar al menos una versión.",
     VERSION_RENAMED: "Versión renombrada",
     VERSION_DELETED: "Versión eliminada",
-    NOTIFS_SUBSCRIPTION_PRICE: "Recibir un correo cuando cambien los precios de suscripción",
 };

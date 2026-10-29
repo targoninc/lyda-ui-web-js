@@ -769,5 +769,4 @@ export const en = {
     CANNOT_DELETE_ONLY_VERSION: "A track must keep at least one version",
     VERSION_RENAMED: "Version renamed",
     VERSION_DELETED: "Version deleted",
-    NOTIFS_SUBSCRIPTION_PRICE: "Get an email when subscription pricing changes",
 } satisfies BaseTranslation;
