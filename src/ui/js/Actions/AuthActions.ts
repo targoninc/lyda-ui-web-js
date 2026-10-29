@@ -3,7 +3,7 @@ import { LydaCache } from "../Cache/LydaCache.ts";
 import { Icons } from "../Enums/Icons.ts";
 import { PlayManager } from "../Streaming/PlayManager.ts";
 import { navigate } from "../Routing/Router.ts";
-import { currentTrackId, navInitialized } from "../state.ts";
+import { currentTrackId, currentUser, navInitialized } from "../state.ts";
 import { RoutePath } from "../Routing/routes.ts";
 import { Api } from "../Api/Api.ts";
 import { t } from "../../locales";
@@ -36,12 +36,13 @@ export class AuthActions {
     }
 
     static async loginLogout() {
-        const user = LydaCache.get("user");
-        if (user.content) {
-            await Ui.getConfirmationModal(t("LOG_OUT"), t("SURE_LOGOUT"), t("YES"), t("NO"), AuthActions.logOut, () => {
-            }, Icons.WARNING);
-        } else {
+        const user = currentUser.value ?? LydaCache.get("user").content;
+        if (!user) {
             navigate(RoutePath.login);
+            return;
         }
+
+        await Ui.getConfirmationModal(t("LOG_OUT"), t("SURE_LOGOUT"), t("YES"), t("NO"), AuthActions.logOutWithRedirect, () => {
+        }, Icons.WARNING);
     }
 }
