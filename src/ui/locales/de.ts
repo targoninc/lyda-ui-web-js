@@ -767,4 +767,9 @@ export const de: Translation = {
     CANNOT_DELETE_ONLY_VERSION: "Ein Track muss mindestens eine Version behalten",
     VERSION_RENAMED: "Version umbenannt",
     VERSION_DELETED: "Version gelöscht",
+    DEVICES: "Geräte",
+    OTHER_DEVICES: "Andere Geräte",
+    NO_OTHER_DEVICES: "Keine anderen Geräte verbunden",
+    PLAYING: "Wiedergabe läuft",
+    PAUSED: "Pausiert",
 };

@@ -769,4 +769,9 @@ export const en = {
     CANNOT_DELETE_ONLY_VERSION: "A track must keep at least one version",
     VERSION_RENAMED: "Version renamed",
     VERSION_DELETED: "Version deleted",
+    DEVICES: "Devices",
+    OTHER_DEVICES: "Other devices",
+    NO_OTHER_DEVICES: "No other devices connected",
+    PLAYING: "Playing",
+    PAUSED: "Paused",
 } satisfies BaseTranslation;

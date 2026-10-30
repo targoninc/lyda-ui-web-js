@@ -10,6 +10,7 @@ import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { NotificationType } from "../Enums/NotificationType.ts";
 import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import { Api } from "../Api/Api.ts";
+import { eventBus } from "./EventBus.ts";
 import { Icons } from "../Enums/Icons.ts";
 import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import { language, localeByLanguage } from "../../locales";
@@ -313,6 +314,7 @@ export function nullIfEmpty(value: any) {
 
 export function finalizeLogin(step: Signal<string>, user: User) {
     LydaCache.set("user", new CacheItem(JSON.stringify(user)));
+    eventBus.reconnect();
     Api.getPermissions().then(res => permissions.value = res ?? []);
     step.value = "complete";
 

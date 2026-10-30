@@ -78,6 +78,10 @@ export class EventBus {
         };
     }
 
+    public reconnect(): void {
+        void this.connect();
+    }
+
     public send(data: any): void {
         const message = JSON.stringify(data);
         if (this.commandWriter) {
