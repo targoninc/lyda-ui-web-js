@@ -6,6 +6,7 @@ import { navigate } from "../Routing/Router.ts";
 import { currentTrackId, currentUser, navInitialized } from "../state.ts";
 import { RoutePath } from "../Routing/routes.ts";
 import { Api } from "../Api/Api.ts";
+import { eventBus } from "../Classes/EventBus.ts";
 import { t } from "../../locales";
 
 export class AuthActions {
@@ -27,6 +28,7 @@ export class AuthActions {
     static async logOut() {
         AuthActions.resetUiState();
         await Api.logout();
+        eventBus.reconnect();
     }
 
     static async logOutWithRedirect() {

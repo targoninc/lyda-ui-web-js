@@ -8,7 +8,7 @@ import { UserTemplates } from "../account/UserTemplates.ts";
 import { GenericTemplates, horizontal, vertical } from "../generic/GenericTemplates.ts";
 import { Ui } from "../../Classes/Ui.ts";
 import { getPlayIcon, Util } from "../../Classes/Util.ts";
-import { compute, computeAsync, create, nullElement, Signal, signal, when } from "@targoninc/jess";
+import { compute, computeAsync, create, nullElement, Signal, signal, signalMap, when } from "@targoninc/jess";
 import { navigate } from "../../Routing/Router.ts";
 import {
     currentlyBuffered,
@@ -28,7 +28,7 @@ import {
     volume,
 } from "../../state.ts";
 import { RoutePath } from "../../Routing/routes.ts";
-import { heading } from "@targoninc/jess-components";
+import { button, heading } from "@targoninc/jess-components";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { ScrubberTemplates } from "./ScrubberTemplates.ts";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
@@ -46,6 +46,8 @@ import { TextSize } from "../../Enums/TextSize.ts";
 import { PlayingFromResolver } from "../../Classes/PlayingFromResolver.ts";
 import { ColorExtractor } from "../../Classes/ColorExtractor.ts";
 import { FeatureDetector } from "../../Classes/Helpers/FeatureDetector.ts";
+import { PlayerSync, playerDevices } from "../../Streaming/PlayerSync.ts";
+import { PopoverTemplates } from "../generic/PopoverTemplates.ts";
 
 
 export class PlayerTemplates {
@@ -407,9 +409,35 @@ export class PlayerTemplates {
                 PlayerTemplates.bigAudioPlayer(track),
                 create("div")
                     .classes("flex", "hideOnMidBreakpoint")
-                    .children(PlayerTemplates.loudnessControl(track), QueueTemplates.queueButton())
+                    .children(PlayerTemplates.loudnessControl(track), PlayerTemplates.deviceButton(), QueueTemplates.queueButton())
                     .build(),
             ).build();
+    }
+
+    static deviceButton() {
+        let anchor: HTMLElement;
+        const otherDevices = compute(devices => devices.filter(device => !device.local), playerDevices);
+        const popover = PopoverTemplates.manualPopover("player-devices",
+            create("div")
+                .classes("padded", "flex-v", "small-gap")
+                .children(
+                    create("span").classes("color-dim").text(t("OTHER_DEVICES")).build(),
+                    signalMap(otherDevices, vertical().classes("flex-v", "small-gap"), device => button({
+                        text: `${device.deviceName} · ${device.playing ? t("PLAYING") : t("PAUSED")}`,
+                        icon: {icon: device.playing ? "volume_up" : "pause"},
+                        classes: ["fullWidth", device.playing ? "positive" : "_"],
+                        onclick: () => PlayerSync.transferTo(device.deviceId),
+                    })),
+                    when(compute(devices => devices.length === 0, otherDevices),
+                        create("span").classes("color-dim").text(t("NO_OTHER_DEVICES")).build()),
+                ).build(),
+        ) as HTMLElement;
+        anchor = GenericTemplates.roundIconButton(
+            {icon: "devices", adaptive: true},
+            () => PopoverTemplates.toggle(popover, anchor, true),
+            t("DEVICES"),
+        ) as HTMLElement;
+        return horizontal(anchor, popover).classes("relative", "align-children").build();
     }
 
     private static smallPlayerLayout(track: Track) {

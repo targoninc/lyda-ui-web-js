@@ -10,6 +10,7 @@ import { create } from "@targoninc/jess";
 import {GenericTemplates, horizontal, vertical} from "./js/Templates/generic/GenericTemplates.ts";
 import { contextQueue, currentUser, history, permissions, playingFrom, userLoading } from "./js/state.ts";
 import { StreamingBroadcaster } from "./js/Streaming/StreamingBroadcaster.ts";
+import { PlayerSync } from "./js/Streaming/PlayerSync.ts";
 import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom";
 import { ListeningHistory } from "@targoninc/lyda-shared/src/Models/db/lyda/ListeningHistory";
 import { QueueManager } from "./js/Streaming/QueueManager.ts";
@@ -137,6 +138,7 @@ if ((window as any).__showAppBanner) {
 KeyBinds.initiate();
 UiActions.runMobileCheck();
 StreamingBroadcaster.initializeReceiver();
+PlayerSync.initialize();
 initializeMediaSessionCallbacks();
 initializeFixedBarRadius();
 

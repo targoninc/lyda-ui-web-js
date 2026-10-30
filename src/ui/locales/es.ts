@@ -766,4 +766,9 @@ export const es: Translation = {
     CANNOT_DELETE_ONLY_VERSION: "Una pista debe conservar al menos una versión.",
     VERSION_RENAMED: "Versión renombrada",
     VERSION_DELETED: "Versión eliminada",
+    DEVICES: "Dispositivos",
+    OTHER_DEVICES: "Otros dispositivos",
+    NO_OTHER_DEVICES: "No hay otros dispositivos conectados",
+    PLAYING: "Reproduciendo",
+    PAUSED: "En pausa",
 };
