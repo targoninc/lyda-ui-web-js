@@ -439,7 +439,7 @@ export class Api {
     static async moveTrackInAlbum(albumId: number, tracks: ListTrack[]): Promise<boolean> {
         await post(ApiRoutes.reorderAlbumTracks, {
             album_id: albumId,
-            tracks,
+            tracks: tracks.map(track => ({track_id: track.track_id, position: track.position})),
         });
         return true;
     }
@@ -734,7 +734,7 @@ export class Api {
     static async moveTrackInPlaylist(playlistId: number, tracks: ListTrack[]): Promise<boolean> {
         return !!(await post(ApiRoutes.reorderPlaylistTracks, {
             playlist_id: playlistId,
-            tracks,
+            tracks: tracks.map(track => ({track_id: track.track_id, position: track.position})),
         }));
     }
 
