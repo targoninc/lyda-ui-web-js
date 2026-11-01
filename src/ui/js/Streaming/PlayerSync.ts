@@ -249,8 +249,11 @@ export class PlayerSync {
                         ...event.data.payload,
                         sourceDeviceId: event.data.payload.deviceId,
                     });
+                } else if (event.data?.type === "player:request") {
+                    publishState();
                 }
             };
+            tabChannel.postMessage({type: "player:request"});
         }
 
         currentTrackId.subscribe(() => {
