@@ -12,6 +12,7 @@ const HEARTBEAT_MS = 10_000;
 const STALE_MS = 30_000;
 const POSITION_THROTTLE_MS = 1_000;
 const TRANSFER_TIMEOUT_MS = 8_000;
+const TAB_CHANNEL_NAME = "lyda-player-sync";
 
 function createDeviceId(): string {
     const stored = sessionStorage.getItem(DEVICE_ID_KEY);
@@ -38,6 +39,7 @@ const localDeviceId = createDeviceId();
 const localPlatform = "web";
 const localDeviceName = `Lyda Web - Tab ${tabNumber()}`;
 const remoteDevices = new Map<string, PlayerDevice>();
+const tabChannel = typeof BroadcastChannel !== "undefined" ? new BroadcastChannel(TAB_CHANNEL_NAME) : null;
 
 export const playerDevices = signal<PlayerDevice[]>([]);
 export const activePlayerDeviceId = signal<string | null>(null);
@@ -93,6 +95,7 @@ function publishState() {
     }
     const state = currentState();
     eventBus.send({type: "player:state", payload: state});
+    tabChannel?.postMessage({type: "player:state", payload: state, timestamp: Date.now()});
     refreshDevices();
 }
 
@@ -225,6 +228,14 @@ export class PlayerSync {
                 void handleTransfer(event.payload);
             }
         });
+
+        if (tabChannel) {
+            tabChannel.onmessage = event => {
+                if (event.data?.type === "player:state" && event.data.payload?.deviceId) {
+                    void handleState(event.data.payload, event.data.timestamp ?? Date.now());
+                }
+            };
+        }
 
         currentTrackId.subscribe(() => {
             if (!applyingRemote) {
