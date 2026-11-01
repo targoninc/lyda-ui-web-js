@@ -2,7 +2,8 @@ import { signal } from "@targoninc/jess";
 import { eventBus } from "../Classes/EventBus.ts";
 import { currentTrackId, currentTrackPosition, currentUser, playingElsewhere, playingHere } from "../state.ts";
 import { PlayManager } from "./PlayManager.ts";
-import type { PlayerDevice, PlayerState } from "../Models/PlayerSync.ts";
+import type { PlayerDevice } from "../Models/PlayerSync/PlayerDevice.ts";
+import type { PlayerState } from "../Models/PlayerSync/PlayerState.ts";
 
 const DEVICE_ID_KEY = "lyda-player-device-id";
 const HEARTBEAT_MS = 10_000;

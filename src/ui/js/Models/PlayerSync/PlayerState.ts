@@ -7,8 +7,3 @@ export interface PlayerState {
     duration: number;
     playing: boolean;
 }
-
-export interface PlayerDevice extends PlayerState {
-    lastSeen: number;
-    local: boolean;
-}

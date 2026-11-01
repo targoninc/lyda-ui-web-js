@@ -1,11 +1,9 @@
 import { Config } from "./Config.ts";
-import type {
-    EventCallback,
-    InternalSubscription,
-    RealtimeConfigResponse,
-    RealtimeTokenResponse,
-    Subscription,
-} from "../Models/EventBus.ts";
+import type { EventCallback } from "../Models/EventBus/EventCallback.ts";
+import type { InternalSubscription } from "../Models/EventBus/InternalSubscription.ts";
+import type { RealtimeConfigResponse } from "../Models/EventBus/RealtimeConfigResponse.ts";
+import type { RealtimeTokenResponse } from "../Models/EventBus/RealtimeTokenResponse.ts";
+import type { Subscription } from "../Models/EventBus/Subscription.ts";
 
 export class EventBus {
     private static instance: EventBus;
