@@ -45,7 +45,7 @@ import { TextSize } from "../../Enums/TextSize.ts";
 import { PlayingFromResolver } from "../../Classes/PlayingFromResolver.ts";
 import { ColorExtractor } from "../../Classes/ColorExtractor.ts";
 import { FeatureDetector } from "../../Classes/Helpers/FeatureDetector.ts";
-import { PlayerSync, playerDevices } from "../../Streaming/PlayerSync.ts";
+import { PlayerSync, playerDevices, playingAnywhere } from "../../Streaming/PlayerSync.ts";
 import { PopoverTemplates } from "../generic/PopoverTemplates.ts";
 
 
@@ -210,11 +210,15 @@ export class PlayerTemplates {
 
         return GenericTemplates.roundIconButton(
             {
-                icon: getPlayIcon(playingHere, loadingAudio),
+                icon: getPlayIcon(playingAnywhere, loadingAudio),
                 adaptive: true,
                 isUrl: true,
             },
             async () => {
+                if (playingAnywhere.value && !playingHere.value) {
+                    await PlayerSync.pauseRemote();
+                    return;
+                }
                 PlayManager.togglePlayAsync(track.id).then();
             },
             t("PLAY_PAUSE"),

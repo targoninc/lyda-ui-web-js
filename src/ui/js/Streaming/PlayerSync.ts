@@ -44,6 +44,7 @@ const tabChannel = typeof BroadcastChannel !== "undefined" ? new BroadcastChanne
 
 export const playerDevices = signal<PlayerDevice[]>([]);
 export const activePlayerDeviceId = signal<string | null>(null);
+export const playingAnywhere = signal(false);
 
 let initialized = false;
 let applyingRemote = false;
@@ -89,6 +90,7 @@ function refreshDevices() {
         local: true,
     };
     playerDevices.value = [local, ...remoteDevices.values()];
+    playingAnywhere.value = local.playing || [...remoteDevices.values()].some(device => device.playing);
 }
 
 function publishState() {
@@ -292,6 +294,14 @@ export class PlayerSync {
         }, HEARTBEAT_MS);
         setInterval(refreshDevices, HEARTBEAT_MS);
         refreshDevices();
+    }
+
+    static async pauseRemote() {
+        const targetDeviceId = activePlayerDeviceId.value;
+        if (!targetDeviceId || targetDeviceId === localDeviceId) {
+            return;
+        }
+        await PlayerSync.transferTo(targetDeviceId);
     }
 
     static async transferTo(targetDeviceId: string) {
