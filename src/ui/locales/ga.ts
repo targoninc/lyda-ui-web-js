@@ -359,7 +359,6 @@ export const ga: Translation = {
     PLAYLIST: "Seinmliosta",
     PLAY_PAUSE: "Súgradh/Sos",
     MUTE_UNMUTE: "Balbhaigh/Díbhalbh",
-    PLAYING_ON_OTHER_INSTANCE: "Ag imirt ar shampla eile de Lyda",
     TOGGLE_EXPANDED_PLAYER: "Scoránaigh imreoir leathnaithe",
     OPEN_MENU: "Roghchlár a oscailt",
     CHANGE_LOOP_MODE: "Athraigh mód lúb",

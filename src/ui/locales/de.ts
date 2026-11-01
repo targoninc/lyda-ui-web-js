@@ -273,7 +273,6 @@ export const de: Translation = {
     LYRICS_FILE: "Datei hochladen",
     LYRICS_PLACEHOLDER: "Liedtext als Klartext eingeben...",
     PLAYER: "Wiedergabe",
-    PLAYING_ON_OTHER_INSTANCE: "Wird auf anderer Instanz abgespielt",
     PLAYLIST_NAME: "Playlistname",
     PLAYS: "Wiedergaben",
     PLAYS_AMOUNT: amount => `${amount} Wiedergaben`,

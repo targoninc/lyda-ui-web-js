@@ -359,7 +359,6 @@ export const en = {
     PLAYLIST: "Playlist",
     PLAY_PAUSE: "Play/Pause",
     MUTE_UNMUTE: "Mute/Unmute",
-    PLAYING_ON_OTHER_INSTANCE: "Playing on another instance of Lyda",
     TOGGLE_EXPANDED_PLAYER: "Toggle expanded player",
     OPEN_MENU: "Open menu",
     CHANGE_LOOP_MODE: "Change loop mode",

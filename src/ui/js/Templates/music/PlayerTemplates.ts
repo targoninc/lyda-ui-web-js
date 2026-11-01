@@ -21,14 +21,13 @@ import {
     loopMode,
     muted,
     playerExpanded,
-    playingElsewhere,
     playingFrom,
     playingHere,
     shuffling,
     volume,
 } from "../../state.ts";
 import { RoutePath } from "../../Routing/routes.ts";
-import { button, heading } from "@targoninc/jess-components";
+import { button } from "@targoninc/jess-components";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { ScrubberTemplates } from "./ScrubberTemplates.ts";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
@@ -370,16 +369,7 @@ export class PlayerTemplates {
             .classes("flex-v", "relative")
             .id("permanent-player")
             .children(
-                when(
-                    playingElsewhere,
-                    heading({
-                        text: t("PLAYING_ON_OTHER_INSTANCE"),
-                        level: 2,
-                    }),
-                ),
-                when(
-                    playingElsewhere,
-                    () => horizontal(
+                horizontal(
                         horizontal(
                             MusicTemplates.cover(EntityType.track, track, CoverContext.desktopPlayer, () => {
                                 const windowWidth = window.innerWidth;
@@ -394,8 +384,6 @@ export class PlayerTemplates {
                         PlayerTemplates.bigPlayerLayout(track, trackUser),
                     ).classes("fullWidth")
                      .build(),
-                    true,
-                ),
                 QueueTemplates.queuePopout(),
                 PlayerTemplates.playerPopout(track),
             ).build();

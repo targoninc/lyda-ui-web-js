@@ -359,7 +359,6 @@ export const es: Translation = {
     PLAYLIST: "Lista de reproducción",
     PLAY_PAUSE: "Reproducir/Pausar",
     MUTE_UNMUTE: "Silenciar/Activar silencio",
-    PLAYING_ON_OTHER_INSTANCE: "Jugando en otra instancia de Lyda",
     TOGGLE_EXPANDED_PLAYER: "Alternar reproductor expandido",
     OPEN_MENU: "abrir menú",
     CHANGE_LOOP_MODE: "Cambiar modo de bucle",

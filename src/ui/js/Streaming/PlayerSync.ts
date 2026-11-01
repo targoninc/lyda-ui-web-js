@@ -1,46 +1,42 @@
 import { signal } from "@targoninc/jess";
 import { eventBus } from "../Classes/EventBus.ts";
-import { currentTrackId, currentTrackPosition, currentUser, playingElsewhere, playingHere } from "../state.ts";
+import { currentTrackId, currentTrackPosition, currentUser, playingHere } from "../state.ts";
 import { PlayManager } from "./PlayManager.ts";
 import type { PlayerDevice } from "../Models/PlayerSync/PlayerDevice.ts";
 import type { PlayerState } from "../Models/PlayerSync/PlayerState.ts";
 
 const DEVICE_ID_KEY = "lyda-player-device-id";
+const TAB_NUMBER_KEY = "lyda-player-tab-number";
+const TAB_COUNTER_KEY = "lyda-player-tab-counter";
 const HEARTBEAT_MS = 10_000;
 const STALE_MS = 30_000;
 const POSITION_THROTTLE_MS = 1_000;
 const TRANSFER_TIMEOUT_MS = 8_000;
 
 function createDeviceId(): string {
-    const stored = localStorage.getItem(DEVICE_ID_KEY);
+    const stored = sessionStorage.getItem(DEVICE_ID_KEY);
     if (stored) {
         return stored;
     }
     const id = crypto.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    localStorage.setItem(DEVICE_ID_KEY, id);
+    sessionStorage.setItem(DEVICE_ID_KEY, id);
     return id;
 }
 
-function platformName(): string {
-    const ua = navigator.userAgent;
-    if (/iPhone|iPad|iPod/.test(ua)) {
-        return "iOS";
+function tabNumber(): number {
+    const stored = Number.parseInt(sessionStorage.getItem(TAB_NUMBER_KEY) ?? "", 10);
+    if (Number.isInteger(stored) && stored > 0) {
+        return stored;
     }
-    if (/Android/.test(ua)) {
-        return "Android";
-    }
-    if (/Macintosh|Mac OS X/.test(ua)) {
-        return "macOS";
-    }
-    if (/Windows/.test(ua)) {
-        return "Windows";
-    }
-    return "Web";
+    const next = Math.max(1, Number.parseInt(localStorage.getItem(TAB_COUNTER_KEY) ?? "0", 10) + 1);
+    localStorage.setItem(TAB_COUNTER_KEY, String(next));
+    sessionStorage.setItem(TAB_NUMBER_KEY, String(next));
+    return next;
 }
 
 const localDeviceId = createDeviceId();
-const localPlatform = platformName();
-const localDeviceName = `${localPlatform} browser`;
+const localPlatform = "web";
+const localDeviceName = `Lyda Web - Tab ${tabNumber()}`;
 const remoteDevices = new Map<string, PlayerDevice>();
 
 export const playerDevices = signal<PlayerDevice[]>([]);
@@ -82,7 +78,6 @@ function refreshDevices() {
     }
     if (activePlayerDeviceId.value !== localDeviceId && activePlayerDeviceId.value && !remoteDevices.has(activePlayerDeviceId.value)) {
         activePlayerDeviceId.value = null;
-        playingElsewhere.value = false;
     }
     const local = {
         ...currentState(),
@@ -170,7 +165,6 @@ async function handleTransfer(payload: PlayerState & {targetDeviceId: string; so
 
     cancelPendingTransfer();
     activePlayerDeviceId.value = localDeviceId;
-    playingElsewhere.value = false;
 
     if (payload.playing) {
         await PlayManager.startAsync(payload.trackId, true);
@@ -200,7 +194,6 @@ async function handleState(state: PlayerState, receivedAt: number) {
 
     if (state.playing) {
         activePlayerDeviceId.value = state.deviceId;
-        playingElsewhere.value = true;
         if (pendingTransfer?.targetDeviceId === state.deviceId) {
             cancelPendingTransfer();
         }
@@ -209,7 +202,6 @@ async function handleState(state: PlayerState, receivedAt: number) {
         }
         await applyRemoteState(state);
     } else if (activePlayerDeviceId.value === state.deviceId) {
-        playingElsewhere.value = false;
         await applyRemoteState(state);
     }
 
@@ -250,8 +242,7 @@ export class PlayerSync {
             }
             if (playing) {
                 activePlayerDeviceId.value = localDeviceId;
-                playingElsewhere.value = false;
-                cancelPendingTransfer();
+                        cancelPendingTransfer();
             }
             publishState();
         });
@@ -290,8 +281,7 @@ export class PlayerSync {
             const shouldResume = pendingTransfer.resume;
             pendingTransfer = null;
             activePlayerDeviceId.value = null;
-            playingElsewhere.value = false;
-            if (shouldResume.trackId && shouldResume.playing) {
+                if (shouldResume.trackId && shouldResume.playing) {
                 void (async () => {
                     await PlayManager.startAsync(shouldResume.trackId!, true);
                     const relative = relativePosition(shouldResume);
@@ -304,7 +294,6 @@ export class PlayerSync {
 
         pendingTransfer = {targetDeviceId, resume, timeout};
         activePlayerDeviceId.value = targetDeviceId;
-        playingElsewhere.value = true;
         eventBus.send({
             type: "player:transfer",
             payload: {
