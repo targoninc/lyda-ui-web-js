@@ -4,6 +4,7 @@ import { currentTrackId, currentTrackPosition, currentUser, playingHere } from "
 import { PlayManager } from "./PlayManager.ts";
 import type { PlayerDevice } from "../Models/PlayerSync/PlayerDevice.ts";
 import type { PlayerState } from "../Models/PlayerSync/PlayerState.ts";
+import type { PlayerTransfer } from "../Models/PlayerSync/PlayerTransfer.ts";
 
 const DEVICE_ID_KEY = "lyda-player-device-id";
 const TAB_NUMBER_KEY = "lyda-player-tab-number";
@@ -53,6 +54,7 @@ let pendingTransfer: {
     resume: PlayerState;
     timeout: number;
 } | null = null;
+let lastTransferFrom: { sourceDeviceId: string; at: number } | null = null;
 
 function currentState(): PlayerState {
     const trackId = currentTrackId.value || null;
@@ -161,10 +163,16 @@ function cancelPendingTransfer() {
     }
 }
 
-async function handleTransfer(payload: PlayerState & {targetDeviceId: string; sourceDeviceId: string}) {
+async function handleTransfer(payload: PlayerTransfer) {
     if (payload.targetDeviceId !== localDeviceId || !payload.trackId) {
         return;
     }
+
+    const now = Date.now();
+    if (lastTransferFrom?.sourceDeviceId === payload.sourceDeviceId && now - lastTransferFrom.at < 2000) {
+        return;
+    }
+    lastTransferFrom = {sourceDeviceId: payload.sourceDeviceId, at: now};
 
     cancelPendingTransfer();
     activePlayerDeviceId.value = localDeviceId;
@@ -225,7 +233,10 @@ export class PlayerSync {
             if (event.type === "player:state") {
                 void handleState(event.payload, event.timestamp ?? Date.now());
             } else if (event.type === "player:transfer") {
-                void handleTransfer(event.payload);
+                void handleTransfer({
+                    ...event.payload,
+                    sourceDeviceId: event.payload.sourceDeviceId ?? event.payload.deviceId,
+                });
             }
         });
 
@@ -233,6 +244,11 @@ export class PlayerSync {
             tabChannel.onmessage = event => {
                 if (event.data?.type === "player:state" && event.data.payload?.deviceId) {
                     void handleState(event.data.payload, event.data.timestamp ?? Date.now());
+                } else if (event.data?.type === "player:transfer" && event.data.payload?.deviceId) {
+                    void handleTransfer({
+                        ...event.data.payload,
+                        sourceDeviceId: event.data.payload.deviceId,
+                    });
                 }
             };
         }
@@ -305,12 +321,19 @@ export class PlayerSync {
 
         pendingTransfer = {targetDeviceId, resume, timeout};
         activePlayerDeviceId.value = targetDeviceId;
+        const payload: PlayerTransfer = {
+            ...resume,
+            sourceDeviceId: localDeviceId,
+            targetDeviceId,
+        };
         eventBus.send({
             type: "player:transfer",
-            payload: {
-                ...resume,
-                targetDeviceId,
-            },
+            payload,
+        });
+        tabChannel?.postMessage({
+            type: "player:transfer",
+            payload,
+            timestamp: Date.now(),
         });
         if (playingHere.value) {
             await PlayManager.pauseAsync(currentTrackId.value);
