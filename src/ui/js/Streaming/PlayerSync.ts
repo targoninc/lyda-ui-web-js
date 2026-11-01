@@ -2,21 +2,7 @@ import { signal } from "@targoninc/jess";
 import { eventBus } from "../Classes/EventBus.ts";
 import { currentTrackId, currentTrackPosition, currentUser, playingElsewhere, playingHere } from "../state.ts";
 import { PlayManager } from "./PlayManager.ts";
-
-export interface PlayerState {
-    deviceId: string;
-    deviceName: string;
-    platform: string;
-    trackId: number | null;
-    position: number;
-    duration: number;
-    playing: boolean;
-}
-
-export interface PlayerDevice extends PlayerState {
-    lastSeen: number;
-    local: boolean;
-}
+import type { PlayerDevice, PlayerState } from "../Models/PlayerSync.ts";
 
 const DEVICE_ID_KEY = "lyda-player-device-id";
 const HEARTBEAT_MS = 10_000;
