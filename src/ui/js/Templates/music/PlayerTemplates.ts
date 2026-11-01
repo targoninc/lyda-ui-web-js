@@ -408,7 +408,7 @@ export class PlayerTemplates {
                 PlayerTemplates.trackInfo(track, trackUser),
                 PlayerTemplates.bigAudioPlayer(track),
                 create("div")
-                    .classes("flex", "hideOnMidBreakpoint")
+                    .classes("flex", "hideOnMidBreakpoint", "noflexwrap", "align-children")
                     .children(PlayerTemplates.loudnessControl(track), PlayerTemplates.deviceButton(), QueueTemplates.queueButton())
                     .build(),
             ).build();
@@ -434,10 +434,10 @@ export class PlayerTemplates {
         ) as HTMLElement;
         anchor = GenericTemplates.roundIconButton(
             {icon: "devices", adaptive: true},
-            () => PopoverTemplates.toggle(popover, anchor, true),
+            () => PopoverTemplates.toggle(popover, anchor, true, true),
             t("DEVICES"),
         ) as HTMLElement;
-        return horizontal(anchor, popover).classes("relative", "align-children").build();
+        return horizontal(anchor, popover).classes("relative", "align-children", "align-center").build();
     }
 
     private static smallPlayerLayout(track: Track) {
