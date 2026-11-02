@@ -1,5 +1,6 @@
 import {compute, create, Signal} from "@targoninc/jess";
 import {PlayManager} from "../../Streaming/PlayManager.ts";
+import {PlayerSync} from "../../Streaming/PlayerSync.ts";
 import {loadingAudio} from "../../state.ts";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 
@@ -16,10 +17,10 @@ export class ScrubberTemplates {
         return create("div")
             .classes("audio-player-scrubber", "flex-grow", "flex", "rounded", "padded-inline", ...classes, disabledClass)
             .id(track.id)
-            .onmousedown(e => PlayManager.scrubFromElement(e, track.id, version))
+            .onmousedown(e => PlayerSync.seekFromElement(e, track.id, version))
             .onmousemove(async e => {
                 if (e.buttons === 1) {
-                    await PlayManager.scrubFromElement(e, track.id, version);
+                    await PlayerSync.seekFromElement(e, track.id, version);
                 }
             })
             .on("pointerdown", async e => {
