@@ -8,5 +8,6 @@ export interface PlayerState {
     position: number;
     duration: number;
     playing: boolean;
+    activeDeviceId: string | null;
     queue: PlayerQueue;
 }
