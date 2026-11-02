@@ -12,7 +12,6 @@ import { contextQueue, currentUser, history, permissions, playingFrom, userLoadi
 import { PlayerSync } from "./js/Streaming/PlayerSync.ts";
 import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom";
 import { ListeningHistory } from "@targoninc/lyda-shared/src/Models/db/lyda/ListeningHistory";
-import { QueueManager } from "./js/Streaming/QueueManager.ts";
 import { initializeMediaSessionCallbacks } from "./js/Classes/Helpers/MediaSession.ts";
 import { Api } from "./js/Api/Api.ts";
 import { initializeGlobalErrorHandler } from "./js/Classes/Helpers/ErrorHandler.ts";
@@ -90,7 +89,6 @@ export const router = new Router(routes, async (route: Route, params: any) => {
 
 if (currentUser.value) {
     Api.getPermissions().then(res => permissions.value = res ?? []);
-    QueueManager.fillAutoQueue().then();
 
     const playingFromTmp = LydaCache.get<PlayingFrom|null>("playingFrom").content;
     if (playingFromTmp) {

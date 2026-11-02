@@ -70,6 +70,7 @@ function currentState(): PlayerState {
         position: currentTrackPosition.value.absolute,
         duration: trackId ? PlayManager.getDuration(trackId) : 0,
         playing: playingHere.value,
+        activeDeviceId: activePlayerDeviceId.value,
         queue: {
             manual: [...manualQueue.value],
             context: [...contextQueue.value],
@@ -277,7 +278,8 @@ async function handleState(state: PlayerState, receivedAt: number) {
             await PlayManager.pauseAsync(currentTrackId.value);
         }
         await applyRemoteState(state);
-    } else if (activePlayerDeviceId.value === state.deviceId) {
+    } else if (state.activeDeviceId === state.deviceId || activePlayerDeviceId.value === state.deviceId) {
+        activePlayerDeviceId.value = state.deviceId;
         await applyRemoteState(state);
     }
 
@@ -304,6 +306,8 @@ export class PlayerSync {
                 });
             } else if (event.type === "player:command") {
                 void handleCommand(event.payload);
+            } else if (event.type === "player:request") {
+                publishState();
             }
         });
 
@@ -376,6 +380,7 @@ export class PlayerSync {
         }, HEARTBEAT_MS);
         setInterval(refreshDevices, HEARTBEAT_MS);
         refreshDevices();
+        eventBus.send({type: "player:request", payload: {deviceId: localDeviceId}});
     }
 
     static hasActiveRemote() {
