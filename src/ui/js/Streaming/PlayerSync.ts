@@ -1,6 +1,6 @@
 import { signal } from "@targoninc/jess";
 import { eventBus } from "../Classes/EventBus.ts";
-import { currentTrackId, currentTrackPosition, currentUser, playingHere } from "../state.ts";
+import { currentTrackId, currentTrackPosition, currentUser, loadingAudio, playingHere } from "../state.ts";
 import { PlayManager } from "./PlayManager.ts";
 import type { PlayerDevice } from "../Models/PlayerSync/PlayerDevice.ts";
 import type { PlayerState } from "../Models/PlayerSync/PlayerState.ts";
@@ -154,6 +154,7 @@ async function applyRemoteState(state: PlayerState) {
         }
     } finally {
         applyingRemote = false;
+        loadingAudio.value = false;
         refreshDevices();
     }
 }
@@ -189,6 +190,7 @@ async function handleTransfer(payload: PlayerTransfer) {
         currentTrackId.value = payload.trackId;
         setTrackPosition(payload);
         await PlayManager.initializeTrackAsync(payload.trackId);
+        loadingAudio.value = false;
     }
     publishState();
 }
