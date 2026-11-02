@@ -770,4 +770,5 @@ export const es: Translation = {
     NO_OTHER_DEVICES: "No hay otros dispositivos conectados",
     PLAYING: "Reproduciendo",
     PAUSED: "En pausa",
+    THIS_DEVICE: "Este dispositivo",
 };

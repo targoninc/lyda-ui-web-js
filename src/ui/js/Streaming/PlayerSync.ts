@@ -1,11 +1,13 @@
 import { signal } from "@targoninc/jess";
 import { eventBus } from "../Classes/EventBus.ts";
-import { currentTrackId, currentTrackPosition, currentUser, loadingAudio, playingHere } from "../state.ts";
+import { autoQueue, contextQueue, currentTrackId, currentTrackPosition, currentUser, loadingAudio, manualQueue, playingHere } from "../state.ts";
+import { QueueManager } from "./QueueManager.ts";
 import { PlayManager } from "./PlayManager.ts";
 import type { PlayerDevice } from "../Models/PlayerSync/PlayerDevice.ts";
 import type { PlayerState } from "../Models/PlayerSync/PlayerState.ts";
 import type { PlayerTransfer } from "../Models/PlayerSync/PlayerTransfer.ts";
 import type { PlayerCommand } from "../Models/PlayerSync/PlayerCommand.ts";
+import type { PlayerQueue } from "../Models/PlayerSync/PlayerQueue.ts";
 
 const DEVICE_ID_KEY = "lyda-player-device-id";
 const TAB_NUMBER_KEY = "lyda-player-tab-number";
@@ -68,7 +70,30 @@ function currentState(): PlayerState {
         position: currentTrackPosition.value.absolute,
         duration: trackId ? PlayManager.getDuration(trackId) : 0,
         playing: playingHere.value,
+        queue: {
+            manual: [...manualQueue.value],
+            context: [...contextQueue.value],
+            auto: [...autoQueue.value],
+        },
     };
+}
+
+function emptyQueue(): PlayerQueue {
+    return {manual: [], context: [], auto: []};
+}
+
+function applyQueue(queue: PlayerQueue) {
+    const wasApplyingRemote = applyingRemote;
+    applyingRemote = true;
+    QueueManager.setManualQueue(queue.manual);
+    QueueManager.setContextQueue(queue.context);
+    QueueManager.setAutoQueue(queue.auto);
+    applyingRemote = wasApplyingRemote;
+}
+
+function activeRemoteDeviceId(): string | null {
+    const id = activePlayerDeviceId.value;
+    return id && id !== localDeviceId && remoteDevices.has(id) ? id : null;
 }
 
 function refreshDevices() {
@@ -148,6 +173,7 @@ async function applyRemoteState(state: PlayerState) {
             currentTrackId.value = state.trackId;
         }
         setTrackPosition(state);
+        applyQueue(state.queue ?? emptyQueue());
         if (trackChanged) {
             await PlayManager.initializeTrackAsync(state.trackId);
         } else if (!playingHere.value) {
@@ -180,6 +206,7 @@ async function handleTransfer(payload: PlayerTransfer) {
 
     cancelPendingTransfer();
     activePlayerDeviceId.value = localDeviceId;
+    applyQueue(payload.queue ?? emptyQueue());
 
     if (payload.playing) {
         await PlayManager.startAsync(payload.trackId, true);
@@ -219,6 +246,12 @@ async function handleCommand(command: PlayerCommand) {
             if (command.position !== undefined && currentTrackId.value) {
                 await PlayManager.scrubTo(currentTrackId.value, command.position);
             }
+            break;
+        case "next":
+            await PlayManager.playNextFromQueues(currentTrackId.value);
+            break;
+        case "previous":
+            await PlayManager.playPreviousFromQueues();
             break;
     }
 }
@@ -297,6 +330,21 @@ export class PlayerSync {
                 scheduleState();
             }
         });
+        manualQueue.subscribe(() => {
+            if (!applyingRemote) {
+                scheduleState();
+            }
+        });
+        contextQueue.subscribe(() => {
+            if (!applyingRemote) {
+                scheduleState();
+            }
+        });
+        autoQueue.subscribe(() => {
+            if (!applyingRemote) {
+                scheduleState();
+            }
+        });
         currentTrackPosition.subscribe(() => {
             if (!applyingRemote) {
                 schedulePositionState();
@@ -330,9 +378,25 @@ export class PlayerSync {
         refreshDevices();
     }
 
+    static hasActiveRemote() {
+        return activeRemoteDeviceId() !== null;
+    }
+
+    static playRemote() {
+        const targetDeviceId = activeRemoteDeviceId();
+        if (!targetDeviceId) {
+            return;
+        }
+        PlayerSync.sendCommand({
+            deviceId: localDeviceId,
+            targetDeviceId,
+            action: "play",
+        });
+    }
+
     static pauseRemote() {
-        const targetDeviceId = activePlayerDeviceId.value;
-        if (!targetDeviceId || targetDeviceId === localDeviceId) {
+        const targetDeviceId = activeRemoteDeviceId();
+        if (!targetDeviceId) {
             return;
         }
         PlayerSync.sendCommand({
@@ -342,9 +406,35 @@ export class PlayerSync {
         });
     }
 
+    static next() {
+        const targetDeviceId = activeRemoteDeviceId();
+        if (targetDeviceId) {
+            PlayerSync.sendCommand({
+                deviceId: localDeviceId,
+                targetDeviceId,
+                action: "next",
+            });
+            return;
+        }
+        PlayManager.playNextFromQueues(currentTrackId.value).then();
+    }
+
+    static previous() {
+        const targetDeviceId = activeRemoteDeviceId();
+        if (targetDeviceId) {
+            PlayerSync.sendCommand({
+                deviceId: localDeviceId,
+                targetDeviceId,
+                action: "previous",
+            });
+            return;
+        }
+        PlayManager.playPreviousFromQueues().then();
+    }
+
     static seekRemote(position: number) {
-        const targetDeviceId = activePlayerDeviceId.value;
-        if (!targetDeviceId || targetDeviceId === localDeviceId) {
+        const targetDeviceId = activeRemoteDeviceId();
+        if (!targetDeviceId) {
             return;
         }
         PlayerSync.sendCommand({
@@ -356,7 +446,7 @@ export class PlayerSync {
     }
 
     static async seekFromElement(event: MouseEvent, trackId: number, version?: number) {
-        if (playingAnywhere.value && !playingHere.value) {
+        if (activeRemoteDeviceId()) {
             const rect = (event.target as HTMLElement).getBoundingClientRect();
             const relative = Math.min(Math.max(event.offsetX / rect.width, 0), 1);
             const duration = PlayManager.getDuration(trackId);
@@ -372,8 +462,23 @@ export class PlayerSync {
         tabChannel?.postMessage({type: "player:command", payload: command, timestamp: Date.now()});
     }
 
+    static async claimPlayback() {
+        if (playingHere.value || !currentTrackId.value) {
+            return;
+        }
+        const relative = currentTrackPosition.value.relative;
+        await PlayManager.startAsync(currentTrackId.value, true);
+        if (relative > 0) {
+            await PlayManager.scrubTo(currentTrackId.value, relative);
+        }
+    }
+
     static async transferTo(targetDeviceId: string) {
-        if (targetDeviceId === localDeviceId || !remoteDevices.has(targetDeviceId)) {
+        if (targetDeviceId === localDeviceId) {
+            await PlayerSync.claimPlayback();
+            return;
+        }
+        if (!remoteDevices.has(targetDeviceId)) {
             return;
         }
         const resume = currentState();

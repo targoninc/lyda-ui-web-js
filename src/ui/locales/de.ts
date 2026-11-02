@@ -771,4 +771,5 @@ export const de: Translation = {
     NO_OTHER_DEVICES: "Keine anderen Geräte verbunden",
     PLAYING: "Wiedergabe läuft",
     PAUSED: "Pausiert",
+    THIS_DEVICE: "Dieses Gerät",
 };

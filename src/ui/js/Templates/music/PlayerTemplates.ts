@@ -77,7 +77,7 @@ export class PlayerTemplates {
                                 icon: "skip_previous",
                                 adaptive: true,
                             },
-                            PlayManager.playPreviousFromQueues,
+                            PlayerSync.previous,
                             t("PREVIOUS"),
                         ),
                         PlayerTemplates.roundPlayButton(track),
@@ -86,7 +86,7 @@ export class PlayerTemplates {
                                 icon: "skip_next",
                                 adaptive: true,
                             },
-                            async () => await PlayManager.playNextFromQueues(currentTrackId.value),
+                            PlayerSync.next,
                             t("NEXT"),
                         ),
                         PlayerTemplates.loopModeButton(),
@@ -154,7 +154,7 @@ export class PlayerTemplates {
                                     icon: "skip_previous",
                                     adaptive: true,
                                 },
-                                PlayManager.playPreviousFromQueues,
+                                PlayerSync.previous,
                                 t("PREVIOUS"),
                             ),
                             PlayerTemplates.roundPlayButton(track),
@@ -163,7 +163,7 @@ export class PlayerTemplates {
                                     icon: "skip_next",
                                     adaptive: true,
                                 },
-                                async () => await PlayManager.playNextFromQueues(currentTrackId.value),
+                                PlayerSync.next,
                                 t("NEXT"),
                             ),
                         ).classes("align-children"),
@@ -215,8 +215,12 @@ export class PlayerTemplates {
                 isUrl: true,
             },
             async () => {
-                if (playingAnywhere.value && !playingHere.value) {
-                    await PlayerSync.pauseRemote();
+                if (PlayerSync.hasActiveRemote()) {
+                    if (playingAnywhere.value) {
+                        PlayerSync.pauseRemote();
+                    } else {
+                        PlayerSync.playRemote();
+                    }
                     return;
                 }
                 PlayManager.togglePlayAsync(track.id).then();
@@ -408,19 +412,19 @@ export class PlayerTemplates {
 
     static deviceButton() {
         let anchor: HTMLElement;
-        const otherDevices = compute(devices => devices.filter(device => !device.local), playerDevices);
+        const devices = compute(items => items, playerDevices);
         const popover = PopoverTemplates.manualPopover("player-devices",
             create("div")
                 .classes("padded", "flex-v", "small-gap")
                 .children(
-                    create("span").classes("color-dim").text(t("OTHER_DEVICES")).build(),
-                    signalMap(otherDevices, vertical().classes("flex-v", "small-gap"), device => button({
-                        text: `${device.deviceName} · ${device.playing ? t("PLAYING") : t("PAUSED")}`,
+                    create("span").classes("color-dim").text(t("DEVICES")).build(),
+                    signalMap(devices, vertical().classes("flex-v", "small-gap"), device => button({
+                        text: `${device.deviceName}${device.local ? ` · ${t("THIS_DEVICE")}` : ""} · ${device.playing ? t("PLAYING") : t("PAUSED")}`,
                         icon: {icon: device.playing ? "volume_up" : "pause"},
                         classes: ["fullWidth", device.playing ? "positive" : "_"],
                         onclick: () => PlayerSync.transferTo(device.deviceId),
                     })),
-                    when(compute(devices => devices.length === 0, otherDevices),
+                    when(compute(items => items.length === 0, devices),
                         create("span").classes("color-dim").text(t("NO_OTHER_DEVICES")).build()),
                 ).build(),
         ) as HTMLElement;

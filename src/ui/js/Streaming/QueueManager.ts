@@ -24,6 +24,10 @@ export class QueueManager {
         autoQueue.value = queue;
     }
 
+    static setManualQueue(queue: number[]) {
+        manualQueue.value = queue;
+    }
+
     static addToManualQueue(id: number, track?: Track) {
         if (!id) {
             return;

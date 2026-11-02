@@ -770,4 +770,5 @@ export const ga: Translation = {
     NO_OTHER_DEVICES: "Níl aon ghléas eile ceangailte",
     PLAYING: "Ag seinm",
     PAUSED: "Cuirtear ar sos",
+    THIS_DEVICE: "An gléas seo",
 };
