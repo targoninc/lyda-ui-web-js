@@ -1,6 +1,5 @@
 import { IStreamClient } from "./IStreamClient.ts";
 import { ApiRoutes } from "../Api/ApiRoutes.ts";
-import { get } from "../Api/ApiClient.ts";
 import { currentQuality, currentTrackId, currentTrackPosition, loadingAudio, muted, volume } from "../state.ts";
 import { initializeClient } from "./InitializeClient.ts";
 
@@ -24,8 +23,6 @@ export class StreamClient implements IStreamClient {
     private readonly id: number;
     private readonly code: string;
     private version?: number;
-    private signedUrl?: string;
-    private signedUrlKey?: string;
     private audioPromise?: Promise<boolean>;
     private generation = 0;
 
@@ -112,8 +109,6 @@ export class StreamClient implements IStreamClient {
     public close(): void {
         this.stopAsync();
         this.generation++;
-        this.signedUrl = undefined;
-        this.signedUrlKey = undefined;
 
         if (this.audio) {
             // Drop the source to stop network activity and free the buffer.
@@ -159,8 +154,6 @@ export class StreamClient implements IStreamClient {
             this.offset = this.getCurrentTime(false);
         }
         this.generation++;
-        this.signedUrl = undefined;
-        this.signedUrlKey = undefined;
         if (this.audio) {
             try {
                 this.audio.removeAttribute("src");
@@ -297,31 +290,6 @@ export class StreamClient implements IStreamClient {
     }
 
     private async resolveSourceUrl(): Promise<string> {
-        const key = `${currentQuality.value}:${this.version ?? ""}`;
-        if (this.signedUrl && this.signedUrlKey === key) {
-            return this.signedUrl;
-        }
-        this.signedUrl = undefined;
-        this.signedUrlKey = undefined;
-
-        try {
-            const result = await get<{url?: string | null}>(ApiRoutes.getTrackAudio, {
-                id: this.id,
-                quality: currentQuality.value,
-                code: this.code,
-                client: "web",
-                signed: "true",
-                ...(this.version !== undefined ? {version: this.version} : {}),
-            });
-            if (result?.url) {
-                this.signedUrl = result.url;
-                this.signedUrlKey = key;
-                return result.url;
-            }
-        } catch (e) {
-            console.warn("[StreamClient] Could not get signed audio URL, falling back to proxy:", e);
-        }
-
         return this.buildUrl();
     }
 
@@ -357,7 +325,7 @@ export class StreamClient implements IStreamClient {
 
         const audio = new Audio();
         audio.preload = "auto";
-        audio.crossOrigin = this.signedUrl ? "anonymous" : "use-credentials";
+        audio.crossOrigin = "use-credentials";
 
         // Route the element through our gain node. Must be called before the
         // element starts playing; the element is exclusively controlled here.
