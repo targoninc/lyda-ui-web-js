@@ -388,7 +388,15 @@ export class Api {
     }
 
     static async updateAlbum(album: Partial<Album>) {
-        return post(ApiRoutes.updateAlbum, album);
+        return post(ApiRoutes.updateAlbum, {
+            id: album.id,
+            title: album.title,
+            description: album.description,
+            upc: album.upc,
+            visibility: album.visibility,
+            release_date: album.release_date,
+            price: album.price,
+        });
     }
 
     static async getAlbumsByUserId(userId: number, name: string = "", offset: number = 0, filter: string = ""): Promise<{ items: Album[], total: number } | null> {
@@ -695,7 +703,12 @@ export class Api {
     }
 
     static async updatePlaylist(playlist: Partial<Playlist>) {
-        return await post(ApiRoutes.updatePlaylist, playlist);
+        return await post(ApiRoutes.updatePlaylist, {
+            id: playlist.id,
+            title: playlist.title,
+            description: playlist.description,
+            visibility: playlist.visibility,
+        });
     }
 
     static async createNewPlaylist(playlist: Partial<Playlist>) {
