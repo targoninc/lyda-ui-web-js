@@ -1,3 +1,5 @@
+import type { PlayerQueue } from "./PlayerQueue.ts";
+
 export interface PlayerState {
     deviceId: string;
     deviceName: string;
@@ -6,4 +8,5 @@ export interface PlayerState {
     position: number;
     duration: number;
     playing: boolean;
+    queue: PlayerQueue;
 }

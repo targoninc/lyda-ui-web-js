@@ -77,7 +77,7 @@ export class PlayerTemplates {
                                 icon: "skip_previous",
                                 adaptive: true,
                             },
-                            PlayManager.playPreviousFromQueues,
+                            PlayerSync.previous,
                             t("PREVIOUS"),
                         ),
                         PlayerTemplates.roundPlayButton(track),
@@ -86,7 +86,7 @@ export class PlayerTemplates {
                                 icon: "skip_next",
                                 adaptive: true,
                             },
-                            async () => await PlayManager.playNextFromQueues(currentTrackId.value),
+                            PlayerSync.next,
                             t("NEXT"),
                         ),
                         PlayerTemplates.loopModeButton(),
@@ -154,7 +154,7 @@ export class PlayerTemplates {
                                     icon: "skip_previous",
                                     adaptive: true,
                                 },
-                                PlayManager.playPreviousFromQueues,
+                                PlayerSync.previous,
                                 t("PREVIOUS"),
                             ),
                             PlayerTemplates.roundPlayButton(track),
@@ -163,7 +163,7 @@ export class PlayerTemplates {
                                     icon: "skip_next",
                                     adaptive: true,
                                 },
-                                async () => await PlayManager.playNextFromQueues(currentTrackId.value),
+                                PlayerSync.next,
                                 t("NEXT"),
                             ),
                         ).classes("align-children"),
@@ -215,8 +215,12 @@ export class PlayerTemplates {
                 isUrl: true,
             },
             async () => {
-                if (playingAnywhere.value && !playingHere.value) {
-                    await PlayerSync.pauseRemote();
+                if (PlayerSync.hasActiveRemote()) {
+                    if (playingAnywhere.value) {
+                        PlayerSync.pauseRemote();
+                    } else {
+                        PlayerSync.playRemote();
+                    }
                     return;
                 }
                 PlayManager.togglePlayAsync(track.id).then();
