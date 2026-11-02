@@ -462,8 +462,23 @@ export class PlayerSync {
         tabChannel?.postMessage({type: "player:command", payload: command, timestamp: Date.now()});
     }
 
+    static async claimPlayback() {
+        if (playingHere.value || !currentTrackId.value) {
+            return;
+        }
+        const relative = currentTrackPosition.value.relative;
+        await PlayManager.startAsync(currentTrackId.value, true);
+        if (relative > 0) {
+            await PlayManager.scrubTo(currentTrackId.value, relative);
+        }
+    }
+
     static async transferTo(targetDeviceId: string) {
-        if (targetDeviceId === localDeviceId || !remoteDevices.has(targetDeviceId)) {
+        if (targetDeviceId === localDeviceId) {
+            await PlayerSync.claimPlayback();
+            return;
+        }
+        if (!remoteDevices.has(targetDeviceId)) {
             return;
         }
         const resume = currentState();

@@ -773,4 +773,5 @@ export const en = {
     NO_OTHER_DEVICES: "No other devices connected",
     PLAYING: "Playing",
     PAUSED: "Paused",
+    THIS_DEVICE: "This device",
 } satisfies BaseTranslation;
