@@ -8,6 +8,10 @@ import type { PlayerState } from "../Models/PlayerSync/PlayerState.ts";
 import type { PlayerTransfer } from "../Models/PlayerSync/PlayerTransfer.ts";
 import type { PlayerCommand } from "../Models/PlayerSync/PlayerCommand.ts";
 import type { PlayerQueue } from "../Models/PlayerSync/PlayerQueue.ts";
+import type { PlayerQueueProbe } from "../Models/PlayerSync/PlayerQueueProbe.ts";
+import type { PlayerQueueOffer } from "../Models/PlayerSync/PlayerQueueOffer.ts";
+import type { PlayerQueueSync } from "../Models/PlayerSync/PlayerQueueSync.ts";
+import type { PlayerQueueSnapshot } from "../Models/PlayerSync/PlayerQueueSnapshot.ts";
 
 const DEVICE_ID_KEY = "lyda-player-device-id";
 const TAB_NUMBER_KEY = "lyda-player-tab-number";
@@ -16,6 +20,8 @@ const HEARTBEAT_MS = 10_000;
 const STALE_MS = 30_000;
 const POSITION_THROTTLE_MS = 1_000;
 const TRANSFER_TIMEOUT_MS = 8_000;
+const QUEUE_OFFER_TIMEOUT_MS = 1_500;
+const QUEUE_SYNC_TIMEOUT_MS = 4_000;
 const TAB_CHANNEL_NAME = "lyda-player-sync";
 
 function createDeviceId(): string {
@@ -59,6 +65,11 @@ let pendingTransfer: {
     timeout: number;
 } | null = null;
 let lastTransferFrom: { sourceDeviceId: string; at: number } | null = null;
+let queueRevision = 0;
+let queueRequestId: string | null = null;
+let queueChosenDeviceId: string | null = null;
+let queueOfferTimeout: number | null = null;
+let queueSyncTimeout: number | null = null;
 
 function currentState(): PlayerState {
     const trackId = currentTrackId.value || null;
@@ -71,6 +82,7 @@ function currentState(): PlayerState {
         duration: trackId ? PlayManager.getDuration(trackId) : 0,
         playing: playingHere.value,
         activeDeviceId: activePlayerDeviceId.value,
+        queueRevision,
         queue: {
             manual: [...manualQueue.value],
             context: [...contextQueue.value],
@@ -83,13 +95,26 @@ function emptyQueue(): PlayerQueue {
     return {manual: [], context: [], auto: []};
 }
 
-function applyQueue(queue: PlayerQueue) {
+function applyQueue(queue: PlayerQueue, revision: number = queueRevision) {
     const wasApplyingRemote = applyingRemote;
     applyingRemote = true;
     QueueManager.setManualQueue(queue.manual);
     QueueManager.setContextQueue(queue.context);
     QueueManager.setAutoQueue(queue.auto);
     applyingRemote = wasApplyingRemote;
+    queueRevision = Math.max(queueRevision, revision);
+}
+
+function markQueueChanged() {
+    if (applyingRemote) {
+        return;
+    }
+    queueRevision = Math.max(Date.now(), queueRevision + 1);
+    scheduleState();
+}
+
+function isQueueEmpty(queue: PlayerQueue): boolean {
+    return queue.manual.length === 0 && queue.context.length === 0 && queue.auto.length === 0;
 }
 
 function activeRemoteDeviceId(): string | null {
@@ -174,7 +199,6 @@ async function applyRemoteState(state: PlayerState) {
             currentTrackId.value = state.trackId;
         }
         setTrackPosition(state);
-        applyQueue(state.queue ?? emptyQueue());
         if (trackChanged) {
             await PlayManager.initializeTrackAsync(state.trackId);
         } else if (!playingHere.value) {
@@ -207,7 +231,7 @@ async function handleTransfer(payload: PlayerTransfer) {
 
     cancelPendingTransfer();
     activePlayerDeviceId.value = localDeviceId;
-    applyQueue(payload.queue ?? emptyQueue());
+    applyQueue(payload.queue ?? emptyQueue(), payload.queueRevision ?? queueRevision);
 
     if (payload.playing) {
         await PlayManager.startAsync(payload.trackId, true);
@@ -269,6 +293,10 @@ async function handleState(state: PlayerState, receivedAt: number) {
     };
     remoteDevices.set(state.deviceId, device);
 
+    if (state.queueRevision > queueRevision) {
+        applyQueue(state.queue ?? emptyQueue(), state.queueRevision);
+    }
+
     if (state.playing) {
         activePlayerDeviceId.value = state.deviceId;
         if (pendingTransfer?.targetDeviceId === state.deviceId) {
@@ -283,6 +311,114 @@ async function handleState(state: PlayerState, receivedAt: number) {
         await applyRemoteState(state);
     }
 
+    refreshDevices();
+}
+
+function clearQueueTimers() {
+    if (queueOfferTimeout !== null) {
+        clearTimeout(queueOfferTimeout);
+        queueOfferTimeout = null;
+    }
+    if (queueSyncTimeout !== null) {
+        clearTimeout(queueSyncTimeout);
+        queueSyncTimeout = null;
+    }
+}
+
+function cancelQueueRequest() {
+    clearQueueTimers();
+    queueRequestId = null;
+    queueChosenDeviceId = null;
+}
+
+function fallbackToLocalQueue(requestId: string, afterSyncTimeout: boolean = false) {
+    if (queueRequestId !== requestId || (!afterSyncTimeout && queueChosenDeviceId)) {
+        return;
+    }
+    cancelQueueRequest();
+    void QueueManager.fillAutoQueue();
+}
+
+function requestQueues() {
+    if (!currentUser.value) {
+        return;
+    }
+    cancelQueueRequest();
+    const requestId = crypto.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    queueRequestId = requestId;
+    const payload: PlayerQueueProbe = {deviceId: localDeviceId, requestId};
+    eventBus.send({type: "player:queue:probe", payload});
+    tabChannel?.postMessage({type: "player:queue:probe", payload, timestamp: Date.now()});
+    queueOfferTimeout = window.setTimeout(() => fallbackToLocalQueue(requestId), QUEUE_OFFER_TIMEOUT_MS);
+}
+
+function handleQueueProbe(payload: PlayerQueueProbe) {
+    if (payload.deviceId === localDeviceId) {
+        return;
+    }
+    const offer: PlayerQueueOffer = {
+        deviceId: localDeviceId,
+        targetDeviceId: payload.deviceId,
+        requestId: payload.requestId,
+    };
+    eventBus.send({type: "player:queue:offer", payload: offer});
+    tabChannel?.postMessage({type: "player:queue:offer", payload: offer, timestamp: Date.now()});
+}
+
+function handleQueueOffer(payload: PlayerQueueOffer) {
+    if (payload.targetDeviceId !== localDeviceId ||
+        payload.deviceId === localDeviceId ||
+        payload.requestId !== queueRequestId ||
+        queueChosenDeviceId) {
+        return;
+    }
+    queueChosenDeviceId = payload.deviceId;
+    if (queueOfferTimeout !== null) {
+        clearTimeout(queueOfferTimeout);
+        queueOfferTimeout = null;
+    }
+    const sync: PlayerQueueSync = {
+        deviceId: localDeviceId,
+        targetDeviceId: payload.deviceId,
+        requestId: payload.requestId,
+    };
+    eventBus.send({type: "player:queue:sync", payload: sync});
+    tabChannel?.postMessage({type: "player:queue:sync", payload: sync, timestamp: Date.now()});
+    queueSyncTimeout = window.setTimeout(
+        () => fallbackToLocalQueue(payload.requestId, true),
+        QUEUE_SYNC_TIMEOUT_MS,
+    );
+}
+
+function handleQueueSync(payload: PlayerQueueSync) {
+    if (payload.targetDeviceId !== localDeviceId) {
+        return;
+    }
+    const state = currentState();
+    const snapshot: PlayerQueueSnapshot = {
+        deviceId: localDeviceId,
+        targetDeviceId: payload.deviceId,
+        requestId: payload.requestId,
+        queue: state.queue,
+        queueRevision: state.queueRevision,
+    };
+    eventBus.send({type: "player:queue:snapshot", payload: snapshot});
+    tabChannel?.postMessage({type: "player:queue:snapshot", payload: snapshot, timestamp: Date.now()});
+}
+
+function handleQueueSnapshot(payload: PlayerQueueSnapshot) {
+    if (payload.targetDeviceId !== localDeviceId ||
+        payload.requestId !== queueRequestId ||
+        (queueChosenDeviceId && payload.deviceId !== queueChosenDeviceId)) {
+        return;
+    }
+    cancelQueueRequest();
+    if (payload.queueRevision >= queueRevision) {
+        applyQueue(payload.queue, payload.queueRevision);
+    }
+    if (isQueueEmpty(currentState().queue)) {
+        void QueueManager.fillAutoQueue();
+    }
     refreshDevices();
 }
 
@@ -308,6 +444,14 @@ export class PlayerSync {
                 void handleCommand(event.payload);
             } else if (event.type === "player:request") {
                 publishState();
+            } else if (event.type === "player:queue:probe") {
+                handleQueueProbe(event.payload);
+            } else if (event.type === "player:queue:offer") {
+                handleQueueOffer(event.payload);
+            } else if (event.type === "player:queue:sync") {
+                handleQueueSync(event.payload);
+            } else if (event.type === "player:queue:snapshot") {
+                handleQueueSnapshot(event.payload);
             }
         });
 
@@ -324,9 +468,16 @@ export class PlayerSync {
                     void handleCommand(event.data.payload);
                 } else if (event.data?.type === "player:request") {
                     publishState();
+                } else if (event.data?.type === "player:queue:probe") {
+                    handleQueueProbe(event.data.payload);
+                } else if (event.data?.type === "player:queue:offer") {
+                    handleQueueOffer(event.data.payload);
+                } else if (event.data?.type === "player:queue:sync") {
+                    handleQueueSync(event.data.payload);
+                } else if (event.data?.type === "player:queue:snapshot") {
+                    handleQueueSnapshot(event.data.payload);
                 }
             };
-            tabChannel.postMessage({type: "player:request"});
         }
 
         currentTrackId.subscribe(() => {
@@ -334,21 +485,9 @@ export class PlayerSync {
                 scheduleState();
             }
         });
-        manualQueue.subscribe(() => {
-            if (!applyingRemote) {
-                scheduleState();
-            }
-        });
-        contextQueue.subscribe(() => {
-            if (!applyingRemote) {
-                scheduleState();
-            }
-        });
-        autoQueue.subscribe(() => {
-            if (!applyingRemote) {
-                scheduleState();
-            }
-        });
+        manualQueue.subscribe(markQueueChanged);
+        contextQueue.subscribe(markQueueChanged);
+        autoQueue.subscribe(markQueueChanged);
         currentTrackPosition.subscribe(() => {
             if (!applyingRemote) {
                 schedulePositionState();
@@ -360,18 +499,20 @@ export class PlayerSync {
             }
             if (playing) {
                 activePlayerDeviceId.value = localDeviceId;
-                        cancelPendingTransfer();
+                cancelPendingTransfer();
             }
             publishState();
         });
         currentUser.subscribe(user => {
             if (!user) {
+                cancelQueueRequest();
                 remoteDevices.clear();
                 activePlayerDeviceId.value = null;
                 playerDevices.value = [];
                 return;
             }
             publishState();
+            requestQueues();
         });
 
         setInterval(() => {
@@ -380,7 +521,9 @@ export class PlayerSync {
         }, HEARTBEAT_MS);
         setInterval(refreshDevices, HEARTBEAT_MS);
         refreshDevices();
-        eventBus.send({type: "player:request", payload: {deviceId: localDeviceId}});
+        if (currentUser.value) {
+            requestQueues();
+        }
     }
 
     static hasActiveRemote() {
@@ -499,7 +642,7 @@ export class PlayerSync {
             const shouldResume = pendingTransfer.resume;
             pendingTransfer = null;
             activePlayerDeviceId.value = null;
-                if (shouldResume.trackId && shouldResume.playing) {
+            if (shouldResume.trackId && shouldResume.playing) {
                 void (async () => {
                     await PlayManager.startAsync(shouldResume.trackId!, true);
                     const relative = relativePosition(shouldResume);

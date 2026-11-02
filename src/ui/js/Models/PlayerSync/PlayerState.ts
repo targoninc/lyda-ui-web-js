@@ -9,5 +9,6 @@ export interface PlayerState {
     duration: number;
     playing: boolean;
     activeDeviceId: string | null;
+    queueRevision: number;
     queue: PlayerQueue;
 }
