@@ -1,32 +1,9 @@
 import { Config } from "./Config.ts";
-
-export interface Subscription {
-    unsubscribe: () => void;
-}
-
-type EventCallback = (event: any) => void;
-
-interface InternalSubscription {
-    id: string;
-    callback: EventCallback;
-}
-
-interface RealtimeConfigResponse {
-    websocket: {
-        enabled: boolean;
-        path: string;
-    };
-    webtransport: {
-        enabled: boolean;
-        port: number;
-        path: string;
-    };
-}
-
-interface RealtimeTokenResponse {
-    token: string;
-    expiresAt: number;
-}
+import type { EventCallback } from "../Models/EventBus/EventCallback.ts";
+import type { InternalSubscription } from "../Models/EventBus/InternalSubscription.ts";
+import type { RealtimeConfigResponse } from "../Models/EventBus/RealtimeConfigResponse.ts";
+import type { RealtimeTokenResponse } from "../Models/EventBus/RealtimeTokenResponse.ts";
+import type { Subscription } from "../Models/EventBus/Subscription.ts";
 
 export class EventBus {
     private static instance: EventBus;
@@ -76,6 +53,10 @@ export class EventBus {
                 }
             }
         };
+    }
+
+    public reconnect(): void {
+        void this.connect();
     }
 
     public send(data: any): void {

@@ -23,7 +23,6 @@ import {
     removeTrackInfo,
     volume,
 } from "../state.ts";
-import {StreamingBroadcaster, StreamingEvent} from "./StreamingBroadcaster.ts";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import {TrackDetailResponse} from "@targoninc/lyda-shared/src/Models/TrackDetailResponse";
 import {PlayingFrom} from "@targoninc/lyda-shared/src/Models/PlayingFrom";
@@ -370,7 +369,6 @@ export class PlayManager {
             currentTrackId.value = 0;
             removeTrackInfo(id);
             document.querySelector("#permanent-player")?.remove();
-            StreamingBroadcaster.send(StreamingEvent.trackStop, id);
         }
         if (trackInfo.value[id]) {
             removeTrackInfo(id);
@@ -385,13 +383,11 @@ export class PlayManager {
 
         streamClient.stopAsync();
         playingHere.value = false;
-        StreamingBroadcaster.send(StreamingEvent.trackStop, id);
 
         await StreamingUpdater.updatePlayState();
     }
 
     private static afterStart(id: number, recordPlay: boolean = false) {
-        StreamingBroadcaster.send(StreamingEvent.trackStart, id);
         playingHere.value = true;
         if (recordPlay) {
             Api.recordPlay(id, currentQuality.value).catch(e => console.error("[PlayManager] Failed to record play:", e));

@@ -243,8 +243,6 @@ currentTrackPosition.subscribe((p, changed) => {
 
 export const currentlyBuffered = signal(0);
 
-export const playingElsewhere = signal(false);
-
 export const playingHere = signal(false);
 playingHere.subscribe((p, changed) => {
     if (!changed) {

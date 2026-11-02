@@ -359,7 +359,6 @@ export const es: Translation = {
     PLAYLIST: "Lista de reproducción",
     PLAY_PAUSE: "Reproducir/Pausar",
     MUTE_UNMUTE: "Silenciar/Activar silencio",
-    PLAYING_ON_OTHER_INSTANCE: "Jugando en otra instancia de Lyda",
     TOGGLE_EXPANDED_PLAYER: "Alternar reproductor expandido",
     OPEN_MENU: "abrir menú",
     CHANGE_LOOP_MODE: "Cambiar modo de bucle",
@@ -766,4 +765,9 @@ export const es: Translation = {
     CANNOT_DELETE_ONLY_VERSION: "Una pista debe conservar al menos una versión.",
     VERSION_RENAMED: "Versión renombrada",
     VERSION_DELETED: "Versión eliminada",
+    DEVICES: "Dispositivos",
+    OTHER_DEVICES: "Otros dispositivos",
+    NO_OTHER_DEVICES: "No hay otros dispositivos conectados",
+    PLAYING: "Reproduciendo",
+    PAUSED: "En pausa",
 };

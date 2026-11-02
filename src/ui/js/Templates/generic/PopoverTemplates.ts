@@ -97,7 +97,7 @@ export class PopoverTemplates {
         popover.hidePopover();
     }
 
-    static toggle(popover: HTMLElement, anchor: AnyElement, rightAlign = false): void {
+    static toggle(popover: HTMLElement, anchor: AnyElement, rightAlign = false, above = false): void {
         if (!popover.isConnected) return;
 
         if (popover.matches(":popover-open")) {
@@ -105,7 +105,7 @@ export class PopoverTemplates {
             return;
         }
 
-        PopoverTemplates.positionAtAnchor(popover, anchor, false, rightAlign);
+        PopoverTemplates.positionAtAnchor(popover, anchor, above, rightAlign);
         popover.showPopover();
 
         if (popover.getAttribute("popover") === "manual") {

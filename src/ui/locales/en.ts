@@ -359,7 +359,6 @@ export const en = {
     PLAYLIST: "Playlist",
     PLAY_PAUSE: "Play/Pause",
     MUTE_UNMUTE: "Mute/Unmute",
-    PLAYING_ON_OTHER_INSTANCE: "Playing on another instance of Lyda",
     TOGGLE_EXPANDED_PLAYER: "Toggle expanded player",
     OPEN_MENU: "Open menu",
     CHANGE_LOOP_MODE: "Change loop mode",
@@ -769,4 +768,9 @@ export const en = {
     CANNOT_DELETE_ONLY_VERSION: "A track must keep at least one version",
     VERSION_RENAMED: "Version renamed",
     VERSION_DELETED: "Version deleted",
+    DEVICES: "Devices",
+    OTHER_DEVICES: "Other devices",
+    NO_OTHER_DEVICES: "No other devices connected",
+    PLAYING: "Playing",
+    PAUSED: "Paused",
 } satisfies BaseTranslation;

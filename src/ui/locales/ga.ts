@@ -359,7 +359,6 @@ export const ga: Translation = {
     PLAYLIST: "Seinmliosta",
     PLAY_PAUSE: "Súgradh/Sos",
     MUTE_UNMUTE: "Balbhaigh/Díbhalbh",
-    PLAYING_ON_OTHER_INSTANCE: "Ag imirt ar shampla eile de Lyda",
     TOGGLE_EXPANDED_PLAYER: "Scoránaigh imreoir leathnaithe",
     OPEN_MENU: "Roghchlár a oscailt",
     CHANGE_LOOP_MODE: "Athraigh mód lúb",
@@ -766,4 +765,9 @@ export const ga: Translation = {
     CANNOT_DELETE_ONLY_VERSION: "Ní mór rian a choinneáil ar leagan amháin ar a laghad",
     VERSION_RENAMED: "Athainmníodh an leagan",
     VERSION_DELETED: "Scriosadh an leagan",
+    DEVICES: "Gléasanna",
+    OTHER_DEVICES: "Gléasanna eile",
+    NO_OTHER_DEVICES: "Níl aon ghléas eile ceangailte",
+    PLAYING: "Ag seinm",
+    PAUSED: "Cuirtear ar sos",
 };
