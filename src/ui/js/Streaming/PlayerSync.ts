@@ -1,10 +1,11 @@
 import { signal } from "@targoninc/jess";
 import { eventBus } from "../Classes/EventBus.ts";
-import { currentTrackId, currentTrackPosition, currentUser, playingHere } from "../state.ts";
+import { currentTrackId, currentTrackPosition, currentUser, loadingAudio, playingHere } from "../state.ts";
 import { PlayManager } from "./PlayManager.ts";
 import type { PlayerDevice } from "../Models/PlayerSync/PlayerDevice.ts";
 import type { PlayerState } from "../Models/PlayerSync/PlayerState.ts";
 import type { PlayerTransfer } from "../Models/PlayerSync/PlayerTransfer.ts";
+import type { PlayerCommand } from "../Models/PlayerSync/PlayerCommand.ts";
 
 const DEVICE_ID_KEY = "lyda-player-device-id";
 const TAB_NUMBER_KEY = "lyda-player-tab-number";
@@ -154,6 +155,7 @@ async function applyRemoteState(state: PlayerState) {
         }
     } finally {
         applyingRemote = false;
+        loadingAudio.value = false;
         refreshDevices();
     }
 }
@@ -186,11 +188,39 @@ async function handleTransfer(payload: PlayerTransfer) {
             await PlayManager.scrubTo(payload.trackId, relative);
         }
     } else {
+        if (playingHere.value) {
+            await PlayManager.pauseAsync(currentTrackId.value);
+        }
         currentTrackId.value = payload.trackId;
         setTrackPosition(payload);
         await PlayManager.initializeTrackAsync(payload.trackId);
+        loadingAudio.value = false;
     }
     publishState();
+}
+
+async function handleCommand(command: PlayerCommand) {
+    if (command.targetDeviceId !== localDeviceId) {
+        return;
+    }
+
+    switch (command.action) {
+        case "pause":
+            if (playingHere.value) {
+                await PlayManager.pauseAsync(currentTrackId.value);
+            }
+            break;
+        case "play":
+            if (!playingHere.value && currentTrackId.value) {
+                await PlayManager.togglePlayAsync(currentTrackId.value);
+            }
+            break;
+        case "seek":
+            if (command.position !== undefined && currentTrackId.value) {
+                await PlayManager.scrubTo(currentTrackId.value, command.position);
+            }
+            break;
+    }
 }
 
 async function handleState(state: PlayerState, receivedAt: number) {
@@ -239,6 +269,8 @@ export class PlayerSync {
                     ...event.payload,
                     sourceDeviceId: event.payload.sourceDeviceId ?? event.payload.deviceId,
                 });
+            } else if (event.type === "player:command") {
+                void handleCommand(event.payload);
             }
         });
 
@@ -251,6 +283,8 @@ export class PlayerSync {
                         ...event.data.payload,
                         sourceDeviceId: event.data.payload.deviceId,
                     });
+                } else if (event.data?.type === "player:command") {
+                    void handleCommand(event.data.payload);
                 } else if (event.data?.type === "player:request") {
                     publishState();
                 }
@@ -296,12 +330,46 @@ export class PlayerSync {
         refreshDevices();
     }
 
-    static async pauseRemote() {
+    static pauseRemote() {
         const targetDeviceId = activePlayerDeviceId.value;
         if (!targetDeviceId || targetDeviceId === localDeviceId) {
             return;
         }
-        await PlayerSync.transferTo(targetDeviceId);
+        PlayerSync.sendCommand({
+            deviceId: localDeviceId,
+            targetDeviceId,
+            action: "pause",
+        });
+    }
+
+    static seekRemote(position: number) {
+        const targetDeviceId = activePlayerDeviceId.value;
+        if (!targetDeviceId || targetDeviceId === localDeviceId) {
+            return;
+        }
+        PlayerSync.sendCommand({
+            deviceId: localDeviceId,
+            targetDeviceId,
+            action: "seek",
+            position: Math.min(Math.max(position, 0), 1),
+        });
+    }
+
+    static async seekFromElement(event: MouseEvent, trackId: number, version?: number) {
+        if (playingAnywhere.value && !playingHere.value) {
+            const rect = (event.target as HTMLElement).getBoundingClientRect();
+            const relative = Math.min(Math.max(event.offsetX / rect.width, 0), 1);
+            const duration = PlayManager.getDuration(trackId);
+            currentTrackPosition.value = {relative, absolute: relative * duration};
+            PlayerSync.seekRemote(relative);
+            return;
+        }
+        await PlayManager.scrubFromElement(event, trackId, version);
+    }
+
+    private static sendCommand(command: PlayerCommand) {
+        eventBus.send({type: "player:command", payload: command});
+        tabChannel?.postMessage({type: "player:command", payload: command, timestamp: Date.now()});
     }
 
     static async transferTo(targetDeviceId: string) {
