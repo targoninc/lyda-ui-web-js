@@ -68,6 +68,7 @@ export class Api {
         query: string = "",
         offset: number = 0,
         limit: number = 20,
+        code: string = "",
     ): Promise<InteractionUsersResponse | null> {
         return await get<InteractionUsersResponse>(ApiRoutes.getInteractionUsers, {
             entityType,
@@ -76,6 +77,7 @@ export class Api {
             query,
             offset,
             limit,
+            code,
         });
     }
 

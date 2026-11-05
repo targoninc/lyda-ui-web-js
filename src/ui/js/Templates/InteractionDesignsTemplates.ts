@@ -10,7 +10,7 @@ import { Icons } from "../Enums/Icons.ts";
 import { Images } from "../Enums/Images.ts";
 import { TextSize } from "../Enums/TextSize.ts";
 import { InteractionUser } from "../Models/InteractionUser.ts";
-import { currentTrackId } from "../state.ts";
+import { currentTrackId, getTrackSecretCode } from "../state.ts";
 import { RoutePath } from "../Routing/routes.ts";
 import { navigate } from "../Routing/Router.ts";
 import { UserTemplates } from "./account/UserTemplates.ts";
@@ -139,6 +139,7 @@ export class InteractionDesignsTemplates {
         document.querySelector("footer")?.classList.add("hidden");
 
         const trackId = signal(currentTrackId.value ? String(currentTrackId.value) : "");
+        const secretCode = signal(currentTrackId.value ? getTrackSecretCode(currentTrackId.value) : "");
         const query = signal("");
         const activeType = signal(InteractionType.like);
         const people = signal<InteractionUser[]>(sampleUsers);
@@ -168,7 +169,8 @@ export class InteractionDesignsTemplates {
 
             const token = ++request;
             loading.value = true;
-            const response = await Api.getInteractionUsers(EntityType.track, activeType.value, id, query.value, 0, 20);
+            const code = secretCode.value || getTrackSecretCode(id);
+            const response = await Api.getInteractionUsers(EntityType.track, activeType.value, id, query.value, 0, 20, code);
             if (token !== request) {
                 return;
             }
@@ -229,6 +231,18 @@ export class InteractionDesignsTemplates {
                         value: trackId,
                         onchange: value => {
                             trackId.value = value;
+                            secretCode.value = getTrackSecretCode(Number.parseInt(value, 10));
+                            void loadPeople();
+                        },
+                    }),
+                    input<string>({
+                        type: InputType.text,
+                        name: "interaction-design-secret-code",
+                        label: "Secret code",
+                        placeholder: "Private track code",
+                        value: secretCode,
+                        onchange: value => {
+                            secretCode.value = value;
                             void loadPeople();
                         },
                     }),
