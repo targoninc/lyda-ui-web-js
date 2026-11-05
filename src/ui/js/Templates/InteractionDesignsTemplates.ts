@@ -183,12 +183,26 @@ export class InteractionDesignsTemplates {
         document.body.appendChild(popover);
         trackCleanup(() => popover.remove());
 
+        let popoverAnchor: HTMLElement | null = null;
+        let popoverType: InteractionType | null = null;
+        popover.addEventListener("hidePopover", () => {
+            popoverAnchor = null;
+            popoverType = null;
+        });
+
         const openPeople: OpenPeople = (type, anchor, point) => {
+            if (popover.matches(":popover-open") && popoverAnchor === anchor && popoverType === type) {
+                popover.hidePopover();
+                return;
+            }
+
             activeType.value = type;
             void loadPeople();
             if (popover.matches(":popover-open")) {
                 popover.hidePopover();
             }
+            popoverAnchor = anchor;
+            popoverType = type;
             const rect = anchor.getBoundingClientRect();
             const x = point?.x ?? Math.max(8, rect.right - 340);
             const y = point?.y ?? rect.bottom + 2;
