@@ -2862,6 +2862,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 .interaction-design-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    grid-auto-rows: max-content;
     gap: var(--large-padding);
     align-items: start;
 }
