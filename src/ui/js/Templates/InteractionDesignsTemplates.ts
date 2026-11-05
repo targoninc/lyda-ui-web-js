@@ -45,7 +45,11 @@ function actionIcon(type: InteractionType, entry: InteractionEntry) {
         }
         return Icons.REPOST;
     }, entry.interacted$);
-    return GenericTemplates.icon(icon, true);
+    const mask = compute((url): string => `url("${url}")`, icon);
+    return create("span")
+        .classes("interaction-design-icon-mask")
+        .styles("mask-image", mask, "-webkit-mask-image", mask)
+        .build();
 }
 
 function iconButton(type: InteractionType, entry: InteractionEntry, classes: string[] = []) {
