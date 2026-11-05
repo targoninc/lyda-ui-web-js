@@ -2926,12 +2926,16 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .interaction-design-split-button {
+    padding-left: var(--mid-padding);
+    padding-right: var(--layout-gap);
     border-right: 1px solid var(--border);
 }
 
 .interaction-design-split-count {
     justify-content: center;
     min-width: 2em;
+    padding-left: var(--layout-gap);
+    padding-right: var(--mid-padding);
     font-variant-numeric: tabular-nums;
 }
 
