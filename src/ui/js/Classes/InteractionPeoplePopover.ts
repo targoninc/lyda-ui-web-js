@@ -66,7 +66,7 @@ export class InteractionPeoplePopover {
             return this.popover;
         }
 
-        const panel = create("div").classes("interaction-people-panel").children(
+        const panel = create("div").classes("flex-v").children(
             horizontal(
                 create("span").classes("bold").text(
                     compute((type): string => type === InteractionType.like ? "Liked by" : "Reposted by", this.activeType),

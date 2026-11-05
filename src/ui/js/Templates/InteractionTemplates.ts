@@ -108,7 +108,7 @@ export class InteractionTemplates {
 
         if (!hasSplit) {
             return create("div")
-                .classes("interaction-icon-only-wrapper", disabledClass$)
+                .classes("flex", disabledClass$)
                 .children(action)
                 .build();
         }
@@ -131,7 +131,7 @@ export class InteractionTemplates {
             .build();
 
         return create("div")
-            .classes("interaction-split", stateClass$, disabledClass$)
+            .classes("interaction-split", "flex", "no-gap", "noflexwrap", "align-children", stateClass$, disabledClass$)
             .children(action, count)
             .build();
     }

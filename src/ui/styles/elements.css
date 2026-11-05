@@ -2869,9 +2869,6 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .interaction-split {
-    display: flex;
-    align-items: center;
-    gap: 0;
     color: var(--fg-0);
     background: var(--background-glass);
     border: 1px solid var(--border);
@@ -2879,7 +2876,8 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     overflow: hidden;
 }
 
-.interaction-split.active {
+.interaction-split.active,
+.interaction-icon-only.active {
     color: var(--green);
     border-color: var(--green);
 }
@@ -2908,9 +2906,6 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     font-variant-numeric: tabular-nums;
 }
 
-.interaction-icon-only-wrapper {
-    display: flex;
-}
 
 .interaction-icon-only {
     display: flex;
@@ -2926,20 +2921,10 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     cursor: pointer;
 }
 
-.interaction-icon-only.active {
-    color: var(--green);
-    border-color: var(--green);
-}
-
 #interaction-people-popover {
     width: min(340px, calc(100vw - 16px));
 }
 
-.interaction-people-panel {
-    display: flex;
-    flex-direction: column;
-    gap: var(--layout-gap);
-}
 
 .interaction-people-list {
     max-height: 220px;
