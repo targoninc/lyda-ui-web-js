@@ -26,7 +26,7 @@ const sampleUsers: InteractionUser[] = [
 ];
 
 type InteractionEntry = ReturnType<typeof InteractionStateManager.getOrCreate>;
-type OpenPeople = (type: InteractionType, anchor: HTMLElement) => void;
+type OpenPeople = (type: InteractionType, anchor: HTMLElement, point?: {x: number; y: number}) => void;
 
 function toggle(entry: InteractionEntry) {
     entry.interacted$.value = !entry.interacted$.value;
@@ -55,113 +55,39 @@ function actionIcon(type: InteractionType, entry: InteractionEntry) {
         .build();
 }
 
-function attachPeopleMenu(element: HTMLElement, type: InteractionType, openPeople: OpenPeople) {
-    element.addEventListener("contextmenu", event => {
-        event.preventDefault();
-        openPeople(type, element);
-    });
-    return element;
-}
-
-function toggleButton(type: InteractionType, entry: InteractionEntry, classes: string[], children: any[], openPeople: OpenPeople) {
-    const button = create("button")
-        .attributes("type", "button")
-        .classes(...classes, activeClass(entry))
-        .title(type === InteractionType.like ? "Like" : "Repost")
-        .onclick(() => toggle(entry))
-        .children(...children)
-        .build() as HTMLElement;
-    return attachPeopleMenu(button, type, openPeople);
-}
-
-function countButton(type: InteractionType, entry: InteractionEntry, openPeople: OpenPeople, classes: string[] = []) {
+function countButton(type: InteractionType, entry: InteractionEntry, openPeople: OpenPeople) {
     return create("button")
         .attributes("type", "button")
-        .classes("interaction-design-count-button", ...classes, activeClass(entry))
+        .classes("interaction-design-split-count")
         .title("Show people")
         .onclick((event: MouseEvent) => {
             event.stopPropagation();
             openPeople(type, event.currentTarget as HTMLElement);
         })
         .text(countText(entry))
-        .build() as HTMLElement;
-}
-
-function minimalActions(like: InteractionEntry, repost: InteractionEntry, openPeople: OpenPeople) {
-    return horizontal(
-        toggleButton(InteractionType.like, like, ["interaction-design-icon"], [actionIcon(InteractionType.like, like)], openPeople),
-        toggleButton(InteractionType.repost, repost, ["interaction-design-icon"], [actionIcon(InteractionType.repost, repost)], openPeople),
-    ).classes("align-children", "small-gap").build();
-}
-
-function chipActions(like: InteractionEntry, repost: InteractionEntry, openPeople: OpenPeople) {
-    const chip = (type: InteractionType, entry: InteractionEntry) => create("div")
-        .classes("interaction-design-chip", activeClass(entry))
-        .children(
-            toggleButton(type, entry, ["interaction-design-chip-toggle"], [actionIcon(type, entry)], openPeople),
-            countButton(type, entry, openPeople, ["interaction-design-chip-count"]),
-        ).build();
-
-    return horizontal(
-        chip(InteractionType.like, like),
-        chip(InteractionType.repost, repost),
-    ).classes("align-children", "small-gap").build();
+        .build();
 }
 
 function splitActions(like: InteractionEntry, repost: InteractionEntry, openPeople: OpenPeople) {
-    const split = (type: InteractionType, entry: InteractionEntry) => create("div")
-        .classes("interaction-design-split", activeClass(entry))
-        .children(
-            toggleButton(type, entry, ["interaction-design-split-button"], [actionIcon(type, entry)], openPeople),
-            countButton(type, entry, openPeople, ["interaction-design-split-count"]),
-        ).build();
+    const split = (type: InteractionType, entry: InteractionEntry) => {
+        const action = create("button")
+            .attributes("type", "button")
+            .classes("interaction-design-split-button")
+            .title(type === InteractionType.like ? "Like" : "Repost")
+            .onclick(() => toggle(entry))
+            .children(actionIcon(type, entry))
+            .build() as HTMLElement;
+        action.addEventListener("contextmenu", event => {
+            event.preventDefault();
+            openPeople(type, action, {x: event.clientX, y: event.clientY});
+        });
+        return create("div")
+            .classes("interaction-design-split", activeClass(entry))
+            .children(action, countButton(type, entry, openPeople))
+            .build();
+    };
 
     return horizontal(split(InteractionType.like, like), split(InteractionType.repost, repost)).classes("align-children", "small-gap").build();
-}
-
-function segmentedActions(like: InteractionEntry, repost: InteractionEntry, openPeople: OpenPeople) {
-    const segment = (type: InteractionType, entry: InteractionEntry) => create("div")
-        .classes("interaction-design-segment", activeClass(entry))
-        .children(
-            toggleButton(type, entry, ["interaction-design-segment-button"], [actionIcon(type, entry)], openPeople),
-            countButton(type, entry, openPeople, ["interaction-design-segment-count"]),
-        ).build();
-
-    return create("div").classes("interaction-design-segmented").children(
-        segment(InteractionType.like, like),
-        segment(InteractionType.repost, repost),
-    ).build();
-}
-
-function fullActions(like: InteractionEntry, repost: InteractionEntry, openPeople: OpenPeople) {
-    const action = (type: InteractionType, entry: InteractionEntry) => create("div")
-        .classes("interaction-design-full-action", activeClass(entry))
-        .children(
-            toggleButton(type, entry, ["interaction-design-full-toggle"], [
-                actionIcon(type, entry),
-                create("span").classes("interaction-design-full-label").text(type === InteractionType.like ? "Like" : "Repost").build(),
-            ], openPeople),
-            countButton(type, entry, openPeople, ["interaction-design-full-count"]),
-        ).build();
-
-    return horizontal(
-        action(InteractionType.like, like),
-        action(InteractionType.repost, repost),
-    ).classes("align-children", "small-gap").build();
-}
-
-function railActions(like: InteractionEntry, repost: InteractionEntry, openPeople: OpenPeople) {
-    const action = (type: InteractionType, entry: InteractionEntry) => create("div")
-        .classes("interaction-design-rail-item", activeClass(entry))
-        .children(
-            toggleButton(type, entry, ["interaction-design-rail-button"], [actionIcon(type, entry)], openPeople),
-            countButton(type, entry, openPeople, ["interaction-design-rail-count"]),
-        ).build();
-
-    return vertical(
-        action(InteractionType.like, like),
-        action(InteractionType.repost, repost),
-    ).classes("interaction-design-rail", "small-gap").build();
 }
 
 function personRow(user: InteractionUser) {
@@ -180,8 +106,6 @@ function personRow(user: InteractionUser) {
 
 function peoplePanel(
     activeType: Signal<InteractionType>,
-    like: InteractionEntry,
-    repost: InteractionEntry,
     people: Signal<InteractionUser[]>,
     total: Signal<number>,
     loading: Signal<boolean>,
@@ -189,22 +113,10 @@ function peoplePanel(
     onSearch: () => void,
     name: string,
 ) {
-    const tab = (type: InteractionType, entry: InteractionEntry) => create("button")
-        .attributes("type", "button")
-        .classes("interaction-people-tab", compute((active): string => active === type ? "active" : "_", activeType))
-        .onclick(() => {
-            activeType.value = type;
-            onSearch();
-        })
-        .children(
-            create("span").text(type === InteractionType.like ? "Liked by" : "Reposted by").build(),
-            create("span").classes("interaction-design-count").text(countText(entry)).build(),
-        ).build();
-
     return create("div").classes("interaction-people-panel").children(
         horizontal(
-            tab(InteractionType.like, like),
-            tab(InteractionType.repost, repost),
+            create("span").classes("bold").text(compute((type): string => type === InteractionType.like ? "Liked by" : "Reposted by", activeType)).build(),
+            create("span").classes("color-dim", TextSize.small).text(compute((count, isLoading): string => isLoading ? "Searching…" : `${count} people`, total, loading)).build(),
         ).classes("align-children", "small-gap").build(),
         input<string>({
             type: InputType.text,
@@ -219,17 +131,6 @@ function peoplePanel(
         create("div").classes("interaction-people-list").children(
             signalMap(people, vertical().classes("flex-v", "small-gap"), user => personRow(user)),
         ).build(),
-        create("span").classes("color-dim", TextSize.small).text(
-            compute((count, isLoading): string => isLoading ? "Searching…" : `${count} people`, total, loading),
-        ).build(),
-    ).build();
-}
-
-function designCard(title: string, context: string, description: string, preview: any) {
-    return create("div").classes("card", "flex-v", "interaction-design-card").children(
-        create("span").classes("bold", TextSize.large).text(title).build(),
-        create("span").classes("color-dim", TextSize.small).text(`${context} — ${description}`).build(),
-        create("div").classes("interaction-design-preview").children(preview).build(),
     ).build();
 }
 
@@ -276,18 +177,22 @@ export class InteractionDesignsTemplates {
             loading.value = false;
         };
 
-        const panel = peoplePanel(activeType, like, repost, people, total, loading, query, () => void loadPeople(), "popover");
+        const panel = peoplePanel(activeType, people, total, loading, query, () => void loadPeople(), "popover");
         const popover = PopoverTemplates.manualPopover("interaction-people-popover", panel);
+        popover.classList.add("padded");
         document.body.appendChild(popover);
         trackCleanup(() => popover.remove());
 
-        const openPeople: OpenPeople = (type, anchor) => {
+        const openPeople: OpenPeople = (type, anchor, point) => {
             activeType.value = type;
             void loadPeople();
             if (popover.matches(":popover-open")) {
                 popover.hidePopover();
             }
-            requestAnimationFrame(() => PopoverTemplates.show(popover, anchor, false, true));
+            const rect = anchor.getBoundingClientRect();
+            const x = point?.x ?? Math.max(8, rect.right - 340);
+            const y = point?.y ?? rect.bottom + 2;
+            requestAnimationFrame(() => PopoverTemplates.showContextMenu(popover, x, y));
         };
 
         if (trackId.value) {
@@ -296,7 +201,7 @@ export class InteractionDesignsTemplates {
 
         return vertical(
             heading({level: 1, text: "Interaction designs"}),
-            GenericTemplates.text("Design studies for like and repost controls. Click a count or right-click an action to open the searchable people list."),
+            GenericTemplates.text("Split action study. Click the icon to toggle, the count or right-click to open the searchable people list."),
             create("div").classes("card", "flex-v", "small-gap").children(
                 create("span").classes("bold").text("Preview data").build(),
                 horizontal(
@@ -315,12 +220,11 @@ export class InteractionDesignsTemplates {
                 ).classes("align-end", "small-gap").build(),
             ).build(),
             create("div").classes("interaction-design-grid").children(
-                designCard("Icon only", "Player", "The smallest footprint: actions without counts. Right-click opens people.", minimalActions(like, repost, openPeople)),
-                designCard("Count chips", "Lists and cards", "Click the icon to toggle, the count to open people.", chipActions(like, repost, openPeople)),
-                designCard("Split actions", "Track page header", "Click the icon to toggle, the count to open people.", splitActions(like, repost, openPeople)),
-                designCard("Segmented actions", "Track page", "Click the icon to toggle, the count to open people.", segmentedActions(like, repost, openPeople)),
-                designCard("Full action bar", "Full track page", "Labels, icons and counts with a popout people list.", fullActions(like, repost, openPeople)),
-                designCard("Vertical rail", "Full player / side rail", "A narrow stack with a popout people list.", railActions(like, repost, openPeople)),
+                create("div").classes("card", "flex-v", "interaction-design-card").children(
+                    create("span").classes("bold", TextSize.large).text("Split actions").build(),
+                    create("span").classes("color-dim", TextSize.small).text("Track page header — Click the icon to toggle, the count to open people.").build(),
+                    create("div").classes("interaction-design-preview").children(splitActions(like, repost, openPeople)).build(),
+                ).build(),
             ).build(),
         ).classes("interaction-design-page", "padded-page", "flex-v", "gap").build();
     }
