@@ -41,6 +41,7 @@ export class ApiRoutes {
     static reorderPins = ApiRoutes.user + "/pins/reorder";
 
     static toggleInteraction = ApiRoutes.base + "/toggleInteraction";
+    static getInteractionUsers = ApiRoutes.base + "/interactions/get";
     static removeAllInteractions = ApiRoutes.base + "/removeAllInteractions";
     // endregion
 

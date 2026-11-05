@@ -2852,3 +2852,188 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 
+
+/* Interaction design studies (/interactions) */
+.interaction-design-page {
+    max-width: 1500px;
+    margin: 0 auto;
+}
+
+.interaction-design-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: var(--large-padding);
+    align-items: start;
+}
+
+.interaction-design-card {
+    min-width: 0;
+}
+
+.interaction-design-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 110px;
+    padding: var(--large-padding);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius);
+    background: var(--bg-1);
+}
+
+.interaction-design-icon,
+.interaction-design-chip,
+.interaction-design-split-button,
+.interaction-design-split-count,
+.interaction-design-segment-button,
+.interaction-design-full-action,
+.interaction-design-rail-button,
+.interaction-people-tab {
+    color: var(--fg-0);
+    background: var(--background-glass);
+    border: 1px solid var(--border);
+    cursor: pointer;
+}
+
+.interaction-design-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border-radius: 50%;
+}
+
+.interaction-design-icon.active,
+.interaction-design-chip.active,
+.interaction-design-split-button.active,
+.interaction-design-segment-button.active,
+.interaction-design-full-action.active,
+.interaction-design-rail-button.active,
+.interaction-people-tab.active {
+    color: var(--green);
+    border-color: var(--green);
+}
+
+.interaction-design-chip,
+.interaction-design-split,
+.interaction-design-segment-button,
+.interaction-design-full-action,
+.interaction-design-rail-button {
+    display: flex;
+    align-items: center;
+    gap: var(--gap);
+}
+
+.interaction-design-chip {
+    padding: var(--gap) var(--mid-padding);
+    border-radius: 999px;
+}
+
+.interaction-design-count {
+    color: inherit;
+    font-variant-numeric: tabular-nums;
+}
+
+.interaction-design-split {
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.interaction-design-split-button,
+.interaction-design-split-count {
+    border: 0;
+    border-radius: 0;
+    padding: var(--gap) var(--mid-padding);
+}
+
+.interaction-design-split-button {
+    border-right: 1px solid var(--border);
+}
+
+.interaction-design-split-count {
+    display: flex;
+    align-items: center;
+    min-width: 2.4em;
+    justify-content: center;
+}
+
+.interaction-design-segmented {
+    display: flex;
+    gap: 0;
+    padding: 3px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--bg-1);
+}
+
+.interaction-design-segment-button {
+    padding: var(--gap) var(--mid-padding);
+    border: 0;
+    border-radius: 999px;
+}
+
+.interaction-design-segment-button.active {
+    background: var(--bg-2);
+}
+
+.interaction-design-full-action {
+    padding: var(--mid-padding) var(--large-padding);
+    border-radius: var(--large-border-radius);
+}
+
+.interaction-design-full-label {
+    font-weight: 600;
+}
+
+.interaction-design-rail {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.interaction-design-rail-button {
+    flex-direction: column;
+    justify-content: center;
+    min-width: 52px;
+    padding: var(--gap);
+    border-radius: var(--border-radius);
+}
+
+.interaction-people-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--layout-gap);
+    padding-top: var(--layout-gap);
+    border-top: 1px solid var(--border);
+}
+
+.interaction-people-tab {
+    display: flex;
+    align-items: center;
+    gap: var(--gap);
+    padding: var(--gap) var(--mid-padding);
+    border-radius: 999px;
+}
+
+.interaction-people-tab.active {
+    background: var(--bg-2);
+}
+
+.interaction-people-list {
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.interaction-person {
+    padding: var(--gap) var(--layout-gap);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+}
+
+.interaction-person:hover {
+    background: var(--bg-2);
+}
