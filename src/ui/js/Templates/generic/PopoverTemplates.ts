@@ -64,6 +64,7 @@ export class PopoverTemplates {
         popover.style.right = "auto";
         popover.style.bottom = "auto";
         popover.showPopover();
+        PopoverTemplates.clampHorizontally(popover);
         PopoverTemplates.attachContextMenuDismissal(popover);
     }
 
@@ -73,7 +74,20 @@ export class PopoverTemplates {
         if (popover.matches(":popover-open")) return;
         PopoverTemplates.positionAtAnchor(popover, anchor, above, rightAlign);
         popover.showPopover();
+        PopoverTemplates.clampHorizontally(popover);
         PopoverTemplates.attachContextMenuDismissal(popover);
+    }
+
+    private static clampHorizontally(popover: HTMLElement): void {
+        const margin = 4;
+        const rect = popover.getBoundingClientRect();
+        if (rect.left < margin) {
+            popover.style.left = `${margin}px`;
+            popover.style.right = "auto";
+        } else if (rect.right > window.innerWidth - margin) {
+            popover.style.left = "auto";
+            popover.style.right = `${margin}px`;
+        }
     }
 
     private static attachContextMenuDismissal(popover: HTMLElement): void {
