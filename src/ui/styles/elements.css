@@ -2921,6 +2921,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     color: inherit;
     background: transparent;
     border: 0;
+    border-radius: 0;
     cursor: pointer;
 }
 
