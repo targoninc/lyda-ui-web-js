@@ -436,7 +436,10 @@ export class SettingsTemplates {
                                 GenericTemplates.icon(group.icon, true),
                                 create("span").classes("bold", TextSize.large).text(group.heading),
                             ).classes("align-children", "small-gap").build(),
-                            ...group.items.map(item => SettingsTemplates.notificationToggle(item.text, item.key)),
+                            create("div")
+                                .classes("flex-v", "notification-group-items")
+                                .children(...group.items.map(item => SettingsTemplates.notificationToggle(item.text, item.key)))
+                                .build(),
                         ];
                     }),
                 ).build();

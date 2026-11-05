@@ -1552,6 +1552,10 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     display: none;
 }
 
+.notification-group-items {
+    padding-left: calc(var(--layout-gap) * 1.5);
+}
+
 .settings-nav input {
     width: 100%;
     box-sizing: border-box;
