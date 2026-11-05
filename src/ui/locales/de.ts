@@ -458,6 +458,7 @@ export const de: Translation = {
     NOTIFS_COMMENT: "Benachrichtigungen zu Kommentaren",
     NOTIFS_REPLIES: "Benachrichtigungen zu Antworten",
     NOTIFS_FOLLOW: "Benachrichtigungen wenn dir jemand folgt",
+    NOTIFS_COMMENT_LIKES: "Benachrichtigungen zu Likes auf deinen Kommentaren",
     NOTIFS_LIKE: "Benachrichtigungen zu Likes",
     NOTIFS_REPOST: "Benachrichtigungen zu Wiederveröffentlichungen",
     DELETE_ACCOUNT: "Konto löschen",

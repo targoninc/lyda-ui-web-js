@@ -68,6 +68,7 @@ export const es: Translation = {
     QUALITY_LOW: "bajo",
     QUALITY_MEDIUM: "medio",
     QUALITY_HIGH: "alto",
+    NOTIFS_COMMENT_LIKES: "Notificaciones de me gusta en tus comentarios",
     NOTIFS_LIKE: "Me gustan las notificaciones",
     NOTIFS_COMMENT: "Notificaciones de comentarios",
     NOTIFS_REPLIES: "Responder notificaciones",

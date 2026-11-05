@@ -68,6 +68,7 @@ export const ga: Translation = {
     QUALITY_LOW: "íseal",
     QUALITY_MEDIUM: "meánach",
     QUALITY_HIGH: "ard",
+    NOTIFS_COMMENT_LIKES: "Fógraí faoi chosúil ar do thuairimí",
     NOTIFS_LIKE: "Cosúil le fógraí",
     NOTIFS_COMMENT: "Fógraí tráchta",
     NOTIFS_REPLIES: "Fógraí freagartha",

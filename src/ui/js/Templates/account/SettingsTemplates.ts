@@ -369,6 +369,7 @@ export class SettingsTemplates {
         const heading = t("EMAIL_NOTIFICATIONS");
         const items = [
             {text: t("NOTIFS_LIKE"), key: "like", value: UserSettings.notificationLike},
+            {text: t("NOTIFS_COMMENT_LIKES"), key: "comment_like", value: UserSettings.notificationCommentLike},
             {text: t("NOTIFS_COMMENT"), key: "comment", value: UserSettings.notificationComment},
             {text: t("NOTIFS_REPLIES"), key: "reply", value: UserSettings.notificationReply},
             {text: t("NOTIFS_FOLLOW"), key: "follow", value: UserSettings.notificationFollow},

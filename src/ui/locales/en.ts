@@ -68,6 +68,7 @@ export const en = {
     QUALITY_LOW: "low",
     QUALITY_MEDIUM: "medium",
     QUALITY_HIGH: "high",
+    NOTIFS_COMMENT_LIKES: "Notifications for likes on your comments",
     NOTIFS_LIKE: "Like notifications",
     NOTIFS_COMMENT: "Comment notifications",
     NOTIFS_REPLIES: "Reply notifications",
