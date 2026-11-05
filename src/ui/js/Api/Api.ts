@@ -23,6 +23,7 @@ import { AuthenticationJSON, CredentialDescriptor, RegistrationJSON } from "@pas
 import { MfaOption } from "@targoninc/lyda-shared/src/Enums/MfaOption.ts";
 import { UploadableTrack } from "../Models/UploadableTrack.ts";
 import { InteractionType } from "@targoninc/lyda-shared/src/Enums/InteractionType";
+import { InteractionUsersResponse } from "../Models/InteractionUsersResponse.ts";
 import { EntityType } from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 import { Genre } from "@targoninc/lyda-shared/src/Enums/Genre";
 import { MonthIdentifier } from "../Classes/Helpers/Date.ts";
@@ -57,6 +58,26 @@ export class Api {
             interactionType,
             id,
             toggle: !interacted$.value,
+        });
+    }
+
+    static async getInteractionUsers(
+        entityType: EntityType,
+        interactionType: InteractionType,
+        id: number,
+        query: string = "",
+        offset: number = 0,
+        limit: number = 20,
+        code: string = "",
+    ): Promise<InteractionUsersResponse | null> {
+        return await get<InteractionUsersResponse>(ApiRoutes.getInteractionUsers, {
+            entityType,
+            interactionType,
+            id,
+            query,
+            offset,
+            limit,
+            code,
         });
     }
 

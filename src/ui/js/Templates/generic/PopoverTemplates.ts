@@ -64,7 +64,33 @@ export class PopoverTemplates {
         popover.style.right = "auto";
         popover.style.bottom = "auto";
         popover.showPopover();
+        PopoverTemplates.clampHorizontally(popover);
+        PopoverTemplates.attachContextMenuDismissal(popover);
+    }
 
+    static showContextMenuAtAnchor(popover: HTMLElement, anchor: AnyElement, above = false, rightAlign = false): void {
+        if (!popover.isConnected) return;
+        PopoverTemplates.closeOthers(popover);
+        if (popover.matches(":popover-open")) return;
+        PopoverTemplates.positionAtAnchor(popover, anchor, above, rightAlign);
+        popover.showPopover();
+        PopoverTemplates.clampHorizontally(popover);
+        PopoverTemplates.attachContextMenuDismissal(popover);
+    }
+
+    private static clampHorizontally(popover: HTMLElement): void {
+        const margin = 4;
+        const rect = popover.getBoundingClientRect();
+        if (rect.left < margin) {
+            popover.style.left = `${margin}px`;
+            popover.style.right = "auto";
+        } else if (rect.right > window.innerWidth - margin) {
+            popover.style.left = "auto";
+            popover.style.right = `${margin}px`;
+        }
+    }
+
+    private static attachContextMenuDismissal(popover: HTMLElement): void {
         const onDocumentClick = (e: MouseEvent) => {
             if (!popover.contains(e.target as Node)) {
                 popover.hidePopover();

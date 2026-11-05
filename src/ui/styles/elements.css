@@ -2852,3 +2852,91 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 
+
+/* Interaction buttons */
+.interaction-icon-mask {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    flex: 0 0 auto;
+    background: currentColor;
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+}
+
+.interaction-split {
+    color: var(--fg-0);
+    background: var(--background-glass);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.interaction-split.active,
+.interaction-icon-only.active {
+    color: var(--green);
+    border-color: var(--green);
+}
+
+.interaction-split-action,
+.interaction-split-count {
+    display: flex;
+    align-items: center;
+    gap: var(--gap);
+    color: inherit;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    cursor: pointer;
+}
+
+.interaction-split-action {
+    padding: var(--gap) var(--layout-gap) var(--gap) var(--mid-padding);
+    border-right: 1px solid var(--border);
+}
+
+.interaction-split-count {
+    justify-content: center;
+    min-width: 2em;
+    padding: var(--gap) var(--mid-padding) var(--gap) var(--layout-gap);
+    font-variant-numeric: tabular-nums;
+}
+
+
+.interaction-icon-only {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    color: var(--fg-0);
+    background: var(--background-glass);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+#interaction-people-popover {
+    width: min(340px, calc(100vw - 16px));
+}
+
+
+.interaction-people-list {
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.interaction-person {
+    padding: var(--gap) var(--layout-gap);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+}
+
+.interaction-person:hover {
+    background: var(--bg-2);
+}
