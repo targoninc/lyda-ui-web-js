@@ -423,10 +423,6 @@ export class SettingsTemplates {
                         );
                         return [
                             horizontal(
-                                horizontal(
-                                    GenericTemplates.icon(group.icon, true),
-                                    create("span").classes("bold", TextSize.large).text(group.heading),
-                                ).classes("align-children", "small-gap").build(),
                                 GenericTemplates.toggle(
                                     t("ALL"),
                                     `notification_group_${group.heading.value.trim().replaceAll(/\s+/g, "-").toLowerCase()}`,
@@ -437,7 +433,9 @@ export class SettingsTemplates {
                                     ["notification-group-toggle"],
                                     checked,
                                 ),
-                            ).classes("space-between", "align-children").build(),
+                                GenericTemplates.icon(group.icon, true),
+                                create("span").classes("bold", TextSize.large).text(group.heading),
+                            ).classes("align-children", "small-gap").build(),
                             ...group.items.map(item => SettingsTemplates.notificationToggle(item.text, item.key)),
                         ];
                     }),
