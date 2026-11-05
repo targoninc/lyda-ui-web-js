@@ -409,21 +409,41 @@ export class SettingsTemplates {
                 .classes("card", "flex-v")
                 .children(
                     SettingsTemplates.sectionHeading(heading),
-                    ...matchingGroups.flatMap(group => [
-                        create("h3").classes("bold").text(group.heading),
-                        ...group.items.map(item => SettingsTemplates.notificationToggle(
-                            item.text,
-                            item.key,
-                            getUserSettingValue(user, item.value),
-                        )),
-                    ]),
+                    ...matchingGroups.flatMap(group => {
+                        const checked = compute(
+                            (currentUserValue: User | null): boolean => !!currentUserValue &&
+                                group.items.every(item => !!getUserSettingValue(currentUserValue, item.value)),
+                            currentUser,
+                        );
+                        return [
+                            horizontal(
+                                create("h3").classes("bold").text(group.heading),
+                                GenericTemplates.toggle(
+                                    t("ALL"),
+                                    `notification_group_${group.heading.value.trim().replaceAll(/\s+/g, "-").toLowerCase()}`,
+                                    async () => await UserActions.setNotificationSettings(
+                                        group.items.map(item => item.key),
+                                        !checked.value,
+                                    ),
+                                    ["notification-group-toggle"],
+                                    checked,
+                                ),
+                            ).classes("space-between", "align-children").build(),
+                            ...group.items.map(item => SettingsTemplates.notificationToggle(item.text, item.key)),
+                        ];
+                    }),
                 ).build();
         }, searchQuery$);
     }
 
-    static notificationToggle(text: StringOrSignal, key: string, currentValue: boolean) {
+    static notificationToggle(text: StringOrSignal, key: string) {
+        const settingKey = `notification_${key}` as UserSettings;
+        const checked = compute(
+            (user: User | null): boolean => user ? !!getUserSettingValue(user, settingKey) : false,
+            currentUser,
+        );
         return GenericTemplates.toggle(text, "notification_" + key, async () =>
-            await UserActions.toggleNotificationSetting(key), [], currentValue);
+            await UserActions.toggleNotificationSetting(key), [], checked);
     }
 
     static behaviourSection(user: User, searchQuery$: Signal<string>) {

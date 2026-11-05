@@ -154,6 +154,18 @@ export class UserActions {
         return await UserActions.toggleBooleanUserSetting(settingKey);
     }
 
+    static async setNotificationSettings(keys: string[], value: boolean) {
+        const user = await Util.getUserAsync();
+        const settingKeys = keys.map(key => `notification_${key}` as UserSettings);
+        await Promise.all(settingKeys.map(key => Api.updateUserSetting(key, value)));
+        for (const key of settingKeys) {
+            user.settings = updateUserSetting(user, key, value.toString());
+        }
+        LydaCache.set("user", new CacheItem(user));
+        currentUser.value = user;
+        return true;
+    }
+
     static editDescription(currentDescription: string, successCallback: Function) {
         Ui.getTextAreaInputModal(
             t("EDIT_DESCRIPTION"),

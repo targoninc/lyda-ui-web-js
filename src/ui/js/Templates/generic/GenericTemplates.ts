@@ -115,10 +115,10 @@ export class GenericTemplates {
         callback = () => {
         },
         extraClasses: string[] = [],
-        checked = false,
+        checked: HtmlPropertyValue | Signal<boolean> = false,
     ) {
         return create("label").classes("flex", ...extraClasses).for(id).children(
-            create("input").type(InputType.checkbox).classes("hidden", "slider").id(id).checked(checked).onclick(callback).build(),
+            create("input").type(InputType.checkbox).classes("hidden", "slider").id(id).checked(checked as HtmlPropertyValue).onclick(callback).build(),
             create("div").classes("toggle-container").children(create("span").classes("toggle-slider").build()).build(),
             create("span").classes("toggle-text").text(text).build(),
         ).build();
