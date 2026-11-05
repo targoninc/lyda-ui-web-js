@@ -14,6 +14,8 @@ import {Visibility} from "@targoninc/lyda-shared/src/Enums/Visibility";
 import {Api} from "../Api/Api.ts";
 import {InteractionOptions} from "../Models/InteractionOptions.ts";
 import {InteractionStateManager} from "../Classes/InteractionStateManager.ts";
+import {InteractionPeoplePopover} from "../Classes/InteractionPeoplePopover.ts";
+import {getTrackSecretCode} from "../Classes/Helpers/TrackSecretCodes.ts";
 
 const interactionConfigs: Record<InteractionType, InteractionConfig> = {
     [InteractionType.like]: {
@@ -47,7 +49,6 @@ export class InteractionTemplates {
             metadata.interacted ?? false, metadata.count ?? 0,
         );
 
-        const icon$ = compute(i => i ? config.icons.interacted : config.icons.default, interacted$);
         const stateClass$ = compute((s: boolean): string => s ? "active" : "_", interacted$);
         const inertClass = config.toggleable ? "_" : "inert";
         const entityVisibility = (entity as any).visibility;
@@ -58,20 +59,81 @@ export class InteractionTemplates {
             return "_";
         }, currentUser);
         const hideOnSmall = interactionType === InteractionType.comment;
+        const countVisible = metadata.count !== undefined && metadata.count !== null && showCount;
+        const hasSplit = config.toggleable && countVisible;
+
+        if (!config.toggleable) {
+            const icon$ = compute(i => i ? config.icons.interacted : config.icons.default, interacted$);
+            return create("div")
+                .classes("flex", "align-children", hideOnSmall ? "hideOnSmallBreakpoint" : "", disabledClass$)
+                .children(
+                    GenericTemplates.roundIconButton({
+                        icon: icon$,
+                        isUrl: icon$.value.includes("http")
+                    }, () => toggleInteraction(entityType, interactionType, config, entity.id, interacted$, count$), interactionType,
+                        ["positive", stateClass$, "stats-indicator", inertClass]),
+                    when(countVisible, create("span")
+                        .classes("interaction-count", stateClass$, "hideOnSmallBreakpoint")
+                        .text(count$ as HtmlPropertyValue)
+                        .build()),
+                ).build();
+        }
+
+        const icon$ = compute(i => i ? config.icons.interacted : config.icons.default, interacted$);
+        const mask$ = compute((url): string => `url("${url}")`, icon$);
+        const action = create("button")
+            .attributes("type", "button")
+            .classes(hasSplit ? "interaction-split-action" : "interaction-icon-only", stateClass$)
+            .title(interactionType)
+            .onclick(() => toggleInteraction(entityType, interactionType, config, entity.id, interacted$, count$))
+            .children(
+                create("span")
+                    .classes("interaction-icon-mask")
+                    .styles("mask-image", mask$, "-webkit-mask-image", mask$)
+                    .build(),
+            ).build() as HTMLElement;
+
+        const code = entityType === EntityType.track ? getTrackSecretCode(entity.id) : "";
+        action.addEventListener("contextmenu", event => {
+            event.preventDefault();
+            InteractionPeoplePopover.show(
+                entityType,
+                interactionType,
+                entity.id,
+                code,
+                action,
+                {x: event.clientX, y: event.clientY},
+            );
+        });
+
+        if (!hasSplit) {
+            return create("div")
+                .classes("interaction-icon-only-wrapper", disabledClass$)
+                .children(action)
+                .build();
+        }
+
+        const count = create("button")
+            .attributes("type", "button")
+            .classes("interaction-split-count", stateClass$)
+            .title("Show people")
+            .onclick((event: MouseEvent) => {
+                event.stopPropagation();
+                InteractionPeoplePopover.show(
+                    entityType,
+                    interactionType,
+                    entity.id,
+                    code,
+                    event.currentTarget as HTMLElement,
+                );
+            })
+            .text(compute((value): string => String(value), count$))
+            .build();
 
         return create("div")
-            .classes("flex", "align-children", hideOnSmall ? "hideOnSmallBreakpoint" : "", disabledClass$)
-            .children(
-                GenericTemplates.roundIconButton({
-                    icon: icon$,
-                    isUrl: icon$.value.includes("http")
-                }, () => toggleInteraction(entityType, interactionType, config, entity.id, interacted$, count$), interactionType,
-                    ["positive", stateClass$, "stats-indicator", inertClass]),
-                when(metadata.count !== undefined && metadata.count !== null && showCount, create("span")
-                    .classes("interaction-count", stateClass$, "hideOnSmallBreakpoint")
-                    .text(count$ as HtmlPropertyValue)
-                    .build()),
-            ).build();
+            .classes("interaction-split", stateClass$, disabledClass$)
+            .children(action, count)
+            .build();
     }
 
     static interactions<T>(entityType: EntityType, entity: T, options?: InteractionOptions) {

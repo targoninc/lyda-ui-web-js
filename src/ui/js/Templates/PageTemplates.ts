@@ -53,7 +53,6 @@ import {t} from "../../locales";
 import {TransactionTemplates} from "./money/TransactionTemplates.ts";
 import {BatchEditField, BatchEditTemplates} from "./generic/BatchEditTemplates.ts";
 import {ComponentGalleryTemplates} from "./Development/ComponentGalleryTemplates.ts";
-import {InteractionDesignsTemplates} from "./InteractionDesignsTemplates.ts";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, (route: Route, params: Record<string, string>) => Promise<AnyElement> | AnyElement> = {
@@ -87,7 +86,6 @@ export class PageTemplates {
         [RoutePath.createAlbum]: AlbumTemplates.createAlbumPage,
         [RoutePath.createPlaylist]: PlaylistTemplates.createPlaylistPage,
         [RoutePath.componentGallery]: ComponentGalleryTemplates.page,
-        [RoutePath.interactions]: InteractionDesignsTemplates.page,
 
     };
     static needLoginPages: RoutePath[] = [

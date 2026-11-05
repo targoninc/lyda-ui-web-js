@@ -2853,36 +2853,8 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 
 
 
-/* Interaction design studies (/interactions) */
-.interaction-design-page {
-    max-width: 1500px;
-    margin: 0 auto;
-}
-
-.interaction-design-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-    grid-auto-rows: max-content;
-    gap: var(--large-padding);
-    align-items: start;
-}
-
-.interaction-design-card {
-    min-width: 0;
-}
-
-.interaction-design-preview {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 80px;
-    padding: var(--mid-padding);
-    border: 1px solid var(--border);
-    border-radius: var(--border-radius);
-    background: var(--bg-1);
-}
-
-.interaction-design-icon-mask {
+/* Interaction buttons */
+.interaction-icon-mask {
     display: inline-block;
     width: 1em;
     height: 1em;
@@ -2896,7 +2868,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     -webkit-mask-position: center;
 }
 
-.interaction-design-split {
+.interaction-split {
     display: flex;
     align-items: center;
     gap: 0;
@@ -2907,17 +2879,16 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     overflow: hidden;
 }
 
-.interaction-design-split.active {
+.interaction-split.active {
     color: var(--green);
     border-color: var(--green);
 }
 
-.interaction-design-split-button,
-.interaction-design-split-count {
+.interaction-split-action,
+.interaction-split-count {
     display: flex;
     align-items: center;
     gap: var(--gap);
-    padding: var(--gap) var(--layout-gap);
     color: inherit;
     background: transparent;
     border: 0;
@@ -2925,18 +2896,39 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     cursor: pointer;
 }
 
-.interaction-design-split-button {
-    padding-left: var(--mid-padding);
-    padding-right: var(--layout-gap);
+.interaction-split-action {
+    padding: var(--gap) var(--layout-gap) var(--gap) var(--mid-padding);
     border-right: 1px solid var(--border);
 }
 
-.interaction-design-split-count {
+.interaction-split-count {
     justify-content: center;
     min-width: 2em;
-    padding-left: var(--layout-gap);
-    padding-right: var(--mid-padding);
+    padding: var(--gap) var(--mid-padding) var(--gap) var(--layout-gap);
     font-variant-numeric: tabular-nums;
+}
+
+.interaction-icon-only-wrapper {
+    display: flex;
+}
+
+.interaction-icon-only {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    color: var(--fg-0);
+    background: var(--background-glass);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.interaction-icon-only.active {
+    color: var(--green);
+    border-color: var(--green);
 }
 
 #interaction-people-popover {
