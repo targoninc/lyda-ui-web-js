@@ -55,10 +55,17 @@ export class InteractionPeoplePopover {
             popover.hidePopover();
         }
 
+        const above = !!anchor.closest("footer");
         const rect = anchor.getBoundingClientRect();
         const x = point?.x ?? Math.max(8, rect.right - 340);
         const y = point?.y ?? rect.bottom + 2;
-        requestAnimationFrame(() => PopoverTemplates.showContextMenu(popover, x, y));
+        requestAnimationFrame(() => {
+            if (above) {
+                PopoverTemplates.showContextMenuAtAnchor(popover, anchor, true, true);
+            } else {
+                PopoverTemplates.showContextMenu(popover, x, y);
+            }
+        });
     }
 
     private static ensurePopover() {
