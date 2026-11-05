@@ -75,6 +75,7 @@ export const ga: Translation = {
     NOTIFS_NEW_ALBUM: "Albaim nua",
     NOTIFS_NEW_PLAYLIST: "Seinnliostaí nua",
     NOTIFS_TRACK_PUBLISHED: "Rianta príobháideacha a dhéantar poiblí",
+    NOTIFS_FOLLOWED_REPOST: "Athphoist ó dhaoine a leanaim",
     NOTIFS_LIKE: "Cosúil le fógraí",
     NOTIFS_COMMENT: "Fógraí tráchta",
     NOTIFS_REPLIES: "Fógraí freagartha",

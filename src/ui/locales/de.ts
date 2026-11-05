@@ -465,6 +465,7 @@ export const de: Translation = {
     NOTIFS_NEW_ALBUM: "Neue Alben",
     NOTIFS_NEW_PLAYLIST: "Neue Playlists",
     NOTIFS_TRACK_PUBLISHED: "Private Tracks, die öffentlich gemacht werden",
+    NOTIFS_FOLLOWED_REPOST: "Reposts von Personen, denen ich folge",
     NOTIFS_LIKE: "Benachrichtigungen zu Likes",
     NOTIFS_REPOST: "Benachrichtigungen zu Wiederveröffentlichungen",
     DELETE_ACCOUNT: "Konto löschen",

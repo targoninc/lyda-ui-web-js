@@ -75,6 +75,7 @@ export const es: Translation = {
     NOTIFS_NEW_ALBUM: "Nuevos álbumes",
     NOTIFS_NEW_PLAYLIST: "Nuevas listas de reproducción",
     NOTIFS_TRACK_PUBLISHED: "Pistas privadas que se hacen públicas",
+    NOTIFS_FOLLOWED_REPOST: "Reposts de personas que sigo",
     NOTIFS_LIKE: "Me gustan las notificaciones",
     NOTIFS_COMMENT: "Notificaciones de comentarios",
     NOTIFS_REPLIES: "Responder notificaciones",

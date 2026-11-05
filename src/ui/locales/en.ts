@@ -75,6 +75,7 @@ export const en = {
     NOTIFS_NEW_ALBUM: "New albums",
     NOTIFS_NEW_PLAYLIST: "New playlists",
     NOTIFS_TRACK_PUBLISHED: "Private tracks made public",
+    NOTIFS_FOLLOWED_REPOST: "Reposts from people I follow",
     NOTIFS_LIKE: "Like notifications",
     NOTIFS_COMMENT: "Comment notifications",
     NOTIFS_REPLIES: "Reply notifications",
