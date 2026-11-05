@@ -179,7 +179,7 @@ export class InteractionDesignsTemplates {
 
         const panel = peoplePanel(activeType, people, total, loading, query, () => void loadPeople(), "popover");
         const popover = PopoverTemplates.manualPopover("interaction-people-popover", panel);
-        popover.classList.add("padded");
+        popover.classList.add("padded-large");
         document.body.appendChild(popover);
         trackCleanup(() => popover.remove());
 
