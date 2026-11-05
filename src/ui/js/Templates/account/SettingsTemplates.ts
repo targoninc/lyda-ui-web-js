@@ -367,33 +367,56 @@ export class SettingsTemplates {
 
     static notificationsSection(user: User, searchQuery$: Signal<string>) {
         const heading = t("EMAIL_NOTIFICATIONS");
-        const items = [
-            {text: t("NOTIFS_LIKE"), key: "like", value: UserSettings.notificationLike},
-            {text: t("NOTIFS_COMMENT_LIKES"), key: "comment_like", value: UserSettings.notificationCommentLike},
-            {text: t("NOTIFS_COMMENT"), key: "comment", value: UserSettings.notificationComment},
-            {text: t("NOTIFS_REPLIES"), key: "reply", value: UserSettings.notificationReply},
-            {text: t("NOTIFS_FOLLOW"), key: "follow", value: UserSettings.notificationFollow},
-            {text: t("NOTIFS_REPOST"), key: "repost", value: UserSettings.notificationRepost},
-            {text: t("NOTIFS_COLLAB"), key: "collaboration", value: UserSettings.notificationCollaboration},
-            {text: t("NOTIFS_SALE"), key: "sale", value: UserSettings.notificationSale},
-            {text: t("NOTIFS_TRACK_DELETED"), key: "track_deleted", value: UserSettings.notificationTrackDeleted},
+        const groups = [
+            {
+                heading: t("NOTIFS_MY_CONTENT"),
+                items: [
+                    {text: t("NOTIFS_LIKE"), key: "like", value: UserSettings.notificationLike},
+                    {text: t("NOTIFS_COMMENT_LIKES"), key: "comment_like", value: UserSettings.notificationCommentLike},
+                    {text: t("NOTIFS_COMMENT"), key: "comment", value: UserSettings.notificationComment},
+                    {text: t("NOTIFS_REPLIES"), key: "reply", value: UserSettings.notificationReply},
+                    {text: t("NOTIFS_FOLLOW"), key: "follow", value: UserSettings.notificationFollow},
+                    {text: t("NOTIFS_REPOST"), key: "repost", value: UserSettings.notificationRepost},
+                    {text: t("NOTIFS_COLLAB"), key: "collaboration", value: UserSettings.notificationCollaboration},
+                    {text: t("NOTIFS_SALE"), key: "sale", value: UserSettings.notificationSale},
+                    {text: t("NOTIFS_TRACK_DELETED"), key: "track_deleted", value: UserSettings.notificationTrackDeleted},
+                ],
+            },
+            {
+                heading: t("NOTIFS_PEOPLE_I_FOLLOW"),
+                items: [
+                    {text: t("NOTIFS_NEW_TRACK"), key: "new_track", value: UserSettings.notificationNewTrack},
+                    {text: t("NOTIFS_NEW_ALBUM"), key: "new_album", value: UserSettings.notificationNewAlbum},
+                    {text: t("NOTIFS_NEW_PLAYLIST"), key: "new_playlist", value: UserSettings.notificationNewPlaylist},
+                    {text: t("NOTIFS_TRACK_PUBLISHED"), key: "track_published", value: UserSettings.notificationTrackPublished},
+                ],
+            },
         ];
 
         return compute(query => {
             const headingMatches = SettingsTemplates.matches(heading, query);
-            const matchingItems = items.filter(item => headingMatches || SettingsTemplates.matches(item.text, query));
+            const matchingGroups = groups.map(group => {
+                const groupMatches = headingMatches || SettingsTemplates.matches(group.heading, query);
+                return {
+                    heading: group.heading,
+                    items: group.items.filter(item => groupMatches || SettingsTemplates.matches(item.text, query)),
+                };
+            }).filter(group => group.items.length > 0);
 
-            if (matchingItems.length === 0) return nullElement();
+            if (matchingGroups.length === 0) return nullElement();
 
             return create("div")
                 .classes("card", "flex-v")
                 .children(
                     SettingsTemplates.sectionHeading(heading),
-                    ...matchingItems.map(item => SettingsTemplates.notificationToggle(
-                        item.text,
-                        item.key,
-                        getUserSettingValue(user, item.value),
-                    )),
+                    ...matchingGroups.flatMap(group => [
+                        create("h3").classes("bold").text(group.heading),
+                        ...group.items.map(item => SettingsTemplates.notificationToggle(
+                            item.text,
+                            item.key,
+                            getUserSettingValue(user, item.value),
+                        )),
+                    ]),
                 ).build();
         }, searchQuery$);
     }
