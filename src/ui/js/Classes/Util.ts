@@ -7,6 +7,7 @@ import { currentUser, permissions } from "../state.ts";
 import { AnyElement, asSignal, compute, signal, Signal } from "@targoninc/jess";
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
+import { Usersetting } from "@targoninc/lyda-shared/src/Models/db/lyda/Usersetting";
 import { NotificationType } from "../Enums/NotificationType.ts";
 import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import { Api } from "../Api/Api.ts";
@@ -338,12 +339,26 @@ export function userHasSettingValue(user: User, key: UserSettings, value: string
 }
 
 export function updateUserSetting(user: User, key: string, value: string) {
-    return user.settings?.map(s => {
+    let found = false;
+    const settings = user.settings?.map(s => {
         if (s.key === key) {
             s.value = value;
+            found = true;
         }
         return s;
-    })
+    }) ?? [];
+    if (!found) {
+        const now = new Date();
+        settings.push(<Usersetting>{
+            user_id: user.id,
+            key,
+            value,
+            created_at: now,
+            updated_at: now,
+        });
+    }
+    user.settings = settings;
+    return settings;
 }
 
 export function target<T = HTMLInputElement>(e: Event) {
