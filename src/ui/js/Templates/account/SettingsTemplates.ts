@@ -370,6 +370,7 @@ export class SettingsTemplates {
         const groups = [
             {
                 heading: t("NOTIFS_MY_CONTENT"),
+                icon: "person",
                 items: [
                     {text: t("NOTIFS_LIKE"), key: "like", value: UserSettings.notificationLike},
                     {text: t("NOTIFS_COMMENT_LIKES"), key: "comment_like", value: UserSettings.notificationCommentLike},
@@ -384,6 +385,7 @@ export class SettingsTemplates {
             },
             {
                 heading: t("NOTIFS_PEOPLE_I_FOLLOW"),
+                icon: "group",
                 items: [
                     {text: t("NOTIFS_NEW_TRACK"), key: "new_track", value: UserSettings.notificationNewTrack},
                     {text: t("NOTIFS_NEW_ALBUM"), key: "new_album", value: UserSettings.notificationNewAlbum},
@@ -399,6 +401,7 @@ export class SettingsTemplates {
                 const groupMatches = headingMatches || SettingsTemplates.matches(group.heading, query);
                 return {
                     heading: group.heading,
+                    icon: group.icon,
                     items: group.items.filter(item => groupMatches || SettingsTemplates.matches(item.text, query)),
                 };
             }).filter(group => group.items.length > 0);
@@ -417,6 +420,7 @@ export class SettingsTemplates {
                         );
                         return [
                             horizontal(
+                                GenericTemplates.icon(group.icon, true),
                                 create("h3").classes("bold").text(group.heading),
                                 GenericTemplates.toggle(
                                     t("ALL"),
