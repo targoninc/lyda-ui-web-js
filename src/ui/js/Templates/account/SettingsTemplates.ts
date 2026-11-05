@@ -145,10 +145,13 @@ export class SettingsTemplates {
                 searchInput(),
                 create("div")
                     .classes("settings-nav-links", "flex-v")
-                    .children(...sectionConfigs.map(({heading, id}) => GenericTemplates.inlineLink(
-                        () => scrollToSection(id),
-                        heading(),
-                    )))
+                    .children(...sectionConfigs.map(({heading, id}) => horizontal(
+                        GenericTemplates.icon(SettingsTemplates.sectionIcons[id] ?? "settings", true),
+                        GenericTemplates.inlineLink(
+                            () => scrollToSection(id),
+                            heading(),
+                        ),
+                    ).classes("align-children", "small-gap").build()))
                     .build(),
             ).build();
 
@@ -420,8 +423,10 @@ export class SettingsTemplates {
                         );
                         return [
                             horizontal(
-                                GenericTemplates.icon(group.icon, true),
-                                create("h3").classes("bold").text(group.heading),
+                                horizontal(
+                                    GenericTemplates.icon(group.icon, true),
+                                    create("span").classes("bold", TextSize.large).text(group.heading),
+                                ).classes("align-children", "small-gap").build(),
                                 GenericTemplates.toggle(
                                     t("ALL"),
                                     `notification_group_${group.heading.value.trim().replaceAll(/\s+/g, "-").toLowerCase()}`,
