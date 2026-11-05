@@ -8,6 +8,7 @@ import { AnyElement, asSignal, compute, signal, Signal } from "@targoninc/jess";
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import { Usersetting } from "@targoninc/lyda-shared/src/Models/db/lyda/Usersetting";
+import { getTrackSecretCode } from "./Helpers/TrackSecretCodes.ts";
 import { NotificationType } from "../Enums/NotificationType.ts";
 import { Comment } from "@targoninc/lyda-shared/src/Models/db/lyda/Comment";
 import { Api } from "../Api/Api.ts";
@@ -69,7 +70,8 @@ export class Util {
     }
 
     static getImage(id: number, type: MediaFileType) {
-        return ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${type}&t=${Date.now()}`;
+        const code = type === MediaFileType.trackCover ? getTrackSecretCode(id) : "";
+        return ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${type}${code ? `&code=${encodeURIComponent(code)}` : ""}&t=${Date.now()}`;
     }
 
     static updateUserImage(userId: number, type: "avatar" | "banner", newSrc: string) {

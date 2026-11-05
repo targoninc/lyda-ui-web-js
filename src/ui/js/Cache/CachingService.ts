@@ -1,6 +1,7 @@
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import { ApiRoutes } from "../Api/ApiRoutes.ts";
 import { Images } from "../Enums/Images.ts";
+import { getTrackSecretCode } from "../Classes/Helpers/TrackSecretCodes.ts";
 
 interface CachedImage {
     key: string;
@@ -105,7 +106,8 @@ export class CachingService {
     }
 
     async getImageUrl(id: number, type: MediaFileType, quality: number = 500): Promise<string> {
-        const key = `${type}_${id}_${quality}`;
+        const code = type === MediaFileType.trackCover ? getTrackSecretCode(id) : "";
+        const key = `${type}_${id}_${quality}${code ? `_${code}` : ""}`;
 
         const existing = this.blobUrlCache.get(key);
         if (existing) {
@@ -134,7 +136,7 @@ export class CachingService {
             // fall through
         }
 
-        const serverUrl = `${ApiRoutes.getImageMedia}?id=${id}&quality=${quality}&mediaFileType=${type}`;
+        const serverUrl = `${ApiRoutes.getImageMedia}?id=${id}&quality=${quality}&mediaFileType=${type}${code ? `&code=${encodeURIComponent(code)}` : ""}`;
 
         try {
             const resp = await fetch(serverUrl);
