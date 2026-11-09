@@ -717,8 +717,15 @@ span.positive {
     flex-wrap: nowrap;
 }
 
+.batch-selection-wrapper {
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+}
+
 .batch-selection-card {
     align-items: center;
+    height: 50%;
     background: var(--bg-1);
     border: 1px solid var(--border);
     box-sizing: border-box;

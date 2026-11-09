@@ -10,25 +10,30 @@ export class BatchEditTemplates {
         const selected = compute(ids => ids.has(id), selectedIds);
         const selectedClass = compute((isSelected): string => isSelected ? "selected" : "_", selected);
 
-        return create("button")
-            .classes("card", "batch-selection-card", selectedClass)
-            .attributes("type", "button")
-            .title(`Select ${kind}`)
+        return create("div")
+            .classes("batch-selection-wrapper")
             .children(
-                create("span")
-                    .classes("batch-selection-checkmark")
-                    .text("✓")
+                create("button")
+                    .classes("card", "batch-selection-card", selectedClass)
+                    .attributes("type", "button")
+                    .title(`Select ${kind}`)
+                    .children(
+                        create("span")
+                            .classes("batch-selection-checkmark")
+                            .text("✓")
+                            .build(),
+                    )
+                    .onclick(() => {
+                        const next = new Set(selectedIds.value);
+                        if (selected.value) {
+                            next.delete(id);
+                        } else {
+                            next.add(id);
+                        }
+                        selectedIds.value = next;
+                    })
                     .build(),
             )
-            .onclick(() => {
-                const next = new Set(selectedIds.value);
-                if (selected.value) {
-                    next.delete(id);
-                } else {
-                    next.add(id);
-                }
-                selectedIds.value = next;
-            })
             .build();
     }
 
