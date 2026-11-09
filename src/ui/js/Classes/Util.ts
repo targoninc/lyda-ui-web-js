@@ -74,6 +74,23 @@ export class Util {
         return ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${type}${code ? `&code=${encodeURIComponent(code)}` : ""}&t=${Date.now()}`;
     }
 
+    static async downloadUrl(fileName: string, url: string) {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error("Failed to download file: " + response.status);
+        }
+        const blob = await response.blob();
+        const extension = blob.type.split("/")[1]?.split("+")[0] || "bin";
+        const objectUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = objectUrl;
+        link.download = fileName + "." + extension;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(objectUrl);
+    }
+
     static updateUserImage(userId: number, type: "avatar" | "banner", newSrc: string) {
         const selector = type === "avatar"
             ? ".user-icon, .user-icon-big, .avatar-image"

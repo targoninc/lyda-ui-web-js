@@ -300,6 +300,20 @@ export class GenericTemplates {
         });
     }
 
+    static downloadIconButton(id: HtmlPropertyValue, getUrl: () => string, fileName: string, extraClasses: string[] = []) {
+        return button({
+            id,
+            classes: ["positive", ...extraClasses],
+            onclick: async e => {
+                e.stopPropagation();
+                await Util.downloadUrl(fileName, getUrl());
+            },
+            icon: { icon: "download" },
+            title: t("DOWNLOAD"),
+            text: "",
+        });
+    }
+
     static card() {
         return create("div").classes("card").build();
     }
