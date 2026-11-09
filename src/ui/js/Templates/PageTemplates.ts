@@ -15,9 +15,9 @@ import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import {TrackEditTemplates} from "./music/TrackEditTemplates.ts";
 import {BulkUploadTemplates} from "./music/BulkUploadTemplates.ts";
 import {navigate, Route} from "../Routing/Router.ts";
-import {copy, getTabFromUrl, Util} from "../Classes/Util.ts";
+import {copy, getPlayIcon, getTabFromUrl, Util} from "../Classes/Util.ts";
 import {PlayManager} from "../Streaming/PlayManager.ts";
-import {currentTrackId, currentUser, playingHere, setTrackSecretCode} from "../state.ts";
+import {currentTrackId, currentUser, loadingAudio, playingFrom, playingHere, setTrackSecretCode, shuffling} from "../state.ts";
 import {TrackTemplates} from "./music/TrackTemplates.ts";
 import {PlaylistTemplates} from "./music/PlaylistTemplates.ts";
 import {StatisticTemplates} from "./StatisticTemplates.ts";
@@ -53,6 +53,7 @@ import {t} from "../../locales";
 import {TransactionTemplates} from "./money/TransactionTemplates.ts";
 import {BatchEditField, BatchEditTemplates} from "./generic/BatchEditTemplates.ts";
 import {ComponentGalleryTemplates} from "./Development/ComponentGalleryTemplates.ts";
+import {playFeed} from "../Actions/MusicActions.ts";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, (route: Route, params: Record<string, string>) => Promise<AnyElement> | AnyElement> = {
@@ -563,10 +564,32 @@ export class PageTemplates {
             },
         ];
 
+        const explorePlayingFrom = {type: FeedType.explore, name: "Explore"};
+        const isPlayingExplore = compute((playing: boolean, from) => playing && from?.type === FeedType.explore, playingHere, playingFrom);
+        const explorePlayButton = GenericTemplates.roundIconButton(
+            {
+                icon: getPlayIcon(isPlayingExplore, loadingAudio),
+                isUrl: true,
+                classes: ["inline-icon"],
+            },
+            async () => {
+                if (isPlayingExplore.value) {
+                    await PlayManager.pauseAsync(currentTrackId.value);
+                } else {
+                    await playFeed(explorePlayingFrom, shuffling.value);
+                }
+            },
+            t("PLAY_PAUSE"),
+            ["positive"],
+        );
+
         const tabRow = create("div")
             .classes("flex", "space-between", "align-children")
             .children(
-                GenericTemplates.combinedSelector(tabs, i => selectedTab.value = i, selectedTab.value),
+                horizontal(
+                    when(tabSelected(selectedTab, 0), explorePlayButton),
+                    GenericTemplates.combinedSelector(tabs, i => selectedTab.value = i, selectedTab.value),
+                ).classes("align-children", "small-gap").build(),
             ).build();
 
         const genreExploreState = PageTemplates.genreExploreSection();

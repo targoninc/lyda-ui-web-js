@@ -128,7 +128,7 @@ export class TrackTemplates {
                 await playFeed(TrackTemplates.feedPlayingFrom(newPlayingFrom, userId, filter), true);
             },
             t("SHUFFLE_FEED"),
-            ["special"],
+            [],
         );
         return horizontal(playButton, shuffleButton).classes("align-children", "small-gap").build();
     }

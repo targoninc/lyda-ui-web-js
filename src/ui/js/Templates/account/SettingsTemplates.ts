@@ -1,6 +1,7 @@
 import {UserActions} from "../../Actions/UserActions.ts";
 import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
 import {copy, getUserSettingValue, Util} from "../../Classes/Util.ts";
+import {Images} from "../../Enums/Images.ts";
 import {createModal, notify, Ui} from "../../Classes/Ui.ts";
 import {Api} from "../../Api/Api.ts";
 import {
@@ -997,22 +998,46 @@ export class SettingsTemplates {
     }
 
     private static userImageSettings(user: User) {
+        const avatar = signal(Images.DEFAULT_AVATAR);
+        const banner = signal(Images.DEFAULT_BANNER);
+        const avatarLoading = signal(false);
+        const bannerLoading = signal(false);
+
+        if (user.has_avatar) {
+            Util.getCachedUserAvatar(user.id).then(url => avatar.value = url);
+        }
+        if (user.has_banner) {
+            banner.value = Util.getUserBanner(user.id);
+        }
+
         return create("div")
             .classes("flex-v")
             .children(
                 create("div")
-                    .classes("flex", "card", "small-card", "secondary")
+                    .classes("flex", "card", "small-card", "secondary", "align-children")
                     .children(
+                        create("img")
+                            .classes("settings-avatar-preview", "nopointer")
+                            .attributes("src", avatar)
+                            .alt(t("AVATAR"))
+                            .build(),
                         create("span").text(t("AVATAR")).build(),
-                        UserTemplates.avatarDeleteButton(user),
-                        UserTemplates.avatarReplaceButton(user),
+                        UserTemplates.avatarDeleteButton(user, avatar, avatarLoading),
+                        UserTemplates.avatarReplaceButton(user, avatar, avatarLoading),
                     ).build(),
                 create("div")
-                    .classes("flex", "card", "small-card", "secondary")
+                    .classes("flex-v", "card", "small-card", "secondary")
                     .children(
+                        create("img")
+                            .classes("settings-banner-preview", "nopointer")
+                            .attributes("src", banner)
+                            .alt(t("BANNER"))
+                            .build(),
                         create("span").text(t("BANNER")).build(),
-                        UserTemplates.bannerDeleteButton(user),
-                        UserTemplates.bannerReplaceButton(user),
+                        horizontal(
+                            UserTemplates.bannerDeleteButton(user, banner, bannerLoading),
+                            UserTemplates.bannerReplaceButton(user, banner, bannerLoading),
+                        ).classes("align-children").build(),
                     ).build(),
             ).build();
     }

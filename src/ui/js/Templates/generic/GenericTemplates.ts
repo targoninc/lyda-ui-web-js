@@ -26,7 +26,7 @@ import { PlayManager } from "../../Streaming/PlayManager.ts";
 import { RoutePath } from "../../Routing/routes.ts";
 import { AuthActions } from "../../Actions/AuthActions.ts";
 import { Images } from "../../Enums/Images.ts";
-import { button, icon, IconConfig, input, textarea } from "@targoninc/jess-components";
+import { button, icon, IconConfig, input, textarea, toggle as jessToggle } from "@targoninc/jess-components";
 import { NotificationType } from "../../Enums/NotificationType.ts";
 import { SearchResult } from "@targoninc/lyda-shared/src/Models/SearchResult";
 import { Filter } from "@targoninc/lyda-shared/src/Models/Filter";
@@ -117,11 +117,13 @@ export class GenericTemplates {
         extraClasses: string[] = [],
         checked: HtmlPropertyValue | Signal<boolean> = false,
     ) {
-        return create("label").classes("flex", ...extraClasses).for(id).children(
-            create("input").type(InputType.checkbox).classes("hidden", "slider").id(id).checked(checked as HtmlPropertyValue).onclick(callback).build(),
-            create("div").classes("toggle-container").children(create("span").classes("toggle-slider").build()).build(),
-            create("span").classes("toggle-text").text(text).build(),
-        ).build();
+        return jessToggle({
+            text,
+            name: id as string,
+            checked: checked as boolean | Signal<boolean>,
+            classes: extraClasses,
+            onchange: () => callback(),
+        });
     }
 
     static logoutButton(classes: string[] = []) {

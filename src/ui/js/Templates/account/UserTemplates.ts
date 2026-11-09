@@ -1,4 +1,4 @@
-import {copy, getAvatar, target, Util} from "../../Classes/Util.ts";
+import {copy, getAvatar, getPlayIcon, target, Util} from "../../Classes/Util.ts";
 import {TrackActions} from "../../Actions/TrackActions.ts";
 import {UserActions} from "../../Actions/UserActions.ts";
 import {GenericTemplates, horizontal, tabSelected, vertical} from "../generic/GenericTemplates.ts";
@@ -20,7 +20,7 @@ import {
     StringOrSignal,
     when,
 } from "@targoninc/jess";
-import {currentUser, permissions, playingFrom, playingHere} from "../../state.ts";
+import {currentTrackId, currentUser, loadingAudio, permissions, playingFrom, playingHere, shuffling} from "../../state.ts";
 import {createModal, notify, Ui} from "../../Classes/Ui.ts";
 import {MediaActions} from "../../Actions/MediaActions.ts";
 import {RoutePath} from "../../Routing/routes.ts";
@@ -56,6 +56,9 @@ import {t, language, localeByLanguage} from "../../../locales";
 import {Time} from "../../Classes/Helpers/Time.ts";
 import {FeedType} from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 import {CardFeedType} from "../../Enums/CardFeedType.ts";
+import {getFeedDisplayName} from "../../Classes/Helpers/FeedNames.ts";
+import {playFeed} from "../../Actions/MusicActions.ts";
+import {PlayManager} from "../../Streaming/PlayManager.ts";
 import {TextSize} from "../../Enums/TextSize.ts";
 import {ReportTemplates} from "../ReportTemplates.ts";
 import {artworkDisplay} from "../music/ArtworkTemplates.ts";
@@ -86,7 +89,7 @@ export class UserTemplates {
         );
 
         const link = create("a")
-            .classes("page-link", "color-dim", "flex", "align-children", "small-gap", "noflexwrap")
+            .classes("page-link", "user-link", "color-dim", "flex", "align-children", "small-gap", "noflexwrap")
             .onclick((e: MouseEvent) => {
                 if (e.button === 0 && !preview.contains(e.target as Node)) {
                     e.preventDefault();
@@ -140,7 +143,7 @@ export class UserTemplates {
     public static userMenu(user: User) {
         const popover = PopoverTemplates.manualPopover(`user-menu-${user.id}`, UserTemplates.userMenuContent(user));
         const link = create("a")
-            .classes("page-link", "color-dim", "flex", "align-children", "small-gap", "noflexwrap")
+            .classes("page-link", "user-link", "color-dim", "flex", "align-children", "small-gap", "noflexwrap")
             .onclick((e: MouseEvent) => {
                 if (e.button === 0) {
                     e.preventDefault();
@@ -167,7 +170,6 @@ export class UserTemplates {
 
     private static userMenuContent(user: User) {
         return vertical(
-            UserTemplates.subscriptionSection(user),
             button({
                 text: t("GO_TO_PROFILE"),
                 icon: {icon: "person"},
@@ -175,23 +177,23 @@ export class UserTemplates {
                 onclick: () => navigate(`${RoutePath.profile}/${user.username}`),
             }),
             UserTemplates.settingsButton(["fullWidth"]),
+            GenericTemplates.logoutButton(["fullWidth"]),
+            UserTemplates.subscriptionButton(user, ["fullWidth"]),
+            UserTemplates.subscriptionSection(user),
         ).classes("small-gap", "padded").build();
     }
 
     private static subscriptionSection(user: User) {
         const subscriptionBadge = user.badges?.find(badge => badge.name === "support_listener");
 
-        return vertical(
-            horizontal(
-                subscriptionBadge ? UserTemplates.badge(subscriptionBadge) : nullElement(),
-                create("span")
-                    .classes("text", "align-center")
-                    .text(user.subscription ? t("SUBSCRIBED") : t("FREE"))
-                    .build(),
-                UserTemplates.subscriptionInfo(user.subscription),
-            ).classes("align-children", "small-gap", "noflexwrap").build(),
-            UserTemplates.subscriptionButton(user, ["fullWidth"]),
-        ).classes("small-gap").build();
+        return horizontal(
+            subscriptionBadge ? UserTemplates.badge(subscriptionBadge) : nullElement(),
+            create("span")
+                .classes("text", "align-center")
+                .text(user.subscription ? t("SUBSCRIBED") : t("FREE"))
+                .build(),
+            UserTemplates.subscriptionInfo(user.subscription),
+        ).classes("align-children", "small-gap", "noflexwrap").build();
     }
 
     private static subscriptionInfo(subscription: Subscription | undefined) {
@@ -618,10 +620,47 @@ export class UserTemplates {
                 filterPopover,
             ).build();
 
+        const profilePlayingFrom = compute((index): any => {
+            if (index === 0) {
+                return {type: FeedType.profileTracks, name: getFeedDisplayName(FeedType.profileTracks, user.displayname), id: user.id, username: user.username};
+            }
+            if (index === 3) {
+                return {type: FeedType.profileReposts, name: getFeedDisplayName(FeedType.profileReposts, user.displayname), id: user.id, username: user.username};
+            }
+            if (index === 4) {
+                return {type: FeedType.history, name: getFeedDisplayName(FeedType.history), id: user.id, username: user.username};
+            }
+            return null;
+        }, currentIndex);
+        const playDisabled = compute(index => index === 1 || index === 2, currentIndex);
+        const isPlayingProfile = compute((playing, from, target) => {
+            return playing && !!from && !!target && from.type === target.type && from.id === target.id;
+        }, playingHere, playingFrom, profilePlayingFrom);
+        const profilePlayButton = GenericTemplates.roundIconButton(
+            {
+                icon: getPlayIcon(isPlayingProfile, loadingAudio),
+                isUrl: true,
+                classes: ["inline-icon"],
+            },
+            async () => {
+                if (isPlayingProfile.value) {
+                    await PlayManager.pauseAsync(currentTrackId.value);
+                } else if (profilePlayingFrom.value) {
+                    await playFeed(profilePlayingFrom.value, shuffling.value);
+                }
+            },
+            t("PLAY_PAUSE"),
+            ["positive"],
+            playDisabled,
+        );
+
         const tabRow = create("div")
             .classes("flex", "space-between", "align-children", "fullWidth")
             .children(
-                GenericTemplates.combinedSelector(tabs, (i: number) => (currentIndex.value = i), currentIndex.value),
+                horizontal(
+                    profilePlayButton,
+                    GenericTemplates.combinedSelector(tabs, (i: number) => (currentIndex.value = i), currentIndex.value),
+                ).classes("align-children", "small-gap").build(),
                 create("div").classes("flex", "align-children", "small-gap")
                     .children(
                         SearchTemplates.searchInputWidget(pageSearch$),
@@ -734,10 +773,6 @@ export class UserTemplates {
                             }),
                             UserTemplates.unapprovedTracksLink(),
                         ).classes("align-children").build(),
-                        horizontal(
-                            UserTemplates.settingsButton(),
-                            GenericTemplates.logoutButton(["hideOnSmallBreakpoint"]),
-                        ).build(),
                     ).build(),
             ),
         );
