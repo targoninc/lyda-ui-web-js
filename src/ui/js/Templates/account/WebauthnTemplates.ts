@@ -82,9 +82,25 @@ export class WebauthnTemplates {
                                             return;
                                         }
                                         Api.registerWebauthnMethod(registration, res.challenge, name).then(() => {
-                                            Api.getUserById().then(u => {
-                                                currentUser.value = u;
-                                            });
+                                            const user = currentUser.value;
+                                            if (user) {
+                                                const newKey: PublicKey = {
+                                                    id: registration.id,
+                                                    key_id: registration.id,
+                                                    public_key: registration.response.publicKey,
+                                                    algorithm: String(registration.response.publicKeyAlgorithm),
+                                                    passkey_user_id: user.passkey_user_id,
+                                                    backed_up: false,
+                                                    name,
+                                                    transports: registration.response.transports?.join(", ") ?? "",
+                                                    created_at: new Date(),
+                                                    updated_at: new Date(),
+                                                };
+                                                currentUser.value = {
+                                                    ...user,
+                                                    public_keys: [...(user.public_keys ?? []), newKey],
+                                                };
+                                            }
                                             notify(t("SUCCESSFULLY_REGISTERED_PASSKEY"), NotificationType.success);
                                         });
                                     }).finally(() => loading.value = false);

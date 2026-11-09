@@ -1,7 +1,7 @@
 import {GenericTemplates, horizontal, vertical} from "./generic/GenericTemplates.ts";
 import {navigate} from "../Routing/Router.ts";
 import {RoutePath} from "../Routing/routes.ts";
-import {AnyNode, create} from "@targoninc/jess";
+import {AnyNode, create, StringOrSignal} from "@targoninc/jess";
 import {t} from "../../locales";
 import {AuthTemplates} from "./account/AuthTemplates.ts";
 
@@ -38,10 +38,10 @@ export class LandingPageTemplates {
                     ).build(),
                 create("hr"),
                 vertical(
-                    LandingPageTemplates.feature("neurology", "No AI music allowed", "We want humans to make music and express their emotions"),
-                    LandingPageTemplates.feature("balance", "Fair payouts", "Your money goes to the artists you actually listen to, not pro-rata"),
-                    LandingPageTemplates.feature("discover_tune", "Properly filterable", "Find what you're searching for by filtering for originals, reposts, WIPs..."),
-                    LandingPageTemplates.feature("diversity_1", "Social", "Comment on your favorite tracks to let artists know what you like"),
+                    LandingPageTemplates.feature("neurology", t("LANDER_FEATURE_NO_AI"), t("LANDER_FEATURE_NO_AI_DESCRIPTION")),
+                    LandingPageTemplates.feature("balance", t("LANDER_FEATURE_FAIR_PAYOUTS"), t("LANDER_FEATURE_FAIR_PAYOUTS_DESCRIPTION")),
+                    LandingPageTemplates.feature("discover_tune", t("LANDER_FEATURE_FILTERABLE"), t("LANDER_FEATURE_FILTERABLE_DESCRIPTION")),
+                    LandingPageTemplates.feature("diversity_1", t("LANDER_FEATURE_SOCIAL"), t("LANDER_FEATURE_SOCIAL_DESCRIPTION")),
                 ),
                 create("hr"),
                 create("p")
@@ -68,7 +68,7 @@ export class LandingPageTemplates {
             ).build();
     }
 
-    static feature(icon: string, buttonText: string, text: string) {
+    static feature(icon: string, buttonText: StringOrSignal, text: StringOrSignal) {
         return vertical(
             horizontal(
                 GenericTemplates.benefit(buttonText, icon),
