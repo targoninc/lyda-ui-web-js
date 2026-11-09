@@ -5,6 +5,7 @@ import {Api} from "../Api/Api.ts";
 import {ReportTarget} from "../Models/ReportTarget.ts";
 import {createModal, notify} from "../Classes/Ui.ts";
 import {Util} from "../Classes/Util.ts";
+import {horizontal, vertical} from "./generic/GenericTemplates.ts";
 
 export class ReportTemplates {
     static reasonOptions() {
@@ -31,7 +32,7 @@ export class ReportTemplates {
 
         const modalContents = [
             create("h2").text(contentTitle).build(),
-            create("div").classes("flex-v").children(
+            vertical(
                 create("label").text(t("REASON")).build(),
                 create("select")
                     .children(...ReportTemplates.reasonOptions().map(option =>
@@ -41,7 +42,7 @@ export class ReportTemplates {
                     })
                     .build(),
             ).build(),
-            create("div").classes("flex-v").children(
+            vertical(
                 create("label").text(t("DESCRIPTION")).build(),
                 create("textarea")
                     .attributes("maxlength", "2048")
@@ -50,7 +51,7 @@ export class ReportTemplates {
                     .build(),
                 create("span").classes("color-dim").text(t("MAX_2048_CHARACTERS")).build(),
             ).build(),
-            create("div").classes("flex", "align-children").children(
+            horizontal(
                 button({
                     text: t("REPORT"),
                     icon: {icon: "flag"},
@@ -67,7 +68,7 @@ export class ReportTemplates {
                     classes: ["negative"],
                     onclick: () => Util.removeModal(modal),
                 }),
-            ).build(),
+            ).classes("align-children").build(),
         ];
 
         const modal = createModal(modalContents, modalId);
