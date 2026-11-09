@@ -15,6 +15,7 @@ import {TrackEditTemplates} from "./TrackEditTemplates.ts";
 import {ScrubberTemplates} from "./ScrubberTemplates.ts";
 import {hideWaveformsSetting} from "../../Enums/UserSettingKeys.ts";
 import {LyricsTemplates} from "./LyricsTemplates.ts";
+import {ReportTemplates} from "../ReportTemplates.ts";
 import {StatisticTemplates} from "../StatisticTemplates.ts";
 import {CustomText} from "../../Classes/Helpers/CustomText.ts";
 import {navigate} from "../../Routing/Router.ts";
@@ -489,7 +490,7 @@ export class TrackTemplates {
         get<Comment[]>(ApiRoutes.getCommentsByTrackId, {track_id: track.id}).then(c => {
             comments.value = c ?? [];
         });
-        const hasMenu = Util.isLoggedIn() && (trackData.canEdit || trackData.canDownload);
+        const hasMenu = Util.isLoggedIn();
         const backgroundImage = compute(c => trackData.canDownload ? `url(${c})` : "none", coverFile);
         const bought = trackData.bought;
         const selectedTab$ = signal(0);
@@ -618,7 +619,7 @@ export class TrackTemplates {
                                             })),
                                         ).classes("align-children").build(),
                                     ),
-                                    when(hasMenu, TrackTemplates.trackMenu(isPrivate, track, trackData)),
+                                    when(hasMenu, TrackTemplates.trackMenu(isPrivate, track, trackData, !isUploader)),
                                 ).classes("align-end"),
                                 GenericTemplates.combinedSelector(tabs, (newTabIndex) => selectedTab$.value = newTabIndex, 0),
                             ).classes("space-between", "align-children", "track-tabs-row"),
@@ -918,19 +919,30 @@ export class TrackTemplates {
         return path;
     }
 
-    private static trackMenu(isPrivate: boolean, track: Track, trackData: any) {
+    private static trackMenu(isPrivate: boolean, track: Track, trackData: any, canReport: boolean) {
         const popId = `track-menu-${track.id}`;
         const versions = (trackData.versions ?? []) as any[];
         const latestVersionIdx = trackData.latestVersion;
         const versionCount = versions.length;
         const popover = PopoverTemplates.manualPopover(popId,
-            when(trackData.canEdit, vertical(
-                TrackEditTemplates.addToAlbumsButton(track),
-                TrackEditTemplates.replaceAudioButton(track, latestVersionIdx, versionCount),
-                TrackEditTemplates.editVersionsButton(track, versions),
-                TrackEditTemplates.openEditPageButton(track),
-                TrackEditTemplates.deleteTrackButton(track.id),
-            ).build()),
+            vertical(
+                when(trackData.canEdit, vertical(
+                    TrackEditTemplates.addToAlbumsButton(track),
+                    TrackEditTemplates.replaceAudioButton(track, latestVersionIdx, versionCount),
+                    TrackEditTemplates.editVersionsButton(track, versions),
+                    TrackEditTemplates.openEditPageButton(track),
+                    TrackEditTemplates.deleteTrackButton(track.id),
+                ).build()),
+                when(canReport, button({
+                    text: t("REPORT_TRACK"),
+                    icon: {icon: "flag"},
+                    classes: ["negative"],
+                    onclick: () => {
+                        popover.hidePopover();
+                        ReportTemplates.open({entityType: "track", entityId: track.id}, t("REPORT_TRACK"));
+                    },
+                })),
+            ).build(),
         );
         popover.classList.add("flex-v");
 

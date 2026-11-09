@@ -16,6 +16,7 @@ import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
 import {PlayManager} from "../Streaming/PlayManager.ts";
 import {createModal, notify} from "../Classes/Ui.ts";
 import {Api} from "../Api/Api.ts";
+import {ReportTemplates} from "./ReportTemplates.ts";
 
 const COMMENT_MAX_LENGTH = 1000;
 export class CommentTemplates {
@@ -318,19 +319,8 @@ export class CommentTemplates {
             create("div").classes("flex-v").children(
                 create("label").text(t("REASON")).build(),
                 create("select")
-                    .children(
-                        create("option").value("spam").text(t("REASON_SPAM")).build(),
-                        create("option").value("bullying").text(t("REASON_BULLYING")).build(),
-                        create("option").value("sexual_content").text(t("REASON_SEXUAL_CONTENT")).build(),
-                        create("option").value("abuse").text(t("REASON_ABUSE")).build(),
-                        create("option").value("hatespeech").text(t("REASON_HATESPEECH")).build(),
-                        create("option").value("heavy_swearing").text(t("REASON_HEAVY_SWEARING")).build(),
-                        create("option").value("advertising").text(t("REASON_ADVERTISING")).build(),
-                        create("option").value("bot").text(t("REASON_BOT")).build(),
-                        create("option").value("doxxing").text(t("REASON_DOXXING")).build(),
-                        create("option").value("fake_news").text(t("REASON_FAKE_NEWS")).build(),
-                        create("option").value("other").text(t("REASON_OTHER")).build(),
-                    )
+                    .children(...ReportTemplates.reasonOptions().map(option =>
+                        create("option").value(option.value).text(option.label).build()))
                     .onchange((e: Event) => {
                         reason.value = (e.target as HTMLSelectElement).value;
                     })

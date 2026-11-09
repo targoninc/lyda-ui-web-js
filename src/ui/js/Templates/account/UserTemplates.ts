@@ -57,6 +57,7 @@ import {Time} from "../../Classes/Helpers/Time.ts";
 import {FeedType} from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 import {CardFeedType} from "../../Enums/CardFeedType.ts";
 import {TextSize} from "../../Enums/TextSize.ts";
+import {ReportTemplates} from "../ReportTemplates.ts";
 import {artworkDisplay} from "../music/ArtworkTemplates.ts";
 import {InteractionType} from "@targoninc/lyda-shared/src/Enums/InteractionType";
 import {MusicTemplates} from "../music/MusicTemplates.ts";
@@ -778,7 +779,13 @@ export class UserTemplates {
                         compute((i): string => (i ? "clickable" : "_"), isOwnProfile),
                         compute((i): string => (i ? "blurOnParentHover" : "_"), isOwnProfile),
                     )
-                    .onclick(() => Ui.showImageModal(userBanner))
+                    .onclick(() => Ui.showImageModal(userBanner, user.has_banner && Util.isLoggedIn() && currentUser.value?.id !== user.id ? {
+                        label: t("REPORT_MEDIA"),
+                        onclick: () => {
+                            Util.removeModal();
+                            ReportTemplates.open({entityType: "media", entityId: user.id, mediaType: MediaFileType.userBanner}, t("REPORT_MEDIA"));
+                        },
+                    } : undefined))
                     .children(
                         create("img")
                             .classes("nopointer", "user-banner", "banner-image")
@@ -808,7 +815,13 @@ export class UserTemplates {
                     .children(
                         create("div")
                             .classes("avatar-container", "relative", isOwnProfile ? "pointer" : "_")
-                            .onclick(() => Ui.showImageModal(userAvatar))
+                            .onclick(() => Ui.showImageModal(userAvatar, user.has_avatar && Util.isLoggedIn() && currentUser.value?.id !== user.id ? {
+                                label: t("REPORT_MEDIA"),
+                                onclick: () => {
+                                    Util.removeModal();
+                                    ReportTemplates.open({entityType: "media", entityId: user.id, mediaType: MediaFileType.userAvatar}, t("REPORT_MEDIA"));
+                                },
+                            } : undefined))
                             .onmouseover(() => {
                                 if (!isOwnProfile) {
                                     return;
