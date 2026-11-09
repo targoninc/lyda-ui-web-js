@@ -177,9 +177,9 @@ export class UserTemplates {
                 onclick: () => navigate(`${RoutePath.profile}/${user.username}`),
             }),
             UserTemplates.settingsButton(["fullWidth"]),
-            GenericTemplates.logoutButton(["fullWidth"]),
             UserTemplates.subscriptionButton(user, ["fullWidth"]),
             UserTemplates.subscriptionSection(user),
+            GenericTemplates.logoutButton(["fullWidth"]),
         ).classes("small-gap", "padded").build();
     }
 
