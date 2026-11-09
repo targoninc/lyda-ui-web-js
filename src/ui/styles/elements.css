@@ -728,27 +728,6 @@ label {
     align-items: center;
 }
 
-.toggle-container {
-    width: 40px;
-    height: 20px;
-    border-radius: 10px;
-    background: var(--bg-4);
-    position: relative;
-    cursor: pointer;
-}
-
-.toggle-slider {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: var(--bg-0);
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    transition: left .2s ease;
-    left: 2px;
-}
-
 .corner-check {
     background: var(--green);
     border-radius: var(--gap);
@@ -766,12 +745,21 @@ label {
     color: var(--blue);
 }
 
-input.slider:checked ~ .toggle-container {
+.jessc-toggle-container {
+    background: var(--bg-4);
+    border: none;
+}
+
+.jessc-toggle-slider {
+    background: var(--bg-0);
+}
+
+input.jessc-slider:checked ~ .jessc-toggle-container {
     background: var(--fg-0);
 }
 
-input.slider:checked ~ .toggle-container .toggle-slider {
-    left: 22px;
+input.jessc-slider:checked ~ .jessc-toggle-container .jessc-toggle-slider {
+    background: var(--bg-0);
 }
 
 .invalid .jessc-toggle-container {
