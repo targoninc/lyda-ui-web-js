@@ -450,6 +450,7 @@ textarea {
 }
 
 .readable-surface {
+    box-sizing: border-box;
     background: var(--jessc-interactive-background);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
