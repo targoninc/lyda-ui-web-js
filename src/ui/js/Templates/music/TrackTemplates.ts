@@ -933,15 +933,7 @@ export class TrackTemplates {
                     TrackEditTemplates.openEditPageButton(track),
                     TrackEditTemplates.deleteTrackButton(track.id),
                 ).build()),
-                when(canReport, button({
-                    text: t("REPORT_TRACK"),
-                    icon: {icon: "flag"},
-                    classes: ["negative"],
-                    onclick: () => {
-                        popover.hidePopover();
-                        ReportTemplates.open({entityType: "track", entityId: track.id}, t("REPORT_TRACK"));
-                    },
-                })),
+                when(canReport, ReportTemplates.reportButton({entityType: "track", entityId: track.id}, t("REPORT_TRACK"), () => popover.hidePopover())),
             ).build(),
         );
         popover.classList.add("flex-v");

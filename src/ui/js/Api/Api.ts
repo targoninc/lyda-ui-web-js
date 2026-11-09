@@ -802,6 +802,14 @@ export class Api {
         });
     }
 
+    static async getReportStatus(entityType: "track" | "media", entityId: number, mediaType?: MediaFileType) {
+        return (await get<{reported: boolean}>(ApiRoutes.reportStatus, {
+            entity_type: entityType,
+            entity_id: entityId,
+            media_type: mediaType ?? "",
+        })) ?? {reported: false};
+    }
+
     //endregion
 
     //region Media

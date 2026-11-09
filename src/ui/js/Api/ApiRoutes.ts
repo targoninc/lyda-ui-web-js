@@ -160,6 +160,7 @@ export class ApiRoutes {
     // region Reports
     private static reports = ApiRoutes.base + "/reports";
     static createReport = ApiRoutes.reports + "/create";
+    static reportStatus = ApiRoutes.reports + "/status";
     // endregion
 
     // region Statistics

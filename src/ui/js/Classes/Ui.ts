@@ -11,7 +11,6 @@ import { NotificationType } from "../Enums/NotificationType.ts";
 import { Icons } from "../Enums/Icons.ts";
 import { Theme } from "@targoninc/lyda-shared/src/Enums/Theme";
 import { t } from "../../locales";
-import { button } from "@targoninc/jess-components";
 
 export class Ui {
     static async initializeNavBar() {
@@ -92,17 +91,10 @@ export class Ui {
         });
     }
 
-    static showImageModal(imageUrl: StringOrSignal, report?: { label: StringOrSignal; onclick: Function }) {
+    static showImageModal(imageUrl: StringOrSignal, reportButton?: AnyNode) {
         const children: AnyNode[] = [GenericTemplates.modalImage(imageUrl)];
-        if (report) {
-            children.push(horizontal(
-                button({
-                    text: report.label,
-                    icon: { icon: "flag" },
-                    classes: ["negative"],
-                    onclick: report.onclick,
-                }),
-            ).build());
+        if (reportButton) {
+            children.push(horizontal(reportButton).build());
         }
         createModal(children, "image-modal");
     }

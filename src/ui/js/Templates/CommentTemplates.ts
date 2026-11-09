@@ -147,15 +147,19 @@ export class CommentTemplates {
             "more_horiz",
         );
 
+        const reported = signal<boolean>(!!comment.reported_by_me);
         const reportBtn = button({
-            text: comment.reported_by_me ? t("REPORTED") : t("REPORT"),
-            icon: { icon: "flag" },
-            classes: comment.reported_by_me ? ["color-dim"] : [],
-            disabled: comment.reported_by_me,
+            text: compute((value, reportedLabel, reportLabel) => value ? reportedLabel : reportLabel, reported, t("REPORTED"), t("REPORT")),
+            icon: {icon: compute((value): string => value ? "check" : "flag", reported)},
+            classes: [compute((value): string => value ? "color-dim" : "_", reported)],
+            disabled: reported,
             onclick: () => {
                 PopoverTemplates.toggle(reportPopover, reportBtn);
-                if (!comment.reported_by_me) {
-                    CommentTemplates.showReportModal(comment);
+                if (!reported.value) {
+                    CommentTemplates.showReportModal(comment, () => {
+                        comment.reported_by_me = true;
+                        reported.value = true;
+                    });
                 }
             },
         });
@@ -309,7 +313,7 @@ export class CommentTemplates {
         return renderContent(comment.content);
     }
 
-    private static showReportModal(comment: Comment) {
+    private static showReportModal(comment: Comment, onReported?: () => void) {
         const reason = signal("spam");
         const description = signal("");
         const modalId = `report-comment-${comment.id}`;
@@ -345,6 +349,7 @@ export class CommentTemplates {
                     onclick: async () => {
                         await Api.reportComment(comment.id, reason.value, description.value);
                         comment.reported_by_me = true;
+                        onReported?.();
                         Util.removeModal(modal);
                         notify(t("COMMENT_REPORTED"));
                     },
