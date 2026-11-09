@@ -567,6 +567,7 @@ export class PlayerTemplates {
                 create("div")
                     .classes("hideOnMidBreakpoint")
                     .children(InteractionTemplates.interactions(EntityType.track, track, {
+                        showCount: false,
                         overrideActions: [InteractionType.like, InteractionType.repost],
                     }))
                     .build(),
@@ -584,6 +585,7 @@ export class PlayerTemplates {
             .attributes("popover", "manual")
             .children(
                 InteractionTemplates.interactions(EntityType.track, track, {
+                    showCount: false,
                     overrideActions: [InteractionType.like, InteractionType.repost],
                 }),
                 QueueTemplates.queueButton(),
