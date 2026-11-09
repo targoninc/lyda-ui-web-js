@@ -66,7 +66,7 @@ export class CommentTemplates {
                     .children(
                         (() => {
                             const ta = textarea({
-                                classes: ["comment-box-input"],
+                                classes: ["comment-box-input", "readable-surface"],
                                 name: "comment-box-input",
                                 placeholder: t("NEW_COMMENT"),
                                 value: newComment,

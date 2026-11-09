@@ -449,6 +449,14 @@ textarea {
     min-height: calc(1lh + 2 * var(--jessc-input-padding-y) + 2px);
 }
 
+.readable-surface {
+    background: var(--jessc-interactive-background);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--jessc-interactive-border);
+    border-radius: var(--border-radius);
+}
+
 input.round-input, textarea.round-input, select.round-input {
     border-radius: 999px;
 }
