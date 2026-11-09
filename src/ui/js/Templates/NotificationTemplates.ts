@@ -36,7 +36,7 @@ export class NotificationTemplates {
 
     static notificationLink(notification: Notification, part: NotificationPart) {
         const link = `/${part.type}/${NotificationParser.getLinkIdentifierByType(part.type, part.id, notification.references!)}`;
-        const text = NotificationParser.getDisplayTextByType(part.type, part.id, notification.references!);
+        const text = part.text ?? NotificationParser.getDisplayTextByType(part.type, part.id, notification.references!);
 
         return create("span")
             .classes("inlineLink", "flex", "align-children", "small-gap")

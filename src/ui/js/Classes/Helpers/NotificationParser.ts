@@ -55,14 +55,14 @@ export class NotificationParser {
 
         const result: MessagePart[] = [];
         // Regex to match `{entity:id|text}` pattern
-        const regex = /\{([utap]:\d+)}/g;
+        const regex = /\{([utap]:\d+)(?:\|([^}]*))?}/g;
 
         let lastIndex = 0;
         let match;
 
         // Iterating over all matches in the message string
         while ((match = regex.exec(message)) !== null) {
-            const [fullMatch, entityId] = match;
+            const [fullMatch, entityId, label] = match;
             const [entity, id] = entityId.split(':');
 
             // Push plain text before the match
@@ -76,6 +76,7 @@ export class NotificationParser {
                 result.push({
                     type: entities[entity],
                     id: parseInt(id),
+                    text: label || undefined,
                 });
             }
 

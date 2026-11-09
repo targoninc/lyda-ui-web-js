@@ -565,6 +565,7 @@ export class PageTemplates {
         ];
 
         const explorePlayingFrom = {type: FeedType.explore, name: "Explore"};
+        const explorePlayDisabled = compute(index => index !== 0, selectedTab);
         const isPlayingExplore = compute((playing: boolean, from) => playing && from?.type === FeedType.explore, playingHere, playingFrom);
         const explorePlayButton = GenericTemplates.roundIconButton(
             {
@@ -573,6 +574,9 @@ export class PageTemplates {
                 classes: ["inline-icon"],
             },
             async () => {
+                if (explorePlayDisabled.value) {
+                    return;
+                }
                 if (isPlayingExplore.value) {
                     await PlayManager.pauseAsync(currentTrackId.value);
                 } else {
@@ -581,13 +585,14 @@ export class PageTemplates {
             },
             t("PLAY_PAUSE"),
             ["positive"],
+            explorePlayDisabled,
         );
 
         const tabRow = create("div")
             .classes("flex", "space-between", "align-children")
             .children(
                 horizontal(
-                    when(tabSelected(selectedTab, 0), explorePlayButton),
+                    explorePlayButton,
                     GenericTemplates.combinedSelector(tabs, i => selectedTab.value = i, selectedTab.value),
                 ).classes("align-children", "small-gap").build(),
             ).build();
