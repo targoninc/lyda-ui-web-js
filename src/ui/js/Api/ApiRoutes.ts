@@ -157,6 +157,11 @@ export class ApiRoutes {
     static reportComment = ApiRoutes.commentActions + "/report";
     // endregion
 
+    // region Reports
+    private static reports = ApiRoutes.base + "/reports";
+    static createReport = ApiRoutes.reports + "/create";
+    // endregion
+
     // region Statistics
     private static statistics = ApiRoutes.base + "/statistics";
     static getPlayCountByTrack = ApiRoutes.statistics + "/playCountByTrack";

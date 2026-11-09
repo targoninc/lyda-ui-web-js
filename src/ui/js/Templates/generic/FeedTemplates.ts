@@ -229,6 +229,7 @@ export class FeedTemplates {
         const getPageForIndex = (index: number) => Math.floor(index / ps);
 
         const isPageLoaded = (page: number) => loadedPages.has(page);
+        let loadVersion = 0;
 
         const flattenLoadedItems = () => {
             const all: T[] = [];
@@ -244,12 +245,17 @@ export class FeedTemplates {
             if (loadedPages.has(pageToLoad)) return;
             if (totalCount$.value !== null && pageToLoad * ps >= totalCount$.value) return;
 
+            const version = loadVersion;
             loadingPages.add(pageToLoad);
             loading$.value = true;
 
             const offset = pageToLoad * ps;
             const filterValue = config.filterState?.value ?? search$.value;
             const result = await config.fetchPage(offset, ps, filterValue, sortBy$.value ?? undefined, sortDir$.value ?? undefined);
+            if (version !== loadVersion) {
+                return;
+            }
+
             let next: T[];
             if (result && !Array.isArray(result) && 'items' in result) {
                 next = result.items;
@@ -267,10 +273,12 @@ export class FeedTemplates {
         };
 
         const reload = () => {
+            loadVersion++;
             loadedPages.clear();
             loadingPages.clear();
             items$.value = [];
             totalCount$.value = null;
+            loading$.value = false;
             load(0);
         };
 

@@ -1,7 +1,7 @@
 import { Util } from "./Util.ts";
 import { LydaCache } from "../Cache/LydaCache.ts";
 import { NavTemplates } from "../Templates/NavTemplates.ts";
-import { GenericTemplates, vertical } from "../Templates/generic/GenericTemplates.ts";
+import { GenericTemplates, horizontal, vertical } from "../Templates/generic/GenericTemplates.ts";
 import { CacheItem } from "../Cache/CacheItem.ts";
 import { UserActions } from "../Actions/UserActions.ts";
 import { AnyNode, HtmlPropertyValue, isSignal, signal, Signal, StringOrSignal, when } from "@targoninc/jess";
@@ -11,6 +11,7 @@ import { NotificationType } from "../Enums/NotificationType.ts";
 import { Icons } from "../Enums/Icons.ts";
 import { Theme } from "@targoninc/lyda-shared/src/Enums/Theme";
 import { t } from "../../locales";
+import { button } from "@targoninc/jess-components";
 
 export class Ui {
     static async initializeNavBar() {
@@ -91,8 +92,19 @@ export class Ui {
         });
     }
 
-    static showImageModal(imageUrl: StringOrSignal) {
-        createModal([GenericTemplates.modalImage(imageUrl)], "image-modal");
+    static showImageModal(imageUrl: StringOrSignal, report?: { label: StringOrSignal; onclick: Function }) {
+        const children: AnyNode[] = [GenericTemplates.modalImage(imageUrl)];
+        if (report) {
+            children.push(horizontal(
+                button({
+                    text: report.label,
+                    icon: { icon: "flag" },
+                    classes: ["negative"],
+                    onclick: report.onclick,
+                }),
+            ).build());
+        }
+        createModal(children, "image-modal");
     }
 
     static async getConfirmationModal(title: StringOrSignal, text: StringOrSignal, confirmText: StringOrSignal,

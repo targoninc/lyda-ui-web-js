@@ -792,6 +792,16 @@ export class Api {
         });
     }
 
+    static async reportContent(entityType: "track" | "media", entityId: number, reason: string, description: string, mediaType?: MediaFileType) {
+        return await post(ApiRoutes.createReport, {
+            entity_type: entityType,
+            entity_id: entityId,
+            media_type: mediaType ?? "",
+            reason,
+            description,
+        });
+    }
+
     //endregion
 
     //region Media
