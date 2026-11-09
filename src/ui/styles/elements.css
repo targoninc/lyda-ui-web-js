@@ -2964,3 +2964,18 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     width: calc(var(--font-size-medium) * 1.5);
     height: calc(var(--font-size-medium) * 1.5);
 }
+
+.settings-avatar-preview {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.settings-banner-preview {
+    width: 100%;
+    max-width: 240px;
+    height: 64px;
+    border-radius: var(--border-radius);
+    object-fit: cover;
+}
