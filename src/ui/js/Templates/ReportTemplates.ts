@@ -1,4 +1,4 @@
-import {create, signal, StringOrSignal} from "@targoninc/jess";
+import {compute, create, signal, StringOrSignal} from "@targoninc/jess";
 import {button} from "@targoninc/jess-components";
 import {t} from "../../locales";
 import {Api} from "../Api/Api.ts";
@@ -26,7 +26,7 @@ export class ReportTemplates {
         ];
     }
 
-    static open(target: ReportTarget, contentTitle: StringOrSignal) {
+    static open(target: ReportTarget, contentTitle: StringOrSignal, onReported?: () => void) {
         const reason = signal("spam");
         const description = signal("");
         const modalId = `report-${target.entityType}-${target.entityId}-${target.mediaType ?? "track"}`;
@@ -60,6 +60,7 @@ export class ReportTemplates {
                     onclick: async () => {
                         await Api.reportContent(target.entityType, target.entityId, reason.value, description.value, target.mediaType);
                         Util.removeModal(modal);
+                        onReported?.();
                         notify(target.entityType === "track" ? t("TRACK_REPORTED") : t("MEDIA_REPORTED"));
                     },
                 }),
@@ -74,5 +75,23 @@ export class ReportTemplates {
 
         const modal = createModal(modalContents, modalId);
         modal?.querySelector("select")?.focus();
+    }
+
+    static reportButton(target: ReportTarget, title: StringOrSignal, beforeOpen?: () => void) {
+        const reported = signal(false);
+        Api.getReportStatus(target.entityType, target.entityId, target.mediaType).then(status => reported.value = status.reported);
+
+        return button({
+            text: compute((value, reportedLabel, reportLabel) => value ? reportedLabel : reportLabel, reported, t("REPORTED"), t("REPORT")),
+            icon: {icon: compute((value): string => value ? "check" : "flag", reported)},
+            classes: [compute((value): string => value ? "color-dim" : "negative", reported)],
+            disabled: reported,
+            onclick: () => {
+                if (!reported.value) {
+                    beforeOpen?.();
+                    ReportTemplates.open(target, title, () => reported.value = true);
+                }
+            },
+        });
     }
 }

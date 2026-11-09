@@ -779,13 +779,9 @@ export class UserTemplates {
                         compute((i): string => (i ? "clickable" : "_"), isOwnProfile),
                         compute((i): string => (i ? "blurOnParentHover" : "_"), isOwnProfile),
                     )
-                    .onclick(() => Ui.showImageModal(userBanner, user.has_banner && Util.isLoggedIn() && currentUser.value?.id !== user.id ? {
-                        label: t("REPORT_MEDIA"),
-                        onclick: () => {
-                            Util.removeModal();
-                            ReportTemplates.open({entityType: "media", entityId: user.id, mediaType: MediaFileType.userBanner}, t("REPORT_MEDIA"));
-                        },
-                    } : undefined))
+                    .onclick(() => Ui.showImageModal(userBanner, user.has_banner && Util.isLoggedIn() && currentUser.value?.id !== user.id
+                        ? ReportTemplates.reportButton({entityType: "media", entityId: user.id, mediaType: MediaFileType.userBanner}, t("REPORT_MEDIA"))
+                        : undefined))
                     .children(
                         create("img")
                             .classes("nopointer", "user-banner", "banner-image")
@@ -815,13 +811,9 @@ export class UserTemplates {
                     .children(
                         create("div")
                             .classes("avatar-container", "relative", isOwnProfile ? "pointer" : "_")
-                            .onclick(() => Ui.showImageModal(userAvatar, user.has_avatar && Util.isLoggedIn() && currentUser.value?.id !== user.id ? {
-                                label: t("REPORT_MEDIA"),
-                                onclick: () => {
-                                    Util.removeModal();
-                                    ReportTemplates.open({entityType: "media", entityId: user.id, mediaType: MediaFileType.userAvatar}, t("REPORT_MEDIA"));
-                                },
-                            } : undefined))
+                            .onclick(() => Ui.showImageModal(userAvatar, user.has_avatar && Util.isLoggedIn() && currentUser.value?.id !== user.id
+                                ? ReportTemplates.reportButton({entityType: "media", entityId: user.id, mediaType: MediaFileType.userAvatar}, t("REPORT_MEDIA"))
+                                : undefined))
                             .onmouseover(() => {
                                 if (!isOwnProfile) {
                                     return;

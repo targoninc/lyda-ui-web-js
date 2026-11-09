@@ -103,13 +103,9 @@ export class MusicTemplates {
                     onclick: () => {
                         const image = item.has_cover ? Util.getImage(item.id, fileType) : imageState.value;
                         const canReport = item.has_cover && Util.isLoggedIn() && currentUser.value?.id !== item.user_id;
-                        Ui.showImageModal(image, canReport ? {
-                            label: t("REPORT_MEDIA"),
-                            onclick: () => {
-                                Util.removeModal();
-                                ReportTemplates.open({entityType: "media", entityId: item.id, mediaType: fileType}, t("REPORT_MEDIA"));
-                            },
-                        } : undefined);
+                        Ui.showImageModal(image, canReport
+                            ? ReportTemplates.reportButton({entityType: "media", entityId: item.id, mediaType: fileType}, t("REPORT_MEDIA"))
+                            : undefined);
                     },
                 }),
                 when(
