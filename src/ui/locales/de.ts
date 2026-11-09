@@ -729,6 +729,7 @@ export const de: Translation = {
     REASON_BOT: "Bot",
     REASON_DOXXING: "Doxxing",
     REASON_FAKE_NEWS: "Falschmeldungen",
+    REASON_STOLEN_CONTENT: "Gestohlener Inhalt",
     REASON_OTHER: "Anderes",
     REASON_AI_GENERATED: "KI-generiert",
     REPORT_DESCRIPTION_PLACEHOLDER: "Beschreibe das Problem...",

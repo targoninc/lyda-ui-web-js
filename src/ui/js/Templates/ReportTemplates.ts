@@ -20,6 +20,7 @@ export class ReportTemplates {
             {value: "bot", label: t("REASON_BOT")},
             {value: "doxxing", label: t("REASON_DOXXING")},
             {value: "fake_news", label: t("REASON_FAKE_NEWS")},
+            {value: "stolen_content", label: t("REASON_STOLEN_CONTENT")},
             {value: "ai_generated", label: t("REASON_AI_GENERATED")},
             {value: "other", label: t("REASON_OTHER")},
         ];

@@ -730,6 +730,7 @@ export const ga: Translation = {
     REASON_BOT: "Bot",
     REASON_DOXXING: "Doxxing",
     REASON_FAKE_NEWS: "Nuacht Bréige",
+    REASON_STOLEN_CONTENT: "Ábhar goidte",
     REASON_OTHER: "Eile",
     REASON_AI_GENERATED: "Ginte le AI",
     REPORT_DESCRIPTION_PLACEHOLDER: "Déan cur síos ar an gceist...",

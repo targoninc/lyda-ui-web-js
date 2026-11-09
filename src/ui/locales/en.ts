@@ -731,6 +731,7 @@ export const en = {
     REASON_BOT: "Bot",
     REASON_DOXXING: "Doxxing",
     REASON_FAKE_NEWS: "Fake News",
+    REASON_STOLEN_CONTENT: "Stolen content",
     REASON_OTHER: "Other",
     REASON_AI_GENERATED: "AI-generated",
     REPORT_DESCRIPTION_PLACEHOLDER: "Describe the issue...",
