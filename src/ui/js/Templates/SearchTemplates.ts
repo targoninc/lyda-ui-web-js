@@ -83,14 +83,6 @@ export class SearchTemplates {
         return create("div")
             .classes("search-input-container", "relative", ...extraClasses)
             .children(
-                GenericTemplates.icon("search", true, ["inline-icon", "svg", "search-icon"]),
-                GenericTemplates.icon(
-                    "close",
-                    true,
-                    ["inline-icon", "svg", "clear-icon", "clickable"],
-                    t("CLEAR_SEARCH"),
-                    () => { currentSearch.value = ""; if (timeout) clearTimeout(timeout); },
-                ),
                 create("input")
                     .classes("jess", "search-input")
                     .placeholder(placeholder)
@@ -105,6 +97,14 @@ export class SearchTemplates {
                         }
                     })
                     .build(),
+                GenericTemplates.icon("search", true, ["inline-icon", "svg", "search-icon"]),
+                GenericTemplates.icon(
+                    "close",
+                    true,
+                    ["inline-icon", "svg", "clear-icon", "clickable"],
+                    t("CLEAR_SEARCH"),
+                    () => { currentSearch.value = ""; if (timeout) clearTimeout(timeout); },
+                ),
             ).build();
     }
 
