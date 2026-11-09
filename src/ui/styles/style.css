@@ -441,6 +441,7 @@ input, textarea, select {
     box-sizing: border-box;
     border-radius: var(--border-radius);
     padding: var(--jessc-input-padding-y) var(--jessc-input-padding-x);
+    font-family: inherit;
     font-size: var(--jessc-base-font-size);
     height: max-content;
 }
