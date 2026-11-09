@@ -3,6 +3,8 @@ import {navigate} from "../../Routing/Router.ts";
 import {Api} from "../../Api/Api.ts";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
 import {PopoverTemplates} from "../../Templates/generic/PopoverTemplates.ts";
+import {UserTemplates} from "../../Templates/account/UserTemplates.ts";
+import {Util} from "../Util.ts";
 
 export class CustomText {
     static escapeHtml(text: string): string {
@@ -93,10 +95,6 @@ export class CustomText {
         if (!user) {
             return;
         }
-        const [{UserTemplates}, {Util}] = await Promise.all([
-            import("../../Templates/account/UserTemplates.ts"),
-            import("../Util.ts"),
-        ]);
         const following$ = Util.isFollowing(user) as Signal<boolean>;
         const followedBy$ = Util.isFollowedBy(user) as Signal<boolean>;
         const preview = PopoverTemplates.manualPopover(
