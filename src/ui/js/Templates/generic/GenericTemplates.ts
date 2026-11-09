@@ -998,7 +998,23 @@ export class GenericTemplates {
         const progress = compute(v => Math.max(0, Math.min(100, ((v - min) / (max - min)) * 100)), value);
         const progressWidth = compute(p => `${p}%`, progress);
         const valueDisplay = displayValueUnderneath ?? compute(v => String(v), value);
-        const dotPositions = [0, 25, 50, 75, 100];
+        const minimumDotDistance = 20;
+        const targetDotDistance = 25;
+        const stepDistance = 100 / steps;
+        let dotInterval = Math.max(1, Math.floor(targetDotDistance / stepDistance));
+        if (dotInterval * stepDistance < minimumDotDistance) {
+            dotInterval++;
+        }
+        const dotPositions: number[] = [];
+        for (let i = 0; i <= steps; i += dotInterval) {
+            dotPositions.push((i / steps) * 100);
+        }
+        if (dotPositions[dotPositions.length - 1] < 100 - 0.01) {
+            while (dotPositions.length > 1 && 100 - dotPositions[dotPositions.length - 1] < minimumDotDistance) {
+                dotPositions.pop();
+            }
+            dotPositions.push(100);
+        }
 
         return create("div")
             .classes("pretty-slider")
@@ -1019,6 +1035,7 @@ export class GenericTemplates {
                             .classes("pretty-slider-dots")
                             .children(...dotPositions.map(position => create("span")
                                 .classes("pretty-slider-dot", compute(p => p >= position - 0.01 ? "active" : "_", progress) as any)
+                                .styles("left", `${position}%`)
                                 .build()))
                             .build(),
                         create("input")

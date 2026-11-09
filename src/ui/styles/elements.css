@@ -244,17 +244,17 @@
     right: 2px;
     top: 0;
     bottom: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     pointer-events: none;
 }
 
 .pretty-slider-dot {
+    position: absolute;
+    top: 50%;
     width: 4px;
     height: 4px;
     border-radius: 50%;
     background: var(--fg-4);
+    transform: translate(-50%, -50%);
 }
 
 .pretty-slider-dot.active {
@@ -1334,6 +1334,13 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     top: 50%;
     left: 10px;
     transform: translateY(-50%);
+    z-index: 1;
+    transition: color 0.15s ease;
+}
+
+.search-input-container:focus-within .search-icon {
+    color: var(--blue);
+    filter: none;
 }
 
 .clear-icon {
