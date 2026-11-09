@@ -2307,7 +2307,7 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     flex-grow: 1;
     overflow: hidden;
     position: relative;
-    justify-content: center;
+    justify-content: safe center;
 }
 
 .lyrics-scroll {
