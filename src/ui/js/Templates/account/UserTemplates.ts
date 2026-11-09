@@ -1692,7 +1692,7 @@ export class UserTemplates {
         });
     }
 
-    private static userPreview(user: User, context: UserWidgetContext, following$: Signal<boolean>, followedBy$: Signal<boolean>) {
+    static userPreview(user: User, context: UserWidgetContext, following$: Signal<boolean>, followedBy$: Signal<boolean>) {
         const canShowFollow = compute(u => !!u && u.id !== user.id, currentUser);
 
         return create("div")

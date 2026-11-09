@@ -1,4 +1,9 @@
 import {navigate} from "../../Routing/Router.ts";
+import {Api} from "../../Api/Api.ts";
+import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
+import {PopoverTemplates} from "../../Templates/generic/PopoverTemplates.ts";
+import {UserTemplates} from "../../Templates/account/UserTemplates.ts";
+import {Util} from "../Util.ts";
 
 export class CustomText {
     static escapeHtml(text: string): string {
@@ -73,9 +78,46 @@ export class CustomText {
                 event.preventDefault();
                 navigate(link.dataset.appRoute ?? link.getAttribute("href") ?? "/");
             });
+
+            const profile = link.dataset.appRoute?.match(/^\/profile\/([^/?#]+)/);
+            if (profile && !link.dataset.userPreviewBound) {
+                link.dataset.userPreviewBound = "true";
+                void CustomText.attachUserPreview(link, decodeURIComponent(profile[1]));
+            }
         });
 
         return container;
+    }
+
+    private static async attachUserPreview(link: HTMLAnchorElement, username: string) {
+        const user = await Api.getUserByName(username);
+        if (!user) {
+            return;
+        }
+        const following$ = Util.isFollowing(user);
+        const followedBy$ = Util.isFollowedBy(user);
+        const preview = PopoverTemplates.manualPopover(
+            `description-user-${user.id}-${Math.random().toString(36).slice(2)}`,
+            UserTemplates.userPreview(user, UserWidgetContext.card, following$, followedBy$),
+        );
+        link.after(preview);
+
+        let showTimer: number | null = null;
+        let hideTimer: number | null = null;
+        const show = () => {
+            if (hideTimer !== null) clearTimeout(hideTimer);
+            showTimer = window.setTimeout(() => PopoverTemplates.show(preview, link, false, true), 500);
+        };
+        const hide = () => {
+            if (showTimer !== null) clearTimeout(showTimer);
+            hideTimer = window.setTimeout(() => PopoverTemplates.hide(preview), 100);
+        };
+        link.addEventListener("mouseenter", show);
+        link.addEventListener("mouseleave", hide);
+        preview.addEventListener("mouseenter", () => {
+            if (hideTimer !== null) clearTimeout(hideTimer);
+        });
+        preview.addEventListener("mouseleave", hide);
     }
 
     private static entityPath(value: string): string | null {
