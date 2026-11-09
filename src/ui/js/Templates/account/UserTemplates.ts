@@ -177,6 +177,7 @@ export class UserTemplates {
                 onclick: () => navigate(`${RoutePath.profile}/${user.username}`),
             }),
             UserTemplates.settingsButton(["fullWidth"]),
+            GenericTemplates.logoutButton(["fullWidth"]),
             UserTemplates.subscriptionButton(user, ["fullWidth"]),
             UserTemplates.subscriptionSection(user),
         ).classes("small-gap", "padded").build();
@@ -772,10 +773,6 @@ export class UserTemplates {
                             }),
                             UserTemplates.unapprovedTracksLink(),
                         ).classes("align-children").build(),
-                        horizontal(
-                            UserTemplates.settingsButton(),
-                            GenericTemplates.logoutButton(["hideOnSmallBreakpoint"]),
-                        ).build(),
                     ).build(),
             ),
         );
