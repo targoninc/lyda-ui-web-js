@@ -173,7 +173,7 @@ export class Util {
     }
 
     static isFollowedBy(user: User) {
-        return compute(u => !!u && user.following?.some(f => f.user_id === u.id), currentUser);
+        return compute(u => !!u && (user.following ?? []).some(f => f.user_id === u.id), currentUser);
     }
 
     static async getUserByNameAsync(name: string) {

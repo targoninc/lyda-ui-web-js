@@ -1,4 +1,3 @@
-import {Signal} from "@targoninc/jess";
 import {navigate} from "../../Routing/Router.ts";
 import {Api} from "../../Api/Api.ts";
 import {UserWidgetContext} from "../../Enums/UserWidgetContext.ts";
@@ -95,8 +94,8 @@ export class CustomText {
         if (!user) {
             return;
         }
-        const following$ = Util.isFollowing(user) as Signal<boolean>;
-        const followedBy$ = Util.isFollowedBy(user) as Signal<boolean>;
+        const following$ = Util.isFollowing(user);
+        const followedBy$ = Util.isFollowedBy(user);
         const preview = PopoverTemplates.manualPopover(
             `description-user-${user.id}-${Math.random().toString(36).slice(2)}`,
             UserTemplates.userPreview(user, UserWidgetContext.card, following$, followedBy$),
