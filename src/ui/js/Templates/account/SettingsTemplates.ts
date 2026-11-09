@@ -1022,6 +1022,7 @@ export class SettingsTemplates {
                             .alt(t("AVATAR"))
                             .build(),
                         create("span").text(t("AVATAR")).build(),
+                        GenericTemplates.downloadIconButton("avatar-download-button", () => avatar.value, `${user.username}-avatar`),
                         UserTemplates.avatarDeleteButton(user, avatar, avatarLoading),
                         UserTemplates.avatarReplaceButton(user, avatar, avatarLoading),
                     ).build(),
@@ -1035,6 +1036,7 @@ export class SettingsTemplates {
                             .build(),
                         create("span").text(t("BANNER")).build(),
                         horizontal(
+                            GenericTemplates.downloadIconButton("banner-download-button", () => banner.value, `${user.username}-banner`),
                             UserTemplates.bannerDeleteButton(user, banner, bannerLoading),
                             UserTemplates.bannerReplaceButton(user, banner, bannerLoading),
                         ).classes("align-children").build(),
