@@ -86,7 +86,7 @@ export class UserTemplates {
         );
 
         const link = create("a")
-            .classes("page-link", "color-dim", "flex", "align-children", "small-gap", "noflexwrap")
+            .classes("page-link", "user-link", "color-dim", "flex", "align-children", "small-gap", "noflexwrap")
             .onclick((e: MouseEvent) => {
                 if (e.button === 0 && !preview.contains(e.target as Node)) {
                     e.preventDefault();
@@ -140,7 +140,7 @@ export class UserTemplates {
     public static userMenu(user: User) {
         const popover = PopoverTemplates.manualPopover(`user-menu-${user.id}`, UserTemplates.userMenuContent(user));
         const link = create("a")
-            .classes("page-link", "color-dim", "flex", "align-children", "small-gap", "noflexwrap")
+            .classes("page-link", "user-link", "color-dim", "flex", "align-children", "small-gap", "noflexwrap")
             .onclick((e: MouseEvent) => {
                 if (e.button === 0) {
                     e.preventDefault();
