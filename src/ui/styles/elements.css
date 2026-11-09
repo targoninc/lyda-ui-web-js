@@ -2317,6 +2317,11 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     justify-content: safe center;
 }
 
+.lyrics-section {
+    width: 100%;
+    max-width: 100%;
+}
+
 .lyrics-scroll {
     overflow-y: auto;
     overflow-x: hidden;
@@ -2343,6 +2348,9 @@ input.slider:checked ~ .toggle-container .toggle-slider {
 }
 
 .lyrics-full {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
     overflow-y: auto;
     overflow-x: hidden;
     max-height: 30dvh;
@@ -2352,6 +2360,10 @@ input.slider:checked ~ .toggle-container .toggle-slider {
     padding: 30% 0;
     gap: 0;
     align-items: center;
+}
+
+.lyrics-full .lyrics-content {
+    padding: var(--large-padding) 0;
 }
 
 .lyrics-line {

@@ -553,9 +553,9 @@ export class TrackTemplates {
                                     .classes("description", "break-lines")
                                     .children(CustomText.renderToHtml(track.description))
                                     .build()),
-                                TrackTemplates.lyricsSection(track),
                             ).classes("track-info-container"),
                         ).classes("big-gap"),
+                        TrackTemplates.lyricsSection(track),
                         horizontal(
                             TrackTemplates.playButton(track, selectedVersion, versions),
                             when(versions.length > 1, (() => {
@@ -1018,7 +1018,7 @@ export class TrackTemplates {
 
         return vertical(
             create("div")
-                .classes("flex", "align-children", "clickable", "expandable")
+                .classes("flex", "align-children", "clickable", "expandable", "lyrics-section-header")
                 .onclick(() => { expanded.value = !expanded.value; })
                 .children(
                     GenericTemplates.icon(
@@ -1028,6 +1028,6 @@ export class TrackTemplates {
                     create("span").text(t("LYRICS")).build(),
                 ).build(),
             when(expanded, LyricsTemplates.lyricsView(track, true)),
-        ).build();
+        ).classes("lyrics-section").build();
     }
 }

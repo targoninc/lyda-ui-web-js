@@ -28,9 +28,13 @@ export class LyricsTemplates {
         return fullPage ? "lyrics-full" : "lyrics-scroll";
     }
 
+    static #surfaceClasses(fullPage: boolean) {
+        return fullPage ? ["readable-surface"] : [];
+    }
+
     static #plainLyrics(text: string, fullPage = false) {
         return create("div")
-            .classes("lyrics-container", LyricsTemplates.#scrollClass(fullPage), "flex-v")
+            .classes("lyrics-container", LyricsTemplates.#scrollClass(fullPage), "flex-v", ...LyricsTemplates.#surfaceClasses(fullPage))
             .children(
                 create("div")
                     .classes("lyrics-content", "flex-v")
@@ -83,7 +87,7 @@ export class LyricsTemplates {
         });
 
         const container = create("div")
-            .classes("lyrics-container", LyricsTemplates.#scrollClass(fullPage), "flex-v")
+            .classes("lyrics-container", LyricsTemplates.#scrollClass(fullPage), "flex-v", ...LyricsTemplates.#surfaceClasses(fullPage))
             .children(
                 create("div")
                     .classes("lyrics-content", "flex-v")
