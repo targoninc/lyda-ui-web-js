@@ -167,7 +167,6 @@ export class UserTemplates {
 
     private static userMenuContent(user: User) {
         return vertical(
-            UserTemplates.subscriptionSection(user),
             button({
                 text: t("GO_TO_PROFILE"),
                 icon: {icon: "person"},
@@ -175,23 +174,22 @@ export class UserTemplates {
                 onclick: () => navigate(`${RoutePath.profile}/${user.username}`),
             }),
             UserTemplates.settingsButton(["fullWidth"]),
+            UserTemplates.subscriptionButton(user, ["fullWidth"]),
+            UserTemplates.subscriptionSection(user),
         ).classes("small-gap", "padded").build();
     }
 
     private static subscriptionSection(user: User) {
         const subscriptionBadge = user.badges?.find(badge => badge.name === "support_listener");
 
-        return vertical(
-            horizontal(
-                subscriptionBadge ? UserTemplates.badge(subscriptionBadge) : nullElement(),
-                create("span")
-                    .classes("text", "align-center")
-                    .text(user.subscription ? t("SUBSCRIBED") : t("FREE"))
-                    .build(),
-                UserTemplates.subscriptionInfo(user.subscription),
-            ).classes("align-children", "small-gap", "noflexwrap").build(),
-            UserTemplates.subscriptionButton(user, ["fullWidth"]),
-        ).classes("small-gap").build();
+        return horizontal(
+            subscriptionBadge ? UserTemplates.badge(subscriptionBadge) : nullElement(),
+            create("span")
+                .classes("text", "align-center")
+                .text(user.subscription ? t("SUBSCRIBED") : t("FREE"))
+                .build(),
+            UserTemplates.subscriptionInfo(user.subscription),
+        ).classes("align-children", "small-gap", "noflexwrap").build();
     }
 
     private static subscriptionInfo(subscription: Subscription | undefined) {
