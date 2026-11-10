@@ -143,6 +143,7 @@ export class AuthTemplates {
     static mfaSelection(step: Signal<string>, user: Signal<AuthData>) {
         const options = signal<{ type: MfaOption; lastUsed?: string }[]>([]);
         const selected = signal<MfaOption | undefined>(user.value.mfaMethod);
+        const loading = signal(true);
         Api.getMfaOptions(user.value.email, user.value.password).then(data => {
             if (data) {
                 options.value = data.options;
@@ -150,6 +151,11 @@ export class AuthTemplates {
                     selected.value = options.value[0].type;
                 }
             }
+        }).catch(() => {
+            notify(t("INVALID_CREDENTIALS"), NotificationType.error);
+            step.value = "login";
+        }).finally(() => {
+            loading.value = false;
         });
         selected.subscribe(s => {
             user.value = {
@@ -165,16 +171,26 @@ export class AuthTemplates {
                 create("h1")
                     .text(t("SELECT_MFA_METHOD"))
                     .build(),
-                create("div")
-                    .classes("flex-v")
-                    .children(
-                        create("p")
-                            .text(t("PLEASE_SELECT_MFA_METHOD"))
-                            .build(),
-                        signalMap(options, horizontal(), o =>
-                            AuthTemplates.mfaOption(o.type, selected, o.lastUsed),
-                        ),
-                    ).build(),
+                when(
+                    loading,
+                    horizontal(
+                        GenericTemplates.loadingSpinner(),
+                        create("span").text(t("LOADING")),
+                    ).classes("align-children").build(),
+                ),
+                when(
+                    compute(l => !l, loading),
+                    create("div")
+                        .classes("flex-v")
+                        .children(
+                            create("p")
+                                .text(t("PLEASE_SELECT_MFA_METHOD"))
+                                .build(),
+                            signalMap(options, horizontal(), o =>
+                                AuthTemplates.mfaOption(o.type, selected, o.lastUsed),
+                            ),
+                        ).build(),
+                ),
             ).build();
     }
 
