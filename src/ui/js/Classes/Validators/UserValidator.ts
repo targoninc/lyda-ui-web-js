@@ -5,6 +5,18 @@ const regexps: Record<string, RegExp> = {
     whitespace: new RegExp(/[\s\u034f\u17b4\u17b5\u061c\u200b-\u200d\u200e\u200f\u2028\u2029\u202a-\u202e\u2060-\u2064\u2066-\u206f\ufeff\u00ad\u115f\u1160\u180e\u2000-\u200f\u202f\u205f\u3000\uffa0\ufff9-\ufffb]/g)
 };
 
+const PASSWORD_MIN_LENGTH = 10;
+const PASSWORD_MAX_BYTES = 72;
+
+function validatePasswordLength(password: string, errors: Set<string>) {
+    if (Array.from(password).length < PASSWORD_MIN_LENGTH) {
+        errors.add(`${t("ERROR_PASSWORD_TOO_SHORT")}`);
+    }
+    if (new TextEncoder().encode(password).length > PASSWORD_MAX_BYTES) {
+        errors.add(`${t("ERROR_PASSWORD_TOO_LONG")}`);
+    }
+}
+
 export class UserValidator {
     static validateRegistration(state: AuthData, touchedFields: Set<string>): string[] {
         const errors = new Set<string>();
@@ -29,8 +41,8 @@ export class UserValidator {
         if (state.password !== state.password2 && touchedFields.has("password2") && touchedFields.has("password")) {
             errors.add(`${t("ERROR_PASSWORDS_DO_NOT_MATCH")}`);
         }
-        if (state.password.length > 64) {
-            errors.add(`${t("ERROR_PASSWORD_TOO_LONG")}`);
+        if (state.password) {
+            validatePasswordLength(state.password, errors);
         }
         if (!state.termsOfService) {
             errors.add(`${t("ERROR_TERMS_OF_SERVICE_AND_PRIVACY_POLICY")}`);
@@ -59,6 +71,9 @@ export class UserValidator {
         }
         if (state.password !== state.password2) {
             errors.add(`${t("ERROR_PASSWORDS_DO_NOT_MATCH")}`);
+        }
+        if (state.password) {
+            validatePasswordLength(state.password, errors);
         }
         return [...errors];
     }
