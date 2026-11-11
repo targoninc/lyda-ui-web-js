@@ -655,13 +655,13 @@ export class UserTemplates {
         );
 
         const tabRow = create("div")
-            .classes("flex", "space-between", "align-children", "fullWidth")
+            .classes("flex", "space-between", "align-children", "fullWidth", "profile-tab-row")
             .children(
                 horizontal(
                     profilePlayButton,
                     GenericTemplates.combinedSelector(tabs, (i: number) => (currentIndex.value = i), currentIndex.value),
-                ).classes("align-children", "small-gap").build(),
-                create("div").classes("flex", "align-children", "small-gap")
+                ).classes("align-children", "small-gap", "profile-tab-tabs").build(),
+                create("div").classes("flex", "align-children", "small-gap", "profile-tab-actions")
                     .children(
                         SearchTemplates.searchInputWidget(pageSearch$),
                         filterArea,
