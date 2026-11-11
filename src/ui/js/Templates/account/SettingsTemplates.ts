@@ -44,7 +44,6 @@ import {NotificationType} from "../../Enums/NotificationType.ts";
 import {TotpTemplates} from "./TotpTemplates.ts";
 import {WebauthnTemplates} from "./WebauthnTemplates.ts";
 import {Language, language, LanguageOptions, t} from "../../../locales";
-import {debounce} from "../../Classes/Helpers/Debounce.ts";
 import {TextSize} from "../../Enums/TextSize.ts";
 import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 import {InteractionType} from "@targoninc/lyda-shared/src/Enums/InteractionType.ts";
@@ -847,6 +846,7 @@ export class SettingsTemplates {
             { key: "appleMusic", label: "Apple Music" },
             { key: "youtubeMusic", label: "YouTube Music" },
             { key: "tidal", label: "Tidal" },
+            { key: "soundcloud", label: "SoundCloud" },
         ];
 
         return compute((query, pfs) => {
