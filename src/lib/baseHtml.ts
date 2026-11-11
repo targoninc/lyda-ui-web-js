@@ -18,7 +18,7 @@ export async function baseHtml(req: Request) {
 
     let title = "Lyda";
     let description = "Stream the music you love.";
-    let image = `${baseUrl}/img/lyda_banner.png`;
+    let image = `${baseUrl}/img/graphics/email-box.webp`;
     const apiUrl = (process.env.API_URL ?? "https://api.lyda.app").replace(/\/$/, "");
     // Android "open in app" handoff is disabled until an Android app ships.
     const enableAndroidOpenInApp = process.env.ENABLE_ANDROID_OPEN_IN_APP === "true";
@@ -82,8 +82,9 @@ export async function baseHtml(req: Request) {
     }
 
     const baseImage = `<meta property="og:image" content="${image}" />
-    <meta property="og:image:width" content="1080" />
-    <meta property="og:image:height" content="720" />`;
+    <meta property="og:image:type" content="image/webp" />
+    <meta property="og:image:width" content="800" />
+    <meta property="og:image:height" content="400" />`;
     const entityImage = newimage ? `<meta property="og:image" content="${newimage}" />
     <meta property="og:image:width" content="500" />
     <meta property="og:image:height" content="500" />` : "";

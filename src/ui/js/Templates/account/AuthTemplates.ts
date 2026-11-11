@@ -412,12 +412,14 @@ export class AuthTemplates {
         const appleUrl = signal("");
         const youtubeUrl = signal("");
         const tidalUrl = signal("");
+        const soundcloudUrl = signal("");
 
         const linkFields = [
             { label: "Spotify", signal: spotifyUrl, placeholder: "https://open.spotify.com/artist/..." },
             { label: "Apple Music", signal: appleUrl, placeholder: "https://music.apple.com/artist/..." },
             { label: "YouTube Music", signal: youtubeUrl, placeholder: "https://music.youtube.com/channel/..." },
             { label: "Tidal", signal: tidalUrl, placeholder: "https://tidal.com/artist/..." },
+            { label: "SoundCloud", signal: soundcloudUrl, placeholder: "https://soundcloud.com/..." },
         ];
 
         return create("div")
