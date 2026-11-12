@@ -840,7 +840,19 @@ export class Api {
     }
 
     static async getListeningHistory(limit = 100): Promise<ListeningHistory[] | null> {
-        return await get<ListeningHistory[]>(ApiRoutes.listeningHistory, {limit: String(limit)});
+        const result = await Api.getFeed(ApiRoutes.historyFeed, {limit: String(limit), offset: "0"});
+        if (!result) {
+            return null;
+        }
+
+        const tracks = Array.isArray(result) ? result : result.items;
+        return tracks.slice().reverse().map(track => ({
+            id: -1,
+            user_id: -1,
+            track_id: track.id,
+            quality: "h",
+            created_at: new Date((track as Track & {listened_at?: string}).listened_at ?? track.created_at),
+        }));
     }
 
     //endregion
