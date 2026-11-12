@@ -64,6 +64,7 @@ import {trackCleanup} from "../../Classes/Helpers/PageLifecycle.ts";
 
 const batchEditMissingAudioFilter = signal(false);
 const batchEditMissingArtworkFilter = signal(false);
+const batchEditPrivateFilter = signal(false);
 
 export class TrackEditTemplates {
     static uploadPage() {
@@ -1421,12 +1422,24 @@ export class TrackEditTemplates {
         const bulkState = signal<UploadableTrack>({} as UploadableTrack);
         const onlyMissingAudio = batchEditMissingAudioFilter;
         const onlyMissingArtwork = batchEditMissingArtworkFilter;
-        const anyFilter = compute((audio, artwork) => audio || artwork, onlyMissingAudio, onlyMissingArtwork);
-        const filteredTracks = compute((items: Track[], audio: boolean, artwork: boolean) => items.filter(track => {
+        const onlyPrivate = batchEditPrivateFilter;
+        const anyFilter = compute((audio, artwork, privateOnly) => audio || artwork || privateOnly, onlyMissingAudio, onlyMissingArtwork, onlyPrivate);
+        const filteredTracks = compute((items: Track[], audio: boolean, artwork: boolean, privateOnly: boolean) => items.filter(track => {
             return (!audio || TrackEditTemplates.isMissingAudio(track))
-                && (!artwork || TrackEditTemplates.isMissingArtwork(track));
-        }), tracks, onlyMissingAudio, onlyMissingArtwork);
+                && (!artwork || TrackEditTemplates.isMissingArtwork(track))
+                && (!privateOnly || track.visibility === Visibility.private);
+        }), tracks, onlyMissingAudio, onlyMissingArtwork, onlyPrivate);
+        const pageState = signal(1);
+        const pageSize = 50;
+        const pageCount = compute((items) => Math.max(1, Math.ceil(items.length / pageSize)), filteredTracks);
+        const safePage = compute((page, count) => Math.min(Math.max(1, page), count), pageState, pageCount);
+        const pagedTracks = compute((items, page) => {
+            const start = (page - 1) * pageSize;
+            return items.slice(start, start + pageSize);
+        }, filteredTracks, safePage);
+        const nextPageDisabled = compute((page, count) => page >= count, safePage, pageCount);
         const noFilterResults = compute((items, active) => active && items.length === 0, filteredTracks, anyFilter);
+        const resetPage = () => pageState.value = 1;
         selectedIds.subscribe(ids => {
             if (ids.size === 0) {
                 bulkState.value = {} as UploadableTrack;
@@ -1525,9 +1538,34 @@ export class TrackEditTemplates {
             ).classes("align-children", "small-gap"),
         ).classes("card", "space-between").build();
 
-        Api.getTracksByUser(currentUser.value?.username ?? "", currentUser.value?.id)
-            .then(t => tracks.value = (t as any)?.items ?? [])
-            .finally(() => loading.value = false);
+        const loadTracks = async () => {
+            loading.value = true;
+            try {
+                const allTracks: Track[] = [];
+                const limit = 100;
+                let offset = 0;
+                while (true) {
+                    const response = await Api.getTracksByUser(
+                        currentUser.value?.username ?? "",
+                        currentUser.value?.id,
+                        offset,
+                        limit,
+                    );
+                    const items = response?.items ?? [];
+                    allTracks.push(...items);
+                    const total = response?.total ?? allTracks.length;
+                    if (items.length < limit || allTracks.length >= total) {
+                        break;
+                    }
+                    offset += limit;
+                }
+                tracks.value = allTracks;
+                resetPage();
+            } finally {
+                loading.value = false;
+            }
+        };
+        loadTracks().then();
 
         const filterBar = GenericTemplates.fixedBar([
             horizontal(
@@ -1538,26 +1576,62 @@ export class TrackEditTemplates {
                         label: t("MISSING_AUDIO"),
                         text: t("MISSING_AUDIO"),
                         checked: onlyMissingAudio,
-                        onchange: value => onlyMissingAudio.value = value,
+                        onchange: value => {
+                            onlyMissingAudio.value = value;
+                            resetPage();
+                        },
                     }),
                     toggle({
                         name: "batch-filter-missing-artwork",
                         label: t("MISSING_ARTWORK"),
                         text: t("MISSING_ARTWORK"),
                         checked: onlyMissingArtwork,
-                        onchange: value => onlyMissingArtwork.value = value,
+                        onchange: value => {
+                            onlyMissingArtwork.value = value;
+                            resetPage();
+                        },
+                    }),
+                    toggle({
+                        name: "batch-filter-private",
+                        label: t("PRIVATE"),
+                        text: t("PRIVATE"),
+                        checked: onlyPrivate,
+                        onchange: value => {
+                            onlyPrivate.value = value;
+                            resetPage();
+                        },
                     }),
                 ).classes("align-children", "small-gap", "flex-wrap").build(),
-                button({
-                    text: t("CLEAR_FILTERS"),
-                    icon: {icon: "filter_alt_off"},
-                    classes: ["small"],
-                    disabled: compute((active) => !active, anyFilter),
-                    onclick: () => {
-                        onlyMissingAudio.value = false;
-                        onlyMissingArtwork.value = false;
-                    },
-                }),
+                horizontal(
+                    GenericTemplates.roundIconButton(
+                        {icon: "arrow_back_ios_new"},
+                        () => pageState.value = Math.max(1, safePage.value - 1),
+                        t("PREVIOUS_PAGE"),
+                        [compute((page): string => page <= 1 ? "disabled" : "_", safePage), "pagination-button"],
+                    ),
+                    create("span")
+                        .classes("color-dim")
+                        .text(compute((page, count) => `${page} / ${count}`, safePage, pageCount))
+                        .build(),
+                    GenericTemplates.roundIconButton(
+                        {icon: "arrow_forward_ios"},
+                        () => pageState.value = Math.min(pageCount.value, safePage.value + 1),
+                        t("NEXT_PAGE"),
+                        [compute((disabled): string => disabled ? "disabled" : "_", nextPageDisabled), "pagination-button"],
+                    ),
+                    button({
+                        text: t("CLEAR_FILTERS"),
+                        icon: {icon: "filter_alt_off"},
+                        classes: ["small"],
+                        disabled: compute((active) => !active, anyFilter),
+                        onclick: () => {
+                            onlyMissingAudio.value = false;
+                            onlyMissingArtwork.value = false;
+                            onlyPrivate.value = false;
+                            resetPage();
+                        },
+                    }),
+                ).classes("align-children", "small-gap").build(),
             ).classes("space-between", "align-children", "fullWidth").build(),
         ]);
 
@@ -1569,7 +1643,7 @@ export class TrackEditTemplates {
                 compute(ids => ids.size > 0, selectedIds),
                 bulkEdit,
             ),
-            signalMap(filteredTracks, vertical(), t => TrackEditTemplates.editableTrackInList(t, tracks, selectedIds)),
+            signalMap(pagedTracks, vertical(), t => TrackEditTemplates.editableTrackInList(t, tracks, selectedIds)),
         ).build();
     }
 }
