@@ -1251,10 +1251,15 @@ export class UserTemplates {
                             liked: MusicTemplates.interactionSignal(pin.entity_type as EntityType, entity, InteractionType.like),
                             reposted: MusicTemplates.interactionSignal(pin.entity_type as EntityType, entity, InteractionType.repost),
                         }),
-                        create("span")
-                            .classes("nopointer", "break-lines", "pin-title")
-                            .text(entity.title)
-                            .build(),
+                        horizontal(
+                            create("span")
+                                .classes("nopointer", "break-lines", "pin-title")
+                                .text(entity.title)
+                                .build(),
+                            pin.entity_type === EntityType.track
+                                ? MusicTemplates.noAudioWarning(entity)
+                                : nullElement(),
+                        ).classes("align-children", "small-gap").build(),
                         horizontal(
                             GenericTemplates.icon("keep", true),
                             create("span")
