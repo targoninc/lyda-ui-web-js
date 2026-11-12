@@ -2688,6 +2688,23 @@ input.jessc-slider:checked ~ .jessc-toggle-container .jessc-toggle-slider {
     height: 100%;
     object-fit: cover;
     display: block;
+    opacity: 0;
+    color: transparent;
+    transition: opacity .2s ease;
+}
+
+.artwork .artwork-cover-disc:not(.artwork-loaded) {
+    background: linear-gradient(90deg, var(--bg-4) 25%, var(--bg-5) 50%, var(--bg-4) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.artwork .artwork-cover-disc.artwork-loaded {
+    background: transparent;
+}
+
+.artwork-loaded .artwork-image {
+    opacity: 1;
 }
 
 .artwork-format-vinyl .artwork-disc {

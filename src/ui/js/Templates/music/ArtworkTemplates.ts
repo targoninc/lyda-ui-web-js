@@ -81,26 +81,18 @@ export function artworkDisplay(url: StringOrSignal, opts: ArtworkOptions = {}): 
         children.push(
             create("div").classes("artwork-vinyl-disc").build(),
             create("div")
-                .classes("artwork-disc", "relative")
+                .classes("artwork-disc", "artwork-cover-disc", "relative")
                 .children(
-                    create("img")
-                        .classes("artwork-image")
-                        .src(url)
-                        .alt(opts.alt ?? "")
-                        .build(),
+                    artworkImage(url, opts.alt ?? ""),
                     create("div").classes("artwork-vinyl-wrap").build(),
                 ).build(),
         );
     } else {
         children.push(
             create("div")
-                .classes("artwork-disc", "relative")
+                .classes("artwork-disc", "artwork-cover-disc", "relative")
                 .children(
-                    create("img")
-                        .classes("artwork-image")
-                        .src(url)
-                        .alt(opts.alt ?? "")
-                        .build(),
+                    artworkImage(url, opts.alt ?? ""),
                 ).build(),
         );
     }
@@ -225,6 +217,35 @@ function attachArtworkParallax(root: HTMLElement) {
         root.style.transform = "";
         root.classList.remove("artwork-parallax");
     });
+}
+
+function artworkImage(url: StringOrSignal, alt: string): HTMLImageElement {
+    const image = create("img")
+        .classes("artwork-image")
+        .src(url)
+        .alt(alt)
+        .build() as HTMLImageElement;
+    const disc = () => image.closest(".artwork-cover-disc");
+    const markLoaded = () => {
+        image.classList.add("artwork-image-loaded");
+        disc()?.classList.add("artwork-loaded");
+    };
+    const markFailed = () => {
+        image.classList.remove("artwork-image-loaded");
+        disc()?.classList.remove("artwork-loaded");
+    };
+
+    image.addEventListener("load", markLoaded);
+    image.addEventListener("error", markFailed);
+    if (image.complete) {
+        if (image.naturalWidth > 0) {
+            markLoaded();
+        } else {
+            markFailed();
+        }
+    }
+
+    return image;
 }
 
 function artworkSticker(opts: {
