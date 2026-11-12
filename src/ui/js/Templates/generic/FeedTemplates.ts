@@ -1,4 +1,4 @@
-import {compute, create, Signal, signal, signalMap, AnyNode, nullElement, when} from "@targoninc/jess";
+import {compute, create, Signal, signal, AnyNode, nullElement, when} from "@targoninc/jess";
 import { GenericTemplates, horizontal } from "./GenericTemplates.ts";
 import { getPlayIcon, copy, Util } from "../../Classes/Util.ts";
 import { t } from "../../../locales";
@@ -395,6 +395,39 @@ export class FeedTemplates {
         const toolbar = config.noToolbar ? nullElement() : GenericTemplates.fixedBar([topRow]);
         const contentClass = config.noToolbar ? "_" : "fixed-bar-content";
 
+        const rowsBody = create("tbody").classes("feed-rows").build() as HTMLElement;
+        let renderedItems: T[] = [];
+        const updateRows = (items: T[] | null | undefined) => {
+            const nextItems = (items ?? []).filter((item): item is T => item !== undefined && item !== null);
+            const isAppend = nextItems.length >= renderedItems.length
+                && renderedItems.every((item, i) => item === nextItems[i]);
+
+            if (!isAppend) {
+                rowsBody.replaceChildren();
+                renderedItems = [];
+            }
+
+            for (let i = renderedItems.length; i < nextItems.length; i++) {
+                rowsBody.appendChild(FeedTemplates.#row(
+                    nextItems[i],
+                    i,
+                    getPageForIndex(i),
+                    config,
+                    feedId,
+                    rebuildAndShowMobile,
+                    selectedIds$,
+                    handleRowClick,
+                    buildBatchActions,
+                    items$,
+                    batchPopover,
+                ));
+            }
+            renderedItems = nextItems;
+        };
+        items$.subscribe(updateRows);
+        trackCleanup(() => items$.unsubscribe(updateRows));
+        updateRows(items$.value);
+
         const el = create("div")
             .classes("feed-wrapper", "flex-v", "fullWidth", config.compact ? "feed-compact" : "_")
             .id(feedId)
@@ -433,11 +466,7 @@ export class FeedTemplates {
                             },
                             items$, sortKey,
                         ),
-                        signalMap(
-                            items$,
-                            create("tbody").classes("feed-rows"),
-                            (item, i) => FeedTemplates.#row(item, i, getPageForIndex(i), config, feedId, rebuildAndShowMobile, selectedIds$, handleRowClick, buildBatchActions, items$, batchPopover),
-                        ),
+                        rowsBody,
                         compute(
                             (total, _items) => {
                                 if (total === null) return nullElement();
