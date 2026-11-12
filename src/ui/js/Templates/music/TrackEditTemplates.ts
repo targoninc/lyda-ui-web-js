@@ -1329,9 +1329,12 @@ export class TrackEditTemplates {
                 ),
                 vertical(
                     horizontal(
+                        !track.processed || track.length <= 0
+                            ? GenericTemplates.icon("warning", true, ["warning"], t("NO_AUDIO_FILE"))
+                            : nullElement(),
                         TrackEditTemplates.replaceAudioButton(track),
                         TrackEditTemplates.downloadAudioButton(track),
-                    ).classes("align-end"),
+                    ).classes("align-end", "align-children"),
                     horizontal(
                         create("span")
                             .text(t("ARTWORK"))
