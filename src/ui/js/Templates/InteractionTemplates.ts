@@ -1,5 +1,4 @@
-import {AnyNode, compute, create, HtmlPropertyValue, nullElement, Signal, when} from "@targoninc/jess";
-import {GenericTemplates} from "./generic/GenericTemplates.ts";
+import {AnyNode, compute, create, nullElement, Signal} from "@targoninc/jess";
 import {InteractionMetadata} from "@targoninc/lyda-shared/src/Models/InteractionMetadata";
 import {InteractionConfig} from "@targoninc/lyda-shared/src/Models/InteractionConfig";
 import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType";
@@ -17,7 +16,7 @@ import {InteractionStateManager} from "../Classes/InteractionStateManager.ts";
 import {InteractionPeoplePopover} from "../Classes/InteractionPeoplePopover.ts";
 import {getTrackSecretCode} from "../Classes/Helpers/TrackSecretCodes.ts";
 
-const interactionConfigs: Record<InteractionType, InteractionConfig> = {
+const interactionConfigs: Partial<Record<InteractionType, InteractionConfig>> = {
     [InteractionType.like]: {
         icons: {
             default: Icons.LIKE_OUTLINE,
@@ -32,13 +31,6 @@ const interactionConfigs: Record<InteractionType, InteractionConfig> = {
         },
         toggleable: true,
     },
-    [InteractionType.comment]: {
-        icons: {
-            default: "comment",
-            interacted: "comment"
-        },
-        toggleable: false,
-    },
 }
 
 export class InteractionTemplates {
@@ -50,34 +42,15 @@ export class InteractionTemplates {
         );
 
         const stateClass$ = compute((s: boolean): string => s ? "active" : "_", interacted$);
-        const inertClass = config.toggleable ? "_" : "inert";
         const entityVisibility = (entity as any).visibility;
         const disabledClass$ = compute((u): string => {
             if (!u) return "disabled";
-            if (entityVisibility === Visibility.private && inertClass !== "inert") return "disabled";
+            if (entityVisibility === Visibility.private) return "disabled";
             if (disabler$?.value) return "disabled";
             return "_";
         }, currentUser);
-        const hideOnSmall = interactionType === InteractionType.comment;
         const countVisible = metadata.count !== undefined && metadata.count !== null && showCount;
-        const hasSplit = config.toggleable && countVisible;
-
-        if (!config.toggleable) {
-            const icon$ = compute(i => i ? config.icons.interacted : config.icons.default, interacted$);
-            return create("div")
-                .classes("flex", "align-children", hideOnSmall ? "hideOnSmallBreakpoint" : "", disabledClass$)
-                .children(
-                    GenericTemplates.roundIconButton({
-                        icon: icon$,
-                        isUrl: icon$.value.includes("http")
-                    }, () => toggleInteraction(entityType, interactionType, config, entity.id, interacted$, count$), interactionType,
-                        ["positive", stateClass$, "stats-indicator", inertClass]),
-                    when(countVisible, create("span")
-                        .classes("interaction-count", stateClass$, "hideOnSmallBreakpoint")
-                        .text(count$ as HtmlPropertyValue)
-                        .build()),
-                ).build();
-        }
+        const hasSplit = countVisible;
 
         const icon$ = compute(i => i ? config.icons.interacted : config.icons.default, interacted$);
         const mask$ = compute((url): string => `url("${url}")`, icon$);
@@ -165,6 +138,9 @@ export class InteractionTemplates {
         const elements = [];
         for (const interaction of interactions) {
             const config = interactionConfigs[interaction];
+            if (!config) {
+                continue;
+            }
             elements.push(InteractionTemplates.interactionButton(entityType, interaction, entity[interaction + "s" as keyof T] ?? {} as InteractionMetadata<any>, config, entity, options?.showCount, options?.disabled));
         }
 
@@ -172,7 +148,7 @@ export class InteractionTemplates {
     }
 
     private static trackInteractions(entity: Track, options?: InteractionOptions) {
-        const interactions = [InteractionType.like, InteractionType.repost, InteractionType.comment];
+        const interactions = [InteractionType.like, InteractionType.repost];
         return this.interactionList(options?.overrideActions ?? interactions, entity, EntityType.track, options);
     }
 
