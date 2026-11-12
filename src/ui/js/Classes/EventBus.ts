@@ -94,7 +94,7 @@ export class EventBus {
                 return;
             } catch (e) {
                 this.webTransportRetryAfter = Date.now() + EventBus.WEBTRANSPORT_FAILURE_COOLDOWN_MS;
-                console.warn("WebTransport connection failed, falling back to WebSocket", e);
+                console.warn(`WebTransport connection failed, falling back to WebSocket: ${describeWebTransportError(e)}`);
             }
         }
 
@@ -120,18 +120,25 @@ export class EventBus {
     private async connectWebTransport(config: RealtimeConfigResponse, generation: number): Promise<void> {
         const url = this.webTransportUrl(config);
         const transport = new WebTransport(url);
-        const closed = transport.closed;
-        void closed.catch(() => {});
+        const closedOutcome = transport.closed.then(() => null, e => e);
 
         try {
             await transport.ready;
         } catch (e) {
+            const closedError = await Promise.race([
+                closedOutcome,
+                new Promise<null>(resolve => window.setTimeout(() => resolve(null), 100)),
+            ]);
             try {
                 transport.close();
             } catch {
                 // Already closed.
             }
-            throw e;
+            const details = describeWebTransportError(e);
+            const closedDetails = closedError && closedError !== e
+                ? `; session closed: ${describeWebTransportError(closedError)}`
+                : "";
+            throw new Error(`WebTransport connection to ${url} was rejected: ${details}${closedDetails}`);
         }
 
         if (generation !== this.generation) {
@@ -144,13 +151,9 @@ export class EventBus {
 
         void this.readWebTransportEvents(transport);
         void this.openCommandStream(transport);
-        void closed.then(() => {
+        void closedOutcome.then(error => {
             if (this.transport === transport) {
-                console.warn("EventBus WebTransport connection closed. Reconnecting...");
-                this.scheduleReconnect();
-            }
-        }).catch(() => {
-            if (this.transport === transport) {
+                console.warn(`EventBus WebTransport connection closed (${url}): ${describeWebTransportError(error)}. Reconnecting...`);
                 this.scheduleReconnect();
             }
         });
@@ -186,7 +189,7 @@ export class EventBus {
             this.commandWriter = writer;
             await this.flushPending();
         } catch (e) {
-            console.error("Failed to open EventBus command stream", e);
+            console.error(`Failed to open EventBus command stream: ${describeWebTransportError(e)}`);
             this.scheduleReconnect();
         }
     }
@@ -203,7 +206,7 @@ export class EventBus {
             }
         } catch (e) {
             if (this.transport === transport) {
-                console.error("EventBus WebTransport read failed", e);
+                console.error(`EventBus WebTransport read failed: ${describeWebTransportError(e)}`);
             }
         }
     }
@@ -224,7 +227,7 @@ export class EventBus {
             buffer += decoder.decode();
             this.handleLines(`${buffer}\n`);
         } catch (e) {
-            console.error("EventBus WebTransport event stream failed", e);
+            console.error(`EventBus WebTransport event stream failed: ${describeWebTransportError(e)}`);
         }
     }
 
@@ -378,6 +381,28 @@ export class EventBus {
             void this.connect().catch(e => console.warn("EventBus connection failed", e));
         }, 5000);
     }
+}
+
+function describeWebTransportError(error: unknown): string {
+    if (!error) {
+        return "unknown error";
+    }
+    if (!(error instanceof Error)) {
+        return String(error);
+    }
+
+    const details = [`${error.name}: ${error.message}`];
+    const webTransportError = error as Error & {source?: string; streamErrorCode?: number};
+    if (webTransportError.source) {
+        details.push(`source=${webTransportError.source}`);
+    }
+    if (webTransportError.streamErrorCode !== undefined) {
+        details.push(`streamErrorCode=${webTransportError.streamErrorCode}`);
+    }
+    if (error.cause) {
+        details.push(`cause=${error.cause instanceof Error ? `${error.cause.name}: ${error.cause.message}` : String(error.cause)}`);
+    }
+    return details.join(", ");
 }
 
 export const eventBus = EventBus.getInstance();
