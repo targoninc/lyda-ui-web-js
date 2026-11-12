@@ -60,6 +60,9 @@ import {BatchEditField, BatchEditTemplates} from "../generic/BatchEditTemplates.
 import {TrackVersion} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackVersion";
 import {DragActions} from "../../Actions/DragActions.ts";
 
+const batchEditMissingAudioFilter = signal(false);
+const batchEditMissingArtworkFilter = signal(false);
+
 export class TrackEditTemplates {
     static uploadPage() {
         const state = signal<UploadableTrack>(defaultUploadState());
@@ -1393,8 +1396,8 @@ export class TrackEditTemplates {
         const loading = signal(true);
         const selectedIds = signal<Set<number>>(new Set());
         const bulkState = signal<UploadableTrack>({} as UploadableTrack);
-        const onlyMissingAudio = signal(false);
-        const onlyMissingArtwork = signal(false);
+        const onlyMissingAudio = batchEditMissingAudioFilter;
+        const onlyMissingArtwork = batchEditMissingArtworkFilter;
         const anyFilter = compute((audio, artwork) => audio || artwork, onlyMissingAudio, onlyMissingArtwork);
         const filteredTracks = compute((items: Track[], audio: boolean, artwork: boolean) => items.filter(track => {
             return (!audio || TrackEditTemplates.isMissingAudio(track))
@@ -1503,33 +1506,37 @@ export class TrackEditTemplates {
             .then(t => tracks.value = (t as any)?.items ?? [])
             .finally(() => loading.value = false);
 
-        const filterBar = horizontal(
-            create("span").classes("color-dim").text(t("FILTER")).build(),
-            toggle({
-                name: "batch-filter-missing-audio",
-                label: t("MISSING_AUDIO"),
-                text: t("MISSING_AUDIO"),
-                checked: onlyMissingAudio,
-                onchange: value => onlyMissingAudio.value = value,
-            }),
-            toggle({
-                name: "batch-filter-missing-artwork",
-                label: t("MISSING_ARTWORK"),
-                text: t("MISSING_ARTWORK"),
-                checked: onlyMissingArtwork,
-                onchange: value => onlyMissingArtwork.value = value,
-            }),
-            button({
-                text: t("CLEAR_FILTERS"),
-                icon: {icon: "filter_alt_off"},
-                classes: ["small"],
-                disabled: compute((active) => !active, anyFilter),
-                onclick: () => {
-                    onlyMissingAudio.value = false;
-                    onlyMissingArtwork.value = false;
-                },
-            }),
-        ).classes("card", "padded", "flex", "align-children", "small-gap", "flex-wrap").build();
+        const filterBar = GenericTemplates.fixedBar([
+            horizontal(
+                horizontal(
+                    create("span").classes("color-dim").text(t("FILTER")).build(),
+                    toggle({
+                        name: "batch-filter-missing-audio",
+                        label: t("MISSING_AUDIO"),
+                        text: t("MISSING_AUDIO"),
+                        checked: onlyMissingAudio,
+                        onchange: value => onlyMissingAudio.value = value,
+                    }),
+                    toggle({
+                        name: "batch-filter-missing-artwork",
+                        label: t("MISSING_ARTWORK"),
+                        text: t("MISSING_ARTWORK"),
+                        checked: onlyMissingArtwork,
+                        onchange: value => onlyMissingArtwork.value = value,
+                    }),
+                ).classes("align-children", "small-gap", "flex-wrap").build(),
+                button({
+                    text: t("CLEAR_FILTERS"),
+                    icon: {icon: "filter_alt_off"},
+                    classes: ["small"],
+                    disabled: compute((active) => !active, anyFilter),
+                    onclick: () => {
+                        onlyMissingAudio.value = false;
+                        onlyMissingArtwork.value = false;
+                    },
+                }),
+            ).classes("space-between", "align-children", "fullWidth").build(),
+        ]);
 
         return vertical(
             when(loading, GenericTemplates.loadingSpinner()),
