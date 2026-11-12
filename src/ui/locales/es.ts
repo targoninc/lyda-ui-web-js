@@ -204,6 +204,7 @@ export const es: Translation = {
     UNAPPROVED_TRACKS: count => `${count} pistas no aprobadas`,
     LOGIN_TO_VIEW_PROFILE: "Necesitas iniciar sesión para ver tu perfil",
     USER_NOT_FOUND: "Usuario no encontrado",
+    PAGE_LOAD_FAILED: "No se pudo cargar esta página.",
     TRACKS: "Pistas",
     ALBUMS: "Álbumes",
     PLAYLISTS: "Listas de reproducción",

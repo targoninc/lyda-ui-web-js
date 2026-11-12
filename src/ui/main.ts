@@ -14,7 +14,7 @@ import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom";
 import { ListeningHistory } from "@targoninc/lyda-shared/src/Models/db/lyda/ListeningHistory";
 import { initializeMediaSessionCallbacks } from "./js/Classes/Helpers/MediaSession.ts";
 import { Api } from "./js/Api/Api.ts";
-import { initializeGlobalErrorHandler } from "./js/Classes/Helpers/ErrorHandler.ts";
+import { initializeGlobalErrorHandler, recordClientBreadcrumb, reportClientError } from "./js/Classes/Helpers/ErrorHandler.ts";
 import { PlayerTemplates } from "./js/Templates/music/PlayerTemplates.ts";
 import { NotificationType } from "./js/Enums/NotificationType.ts";
 import { t } from "./locales";
@@ -52,32 +52,52 @@ footer.appendChild(player);
 export const router = new Router(routes, async (route: Route, params: any) => {
     const page = route.path.replace("/", "") as RoutePath;
     console.log(`Navigating to ${page} with params`, params);
+    recordClientBreadcrumb(`route ${window.location.pathname}${window.location.search}`);
 
-    disposePageRender();
-    ColorExtractor.clearPageBackground();
-    InteractionStateManager.clearContextType("list");
-    InteractionStateManager.clearContextType("page");
+    try {
+        disposePageRender();
+        ColorExtractor.clearPageBackground();
+        InteractionStateManager.clearContextType("list");
+        InteractionStateManager.clearContextType("page");
 
-    await Ui.windowResize();
+        await Ui.windowResize();
 
-    if (!userLoading.value) {
-        userLoading.value = true;
-        Util.getUserAsync(null, false).then(user => {
-            currentUser.value = user;
-            userLoading.value = false;
+        if (!userLoading.value) {
+            userLoading.value = true;
+            Util.getUserAsync(null, false).then(user => {
+                currentUser.value = user;
+                userLoading.value = false;
+            });
+        }
+        pageContainer.innerHTML = "";
+        releaseDetachedSubscriptions();
+        beginPageRender();
+        const template = PageTemplates.needLoginPages.includes(page)
+            ? PageTemplates.needsLoginPage(page, route, params, userLoading)
+            : await PageTemplates.mapping[page](route, params);
+        pageContainer.appendChild(template);
+        pageContainer.setAttribute("page", page);
+        window.scrollTo(0, 0);
+
+        Ui.loadTheme().then();
+    } catch (error) {
+        await reportClientError(error, {
+            context: "route-render",
+            page,
+            params,
         });
+        pageContainer.innerHTML = "";
+        pageContainer.setAttribute("page", "error");
+        pageContainer.appendChild(vertical(
+            create("h1").text(t("PAGE_LOAD_FAILED")),
+            button({
+                text: t("RELOAD"),
+                icon: {icon: "refresh"},
+                onclick: () => window.location.reload(),
+            }),
+        ).classes("padded").build());
+        window.scrollTo(0, 0);
     }
-    pageContainer.innerHTML = "";
-    releaseDetachedSubscriptions();
-    beginPageRender();
-    const template = PageTemplates.needLoginPages.includes(page)
-        ? PageTemplates.needsLoginPage(page, route, params, userLoading)
-        : await PageTemplates.mapping[page](route, params);
-    pageContainer.appendChild(template);
-    pageContainer.setAttribute("page", page);
-    window.scrollTo(0, 0);
-
-    Ui.loadTheme().then();
 }, () => {}, () => {
     console.log(window.location.pathname);
     setTimeout(() => {

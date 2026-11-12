@@ -204,6 +204,7 @@ export const ga: Translation = {
     UNAPPROVED_TRACKS: count => `${count} rianta neamhcheadaithe`,
     LOGIN_TO_VIEW_PROFILE: "Ní mór duit a bheith logáilte isteach chun do phróifíl a fheiceáil",
     USER_NOT_FOUND: "Úsáideoir gan aimsiú",
+    PAGE_LOAD_FAILED: "Níorbh fhéidir an leathanach seo a lódáil.",
     TRACKS: "Rianta",
     ALBUMS: "Albaim",
     PLAYLISTS: "Seinmliostaí",

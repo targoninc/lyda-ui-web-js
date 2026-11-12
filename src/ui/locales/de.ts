@@ -458,6 +458,7 @@ export const de: Translation = {
     UNFOLLOW: "Entfolgen",
     UNVERIFY: "Entverifizieren",
     USER_NOT_FOUND: "Nutzer nicht gefunden",
+    PAGE_LOAD_FAILED: "Diese Seite konnte nicht geladen werden.",
     VERIFIED: "Verifiziert",
     LYDA_SUBSCRIPTION: "Lyda Abonnement",
     NO_ACTIVE_SUBSCRIPTION: "Du hast kein aktives Abonnement. Wähle eine der unteren Optionen, um anzufangen. Alle Preise sind in USD.",
