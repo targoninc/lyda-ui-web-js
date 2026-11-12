@@ -78,6 +78,11 @@ export class PlayManager {
         history.value = [...history.value, entry].slice(-PlayManager.HISTORY_MAX);
     }
 
+    private static recordReplay(trackId: number) {
+        PlayManager.pushToHistory(trackId);
+        Api.recordPlay(trackId, currentQuality.value).catch(e => console.error("[PlayManager] Failed to record replay:", e));
+    }
+
     static async playCheck(track: Track) {
         if (PlayManager.isPlaying(track.id)) {
             StreamingUpdater.updateScrubber(track.id);
@@ -221,6 +226,7 @@ export class PlayManager {
             const loopingSingle = PlayManager.isLoopingSingle();
             console.log(`[PlayManager] loopingSingle: ${loopingSingle}`);
             if (loopingSingle) {
+                PlayManager.recordReplay(id);
                 await PlayManager.scrubTo(id, 0);
             } else {
                 await PlayManager.playNextFromQueues(id);

@@ -44,6 +44,7 @@ import { TrackSale } from "@targoninc/lyda-shared/src/Models/db/lyda/TrackSale.t
 import {UserTaxinfo} from "@targoninc/lyda-shared/src/Models/db/lyda/UserTaxinfo.ts";
 import {PaymentProvider} from "@targoninc/lyda-shared/src/Enums/PaymentProvider";
 import {DiscographyImportResult} from "@targoninc/lyda-shared/src/Models/DiscographyImport";
+import {ListeningHistory} from "@targoninc/lyda-shared/src/Models/db/lyda/ListeningHistory";
 
 export class Api {
     //region Interactions
@@ -836,6 +837,10 @@ export class Api {
 
     static async recordPlay(id: number, quality?: string) {
         return await post<{success: boolean}>(ApiRoutes.recordPlay, {id, quality});
+    }
+
+    static async getListeningHistory(limit = 100): Promise<ListeningHistory[] | null> {
+        return await get<ListeningHistory[]>(ApiRoutes.listeningHistory, {limit: String(limit)});
     }
 
     //endregion
