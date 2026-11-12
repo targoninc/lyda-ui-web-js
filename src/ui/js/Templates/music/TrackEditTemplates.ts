@@ -64,6 +64,7 @@ import {trackCleanup} from "../../Classes/Helpers/PageLifecycle.ts";
 
 const batchEditMissingAudioFilter = signal(false);
 const batchEditMissingArtworkFilter = signal(false);
+const batchEditPrivateFilter = signal(false);
 
 export class TrackEditTemplates {
     static uploadPage() {
@@ -1421,11 +1422,13 @@ export class TrackEditTemplates {
         const bulkState = signal<UploadableTrack>({} as UploadableTrack);
         const onlyMissingAudio = batchEditMissingAudioFilter;
         const onlyMissingArtwork = batchEditMissingArtworkFilter;
-        const anyFilter = compute((audio, artwork) => audio || artwork, onlyMissingAudio, onlyMissingArtwork);
-        const filteredTracks = compute((items: Track[], audio: boolean, artwork: boolean) => items.filter(track => {
+        const onlyPrivate = batchEditPrivateFilter;
+        const anyFilter = compute((audio, artwork, privateOnly) => audio || artwork || privateOnly, onlyMissingAudio, onlyMissingArtwork, onlyPrivate);
+        const filteredTracks = compute((items: Track[], audio: boolean, artwork: boolean, privateOnly: boolean) => items.filter(track => {
             return (!audio || TrackEditTemplates.isMissingAudio(track))
-                && (!artwork || TrackEditTemplates.isMissingArtwork(track));
-        }), tracks, onlyMissingAudio, onlyMissingArtwork);
+                && (!artwork || TrackEditTemplates.isMissingArtwork(track))
+                && (!privateOnly || track.visibility === Visibility.private);
+        }), tracks, onlyMissingAudio, onlyMissingArtwork, onlyPrivate);
         const noFilterResults = compute((items, active) => active && items.length === 0, filteredTracks, anyFilter);
         selectedIds.subscribe(ids => {
             if (ids.size === 0) {
@@ -1547,6 +1550,13 @@ export class TrackEditTemplates {
                         checked: onlyMissingArtwork,
                         onchange: value => onlyMissingArtwork.value = value,
                     }),
+                    toggle({
+                        name: "batch-filter-private",
+                        label: t("PRIVATE"),
+                        text: t("PRIVATE"),
+                        checked: onlyPrivate,
+                        onchange: value => onlyPrivate.value = value,
+                    }),
                 ).classes("align-children", "small-gap", "flex-wrap").build(),
                 button({
                     text: t("CLEAR_FILTERS"),
@@ -1556,6 +1566,7 @@ export class TrackEditTemplates {
                     onclick: () => {
                         onlyMissingAudio.value = false;
                         onlyMissingArtwork.value = false;
+                        onlyPrivate.value = false;
                     },
                 }),
             ).classes("space-between", "align-children", "fullWidth").build(),
