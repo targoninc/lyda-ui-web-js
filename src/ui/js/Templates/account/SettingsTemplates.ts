@@ -865,7 +865,14 @@ export class SettingsTemplates {
                             const urlSig = signal(platformInfo?.currentUrl ?? "");
                             const progress = signal<ProgressPart | null>(null);
                             const importing = signal(false);
+                            const saveError = signal<string | null>(null);
+                            const failedUrl = signal("");
+                            const saveErrorText = compute(error => error ?? "", saveError);
                             const changed = compute((orig, curr) => orig !== curr, originalUrlSig, urlSig);
+                            const canImport = compute(
+                                (apiConf, url, imp, orig) => apiConf && !imp && url.trim().length > 0 && url === orig,
+                                signal(platformInfo?.apiConfigured ?? false), urlSig, importing, originalUrlSig,
+                            );
 
                             return create("div")
                                 .classes("flex-v", "small-gap")
@@ -895,7 +902,12 @@ export class SettingsTemplates {
                                                         await Api.saveUserLink(p.label, urlSig.value);
                                                         notify(t("SUCCESS"), NotificationType.success);
                                                         originalUrlSig.value = urlSig.value;
+                                                        saveError.value = null;
+                                                        failedUrl.value = "";
                                                     } catch (error) {
+                                                        const message = error instanceof Error ? error.message : "Error";
+                                                        saveError.value = message;
+                                                        failedUrl.value = urlSig.value;
                                                         console.warn("Failed to save discography link", error);
                                                     }
                                                 },
@@ -906,10 +918,7 @@ export class SettingsTemplates {
                                                 classes: ["small", "rounded-max"],
                                                 onclick: () => { urlSig.value = originalUrlSig.value; },
                                             })),
-                                            when(
-                                                compute((apiConf, url, imp) => apiConf && url.trim().length > 0 && !imp,
-                                                    signal(platformInfo?.apiConfigured ?? false), urlSig, importing),
-                                                button({
+                                            when(canImport, button({
                                                     text: t("IMPORT"),
                                                     icon: { icon: "download" },
                                                     classes: ["small", "rounded-max", "positive"],
@@ -982,6 +991,10 @@ export class SettingsTemplates {
                                                         };
                                                     },
                                                 }),
+                                            ),
+                                            when(
+                                                compute((url, failed) => failed !== "" && url === failed, urlSig, failedUrl),
+                                                create("span").classes("warning", "small").text(saveErrorText).build(),
                                             ),
                                         ).build(),
                                     GenericTemplates.progressSectionPart(progress),
