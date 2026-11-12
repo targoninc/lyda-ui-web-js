@@ -297,6 +297,7 @@ export class FeedTemplates {
         if (config.showSearch || config.searchOverride$) search$.subscribe(reload);
         if (config.filterState) config.filterState.subscribe(reload);
         if (config.wipFilterState) config.wipFilterState.subscribe(reload);
+        if (config.visibilityFilterState) config.visibilityFilterState.subscribe(reload);
         sortBy$.subscribe(reload);
         sortDir$.subscribe(reload);
 
@@ -610,7 +611,7 @@ export class FeedTemplates {
         return el;
     }
 
-    static feed(type: FeedType, user?: { id?: number; username?: string; displayname?: string }, overrides?: { search$?: Signal<string>; wipFilterState?: Signal<string>; noToolbar?: boolean; sortable?: boolean }): any {
+    static feed(type: FeedType, user?: { id?: number; username?: string; displayname?: string }, overrides?: { search$?: Signal<string>; wipFilterState?: Signal<string>; visibilityFilterState?: Signal<string>; noToolbar?: boolean; sortable?: boolean }): any {
         const validFilters = ["all", "originals", "reposts"];
         const urlParams = new URLSearchParams(window.location.search);
         const initialFilter = urlParams.get("filter") ?? "all";
@@ -629,6 +630,7 @@ export class FeedTemplates {
 
         const initialWip = overrides?.wipFilterState?.value ?? urlParams.get("wip") ?? "";
         const wipFilterState = overrides?.wipFilterState ?? signal(validWipValues.includes(initialWip) ? initialWip : "");
+        const visibilityFilterState = overrides?.visibilityFilterState;
         if (supportsWip) {
             pf.wip = wipFilterState.value;
         }
@@ -737,6 +739,7 @@ export class FeedTemplates {
             playingUserId: user?.id,
             filterState: isFollowing ? filterState : undefined,
             wipFilterState: supportsWip ? wipFilterState : undefined,
+            visibilityFilterState,
             searchOverride$: overrides?.search$,
             noToolbar: overrides?.noToolbar,
             sortable: overrides?.sortable,
@@ -749,6 +752,9 @@ export class FeedTemplates {
                 if (supportsWip) {
                     params.wip = wipFilterState.value;
                     pf.wip = wipFilterState.value;
+                }
+                if (visibilityFilterState) {
+                    params.visibility = visibilityFilterState.value;
                 }
                 params.sortBy = sortBy || "";
                 params.sortDir = sortDir || "";

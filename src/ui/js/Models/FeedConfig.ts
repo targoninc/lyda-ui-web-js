@@ -43,6 +43,7 @@ export interface FeedConfig<T extends { id: number }> {
     playingUserId?: number;
     filterState?: Signal<string>;
     wipFilterState?: Signal<string>;
+    visibilityFilterState?: Signal<string>;
     searchOverride$?: Signal<string>;
     noToolbar?: boolean;
 }

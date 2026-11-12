@@ -614,13 +614,27 @@ export class UserTemplates {
 
         const pageSearch$ = signal("");
         const pageWipFilter$ = signal("");
+        const pageVisibilityFilter$ = signal("");
+
+        const isOwnProfile = currentUser.value?.id === user.id;
+        const visibilityFilter = isOwnProfile
+            ? vertical(
+                create("span").classes("color-dim").text(t("VISIBILITY")).build(),
+                GenericTemplates.combinedSelector(
+                    [t("ALL"), t("PUBLIC"), t("PRIVATE")],
+                    (i: number) => pageVisibilityFilter$.value = ["", "public", "private"][i],
+                    0,
+                ),
+            ).classes("small-gap").build()
+            : nullElement();
 
         const showFilter = compute(i => i === 0, currentIndex);
         const filterPopover = create("div")
             .classes("generic-popover", "feed-filter-popover", "flex-v")
             .attributes("popover", "manual")
             .children(
-                create("div").classes("padded").children(
+                create("div").classes("padded", "flex-v", "small-gap").children(
+                    visibilityFilter,
                     TrackTemplates.wipFilter(pageWipFilter$),
                 ).build(),
             ).build() as HTMLElement;
@@ -694,6 +708,7 @@ export class UserTemplates {
                     FeedTemplates.feed(FeedType.profileTracks, user, {
                         search$: pageSearch$,
                         wipFilterState: pageWipFilter$,
+                        visibilityFilterState: pageVisibilityFilter$,
                         noToolbar: true
                     }),
                 ),
