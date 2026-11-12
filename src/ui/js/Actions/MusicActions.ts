@@ -2,7 +2,15 @@ import { PlayManager } from "../Streaming/PlayManager.ts";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { QueueManager } from "../Streaming/QueueManager.ts";
 import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom.ts";
-import { playingFrom, shuffling } from "../state.ts";
+import { currentTrackId, playingFrom, shuffling } from "../state.ts";
+
+export async function toggleTrackPlayback(track: Track, newPlayingFrom?: PlayingFrom) {
+    if (currentTrackId.value === track.id) {
+        await PlayManager.togglePlayAsync(track.id);
+        return;
+    }
+    await startItem(track, newPlayingFrom);
+}
 
 export async function startItem(track: Track, newPlayingFrom?: PlayingFrom) {
     if (newPlayingFrom) {

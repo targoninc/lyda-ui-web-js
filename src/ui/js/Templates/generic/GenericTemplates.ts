@@ -677,8 +677,8 @@ export class GenericTemplates {
         const isPlaying = compute((c, p) => c === trackId && p, currentTrackId, playingHere);
         const icon = getPlayIcon(isPlaying, loadingAudio);
         const onclick = async () => {
-            if (isPlaying.value) {
-                await PlayManager.pauseAsync(trackId);
+            if (currentTrackId.value === trackId) {
+                await PlayManager.togglePlayAsync(trackId);
             } else {
                 start();
             }
