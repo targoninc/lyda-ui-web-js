@@ -72,6 +72,10 @@ currentUser.subscribe(u => {
                             break;
                     }
                 }
+            }).catch(error => {
+                console.warn("Unable to load user cache", error);
+            }).finally(() => {
+                void hydrateListeningHistory();
             });
         }
     }
@@ -323,13 +327,54 @@ export const permissions = signal<Permission[]>([]);
 
 
 
-export const history = signal<ListeningHistory[]>([]);
+const LISTENING_HISTORY_STORAGE_KEY = "lyda-listening-history";
+
+function loadStoredListeningHistory(): ListeningHistory[] {
+    try {
+        const raw = localStorage.getItem(LISTENING_HISTORY_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed.slice(-100) : [];
+    } catch {
+        return [];
+    }
+}
+
+export const history = signal<ListeningHistory[]>(loadStoredListeningHistory());
 history.subscribe((h, changed) => {
     if (!changed) {
         return;
     }
-    LydaCache.set("listeningHistory", new CacheItem(h.slice(h.length - 100, h.length)));
+    try {
+        localStorage.setItem(LISTENING_HISTORY_STORAGE_KEY, JSON.stringify(h.slice(-100)));
+    } catch (error) {
+        console.warn("Unable to persist listening history", error);
+    }
 });
+
+async function hydrateListeningHistory() {
+    try {
+        const entries = await Api.getListeningHistory(100);
+        if (!entries?.length) {
+            return;
+        }
+
+        history.value = entries;
+        if (currentTrackId.value !== 0) {
+            return;
+        }
+
+        const lastTrackId = entries[entries.length - 1]?.track_id;
+        if (!lastTrackId) {
+            return;
+        }
+
+        currentTrackId.value = lastTrackId;
+        await PlayManager.initializeTrackAsync(lastTrackId);
+        await PlayManager.stopAllAsync();
+    } catch (error) {
+        console.warn("Unable to restore listening history", error);
+    }
+}
 
 export const queueVisible = signal(false);
 
