@@ -60,6 +60,9 @@ import {BatchEditField, BatchEditTemplates} from "../generic/BatchEditTemplates.
 import {TrackVersion} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackVersion";
 import {DragActions} from "../../Actions/DragActions.ts";
 
+const batchEditMissingAudioFilter = signal(false);
+const batchEditMissingArtworkFilter = signal(false);
+
 export class TrackEditTemplates {
     static uploadPage() {
         const state = signal<UploadableTrack>(defaultUploadState());
@@ -1393,8 +1396,8 @@ export class TrackEditTemplates {
         const loading = signal(true);
         const selectedIds = signal<Set<number>>(new Set());
         const bulkState = signal<UploadableTrack>({} as UploadableTrack);
-        const onlyMissingAudio = signal(false);
-        const onlyMissingArtwork = signal(false);
+        const onlyMissingAudio = batchEditMissingAudioFilter;
+        const onlyMissingArtwork = batchEditMissingArtworkFilter;
         const anyFilter = compute((audio, artwork) => audio || artwork, onlyMissingAudio, onlyMissingArtwork);
         const filteredTracks = compute((items: Track[], audio: boolean, artwork: boolean) => items.filter(track => {
             return (!audio || TrackEditTemplates.isMissingAudio(track))
@@ -1529,7 +1532,7 @@ export class TrackEditTemplates {
                     onlyMissingArtwork.value = false;
                 },
             }),
-        ).classes("card", "padded", "flex", "align-children", "small-gap", "flex-wrap").build();
+        ).classes("card", "padded", "flex", "align-children", "small-gap", "flex-wrap", "batch-edit-filter-bar").build();
 
         return vertical(
             when(loading, GenericTemplates.loadingSpinner()),

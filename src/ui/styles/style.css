@@ -728,6 +728,13 @@ span.positive {
     flex-wrap: nowrap;
 }
 
+.batch-edit-filter-bar {
+    position: sticky;
+    top: 43px;
+    z-index: 1;
+    box-shadow: 0 10px 20px -7px var(--bg-0);
+}
+
 .batch-selection-wrapper {
     align-self: stretch;
     display: flex;
