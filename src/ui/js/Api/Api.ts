@@ -480,12 +480,12 @@ export class Api {
         return get<Track[] | { items: Track[], total: number }>(endpoint, params);
     }
 
-    static async getTracksByUser(name: string, id: number | null = null) {
-        return get<Track[]>(ApiRoutes.profileTracksFeed, {
+    static async getTracksByUser(name: string, id: number | null = null, offset: number = 0, limit: number = 100) {
+        return get<{ items: Track[]; total: number }>(ApiRoutes.profileTracksFeed, {
             id,
             name,
-            offset: 0,
-            limit: 100,
+            offset,
+            limit,
         });
     }
 
