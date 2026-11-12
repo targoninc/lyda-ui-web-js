@@ -5,6 +5,7 @@ import {PlayingFrom} from "@targoninc/lyda-shared/src/Models/PlayingFrom";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {shuffleArray} from "../Classes/Util.ts";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
+import {isPlayableTrack} from "../Classes/Helpers/PlayableTrack.ts";
 
 function resolveFeedResult(result: any): any[] {
     if (!result) return [];
@@ -16,20 +17,38 @@ function resolveFeedResult(result: any): any[] {
 export class QueueManager {
     static lastPopulatedShuffleState: boolean | null = null;
 
+    static isPlayableId(id: number): boolean {
+        const track = trackInfo.value[id]?.track as Track | undefined;
+        return !track || isPlayableTrack(track);
+    }
+
+    private static filterPlayableIds(queue: number[]): number[] {
+        return queue.filter(id => QueueManager.isPlayableId(id));
+    }
+
     static addToAutoQueue(id: number) {
+        if (!QueueManager.isPlayableId(id)) {
+            return;
+        }
         autoQueue.value.push(id);
     }
 
     static setAutoQueue(queue: number[]) {
-        autoQueue.value = queue;
+        autoQueue.value = QueueManager.filterPlayableIds(queue);
     }
 
     static setManualQueue(queue: number[]) {
-        manualQueue.value = queue;
+        manualQueue.value = QueueManager.filterPlayableIds(queue);
     }
 
     static addToManualQueue(id: number, track?: Track) {
         if (!id) {
+            return;
+        }
+        if (track && !isPlayableTrack(track)) {
+            return;
+        }
+        if (!track && !QueueManager.isPlayableId(id)) {
             return;
         }
         if (track && !trackInfo.value[id]) {
@@ -43,7 +62,7 @@ export class QueueManager {
     }
 
     static setContextQueue(queue: number[]) {
-        contextQueue.value = queue;
+        contextQueue.value = QueueManager.filterPlayableIds(queue);
     }
 
     static clearContextQueue() {
@@ -52,7 +71,9 @@ export class QueueManager {
 
     static async populateContextQueue(pf: PlayingFrom, shuffle: boolean) {
         if (pf.entity?.tracks) {
-            let trackIds = pf.entity.tracks.map(t => t.track_id);
+            let trackIds = pf.entity.tracks
+                .filter(t => !t.track || isPlayableTrack(t.track))
+                .map(t => t.track_id);
             if (shuffle) {
                 trackIds = shuffleArray(trackIds);
             }
@@ -80,7 +101,9 @@ export class QueueManager {
             }
         }
 
-        let trackIds = tracks.map((t: any) => t.id);
+        let trackIds = tracks
+            .filter((t: any) => isPlayableTrack(t))
+            .map((t: any) => t.id);
         if (shuffle) {
             trackIds = shuffleArray(trackIds);
         }
@@ -89,18 +112,18 @@ export class QueueManager {
     }
 
     static reshuffleContextQueue() {
-        const current = contextQueue.value;
+        const current = QueueManager.getContextQueue();
         if (current.length > 0) {
             contextQueue.value = shuffleArray(current);
         }
     }
 
     static async popFromAutoQueue() {
-        let autoQueueTmp = QueueManager.getAutoQueue();
+        let autoQueueTmp = QueueManager.getAutoQueue().filter(id => QueueManager.isPlayableId(id));
         let firstItem = autoQueueTmp[0];
 
         if (firstItem === undefined || autoQueueTmp.length < 10) {
-            autoQueueTmp = await QueueManager.fillAutoQueue();
+            autoQueueTmp = (await QueueManager.fillAutoQueue()).filter(id => QueueManager.isPlayableId(id));
             firstItem = autoQueueTmp[0];
             if (firstItem === undefined) {
                 return undefined;
@@ -122,8 +145,10 @@ export class QueueManager {
                 setTrackInfo(track.id, {track});
             }
         }
-        const ids = queueToAdd.map((item) => item.id);
-        autoQueue.value = autoQueue.value.concat(ids);
+        const ids = queueToAdd
+            .filter((item) => isPlayableTrack(item))
+            .map((item) => item.id);
+        autoQueue.value = QueueManager.filterPlayableIds(autoQueue.value.concat(ids));
         return autoQueue.value;
     }
 
@@ -150,11 +175,11 @@ export class QueueManager {
     }
 
     static getAutoQueue() {
-        let autoQueueTmp = autoQueue.value;
+        let autoQueueTmp = QueueManager.filterPlayableIds(autoQueue.value);
         if (autoQueueTmp.length === 0) {
             const cache = LydaCache.get<number[] | number>("queue").content;
             if (cache) {
-                autoQueueTmp = (Array.isArray(cache) ? cache : [cache]) as number[];
+                autoQueueTmp = QueueManager.filterPlayableIds((Array.isArray(cache) ? cache : [cache]) as number[]);
                 autoQueue.value = autoQueueTmp;
             }
         }
@@ -162,11 +187,11 @@ export class QueueManager {
     }
 
     static getContextQueue() {
-        let contextQueueTmp = contextQueue.value;
+        let contextQueueTmp = QueueManager.filterPlayableIds(contextQueue.value);
         if (contextQueueTmp.length === 0) {
             const cache = LydaCache.get<number[] | number>("contextQueue").content;
             if (cache) {
-                contextQueueTmp = (Array.isArray(cache) ? cache : [cache]) as number[];
+                contextQueueTmp = QueueManager.filterPlayableIds((Array.isArray(cache) ? cache : [cache]) as number[]);
                 contextQueue.value = contextQueueTmp;
             }
         }
