@@ -1307,7 +1307,7 @@ export class TrackEditTemplates {
         const coverLoading = signal(false);
         const imageState = signal("");
         const isPrivate = compute(s => s.visibility === "private", state);
-        const noAudio = !track.processed || track.length <= 0;
+        const noAudio = TrackEditTemplates.isMissingAudio(track);
 
         return horizontal(
             BatchEditTemplates.selectionCard("track", track.id, selectedIds),
@@ -1380,11 +1380,27 @@ export class TrackEditTemplates {
             .build();
     }
 
+    private static isMissingAudio(track: Track): boolean {
+        return !track.processed || track.length <= 0;
+    }
+
+    private static isMissingArtwork(track: Track): boolean {
+        return !track.has_cover;
+    }
+
     static batchEditTracksPage() {
         const tracks = signal<Track[]>([]);
         const loading = signal(true);
         const selectedIds = signal<Set<number>>(new Set());
         const bulkState = signal<UploadableTrack>({} as UploadableTrack);
+        const onlyMissingAudio = signal(false);
+        const onlyMissingArtwork = signal(false);
+        const anyFilter = compute((audio, artwork) => audio || artwork, onlyMissingAudio, onlyMissingArtwork);
+        const filteredTracks = compute((items: Track[], audio: boolean, artwork: boolean) => items.filter(track => {
+            return (!audio || TrackEditTemplates.isMissingAudio(track))
+                && (!artwork || TrackEditTemplates.isMissingArtwork(track));
+        }), tracks, onlyMissingAudio, onlyMissingArtwork);
+        const noFilterResults = compute((items, active) => active && items.length === 0, filteredTracks, anyFilter);
         selectedIds.subscribe(ids => {
             if (ids.size === 0) {
                 bulkState.value = {} as UploadableTrack;
@@ -1487,13 +1503,43 @@ export class TrackEditTemplates {
             .then(t => tracks.value = (t as any)?.items ?? [])
             .finally(() => loading.value = false);
 
+        const filterBar = horizontal(
+            create("span").classes("color-dim").text(t("FILTER")).build(),
+            toggle({
+                name: "batch-filter-missing-audio",
+                label: t("MISSING_AUDIO"),
+                text: t("MISSING_AUDIO"),
+                checked: onlyMissingAudio,
+                onchange: value => onlyMissingAudio.value = value,
+            }),
+            toggle({
+                name: "batch-filter-missing-artwork",
+                label: t("MISSING_ARTWORK"),
+                text: t("MISSING_ARTWORK"),
+                checked: onlyMissingArtwork,
+                onchange: value => onlyMissingArtwork.value = value,
+            }),
+            button({
+                text: t("CLEAR_FILTERS"),
+                icon: {icon: "filter_alt_off"},
+                classes: ["small"],
+                disabled: compute((active) => !active, anyFilter),
+                onclick: () => {
+                    onlyMissingAudio.value = false;
+                    onlyMissingArtwork.value = false;
+                },
+            }),
+        ).classes("card", "padded", "flex", "align-children", "small-gap", "flex-wrap").build();
+
         return vertical(
             when(loading, GenericTemplates.loadingSpinner()),
+            filterBar,
+            when(noFilterResults, create("span").classes("color-dim").text(t("NO_TRACKS_MATCH_FILTERS")).build()),
             when(
                 compute(ids => ids.size > 0, selectedIds),
                 bulkEdit,
             ),
-            signalMap(tracks, vertical(), t => TrackEditTemplates.editableTrackInList(t, tracks, selectedIds)),
+            signalMap(filteredTracks, vertical(), t => TrackEditTemplates.editableTrackInList(t, tracks, selectedIds)),
         ).build();
     }
 }
