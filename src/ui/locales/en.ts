@@ -175,6 +175,8 @@ export const en = {
     LOGIN_TO_VIEW_PAGE: "You need to be logged in to view this page",
     LOG_OUT: "Log out",
     PRIVATE: "Private",
+    PUBLIC: "Public",
+    VISIBILITY: "Visibility",
     NOTHING_FOR_YOU_HERE: "Nothing for you here 🤖",
     GO_EXPLORE_SOMEWHERE_ELSE: "Go explore somewhere else",
     NEW_ALBUM: "New album",

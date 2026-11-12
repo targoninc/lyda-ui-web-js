@@ -1,4 +1,4 @@
-import {compute, create, Signal, signal, signalMap, AnyNode, nullElement, when} from "@targoninc/jess";
+import {compute, create, Signal, signal, AnyNode, nullElement, when} from "@targoninc/jess";
 import { GenericTemplates, horizontal } from "./GenericTemplates.ts";
 import { getPlayIcon, copy, Util } from "../../Classes/Util.ts";
 import { t } from "../../../locales";
@@ -297,6 +297,7 @@ export class FeedTemplates {
         if (config.showSearch || config.searchOverride$) search$.subscribe(reload);
         if (config.filterState) config.filterState.subscribe(reload);
         if (config.wipFilterState) config.wipFilterState.subscribe(reload);
+        if (config.visibilityFilterState) config.visibilityFilterState.subscribe(reload);
         sortBy$.subscribe(reload);
         sortDir$.subscribe(reload);
 
@@ -394,6 +395,39 @@ export class FeedTemplates {
         const toolbar = config.noToolbar ? nullElement() : GenericTemplates.fixedBar([topRow]);
         const contentClass = config.noToolbar ? "_" : "fixed-bar-content";
 
+        const rowsBody = create("tbody").classes("feed-rows").build() as HTMLElement;
+        let renderedItems: T[] = [];
+        const updateRows = (items: T[] | null | undefined) => {
+            const nextItems = (items ?? []).filter((item): item is T => item !== undefined && item !== null);
+            const isAppend = nextItems.length >= renderedItems.length
+                && renderedItems.every((item, i) => item === nextItems[i]);
+
+            if (!isAppend) {
+                rowsBody.replaceChildren();
+                renderedItems = [];
+            }
+
+            for (let i = renderedItems.length; i < nextItems.length; i++) {
+                rowsBody.appendChild(FeedTemplates.#row(
+                    nextItems[i],
+                    i,
+                    getPageForIndex(i),
+                    config,
+                    feedId,
+                    rebuildAndShowMobile,
+                    selectedIds$,
+                    handleRowClick,
+                    buildBatchActions,
+                    items$,
+                    batchPopover,
+                ));
+            }
+            renderedItems = nextItems;
+        };
+        items$.subscribe(updateRows);
+        trackCleanup(() => items$.unsubscribe(updateRows));
+        updateRows(items$.value);
+
         const el = create("div")
             .classes("feed-wrapper", "flex-v", "fullWidth", config.compact ? "feed-compact" : "_")
             .id(feedId)
@@ -432,11 +466,7 @@ export class FeedTemplates {
                             },
                             items$, sortKey,
                         ),
-                        signalMap(
-                            items$,
-                            create("tbody").classes("feed-rows"),
-                            (item, i) => FeedTemplates.#row(item, i, getPageForIndex(i), config, feedId, rebuildAndShowMobile, selectedIds$, handleRowClick, buildBatchActions, items$, batchPopover),
-                        ),
+                        rowsBody,
                         compute(
                             (total, _items) => {
                                 if (total === null) return nullElement();
@@ -610,7 +640,7 @@ export class FeedTemplates {
         return el;
     }
 
-    static feed(type: FeedType, user?: { id?: number; username?: string; displayname?: string }, overrides?: { search$?: Signal<string>; wipFilterState?: Signal<string>; noToolbar?: boolean; sortable?: boolean }): any {
+    static feed(type: FeedType, user?: { id?: number; username?: string; displayname?: string }, overrides?: { search$?: Signal<string>; wipFilterState?: Signal<string>; visibilityFilterState?: Signal<string>; noToolbar?: boolean; sortable?: boolean }): any {
         const validFilters = ["all", "originals", "reposts"];
         const urlParams = new URLSearchParams(window.location.search);
         const initialFilter = urlParams.get("filter") ?? "all";
@@ -629,6 +659,7 @@ export class FeedTemplates {
 
         const initialWip = overrides?.wipFilterState?.value ?? urlParams.get("wip") ?? "";
         const wipFilterState = overrides?.wipFilterState ?? signal(validWipValues.includes(initialWip) ? initialWip : "");
+        const visibilityFilterState = overrides?.visibilityFilterState;
         if (supportsWip) {
             pf.wip = wipFilterState.value;
         }
@@ -737,6 +768,7 @@ export class FeedTemplates {
             playingUserId: user?.id,
             filterState: isFollowing ? filterState : undefined,
             wipFilterState: supportsWip ? wipFilterState : undefined,
+            visibilityFilterState,
             searchOverride$: overrides?.search$,
             noToolbar: overrides?.noToolbar,
             sortable: overrides?.sortable,
@@ -749,6 +781,9 @@ export class FeedTemplates {
                 if (supportsWip) {
                     params.wip = wipFilterState.value;
                     pf.wip = wipFilterState.value;
+                }
+                if (visibilityFilterState) {
+                    params.visibility = visibilityFilterState.value;
                 }
                 params.sortBy = sortBy || "";
                 params.sortDir = sortDir || "";

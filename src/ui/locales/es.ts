@@ -175,6 +175,8 @@ export const es: Translation = {
     LOGIN_TO_VIEW_PAGE: "Necesitas iniciar sesión para ver esta página",
     LOG_OUT: "Cerrar sesión",
     PRIVATE: "Privado",
+    PUBLIC: "Público",
+    VISIBILITY: "Visibilidad",
     NOTHING_FOR_YOU_HERE: "Aquí no hay nada para ti 🤖",
     GO_EXPLORE_SOMEWHERE_ELSE: "Ve a explorar otro lugar",
     NEW_ALBUM: "Nuevo album",

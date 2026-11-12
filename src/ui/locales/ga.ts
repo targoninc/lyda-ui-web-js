@@ -175,6 +175,8 @@ export const ga: Translation = {
     LOGIN_TO_VIEW_PAGE: "Ní mór duit a bheith logáilte isteach chun an leathanach seo a fheiceáil",
     LOG_OUT: "Logáil amach",
     PRIVATE: "Príobháideach",
+    PUBLIC: "Poiblí",
+    VISIBILITY: "Infheictheacht",
     NOTHING_FOR_YOU_HERE: "Ní dhéanfaidh aon ní duit anseo 🤖",
     GO_EXPLORE_SOMEWHERE_ELSE: "Téigh ag iniúchadh áit éigin eile",
     NEW_ALBUM: "Albam nua",
