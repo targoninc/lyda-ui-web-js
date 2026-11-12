@@ -404,7 +404,9 @@ export class TrackTemplates {
                                     ),
                                     horizontal(
                                         TrackTemplates.addToQueueButton(track),
-                                        InteractionTemplates.interactions(EntityType.track, track),
+                                        InteractionTemplates.interactions(EntityType.track, track, type === "playlist"
+                                            ? {overrideActions: [InteractionType.like, InteractionType.repost]}
+                                            : undefined),
                                     ).classes("align-children"),
                                 ).classes("align-children-end"),
                             ).build(),
