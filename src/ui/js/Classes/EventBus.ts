@@ -18,6 +18,7 @@ export class EventBus {
     private nextId: number = 0;
     private generation: number = 0;
     private webTransportRetryAfter = 0;
+    private hasConnected = false;
     private static readonly WEBTRANSPORT_FAILURE_COOLDOWN_MS = 30 * 60_000;
 
     private constructor() {
@@ -94,7 +95,12 @@ export class EventBus {
                 return;
             } catch (e) {
                 this.webTransportRetryAfter = Date.now() + EventBus.WEBTRANSPORT_FAILURE_COOLDOWN_MS;
-                console.warn(`WebTransport connection failed, falling back to WebSocket: ${describeWebTransportError(e)}`);
+                const message = `WebTransport connection failed, falling back to WebSocket: ${describeWebTransportError(e)}`;
+                if (this.hasConnected) {
+                    console.info(message);
+                } else {
+                    console.warn(message);
+                }
             }
         }
 
@@ -147,13 +153,22 @@ export class EventBus {
         }
 
         this.transport = transport;
+        this.hasConnected = true;
         console.log(`EventBus connected over WebTransport to ${url}`);
 
         void this.readWebTransportEvents(transport);
         void this.openCommandStream(transport);
         void closedOutcome.then(error => {
             if (this.transport === transport) {
-                console.warn(`EventBus WebTransport connection closed (${url}): ${describeWebTransportError(error)}. Reconnecting...`);
+                this.transport = null;
+                this.commandWriter = null;
+                const reason = error ? describeWebTransportError(error) : "closed";
+                const message = `EventBus WebTransport connection closed (${url}): ${reason}. Reconnecting...`;
+                if (this.hasConnected) {
+                    console.info(message);
+                } else {
+                    console.warn(message);
+                }
                 this.scheduleReconnect();
             }
         });
@@ -189,7 +204,11 @@ export class EventBus {
             this.commandWriter = writer;
             await this.flushPending();
         } catch (e) {
-            console.error(`Failed to open EventBus command stream: ${describeWebTransportError(e)}`);
+            if (this.hasConnected) {
+                console.debug(`EventBus command stream ended: ${describeWebTransportError(e)}`);
+            } else {
+                console.error(`Failed to open EventBus command stream: ${describeWebTransportError(e)}`);
+            }
             this.scheduleReconnect();
         }
     }
@@ -206,7 +225,11 @@ export class EventBus {
             }
         } catch (e) {
             if (this.transport === transport) {
-                console.error(`EventBus WebTransport read failed: ${describeWebTransportError(e)}`);
+                if (this.hasConnected) {
+                    console.debug(`EventBus WebTransport read ended: ${describeWebTransportError(e)}`);
+                } else {
+                    console.error(`EventBus WebTransport read failed: ${describeWebTransportError(e)}`);
+                }
             }
         }
     }
@@ -227,7 +250,11 @@ export class EventBus {
             buffer += decoder.decode();
             this.handleLines(`${buffer}\n`);
         } catch (e) {
-            console.error(`EventBus WebTransport event stream failed: ${describeWebTransportError(e)}`);
+            if (this.hasConnected) {
+                console.debug(`EventBus WebTransport event stream ended: ${describeWebTransportError(e)}`);
+            } else {
+                console.error(`EventBus WebTransport event stream failed: ${describeWebTransportError(e)}`);
+            }
         }
     }
 
@@ -248,6 +275,7 @@ export class EventBus {
                 socket.close();
                 return;
             }
+            this.hasConnected = true;
             void this.flushPending().catch(e => console.warn("EventBus flush failed", e));
         };
 
@@ -262,13 +290,22 @@ export class EventBus {
 
         socket.onclose = () => {
             if (this.ws === socket) {
-                console.warn("EventBus connection closed. Reconnecting...");
+                const message = "EventBus connection closed. Reconnecting...";
+                if (this.hasConnected) {
+                    console.info(message);
+                } else {
+                    console.warn(message);
+                }
                 this.scheduleReconnect();
             }
         };
 
         socket.onerror = (error) => {
-            console.error("EventBus error:", error);
+            if (this.hasConnected) {
+                console.debug("EventBus WebSocket error", error);
+            } else {
+                console.error("EventBus error:", error);
+            }
             socket.close();
         };
     }
