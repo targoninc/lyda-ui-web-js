@@ -1,5 +1,5 @@
 import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
-import {AnyElement, AnyNode, compute, create, Signal, signal, signalMap, StringOrSignal, when} from "@targoninc/jess";
+import {AnyElement, compute, create, nullElement, Signal, signal, signalMap, StringOrSignal, when} from "@targoninc/jess";
 import {currentTrackId, currentUser, loadingAudio, manualQueue, playingFrom, playingHere, setTrackSecretCode} from "../../state.ts";
 import {InteractionStateManager} from "../../Classes/InteractionStateManager.ts";
 import {getPlayIcon, Util} from "../../Classes/Util.ts";
@@ -295,7 +295,14 @@ export class MusicTemplates {
         });
     }
 
-    static title(type: EntityType, title: string, id: number, icons: AnyNode[] = [], textSize: TextSize = TextSize.large, goToEntity = true, noTruncate = false, wip = false) {
+    static noAudioWarning(track: {processed?: boolean}): AnyElement | Signal<AnyElement> {
+        if (track.processed !== false) {
+            return nullElement();
+        }
+        return GenericTemplates.icon("warning", true, ["warning", "no-audio-indicator"], t("NO_AUDIO_FILE"));
+    }
+
+    static title(type: EntityType, title: string, id: number, icons: (AnyElement | Signal<AnyElement>)[] = [], textSize: TextSize = TextSize.large, goToEntity = true, noTruncate = false, wip = false) {
         let baseRoute = RoutePath.track;
         switch (type) {
             case EntityType.album:
