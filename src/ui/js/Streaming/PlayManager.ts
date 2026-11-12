@@ -4,6 +4,7 @@ import {QueueManager} from "./QueueManager.ts";
 import {StreamClient} from "./StreamClient.ts";
 import {target, userHasSettingValue, Util} from "../Classes/Util.ts";
 import {FeatureDetector} from "../Classes/Helpers/FeatureDetector.ts";
+import {isPlayableTrack} from "../Classes/Helpers/PlayableTrack.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
 import {
     currentQuality,
@@ -114,7 +115,7 @@ export class PlayManager {
      * Does not mutate queue state — the caller applies consumption.
      */
     private static resolveNextFromQueues(currentId: number): NextTrackResolution | NextAutoResolution {
-        const manualQueue = QueueManager.getManualQueue();
+        const manualQueue = QueueManager.getManualQueue().filter(id => QueueManager.isPlayableId(id));
         const nextTrackIdFromManual = manualQueue[0];
         if (nextTrackIdFromManual !== undefined) {
             return {
@@ -503,13 +504,19 @@ export class PlayManager {
         loadingAudio.value = true;
         const isNewPlay = nextId !== currentTrackId.value || force;
         try {
-            if (isNewPlay) {
-                PlayManager.pushToHistory(nextId);
-            }
-
             const d = await PlayManager.getTrackData(nextId, false);
             if (!d) {
                 throw new Error(`Track ${nextId} not found`);
+            }
+            if (!isPlayableTrack(d.track)) {
+                loadingAudio.value = false;
+                PlayManager.transitionInProgress = false;
+                QueueManager.removeFromAllQueues(nextId);
+                notify(`${t("NO_AUDIO_FILE")}`, NotificationType.error);
+                return;
+            }
+            if (isNewPlay) {
+                PlayManager.pushToHistory(nextId);
             }
             setTrackInfo(d.track.id, {track: d.track});
 
@@ -590,16 +597,21 @@ export class PlayManager {
 
     private static async startTrackAsync(id: number, fromBeginning: boolean, force: boolean, version?: number, track?: Track) {
         const isNewPlay = id !== currentTrackId.value || force;
-        if (isNewPlay) {
-            PlayManager.pushToHistory(id);
-        }
-
         const d = track?.user
             ? {track}
             : await PlayManager.getTrackData(id, false);
         if (!d) {
             loadingAudio.value = false;
             return;
+        }
+        if (!isPlayableTrack(d.track)) {
+            loadingAudio.value = false;
+            QueueManager.removeFromAllQueues(id);
+            notify(`${t("NO_AUDIO_FILE")}`, NotificationType.error);
+            return;
+        }
+        if (isNewPlay) {
+            PlayManager.pushToHistory(id);
         }
         setTrackInfo(d.track.id, {track: d.track});
 
@@ -650,7 +662,7 @@ export class PlayManager {
         console.log(`[PlayManager] initializeTrackAsync called for track ${id}`);
         let streamClient = PlayManager.getStreamClient(id);
         const track = await PlayManager.getTrackData(id);
-        if (!track) {
+        if (!track || !isPlayableTrack(track.track)) {
             return;
         }
         if (streamClient === undefined) {

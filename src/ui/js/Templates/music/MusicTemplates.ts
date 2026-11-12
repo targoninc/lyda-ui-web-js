@@ -33,6 +33,7 @@ import {TextSize} from "../../Enums/TextSize.ts";
 import {startItem} from "../../Actions/MusicActions.ts";
 import {artworkDisplay, ArtworkOptions} from "./ArtworkTemplates.ts";
 import {InteractionType} from "@targoninc/lyda-shared/src/Enums/InteractionType";
+import {isPlayableTrack} from "../../Classes/Helpers/PlayableTrack.ts";
 import {ReportTemplates} from "../ReportTemplates.ts";
 
 export class MusicTemplates {
@@ -296,8 +297,7 @@ export class MusicTemplates {
     }
 
     static noAudioWarning(track: {processed?: boolean | number | string | null}): AnyElement | Signal<AnyElement> {
-        const isProcessed = track.processed === true || track.processed === 1 || track.processed === "1";
-        if (isProcessed) {
+        if (isPlayableTrack(track)) {
             return nullElement();
         }
         return GenericTemplates.icon("warning", true, ["warning", "no-audio-indicator"], t("NO_AUDIO_FILE"));

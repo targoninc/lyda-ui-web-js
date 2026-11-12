@@ -17,11 +17,13 @@ export class EventBus {
     private readonly url: string;
     private nextId: number = 0;
     private generation: number = 0;
+    private webTransportRetryAfter = 0;
+    private static readonly WEBTRANSPORT_FAILURE_COOLDOWN_MS = 30 * 60_000;
 
     private constructor() {
         const baseUrl = Config.apiBaseUrl;
         this.url = baseUrl.replace(/^http/, "ws") + "/events";
-        void this.connect();
+        void this.connect().catch(e => console.warn("EventBus connection failed", e));
     }
 
     public static getInstance(): EventBus {
@@ -56,7 +58,7 @@ export class EventBus {
     }
 
     public reconnect(): void {
-        void this.connect();
+        void this.connect().catch(e => console.warn("EventBus connection failed", e));
     }
 
     public send(data: any): void {
@@ -91,6 +93,7 @@ export class EventBus {
                 await this.connectWebTransport(config, generation);
                 return;
             } catch (e) {
+                this.webTransportRetryAfter = Date.now() + EventBus.WEBTRANSPORT_FAILURE_COOLDOWN_MS;
                 console.warn("WebTransport connection failed, falling back to WebSocket", e);
             }
         }
@@ -108,7 +111,8 @@ export class EventBus {
     }
 
     private canUseWebTransport(): boolean {
-        return typeof WebTransport !== "undefined" &&
+        return Date.now() >= this.webTransportRetryAfter &&
+            typeof WebTransport !== "undefined" &&
             window.isSecureContext &&
             Config.realtimeBaseUrl.startsWith("https://");
     }
@@ -116,10 +120,12 @@ export class EventBus {
     private async connectWebTransport(config: RealtimeConfigResponse, generation: number): Promise<void> {
         const url = this.webTransportUrl(config);
         const transport = new WebTransport(url);
+        const closed = transport.closed;
+        void closed.catch(() => {});
+
         try {
             await transport.ready;
         } catch (e) {
-            void transport.closed.catch(() => {});
             try {
                 transport.close();
             } catch {
@@ -138,7 +144,7 @@ export class EventBus {
 
         void this.readWebTransportEvents(transport);
         void this.openCommandStream(transport);
-        void transport.closed.then(() => {
+        void closed.then(() => {
             if (this.transport === transport) {
                 console.warn("EventBus WebTransport connection closed. Reconnecting...");
                 this.scheduleReconnect();
@@ -203,11 +209,10 @@ export class EventBus {
     }
 
     private async readWebTransportEventStream(stream: ReadableStream<Uint8Array>): Promise<void> {
-        const reader = stream.getReader();
-        const decoder = new TextDecoder();
-        let buffer = "";
-
         try {
+            const reader = stream.getReader();
+            const decoder = new TextDecoder();
+            let buffer = "";
             while (true) {
                 const {value, done} = await reader.read();
                 if (done) {
@@ -240,7 +245,7 @@ export class EventBus {
                 socket.close();
                 return;
             }
-            void this.flushPending();
+            void this.flushPending().catch(e => console.warn("EventBus flush failed", e));
         };
 
         socket.onmessage = (event) => {
@@ -355,7 +360,11 @@ export class EventBus {
             const transport = this.transport;
             this.transport = null;
             this.commandWriter = null;
-            void transport.close();
+            try {
+                transport.close();
+            } catch {
+                // Already closed.
+            }
         }
         this.commandWriter = null;
     }
@@ -366,7 +375,7 @@ export class EventBus {
         }
         this.reconnectTimeout = window.setTimeout(() => {
             this.reconnectTimeout = null;
-            void this.connect();
+            void this.connect().catch(e => console.warn("EventBus connection failed", e));
         }, 5000);
     }
 }
