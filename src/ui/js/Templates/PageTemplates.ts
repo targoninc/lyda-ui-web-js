@@ -53,7 +53,7 @@ import {t} from "../../locales";
 import {TransactionTemplates} from "./money/TransactionTemplates.ts";
 import {BatchEditField, BatchEditTemplates} from "./generic/BatchEditTemplates.ts";
 import {ComponentGalleryTemplates} from "./Development/ComponentGalleryTemplates.ts";
-import {playFeed} from "../Actions/MusicActions.ts";
+import {playFeed, toggleTrackPlayback} from "../Actions/MusicActions.ts";
 
 export class PageTemplates {
     static mapping: Record<RoutePath, (route: Route, params: Record<string, string>) => Promise<AnyElement> | AnyElement> = {
@@ -1024,11 +1024,7 @@ export class PageTemplates {
                     }),
                 ],
                 onPlayToggle: async (track) => {
-                    if (currentTrackId.value === track.id && playingHere.value) {
-                        await PlayManager.pauseAsync(track.id);
-                    } else {
-                        await PlayManager.startAtBeginningAsync(track.id, track);
-                    }
+                    await toggleTrackPlayback(track);
                 },
                 isPlaying: (id) => compute((c, p) => c === id && p, currentTrackId, playingHere),
                 dateRender: (track) => GenericTemplates.timestamp(track.created_at, ["hideOnSmallBreakpoint"]),

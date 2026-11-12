@@ -185,8 +185,8 @@ export class MusicTemplates {
             playingHere,
         );
         const onclick = async () => {
-            if (playingHere.value && currentTrackId.value === itemId) {
-                await PlayManager.pauseAsync(currentTrackId.value);
+            if (type === EntityType.track && currentTrackId.value === itemId) {
+                await PlayManager.togglePlayAsync(itemId);
             } else {
                 start();
             }

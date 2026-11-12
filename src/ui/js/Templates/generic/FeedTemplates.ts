@@ -8,9 +8,8 @@ import { PopoverTemplates } from "./PopoverTemplates.ts";
 import { InteractionTemplates } from "../InteractionTemplates.ts";
 import { InteractionStateManager } from "../../Classes/InteractionStateManager.ts";
 import { currentTrackId, currentUser, loadingAudio, playingHere, manualQueue } from "../../state.ts";
-import { PlayManager } from "../../Streaming/PlayManager.ts";
 import { QueueManager } from "../../Streaming/QueueManager.ts";
-import { startItem } from "../../Actions/MusicActions.ts";
+import { toggleTrackPlayback } from "../../Actions/MusicActions.ts";
 import { Api } from "../../Api/Api.ts";
 import { ApiRoutes } from "../../Api/ApiRoutes.ts";
 import { navigate } from "../../Routing/Router.ts";
@@ -849,11 +848,7 @@ export class FeedTemplates {
                 }),
             ],
             onPlayToggle: async (track) => {
-                if (currentTrackId.value === track.id && playingHere.value) {
-                    await PlayManager.pauseAsync(track.id);
-                } else {
-                    await startItem(track, pf);
-                }
+                await toggleTrackPlayback(track, pf);
             },
             isPlaying: (id) => compute((c, p) => c === id && p, currentTrackId, playingHere),
             isLoading: (id) => compute((c, l) => c === id && l, currentTrackId, loadingAudio),
