@@ -21,6 +21,7 @@ import {
     trackInfo,
     setTrackInfo,
     removeTrackInfo,
+    setTrackSecretCode,
     volume,
 } from "../state.ts";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
@@ -871,6 +872,9 @@ export class PlayManager {
     }
 
     static async cacheTrackData(trackData: TrackDetailResponse) {
+        if (trackData.track.visibility === "private" && trackData.track.secretcode) {
+            setTrackSecretCode(trackData.track.id, trackData.track.secretcode);
+        }
         setTrackInfo(trackData.track.id, trackData);
     }
 

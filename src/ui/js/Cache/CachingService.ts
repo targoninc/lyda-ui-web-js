@@ -139,7 +139,7 @@ export class CachingService {
         const serverUrl = `${ApiRoutes.getImageMedia}?id=${id}&quality=${quality}&mediaFileType=${type}${code ? `&code=${encodeURIComponent(code)}` : ""}`;
 
         try {
-            const resp = await fetch(serverUrl);
+            const resp = await fetch(serverUrl, {credentials: "include"});
             if (!resp.ok) {
                 return DEFAULT_FALLBACKS[type] ?? serverUrl;
             }
