@@ -119,6 +119,7 @@ export class EventBus {
         try {
             await transport.ready;
         } catch (e) {
+            void transport.closed.catch(() => {});
             try {
                 transport.close();
             } catch {
