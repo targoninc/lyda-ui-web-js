@@ -1,6 +1,6 @@
 import {GenericTemplates, horizontal, vertical} from "../generic/GenericTemplates.ts";
 import {AnyElement, AnyNode, compute, create, Signal, signal, signalMap, StringOrSignal, when} from "@targoninc/jess";
-import {currentTrackId, currentUser, loadingAudio, manualQueue, playingFrom, playingHere} from "../../state.ts";
+import {currentTrackId, currentUser, loadingAudio, manualQueue, playingFrom, playingHere, setTrackSecretCode} from "../../state.ts";
 import {InteractionStateManager} from "../../Classes/InteractionStateManager.ts";
 import {getPlayIcon, Util} from "../../Classes/Util.ts";
 import {TrackTemplates} from "./TrackTemplates.ts";
@@ -46,6 +46,12 @@ export class MusicTemplates {
     ) {
         const imageState = signal(DefaultImages[type]);
         const fileType = `${type}Cover` as MediaFileType;
+        if (type === EntityType.track) {
+            const track = item as Track;
+            if (track.visibility === Visibility.private && track.secretcode) {
+                setTrackSecretCode(track.id, track.secretcode);
+            }
+        }
         if (item.has_cover) {
             Util.getCachedImage(item.id, fileType).then(url => {
                 imageState.value = url;

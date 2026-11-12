@@ -891,7 +891,7 @@ export class TrackEditTemplates {
             ).build();
     }
 
-    static replaceAudioButton(track: Track, latestVersionIndex?: number, versionCount?: number) {
+    static replaceAudioButton(track: Track, latestVersionIndex?: number, versionCount?: number, classes: StringOrSignal[] = []) {
         const progress = signal<ProgressPart | null>(null);
         const loading = compute(p => p?.state === ProgressState.inProgress, progress);
 
@@ -900,6 +900,7 @@ export class TrackEditTemplates {
                 text: t("REPLACE_AUDIO"),
                 icon: {icon: "upload"},
                 disabled: loading,
+                classes,
                 onclick: async () => {
                     TrackActions.replaceAudio(track.id, true, progress, () => {
                         PlayManager.removeTrackFromAllStates(track.id);
@@ -1306,6 +1307,7 @@ export class TrackEditTemplates {
         const coverLoading = signal(false);
         const imageState = signal("");
         const isPrivate = compute(s => s.visibility === "private", state);
+        const noAudio = !track.processed || track.length <= 0;
 
         return horizontal(
             BatchEditTemplates.selectionCard("track", track.id, selectedIds),
@@ -1329,9 +1331,12 @@ export class TrackEditTemplates {
                 ),
                 vertical(
                     horizontal(
-                        TrackEditTemplates.replaceAudioButton(track),
+                        noAudio
+                            ? GenericTemplates.icon("warning", true, ["warning"], t("NO_AUDIO_FILE"))
+                            : nullElement(),
+                        TrackEditTemplates.replaceAudioButton(track, undefined, undefined, noAudio ? ["warning"] : []),
                         TrackEditTemplates.downloadAudioButton(track),
-                    ).classes("align-end"),
+                    ).classes("align-end", "align-children"),
                     horizontal(
                         create("span")
                             .text(t("ARTWORK"))
