@@ -726,6 +726,7 @@ export class FeedTemplates {
                                                     navigate(`/track/${track.id}`);
                                                 })
                                                 .build(),
+                                            MusicTemplates.noAudioWarning(track),
                                             ...(track.wip ? [GenericTemplates.tag(t("WIP"), "wip")] : []),
                                             ...(track.collab?.collab_type ? [TrackTemplates.collabIndicator(track.collab)] : []),
                                             ...icons,

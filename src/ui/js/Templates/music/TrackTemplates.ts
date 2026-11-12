@@ -336,6 +336,9 @@ export class TrackTemplates {
         if (track.visibility === "private") {
             icons.push(GenericTemplates.lock());
         }
+        if (!track.processed) {
+            icons.push(MusicTemplates.noAudioWarning(track));
+        }
 
         const graphics = [];
         const trackLoudness = track.loudness_data ? (() => { try { return JSON.parse(track.loudness_data); } catch { return []; } })() : [];
@@ -465,10 +468,13 @@ export class TrackTemplates {
         const linkedUserState = signal(collaborators);
         const track$ = signal(track as Track | UploadableTrack);
 
-        const icons: AnyElement[] = [];
+        const icons: (AnyElement | Signal<AnyElement>)[] = [];
         const isPrivate = track.visibility === "private";
         if (isPrivate) {
             icons.push(GenericTemplates.lock());
+        }
+        if (!track.processed) {
+            icons.push(MusicTemplates.noAudioWarning(track));
         }
 
         const trackUser = track.user;
@@ -804,7 +810,7 @@ export class TrackTemplates {
             horizontal(
                 MusicTemplates.cover(EntityType.track, data.track, CoverContext.inline),
                 vertical(
-                    MusicTemplates.title(EntityType.track, data.track.title, data.track.id, [], TextSize.large, true, false, data.track.wip),
+                    MusicTemplates.title(EntityType.track, data.track.title, data.track.id, [MusicTemplates.noAudioWarning(data.track)], TextSize.large, true, false, data.track.wip),
                     horizontal(
                         UserTemplates.userLink(UserWidgetContext.card, data.user),
                         create("span")

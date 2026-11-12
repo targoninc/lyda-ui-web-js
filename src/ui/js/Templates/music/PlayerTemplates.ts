@@ -535,7 +535,14 @@ export class PlayerTemplates {
     }
 
     static trackIcons(track: Track) {
-        return track.visibility === "private" ? [GenericTemplates.lock()] : [];
+        const icons = [];
+        if (track.visibility === "private") {
+            icons.push(GenericTemplates.lock());
+        }
+        if (!track.processed) {
+            icons.push(MusicTemplates.noAudioWarning(track));
+        }
+        return icons;
     }
 
     static playerTrackTitle(track: Track, onTitleClick?: () => void) {
