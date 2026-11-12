@@ -295,8 +295,9 @@ export class MusicTemplates {
         });
     }
 
-    static noAudioWarning(track: {processed?: boolean}): AnyElement | Signal<AnyElement> {
-        if (track.processed !== false) {
+    static noAudioWarning(track: {processed?: boolean | number | string | null}): AnyElement | Signal<AnyElement> {
+        const isProcessed = track.processed === true || track.processed === 1 || track.processed === "1";
+        if (isProcessed) {
             return nullElement();
         }
         return GenericTemplates.icon("warning", true, ["warning", "no-audio-indicator"], t("NO_AUDIO_FILE"));

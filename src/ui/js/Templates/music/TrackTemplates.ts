@@ -336,7 +336,7 @@ export class TrackTemplates {
         if (track.visibility === "private") {
             icons.push(GenericTemplates.lock());
         }
-        if (track.processed === false) {
+        if (!track.processed) {
             icons.push(MusicTemplates.noAudioWarning(track));
         }
 
@@ -473,7 +473,7 @@ export class TrackTemplates {
         if (isPrivate) {
             icons.push(GenericTemplates.lock());
         }
-        if (track.processed === false) {
+        if (!track.processed) {
             icons.push(MusicTemplates.noAudioWarning(track));
         }
 

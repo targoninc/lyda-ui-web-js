@@ -539,7 +539,7 @@ export class PlayerTemplates {
         if (track.visibility === "private") {
             icons.push(GenericTemplates.lock());
         }
-        if (track.processed === false) {
+        if (!track.processed) {
             icons.push(MusicTemplates.noAudioWarning(track));
         }
         return icons;
