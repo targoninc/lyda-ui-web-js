@@ -124,7 +124,10 @@ function activeRemoteDeviceId(): string | null {
 
 function refreshDevices() {
     if (!currentUser.value) {
+        remoteDevices.clear();
+        activePlayerDeviceId.value = null;
         playerDevices.value = [];
+        playingAnywhere.value = playingHere.value;
         return;
     }
     const now = Date.now();
@@ -147,6 +150,7 @@ function refreshDevices() {
 
 function publishState() {
     if (!currentUser.value) {
+        refreshDevices();
         return;
     }
     const state = currentState();
@@ -506,9 +510,7 @@ export class PlayerSync {
         currentUser.subscribe(user => {
             if (!user) {
                 cancelQueueRequest();
-                remoteDevices.clear();
-                activePlayerDeviceId.value = null;
-                playerDevices.value = [];
+                refreshDevices();
                 return;
             }
             publishState();
