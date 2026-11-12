@@ -21,7 +21,7 @@ import {
     when,
 } from "@targoninc/jess";
 import {currentTrackId, currentUser, loadingAudio, permissions, playingFrom, playingHere, shuffling} from "../../state.ts";
-import {createModal, notify, Ui} from "../../Classes/Ui.ts";
+import {createModal, Ui} from "../../Classes/Ui.ts";
 import {MediaActions} from "../../Actions/MediaActions.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {FeedTemplates} from "../generic/FeedTemplates.ts";
@@ -46,7 +46,6 @@ import {trackCleanup} from "../../Classes/Helpers/PageLifecycle.ts";
 import {Badge} from "@targoninc/lyda-shared/src/Models/db/lyda/Badge";
 import {Subscription} from "@targoninc/lyda-shared/src/Models/db/finance/Subscription";
 import {SubscriptionStatus} from "@targoninc/lyda-shared/src/Enums/SubscriptionStatus";
-import {NotificationType} from "../../Enums/NotificationType.ts";
 import {ColorExtractor} from "../../Classes/ColorExtractor.ts";
 import {Api} from "../../Api/Api.ts";
 import {TrackCollaborator} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackCollaborator";
@@ -64,6 +63,7 @@ import {ReportTemplates} from "../ReportTemplates.ts";
 import {artworkDisplay} from "../music/ArtworkTemplates.ts";
 import {InteractionType} from "@targoninc/lyda-shared/src/Enums/InteractionType";
 import {MusicTemplates} from "../music/MusicTemplates.ts";
+import {reportClientError} from "../../Classes/Helpers/ErrorHandler.ts";
 
 export class UserTemplates {
     static #popoverUid = 0;
@@ -400,8 +400,10 @@ export class UserTemplates {
     static profile(route: Route, params: Record<string, string>) {
         const user = signal<User | null>(null);
         const isOwnProfile = compute((u1, u2) => u1?.id === u2?.id, currentUser, user);
-        const loading = signal(false);
-        const notFound = compute((l, u) => l && !u, loading, user);
+        const loading = signal(true);
+        const loadFailed = signal(false);
+        const ready = compute((l, f, u) => !l && !f && !!u, loading, loadFailed, user);
+        const notFound = compute((l, f, u) => !l && !f && !u, loading, loadFailed, user);
 
         user.subscribe(u => {
             if (u?.has_banner) {
@@ -409,22 +411,39 @@ export class UserTemplates {
             }
         });
 
-        Api.getUserByName(params["name"])
-            .then(u => {
-                user.value = u;
-                document.title = u?.displayname ?? "";
-                if (!user && isOwnProfile) {
-                    notify(`${t("LOGIN_TO_VIEW_PROFILE")}`, NotificationType.error);
-                    return;
-                }
-            })
-            .finally(() => (loading.value = false));
+        const loadProfile = () => {
+            loading.value = true;
+            loadFailed.value = false;
+
+            Api.getUserByName(params["name"])
+                .then(u => {
+                    user.value = u;
+                    document.title = u?.displayname ?? "";
+                })
+                .catch(error => {
+                    loadFailed.value = true;
+                    void reportClientError(error, {
+                        context: "profile-load",
+                        username: params["name"],
+                    });
+                })
+                .finally(() => (loading.value = false));
+        };
+        loadProfile();
 
         return vertical()
             .children(
                 when(loading, GenericTemplates.loadingSpinner()),
+                when(loadFailed, vertical(
+                    create("span").text(t("PAGE_LOAD_FAILED")),
+                    button({
+                        text: t("RETRY"),
+                        icon: {icon: "refresh"},
+                        onclick: loadProfile,
+                    }),
+                ).classes("padded").build()),
                 when(
-                    notFound,
+                    ready,
                     vertical(
                         UserTemplates.userActionsContainer(isOwnProfile),
                         compute(u => (u ? UserTemplates.profileHeader(u, isOwnProfile) : nullElement()), user),
@@ -432,7 +451,6 @@ export class UserTemplates {
                         compute((u) => (u ? UserTemplates.profileTabs(u) : nullElement()), user),
                     ).classes("noflexwrap", "fullWidth")
                         .build(),
-                    true,
                 ),
                 when(notFound, vertical(
                     create("span")

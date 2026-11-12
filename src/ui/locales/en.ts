@@ -204,6 +204,7 @@ export const en = {
     UNAPPROVED_TRACKS: count => `${count} unapproved tracks`,
     LOGIN_TO_VIEW_PROFILE: "You need to be logged in to see your profile",
     USER_NOT_FOUND: "User not found",
+    PAGE_LOAD_FAILED: "This page could not be loaded.",
     TRACKS: "Tracks",
     ALBUMS: "Albums",
     PLAYLISTS: "Playlists",
