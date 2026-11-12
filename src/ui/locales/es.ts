@@ -548,7 +548,7 @@ export const es: Translation = {
     BENEFIT_SUPPORT_ARTISTS: "Artistas de apoyo",
     BENEFIT_NOT_FUNDING_DRONES: "No financiar drones",
     DISCOGRAPHY: "Discografía",
-    DISCOGRAPHY_DESCRIPTION: "Importa tus lanzamientos desde otras plataformas. Todas las pistas y álbumes importados serán privados.",
+    DISCOGRAPHY_DESCRIPTION: "Importa metadatos de tus lanzamientos desde otras plataformas de forma privada.",
     DISCOGRAPHY_FETCHING: "Obteniendo lanzamientos...",
     DISCOGRAPHY_IMPORTING: "Importando versiones...",
     NO_PLATFORMS_CONFIGURED: "Agregue enlaces a sus perfiles en otras plataformas en la configuración de su cuenta y configure las claves API correspondientes en el servidor para permitir la importación.",

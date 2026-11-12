@@ -548,7 +548,7 @@ export const ga: Translation = {
     BENEFIT_SUPPORT_ARTISTS: "Tacaigh le healaíontóirí",
     BENEFIT_NOT_FUNDING_DRONES: "Gan drones a mhaoiniú",
     DISCOGRAPHY: "Dioscliosta",
-    DISCOGRAPHY_DESCRIPTION: "Iompórtáil do chuid eisiúintí ó ardáin eile. Beidh gach rian agus albam allmhairithe príobháideach.",
+    DISCOGRAPHY_DESCRIPTION: "Iompórtáil meiteashonraí do do chuid eisiúintí ó ardáin eile go príobháideach.",
     DISCOGRAPHY_FETCHING: "eisiúintí á bhfáil...",
     DISCOGRAPHY_IMPORTING: "Eisiúintí á n-iompórtáil...",
     NO_PLATFORMS_CONFIGURED: "Cuir naisc le do phróifílí ar ardáin eile i do shocruithe cuntais agus cumraigh na heochracha API comhfhreagracha ar an bhfreastalaí chun allmhairiú a chumasú.",

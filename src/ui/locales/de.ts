@@ -145,7 +145,7 @@ export const de: Translation = {
     CHOOSE_IMAGE_FILE: "Bilddatei auswählen",
     CLEAR_SEARCH: "Suche löschen",
     DISCOGRAPHY: "Diskografie",
-    DISCOGRAPHY_DESCRIPTION: "Importiere deine Veröffentlichungen von anderen Plattformen. Alle importierten Tracks und Alben werden privat sein.",
+    DISCOGRAPHY_DESCRIPTION: "Importiere Metadaten für deine Veröffentlichungen von anderen Plattformen privat.",
     DISCOGRAPHY_FETCHING: "Rufe Veröffentlichungen ab...",
     DISCOGRAPHY_IMPORTING: "Importiere Veröffentlichungen...",
     NO_PLATFORMS_CONFIGURED: "Füge Links zu deinen Profilen auf anderen Plattformen in deinen Kontoeinstellungen hinzu und konfiguriere die entsprechenden API-Schlüssel auf dem Server, um den Import zu aktivieren.",

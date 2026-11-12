@@ -548,7 +548,7 @@ export const en = {
     BENEFIT_SUPPORT_ARTISTS: "Support artists",
     BENEFIT_NOT_FUNDING_DRONES: "Not funding drones",
     DISCOGRAPHY: "Discography",
-    DISCOGRAPHY_DESCRIPTION: "Import your releases from other platforms. All imported tracks and albums will be private.",
+    DISCOGRAPHY_DESCRIPTION: "Import metadata for your releases from other platforms privately.",
     DISCOGRAPHY_FETCHING: "Fetching releases...",
     DISCOGRAPHY_IMPORTING: "Importing releases...",
     NO_PLATFORMS_CONFIGURED: "Add links to your profiles on other platforms in your account settings and configure the corresponding API keys on the server to enable import.",
