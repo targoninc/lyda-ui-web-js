@@ -109,7 +109,7 @@ export class TrackActions {
         following.value = !following.value;
     }
 
-    static replaceAudio(id: number, canEdit: boolean, progress: Signal<ProgressPart | null>, onSuccess: () => void = () => {}, latestVersionIndex?: number, versionCount?: number) {
+    static replaceAudio(id: number, canEdit: boolean, progress: Signal<ProgressPart | null>, onSuccess: () => void | Promise<void> = () => {}, latestVersionIndex?: number, versionCount?: number) {
         if (!canEdit) {
             return;
         }
@@ -211,7 +211,7 @@ export class TrackActions {
                             };
                             notify(`${t("AUDIO_UPLOADED")}`, NotificationType.success);
                             Util.removeModal();
-                            onSuccess();
+                            await onSuccess();
                         } catch {
                             progress.value = {
                                 ...progress.value!,

@@ -894,7 +894,7 @@ export class TrackEditTemplates {
             ).build();
     }
 
-    static replaceAudioButton(track: Track, latestVersionIndex?: number, versionCount?: number, classes: StringOrSignal[] = []) {
+    static replaceAudioButton(track: Track, latestVersionIndex?: number, versionCount?: number, classes: StringOrSignal[] = [], onSuccess?: () => void | Promise<void>) {
         const progress = signal<ProgressPart | null>(null);
         const loading = compute(p => p?.state === ProgressState.inProgress, progress);
 
@@ -905,9 +905,13 @@ export class TrackEditTemplates {
                 disabled: loading,
                 classes,
                 onclick: async () => {
-                    TrackActions.replaceAudio(track.id, true, progress, () => {
+                    TrackActions.replaceAudio(track.id, true, progress, async () => {
                         PlayManager.removeTrackFromAllStates(track.id);
-                        reload();
+                        if (onSuccess) {
+                            await onSuccess();
+                        } else {
+                            reload();
+                        }
                     }, latestVersionIndex, versionCount);
                 },
             }),
@@ -1310,7 +1314,14 @@ export class TrackEditTemplates {
         const coverLoading = signal(false);
         const imageState = signal("");
         const isPrivate = compute(s => s.visibility === "private", state);
-        const noAudio = TrackEditTemplates.isMissingAudio(track);
+        const audioExists = signal(!TrackEditTemplates.isMissingAudio(track));
+        const missingAudioIndicator = create("span")
+            .classes(compute((exists): string => exists ? "hidden" : "_", audioExists))
+            .children(GenericTemplates.icon("warning", true, ["warning"], t("NO_AUDIO_FILE")))
+            .build();
+        const audioButtonClasses: StringOrSignal[] = [
+            compute((exists): string => exists ? "_" : "warning", audioExists),
+        ];
 
         return horizontal(
             BatchEditTemplates.selectionCard("track", track.id, selectedIds),
@@ -1334,10 +1345,19 @@ export class TrackEditTemplates {
                 ),
                 vertical(
                     horizontal(
-                        noAudio
-                            ? GenericTemplates.icon("warning", true, ["warning"], t("NO_AUDIO_FILE"))
-                            : nullElement(),
-                        TrackEditTemplates.replaceAudioButton(track, undefined, undefined, noAudio ? ["warning"] : []),
+                        missingAudioIndicator,
+                        TrackEditTemplates.replaceAudioButton(track, undefined, undefined, audioButtonClasses, async () => {
+                            const updated = await Api.getTrackById(track.id).catch(() => null);
+                            if (updated?.track) {
+                                audioExists.value = !TrackEditTemplates.isMissingAudio(updated.track);
+                                tracks.value = tracks.value.map(t => t.id === track.id ? updated.track : t);
+                            } else {
+                                audioExists.value = true;
+                                tracks.value = tracks.value.map(t => t.id === track.id
+                                    ? {...t, processed: true}
+                                    : t);
+                            }
+                        }),
                         TrackEditTemplates.downloadAudioButton(track),
                     ).classes("align-end", "align-children"),
                     horizontal(
@@ -1384,7 +1404,7 @@ export class TrackEditTemplates {
     }
 
     private static isMissingAudio(track: Track): boolean {
-        return !track.processed || track.length <= 0;
+        return !track.processed;
     }
 
     private static isMissingArtwork(track: Track): boolean {
