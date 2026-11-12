@@ -59,6 +59,8 @@ import {predictGenresFromFile} from "../../Classes/GenrePredictor.ts";
 import {BatchEditField, BatchEditTemplates} from "../generic/BatchEditTemplates.ts";
 import {TrackVersion} from "@targoninc/lyda-shared/src/Models/db/lyda/TrackVersion";
 import {DragActions} from "../../Actions/DragActions.ts";
+import {getBatchEditTrackRowState, resetBatchEditTrackRowStates} from "../../Classes/BatchEditTrackStateStore.ts";
+import {trackCleanup} from "../../Classes/Helpers/PageLifecycle.ts";
 
 const batchEditMissingAudioFilter = signal(false);
 const batchEditMissingArtworkFilter = signal(false);
@@ -894,8 +896,8 @@ export class TrackEditTemplates {
             ).build();
     }
 
-    static replaceAudioButton(track: Track, latestVersionIndex?: number, versionCount?: number, classes: StringOrSignal[] = [], onSuccess?: () => void | Promise<void>) {
-        const progress = signal<ProgressPart | null>(null);
+    static replaceAudioButton(track: Track, latestVersionIndex?: number, versionCount?: number, classes: StringOrSignal[] = [], onSuccess?: () => void | Promise<void>, progressSignal?: Signal<ProgressPart | null>) {
+        const progress = progressSignal ?? signal<ProgressPart | null>(null);
         const loading = compute(p => p?.state === ProgressState.inProgress, progress);
 
         return horizontal(
@@ -1298,7 +1300,8 @@ export class TrackEditTemplates {
     }
 
     static editableTrackInList(track: Track, tracks: Signal<Track[]>, selectedIds: Signal<Set<number>>) {
-        const state = signal<UploadableTrack>(track as UploadableTrack);
+        const rowState = getBatchEditTrackRowState(track);
+        const state = rowState.state;
         const changed = compute(s => {
             return s.title !== track.title ||
                 s.credits !== track.credits ||
@@ -1310,11 +1313,11 @@ export class TrackEditTemplates {
                 s.wip !== track.wip ||
                 s.free_download !== track.free_download;
         }, state);
-        const loading = signal(false);
-        const coverLoading = signal(false);
-        const imageState = signal("");
+        const loading = rowState.loading;
+        const coverLoading = rowState.coverLoading;
+        const imageState = rowState.imageState;
         const isPrivate = compute(s => s.visibility === "private", state);
-        const audioExists = signal(!TrackEditTemplates.isMissingAudio(track));
+        const audioExists = rowState.audioExists;
         const missingAudioIndicator = create("span")
             .classes(compute((exists): string => exists ? "hidden" : "_", audioExists))
             .children(GenericTemplates.icon("warning", true, ["warning"], t("NO_AUDIO_FILE")))
@@ -1348,16 +1351,10 @@ export class TrackEditTemplates {
                         missingAudioIndicator,
                         TrackEditTemplates.replaceAudioButton(track, undefined, undefined, audioButtonClasses, async () => {
                             const updated = await Api.getTrackById(track.id).catch(() => null);
-                            if (updated?.track) {
-                                audioExists.value = !TrackEditTemplates.isMissingAudio(updated.track);
-                                tracks.value = tracks.value.map(t => t.id === track.id ? updated.track : t);
-                            } else {
-                                audioExists.value = true;
-                                tracks.value = tracks.value.map(t => t.id === track.id
-                                    ? {...t, processed: true}
-                                    : t);
-                            }
-                        }),
+                            const nextTrack = updated?.track ?? {...track, processed: true};
+                            audioExists.value = !TrackEditTemplates.isMissingAudio(nextTrack);
+                            tracks.value = tracks.value.map(t => t.id === track.id ? nextTrack : t);
+                        }, rowState.progress),
                         TrackEditTemplates.downloadAudioButton(track),
                     ).classes("align-end", "align-children"),
                     horizontal(
@@ -1378,16 +1375,20 @@ export class TrackEditTemplates {
                             classes: ["positive"],
                             icon: {icon: "save"},
                             text: t("SAVE"),
-                            onclick: async () => Api.updateTrackFull(state.value).then(() => {
-                                Api.getTrackById(track.id).then(t => {
-                                    tracks.value = tracks.value.map(t2 => {
-                                        if (t2.id === track.id) {
-                                            return t?.track ?? t2;
-                                        }
-                                        return t2;
-                                    });
-                                });
-                            }),
+                            onclick: async () => {
+                                loading.value = true;
+                                try {
+                                    await Api.updateTrackFull(state.value);
+                                    loading.value = false;
+                                    const updated = await Api.getTrackById(track.id).catch(() => null);
+                                    const nextTrack = updated?.track ?? (state.value as unknown as Track);
+                                    state.value = nextTrack as UploadableTrack;
+                                    audioExists.value = !TrackEditTemplates.isMissingAudio(nextTrack);
+                                    tracks.value = tracks.value.map(t2 => t2.id === track.id ? nextTrack : t2);
+                                } finally {
+                                    loading.value = false;
+                                }
+                            },
                         }),
                         button({
                             disabled: loading,
@@ -1412,6 +1413,8 @@ export class TrackEditTemplates {
     }
 
     static batchEditTracksPage() {
+        resetBatchEditTrackRowStates();
+        trackCleanup(resetBatchEditTrackRowStates);
         const tracks = signal<Track[]>([]);
         const loading = signal(true);
         const selectedIds = signal<Set<number>>(new Set());
