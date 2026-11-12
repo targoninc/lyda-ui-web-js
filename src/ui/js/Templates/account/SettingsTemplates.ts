@@ -891,9 +891,13 @@ export class SettingsTemplates {
                                                 classes: ["small", "rounded-max"],
                                                 disabled: compute(c => !c, changed),
                                                 onclick: async () => {
-                                                    await Api.saveUserLink(p.label, urlSig.value);
-                                                    notify(t("SUCCESS"), NotificationType.success);
-                                                    originalUrlSig.value = urlSig.value;
+                                                    try {
+                                                        await Api.saveUserLink(p.label, urlSig.value);
+                                                        notify(t("SUCCESS"), NotificationType.success);
+                                                        originalUrlSig.value = urlSig.value;
+                                                    } catch (error) {
+                                                        console.warn("Failed to save discography link", error);
+                                                    }
                                                 },
                                             }),
                                             when(changed, button({
