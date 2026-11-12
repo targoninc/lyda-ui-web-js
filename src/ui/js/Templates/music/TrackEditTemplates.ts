@@ -115,12 +115,17 @@ export class TrackEditTemplates {
         return el;
     }
 
-    static openEditPageButton(track: Track) {
+    static openEditPageButton(track: Track, newTab = false) {
         return button({
             text: t("EDIT"),
             icon: {icon: "edit"},
             onclick: async () => {
-                navigate("edit-track/" + track.id);
+                const path = `/edit-track/${track.id}`;
+                if (newTab) {
+                    window.open(path, "_blank");
+                } else {
+                    navigate(path);
+                }
             },
         });
     }
@@ -394,18 +399,16 @@ export class TrackEditTemplates {
                 TrackEditTemplates.artistNameInput(state),
                 FormTemplates.descriptionInput(state),
                 vertical(
-                    create("div")
-                        .classes("flex", "align-children", "clickable", "expandable")
-                        .onclick(() => {
+                    button({
+                        text: "More details",
+                        icon: {
+                            icon: compute((e): string => e ? "expand_more" : "chevron_right", expanded),
+                            adaptive: true,
+                        },
+                        onclick: () => {
                             expanded.value = !expanded.value;
-                        })
-                        .children(
-                            GenericTemplates.icon(
-                                compute((e): string => e ? "expand_more" : "chevron_right", expanded),
-                                true,
-                            ),
-                            create("span").text("More details").build(),
-                        ).build(),
+                        },
+                    }),
                     when(expanded, vertical(
                         TrackEditTemplates.creditsInput(state),
                         TrackEditTemplates.linkedUsers(state.value.collaborators, state as Signal<UploadableTrack | Track>, true),
@@ -1357,6 +1360,7 @@ export class TrackEditTemplates {
                             tracks.value = tracks.value.map(t => t.id === track.id ? nextTrack : t);
                         }, rowState.progress),
                         TrackEditTemplates.downloadAudioButton(track),
+                        TrackEditTemplates.openEditPageButton(track, true),
                     ).classes("align-end", "align-children"),
                     horizontal(
                         create("span")
