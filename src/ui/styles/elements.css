@@ -1587,6 +1587,22 @@ input.jessc-slider:checked ~ .jessc-toggle-container .jessc-toggle-slider {
     }
 }
 
+@media only screen and (max-width: 600px) {
+    .page-container[page="settings"] > .flex-v,
+    .page-container[page="settings"] > .flex-v > div,
+    .page-container[page="settings"] > .flex-v > div > .flex-v,
+    .page-container[page="settings"] .settings-layout,
+    .page-container[page="settings"] .settings-content,
+    .page-container[page="settings"] .settings-content > .flex-v,
+    .page-container[page="settings"] .settings-content > .flex-v > div,
+    .page-container[page="settings"] .settings-content .card,
+    .page-container[page="settings"] .settings-content .card * {
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+}
+
 .log-properties {
     resize: both;
     overflow: auto;
@@ -2423,6 +2439,49 @@ input.jessc-slider:checked ~ .jessc-toggle-container .jessc-toggle-slider {
     padding: calc(32px + var(--gap)) 32px;
     margin: -32px;
     width: 100%;
+}
+
+.profile-tab-row,
+.profile-tab-tabs,
+.profile-tab-actions {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.profile-tab-tabs .tab-selector {
+    min-width: 0;
+    max-width: 100%;
+}
+
+@media only screen and (max-width: 600px) {
+    .profile-tab-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .profile-tab-row > * {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .profile-tab-tabs .tab-selector {
+        width: 0;
+        flex: 1 1 auto;
+    }
+
+    .profile-tab-actions {
+        justify-content: flex-end;
+    }
+
+    .pin-scroll {
+        width: calc(100% + 40px);
+        margin-left: -20px;
+        margin-right: -20px;
+        padding-left: 20px;
+        padding-right: 20px;
+        box-sizing: border-box;
+    }
 }
 
 .pin-card {
