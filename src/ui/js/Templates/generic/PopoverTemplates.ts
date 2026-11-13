@@ -1,6 +1,8 @@
 import {create, AnyNode, AnyElement, Signal} from "@targoninc/jess";
 
 export class PopoverTemplates {
+    private static anchoredCleanups = new WeakMap<HTMLElement, () => void>();
+
     static popover(id: string, ...children: AnyNode[]): HTMLElement {
         return create("div")
             .classes("generic-popover")
@@ -117,10 +119,53 @@ export class PopoverTemplates {
         if (popover.matches(":popover-open") || !popover.isConnected) return;
         PopoverTemplates.positionAtAnchor(popover, anchor, above, rightAlign);
         popover.showPopover();
+        PopoverTemplates.trackAnchor(popover, anchor, above, rightAlign);
     }
 
     static hide(popover: HTMLElement): void {
         popover.hidePopover();
+    }
+
+    private static trackAnchor(popover: HTMLElement, anchor: AnyElement, above: boolean, rightAlign: boolean): void {
+        PopoverTemplates.anchoredCleanups.get(popover)?.();
+
+        let frame: number | null = null;
+        const reposition = () => {
+            if (!popover.matches(":popover-open")) return;
+            PopoverTemplates.positionAtAnchor(popover, anchor, above, rightAlign);
+        };
+        const schedule = () => {
+            if (frame !== null) return;
+            frame = requestAnimationFrame(() => {
+                frame = null;
+                reposition();
+            });
+        };
+
+        const anchorElement = anchor as HTMLElement;
+        const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(schedule) : null;
+        observer?.observe(anchorElement);
+        if (anchorElement.parentElement) {
+            observer?.observe(anchorElement.parentElement);
+        }
+        observer?.observe(document.documentElement);
+
+        window.addEventListener("scroll", schedule, true);
+        window.addEventListener("resize", schedule);
+
+        const cleanup = () => {
+            if (frame !== null) {
+                cancelAnimationFrame(frame);
+            }
+            observer?.disconnect();
+            window.removeEventListener("scroll", schedule, true);
+            window.removeEventListener("resize", schedule);
+            popover.removeEventListener("hidePopover", cleanup);
+            PopoverTemplates.anchoredCleanups.delete(popover);
+        };
+
+        PopoverTemplates.anchoredCleanups.set(popover, cleanup);
+        popover.addEventListener("hidePopover", cleanup);
     }
 
     static toggle(popover: HTMLElement, anchor: AnyElement, rightAlign = false, above = false): void {
@@ -133,6 +178,7 @@ export class PopoverTemplates {
 
         PopoverTemplates.positionAtAnchor(popover, anchor, above, rightAlign);
         popover.showPopover();
+        PopoverTemplates.trackAnchor(popover, anchor, above, rightAlign);
 
         if (popover.getAttribute("popover") === "manual") {
             const onDocumentClick = (e: MouseEvent) => {
