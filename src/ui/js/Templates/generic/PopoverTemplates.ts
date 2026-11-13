@@ -28,6 +28,7 @@ export class PopoverTemplates {
         element.style.setProperty("anchor-name", anchorName);
 
         popover.style.position = "fixed";
+        popover.style.setProperty("position-anchor", anchorName);
         popover.style.left = rightAlign ? "auto" : `anchor(${anchorName} left)`;
         popover.style.right = rightAlign ? `anchor(${anchorName} right)` : "auto";
         popover.style.top = above ? "auto" : `calc(anchor(${anchorName} bottom) + 2px)`;
