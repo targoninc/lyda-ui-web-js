@@ -32,7 +32,6 @@ import {CoverContext} from "../Enums/CoverContext.ts";
 import {InteractionTemplates} from "./InteractionTemplates.ts";
 import {FeedMenuAction} from "../Models/FeedConfig.ts";
 import {TrackList} from "../Models/TrackList.ts";
-import {Images} from "../Enums/Images.ts";
 import {DefaultImages} from "../Enums/DefaultImages.ts";
 import {MediaFileType} from "@targoninc/lyda-shared/src/Enums/MediaFileType";
 import {UserWidgetContext} from "../Enums/UserWidgetContext.ts";
@@ -494,26 +493,7 @@ export class PageTemplates {
             {
                 key: "title",
                 header: t("TITLE"),
-                render: (list: TrackList) => {
-                    const coverSrc = signal(DefaultImages[EntityType.album]);
-                    if (list.has_cover) {
-                        Util.getCachedImage(list.id, MediaFileType.albumCover).then(url => {
-                            coverSrc.value = url;
-                        });
-                    }
-                    return create("div")
-                        .classes("flex", "align-children", "small-gap")
-                        .children(
-                            MusicTemplates.feedCover(EntityType.album, list, coverSrc),
-                            create("span").classes("feed-title", "clickable", "pointer")
-                                .text(list.title)
-                                .onclick((e: Event) => {
-                                    e.stopPropagation();
-                                    navigate(`/album/${list.id}`);
-                                })
-                                .build(),
-                        ).build();
-                },
+                render: (list: TrackList) => MusicTemplates.listTitleCell(EntityType.album, list),
             },
             {
                 key: "tracks",
@@ -531,26 +511,7 @@ export class PageTemplates {
             {
                 key: "title",
                 header: t("TITLE"),
-                render: (list: TrackList) => {
-                    const coverSrc = signal(Images.DEFAULT_COVER_PLAYLIST);
-                    if (list.has_cover) {
-                        Util.getCachedImage(list.id, MediaFileType.playlistCover).then(url => {
-                            coverSrc.value = url;
-                        });
-                    }
-                    return create("div")
-                        .classes("flex", "align-children", "small-gap")
-                        .children(
-                            MusicTemplates.feedCover(EntityType.playlist, list, coverSrc),
-                            create("span").classes("feed-title", "clickable", "pointer")
-                                .text(list.title)
-                                .onclick((e: Event) => {
-                                    e.stopPropagation();
-                                    navigate(`/playlist/${list.id}`);
-                                })
-                                .build(),
-                        ).build();
-                },
+                render: (list: TrackList) => MusicTemplates.listTitleCell(EntityType.playlist, list),
             },
             {
                 key: "tracks",

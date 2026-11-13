@@ -233,10 +233,13 @@ export class AlbumTemplates {
                 create("div")
                     .classes("flex-v", "nogap")
                     .children(
-                        create("span")
-                            .classes("title", "wordwrap")
-                            .text(album.title)
-                            .build(),
+                        horizontal(
+                            create("span")
+                                .classes("title", "wordwrap")
+                                .text(album.title)
+                                .build(),
+                            ...(album.visibility === Visibility.private ? [GenericTemplates.lock()] : []),
+                        ).classes("align-children", "small-gap").build(),
                         horizontal(
                             when(canDownload && !canEdit, GenericTemplates.pill({
                                 icon: "order_approve",
