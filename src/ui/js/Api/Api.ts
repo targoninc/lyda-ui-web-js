@@ -421,12 +421,13 @@ export class Api {
         });
     }
 
-    static async getAlbumsByUserId(userId: number, name: string = "", offset: number = 0, filter: string = ""): Promise<{ items: Album[], total: number } | null> {
+    static async getAlbumsByUserId(userId: number, name: string = "", offset: number = 0, filter: string = "", visibility: string = ""): Promise<{ items: Album[], total: number } | null> {
         return await get<{ items: Album[], total: number }>(ApiRoutes.getAlbumsByUserId, {
             id: userId,
             name,
             offset,
             filter,
+            visibility,
         });
     }
 
@@ -706,12 +707,13 @@ export class Api {
         }>(ApiRoutes.getPlaylistById, { id });
     }
 
-    static async getPlaylistsByUserId(userId: number, name: string = "", offset: number = 0, filter: string = ""): Promise<{ items: Playlist[], total: number } | null> {
+    static async getPlaylistsByUserId(userId: number, name: string = "", offset: number = 0, filter: string = "", visibility: string = ""): Promise<{ items: Playlist[], total: number } | null> {
         return await get<{ items: Playlist[], total: number }>(ApiRoutes.getPlaylistsByUserId, {
             id: userId,
             name,
             offset,
             filter,
+            visibility,
         });
     }
 

@@ -542,26 +542,7 @@ export class UserTemplates {
             {
                 key: "title",
                 header: t("TITLE"),
-                render: (list: TrackList) => {
-                    const coverSrc = signal(Images.DEFAULT_COVER_ALBUM);
-                    if (list.has_cover) {
-                        Util.getCachedImage(list.id, MediaFileType.albumCover).then(url => {
-                            coverSrc.value = url;
-                        });
-                    }
-                    return create("div")
-                        .classes("flex", "align-children", "small-gap")
-                        .children(
-                            MusicTemplates.feedCover(EntityType.album, list, coverSrc),
-                            create("span").classes("feed-title", "clickable", "pointer")
-                                .text(list.title)
-                                .onclick((e: Event) => {
-                                    e.stopPropagation();
-                                    navigate(`/album/${list.id}`);
-                                })
-                                .build(),
-                        ).build();
-                },
+                render: (list: TrackList) => MusicTemplates.listTitleCell(EntityType.album, list),
             },
             {
                 key: "tracks",
@@ -579,26 +560,7 @@ export class UserTemplates {
             {
                 key: "title",
                 header: t("TITLE"),
-                render: (list: TrackList) => {
-                    const coverSrc = signal(Images.DEFAULT_COVER_PLAYLIST);
-                    if (list.has_cover) {
-                        Util.getCachedImage(list.id, MediaFileType.playlistCover).then(url => {
-                            coverSrc.value = url;
-                        });
-                    }
-                    return create("div")
-                        .classes("flex", "align-children", "small-gap")
-                        .children(
-                            MusicTemplates.feedCover(EntityType.playlist, list, coverSrc),
-                            create("span").classes("feed-title", "clickable", "pointer")
-                                .text(list.title)
-                                .onclick((e: Event) => {
-                                    e.stopPropagation();
-                                    navigate(`/playlist/${list.id}`);
-                                })
-                                .build(),
-                        ).build();
-                },
+                render: (list: TrackList) => MusicTemplates.listTitleCell(EntityType.playlist, list),
             },
             {
                 key: "tracks",
@@ -628,14 +590,14 @@ export class UserTemplates {
             ).classes("small-gap").build()
             : nullElement();
 
-        const showFilter = compute(i => i === 0, currentIndex);
+        const showFilter = compute(i => i === 0 || (isOwnProfile && (i === 1 || i === 2)), currentIndex);
         const filterPopover = create("div")
             .classes("generic-popover", "feed-filter-popover", "flex-v")
             .attributes("popover", "manual")
             .children(
                 create("div").classes("padded", "flex-v", "small-gap").children(
                     visibilityFilter,
-                    TrackTemplates.wipFilter(pageWipFilter$),
+                    when(compute(i => i === 0, currentIndex), TrackTemplates.wipFilter(pageWipFilter$)),
                 ).build(),
             ).build() as HTMLElement;
         const filterBtn = create("button")
@@ -722,11 +684,12 @@ export class UserTemplates {
                         showSearch: true,
                         searchOverride$: pageSearch$,
                         noToolbar: true,
-                        fetchPage: (offset, limit, filter) => Api.getAlbumsByUserId(user.id, user.username, offset, filter || "").then(r => r ?? {
+                        fetchPage: (offset, limit, filter) => Api.getAlbumsByUserId(user.id, user.username, offset, filter || "", pageVisibilityFilter$.value).then(r => r ?? {
                             items: [],
                             total: 0
                         }),
                         buildMenuActions: cardActions("album"),
+                        visibilityFilterState: pageVisibilityFilter$,
                         onPlayToggle: async (list) => {
                             const ft = list.tracks?.[0]?.track;
                             if (ft) await AlbumActions.startTrackInAlbum(list as Album, ft, true);
@@ -746,11 +709,12 @@ export class UserTemplates {
                         showSearch: true,
                         searchOverride$: pageSearch$,
                         noToolbar: true,
-                        fetchPage: (offset, limit, filter) => Api.getPlaylistsByUserId(user.id, user.username, offset, filter || "").then(r => r ?? {
+                        fetchPage: (offset, limit, filter) => Api.getPlaylistsByUserId(user.id, user.username, offset, filter || "", pageVisibilityFilter$.value).then(r => r ?? {
                             items: [],
                             total: 0
                         }),
                         buildMenuActions: cardActions("playlist"),
+                        visibilityFilterState: pageVisibilityFilter$,
                         onPlayToggle: async (list) => {
                             const ft = list.tracks?.[0]?.track;
                             if (ft) await PlaylistActions.startTrackInPlaylist(list as Playlist, ft, true);
@@ -1259,6 +1223,9 @@ export class UserTemplates {
                             pin.entity_type === EntityType.track
                                 ? MusicTemplates.noAudioWarning(entity)
                                 : nullElement(),
+                            entity.visibility === "private"
+                                ? GenericTemplates.lock()
+                                : nullElement(),
                         ).classes("align-children", "small-gap").build(),
                         horizontal(
                             GenericTemplates.icon("keep", true),
@@ -1488,26 +1455,7 @@ export class UserTemplates {
             {
                 key: "title",
                 header: t("TITLE"),
-                render: (list: TrackList) => {
-                    const coverSrc = signal(Images.DEFAULT_COVER_ALBUM);
-                    if (list.has_cover) {
-                        Util.getCachedImage(list.id, MediaFileType.albumCover).then(url => {
-                            coverSrc.value = url;
-                        });
-                    }
-                    return create("div")
-                        .classes("flex", "align-children", "small-gap")
-                        .children(
-                            MusicTemplates.feedCover(EntityType.album, list, coverSrc),
-                            create("span").classes("feed-title", "clickable", "pointer")
-                                .text(list.title)
-                                .onclick((e: Event) => {
-                                    e.stopPropagation();
-                                    navigate(`/album/${list.id}`);
-                                })
-                                .build(),
-                        ).build();
-                },
+                render: (list: TrackList) => MusicTemplates.listTitleCell(EntityType.album, list),
             },
             {
                 key: "tracks",
@@ -1525,26 +1473,7 @@ export class UserTemplates {
             {
                 key: "title",
                 header: t("TITLE"),
-                render: (list: TrackList) => {
-                    const coverSrc = signal(Images.DEFAULT_COVER_PLAYLIST);
-                    if (list.has_cover) {
-                        Util.getCachedImage(list.id, MediaFileType.playlistCover).then(url => {
-                            coverSrc.value = url;
-                        });
-                    }
-                    return create("div")
-                        .classes("flex", "align-children", "small-gap")
-                        .children(
-                            MusicTemplates.feedCover(EntityType.playlist, list, coverSrc),
-                            create("span").classes("feed-title", "clickable", "pointer")
-                                .text(list.title)
-                                .onclick((e: Event) => {
-                                    e.stopPropagation();
-                                    navigate(`/playlist/${list.id}`);
-                                })
-                                .build(),
-                        ).build();
-                },
+                render: (list: TrackList) => MusicTemplates.listTitleCell(EntityType.playlist, list),
             },
             {
                 key: "tracks",

@@ -1,7 +1,7 @@
 import {create, AnyNode, AnyElement, Signal} from "@targoninc/jess";
 
 export class PopoverTemplates {
-    private static anchoredCleanups = new WeakMap<HTMLElement, () => void>();
+    private static anchorCounter = 0;
 
     static popover(id: string, ...children: AnyNode[]): HTMLElement {
         return create("div")
@@ -21,33 +21,18 @@ export class PopoverTemplates {
             .build() as HTMLElement;
     }
 
-    static positionAtAnchor(popover: HTMLElement, anchor: AnyElement, above = false, rightAlign = false): void {
-        const r = anchor.getBoundingClientRect();
-        popover.style.position = "fixed";
-        if (rightAlign) {
-            popover.style.left = "auto";
-            popover.style.right = `${window.innerWidth - r.right}px`;
-        } else {
-            popover.style.left = `${Math.max(4, r.left)}px`;
-            popover.style.right = "auto";
-        }
-        if (above) {
-            popover.style.top = "auto";
-            popover.style.bottom = `${window.innerHeight - r.top + 2}px`;
-        } else {
-            popover.style.top = `${r.bottom + 2}px`;
-            popover.style.bottom = "auto";
-        }
-    }
+    private static positionAtAnchor(popover: HTMLElement, anchor: AnyElement, above = false, rightAlign = false): void {
+        const element = anchor as HTMLElement;
+        const anchorName = element.style.getPropertyValue("anchor-name")
+            || `--lyda-popover-anchor-${++PopoverTemplates.anchorCounter}`;
+        element.style.setProperty("anchor-name", anchorName);
 
-    static showAtPoint(popover: HTMLElement, x: number, y: number): void {
-        if (popover.matches(":popover-open") || !popover.isConnected) return;
         popover.style.position = "fixed";
-        popover.style.top = `${y}px`;
-        popover.style.left = `${x}px`;
-        popover.style.right = "auto";
-        popover.style.bottom = "auto";
-        popover.showPopover();
+        popover.style.setProperty("position-anchor", anchorName);
+        popover.style.left = rightAlign ? "auto" : `anchor(${anchorName} left)`;
+        popover.style.right = rightAlign ? `anchor(${anchorName} right)` : "auto";
+        popover.style.top = above ? "auto" : `calc(anchor(${anchorName} bottom) + 2px)`;
+        popover.style.bottom = above ? `calc(anchor(${anchorName} top) + 2px)` : "auto";
     }
 
     static closeOthers(popover: HTMLElement): void {
@@ -76,7 +61,6 @@ export class PopoverTemplates {
         if (popover.matches(":popover-open")) return;
         PopoverTemplates.positionAtAnchor(popover, anchor, above, rightAlign);
         popover.showPopover();
-        PopoverTemplates.clampHorizontally(popover);
         PopoverTemplates.attachContextMenuDismissal(popover);
     }
 
@@ -119,53 +103,10 @@ export class PopoverTemplates {
         if (popover.matches(":popover-open") || !popover.isConnected) return;
         PopoverTemplates.positionAtAnchor(popover, anchor, above, rightAlign);
         popover.showPopover();
-        PopoverTemplates.trackAnchor(popover, anchor, above, rightAlign);
     }
 
     static hide(popover: HTMLElement): void {
         popover.hidePopover();
-    }
-
-    private static trackAnchor(popover: HTMLElement, anchor: AnyElement, above: boolean, rightAlign: boolean): void {
-        PopoverTemplates.anchoredCleanups.get(popover)?.();
-
-        let frame: number | null = null;
-        const reposition = () => {
-            if (!popover.matches(":popover-open")) return;
-            PopoverTemplates.positionAtAnchor(popover, anchor, above, rightAlign);
-        };
-        const schedule = () => {
-            if (frame !== null) return;
-            frame = requestAnimationFrame(() => {
-                frame = null;
-                reposition();
-            });
-        };
-
-        const anchorElement = anchor as HTMLElement;
-        const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(schedule) : null;
-        observer?.observe(anchorElement);
-        if (anchorElement.parentElement) {
-            observer?.observe(anchorElement.parentElement);
-        }
-        observer?.observe(document.documentElement);
-
-        window.addEventListener("scroll", schedule, true);
-        window.addEventListener("resize", schedule);
-
-        const cleanup = () => {
-            if (frame !== null) {
-                cancelAnimationFrame(frame);
-            }
-            observer?.disconnect();
-            window.removeEventListener("scroll", schedule, true);
-            window.removeEventListener("resize", schedule);
-            popover.removeEventListener("hidePopover", cleanup);
-            PopoverTemplates.anchoredCleanups.delete(popover);
-        };
-
-        PopoverTemplates.anchoredCleanups.set(popover, cleanup);
-        popover.addEventListener("hidePopover", cleanup);
     }
 
     static toggle(popover: HTMLElement, anchor: AnyElement, rightAlign = false, above = false): void {
@@ -178,7 +119,6 @@ export class PopoverTemplates {
 
         PopoverTemplates.positionAtAnchor(popover, anchor, above, rightAlign);
         popover.showPopover();
-        PopoverTemplates.trackAnchor(popover, anchor, above, rightAlign);
 
         if (popover.getAttribute("popover") === "manual") {
             const onDocumentClick = (e: MouseEvent) => {

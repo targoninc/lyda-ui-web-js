@@ -239,6 +239,32 @@ export class MusicTemplates {
         ).build();
     }
 
+    static listTitleCell(type: EntityType, list: TrackList) {
+        const coverSrc = signal(DefaultImages[type]);
+        if (list.has_cover) {
+            const fileType = type === EntityType.album ? MediaFileType.albumCover : MediaFileType.playlistCover;
+            Util.getCachedImage(list.id, fileType).then(url => {
+                coverSrc.value = url;
+            });
+        }
+        const route = type === EntityType.album ? RoutePath.album : RoutePath.playlist;
+        const icons = list.visibility === Visibility.private ? [GenericTemplates.lock()] : [];
+
+        return create("div")
+            .classes("flex", "align-children", "small-gap")
+            .children(
+                MusicTemplates.feedCover(type, list, coverSrc),
+                create("span").classes("feed-title", "clickable", "pointer")
+                    .text(list.title)
+                    .onclick((e: Event) => {
+                        e.stopPropagation();
+                        navigate(`${route}/${list.id}`);
+                    })
+                    .build(),
+                ...icons,
+            ).build();
+    }
+
     static cardItem(type: EntityType, list: TrackList, isSecondary = false) {
         if (!list.user) {
             throw new Error(`Album has no user: ${list.id}`);
