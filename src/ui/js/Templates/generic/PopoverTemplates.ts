@@ -2,6 +2,10 @@ import {create, AnyNode, AnyElement, Signal} from "@targoninc/jess";
 
 export class PopoverTemplates {
     private static anchoredCleanups = new WeakMap<HTMLElement, () => void>();
+    private static anchorCounter = 0;
+    private static readonly supportsAnchorPositioning = typeof CSS !== "undefined" &&
+        CSS.supports("anchor-name: --lyda-popover-anchor") &&
+        CSS.supports("top: anchor(--lyda-popover-anchor bottom)");
 
     static popover(id: string, ...children: AnyNode[]): HTMLElement {
         return create("div")
@@ -22,8 +26,29 @@ export class PopoverTemplates {
     }
 
     static positionAtAnchor(popover: HTMLElement, anchor: AnyElement, above = false, rightAlign = false): void {
-        const r = anchor.getBoundingClientRect();
         popover.style.position = "fixed";
+
+        if (PopoverTemplates.supportsAnchorPositioning) {
+            const anchorName = PopoverTemplates.anchorName(anchor);
+            popover.style.setProperty("position-anchor", anchorName);
+            if (rightAlign) {
+                popover.style.left = "auto";
+                popover.style.right = `anchor(${anchorName} right)`;
+            } else {
+                popover.style.left = `anchor(${anchorName} left)`;
+                popover.style.right = "auto";
+            }
+            if (above) {
+                popover.style.top = "auto";
+                popover.style.bottom = `calc(anchor(${anchorName} top) + 2px)`;
+            } else {
+                popover.style.top = `calc(anchor(${anchorName} bottom) + 2px)`;
+                popover.style.bottom = "auto";
+            }
+            return;
+        }
+
+        const r = anchor.getBoundingClientRect();
         if (rightAlign) {
             popover.style.left = "auto";
             popover.style.right = `${window.innerWidth - r.right}px`;
@@ -38,6 +63,18 @@ export class PopoverTemplates {
             popover.style.top = `${r.bottom + 2}px`;
             popover.style.bottom = "auto";
         }
+    }
+
+    private static anchorName(anchor: AnyElement): string {
+        const element = anchor as HTMLElement;
+        const existing = element.style.getPropertyValue("anchor-name").split(",")[0]?.trim();
+        if (existing) {
+            return existing;
+        }
+
+        const name = `--lyda-popover-anchor-${++PopoverTemplates.anchorCounter}`;
+        element.style.setProperty("anchor-name", name);
+        return name;
     }
 
     static showAtPoint(popover: HTMLElement, x: number, y: number): void {
@@ -76,7 +113,9 @@ export class PopoverTemplates {
         if (popover.matches(":popover-open")) return;
         PopoverTemplates.positionAtAnchor(popover, anchor, above, rightAlign);
         popover.showPopover();
-        PopoverTemplates.clampHorizontally(popover);
+        if (!PopoverTemplates.supportsAnchorPositioning) {
+            PopoverTemplates.clampHorizontally(popover);
+        }
         PopoverTemplates.attachContextMenuDismissal(popover);
     }
 
@@ -119,7 +158,9 @@ export class PopoverTemplates {
         if (popover.matches(":popover-open") || !popover.isConnected) return;
         PopoverTemplates.positionAtAnchor(popover, anchor, above, rightAlign);
         popover.showPopover();
-        PopoverTemplates.trackAnchor(popover, anchor, above, rightAlign);
+        if (!PopoverTemplates.supportsAnchorPositioning) {
+            PopoverTemplates.trackAnchor(popover, anchor, above, rightAlign);
+        }
     }
 
     static hide(popover: HTMLElement): void {
@@ -178,7 +219,9 @@ export class PopoverTemplates {
 
         PopoverTemplates.positionAtAnchor(popover, anchor, above, rightAlign);
         popover.showPopover();
-        PopoverTemplates.trackAnchor(popover, anchor, above, rightAlign);
+        if (!PopoverTemplates.supportsAnchorPositioning) {
+            PopoverTemplates.trackAnchor(popover, anchor, above, rightAlign);
+        }
 
         if (popover.getAttribute("popover") === "manual") {
             const onDocumentClick = (e: MouseEvent) => {
