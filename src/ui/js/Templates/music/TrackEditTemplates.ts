@@ -1354,9 +1354,9 @@ export class TrackEditTemplates {
                     horizontal(
                         missingAudioIndicator,
                         TrackEditTemplates.replaceAudioButton(track, undefined, undefined, audioButtonClasses, async () => {
+                            audioExists.value = true;
                             const updated = await Api.getTrackById(track.id).catch(() => null);
                             const nextTrack = updated?.track ?? {...track, processed: true};
-                            audioExists.value = !TrackEditTemplates.isMissingAudio(nextTrack);
                             tracks.value = tracks.value.map(t => t.id === track.id ? nextTrack : t);
                         }, rowState.progress),
                         TrackEditTemplates.downloadAudioButton(track),
