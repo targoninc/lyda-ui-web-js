@@ -1,12 +1,22 @@
 import { MediaFileType } from "@targoninc/lyda-shared/src/Enums/MediaFileType.ts";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import { Album } from "@targoninc/lyda-shared/src/Models/db/lyda/Album";
+import { User } from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 
 const cssCacheBuster = Date.now();
 
 function getBaseUrl(requestUrl: URL): string {
     const configured = process.env.BASE_URL?.trim();
     return (configured && configured.length > 0 ? configured : requestUrl.origin).replace(/\/$/, "");
+}
+
+function escapeHtml(value: string): string {
+    return value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
 }
 
 export async function baseHtml(req: Request) {
@@ -27,7 +37,7 @@ export async function baseHtml(req: Request) {
     // Private tracks are shared as /track/{id}/{secretCode}; the secret code
     // unlocks track metadata (title, artist, cover) for the embed metadata.
     let code = requestUrl.searchParams.get("code") ?? "";
-    let id, newimage = "", res, type, optionalTags = "";
+    let id, newimage = "", res, type, optionalTags = "", profileUsername = "";
     if (pathname.includes("/track/")) {
         const index = segments.indexOf("track");
         id = segments[index + 1];
@@ -46,9 +56,33 @@ export async function baseHtml(req: Request) {
         newimage = `${apiUrl}/media/image?id=${id}&mediaFileType=${MediaFileType.playlistCover}&quality=500`;
         type = "playlist";
         ogType = "music.playlist";
+    } else if (pathname.includes("/profile/") || pathname.includes("/user/")) {
+        const index = segments.indexOf("profile") !== -1 ? segments.indexOf("profile") : segments.indexOf("user");
+        try {
+            profileUsername = decodeURIComponent(segments[index + 1] ?? "");
+        } catch {
+            profileUsername = segments[index + 1] ?? "";
+        }
+        title = profileUsername || title;
+        ogType = "profile";
     }
 
-    if (newimage) {
+    if (profileUsername) {
+        res = await fetch(`${apiUrl}/user/get`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({name: profileUsername}),
+        });
+        if (res?.ok) {
+            const user = await res.json() as User;
+            title = user.displayname || user.username || profileUsername;
+            description = user.description?.trim() || `Listen to ${title} on Lyda.`;
+            newimage = user.has_avatar
+                ? `${apiUrl}/media/image?id=${user.id}&mediaFileType=${MediaFileType.userAvatar}&quality=500`
+                : `${baseUrl}/img/defaults/avatar.webp`;
+            optionalTags = `<meta property="profile:username" content="${escapeHtml(user.username ?? profileUsername)}">`;
+        }
+    } else if (newimage) {
         newimage = encodeURI(newimage);
         const codeParam = type === "track" && code ? `&code=${encodeURIComponent(code)}` : "";
         res = await fetch(`${apiUrl}/${type}s/byId?id=${id}${codeParam}`);
@@ -58,7 +92,7 @@ export async function baseHtml(req: Request) {
             if (entity) {
                 title = entity.user?.displayname + " - " + entity.title;
                 description = entity.description ?? description;
-                const profileTag = `<meta property="og:music:profile:username" content="${entity.user.username}">`;
+                const profileTag = `<meta property="og:music:profile:username" content="${escapeHtml(entity.user.username)}">`;
 
                 switch (type) {
                     case "track":
@@ -78,14 +112,14 @@ export async function baseHtml(req: Request) {
     const uniqid = Math.random().toString(36).substring(7);
     image += `?_=${uniqid}`;
     if (newimage) {
-        newimage += `&_=${uniqid}`;
+        newimage += `${newimage.includes("?") ? "&" : "?"}_=${uniqid}`;
     }
 
-    const baseImage = `<meta property="og:image" content="${image}" />
+    const baseImage = `<meta property="og:image" content="${escapeHtml(image)}" />
     <meta property="og:image:type" content="image/webp" />
     <meta property="og:image:width" content="800" />
     <meta property="og:image:height" content="400" />`;
-    const entityImage = newimage ? `<meta property="og:image" content="${newimage}" />
+    const entityImage = newimage ? `<meta property="og:image" content="${escapeHtml(newimage)}" />
     <meta property="og:image:width" content="500" />
     <meta property="og:image:height" content="500" />` : "";
 
@@ -212,17 +246,17 @@ export async function baseHtml(req: Request) {
     </script>
 
     <!-- Other -->
-    <title>${title}</title>
+    <title>${escapeHtml(title)}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="${description}">
+    <meta name="description" content="${escapeHtml(description)}">
     <meta name="theme-color" content="#202025">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <script>window.__baseUrl = ${JSON.stringify(baseUrl)};</script>
     <script>window.__apiUrl = ${JSON.stringify(apiUrl)};</script>
-    <meta property="og:url" content="${baseUrl}${pathname}${requestUrl.search}"/>
+    <meta property="og:url" content="${escapeHtml(`${baseUrl}${pathname}${requestUrl.search}`)}"/>
     <meta property="og:type" content="${ogType}"/>
-    <meta property="og:title" content="${title}"/>
-    <meta property="og:description" content="${description}"/>
+    <meta property="og:title" content="${escapeHtml(title)}"/>
+    <meta property="og:description" content="${escapeHtml(description)}"/>
     ${optionalTags ?? ""}
     ${entityImage || baseImage}
     <script src="/main.js?v=${cssCacheBuster}" type="module"></script>
