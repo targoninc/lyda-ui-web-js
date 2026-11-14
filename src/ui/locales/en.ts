@@ -683,6 +683,7 @@ export const en = {
     EST_TOTAL: amt => `Estimated total: ${amt}`,
     STARTING: "Starting",
     TOTAL_TRACKS: "Total tracks",
+    PUBLIC_TRACKS: "Public tracks",
     PROCESSED_N_OF_TOTAL: (processed, total, currentId) => `Processed ${processed} of ${total} (current: ${currentId})`,
     ERROR_TRACK_ID: (id, error) => `Error processing track ID ${id}: ${error}`,
     SKIPPED_MISSING_FILES: id => `Skipped missing files for track ID: ${id}`,

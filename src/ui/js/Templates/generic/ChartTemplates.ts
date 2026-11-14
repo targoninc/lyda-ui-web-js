@@ -117,11 +117,17 @@ export class ChartTemplates {
                             .build()
                     ).build();
             }
-            const chartData: ChartDatum[] = d.map(e => ({ label: e.label, value: e.value }));
+            const chartData: ChartDatum[] = d.map(e => ({label: e.label, value: e.value}));
+            const series = options.secondarySeries ? [{
+                label: options.secondarySeries.label,
+                values: d.map(e => options.secondarySeries!.value(e)),
+                color: options.secondarySeries.color,
+            }] : undefined;
             return svgLineChart(chartData, id, {
-                valueTitle: options.title,
+                valueTitle: options.primarySeriesLabel ?? options.title,
                 title: options.title,
                 currency: options.currency,
+                series,
             });
         }, data);
 
@@ -132,6 +138,15 @@ export class ChartTemplates {
             const chartData: ChartDatum[] = d.map(e => ({ label: e.label, value: e.value }));
             return metadataTable(buildStatisticMetadata(chartData, options.cumulative ?? false));
         }, data);
+
+        const legend = options.secondarySeries
+            ? create("div")
+                .classes("chart-legend", "flex", "align-children", "small-gap")
+                .children(
+                    ChartTemplates.legendItem(options.primarySeriesLabel ?? options.title, "var(--blue)"),
+                    ChartTemplates.legendItem(options.secondarySeries.label, options.secondarySeries.color ?? "var(--green)"),
+                ).build()
+            : nullElement();
 
         return create("div")
             .classes("chart-container-full", "card", "flex-v")
@@ -153,8 +168,18 @@ export class ChartTemplates {
                         }),
                     )
                     .build(),
+                legend,
                 chart,
                 metadata,
+            ).build();
+    }
+
+    private static legendItem(label: string, color: string) {
+        return create("div")
+            .classes("chart-legend-item", "flex", "align-children", "small-gap")
+            .children(
+                create("span").classes("chart-legend-swatch").styles("background", color).build(),
+                create("span").text(label).build(),
             ).build();
     }
 }

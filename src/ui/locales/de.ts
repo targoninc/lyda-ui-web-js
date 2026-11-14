@@ -646,6 +646,7 @@ export const de: Translation = {
     PAYMENT_INFO: "Zahlungsinformationen",
     STARTING: "Starte",
     TOTAL_TRACKS: "Gesamtanzahl Tracks",
+    PUBLIC_TRACKS: "Öffentliche Tracks",
     PROCESSED_N_OF_TOTAL: (processed, total, currentId) => `Verarbeite ${processed} von ${total} (aktuell: ${currentId})`,
     ERROR_TRACK_ID: (id, error) => `Fehler beim Verarbeiten von Track-ID ${id}: ${error}`,
     SKIPPED_MISSING_FILES: id => `Überspringe fehlende Dateien für Track-ID: ${id}`,

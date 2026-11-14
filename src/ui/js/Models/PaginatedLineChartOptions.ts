@@ -1,3 +1,5 @@
+import {PaginatedLineChartSeries} from "./PaginatedLineChartSeries.ts";
+
 export interface PaginatedLineChartOptions {
     title: string;
     endpoint: string;
@@ -5,4 +7,6 @@ export interface PaginatedLineChartOptions {
     cumulative?: boolean;
     currency?: boolean;
     timeType?: "year" | "month" | "day" | string;
+    primarySeriesLabel?: string;
+    secondarySeries?: PaginatedLineChartSeries;
 }
