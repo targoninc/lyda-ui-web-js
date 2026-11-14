@@ -904,7 +904,7 @@ export class TrackEditTemplates {
         const progress = progressSignal ?? signal<ProgressPart | null>(null);
         const loading = compute(p => p?.state === ProgressState.inProgress, progress);
 
-        return horizontal(
+        return vertical(
             button({
                 text: t("REPLACE_AUDIO"),
                 icon: {icon: "upload"},
@@ -922,7 +922,7 @@ export class TrackEditTemplates {
                 },
             }),
             GenericTemplates.progressSectionPart(progress),
-        ).classes("align-children").build();
+        ).classes("align-children", "small-gap").build();
     }
 
     static editVersionsButton(track: Track, versions: TrackVersion[]) {
