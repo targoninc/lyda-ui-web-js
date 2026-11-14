@@ -623,6 +623,7 @@ export const es: Translation = {
     TRACK_UPLOAD_COMPLETED: "Carga de seguimiento completada",
     UPLOADING_AUDIO: "Subiendo audio",
     NO_AUDIO_FILE: "Sin archivo de audio",
+    NO_AUDIO_YET: "Esta pista aún no tiene audio.",
     MISSING_AUDIO: "Audio faltante",
     MISSING_ARTWORK: "Portada faltante",
     NO_TRACKS_MATCH_FILTERS: "Ninguna pista coincide con los filtros seleccionados.",

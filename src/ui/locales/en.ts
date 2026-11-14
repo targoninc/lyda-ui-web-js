@@ -624,6 +624,7 @@ export const en = {
     TRACK_UPLOAD_COMPLETED: "Track upload completed",
     UPLOADING_AUDIO: "Uploading audio",
     NO_AUDIO_FILE: "No audio file",
+    NO_AUDIO_YET: "This track has no audio (yet).",
     MISSING_AUDIO: "Missing audio",
     MISSING_ARTWORK: "Missing artwork",
     NO_TRACKS_MATCH_FILTERS: "No tracks match the selected filters.",

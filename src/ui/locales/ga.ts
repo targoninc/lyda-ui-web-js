@@ -623,6 +623,7 @@ export const ga: Translation = {
     TRACK_UPLOAD_COMPLETED: "Críochnaíodh uaslódáil an amhráin",
     UPLOADING_AUDIO: "Fuaime a uaslódáil",
     NO_AUDIO_FILE: "Gan comhad fuaime",
+    NO_AUDIO_YET: "Níl aon fhuaim ag an rian seo fós.",
     MISSING_AUDIO: "Fuaim ar iarraidh",
     MISSING_ARTWORK: "Saothar ealaíne ar iarraidh",
     NO_TRACKS_MATCH_FILTERS: "Níl aon rianta ag teacht leis na scagairí roghnaithe.",

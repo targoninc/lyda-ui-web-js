@@ -206,7 +206,7 @@ export class TrackTemplates {
 
     static processingBox(small = false) {
         return create("div")
-            .classes("waveform", small ? "waveform-small" : "_", "processing-box", "rounded-max", "relative")
+            .classes("waveform", small ? "waveform-small" : "waveform-processing", "processing-box", "rounded-max", "relative")
             .title(t("STILL_PROCESSING_CHECK_LATER"))
             .build();
     }
@@ -606,6 +606,12 @@ export class TrackTemplates {
                             compute((idx) => {
                                 const version = versions.find((v) => v.index === idx);
                                 const processed = version ? version.processed : track.processed;
+                                if (!processed && versions.length === 0) {
+                                    return create("span")
+                                        .classes("color-dim")
+                                        .text(t("NO_AUDIO_YET"))
+                                        .build();
+                                }
                                 const raw = version?.loudness_data ?? track.loudness_data;
                                 let data: number[];
                                 try {
