@@ -319,7 +319,10 @@ export function lineChart(data: ChartDatum[], id: string, config: LineChartConfi
     const defs = svgEl("defs");
     svgRoot.appendChild(defs);
 
-    const values = data.map(d => d.value);
+    const values = [
+        ...data.map(d => d.value),
+        ...(config.series ?? []).flatMap(series => series.values),
+    ];
     const scale = domainFor(values, config.includeZero ?? false);
     const points: [number, number][] = data.map((d, i) => [xAt(i, data.length), yAt(d.value, scale)]);
 
@@ -390,6 +393,25 @@ export function lineChart(data: ChartDatum[], id: string, config: LineChartConfi
         svgRoot.appendChild(svgWith("circle", { cx: points[0][0], cy: points[0][1], r: 3, fill: stroke }));
     }
 
+    for (const series of config.series ?? []) {
+        const seriesStroke = series.color ?? "var(--green)";
+        const seriesPoints: [number, number][] = data.map((d, i) => [
+            xAt(i, data.length),
+            yAt(series.values[i] ?? 0, scale),
+        ]);
+        if (data.length >= 2) {
+            const linePath = line<[number, number]>()
+                .x(p => p[0])
+                .y(p => p[1])
+                .curve(curveMonotoneX)(seriesPoints);
+            if (linePath) {
+                svgRoot.appendChild(svgWith("path", {d: linePath, fill: "none", stroke: seriesStroke, "stroke-width": 1.75}));
+            }
+        } else if (data.length === 1) {
+            svgRoot.appendChild(svgWith("circle", {cx: seriesPoints[0][0], cy: seriesPoints[0][1], r: 3, fill: seriesStroke}));
+        }
+    }
+
     const formatValue = config.currency ? currency : formatNumber;
     const container = chartContainer(svgRoot);
     attachHover(
@@ -409,7 +431,11 @@ export function lineChart(data: ChartDatum[], id: string, config: LineChartConfi
         (i: number) => {
             const d = data[i];
             return buildTooltip(formatTooltipHeader(d.label), [
-                { label: config.valueTitle, value: formatValue(d.value) },
+                {label: config.valueTitle, value: formatValue(d.value)},
+                ...(config.series ?? []).map(series => ({
+                    label: series.label,
+                    value: formatValue(series.values[i] ?? 0),
+                })),
             ]);
         },
     );

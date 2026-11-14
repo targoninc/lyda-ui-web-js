@@ -682,6 +682,7 @@ export const ga: Translation = {
     EST_TOTAL: amt => `Iomlán measta: ${amt}`,
     STARTING: "Ag tosú",
     TOTAL_TRACKS: "Rianta iomlána",
+    PUBLIC_TRACKS: "Rianta poiblí",
     PROCESSED_N_OF_TOTAL: (processed, total, currentId) => `Próiseáilte ${processed} de ${total} (reatha: ${currentId})`,
     ERROR_TRACK_ID: (id, error) => `Earráid agus aitheantas an rian á phróiseáil ${id}: ${error}`,
     SKIPPED_MISSING_FILES: id => `Léimeadh comhaid in easnamh le haghaidh aitheantais rian: ${id}`,

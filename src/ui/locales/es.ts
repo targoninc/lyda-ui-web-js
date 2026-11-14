@@ -682,6 +682,7 @@ export const es: Translation = {
     EST_TOTAL: amt => `Total estimado: ${amt}`,
     STARTING: "Comenzando",
     TOTAL_TRACKS: "Pistas totales",
+    PUBLIC_TRACKS: "Pistas públicas",
     PROCESSED_N_OF_TOTAL: (processed, total, currentId) => `Procesado ${processed} de ${total} (actual: ${currentId})`,
     ERROR_TRACK_ID: (id, error) => `Error al procesar el ID de la pista ${id}: ${error}`,
     SKIPPED_MISSING_FILES: id => `Archivos faltantes omitidos para el ID de pista: ${id}`,

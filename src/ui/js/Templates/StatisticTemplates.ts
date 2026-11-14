@@ -7,6 +7,7 @@ import { RoyaltyInfo } from "@targoninc/lyda-shared/src/Models/RoyaltyInfo.ts";
 import { Api } from "../Api/Api.ts";
 import { horizontal, vertical } from "./generic/GenericTemplates.ts";
 import { t } from "../../locales";
+import {CumulativeTrackStatistic} from "../Models/CumulativeTrackStatistic.ts";
 
 export class StatisticTemplates {
     static playCountByMonthChart() {
@@ -54,6 +55,12 @@ export class StatisticTemplates {
             title: `${t("CUMULATIVE_TRACKS")}`,
             endpoint: ApiRoutes.getGlobalCumulativeTracksByMonth,
             cumulative: true,
+            primarySeriesLabel: `${t("TOTAL_TRACKS")}`,
+            secondarySeries: {
+                label: `${t("PUBLIC_TRACKS")}`,
+                value: statistic => (statistic as CumulativeTrackStatistic).publicValue ?? 0,
+                color: "var(--green)",
+            },
         });
     }
 
