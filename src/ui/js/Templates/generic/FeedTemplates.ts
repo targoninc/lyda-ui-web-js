@@ -986,12 +986,9 @@ export class FeedTemplates {
     ): any {
         if (!playable) {
             return create("div")
-                .classes("feed-idx-cell-inner")
+                .classes("feed-idx-cell-inner", "feed-idx-unplayable")
                 .children(
-                    create("div")
-                        .classes("processing-box", "feed-idx-processing")
-                        .title(t("STILL_PROCESSING_CHECK_LATER"))
-                        .build(),
+                    create("span").classes("feed-idx-num").text(String(index + 1)).build(),
                 ).build();
         }
 

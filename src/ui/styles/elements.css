@@ -2063,10 +2063,8 @@ input.jessc-slider:checked ~ .jessc-toggle-container .jessc-toggle-slider {
     min-height: 40px;
 }
 
-.feed-idx-processing {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
+.feed-row:hover .feed-idx-unplayable .feed-idx-num {
+    display: block;
 }
 
 .cover-processing {
