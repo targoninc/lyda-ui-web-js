@@ -36,6 +36,7 @@ import { playFeed } from "../../Actions/MusicActions.ts";
 import { PlayingFrom } from "@targoninc/lyda-shared/src/Models/PlayingFrom.ts";
 import { Icons } from "../../Enums/Icons.ts";
 import {InteractionStateManager} from "../../Classes/InteractionStateManager.ts";
+import {isPlayableTrack} from "../../Classes/Helpers/PlayableTrack.ts";
 import {ApiRoutes} from "../../Api/ApiRoutes.ts";
 import {RoutePath} from "../../Routing/routes.ts";
 import {MusicTemplates} from "./MusicTemplates.ts";
@@ -182,6 +183,10 @@ export class TrackTemplates {
     }
 
     static waveform(track: Track, loudnessData: number[], small = false, version?: number) {
+        if (!isPlayableTrack(track)) {
+            return TrackTemplates.processingBox(small);
+        }
+
         const showWaveforms$ = compute(
             user => !user || getUserSettingValue<boolean>(user, hideWaveformsSetting) !== true,
             currentUser,
@@ -199,14 +204,14 @@ export class TrackTemplates {
             ).build();
     }
 
-    private static waveformVisual(track: Track, loudnessData: number[], small = false, version?: number) {
-        if (!track.processed && (!loudnessData || loudnessData.length === 0)) {
-            return create("div")
-                .classes("waveform", small ? "waveform-small" : "_", "processing-box", "rounded-max", "relative")
-                .title(t("STILL_PROCESSING_CHECK_LATER"))
-                .build();
-        }
+    static processingBox(small = false) {
+        return create("div")
+            .classes("waveform", small ? "waveform-small" : "_", "processing-box", "rounded-max", "relative")
+            .title(t("STILL_PROCESSING_CHECK_LATER"))
+            .build();
+    }
 
+    private static waveformVisual(track: Track, loudnessData: number[], small = false, version?: number) {
         if (!loudnessData || loudnessData.length === 0) {
             const n = 200;
             const cycles = 6;
@@ -370,6 +375,10 @@ export class TrackTemplates {
         const playingClass = compute((id): string => (id === track.id ? "playing" : "_"), currentTrackId);
 
         const startCallback = async () => {
+            if (!isPlayableTrack(track)) {
+                notify(t("STILL_PROCESSING_CHECK_LATER"), NotificationType.warning);
+                return;
+            }
             if (type === "album") {
                 await AlbumActions.startTrackInAlbum(list as Album, track);
             } else if (type === "playlist") {
@@ -488,6 +497,10 @@ export class TrackTemplates {
         if (versions.length > 0 && latestVersionIdx === undefined) {
             selectedVersion.value = versions[versions.length - 1].index;
         }
+        const selectedVersionPlayable = compute(idx => {
+            const version = versions.find(v => v.index === idx);
+            return isPlayableTrack(version ?? track);
+        }, selectedVersion);
 
         const coverFile = signal(Images.DEFAULT_COVER_TRACK);
         if (track.has_cover) {
@@ -566,8 +579,8 @@ export class TrackTemplates {
                         ).classes("big-gap"),
                         TrackTemplates.lyricsSection(track),
                         horizontal(
-                            TrackTemplates.playButton(track, selectedVersion, versions),
-                            when(versions.length > 1, (() => {
+                            when(selectedVersionPlayable, TrackTemplates.playButton(track, selectedVersion, versions)),
+                            when(selectedVersionPlayable, when(versions.length > 1, (() => {
                                 const opts = versions.map((v: any) => ({
                                     name: v.name ?? `v${v.index}`,
                                     value: v.index.toString(),
@@ -589,7 +602,7 @@ export class TrackTemplates {
                                         selectedVersion.value = parseInt((e.target as HTMLSelectElement).value);
                                     })
                                     .build();
-                            })()),
+                            })())),
                             compute((idx) => {
                                 const version = versions.find((v) => v.index === idx);
                                 const processed = version ? version.processed : track.processed;

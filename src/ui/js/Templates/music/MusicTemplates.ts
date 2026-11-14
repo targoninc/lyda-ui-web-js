@@ -84,6 +84,7 @@ export class MusicTemplates {
                 }
             }
         };
+        const playable = type !== EntityType.track || isPlayableTrack(item as Track);
         const isOwnItem = compute(u => u?.id === item.user_id, currentUser);
         const playButtonContexts = [CoverContext.card, CoverContext.queue, CoverContext.small];
         const onlyShowOnHover = compute(
@@ -132,7 +133,12 @@ export class MusicTemplates {
                     playButtonContexts.includes(coverContext),
                     create("div")
                         .classes("centeredInParent", hiddenClass, buttonClass)
-                        .children(MusicTemplates.playButton(type, item.id, start))
+                        .children(playable
+                            ? MusicTemplates.playButton(type, item.id, start)
+                            : create("div")
+                                .classes("processing-box", "cover-processing")
+                                .title(t("STILL_PROCESSING_CHECK_LATER"))
+                                .build())
                         .build(),
                 ),
             ).build();

@@ -29,6 +29,7 @@ import { MusicTemplates } from "../music/MusicTemplates.ts";
 import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
 import { pinState } from "../../Classes/PinState.ts";
 import { trackInterval, trackCleanup } from "../../Classes/Helpers/PageLifecycle.ts";
+import {isPlayableTrack} from "../../Classes/Helpers/PlayableTrack.ts";
 import {SearchTemplates} from "../SearchTemplates.ts";
 
 export { FeedColumn, FeedMenuAction, FeedConfig };
@@ -850,6 +851,7 @@ export class FeedTemplates {
             onPlayToggle: async (track) => {
                 await toggleTrackPlayback(track, pf);
             },
+            isPlayable: track => isPlayableTrack(track),
             isPlaying: (id) => compute((c, p) => c === id && p, currentTrackId, playingHere),
             isLoading: (id) => compute((c, l) => c === id && l, currentTrackId, loadingAudio),
             dateRender: (track) => {
@@ -890,6 +892,7 @@ export class FeedTemplates {
         batchPopover: HTMLElement,
     ): any {
         const playing = config.isPlaying(item.id);
+        const playable = config.isPlayable ? config.isPlayable(item) : true;
         const loading = config.isLoading ? config.isLoading(item.id) : signal(false);
         const icon = getPlayIcon(playing, loading) as Signal<string>;
         const isSelected = compute((ids) => ids.has(item.id), selectedIds$);
@@ -945,7 +948,7 @@ export class FeedTemplates {
             .oncontextmenu(rowOnContextMenu)
             .children(
                 create("td").classes("feed-idx-cell")
-                    .children(FeedTemplates.#idxCell(item, index, icon, loading, config))
+                    .children(FeedTemplates.#idxCell(item, index, icon, loading, config, playable))
                     .build(),
                 ...resolveColumns(config.columns).map(c => {
                     return create("td").classes("feed-cell", `feed-cell-${c.key}`, ...(c.key === "artist" ? ["hideOnSmallBreakpoint"] : []))
@@ -966,7 +969,9 @@ export class FeedTemplates {
                     .build(),
             ).build() as HTMLElement;
 
-        rowEl.addEventListener("dblclick", () => config.onPlayToggle(item));
+        if (playable) {
+            rowEl.addEventListener("dblclick", () => config.onPlayToggle(item));
+        }
         rowEl.addEventListener("touchstart", () => {
             longPressTimer = setTimeout(() => showMobileMenu(item), 500);
         });
@@ -977,8 +982,19 @@ export class FeedTemplates {
     }
 
     static #idxCell<T extends { id: number }>(
-        item: T, index: number, icon: Signal<string>, loading: Signal<boolean>, config: FeedConfig<T>,
+        item: T, index: number, icon: Signal<string>, loading: Signal<boolean>, config: FeedConfig<T>, playable: boolean,
     ): any {
+        if (!playable) {
+            return create("div")
+                .classes("feed-idx-cell-inner")
+                .children(
+                    create("div")
+                        .classes("processing-box", "feed-idx-processing")
+                        .title(t("STILL_PROCESSING_CHECK_LATER"))
+                        .build(),
+                ).build();
+        }
+
         const handle = (e: Event) => { e.stopPropagation(); config.onPlayToggle(item); };
         const handleButton = (e: Event) => { e.stopPropagation(); config.onPlayToggle(item); };
 
