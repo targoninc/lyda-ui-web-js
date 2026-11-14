@@ -78,6 +78,7 @@ export const de: Translation = {
     FAILED_TO_UPLOAD_AUDIO_ERROR: error => `Fehler beim Hochladen des Audios: ${error}`,
     FAILED_UPLOADING_IMAGE: "Fehler beim Hochladen des Bildes",
     NO_AUDIO_FILE: "Keine Audio-Datei",
+    NO_AUDIO_YET: "Dieser Track hat noch keine Audiodatei.",
     MISSING_AUDIO: "Fehlendes Audio",
     MISSING_ARTWORK: "Fehlendes Artwork",
     NO_TRACKS_MATCH_FILTERS: "Keine Tracks entsprechen den ausgewählten Filtern.",

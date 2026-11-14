@@ -2063,6 +2063,27 @@ input.jessc-slider:checked ~ .jessc-toggle-container .jessc-toggle-slider {
     min-height: 40px;
 }
 
+.feed-row:hover .feed-idx-unplayable .feed-idx-num {
+    display: block;
+}
+
+.cover-processing {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+}
+
+.waveform-processing {
+    width: 360px;
+    min-width: 180px;
+    max-width: 60vw;
+}
+
+.track-player-row .waveform-processing {
+    flex: 0 1 auto;
+    width: min(360px, 60vw);
+}
+
 .feed-idx-num {
     font-size: var(--font-size-small);
     color: var(--fg-0);

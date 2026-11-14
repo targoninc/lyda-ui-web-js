@@ -10,6 +10,7 @@ import {AlbumTemplates} from "./music/AlbumTemplates.ts";
 import {RoutePath} from "../Routing/routes.ts";
 import {PayoutTemplates} from "./money/PayoutTemplates.ts";
 import {FeedTemplates} from "./generic/FeedTemplates.ts";
+import {isPlayableTrack} from "../Classes/Helpers/PlayableTrack.ts";
 import {User} from "@targoninc/lyda-shared/src/Models/db/lyda/User";
 import {Track} from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
 import {TrackEditTemplates} from "./music/TrackEditTemplates.ts";
@@ -987,6 +988,7 @@ export class PageTemplates {
                 onPlayToggle: async (track) => {
                     await toggleTrackPlayback(track);
                 },
+                isPlayable: track => isPlayableTrack(track),
                 isPlaying: (id) => compute((c, p) => c === id && p, currentTrackId, playingHere),
                 dateRender: (track) => GenericTemplates.timestamp(track.created_at, ["hideOnSmallBreakpoint"]),
                 onNavigate: (track) => window.open(`/track/${track.id}`, "_blank"),

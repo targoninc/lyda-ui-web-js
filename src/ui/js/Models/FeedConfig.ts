@@ -28,6 +28,7 @@ export interface FeedConfig<T extends { id: number }> {
     fetchPage: (offset: number, limit: number, filter?: string, sortBy?: string, sortDir?: 'asc' | 'desc') => Promise<T[] | { items: T[], total: number }>;
     buildMenuActions: (item: T) => FeedMenuAction<T>[];
     onPlayToggle: (item: T) => Promise<void>;
+    isPlayable?: (item: T) => boolean;
     isPlaying: (itemId: number) => Signal<boolean>;
     isLoading?: (itemId: number) => Signal<boolean>;
     buildInteractions?: (item: T) => AnyNode[];
