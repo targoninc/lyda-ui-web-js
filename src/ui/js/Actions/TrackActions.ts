@@ -142,6 +142,13 @@ export class TrackActions {
             importing,
         );
 
+        let modal: ReturnType<typeof createModal> = null;
+        const closeModal = () => {
+            if (modal) {
+                Util.removeModal(modal);
+            }
+        };
+
         const modalContent = vertical(
             create("h3").text(t("REPLACE_AUDIO")).build(),
             GenericTemplates.fileInput("replace-audio-file", "replace-audio-file", AUDIO_ACCEPT, `${t("DROP_AUDIO_FILE_HERE")}`, false, (_, files) => {
@@ -169,7 +176,7 @@ export class TrackActions {
                     text: t("CANCEL"),
                     icon: {icon: "close"},
                     classes: ["negative"],
-                    onclick: () => Util.removeModal(),
+                    onclick: closeModal,
                 }),
                 button({
                     text: t("UPLOAD"),
@@ -210,7 +217,7 @@ export class TrackActions {
                                 progress: 100,
                             };
                             notify(`${t("AUDIO_UPLOADED")}`, NotificationType.success);
-                            Util.removeModal();
+                            closeModal();
                             await onSuccess();
                         } catch {
                             progress.value = {
@@ -227,7 +234,7 @@ export class TrackActions {
             ).classes("align-end").build(),
         );
 
-        createModal([modalContent], "replace-audio");
+        modal = createModal([modalContent], "replace-audio");
     }
 
     static moveTrackToPosition(idToMove: number, targetPosition: number, tracks: Signal<ListTrack[]>) {
