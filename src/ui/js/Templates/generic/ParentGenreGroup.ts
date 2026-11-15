@@ -16,6 +16,45 @@ export interface ParentGenreGroupOptions {
     availableGenres?: Signal<Genre[] | null>;
 }
 
+function parentGenreValue(parent: DiscogsParentGenre): Genre {
+    const group = GenreByParent[parent] ?? [];
+    if (group.length === 0) {
+        return parent as unknown as Genre;
+    }
+
+    return group[0].split("---")[0] as Genre;
+}
+
+function allSelectableGenres(): Genre[] {
+    return [...new Set([
+        ...DISCOGS_PARENT_GENRES.map(parentGenreValue),
+        ...Object.values(Genre),
+    ])] as Genre[];
+}
+
+function genreMatchScore(genre: Genre, query: string): number {
+    const value = genre.toLowerCase();
+    const display = getSubgenreDisplay(genre).toLowerCase();
+    if (value === query || display === query) return 4;
+    if (display.startsWith(query)) return 3;
+    if (value.startsWith(query)) return 2;
+    if (display.includes(query)) return 1;
+    if (value.includes(query)) return 0;
+
+    return -1;
+}
+
+function findBestGenreMatch(genres: Genre[], query: string): Genre | undefined {
+    return genres
+        .map(genre => ({genre, score: genreMatchScore(genre, query)}))
+        .filter(entry => entry.score >= 0)
+        .sort((a, b) =>
+            b.score - a.score
+            || getSubgenreDisplay(a.genre).length - getSubgenreDisplay(b.genre).length
+            || getSubgenreDisplay(a.genre).localeCompare(getSubgenreDisplay(b.genre)),
+        )[0]?.genre;
+}
+
 export function ParentGenreGroup(options: ParentGenreGroupOptions) {
     const {
         selectedGenres,
@@ -58,7 +97,7 @@ export function ParentGenreGroup(options: ParentGenreGroupOptions) {
     };
 
     const getFilteredGenres = (parent: DiscogsParentGenre): Genre[] => {
-        const allGenres = GenreByParent[parent] ?? [];
+        const allGenres = [...new Set([parentGenreValue(parent), ...(GenreByParent[parent] ?? [])])] as Genre[];
         const query = searchQuery.value.toLowerCase();
         const matching = query
             ? allGenres.filter(g =>
@@ -124,11 +163,8 @@ function selectedGenresRow(
                     e.preventDefault();
                     const val = searchQuery.value.trim().toLowerCase();
                     if (!val) return;
-                    const allGenres = Object.values(Genre).filter(isGenreAvailable);
-                    const match =
-                        allGenres.find(g => g.toLowerCase() === val) ??
-                        allGenres.find(g => getSubgenreDisplay(g).toLowerCase() === val) ??
-                        allGenres.find(g => g.toLowerCase().includes(val) || getSubgenreDisplay(g).toLowerCase().includes(val));
+                    const allGenres = allSelectableGenres().filter(isGenreAvailable);
+                    const match = findBestGenreMatch(allGenres, val);
                     if (match) {
                         addGenre(match);
                     }

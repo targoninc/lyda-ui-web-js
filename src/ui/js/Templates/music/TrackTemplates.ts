@@ -1034,7 +1034,7 @@ export class TrackTemplates {
                     button({
                         classes: ["rounded-max", "tag"],
                         onclick: () => navigate(`${RoutePath.explore}?tab=genres&genres=${encodeURIComponent(g)}`),
-                        text: `#${g.includes("---") ? getSubgenreDisplay(g as any) : g}`,
+                        text: `#${getSubgenreDisplay(g as any)}`,
                     }),
                 ),
             ).build();
