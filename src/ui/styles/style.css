@@ -1117,6 +1117,10 @@ td:last-child, th:last-child {
     right: 0;
 }
 
+.align-children-start {
+    align-items: flex-start;
+}
+
 .align-children-end {
     align-items: flex-end;
 }

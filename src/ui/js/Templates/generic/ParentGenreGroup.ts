@@ -1,8 +1,9 @@
 import {compute, create, signal, signalMap, Signal, when, InputType, StringOrSignal, AnyElement} from "@targoninc/jess";
 import {button} from "@targoninc/jess-components";
 import {DISCOGS_PARENT_GENRES, DiscogsParentGenre, Genre} from "@targoninc/lyda-shared/src/Enums/Genre";
-import {GenreByParent, getSubgenreDisplay} from "@targoninc/lyda-shared/src/Enums/GenreLabels";
+import {GenreByParent} from "@targoninc/lyda-shared/src/Enums/GenreLabels";
 import {GenericTemplates, horizontal, vertical} from "./GenericTemplates.ts";
+import {getGenreDisplay, getParentGenreValue, getParentGenreValues} from "../../Classes/GenreDisplay.ts";
 import {t} from "../../../locales";
 
 export interface ParentGenreGroupOptions {
@@ -14,6 +15,36 @@ export interface ParentGenreGroupOptions {
     analyzing?: Signal<boolean>;
     listVisible?: Signal<boolean>;
     availableGenres?: Signal<Genre[] | null>;
+}
+
+function allSelectableGenres(): Genre[] {
+    return [...new Set([
+        ...getParentGenreValues().filter(value => !value.includes(",")),
+        ...Object.values(Genre),
+    ])] as Genre[];
+}
+
+function genreMatchScore(genre: Genre, query: string): number {
+    const value = genre.toLowerCase();
+    const display = getGenreDisplay(genre).toLowerCase();
+    if (value === query || display === query) return 4;
+    if (display.startsWith(query)) return 3;
+    if (value.startsWith(query)) return 2;
+    if (display.includes(query)) return 1;
+    if (value.includes(query)) return 0;
+
+    return -1;
+}
+
+function findBestGenreMatch(genres: Genre[], query: string): Genre | undefined {
+    return genres
+        .map(genre => ({genre, score: genreMatchScore(genre, query)}))
+        .filter(entry => entry.score >= 0)
+        .sort((a, b) =>
+            b.score - a.score
+            || getGenreDisplay(a.genre).length - getGenreDisplay(b.genre).length
+            || getGenreDisplay(a.genre).localeCompare(getGenreDisplay(b.genre)),
+        )[0]?.genre;
 }
 
 export function ParentGenreGroup(options: ParentGenreGroupOptions) {
@@ -58,12 +89,14 @@ export function ParentGenreGroup(options: ParentGenreGroupOptions) {
     };
 
     const getFilteredGenres = (parent: DiscogsParentGenre): Genre[] => {
-        const allGenres = GenreByParent[parent] ?? [];
+        const parentValue = getParentGenreValue(parent);
+        const parentGenres = parentValue.includes(",") ? [] : [parentValue];
+        const allGenres = [...new Set([...parentGenres, ...(GenreByParent[parent] ?? [])])] as Genre[];
         const query = searchQuery.value.toLowerCase();
         const matching = query
             ? allGenres.filter(g =>
                 g.toLowerCase().includes(query) ||
-                getSubgenreDisplay(g).toLowerCase().includes(query)
+                getGenreDisplay(g).toLowerCase().includes(query)
             )
             : allGenres;
         return matching.filter(isGenreAvailable);
@@ -106,7 +139,7 @@ function selectedGenresRow(
             create("div").classes("flex", "flex-wrap", "small-gap", "align-children"),
             (genre) => button({
                 icon: {icon: "close"},
-                text: getSubgenreDisplay(genre),
+                text: getGenreDisplay(genre),
                 classes: ["tag-remove"],
                 onclick: () => removeGenre(genre),
             }),
@@ -124,11 +157,8 @@ function selectedGenresRow(
                     e.preventDefault();
                     const val = searchQuery.value.trim().toLowerCase();
                     if (!val) return;
-                    const allGenres = Object.values(Genre).filter(isGenreAvailable);
-                    const match =
-                        allGenres.find(g => g.toLowerCase() === val) ??
-                        allGenres.find(g => getSubgenreDisplay(g).toLowerCase() === val) ??
-                        allGenres.find(g => g.toLowerCase().includes(val) || getSubgenreDisplay(g).toLowerCase().includes(val));
+                    const allGenres = allSelectableGenres().filter(isGenreAvailable);
+                    const match = findBestGenreMatch(allGenres, val);
                     if (match) {
                         addGenre(match);
                     }
@@ -160,7 +190,7 @@ function suggestionsRow(suggestedGenres: Signal<Genre[]>, addGenre: (g: Genre) =
                 suggestedGenres,
                 horizontal(),
                 (genre) => button({
-                    text: getSubgenreDisplay(genre),
+                    text: getGenreDisplay(genre),
                     classes: ["tag", "suggestion"],
                     onclick: () => addGenre(genre),
                 }),
@@ -235,7 +265,7 @@ function genreTag(genre: Genre, selectedGenres: Signal<Genre[]>, addGenre: (g: G
     const isSelected = compute(s => s.includes(genre), selectedGenres);
 
     return button({
-        text: getSubgenreDisplay(genre),
+        text: getGenreDisplay(genre),
         classes: ["rounded-max", compute((s): string => s ? "active" : "_", isSelected)],
         onclick: () => {
             if (isSelected.value) {

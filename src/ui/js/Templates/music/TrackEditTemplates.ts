@@ -922,7 +922,7 @@ export class TrackEditTemplates {
                 },
             }),
             GenericTemplates.progressSectionPart(progress),
-        ).classes("align-children", "small-gap").build();
+        ).classes("align-children-start", "small-gap").build();
     }
 
     static editVersionsButton(track: Track, versions: TrackVersion[]) {
