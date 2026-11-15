@@ -27,7 +27,7 @@ function parentGenreValue(parent: DiscogsParentGenre): Genre {
 
 function allSelectableGenres(): Genre[] {
     return [...new Set([
-        ...DISCOGS_PARENT_GENRES.map(parentGenreValue),
+        ...DISCOGS_PARENT_GENRES.map(parentGenreValue).filter(value => !value.includes(",")),
         ...Object.values(Genre),
     ])] as Genre[];
 }
@@ -97,7 +97,9 @@ export function ParentGenreGroup(options: ParentGenreGroupOptions) {
     };
 
     const getFilteredGenres = (parent: DiscogsParentGenre): Genre[] => {
-        const allGenres = [...new Set([parentGenreValue(parent), ...(GenreByParent[parent] ?? [])])] as Genre[];
+        const parentValue = parentGenreValue(parent);
+        const parentGenres = parentValue.includes(",") ? [] : [parentValue];
+        const allGenres = [...new Set([...parentGenres, ...(GenreByParent[parent] ?? [])])] as Genre[];
         const query = searchQuery.value.toLowerCase();
         const matching = query
             ? allGenres.filter(g =>
