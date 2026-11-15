@@ -120,7 +120,7 @@ export class PageTemplates {
                     }),
                 ).build()),
             when(compute(u => !!u, currentUser), () => {
-                const holder = create("div").build();
+                const holder = create("div").classes("fullWidth").build();
                 Promise.resolve(PageTemplates.mapping[page](route, params)).then(template => {
                     holder.appendChild(template);
                 });
