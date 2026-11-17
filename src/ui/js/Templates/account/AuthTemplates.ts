@@ -392,7 +392,7 @@ export class AuthTemplates {
                                     ).onclick(() => toggle(o.type))
                                     .build(),
                             ),
-                        ).classes("flex", "gap", "align-children"),
+                        ).classes("flex", "gap", "align-children", "user-type-options"),
                         create("div")
                             .classes("flex", "gap")
                             .children(

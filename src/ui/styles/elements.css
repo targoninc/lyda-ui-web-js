@@ -52,6 +52,21 @@
     font-size: 1.4em;
 }
 
+.user-type-options {
+    width: 100%;
+}
+
+@media only screen and (max-width: 600px) {
+    .user-type-options {
+        flex-direction: column;
+    }
+
+    .user-type-options > button {
+        width: 100%;
+        height: auto !important;
+    }
+}
+
 .search-result-header {
     padding: 4px 10px 0 10px;
     font-size: 14px;
