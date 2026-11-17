@@ -13,6 +13,11 @@ export async function toggleTrackPlayback(track: Track, newPlayingFrom?: Playing
 }
 
 export async function startItem(track: Track, newPlayingFrom?: PlayingFrom) {
+    const trackId = Number(track?.id);
+    if (!track || !Number.isFinite(trackId) || trackId <= 0) {
+        console.warn("[MusicActions] startItem called without a valid track id", track);
+        return;
+    }
     if (newPlayingFrom) {
         const currentPf = playingFrom.value;
         const isSameContext = currentPf && currentPf.type === newPlayingFrom.type && currentPf.id === newPlayingFrom.id;

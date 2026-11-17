@@ -18,6 +18,9 @@ export class QueueManager {
     static lastPopulatedShuffleState: boolean | null = null;
 
     static isPlayableId(id: number): boolean {
+        if (!Number.isFinite(id) || id <= 0) {
+            return false;
+        }
         const track = trackInfo.value[id]?.track as Track | undefined;
         return !track || isPlayableTrack(track);
     }
@@ -73,7 +76,8 @@ export class QueueManager {
         if (pf.entity?.tracks) {
             let trackIds = pf.entity.tracks
                 .filter(t => !t.track || isPlayableTrack(t.track))
-                .map(t => t.track_id);
+                .map(t => t.track_id)
+                .filter(id => Number.isFinite(id) && id > 0);
             if (shuffle) {
                 trackIds = shuffleArray(trackIds);
             }
@@ -103,7 +107,8 @@ export class QueueManager {
 
         let trackIds = tracks
             .filter((t: any) => isPlayableTrack(t))
-            .map((t: any) => t.id);
+            .map((t: any) => t.id)
+            .filter((id: any) => Number.isFinite(id) && id > 0);
         if (shuffle) {
             trackIds = shuffleArray(trackIds);
         }
