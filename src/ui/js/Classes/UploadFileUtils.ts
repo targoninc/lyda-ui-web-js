@@ -29,6 +29,7 @@ export function defaultUploadState(termsOfService = false): UploadableTrack {
         title: "",
         credits: "",
         artistname: "",
+        visual_artist: "",
         release_date: new Date(),
         visibility: Visibility.private,
         genres: [],

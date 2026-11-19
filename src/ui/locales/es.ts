@@ -426,6 +426,8 @@ export const es: Translation = {
     ISRC: "ISRC",
     EXAMPLE_ISRC: "QZNWX2227540",
     ARTIST_DISPLAY_NAME: "Nombre para mostrar del artista",
+    VISUAL_ARTIST: "Artista visual",
+    EXAMPLE_VISUAL_ARTIST: "Portada por...",
     EXAMPLE_ARTIST_DISPLAY_NAME: "mi otro alias",
     COPYRIGHT: "Derechos de autor",
     I_HAVE_ALL_NECESSARY_RIGHTS: "Tengo todos los derechos necesarios para distribuir este contenido*",

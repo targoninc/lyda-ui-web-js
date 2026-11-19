@@ -426,6 +426,8 @@ export const en = {
     ISRC: "ISRC",
     EXAMPLE_ISRC: "QZNWX2227540",
     ARTIST_DISPLAY_NAME: "Artist display name",
+    VISUAL_ARTIST: "Visual artist",
+    EXAMPLE_VISUAL_ARTIST: "Cover artwork by...",
     EXAMPLE_ARTIST_DISPLAY_NAME: "My other alias",
     COPYRIGHT: "Copyright",
     I_HAVE_ALL_NECESSARY_RIGHTS: "I have all the necessary rights to distribute this content*",

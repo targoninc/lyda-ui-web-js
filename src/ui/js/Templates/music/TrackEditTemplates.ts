@@ -397,6 +397,7 @@ export class TrackEditTemplates {
                 TrackEditTemplates.toggles(isPrivate, state),
                 FormTemplates.titleInput(state),
                 TrackEditTemplates.artistNameInput(state),
+                TrackEditTemplates.visualArtistInput(state),
                 FormTemplates.descriptionInput(state),
                 vertical(
                     button({
@@ -662,6 +663,21 @@ export class TrackEditTemplates {
             value: compute(s => s.artistname ?? "", state),
             onchange: v => {
                 state.value = {...state.value, artistname: v};
+            },
+        });
+    }
+
+    private static visualArtistInput(state: Signal<UploadableTrack>) {
+        return input<string>({
+            type: InputType.text,
+            name: "visual_artist",
+            label: t("VISUAL_ARTIST"),
+            placeholder: t("EXAMPLE_VISUAL_ARTIST"),
+            validators: TrackValidators.visualArtistValidators,
+            attributes: ["maxlength", "256"],
+            value: compute(s => s.visual_artist ?? "", state),
+            onchange: v => {
+                state.value = {...state.value, visual_artist: v};
             },
         });
     }
@@ -1310,6 +1326,7 @@ export class TrackEditTemplates {
             return s.title !== track.title ||
                 s.credits !== track.credits ||
                 s.artistname !== track.artistname ||
+                s.visual_artist !== track.visual_artist ||
                 s.visibility !== track.visibility ||
                 s.isrc !== track.isrc ||
                 s.upc !== track.upc ||
@@ -1335,8 +1352,9 @@ export class TrackEditTemplates {
             horizontal(
                 vertical(
                     horizontal(
-                    FormTemplates.titleInput(state),
+                        FormTemplates.titleInput(state),
                         TrackEditTemplates.artistNameInput(state),
+                        TrackEditTemplates.visualArtistInput(state),
                         TrackEditTemplates.isrcInput(state),
                     ),
                     horizontal(
@@ -1452,6 +1470,7 @@ export class TrackEditTemplates {
         const bulkFields: BatchEditField[] = [
             {key: "title", label: "Title"},
             {key: "artistname", label: "Artist display name"},
+            {key: "visual_artist", label: "Visual artist"},
             {key: "isrc", label: "ISRC"},
             {key: "credits", label: "Collaborators"},
             {key: "price", label: "Price"},
@@ -1515,6 +1534,7 @@ export class TrackEditTemplates {
                 horizontal(
                     FormTemplates.titleInput(bulkState),
                     TrackEditTemplates.artistNameInput(bulkState),
+                    TrackEditTemplates.visualArtistInput(bulkState),
                     TrackEditTemplates.isrcInput(bulkState),
                 ),
                 horizontal(

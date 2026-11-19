@@ -117,6 +117,8 @@ export const de: Translation = {
     ANSWER_ROYALTY_CALCULATION_PART_2: "Das ist besonders von Vorteil für kleinere Künstler, weil es auf relativen Prozentpunkten deiner generierten Plays basiert, nicht der absoluten Menge davon.",
     APPROVE: "Genehmigen",
     ARTIST_DISPLAY_NAME: "Angezeigter Künstlername",
+    VISUAL_ARTIST: "Visueller Künstler",
+    EXAMPLE_VISUAL_ARTIST: "Cover-Artwork von...",
     ARTWORK: "Bild",
     AUDIO: "Audio",
     AUDIO_FILE: "Audiodatei",

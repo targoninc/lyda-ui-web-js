@@ -426,6 +426,8 @@ export const ga: Translation = {
     ISRC: "ISRC",
     EXAMPLE_ISRC: "QZNWX2227540",
     ARTIST_DISPLAY_NAME: "Ainm taispeána an ealaíontóra",
+    VISUAL_ARTIST: "Ealaíontóir amhairc",
+    EXAMPLE_VISUAL_ARTIST: "Saothar ealaíne le...",
     EXAMPLE_ARTIST_DISPLAY_NAME: "Mo ailias eile",
     COPYRIGHT: "Cóipcheart",
     I_HAVE_ALL_NECESSARY_RIGHTS: "Tá na cearta riachtanacha ar fad agam chun an t-ábhar seo a dháileadh*",

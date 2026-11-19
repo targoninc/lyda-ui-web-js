@@ -111,9 +111,12 @@ export class MusicTemplates {
                     onclick: () => {
                         const image = item.has_cover ? Util.getImage(item.id, fileType) : imageState.value;
                         const canReport = item.has_cover && Util.isLoggedIn() && currentUser.value?.id !== item.user_id;
+                        const visualArtist = type === EntityType.track || type === EntityType.album
+                            ? (item as Track | Album).visual_artist
+                            : "";
                         Ui.showImageModal(image, canReport
                             ? ReportTemplates.reportButton({entityType: "media", entityId: item.id, mediaType: fileType}, t("REPORT_MEDIA"))
-                            : undefined);
+                            : undefined, visualArtist ? `${t("VISUAL_ARTIST")}: ${visualArtist}` : undefined);
                     },
                 }),
                 when(

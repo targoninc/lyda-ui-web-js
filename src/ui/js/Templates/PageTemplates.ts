@@ -2,7 +2,7 @@ import {AuthActions} from "../Actions/AuthActions.ts";
 import {LandingPageTemplates} from "./LandingPageTemplates.ts";
 import {UserTemplates} from "./account/UserTemplates.ts";
 import {BuyTemplates} from "./money/BuyTemplates.ts";
-import {AnyElement, compute, create, nullElement, signal, Signal, signalMap, when} from "@targoninc/jess";
+import {AnyElement, compute, create, InputType, nullElement, signal, Signal, signalMap, when} from "@targoninc/jess";
 import {SearchTemplates} from "./SearchTemplates.ts";
 import {SettingsTemplates} from "./account/SettingsTemplates.ts";
 import {RoadmapTemplates} from "./RoadmapTemplates.ts";
@@ -28,6 +28,7 @@ import {NotificationType} from "../Enums/NotificationType.ts";
 import {Api} from "../Api/Api.ts";
 import {GenericTemplates, horizontal, tabSelected, vertical} from "./generic/GenericTemplates.ts";
 import {FormTemplates} from "./generic/FormTemplates.ts";
+import {maxLengthValidator} from "../Classes/Validators/validators.ts";
 import {MusicTemplates} from "./music/MusicTemplates.ts";
 import {CoverContext} from "../Enums/CoverContext.ts";
 import {InteractionTemplates} from "./InteractionTemplates.ts";
@@ -43,7 +44,7 @@ import {AlbumActions} from "../Actions/AlbumActions.ts";
 import {PlaylistActions} from "../Actions/PlaylistActions.ts";
 import {QueueManager} from "../Streaming/QueueManager.ts";
 import {ApiRoutes} from "../Api/ApiRoutes.ts";
-import {button, heading} from "@targoninc/jess-components";
+import {button, heading, input} from "@targoninc/jess-components";
 import {EntityType} from "@targoninc/lyda-shared/src/Enums/EntityType.ts";
 import {FeedType} from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
 import {Genre} from "@targoninc/lyda-shared/src/Enums/Genre";
@@ -163,6 +164,7 @@ export class PageTemplates {
         });
         const bulkFields: BatchEditField[] = [
             {key: "title", label: "Title"},
+            {key: "visual_artist", label: "Visual artist"},
             {key: "upc", label: "UPC"},
             {key: "description", label: "Description"},
             {key: "visibility", label: "Visibility"},
@@ -236,6 +238,18 @@ export class PageTemplates {
                         vertical(
                             horizontal(
                                 FormTemplates.titleInput(bulkState),
+                                input<string>({
+                                    type: InputType.text,
+                                    name: "batch-visual-artist",
+                                    label: t("VISUAL_ARTIST"),
+                                    placeholder: t("EXAMPLE_VISUAL_ARTIST"),
+                                    attributes: ["maxlength", "256"],
+                                    validators: [maxLengthValidator(256)],
+                                    value: compute(s => s.visual_artist ?? "", bulkState),
+                                    onchange: v => {
+                                        bulkState.value = {...bulkState.value, visual_artist: v};
+                                    },
+                                }),
                                 FormTemplates.upcInput(bulkState),
                             ),
                             horizontal(
@@ -265,6 +279,7 @@ export class PageTemplates {
                 const state = signal<Partial<Album>>({...album});
                 const changed = compute(s =>
                         s.title !== album.title ||
+                        s.visual_artist !== album.visual_artist ||
                         s.upc !== album.upc ||
                         s.visibility !== album.visibility ||
                         s.description !== album.description,
@@ -284,6 +299,18 @@ export class PageTemplates {
                                 vertical(
                                     horizontal(
                                         FormTemplates.titleInput(state),
+                                        input<string>({
+                                            type: InputType.text,
+                                            name: "visual-artist-" + album.id,
+                                            label: t("VISUAL_ARTIST"),
+                                            placeholder: t("EXAMPLE_VISUAL_ARTIST"),
+                                            attributes: ["maxlength", "256"],
+                                            validators: [maxLengthValidator(256)],
+                                            value: compute(s => s.visual_artist ?? "", state),
+                                            onchange: v => {
+                                                state.value = {...state.value, visual_artist: v};
+                                            },
+                                        }),
                                         FormTemplates.upcInput(state),
                                         vertical(
                                             FormTemplates.visibilityToggle(

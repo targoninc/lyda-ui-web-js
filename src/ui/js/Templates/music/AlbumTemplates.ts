@@ -31,6 +31,7 @@ import { SearchContext } from "@targoninc/lyda-shared/src/Enums/SearchContext.ts
 import { ApiRoutes } from "../../Api/ApiRoutes.ts";
 import { BuyTemplates } from "../money/BuyTemplates.ts";
 import { FormTemplates } from "../generic/FormTemplates.ts";
+import { maxLengthValidator } from "../../Classes/Validators/validators.ts";
 import { ColorExtractor } from "../../Classes/ColorExtractor.ts";
 import { SearchResult } from "@targoninc/lyda-shared/src/Models/SearchResult";
 
@@ -168,6 +169,7 @@ export class AlbumTemplates {
     static albumInputs(album: Signal<Partial<Album>>) {
         const name = compute((s) => s.title ?? "", album);
         const upc = compute((s) => s.upc ?? "", album);
+        const visualArtist = compute((s) => s.visual_artist ?? "", album);
         const description = compute((s) => s.description ?? "", album);
         const visibility = compute((s) => s.visibility === "private", album);
         const price = compute((s) => s.price ?? 0, album);
@@ -185,6 +187,18 @@ export class AlbumTemplates {
                     value: name,
                     onchange: (v) => {
                         album.value = { ...album.value, title: v };
+                    },
+                }),
+                input<string>({
+                    type: InputType.text,
+                    name: "visual_artist",
+                    label: t("VISUAL_ARTIST"),
+                    placeholder: t("EXAMPLE_VISUAL_ARTIST"),
+                    value: visualArtist,
+                    validators: [maxLengthValidator(256)],
+                    attributes: ["maxlength", "256"],
+                    onchange: (v) => {
+                        album.value = { ...album.value, visual_artist: v };
                     },
                 }),
                 input<string>({
@@ -259,10 +273,16 @@ export class AlbumTemplates {
                 create("div")
                     .classes("album-info-container", "flex")
                     .children(
-                        MusicTemplates.cover(EntityType.album, album, CoverContext.standalone, null, {
-                            bought: canDownload && !canEdit,
-                            price: BuyTemplates.getMinPrice({type: "album", entity: album}) || undefined,
-                        }),
+                        vertical(
+                            MusicTemplates.cover(EntityType.album, album, CoverContext.standalone, null, {
+                                bought: canDownload && !canEdit,
+                                price: BuyTemplates.getMinPrice({type: "album", entity: album}) || undefined,
+                            }),
+                            when(album.visual_artist, () => create("span")
+                                .classes("color-dim", TextSize.small)
+                                .text(`${t("VISUAL_ARTIST")}: ${album.visual_artist}`)
+                                .build()),
+                        ).classes("align-children", "small-gap"),
                         vertical(
                             AlbumTemplates.audioActions(album, canEdit, canBuy, reload),
                             InteractionTemplates.interactions(EntityType.album, album),
@@ -453,6 +473,7 @@ export class AlbumTemplates {
     static createAlbumPage() {
         const album = signal(<Partial<Album>>{
             title: "",
+            visual_artist: "",
             upc: "",
             description: "",
             release_date: new Date(),

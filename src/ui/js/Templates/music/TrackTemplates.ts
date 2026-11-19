@@ -531,10 +531,16 @@ export class TrackTemplates {
                 vertical(
                     vertical(
                         horizontal(
-                            MusicTemplates.cover(EntityType.track, track, CoverContext.standalone, null, {
-                                bought,
-                                price: track.price || undefined,
-                            }),
+                            vertical(
+                                MusicTemplates.cover(EntityType.track, track, CoverContext.standalone, null, {
+                                    bought,
+                                    price: track.price || undefined,
+                                }),
+                                when(track.visual_artist, () => create("span")
+                                    .classes("color-dim", TextSize.small)
+                                    .text(`${t("VISUAL_ARTIST")}: ${track.visual_artist}`)
+                                    .build()),
+                            ).classes("align-children", "small-gap"),
                             vertical(
                                 vertical(
                                     MusicTemplates.title(EntityType.track, track.title, track.id, icons, TextSize.xxLarge, false, false, track.wip),

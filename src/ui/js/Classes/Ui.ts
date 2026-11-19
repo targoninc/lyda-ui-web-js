@@ -4,7 +4,7 @@ import { NavTemplates } from "../Templates/NavTemplates.ts";
 import { GenericTemplates, horizontal, vertical } from "../Templates/generic/GenericTemplates.ts";
 import { CacheItem } from "../Cache/CacheItem.ts";
 import { UserActions } from "../Actions/UserActions.ts";
-import { AnyNode, HtmlPropertyValue, isSignal, signal, Signal, StringOrSignal, when } from "@targoninc/jess";
+import { AnyNode, create, HtmlPropertyValue, isSignal, signal, Signal, StringOrSignal, when } from "@targoninc/jess";
 import { navigate } from "../Routing/Router.ts";
 import { currentUser, navInitialized, openMenus } from "../state.ts";
 import { NotificationType } from "../Enums/NotificationType.ts";
@@ -91,8 +91,12 @@ export class Ui {
         });
     }
 
-    static showImageModal(imageUrl: StringOrSignal, reportButton?: AnyNode) {
-        const children: AnyNode[] = [GenericTemplates.modalImage(imageUrl)];
+    static showImageModal(imageUrl: StringOrSignal, reportButton?: AnyNode, title?: StringOrSignal) {
+        const children: AnyNode[] = [];
+        if (title) {
+            children.push(create("h2").classes("wordwrap").text(title).build());
+        }
+        children.push(GenericTemplates.modalImage(imageUrl));
         if (reportButton) {
             children.push(horizontal(reportButton).build());
         }
