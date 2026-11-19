@@ -944,6 +944,18 @@ details > *:not(summary) {
 .fullWidth {
     width: 100% !important;
     max-width: 100% !important;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.statistics .flex,
+.statistics .flex-v {
+    min-width: 0;
+}
+
+.statistics .flex-v {
+    width: 100%;
+    max-width: 100%;
     box-sizing: border-box;
 }
 

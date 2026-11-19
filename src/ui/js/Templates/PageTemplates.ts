@@ -23,7 +23,7 @@ import {TrackTemplates} from "./music/TrackTemplates.ts";
 import {PlaylistTemplates} from "./music/PlaylistTemplates.ts";
 import {StatisticTemplates} from "./StatisticTemplates.ts";
 import {ParentGenreGroup} from "./generic/ParentGenreGroup.ts";
-import {notify} from "../Classes/Ui.ts";
+import {notify, Ui} from "../Classes/Ui.ts";
 import {NotificationType} from "../Enums/NotificationType.ts";
 import {Api} from "../Api/Api.ts";
 import {GenericTemplates, horizontal, tabSelected, vertical} from "./generic/GenericTemplates.ts";
@@ -120,7 +120,7 @@ export class PageTemplates {
                     }),
                 ).build()),
             when(compute(u => !!u, currentUser), () => {
-                const holder = create("div").build();
+                const holder = create("div").classes("fullWidth").build();
                 Promise.resolve(PageTemplates.mapping[page](route, params)).then(template => {
                     holder.appendChild(template);
                 });
@@ -199,6 +199,29 @@ export class PageTemplates {
                 savingBulk.value = false;
             }
         };
+        const deleteAlbum = (album: Album) => {
+            Ui.getConfirmationModal(
+                t("DELETE_ALBUM"),
+                t("SURE_DELETE_ALBUM"),
+                t("YES"),
+                t("NO"),
+                async () => {
+                    const success = await Api.deleteAlbum(album.id);
+                    if (!success) {
+                        notify(t("ERROR"), NotificationType.error);
+                        return;
+                    }
+                    albums.value = albums.value.filter(a => a.id !== album.id);
+                    const next = new Set(selectedIds.value);
+                    next.delete(album.id);
+                    selectedIds.value = next;
+                    notify(t("ALBUM_DELETED"), NotificationType.success);
+                },
+                () => {},
+                "delete",
+            );
+        };
+
         Api.getAlbumsByUserId(currentUser.value?.id ?? 0, "", 0, "")
             .then(d => albums.value = d?.items ?? [])
             .finally(() => loading.value = false);
@@ -302,6 +325,12 @@ export class PageTemplates {
                                             onclick: () => state.value = {...album},
                                         }),
                                     ).classes("align-children", "small-gap").build()),
+                                    horizontal(button({
+                                        text: t("DELETE_ALBUM"),
+                                        icon: {icon: "delete"},
+                                        classes: ["negative", "small", "rounded-max"],
+                                        onclick: () => deleteAlbum(album),
+                                    })).classes("align-end").build(),
                                 )
                             ).build(),
                     ).build();
@@ -356,6 +385,29 @@ export class PageTemplates {
                 savingBulk.value = false;
             }
         };
+        const deletePlaylist = (playlist: Playlist) => {
+            Ui.getConfirmationModal(
+                t("DELETE_PLAYLIST"),
+                t("SURE_DELETE_PLAYLIST"),
+                t("YES"),
+                t("NO"),
+                async () => {
+                    const success = await Api.deletePlaylist(playlist.id);
+                    if (!success) {
+                        notify(t("ERROR"), NotificationType.error);
+                        return;
+                    }
+                    playlists.value = playlists.value.filter(p => p.id !== playlist.id);
+                    const next = new Set(selectedIds.value);
+                    next.delete(playlist.id);
+                    selectedIds.value = next;
+                    notify(t("PLAYLIST_DELETED"), NotificationType.success);
+                },
+                () => {},
+                "delete",
+            );
+        };
+
         Api.getPlaylistsByUserId(currentUser.value?.id ?? 0, "", 0, "")
             .then(d => playlists.value = d?.items ?? [])
             .finally(() => loading.value = false);
@@ -454,6 +506,12 @@ export class PageTemplates {
                                             onclick: () => state.value = {...playlist},
                                         }),
                                     ).classes("align-children", "small-gap").build()),
+                                    horizontal(button({
+                                        text: t("DELETE_PLAYLIST"),
+                                        icon: {icon: "delete"},
+                                        classes: ["negative", "small", "rounded-max"],
+                                        onclick: () => deletePlaylist(playlist),
+                                    })).classes("align-end").build(),
                                 )
                             ).build(),
                     ).build();

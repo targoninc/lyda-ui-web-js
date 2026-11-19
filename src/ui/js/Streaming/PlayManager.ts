@@ -103,6 +103,9 @@ export class PlayManager {
             return;
         }
 
+        if (!resolved.id) {
+            return;
+        }
         await PlayManager.startAsync(resolved.id, true, resolved.force);
         PlayManager.applyQueueConsumption(resolved, currentId);
     }
@@ -297,6 +300,9 @@ export class PlayManager {
             return;
         }
         const nextId = shuffle ? nextQueue[Math.floor(Math.random() * nextQueue.length)] : nextQueue[0];
+        if (!nextId) {
+            return;
+        }
         await PlayManager.startAtBeginningAsync(nextId);
     }
 
@@ -482,6 +488,11 @@ export class PlayManager {
             return;
         }
 
+        if (!resolved.id) {
+            PlayManager.transitionInProgress = false;
+            return;
+        }
+
         if (resolved.id === prevId) {
             // Same track again (duplicate in queue): plain restart.
             PlayManager.transitionInProgress = false;
@@ -596,9 +607,14 @@ export class PlayManager {
     }
 
     static async startAsync(id: number, fromBeginning: boolean = false, force: boolean = false, version?: number, track?: Track) {
+        const trackId = Number(id);
+        if (!Number.isFinite(trackId) || trackId <= 0) {
+            loadingAudio.value = false;
+            return;
+        }
         loadingAudio.value = true;
         await PlayManager.stopAllAsync();
-        await PlayManager.startTrackAsync(id, fromBeginning, force, version, track);
+        await PlayManager.startTrackAsync(trackId, fromBeginning, force, version, track);
     }
 
     private static async startTrackAsync(id: number, fromBeginning: boolean, force: boolean, version?: number, track?: Track) {
@@ -897,15 +913,17 @@ export class PlayManager {
     }
 
     static async getTrackData(id: number, allowCache = true) {
-        if (trackInfo.value[id]?.track.user && allowCache) {
-            return trackInfo.value[id];
+        const trackId = Number(id);
+        if (!Number.isFinite(trackId) || trackId <= 0) {
+            console.warn("[PlayManager] getTrackData called without a valid track id", id);
+            return null;
         }
 
-        if (!id || id.toString().length === 0) {
-            throw new Error("id is missing");
+        if (trackInfo.value[trackId]?.track.user && allowCache) {
+            return trackInfo.value[trackId];
         }
 
-        const data = await get<TrackDetailResponse>(ApiRoutes.getTrackById, {id, code: getTrackSecretCode(id)});
+        const data = await get<TrackDetailResponse>(ApiRoutes.getTrackById, {id: trackId, code: getTrackSecretCode(trackId)});
         if (data) {
             await PlayManager.cacheTrackData(data);
         }

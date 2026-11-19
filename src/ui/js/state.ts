@@ -56,7 +56,10 @@ currentUser.subscribe(u => {
                             loopMode.value = entry.value ?? loopMode.value;
                             break;
                         case UserCacheKey.lastTrackId:
-                            currentTrackId.value = Number(entry.value ?? "0");
+                            {
+                                const cachedTrackId = Number(entry.value ?? "0");
+                                currentTrackId.value = Number.isFinite(cachedTrackId) && cachedTrackId > 0 ? cachedTrackId : 0;
+                            }
 
                             if (currentTrackId.value !== 0) {
                                 PlayManager.initializeTrackAsync(currentTrackId.value).then(async () => {
@@ -81,7 +84,8 @@ currentUser.subscribe(u => {
     }
 });
 
-export const currentTrackId = signal(LydaCache.get<number>(UserCacheKey.lastTrackId).content ?? 0);
+const cachedTrackId = Number(LydaCache.get<number>(UserCacheKey.lastTrackId).content ?? 0);
+export const currentTrackId = signal<number>(Number.isFinite(cachedTrackId) && cachedTrackId > 0 ? cachedTrackId : 0);
 let previousTrackId = currentTrackId.value;
 if (previousTrackId) {
     InteractionStateManager.addContext(EntityType.track, previousTrackId, "player");

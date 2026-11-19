@@ -324,7 +324,9 @@ export class AlbumTemplates {
 
     static albumPage(route: Route, params: Record<string, string>) {
         const albumId = parseInt(params.id);
-        InteractionStateManager.addContext(EntityType.album, albumId, "page");
+        if (Number.isFinite(albumId)) {
+            InteractionStateManager.addContext(EntityType.album, albumId, "page");
+        }
         const data = signal<{ album: Album | null, canEdit: boolean, canBuy: boolean, canDownload: boolean }>({
             album: null,
             canEdit: false,
@@ -333,14 +335,22 @@ export class AlbumTemplates {
         });
         const loading = signal(true);
         const reload = () => {
-            Api.getAlbumById(parseInt(params.id)).then(async res => {
-                if (res) {
+            Api.getAlbumById(albumId).then(async res => {
+                if (res?.album) {
                     data.value = res;
                     document.title = res.album.title;
 
                     BuyTemplates.handlePurchaseSuccessIfPresent(params, {type: "album", entity: res.album});
                     return;
                 }
+                data.value = {
+                    album: null,
+                    canEdit: false,
+                    canBuy: false,
+                    canDownload: false,
+                };
+            }).catch(error => {
+                console.error("[AlbumTemplates] Could not load album", error);
                 data.value = {
                     album: null,
                     canEdit: false,

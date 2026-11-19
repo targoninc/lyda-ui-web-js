@@ -47,6 +47,39 @@ function describeError(error: unknown): Record<string, unknown> {
     return {value: String(error)};
 }
 
+const networkErrorFragments = [
+    "networkerror",
+    "failed to fetch",
+    "load failed",
+    "network request failed",
+    "network connection was lost",
+    "internet connection appears to be offline",
+    "net::err_",
+    "err_internet_disconnected",
+    "err_network_changed",
+    "err_connection_refused",
+    "err_name_not_resolved",
+    "err_timed_out",
+];
+
+function isNetworkError(error: unknown): boolean {
+    const name = error && typeof error === "object" && "name" in error
+        ? String((error as {name?: unknown}).name ?? "").toLowerCase()
+        : "";
+    if (name === "networkerror") {
+        return true;
+    }
+
+    let details = "";
+    try {
+        details = JSON.stringify(describeError(error));
+    } catch {
+        // Ignore non-serializable error details while checking the message.
+    }
+    const text = `${errorMessage(error)} ${details}`.toLowerCase();
+    return networkErrorFragments.some(fragment => text.includes(fragment));
+}
+
 function errorMessage(error: unknown): string {
     if (typeof error === "string") {
         return error;
@@ -70,6 +103,10 @@ export function recordClientBreadcrumb(message: string): void {
 }
 
 export async function reportClientError(error: unknown, context: Record<string, unknown> = {}): Promise<void> {
+    if (isNetworkError(error)) {
+        return;
+    }
+
     const message = errorMessage(error);
     const details = {
         ...describeError(error),
