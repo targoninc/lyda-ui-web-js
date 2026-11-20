@@ -512,6 +512,7 @@ export const de: Translation = {
     NOTIFICATION_NONE: "Keine",
     NOTIFICATION_IN_APP: "In-App",
     NOTIFICATION_IN_APP_EMAIL: "In-App + E-Mail",
+    NOTIFICATION_MIXED: "Gemischt",
     MY_PERMISSIONS: "Meine Berechtigungen",
     ACCOUNT: "Konto",
     LANGUAGE: "Sprache",

@@ -150,17 +150,21 @@ export class UserActions {
     }
 
     static async setNotificationPreference(key: string, state: number) {
+        return await UserActions.setNotificationPreferences([key], state);
+    }
+
+    static async setNotificationPreferences(keys: string[], state: number) {
         const user = await Util.getUserAsync();
-        const emailKey = `notification_${key}` as UserSettings;
-        const inAppKey = `notification_${key}_in_app` as UserSettings;
         const inApp = state >= 1;
         const email = state >= 2;
-        await Promise.all([
-            Api.updateUserSetting(inAppKey, inApp),
-            Api.updateUserSetting(emailKey, email),
+        const settings = keys.flatMap(key => [
+            {key: `notification_${key}_in_app` as UserSettings, value: inApp},
+            {key: `notification_${key}` as UserSettings, value: email},
         ]);
-        user.settings = updateUserSetting(user, inAppKey, inApp.toString());
-        user.settings = updateUserSetting(user, emailKey, email.toString());
+        await Promise.all(settings.map(setting => Api.updateUserSetting(setting.key, setting.value)));
+        for (const setting of settings) {
+            user.settings = updateUserSetting(user, setting.key, setting.value.toString());
+        }
         LydaCache.set("user", new CacheItem(user));
         currentUser.value = user;
         return true;

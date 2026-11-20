@@ -1578,6 +1578,11 @@ input.jessc-slider:checked ~ .jessc-toggle-container .jessc-toggle-slider {
     padding-left: calc(var(--layout-gap) * 1.5);
 }
 
+.notification-preference-slider {
+    width: 100%;
+    max-width: 300px;
+}
+
 .settings-nav input {
     width: 100%;
     box-sizing: border-box;

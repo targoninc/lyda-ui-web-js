@@ -19,6 +19,7 @@ export const es: Translation = {
     NOTIFICATION_NONE: "Ninguna",
     NOTIFICATION_IN_APP: "En la app",
     NOTIFICATION_IN_APP_EMAIL: "En la app + correo electrónico",
+    NOTIFICATION_MIXED: "Mixto",
     BEHAVIOUR: "Comportamiento",
     UI_THEME: "Tema de interfaz",
     STREAMING_QUALITY: "Calidad de transmisión",

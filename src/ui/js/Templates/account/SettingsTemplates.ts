@@ -415,7 +415,10 @@ export class SettingsTemplates {
                 .children(
                     SettingsTemplates.sectionHeading(heading),
                     ...matchingGroups.flatMap(group => [
-                        create("span").classes("bold", TextSize.large).text(group.heading).build(),
+                        horizontal(
+                            create("span").classes("bold", TextSize.large).text(group.heading).build(),
+                            SettingsTemplates.notificationGroupPreferenceSlider(group.items),
+                        ).classes("align-children", "space-between", "fullWidth", "small-gap").build(),
                         create("div")
                             .classes("flex-v", "notification-group-items")
                             .children(...group.items.map(item => SettingsTemplates.notificationPreferenceSlider(item.text, item.key)))
@@ -426,21 +429,16 @@ export class SettingsTemplates {
     }
 
     static notificationPreferenceSlider(text: StringOrSignal, key: string) {
-        const emailKey = `notification_${key}` as UserSettings;
-        const inAppKey = `notification_${key}_in_app` as UserSettings;
+        const [emailKey, inAppKey] = SettingsTemplates.notificationPreferenceKeys(key);
         const state = signal(SettingsTemplates.notificationPreferenceState(currentUser.value, emailKey, inAppKey));
 
         currentUser.subscribe((user: User | null) => {
             state.value = SettingsTemplates.notificationPreferenceState(user, emailKey, inAppKey);
         });
 
-        const display = compute((value): string => value === 2
-            ? t("NOTIFICATION_IN_APP_EMAIL")
-            : value === 1
-                ? t("NOTIFICATION_IN_APP")
-                : t("NOTIFICATION_NONE"), state);
+        const display = compute((value): string => SettingsTemplates.notificationPreferenceLabel(value), state);
 
-        return GenericTemplates.steppedSlider(text, 0, 2, 1, state, async value => {
+        const slider = GenericTemplates.steppedSlider(text, 0, 2, 1, state, async value => {
             const previous = state.value;
             state.value = value;
             try {
@@ -449,6 +447,59 @@ export class SettingsTemplates {
                 state.value = previous;
             }
         }, display);
+
+        return create("div").classes("notification-preference-slider").children(slider).build();
+    }
+
+    static notificationGroupPreferenceSlider(items: { key: string }[]) {
+        const mixed = signal(false);
+        const state = signal(1);
+
+        const sync = (user: User | null) => {
+            const values = items.map(item => {
+                const [emailKey, inAppKey] = SettingsTemplates.notificationPreferenceKeys(item.key);
+                return SettingsTemplates.notificationPreferenceState(user, emailKey, inAppKey);
+            });
+            const allEqual = values.every(value => value === values[0]);
+            mixed.value = !allEqual;
+            state.value = allEqual ? values[0] : 1;
+        };
+
+        sync(currentUser.value);
+        currentUser.subscribe(sync);
+
+        const display = compute((value, isMixed): string => isMixed
+            ? t("NOTIFICATION_MIXED")
+            : SettingsTemplates.notificationPreferenceLabel(value), state, mixed);
+
+        const slider = GenericTemplates.steppedSlider(t("ALL"), 0, 2, 1, state, async value => {
+            const previous = {state: state.value, mixed: mixed.value};
+            state.value = value;
+            mixed.value = false;
+            try {
+                await UserActions.setNotificationPreferences(items.map(item => item.key), value);
+            } catch {
+                state.value = previous.state;
+                mixed.value = previous.mixed;
+            }
+        }, display);
+
+        return create("div").classes("notification-preference-slider").children(slider).build();
+    }
+
+    private static notificationPreferenceKeys(key: string): [UserSettings, UserSettings] {
+        return [
+            `notification_${key}` as UserSettings,
+            `notification_${key}_in_app` as UserSettings,
+        ];
+    }
+
+    private static notificationPreferenceLabel(value: number): string {
+        return value === 2
+            ? t("NOTIFICATION_IN_APP_EMAIL")
+            : value === 1
+                ? t("NOTIFICATION_IN_APP")
+                : t("NOTIFICATION_NONE");
     }
 
     private static notificationPreferenceState(user: User | null, emailKey: UserSettings, inAppKey: UserSettings): number {

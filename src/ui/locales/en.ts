@@ -19,6 +19,7 @@ export const en = {
     NOTIFICATION_NONE: "None",
     NOTIFICATION_IN_APP: "In-app",
     NOTIFICATION_IN_APP_EMAIL: "In-app + email",
+    NOTIFICATION_MIXED: "Mixed",
     BEHAVIOUR: "Behaviour",
     UI_THEME: "Interface theme",
     STREAMING_QUALITY: "Streaming quality",

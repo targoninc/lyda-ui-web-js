@@ -19,6 +19,7 @@ export const ga: Translation = {
     NOTIFICATION_NONE: "Neamhní",
     NOTIFICATION_IN_APP: "San aip",
     NOTIFICATION_IN_APP_EMAIL: "San aip + ríomhphost",
+    NOTIFICATION_MIXED: "Measctha",
     BEHAVIOUR: "Iompar",
     UI_THEME: "Téama comhéadan",
     STREAMING_QUALITY: "Cáilíocht sruthú",
