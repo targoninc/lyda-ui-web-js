@@ -660,6 +660,10 @@ export class Api {
         return await get<TrackDetailResponse>(ApiRoutes.getTrackById, { id: id.toString(), code });
     }
 
+    static async rotateTrackSecretCode(id: number): Promise<{secretcode: string}> {
+        return await post<{secretcode: string}>(ApiRoutes.rotateTrackSecretCode, {id});
+    }
+
     static async updateTrackFull(track: Partial<Track>): Promise<any> {
         await post(ApiRoutes.updateTrackFull, {
             id: track.id,

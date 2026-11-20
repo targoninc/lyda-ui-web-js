@@ -1,4 +1,4 @@
-import {notify} from "../../Classes/Ui.ts";
+import {notify, Ui} from "../../Classes/Ui.ts";
 import {NotificationType} from "../../Enums/NotificationType.ts";
 import {TrackActions} from "../../Actions/TrackActions.ts";
 import {UserTemplates} from "../account/UserTemplates.ts";
@@ -476,6 +476,7 @@ export class TrackTemplates {
         const collaborators = track.collaborators ?? [];
         const linkedUserState = signal(collaborators);
         const track$ = signal(track as Track | UploadableTrack);
+        const secretCode$ = signal(track.secretcode);
 
         const icons: (AnyElement | Signal<AnyElement>)[] = [];
         const isPrivate = track.visibility === "private";
@@ -652,7 +653,7 @@ export class TrackTemplates {
                                             })),
                                         ).classes("align-children").build(),
                                     ),
-                                    when(hasMenu, TrackTemplates.trackMenu(isPrivate, track, trackData, !isUploader)),
+                                    when(hasMenu, TrackTemplates.trackMenu(isPrivate, track, trackData, !isUploader, secretCode$)),
                                 ).classes("align-end"),
                                 GenericTemplates.combinedSelector(tabs, (newTabIndex) => selectedTab$.value = newTabIndex, 0),
                             ).classes("space-between", "align-children", "track-tabs-row"),
@@ -896,11 +897,31 @@ export class TrackTemplates {
             .build();
     }
 
-    static copyPrivateLinkButton(id: number, code: string) {
+    static copyPrivateLinkButton(id: number, code: Signal<string>) {
         return button({
             text: t("COPY_PRIVATE_LINK"),
             icon: {icon: "link"},
-            onclick: async () => copy(window.location.origin + "/track/" + id + "/" + code),
+            onclick: async () => copy(window.location.origin + "/track/" + id + "/" + code.value),
+        });
+    }
+
+    static rotateSecretCodeButton(id: number, code: Signal<string>) {
+        return button({
+            text: t("ROTATE_SECRET_CODE"),
+            icon: {icon: "key"},
+            onclick: () => Ui.getConfirmationModal(
+                t("ROTATE_SECRET_CODE"),
+                t("ROTATE_SECRET_CODE_CONFIRM"),
+                t("ROTATE_SECRET_CODE"),
+                t("CANCEL"),
+                async () => {
+                    const result = await Api.rotateTrackSecretCode(id);
+                    code.value = result.secretcode;
+                    notify(t("SECRET_CODE_ROTATED"), NotificationType.success);
+                },
+                () => {},
+                "key",
+            ),
         });
     }
 
@@ -952,7 +973,7 @@ export class TrackTemplates {
         return path;
     }
 
-    private static trackMenu(isPrivate: boolean, track: Track, trackData: any, canReport: boolean) {
+    private static trackMenu(isPrivate: boolean, track: Track, trackData: any, canReport: boolean, secretCode$: Signal<string>) {
         const popId = `track-menu-${track.id}`;
         const versions = (trackData.versions ?? []) as any[];
         const latestVersionIdx = trackData.latestVersion;
@@ -963,6 +984,7 @@ export class TrackTemplates {
                     TrackEditTemplates.addToAlbumsButton(track),
                     TrackEditTemplates.replaceAudioButton(track, latestVersionIdx, versionCount),
                     TrackEditTemplates.editVersionsButton(track, versions),
+                    when(isPrivate, TrackTemplates.rotateSecretCodeButton(track.id, secretCode$)),
                     TrackEditTemplates.openEditPageButton(track),
                     TrackEditTemplates.deleteTrackButton(track.id),
                 ).build()),
@@ -977,7 +999,7 @@ export class TrackTemplates {
             "Show menu");
 
         return horizontal(
-            when(isPrivate, TrackTemplates.copyPrivateLinkButton(track.id, track.secretcode)),
+            when(isPrivate, TrackTemplates.copyPrivateLinkButton(track.id, secretCode$)),
             btn,
             popover,
         ).classes("relative", "align-children").build();
