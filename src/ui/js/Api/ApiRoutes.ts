@@ -90,6 +90,7 @@ export class ApiRoutes {
     static deleteTrackVersion = ApiRoutes.tracksActions + "/deleteVersion";
     static reorderTrackVersions = ApiRoutes.tracksActions + "/reorderVersions";
     static updateTrackFull = ApiRoutes.tracksActions + "/updateFull";
+    static rotateTrackSecretCode = ApiRoutes.tracksActions + "/rotateSecretCode";
     static removeCollaborator = ApiRoutes.tracksActions + "/removeCollaborator";
     static addCollaborator = ApiRoutes.tracksActions + "/addCollaborator";
     static approveCollab = ApiRoutes.tracksActions + "/approveCollab";
