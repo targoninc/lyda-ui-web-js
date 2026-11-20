@@ -149,18 +149,18 @@ export class UserActions {
         return await UserActions.toggleBooleanUserSetting(hideWaveformsSetting);
     }
 
-    static async toggleNotificationSetting(key: string) {
-        const settingKey = `notification_${key}` as UserSettings;
-        return await UserActions.toggleBooleanUserSetting(settingKey);
-    }
-
-    static async setNotificationSettings(keys: string[], value: boolean) {
+    static async setNotificationPreference(key: string, state: number) {
         const user = await Util.getUserAsync();
-        const settingKeys = keys.map(key => `notification_${key}` as UserSettings);
-        await Promise.all(settingKeys.map(key => Api.updateUserSetting(key, value)));
-        for (const key of settingKeys) {
-            user.settings = updateUserSetting(user, key, value.toString());
-        }
+        const emailKey = `notification_${key}` as UserSettings;
+        const inAppKey = `notification_${key}_in_app` as UserSettings;
+        const inApp = state >= 1;
+        const email = state >= 2;
+        await Promise.all([
+            Api.updateUserSetting(inAppKey, inApp),
+            Api.updateUserSetting(emailKey, email),
+        ]);
+        user.settings = updateUserSetting(user, inAppKey, inApp.toString());
+        user.settings = updateUserSetting(user, emailKey, email.toString());
         LydaCache.set("user", new CacheItem(user));
         currentUser.value = user;
         return true;

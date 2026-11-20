@@ -70,6 +70,7 @@ export class SettingsTemplates {
         "streaming-quality": "edit_audio",
         "behaviour": "tune",
         "e-mail-notifications": "notifications",
+        "notifications": "notifications",
         "other": "more_horiz",
         "links": "link",
         "discography": "album",
@@ -95,7 +96,7 @@ export class SettingsTemplates {
             {heading: () => t("LANGUAGE"), id: SettingsTemplates.sectionId(t("LANGUAGE"))},
             {heading: () => t("STREAMING_QUALITY"), id: SettingsTemplates.sectionId(t("STREAMING_QUALITY"))},
             {heading: () => t("BEHAVIOUR"), id: SettingsTemplates.sectionId(t("BEHAVIOUR"))},
-            {heading: () => t("EMAIL_NOTIFICATIONS"), id: SettingsTemplates.sectionId(t("EMAIL_NOTIFICATIONS"))},
+            {heading: () => t("NOTIFICATIONS"), id: SettingsTemplates.sectionId(t("NOTIFICATIONS"))},
             {heading: () => t("DISCOGRAPHY"), id: SettingsTemplates.sectionId(t("DISCOGRAPHY"))},
             {heading: () => t("OTHER"), id: SettingsTemplates.sectionId(t("OTHER"))},
             {heading: () => t("LINKS"), id: SettingsTemplates.sectionId(t("LINKS"))},
@@ -369,7 +370,7 @@ export class SettingsTemplates {
     }
 
     static notificationsSection(user: User, searchQuery$: Signal<string>) {
-        const heading = t("EMAIL_NOTIFICATIONS");
+        const heading = t("NOTIFICATIONS");
         const groups = [
             {
                 heading: t("NOTIFS_MY_CONTENT"),
@@ -413,44 +414,52 @@ export class SettingsTemplates {
                 .classes("card", "flex-v")
                 .children(
                     SettingsTemplates.sectionHeading(heading),
-                    ...matchingGroups.flatMap(group => {
-                        const checked = compute(
-                            (currentUserValue: User | null): boolean => !!currentUserValue &&
-                                group.items.every(item => !!getUserSettingValue(currentUserValue, item.value)),
-                            currentUser,
-                        );
-                        return [
-                            horizontal(
-                                GenericTemplates.toggle(
-                                    "",
-                                    `notification_group_${group.heading.value.trim().replaceAll(/\s+/g, "-").toLowerCase()}`,
-                                    async () => await UserActions.setNotificationSettings(
-                                        group.items.map(item => item.key),
-                                        !checked.value,
-                                    ),
-                                    ["notification-group-toggle"],
-                                    checked,
-                                ),
-                                create("span").classes("bold", TextSize.large).text(group.heading),
-                            ).classes("align-children", "small-gap").build(),
-                            create("div")
-                                .classes("flex-v", "notification-group-items")
-                                .children(...group.items.map(item => SettingsTemplates.notificationToggle(item.text, item.key)))
-                                .build(),
-                        ];
-                    }),
+                    ...matchingGroups.flatMap(group => [
+                        create("span").classes("bold", TextSize.large).text(group.heading).build(),
+                        create("div")
+                            .classes("flex-v", "notification-group-items")
+                            .children(...group.items.map(item => SettingsTemplates.notificationPreferenceSlider(item.text, item.key)))
+                            .build(),
+                    ]),
                 ).build();
         }, searchQuery$);
     }
 
-    static notificationToggle(text: StringOrSignal, key: string) {
-        const settingKey = `notification_${key}` as UserSettings;
-        const checked = compute(
-            (user: User | null): boolean => user ? !!getUserSettingValue(user, settingKey) : false,
-            currentUser,
-        );
-        return GenericTemplates.toggle(text, "notification_" + key, async () =>
-            await UserActions.toggleNotificationSetting(key), [], checked);
+    static notificationPreferenceSlider(text: StringOrSignal, key: string) {
+        const emailKey = `notification_${key}` as UserSettings;
+        const inAppKey = `notification_${key}_in_app` as UserSettings;
+        const state = signal(SettingsTemplates.notificationPreferenceState(currentUser.value, emailKey, inAppKey));
+
+        currentUser.subscribe((user: User | null) => {
+            state.value = SettingsTemplates.notificationPreferenceState(user, emailKey, inAppKey);
+        });
+
+        const display = compute((value): string => value === 2
+            ? t("NOTIFICATION_IN_APP_EMAIL")
+            : value === 1
+                ? t("NOTIFICATION_IN_APP")
+                : t("NOTIFICATION_NONE"), state);
+
+        return GenericTemplates.steppedSlider(text, 0, 2, 1, state, async value => {
+            const previous = state.value;
+            state.value = value;
+            try {
+                await UserActions.setNotificationPreference(key, value);
+            } catch {
+                state.value = previous;
+            }
+        }, display);
+    }
+
+    private static notificationPreferenceState(user: User | null, emailKey: UserSettings, inAppKey: UserSettings): number {
+        if (!user) {
+            return 1;
+        }
+        const inApp = getUserSettingValue(user, inAppKey) !== false;
+        if (!inApp) {
+            return 0;
+        }
+        return getUserSettingValue(user, emailKey) ? 2 : 1;
     }
 
     static behaviourSection(user: User, searchQuery$: Signal<string>) {
