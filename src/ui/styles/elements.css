@@ -1593,6 +1593,14 @@ input.jessc-slider:checked ~ .jessc-toggle-container .jessc-toggle-slider {
 
 .notification-preference-slider .pretty-slider-label {
     grid-area: label;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.notification-preference-slider .pretty-slider-label-icon {
+    color: var(--fg-2);
+    font-size: 1.15em;
 }
 
 .notification-preference-slider .pretty-slider-control {

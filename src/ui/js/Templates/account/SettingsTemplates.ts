@@ -76,6 +76,23 @@ export class SettingsTemplates {
         "discography": "album",
     };
 
+    private static notificationIcons: Record<string, string> = {
+        like: "favorite",
+        comment_like: "thumb_up",
+        comment: "comment",
+        reply: "reply",
+        follow: "person_add",
+        repost: "repeat",
+        collaboration: "handshake",
+        sale: "payments",
+        track_deleted: "music_off",
+        new_track: "music_note",
+        new_album: "album",
+        new_playlist: "queue_music",
+        track_published: "public",
+        followed_repost: "repeat",
+    };
+
     static settingsPage() {
         const user = currentUser.value;
         if (!user) {
@@ -415,10 +432,10 @@ export class SettingsTemplates {
                 .children(
                     SettingsTemplates.sectionHeading(heading),
                     ...matchingGroups.flatMap(group => [
-                        horizontal(
+                        vertical(
                             create("span").classes("bold", TextSize.large).text(group.heading).build(),
                             SettingsTemplates.notificationGroupPreferenceSlider(group.items),
-                        ).classes("align-children", "space-between", "fullWidth", "small-gap").build(),
+                        ).classes("small-gap").build(),
                         create("div")
                             .classes("flex-v", "notification-group-items")
                             .children(...group.items.map(item => SettingsTemplates.notificationPreferenceSlider(item.text, item.key)))
@@ -446,7 +463,7 @@ export class SettingsTemplates {
             } catch {
                 state.value = previous;
             }
-        }, display);
+        }, display, SettingsTemplates.notificationIcons[key]);
 
         return create("div").classes("notification-preference-slider").children(slider).build();
     }
