@@ -384,7 +384,7 @@ export class PlayerTemplates {
                                 if (windowWidth < 600) {
                                     navigate(`${RoutePath.track}/` + track.id);
                                 } else {
-                                    Ui.showImageModal(cover);
+                                    Ui.showImageModal(cover, undefined, track.visual_artist ? `${t("VISUAL_ARTIST")}: ${track.visual_artist}` : undefined);
                                 }
                             }),
                         ).classes("hideOnSmallBreakpoint"),
@@ -704,7 +704,7 @@ export class PlayerTemplates {
                         if (windowWidth < 600) {
                             navigate(`${RoutePath.track}/` + track.id);
                         } else {
-                            Ui.showImageModal(cover);
+                            Ui.showImageModal(cover, undefined, track.visual_artist ? `${t("VISUAL_ARTIST")}: ${track.visual_artist}` : undefined);
                         }
                     }),
                 ).classes("align-center"),
