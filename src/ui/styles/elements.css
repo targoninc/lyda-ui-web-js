@@ -1583,6 +1583,28 @@ input.jessc-slider:checked ~ .jessc-toggle-container .jessc-toggle-slider {
     max-width: 300px;
 }
 
+.notification-preference-slider .pretty-slider {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+        "label value"
+        "control control";
+    gap: 2px var(--layout-gap);
+}
+
+.notification-preference-slider .pretty-slider-label {
+    grid-area: label;
+}
+
+.notification-preference-slider .pretty-slider-control {
+    grid-area: control;
+    min-width: 0;
+}
+
+.notification-preference-slider .pretty-slider-value {
+    grid-area: value;
+    white-space: nowrap;
+}
+
 .settings-nav input {
     width: 100%;
     box-sizing: border-box;
