@@ -1008,6 +1008,7 @@ export class GenericTemplates {
         value: Signal<number>,
         onchange: (v: number) => void,
         displayValueUnderneath?: StringOrSignal,
+        labelIcon?: StringOrSignal,
     ) {
         const steps = (max - min) / step;
         const currentStep = compute(v => Math.round((v - min) / step), value);
@@ -1035,7 +1036,10 @@ export class GenericTemplates {
         return create("div")
             .classes("pretty-slider")
             .children(
-                create("span").classes("pretty-slider-label").text(label).build(),
+                create("span").classes("pretty-slider-label").children(
+                    labelIcon ? GenericTemplates.icon(labelIcon, true, ["pretty-slider-label-icon"]) : null,
+                    create("span").text(label).build(),
+                ).build(),
                 create("div")
                     .classes("pretty-slider-control")
                     .children(
