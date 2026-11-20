@@ -407,8 +407,7 @@ export class AlbumTemplates {
 
         return horizontal(
             when(currentUser, horizontal(
-                horizontal(
-                    when(hasTracks, button({
+                when(hasTracks, button({
                     text: playText,
                     icon: {
                         icon: playIcon,
@@ -444,7 +443,6 @@ export class AlbumTemplates {
                         await PlaylistActions.openAddToPlaylistModal(album, "album");
                     },
                 }),
-                ).classes("align-children", "nogap"),
                 when(canBuy && paymentsEnabled.value, button({
                     icon: { icon: "attach_money" },
                     text: t("BUY"),
@@ -468,7 +466,7 @@ export class AlbumTemplates {
                         }, Icons.WARNING);
                     },
                 })),
-            ).classes("align-children", "small-gap").build()),
+            ).classes("align-children").build()),
         ).build();
     }
 
