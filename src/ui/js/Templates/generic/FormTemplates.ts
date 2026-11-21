@@ -41,7 +41,7 @@ export class FormTemplates {
 
     static textField(title: StringOrSignal, name: StringOrSignal, placeholder: StringOrSignal, type = "text", value: StringOrSignal = "", required = false, onchange: Function = (val: string) => {
     }, autofocus = false, onkeydown: Function = () => {
-    }, classes: StringOrSignal[] = []) {
+    }, classes: StringOrSignal[] = [], autocomplete?: string) {
         return input<string>({
             type: type as InputType,
             name,
@@ -50,7 +50,7 @@ export class FormTemplates {
             value,
             required,
             onchange: onchange as (v: string) => void,
-            attributes: ["autocomplete", name],
+            attributes: ["autocomplete", autocomplete ?? name],
             autofocus,
             onkeydown,
             classes

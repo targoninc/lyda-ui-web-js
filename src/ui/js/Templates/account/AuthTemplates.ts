@@ -578,76 +578,84 @@ export class AuthTemplates {
         const email = compute((u: AuthData) => u.email, user);
         const password = compute((u: AuthData) => u.password, user);
 
+        const form = create("form")
+            .classes("flex-v")
+            .attribute("autocomplete", "on")
+            .onsubmit((event: Event) => {
+                event.preventDefault();
+                continueLogin();
+            })
+            .children(
+                input<string>({
+                    type: InputType.email,
+                    name: "username",
+                    label: t("EMAIL"),
+                    placeholder: t("EMAIL"),
+                    value: email,
+                    required: true,
+                    attributes: ["autocomplete", "username", "autocapitalize", "none", "autocorrect", "off", "spellcheck", "false"],
+                    onchange: value => {
+                        AuthApi.userExists(
+                            value,
+                            () => {
+                                user.value = {
+                                    ...user.value,
+                                    email: value,
+                                };
+                            },
+                            () => {
+                                errors.value = [
+                                    `${t("ERROR_EMAIL_NOT_REGISTERED")}`,
+                                ];
+                            },
+                        );
+                    },
+                }),
+                AuthTemplates.passwordInput(
+                    password,
+                    user,
+                    () => {},
+                    true,
+                    "current-password",
+                ),
+                button({
+                    text: t("LOGIN"),
+                    id: "mfaCheckTrigger",
+                    disabled: compute(
+                        u =>
+                            !u.email ||
+                            !u.password ||
+                            u.email.trim().length === 0 ||
+                            u.password.trim().length === 0,
+                        user,
+                    ),
+                    icon: {
+                        icon: "login",
+                        adaptive: true,
+                    },
+                    classes: ["secondary", "positive"],
+                    attributes: ["type", "submit"],
+                }),
+                errorList(errors),
+                GenericTemplates.inlineLink(
+                    () => {
+                        step.value = "reset-password";
+                    },
+                    t("CHANGE_FORGOT_PASSWORD"),
+                    false,
+                ),
+                GenericTemplates.inlineLink(() => {
+                    step.value = "register";
+                }, t("REGISTER_INSTEAD")),
+            ).build();
+
         return create("div")
             .classes("flex-v")
             .children(
                 create("h1")
                     .text(t("LOGIN"))
                     .build(),
-                create("div")
-                    .classes("flex-v")
-                    .children(
-                        input<string>({
-                            type: InputType.text,
-                            name: "email",
-                            label: t("EMAIL"),
-                            placeholder: t("EMAIL"),
-                            value: email,
-                            required: true,
-                            attributes: ["autocomplete", "email"],
-                            onchange: value => {
-                                AuthApi.userExists(
-                                    value,
-                                    () => {
-                                        user.value = {
-                                            ...user.value,
-                                            email: value,
-                                        };
-                                    },
-                                    () => {
-                                        errors.value = [
-                                            `${t("ERROR_EMAIL_NOT_REGISTERED")}`,
-                                        ];
-                                    },
-                                );
-                            },
-                        }),
-                        AuthTemplates.passwordInput(
-                            password,
-                            user,
-                            () => (step.value = "check-mfa"),
-                            true,
-                        ),
-                        button({
-                            text: t("LOGIN"),
-                            id: "mfaCheckTrigger",
-                            disabled: compute(
-                                u =>
-                                    !u.email ||
-                                    !u.password ||
-                                    u.email.trim().length === 0 ||
-                                    u.password.trim().length === 0,
-                                user,
-                            ),
-                            onclick: continueLogin,
-                            icon: {
-                                icon: "login",
-                                adaptive: true,
-                            },
-                            classes: ["secondary", "positive"],
-                        }),
-                        errorList(errors),
-                        GenericTemplates.inlineLink(
-                            () => {
-                                step.value = "reset-password";
-                            },
-                            t("CHANGE_FORGOT_PASSWORD"),
-                            false,
-                        ),
-                        GenericTemplates.inlineLink(() => {
-                            step.value = "register";
-                        }, t("REGISTER_INSTEAD")),
-                    ).build(),
+                form,
             ).build();
     }
 
@@ -737,13 +745,13 @@ export class AuthTemplates {
                 create("div")
                     .classes("flex-v")
                     .children(
-                        AuthTemplates.passwordInput(password, user),
+                        AuthTemplates.passwordInput(password, user, () => {}, false, "new-password"),
                         input<string>({
                             type: InputType.password,
-                            name: "password-confirm",
+                            name: "new-password-confirm",
                             label: t("CONFIRM_PASSWORD"),
                             placeholder: t("CONFIRM_PASSWORD"),
-                            attributes: ["autocomplete", "password"],
+                            attributes: ["autocomplete", "new-password"],
                             value: passwordConfirm,
                             required: true,
                             onchange: value => {
@@ -806,6 +814,7 @@ export class AuthTemplates {
         onEnter: Function = () => {
         },
         focusImmediately = false,
+        autocomplete = "current-password",
     ) {
         setTimeout(() => {
             if (focusImmediately) {
@@ -821,7 +830,7 @@ export class AuthTemplates {
             placeholder: t("PASSWORD"),
             value: password,
             required: true,
-            attributes: ["autocomplete", "password"],
+            attributes: ["autocomplete", autocomplete],
             onchange: value => {
                 user.value = {
                     ...user.value,
@@ -1042,10 +1051,11 @@ export class AuthTemplates {
                             () => {
                             },
                             ["flex-grow"],
+                            "new-password",
                         ),
                         FormTemplates.textField(
                             t("REPEAT_PASSWORD"),
-                            "password",
+                            "password2",
                             t("REPEAT_PASSWORD"),
                             "password",
                             user.value.password2,
@@ -1064,6 +1074,7 @@ export class AuthTemplates {
                             () => {
                             },
                             ["flex-grow"],
+                            "new-password",
                         ),
                         FormTemplates.checkBoxField("tos-checkbox", t("AGREE_TO_TOS"), false, true,
                             () => {
@@ -1131,9 +1142,10 @@ export class AuthTemplates {
                                 .classes("flex", "space-between")
                                 .children(
                                     input<string>({
-                                        type: InputType.text,
-                                        name: "email",
+                                        type: InputType.email,
+                                        name: "username",
                                         placeholder: t("EMAIL"),
+                                        attributes: ["autocomplete", "username", "autocapitalize", "none", "autocorrect", "off", "spellcheck", "false"],
                                         value: user.value.email,
                                         required: true,
                                         classes: ["bigger-input", "rounded-max"],
@@ -1153,16 +1165,6 @@ export class AuthTemplates {
                                             }
                                         },
                                     }),
-                                    create("input")
-                                        .classes("hidden")
-                                        .name("password")
-                                        .type(InputType.password)
-                                        .onchange(e => {
-                                            user.value = {
-                                                ...user.value,
-                                                password: target(e).value,
-                                            };
-                                        }).build(),
                                 ).build(),
                             button({
                                 text: t("NEXT"),
