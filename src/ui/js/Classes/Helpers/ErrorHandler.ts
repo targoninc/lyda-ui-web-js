@@ -47,6 +47,12 @@ function describeError(error: unknown): Record<string, unknown> {
     return {value: String(error)};
 }
 
+const rateLimitErrorFragments = [
+    "too many requests",
+    "rate limit exceeded",
+    "rate limited",
+];
+
 const networkErrorFragments = [
     "networkerror",
     "failed to fetch",
@@ -61,6 +67,17 @@ const networkErrorFragments = [
     "err_name_not_resolved",
     "err_timed_out",
 ];
+
+function isRateLimitError(error: unknown): boolean {
+    let details = "";
+    try {
+        details = JSON.stringify(describeError(error));
+    } catch {
+        // Ignore non-serializable error details while checking the message.
+    }
+    const text = `${errorMessage(error)} ${details}`.toLowerCase();
+    return rateLimitErrorFragments.some(fragment => text.includes(fragment));
+}
 
 function isNetworkError(error: unknown): boolean {
     const name = error && typeof error === "object" && "name" in error
@@ -103,7 +120,7 @@ export function recordClientBreadcrumb(message: string): void {
 }
 
 export async function reportClientError(error: unknown, context: Record<string, unknown> = {}): Promise<void> {
-    if (isNetworkError(error)) {
+    if (isNetworkError(error) || isRateLimitError(error)) {
         return;
     }
 
