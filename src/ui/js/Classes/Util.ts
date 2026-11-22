@@ -71,7 +71,7 @@ export class Util {
 
     static getImage(id: number, type: MediaFileType) {
         const code = type === MediaFileType.trackCover ? getTrackSecretCode(id) : "";
-        return ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${type}${code ? `&code=${encodeURIComponent(code)}` : ""}&t=${Date.now()}`;
+        return ApiRoutes.getImageMedia + `?id=${id}&quality=500&mediaFileType=${type}${code ? `&code=${encodeURIComponent(code)}` : ""}`;
     }
 
     static async downloadUrl(fileName: string, url: string) {

@@ -7,6 +7,7 @@ interface CachedImage {
     key: string;
     blob: Blob;
     fetchedAt: number;
+    etag?: string;
 }
 
 const DEFAULT_FALLBACKS: Record<string, string> = {
@@ -105,9 +106,58 @@ export class CachingService {
         }
     }
 
-    async getImageUrl(id: number, type: MediaFileType, quality: number = 500): Promise<string> {
+    private cacheKey(id: number, type: MediaFileType, quality: number): string {
         const code = type === MediaFileType.trackCover ? getTrackSecretCode(id) : "";
-        const key = `${type}_${id}_${quality}${code ? `_${code}` : ""}`;
+        return `${type}_${id}_${quality}${code ? `_${code}` : ""}`;
+    }
+
+    private async readCachedImage(key: string): Promise<CachedImage | null> {
+        try {
+            const db = await this.getDb();
+            return await new Promise<CachedImage | null>((resolve) => {
+                const tx = db.transaction(CachingService.IMAGE_STORE, "readonly");
+                const store = tx.objectStore(CachingService.IMAGE_STORE);
+                const request = store.get(key);
+                request.onsuccess = () => resolve(request.result ?? null);
+                request.onerror = () => resolve(null);
+            });
+        } catch {
+            return null;
+        }
+    }
+
+    private async storeCachedImage(cached: CachedImage): Promise<void> {
+        try {
+            const db = await this.getDb();
+            await new Promise<void>((resolve) => {
+                const tx = db.transaction(CachingService.IMAGE_STORE, "readwrite");
+                const store = tx.objectStore(CachingService.IMAGE_STORE);
+                store.put(cached);
+                tx.oncomplete = () => resolve();
+                tx.onerror = () => resolve();
+            });
+            this.capIndexedDb();
+        } catch {
+            // storage failed, use the image without caching
+        }
+    }
+
+    private useBlob(key: string, blob: Blob): string {
+        const existing = this.blobUrlCache.get(key);
+        if (existing) {
+            this.touchBlobUrl(key);
+            return existing;
+        }
+        this.dropOldestCacheEntry();
+        const url = URL.createObjectURL(blob);
+        this.blobUrlCache.set(key, url);
+        this.touchBlobUrl(key);
+        return url;
+    }
+
+    async getImageUrl(id: number, type: MediaFileType, quality: number = 500): Promise<string> {
+        const key = this.cacheKey(id, type, quality);
+        const serverUrl = `${ApiRoutes.getImageMedia}?id=${id}&quality=${quality}&mediaFileType=${type}${type === MediaFileType.trackCover && getTrackSecretCode(id) ? `&code=${encodeURIComponent(getTrackSecretCode(id))}` : ""}`;
 
         const existing = this.blobUrlCache.get(key);
         if (existing) {
@@ -115,62 +165,44 @@ export class CachingService {
             return existing;
         }
 
-        try {
-            const db = await this.getDb();
-            const cached = await new Promise<CachedImage | null>((resolve) => {
-                const tx = db.transaction(CachingService.IMAGE_STORE, "readonly");
-                const store = tx.objectStore(CachingService.IMAGE_STORE);
-                const request = store.get(key);
-                request.onsuccess = () => resolve(request.result ?? null);
-                request.onerror = () => resolve(null);
-            });
-
-            if (cached && Date.now() - cached.fetchedAt < CachingService.IMAGE_TTL) {
-                this.dropOldestCacheEntry();
-                const url = URL.createObjectURL(cached.blob);
-                this.blobUrlCache.set(key, url);
-                this.touchBlobUrl(key);
-                return url;
-            }
-        } catch {
-            // fall through
+        const cached = await this.readCachedImage(key);
+        if (cached && Date.now() - cached.fetchedAt < CachingService.IMAGE_TTL) {
+            return this.useBlob(key, cached.blob);
         }
 
-        const serverUrl = `${ApiRoutes.getImageMedia}?id=${id}&quality=${quality}&mediaFileType=${type}${code ? `&code=${encodeURIComponent(code)}` : ""}`;
-
         try {
-            const resp = await fetch(serverUrl, {credentials: "include"});
+            const resp = await fetch(serverUrl, {
+                credentials: "include",
+                cache: cached ? "no-cache" : "default",
+            });
+            if (resp.status === 304 && cached) {
+                cached.fetchedAt = Date.now();
+                await this.storeCachedImage(cached);
+                return this.useBlob(key, cached.blob);
+            }
+
             if (!resp.ok) {
-                return DEFAULT_FALLBACKS[type] ?? serverUrl;
+                return cached ? this.useBlob(key, cached.blob) : (DEFAULT_FALLBACKS[type] ?? serverUrl);
             }
+
+            const etag = resp.headers.get("etag") ?? undefined;
+            if (cached?.etag && etag === cached.etag) {
+                cached.fetchedAt = Date.now();
+                await this.storeCachedImage(cached);
+                return this.useBlob(key, cached.blob);
+            }
+
             const blob = await resp.blob();
-
-            try {
-                const db = await this.getDb();
-                await new Promise<void>((resolve) => {
-                    const tx = db.transaction(CachingService.IMAGE_STORE, "readwrite");
-                    const store = tx.objectStore(CachingService.IMAGE_STORE);
-                    store.put({ key, blob, fetchedAt: Date.now() });
-                    tx.oncomplete = () => resolve();
-                    tx.onerror = () => resolve();
-                });
-                this.capIndexedDb();
-            } catch {
-                // storage failed, use blob URL without cache
-            }
-
-            this.dropOldestCacheEntry();
-            const url = URL.createObjectURL(blob);
-            this.blobUrlCache.set(key, url);
-            this.touchBlobUrl(key);
-            return url;
+            const next = {key, blob, fetchedAt: Date.now(), etag};
+            await this.storeCachedImage(next);
+            return this.useBlob(key, blob);
         } catch {
-            return DEFAULT_FALLBACKS[type] ?? serverUrl;
+            return cached ? this.useBlob(key, cached.blob) : (DEFAULT_FALLBACKS[type] ?? serverUrl);
         }
     }
 
     async deleteCacheEntry(id: number, type: MediaFileType, quality: number = 500): Promise<void> {
-        const key = `${type}_${id}_${quality}`;
+        const key = this.cacheKey(id, type, quality);
 
         const existingUrl = this.blobUrlCache.get(key);
         if (existingUrl) {
