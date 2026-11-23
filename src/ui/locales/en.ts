@@ -343,6 +343,7 @@ export const en = {
     NO_ALBUMS_FOUND: "No albums found",
     ADD_TO_N_ALBUMS: n => `Add to ${n} albums`,
     ADD_TITLE_TO_ALBUM: title => `Add ${title} to album`,
+    EDIT_PLAYLIST: "Edit playlist",
     EDIT_ALBUM: "Edit album",
     UPDATE: "Update",
     NAME: "Name",

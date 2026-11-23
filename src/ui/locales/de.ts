@@ -187,6 +187,7 @@ export const de: Translation = {
     DOWNLOAD_AUDIO: "Audio herunterladen",
     DOWNLOAD_INFO: "Info herunterladen",
     EDIT: "Bearbeiten",
+    EDIT_PLAYLIST: "Playlist bearbeiten",
     EDIT_ALBUM: "Album bearbeiten",
     EDIT_TRACK: "Track bearbeiten",
     EDIT_TRACK_DETAILS_BELOW: "Bearbeite die Trackdetails unten",

@@ -343,6 +343,7 @@ export const ga: Translation = {
     NO_ALBUMS_FOUND: "Níor aimsíodh albam",
     ADD_TO_N_ALBUMS: n => `Cuir le ${n} albam`,
     ADD_TITLE_TO_ALBUM: title => `Cuir ${title} chuig albam`,
+    EDIT_PLAYLIST: "Cuir seinmliosta in eagar",
     EDIT_ALBUM: "Albam a chur in eagar",
     UPDATE: "Nuashonrú",
     NAME: "Ainm",

@@ -409,6 +409,13 @@ export class PlaylistTemplates {
                 }),
                 MusicTemplates.addListToQueueButton(playlist),
             ).build()),
+            when(canEdit, button({
+                text: t("EDIT"),
+                icon: {icon: "edit"},
+                onclick: () => createModal([
+                    PlaylistTemplates.editPlaylistModal(playlist, isOwner, reload),
+                ], `edit-playlist-${playlist.id}`),
+            })),
             when(canOpenCollaborators, button({
                 text: t("COLLABORATORS"),
                 icon: {icon: "group"},
@@ -431,6 +438,76 @@ export class PlaylistTemplates {
                 },
             })),
         ).build();
+    }
+
+    static editPlaylistModal(playlist: Playlist, isOwner: boolean, onSaved: () => void = () => {}) {
+        const state = signal<Partial<Playlist>>({
+            id: playlist.id,
+            title: playlist.title,
+            description: playlist.description,
+            visibility: isOwner ? playlist.visibility : undefined,
+        });
+        const title = compute(s => s.title ?? "", state);
+        const description = compute(s => s.description ?? "", state);
+        const visibility = compute(s => s.visibility === Visibility.private, state);
+        const disabled = compute(s => !s.title || s.title.trim().length === 0, state);
+        const loading = signal(false);
+
+        return create("div")
+            .classes("flex-v")
+            .children(
+                horizontal(
+                    GenericTemplates.icon("queue_music", true),
+                    create("h2").text(t("EDIT_PLAYLIST")).build(),
+                ).classes("align-children", "small-gap").build(),
+                input<string>({
+                    type: InputType.text,
+                    required: true,
+                    name: "playlist-title",
+                    label: t("NAME"),
+                    placeholder: t("PLAYLIST_NAME"),
+                    value: title,
+                    onchange: v => state.value = {...state.value, title: v},
+                }),
+                textarea({
+                    name: "playlist-description",
+                    label: t("DESCRIPTION"),
+                    placeholder: t("DESCRIPTION"),
+                    value: description,
+                    onchange: v => state.value = {...state.value, description: v},
+                }),
+                isOwner
+                    ? toggle({
+                        name: "playlist-visibility",
+                        label: t("PRIVATE"),
+                        text: t("PRIVATE"),
+                        checked: visibility,
+                        onchange: v => state.value = {
+                            ...state.value,
+                            visibility: v ? Visibility.private : Visibility.public,
+                        },
+                    })
+                    : nullElement(),
+                horizontal(
+                    button({
+                        text: t("UPDATE"),
+                        disabled: compute((d, l) => d || l, disabled, loading),
+                        classes: ["positive"],
+                        icon: {icon: "save"},
+                        onclick: async () => {
+                            loading.value = true;
+                            try {
+                                await Api.updatePlaylist(state.value);
+                                Util.removeModal();
+                                onSaved();
+                            } finally {
+                                loading.value = false;
+                            }
+                        },
+                    }),
+                    GenericTemplates.modalCancelButton(),
+                ).classes("align-children").build(),
+            ).build();
     }
 
     static createPlaylistPage() {
