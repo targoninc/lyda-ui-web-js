@@ -63,7 +63,7 @@ function isNavAllowed(id: number): boolean {
 export class FeedTemplates {
     static create<T extends { id: number }>(config: FeedConfig<T>): any {
         const items$ = signal<T[]>([]);
-        const loading$ = signal(false);
+        const loading$ = signal(true);
         const totalCount$ = signal<number | null>(null);
         const search$ = config.searchOverride$ ?? signal("");
         const sortBy$ = signal<string | null>(null);
@@ -278,7 +278,7 @@ export class FeedTemplates {
             loadingPages.clear();
             items$.value = [];
             totalCount$.value = null;
-            loading$.value = false;
+            loading$.value = true;
             load(0);
         };
 
