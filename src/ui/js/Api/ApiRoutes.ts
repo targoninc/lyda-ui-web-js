@@ -133,6 +133,7 @@ export class ApiRoutes {
     private static playlists = ApiRoutes.base + "/playlists";
     static getPlaylistById = ApiRoutes.playlists + "/byId";
     static getPlaylistsByUserId = ApiRoutes.playlists + "/byUserId";
+    static getEditablePlaylists = ApiRoutes.playlists + "/editable";
 
     private static playlistActions = ApiRoutes.playlists + "/actions";
     static newPlaylist = ApiRoutes.playlistActions + "/new";
@@ -142,6 +143,10 @@ export class ApiRoutes {
     static addAlbumToPlaylists = ApiRoutes.playlistActions + "/addAlbum";
     static removeTrackFromPlaylists = ApiRoutes.playlistActions + "/removeTrack";
     static reorderPlaylistTracks = ApiRoutes.playlistActions + "/reorderTracks";
+    private static playlistCollaborators = ApiRoutes.playlists + "/collaborators";
+    static invitePlaylistCollaborator = ApiRoutes.playlistCollaborators + "/invite";
+    static respondPlaylistCollaborator = ApiRoutes.playlistCollaborators + "/respond";
+    static removePlaylistCollaborator = ApiRoutes.playlistCollaborators + "/remove";
 
     private static playlistFeed = ApiRoutes.playlists + "/feeds";
     static likedPlaylistsFeed = ApiRoutes.playlistFeed + "/liked";

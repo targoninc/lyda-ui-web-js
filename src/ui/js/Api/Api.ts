@@ -33,6 +33,7 @@ import { Statistic } from "@targoninc/lyda-shared/src/Models/Statistic";
 import { TypedStatistic } from "@targoninc/lyda-shared/src/Models/TypedStatistic";
 import { Permission } from "@targoninc/lyda-shared/src/Models/db/lyda/Permission.ts";
 import { ClientError } from "@targoninc/lyda-shared/src/Models/db/lyda/ClientError";
+import { PlaylistCollaborator } from "../Models/PlaylistCollaborator.ts";
 import { KeyValue } from "@targoninc/lyda-shared/src/Models/KeyValue";
 import { CreateOrderRequest } from "@targoninc/lyda-shared/src/Models/CreateOrderRequest";
 import { CreateOrderResponse } from "@targoninc/lyda-shared/src/Models/CreateOrderResponse";
@@ -706,12 +707,30 @@ export class Api {
 
     static async getPlaylistById(id: number): Promise<{
         playlist: Playlist;
+        collaborators: PlaylistCollaborator[];
         canEdit: boolean;
     } | null> {
         return await get<{
             playlist: Playlist;
+            collaborators: PlaylistCollaborator[];
             canEdit: boolean;
         }>(ApiRoutes.getPlaylistById, { id });
+    }
+
+    static async invitePlaylistCollaborator(playlist_id: number, user_id: number): Promise<void> {
+        await post(ApiRoutes.invitePlaylistCollaborator, {playlist_id, user_id});
+    }
+
+    static async respondPlaylistCollaborator(playlist_id: number, approved: boolean): Promise<void> {
+        await post(ApiRoutes.respondPlaylistCollaborator, {playlist_id, approved});
+    }
+
+    static async removePlaylistCollaborator(playlist_id: number, user_id?: number): Promise<void> {
+        await post(ApiRoutes.removePlaylistCollaborator, {playlist_id, user_id});
+    }
+
+    static async getEditablePlaylists(): Promise<Playlist[]> {
+        return (await get<Playlist[]>(ApiRoutes.getEditablePlaylists)) ?? [];
     }
 
     static async getPlaylistsByUserId(userId: number, name: string = "", offset: number = 0, filter: string = "", visibility: string = ""): Promise<{ items: Playlist[], total: number } | null> {
