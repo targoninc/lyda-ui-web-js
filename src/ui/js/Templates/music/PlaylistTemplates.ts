@@ -4,7 +4,7 @@ import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
 import { UserTemplates } from "../account/UserTemplates.ts";
 import { Images } from "../../Enums/Images.ts";
 import { getPlayIcon, Util } from "../../Classes/Util.ts";
-import { Ui } from "../../Classes/Ui.ts";
+import { createModal, Ui } from "../../Classes/Ui.ts";
 import { AnyElement, compute, create, InputType, nullElement, Signal, signal, when } from "@targoninc/jess";
 import { button, icon, input, textarea, toggle } from "@targoninc/jess-components";
 import { Track } from "@targoninc/lyda-shared/src/Models/db/lyda/Track";
@@ -226,11 +226,10 @@ export class PlaylistTemplates {
                 horizontal(
                     MusicTemplates.cover(EntityType.playlist, playlist, CoverContext.standalone),
                     vertical(
-                        PlaylistTemplates.audioActions(playlist,  data.canEdit),
+                        PlaylistTemplates.audioActions(playlist, data.canEdit, data.collaborators ?? [], reload),
                         InteractionTemplates.interactions(EntityType.playlist, playlist),
                     ).build(),
                 ).build(),
-                PlaylistTemplates.collaboratorsSection(playlist, data.collaborators ?? [], data.canEdit, reload),
                 MusicTemplates.tracksInList(tracks, data.canEdit, playlist, "playlist"),
                 when(data.canEdit, vertical(
                     create("span")
@@ -310,6 +309,7 @@ export class PlaylistTemplates {
                     onclick: async () => {
                         await Api.removePlaylistCollaborator(playlist.id, collaborator.user_id);
                         reload();
+                        Util.removeModal();
                     },
                 })),
             ).classes("align-children", "space-between", "fullWidth", "small-gap").build();
@@ -324,6 +324,7 @@ export class PlaylistTemplates {
                     }
                     await Api.invitePlaylistCollaborator(playlist.id, result.id);
                     reload();
+                    Util.removeModal();
                 },
                 [ApiRoutes.searchUsers],
                 [],
@@ -349,6 +350,7 @@ export class PlaylistTemplates {
                         onclick: async () => {
                             await Api.respondPlaylistCollaborator(playlist.id, true);
                             reload();
+                            Util.removeModal();
                         },
                     }),
                     button({
@@ -358,6 +360,7 @@ export class PlaylistTemplates {
                         onclick: async () => {
                             await Api.respondPlaylistCollaborator(playlist.id, false);
                             reload();
+                            Util.removeModal();
                         },
                     }),
                 ).classes("align-children", "small-gap").build()
@@ -368,10 +371,10 @@ export class PlaylistTemplates {
                     inviteSearch,
                 ).classes("small-gap").build()
                 : nullElement(),
-        ).classes("card", "flex-v", "small-gap").build();
+        ).classes("flex-v", "small-gap").build();
     }
 
-    static audioActions(playlist: Playlist, canEdit: boolean) {
+    static audioActions(playlist: Playlist, canEdit: boolean, collaborators: PlaylistCollaborator[], reload: () => void) {
         if (!playlist.tracks) {
             throw new Error(`Playlist ${playlist.id} has no tracks`);
         }
@@ -379,6 +382,12 @@ export class PlaylistTemplates {
         const isPlaying = compute((p, pHere) => (p && p.type === "playlist" && p.id === playlist.id && pHere) ?? false, playingFrom, playingHere);
         const playIcon = getPlayIcon(isPlaying, loadingAudio);
         const playText = compute((p): string => p ? `${t("PAUSE")}` : `${t("PLAY")}`, isPlaying);
+        const me = currentUser.value;
+        const isOwner = me?.id === playlist.user_id;
+        const pendingInvite = me
+            ? collaborators.some(collaborator => collaborator.user_id === me.id && !collaborator.approved && !collaborator.denied)
+            : false;
+        const canOpenCollaborators = isOwner || canEdit || pendingInvite;
 
         return horizontal(
             when(currentUser, horizontal(
@@ -400,7 +409,14 @@ export class PlaylistTemplates {
                 }),
                 MusicTemplates.addListToQueueButton(playlist),
             ).build()),
-            when(canEdit, button({
+            when(canOpenCollaborators, button({
+                text: t("COLLABORATORS"),
+                icon: {icon: "group"},
+                onclick: () => createModal([
+                    PlaylistTemplates.collaboratorsSection(playlist, collaborators, canEdit, reload),
+                ], `playlist-collaborators-${playlist.id}`),
+            })),
+            when(isOwner, button({
                 text: t("DELETE"),
                 icon: { icon: "delete" },
                 classes: ["negative"],
