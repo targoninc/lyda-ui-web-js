@@ -1004,10 +1004,11 @@ input.jessc-slider:checked ~ .jessc-toggle-container .jessc-toggle-slider {
 }
 
 .chart-container-vertical {
-    height: 240px !important;
+    height: auto !important;
     width: 600px !important;
     max-width: 100% !important;
     min-width: 0;
+    flex-wrap: nowrap;
 }
 
 .chart-plot {
