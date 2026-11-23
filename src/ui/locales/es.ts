@@ -343,6 +343,7 @@ export const es: Translation = {
     NO_ALBUMS_FOUND: "No se encontraron álbumes",
     ADD_TO_N_ALBUMS: n => `Añadir a ${n} álbumes`,
     ADD_TITLE_TO_ALBUM: title => `Añadir ${title} al álbum`,
+    EDIT_PLAYLIST: "Editar lista de reproducción",
     EDIT_ALBUM: "Editar álbum",
     UPDATE: "Actualizar",
     NAME: "Nombre",
