@@ -507,6 +507,7 @@ export class Api {
             genres: track.genres,
             description: track.description,
             price: track.price,
+            monetization: track.monetization,
             wip: track.wip,
             free_download: track.free_download,
         });
@@ -679,6 +680,7 @@ export class Api {
             isrc: track.isrc,
             upc: track.upc,
             price: track.price,
+            monetization: track.monetization,
             wip: track.wip,
             free_download: (track as any).free_download,
             lyrics_plain_text: (track as any).lyrics_plain_text,

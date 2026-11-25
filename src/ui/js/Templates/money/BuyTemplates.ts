@@ -36,6 +36,9 @@ export class BuyTemplates {
     }
 
     static openBuyModal(item: BuyableEntity) {
+        if (item.type === "track" && !item.entity.monetization) {
+            return;
+        }
         const price = BuyTemplates.getMinPrice(item);
         const entityType = item.type === "track" ? EntityType.track : EntityType.album;
         const title = item.type === "track" ? item.entity.title : item.entity.title;

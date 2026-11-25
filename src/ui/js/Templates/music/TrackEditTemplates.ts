@@ -459,9 +459,13 @@ export class TrackEditTemplates {
     }
 
     private static monetizationSection(errorSections: Signal<string[]>, state: Signal<UploadableTrack>, copyrightToggle: AnyElement | null = null) {
+        const monetization = compute(s => s.monetization ?? false, state);
         const children = [
-            TrackEditTemplates.monetizationInfo(state),
-            TrackEditTemplates.priceInput(state),
+            TrackEditTemplates.monetizationToggle(state),
+            when(monetization, () => vertical(
+                TrackEditTemplates.monetizationInfo(state),
+                TrackEditTemplates.priceInput(state),
+            ).classes("small-gap").build()),
         ];
         if (copyrightToggle) {
             children.push(copyrightToggle);
@@ -473,6 +477,21 @@ export class TrackEditTemplates {
             children,
             "attach_money",
         );
+    }
+
+    static monetizationToggle(state: Signal<UploadableTrack>) {
+        return toggle({
+            name: "monetization",
+            label: t("MONETIZATION"),
+            text: t("MONETIZATION"),
+            checked: compute(s => s.monetization ?? false, state),
+            onchange: (v: boolean) => {
+                state.value = {
+                    ...state.value,
+                    monetization: v,
+                };
+            },
+        });
     }
 
     private static priceInput(state: Signal<UploadableTrack>) {
@@ -1331,6 +1350,7 @@ export class TrackEditTemplates {
                 s.isrc !== track.isrc ||
                 s.upc !== track.upc ||
                 s.price !== track.price ||
+                s.monetization !== track.monetization ||
                 s.wip !== track.wip ||
                 s.free_download !== track.free_download;
         }, state);
@@ -1359,9 +1379,10 @@ export class TrackEditTemplates {
                     ),
                     horizontal(
                         TrackEditTemplates.creditsInput(state),
-                        TrackEditTemplates.priceInput(state),
+                        when(compute(s => s.monetization ?? false, state), TrackEditTemplates.priceInput(state)),
+                        TrackEditTemplates.monetizationToggle(state),
                         FormTemplates.upcInput(state),
-                    ),
+                    ).classes("align-children"),
                     horizontal(
                         TrackEditTemplates.addToAlbumsButton(track),
                         TrackTemplates.addToPlaylistButton(track),
@@ -1474,6 +1495,7 @@ export class TrackEditTemplates {
             {key: "isrc", label: "ISRC"},
             {key: "credits", label: "Collaborators"},
             {key: "price", label: "Price"},
+            {key: "monetization", label: "Monetization"},
             {key: "upc", label: "UPC"},
             {key: "visibility", label: "Visibility"},
             {key: "wip", label: "Work in progress"},
@@ -1539,9 +1561,10 @@ export class TrackEditTemplates {
                 ),
                 horizontal(
                     TrackEditTemplates.creditsInput(bulkState),
-                    bulkPrice,
+                    when(compute(s => s.monetization ?? false, bulkState), bulkPrice),
+                    TrackEditTemplates.monetizationToggle(bulkState),
                     FormTemplates.upcInput(bulkState),
-                ),
+                ).classes("align-children"),
                 TrackEditTemplates.toggles(
                     compute(s => s.visibility === Visibility.private, bulkState),
                     bulkState,

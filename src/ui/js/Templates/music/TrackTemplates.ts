@@ -535,7 +535,7 @@ export class TrackTemplates {
                             vertical(
                                 MusicTemplates.cover(EntityType.track, track, CoverContext.standalone, null, {
                                     bought,
-                                    price: track.price || undefined,
+                                    price: track.monetization ? track.price || undefined : undefined,
                                 }),
                                 when(track.visual_artist, () => create("span")
                                     .classes("color-dim", TextSize.small)
