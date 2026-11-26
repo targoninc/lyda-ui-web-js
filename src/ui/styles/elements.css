@@ -1203,6 +1203,11 @@ input.jessc-slider:checked ~ .jessc-toggle-container .jessc-toggle-slider {
     max-width: 100%;
 }
 
+.track-player-row .track-length {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
 .track-tabs-row {
     max-width: 100%;
     flex-wrap: wrap;

@@ -502,6 +502,10 @@ export class TrackTemplates {
             const version = versions.find(v => v.index === idx);
             return isPlayableTrack(version ?? track);
         }, selectedVersion);
+        const durationLabel = compute(idx => {
+            const version = versions.find(v => v.index === idx);
+            return Time.format(version?.length ?? track.length);
+        }, selectedVersion);
 
         const coverFile = signal(Images.DEFAULT_COVER_TRACK);
         if (track.has_cover) {
@@ -567,13 +571,6 @@ export class TrackTemplates {
                                             .classes("playcount", TextSize.small)
                                             .text(t("PLAYS_AMOUNT", track.plays))
                                             .build(),
-                                        create("span")
-                                            .classes("track-length", TextSize.small)
-                                            .text(compute(idx => {
-                                                const version = versions.find(v => v.index === idx);
-                                                return Time.format(version?.length ?? track.length);
-                                            }, selectedVersion))
-                                            .build(),
                                     ).classes("align-children"),
                                 ).classes("small-gap"),
                                 TrackTemplates.genreTags(track),
@@ -629,6 +626,10 @@ export class TrackTemplates {
                                 const modifiedTrack = {...track, processed, length: version?.length ?? track.length} as Track;
                                 return TrackTemplates.waveform(modifiedTrack, data, false, idx);
                             }, selectedVersion),
+                            create("span")
+                                .classes("track-length", TextSize.small)
+                                .text(durationLabel)
+                                .build(),
                         ).classes("align-children", "bordered", "glass", "rounded-max", "noflexwrap", "limitToContentWidth", "track-player-row")
                             .styles("padding", "10px 20px 10px 10px"),
                     ).classes("big-gap").build(),
