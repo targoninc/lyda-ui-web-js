@@ -330,9 +330,9 @@ export class PlaylistTemplates {
                 [],
                 ["fullWidth"],
                 {},
-                (result) => result.type !== "user"
-                    || result.id === playlist.user_id
-                    || visible.some(collaborator => collaborator.user_id === result.id),
+                (result) => result.type === "user"
+                    && result.id !== playlist.user_id
+                    && !visible.some(collaborator => collaborator.user_id === result.id),
                 true,
             )
             : nullElement();
