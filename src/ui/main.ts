@@ -81,6 +81,7 @@ export const router = new Router(routes, async (route: Route, params: any) => {
 
         Ui.loadTheme().then();
     } catch (error) {
+        disposePageRender();
         await reportClientError(error, {
             context: "route-render",
             page,
