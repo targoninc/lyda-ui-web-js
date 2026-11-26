@@ -34,7 +34,7 @@ import {
     toggle,
 } from "@targoninc/jess-components";
 import {Theme} from "@targoninc/lyda-shared/src/Enums/Theme";
-import {trackInterval} from "../../Classes/Helpers/PageLifecycle.ts";
+import {subscribeScoped, trackCleanup, trackInterval} from "../../Classes/Helpers/PageLifecycle.ts";
 import {UserSettings} from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import {hideWaveformsSetting} from "../../Enums/UserSettingKeys.ts";
 import {StreamingQuality} from "@targoninc/lyda-shared/src/Enums/StreamingQuality";
@@ -449,7 +449,7 @@ export class SettingsTemplates {
         const [emailKey, inAppKey] = SettingsTemplates.notificationPreferenceKeys(key);
         const state = signal(SettingsTemplates.notificationPreferenceState(currentUser.value, emailKey, inAppKey));
 
-        currentUser.subscribe((user: User | null) => {
+        subscribeScoped(currentUser, (user: User | null) => {
             state.value = SettingsTemplates.notificationPreferenceState(user, emailKey, inAppKey);
         });
 
@@ -483,7 +483,7 @@ export class SettingsTemplates {
         };
 
         sync(currentUser.value);
-        currentUser.subscribe(sync);
+        subscribeScoped(currentUser, sync);
 
         const display = compute((value, isMixed): string => isMixed
             ? t("NOTIFICATION_MIXED")
@@ -1266,10 +1266,11 @@ export class SettingsTemplates {
                                     }, 10 * 1000);
                                     trackInterval(interval);
 
-                                    setTimeout(() => {
+                                    const timeout = setTimeout(() => {
                                         clearInterval(interval);
                                         activationTimedOut.value = false;
                                     }, 60 * 1000);
+                                    trackCleanup(() => clearTimeout(timeout));
                                 },
                             }),
                             true,

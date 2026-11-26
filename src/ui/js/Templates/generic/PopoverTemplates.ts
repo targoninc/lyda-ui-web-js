@@ -87,16 +87,18 @@ export class PopoverTemplates {
                 popover.hidePopover();
             }
         };
+        const attachTimeout = window.setTimeout(() => {
+            if (!popover.matches(":popover-open")) return;
+            document.addEventListener("click", onDocumentClick);
+            document.addEventListener("keydown", onKeyDown);
+        }, 0);
         const onHide = () => {
+            window.clearTimeout(attachTimeout);
             document.removeEventListener("click", onDocumentClick);
             document.removeEventListener("keydown", onKeyDown);
             popover.removeEventListener("hidePopover", onHide);
         };
         popover.addEventListener("hidePopover", onHide);
-        setTimeout(() => {
-            document.addEventListener("click", onDocumentClick);
-            document.addEventListener("keydown", onKeyDown);
-        }, 0);
     }
 
     static show(popover: HTMLElement, anchor: AnyElement, above = false, rightAlign = false): void {
@@ -126,14 +128,16 @@ export class PopoverTemplates {
                     popover.hidePopover();
                 }
             };
+            const attachTimeout = window.setTimeout(() => {
+                if (!popover.matches(":popover-open")) return;
+                document.addEventListener("click", onDocumentClick);
+            }, 0);
             const onHide = () => {
+                window.clearTimeout(attachTimeout);
                 document.removeEventListener("click", onDocumentClick);
                 popover.removeEventListener("hidePopover", onHide);
             };
             popover.addEventListener("hidePopover", onHide);
-            setTimeout(() => {
-                document.addEventListener("click", onDocumentClick);
-            }, 0);
         }
     }
 }

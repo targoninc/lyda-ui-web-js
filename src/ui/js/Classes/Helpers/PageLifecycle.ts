@@ -1,4 +1,4 @@
-import { sweepDetachedSubscriptions } from "@targoninc/jess";
+import { sweepDetachedSubscriptions, type Signal } from "@targoninc/jess";
 import { sweepDetachedSubscriptions as sweepComponentsDetachedSubscriptions } from "@targoninc/jess-components";
 
 /**
@@ -83,4 +83,16 @@ export function trackInterval(intervalId: ReturnType<typeof setInterval>): void 
 /** Registers a cleanup callback to run when the current page is disposed. */
 export function trackCleanup(cleanup: () => void): void {
     activeScope?.cleanups.push(cleanup);
+}
+
+/** Subscribes to a signal whose lifetime outlives the current page and drops
+ *  the subscription when that page is disposed. */
+export function subscribeScoped<T>(
+    target: Signal<T>,
+    callback: (value: T, changed: boolean) => void,
+): () => void {
+    target.subscribe(callback);
+    const unsubscribe = () => target.unsubscribe(callback);
+    trackCleanup(unsubscribe);
+    return unsubscribe;
 }

@@ -369,7 +369,10 @@ export class GenericTemplates {
             changeCallback(probableName, input.files);
 
             const preview = document.getElementById(name + "-preview") as HTMLImageElement;
-            if (preview && input.files) {
+            if (preview && input.files?.[0]) {
+                if (preview.src.startsWith("blob:")) {
+                    URL.revokeObjectURL(preview.src);
+                }
                 preview.src = URL.createObjectURL(input.files[0]);
                 preview.style.display = "initial";
             }

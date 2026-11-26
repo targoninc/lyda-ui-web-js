@@ -17,11 +17,6 @@ import { Icons } from "../Enums/Icons.ts";
 import { UserSettings } from "@targoninc/lyda-shared/src/Enums/UserSettings";
 import { language, localeByLanguage } from "../../locales";
 import { cachingService } from "../Cache/CachingService.ts";
-import {RoutePath} from "../Routing/routes.ts";
-import {Route} from "../Routing/Router.ts";
-import {FeedTemplates} from "../Templates/generic/FeedTemplates.ts";
-import {FeedType} from "@targoninc/lyda-shared/src/Enums/FeedType.ts";
-import {AlbumTemplates} from "../Templates/music/AlbumTemplates.ts";
 
 export class Util {
     static capitalizeFirstLetter(string: string) {
@@ -204,6 +199,9 @@ export class Util {
 
     static initializeModalRemove(modalContainer: AnyElement) {
         setTimeout(() => {
+            if (!modalContainer.isConnected) {
+                return;
+            }
             document.addEventListener("click", e => {
                 const foundModal = document.querySelector(".modal");
                 const blockList = ["button", "input", "textarea", "a"];

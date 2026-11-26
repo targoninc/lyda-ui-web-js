@@ -39,7 +39,7 @@ export class LydaCache {
             throw new Error("cacheItem must be an instance of CacheItem");
         }
         this.cacheImplementation.setItem(cacheKey, JSON.stringify(cacheItem));
-        if (cacheItem.reFetchUrl !== null) {
+        if (cacheItem.reFetchUrl) {
             setTimeout(() => {
                 this.reFetch(cacheKey, cacheItem);
             }, cacheItem.reFetchTtlInSeconds * 1000);

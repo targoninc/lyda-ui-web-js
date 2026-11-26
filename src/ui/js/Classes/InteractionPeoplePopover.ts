@@ -12,6 +12,7 @@ import { UserTemplates } from "../Templates/account/UserTemplates.ts";
 import { GenericTemplates, horizontal, vertical } from "../Templates/generic/GenericTemplates.ts";
 import { PopoverTemplates } from "../Templates/generic/PopoverTemplates.ts";
 import { Util } from "./Util.ts";
+import { trackCleanup } from "./Helpers/PageLifecycle.ts";
 
 export class InteractionPeoplePopover {
     private static popover: HTMLElement | null = null;
@@ -48,6 +49,17 @@ export class InteractionPeoplePopover {
         this.id = id;
         this.code = code;
         this.anchor = anchor;
+        trackCleanup(() => {
+            if (this.anchor !== anchor) {
+                return;
+            }
+            this.anchor = null;
+            this.id = 0;
+            this.request++;
+            this.people.value = [];
+            this.total.value = 0;
+            this.popover?.hidePopover();
+        });
         this.activeType.value = interactionType;
         this.query.value = "";
         void this.load();
