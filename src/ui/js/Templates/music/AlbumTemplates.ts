@@ -5,7 +5,7 @@ import { UserTemplates } from "../account/UserTemplates.ts";
 import { PlaylistActions } from "../../Actions/PlaylistActions.ts";
 import { getPlayIcon, Util } from "../../Classes/Util.ts";
 import { createModal, Ui } from "../../Classes/Ui.ts";
-import { AnyNode, compute, create, InputType, signal, Signal, when } from "@targoninc/jess";
+import { AnyNode, compute, create, InputType, nullElement, signal, Signal, when } from "@targoninc/jess";
 import { navigate, Route } from "../../Routing/Router.ts";
 import { currentTrackId, currentUser, loadingAudio, paymentsEnabled, playingFrom, playingHere } from "../../state.ts";
 import { InteractionStateManager } from "../../Classes/InteractionStateManager.ts";
@@ -237,9 +237,14 @@ export class AlbumTemplates {
     }
 
     private static albumPageDisplay(album: Album, canEdit: boolean, canBuy: boolean, canDownload: boolean, reload: () => void) {
-        const albumUser = album.user!;
-        const tracks = signal<ListTrack[]>(album.tracks ?? []);
-        const duration = album.tracks!.reduce((acc, t) => acc + (t.track?.length ?? 0), 0);
+        if (!album) {
+            return nullElement();
+        }
+        const albumTracks = (album.tracks ?? []).filter((track): track is ListTrack => !!track);
+        album = {...album, tracks: albumTracks};
+        const albumUser = album.user;
+        const tracks = signal<ListTrack[]>(albumTracks);
+        const duration = albumTracks.reduce((acc, t) => acc + (t.track?.length ?? 0), 0);
 
         const builder = create("div")
             .classes("single-page", "noflexwrap", "padded-large", "rounded-large", "flex-v")
@@ -260,7 +265,7 @@ export class AlbumTemplates {
                                 onclick: () => {},
                                 text: t("BOUGHT"),
                             })),
-                            UserTemplates.userLink(UserWidgetContext.singlePage, albumUser),
+                            when(albumUser, () => UserTemplates.userLink(UserWidgetContext.singlePage, albumUser)),
                         ).classes("align-children"),
                     ).build(),
                 horizontal(

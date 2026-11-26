@@ -30,7 +30,7 @@ export type BuyableEntity = {
 export class BuyTemplates {
     static getMinPrice(item: BuyableEntity): number {
         if (item.type === "album" && !item.entity.price) {
-            return (item.entity.tracks ?? []).reduce((sum, at) => sum + (at.track?.price ?? 0), 0);
+            return (item.entity.tracks ?? []).reduce((sum, at) => sum + (at?.track?.price ?? 0), 0);
         }
         return item.entity.price;
     }

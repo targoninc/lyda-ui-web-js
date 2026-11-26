@@ -45,6 +45,9 @@ export class MusicTemplates {
         onclickOverride: Function | null = null,
         artworkOptions: Partial<ArtworkOptions> = {},
     ) {
+        if (!item) {
+            return nullElement();
+        }
         const imageState = signal(DefaultImages[type]);
         const fileType = `${type}Cover` as MediaFileType;
         if (type === EntityType.track) {

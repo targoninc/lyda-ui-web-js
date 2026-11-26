@@ -332,9 +332,9 @@ export class TrackTemplates {
         type: "album" | "playlist",
     ) {
         const icons = [];
-        const track = listTrack.track;
+        const track = listTrack?.track;
         if (!track) {
-            throw new Error("Track is missing on list track");
+            return nullElement();
         }
         InteractionStateManager.addContext(EntityType.track, track.id, "list");
 
