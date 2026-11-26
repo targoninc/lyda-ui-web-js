@@ -1650,6 +1650,7 @@ export class TrackEditTemplates {
                     }),
                 ).classes("align-children", "small-gap", "flex-wrap").build(),
                 horizontal(
+                    when(loading, GenericTemplates.loadingSpinner()),
                     GenericTemplates.roundIconButton(
                         {icon: "arrow_back_ios_new"},
                         () => pageState.value = Math.max(1, safePage.value - 1),
@@ -1683,7 +1684,6 @@ export class TrackEditTemplates {
         ]);
 
         return vertical(
-            when(loading, GenericTemplates.loadingSpinner()),
             filterBar,
             when(noFilterResults, create("span").classes("color-dim").text(t("NO_TRACKS_MATCH_FILTERS")).build()),
             when(
